@@ -163,7 +163,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerCount::apply_datetime64(const time_t* data,
+  ReducerCount::apply_datetime64(const uint64_t* data,
                                  const Index64& parents,
                                  int64_t outlength) const {
     throw std::runtime_error(
@@ -432,7 +432,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerCountNonzero::apply_datetime64(const time_t* data,
+  ReducerCountNonzero::apply_datetime64(const uint64_t* data,
                                         const Index64& parents,
                                         int64_t outlength) const {
     throw std::runtime_error(
@@ -805,7 +805,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerSum::apply_datetime64(const time_t* data,
+  ReducerSum::apply_datetime64(const uint64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
     throw std::runtime_error(
@@ -1178,7 +1178,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerProd::apply_datetime64(const time_t* data,
+  ReducerProd::apply_datetime64(const uint64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
    throw std::runtime_error(
@@ -1447,7 +1447,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerAny::apply_datetime64(const time_t* data,
+  ReducerAny::apply_datetime64(const uint64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
     throw std::runtime_error(
@@ -1716,7 +1716,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerAll::apply_datetime64(const time_t* data,
+  ReducerAll::apply_datetime64(const uint64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
     throw std::runtime_error(
@@ -2054,7 +2054,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerMin::apply_datetime64(const time_t* data,
+  ReducerMin::apply_datetime64(const uint64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
     throw std::runtime_error(
@@ -2392,7 +2392,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerMax::apply_datetime64(const time_t* data,
+  ReducerMax::apply_datetime64(const uint64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
     throw std::runtime_error(
@@ -2666,7 +2666,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerArgmin::apply_datetime64(const time_t* data,
+  ReducerArgmin::apply_datetime64(const uint64_t* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
     throw std::runtime_error(
@@ -2940,7 +2940,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerArgmax::apply_datetime64(const time_t* data,
+  ReducerArgmax::apply_datetime64(const uint64_t* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
     throw std::runtime_error(

@@ -19,9 +19,9 @@ def test_date_time():
         == '3 * datetime64[parameters={"__array__": "datetime64", "__datetime64_data__": "<M8[s]", "__datetime64_unit__": "1s"}]'
     )
     assert array.tolist() == [
-        1595846471,
-        1546300800,
-        1577836800,
+        "2020-07-27T10:41:11",
+        "2019-01-01T00:00:00",
+        "2020-01-01T00:00:00",
     ]
     for i in range(len(array)):
         assert ak.to_numpy(array)[i] == numpy_array[i]
@@ -33,7 +33,9 @@ def test_date_time():
     # FIXME: this prints '2020-07-27T10:41:11.200000'
     print(ak.to_numpy(array1))
 
-    assert ak.to_list(ak.from_iter(ak.to_list(array1))) == [1595846471200000]
+    assert ak.to_list(ak.from_iter(ak.to_list(array1))) == [
+        "2020-07-27T10:41:11.200000"
+    ]
 
 
 def test_date_time_units():

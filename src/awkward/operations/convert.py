@@ -1007,9 +1007,9 @@ def to_list(array):
     elif ak.operations.describe.parameters(array).get("__array__") == "char":
         return ak.behaviors.string.CharBehavior(array).__str__()
 
-    # elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
-    #     tmp = to_numpy(array)
-    #     return [numpy.datetime_as_string(tmp[i]) for i in range(len(tmp))]
+    elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
+        tmp = to_numpy(array)
+        return [numpy.datetime_as_string(tmp[i]) for i in range(len(tmp))]
 
     elif isinstance(array, ak.highlevel.Array):
         return [to_list(x) for x in array]
