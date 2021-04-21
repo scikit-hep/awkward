@@ -122,10 +122,11 @@ def from_numpy(
             for i in range(len(array.shape) - 1, 0, -1):
                 data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
         elif array.dtype.kind == "M":
+            data = ak.layout.NumpyArray(array)
             asbytes = array.reshape(-1)
             itemsize = asbytes.dtype.itemsize
             data = ak.layout.NumpyArray(
-                asbytes.view("i8"),
+                asbytes,
                 parameters={
                     "__array__": "datetime64",
                     "__datetime64_data__": array.dtype.str,
@@ -133,13 +134,11 @@ def from_numpy(
                     + np.datetime_data(array.dtype)[0],
                 },
             )
-            for i in range(len(array.shape) - 1, 0, -1):
-                data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
         elif array.dtype.kind == "m":
             asbytes = array.reshape(-1)
             itemsize = asbytes.dtype.itemsize
             data = ak.layout.NumpyArray(
-                asbytes.view("i8"),
+                asbytes,
                 parameters={
                     "__array__": "timedelta64",
                     "__timedelta64_data__": array.dtype.str,
@@ -147,8 +146,6 @@ def from_numpy(
                     + np.datetime_data(array.dtype)[0],
                 },
             )
-            for i in range(len(array.shape) - 1, 0, -1):
-                data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
         else:
             data = ak.layout.NumpyArray(array)
 
@@ -222,6 +219,7 @@ def to_numpy(array, allow_missing=True):
 
     See also #ak.from_numpy and #ak.to_cupy.
     """
+
     if isinstance(array, (bool, str, bytes, numbers.Number)):
         return numpy.array([array])[0]
 
@@ -1009,9 +1007,9 @@ def to_list(array):
     elif ak.operations.describe.parameters(array).get("__array__") == "char":
         return ak.behaviors.string.CharBehavior(array).__str__()
 
-    elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
-        tmp = to_numpy(array)
-        return [numpy.datetime_as_string(tmp[i]) for i in range(len(tmp))]
+    # elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
+    #     tmp = to_numpy(array)
+    #     return [numpy.datetime_as_string(tmp[i]) for i in range(len(tmp))]
 
     elif isinstance(array, ak.highlevel.Array):
         return [to_list(x) for x in array]

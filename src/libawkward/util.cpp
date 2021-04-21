@@ -69,10 +69,10 @@ namespace awkward {
       else if (name == "complex256") {
         return util::dtype::complex256;
       }
-      else if (name == "datetime64") {
+      else if (name.rfind("datetime64", 0) == 0) {
         return util::dtype::datetime64;
       }
-      else if (name == "timedelta64") {
+      else if (name.rfind("timedelta64", 0) == 0) {
         return util::dtype::timedelta64;
       }
       else {
@@ -115,10 +115,10 @@ namespace awkward {
         return "complex128";
       case util::dtype::complex256:
         return "complex256";
-        // case datetime64:
-        //   return "datetime64";
-        // case timedelta64:
-        //   return "timedelta64";
+      case util::dtype::datetime64:
+        return "datetime64";
+      case util::dtype::timedelta64:
+        return "timedelta64";
       default:
         return "unknown";
       }
@@ -210,12 +210,12 @@ namespace awkward {
       else if (fmt == std::string("Zg")) {
         return dtype::complex256;
       }
-      // else if (fmt == std::string("M")) {
-      //   return dtype::datetime64;
-      // }
-      // else if (fmt == std::string("m")) {
-      //   return dtype::timedelta64;
-      // }
+      else if (fmt == std::string("M")) {
+        return dtype::datetime64;
+      }
+      else if (fmt == std::string("m")) {
+        return dtype::timedelta64;
+      }
       else {
         return dtype::NOT_PRIMITIVE;
       }
@@ -272,10 +272,10 @@ namespace awkward {
         return "Zd";
       case dtype::complex256:
         return "Zg";
-      // case dtype::datetime64:
-      //   return "M";
-      // case dtype::timedelta64:
-      //   return "m";
+      case dtype::datetime64:
+        return "M";
+      case dtype::timedelta64:
+        return "m";
       default:
         return "";
       }
@@ -316,10 +316,10 @@ namespace awkward {
         return 16;
       case dtype::complex256:
         return 32;
-      // case dtype::datetime64:
-      //   return 8;
-      // case dtype::timedelta64:
-      //   return 8;
+      case dtype::datetime64:
+        return 8;
+      case dtype::timedelta64:
+        return 8;
       default:
         return 0;
       }

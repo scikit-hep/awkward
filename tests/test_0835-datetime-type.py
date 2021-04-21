@@ -14,21 +14,26 @@ def test_date_time():
     )
 
     array = ak.Array(numpy_array)
-
+    assert (
+        str(array.type)
+        == '3 * datetime64[parameters={"__array__": "datetime64", "__datetime64_data__": "<M8[s]", "__datetime64_unit__": "1s"}]'
+    )
     assert array.tolist() == [
-        "2020-07-27T10:41:11",
-        "2019-01-01T00:00:00",
-        "2020-01-01T00:00:00",
+        1595846471,
+        1546300800,
+        1577836800,
     ]
     for i in range(len(array)):
         assert ak.to_numpy(array)[i] == numpy_array[i]
 
     date_time = np.datetime64("2020-07-27T10:41:11.200000011", "us")
     array1 = ak.Array(np.array(["2020-07-27T10:41:11.200000011"], "datetime64[us]"))
-    assert str(array1.tolist()[0]) == np.datetime_as_string(date_time)
+    assert np.datetime64(array1[0], "us") == date_time
 
-    # FIXME: this is actually '2020-07-27T10:41:11.200000'
+    # FIXME: this prints '2020-07-27T10:41:11.200000'
     print(ak.to_numpy(array1))
+
+    assert ak.to_list(ak.from_iter(ak.to_list(array1))) == [1595846471200000]
 
 
 def test_date_time_units():
@@ -56,4 +61,3 @@ def test_NumpyArray_date_time():
     arrays = (np.arange(0, 10, dtype=dtype) for dtype in dtypes)
     for array in arrays:
         print(array)
-    # raise ValueError

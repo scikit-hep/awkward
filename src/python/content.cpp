@@ -80,6 +80,14 @@ box(const std::shared_ptr<ak::Content>& content) {
           return py::cast(ak::kernel::NumpyArray_getitem_at0(
                    raw->ptr_lib(),
                    reinterpret_cast<double*>(raw->data())));
+       case ak::util::dtype::datetime64:
+         return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                  raw->ptr_lib(),
+                  reinterpret_cast<uint64_t*>(raw->data())));
+       case ak::util::dtype::timedelta64:
+         return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                  raw->ptr_lib(),
+                  reinterpret_cast<int64_t*>(raw->data())));
         default:
           if (raw->ptr_lib() == ak::kernel::lib::cuda) {
             throw std::runtime_error(
@@ -2163,6 +2171,33 @@ NumpyArray_from_jax(const std::string& name,
   }
 }
 
+const ak::NumpyArray
+NumpyArray_from_datetime64(const std::string& name,
+                           const py::object& array,
+                           const py::object& identities,
+                           const py::object& parameters) {
+  const std::vector<ssize_t> shape = array.attr("shape").cast<std::vector<ssize_t>>();
+  const std::vector<ssize_t> strides = array.attr("strides").cast<std::vector<ssize_t>>();
+
+  void* ptr = reinterpret_cast<void*>(
+    py::cast<ssize_t>(array.attr("ctypes").attr("data")));
+
+  ak::util::dtype dtype= ak::util::name_to_dtype(
+    py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
+
+  return ak::NumpyArray(
+    unbox_identities_none(identities),
+    dict2parameters(parameters),
+    std::shared_ptr<void>(ptr, pyobject_deleter<void>(array.ptr())),
+    shape,
+    strides,
+    0,
+    ak::util::dtype_to_itemsize(dtype),
+    ak::util::dtype_to_format(dtype),
+    dtype,
+    ak::kernel::lib::cpu);
+}
+
 py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content>
 make_NumpyArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::NumpyArray,
@@ -2187,6 +2222,12 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         }
         else if (module.rfind("jax.", 0) == 0) {
           return NumpyArray_from_jax(name, anyarray, identities, parameters);
+        }
+        else {
+          const auto data_type = pybind11::reinterpret_borrow<pybind11::dtype>(pybind11::detail::array_proxy(anyarray.ptr())->descr).kind();
+          if (data_type == 'M'  ||  data_type == 'm') {
+            return NumpyArray_from_datetime64(name, anyarray, identities, parameters);
+          }
         }
 
         py::array array = anyarray.cast<py::array>();
