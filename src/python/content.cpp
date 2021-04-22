@@ -81,15 +81,17 @@ box(const std::shared_ptr<ak::Content>& content) {
                    raw->ptr_lib(),
                    reinterpret_cast<double*>(raw->data())));
         case ak::util::dtype::datetime64:
-          // FIXME:
+          // FIXME: util to trim the string?
           return py::module::import("numpy").attr("datetime64")(
                    reinterpret_cast<uint64_t*>(raw->data()),
                    raw->parameter("__datetime64_unit__").substr(
                      1, raw->parameter("__datetime64_unit__").length() - 2));
         case ak::util::dtype::timedelta64:
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(
-                   raw->ptr_lib(),
-                   reinterpret_cast<int64_t*>(raw->data())));
+          // FIXME: util to trim the string?
+          return py::module::import("numpy").attr("timedelta64")(
+                   reinterpret_cast<uint64_t*>(raw->data()),
+                   raw->parameter("__timedelta64_unit__").substr(
+                     1, raw->parameter("__timedelta64_unit__").length() - 2));
         default:
           if (raw->ptr_lib() == ak::kernel::lib::cuda) {
             throw std::runtime_error(
@@ -895,6 +897,20 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
     self.real(obj.cast<double>());
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("datetime64"))) {
+    throw std::runtime_error(
+      std::string("FIXME: array builder does not support datetime64 yet:\ncannot convert ")
+      + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
+      + obj.attr("__class__").attr("__name__").cast<std::string>()
+      + std::string(") to an array element") + FILENAME(__LINE__));
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
+    throw std::runtime_error(
+      std::string("FIXME: array builder does not support timedelta64 yet:\ncannot convert ")
+      + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
+      + obj.attr("__class__").attr("__name__").cast<std::string>()
+      + std::string(") to an array element") + FILENAME(__LINE__));
   }
   else {
     throw std::invalid_argument(

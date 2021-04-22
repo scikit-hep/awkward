@@ -547,6 +547,11 @@ def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
                 x, y = xs[0], reduce(xs[1:])
                 return x if x < y else y
 
+        if isinstance(layout, ak.layout.NumpyArray) and (
+            layout.format == "M" or layout.format == "m"
+        ):
+            return reduce([ak.nplike.of(x).min(x) for x in layout])
+
         tmp = ak._util.completely_flatten(layout)
         return reduce([ak.nplike.of(x).min(x) for x in tmp if len(x) > 0])
     else:
@@ -597,6 +602,7 @@ def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
+
     if axis is None:
 
         def reduce(xs):
@@ -607,6 +613,11 @@ def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
             else:
                 x, y = xs[0], reduce(xs[1:])
                 return x if x > y else y
+
+        if isinstance(layout, ak.layout.NumpyArray) and (
+            layout.format == "M" or layout.format == "m"
+        ):
+            return reduce([ak.nplike.of(x).max(x) for x in layout])
 
         tmp = ak._util.completely_flatten(layout)
         return reduce([ak.nplike.of(x).max(x) for x in tmp if len(x) > 0])

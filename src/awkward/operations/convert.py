@@ -258,21 +258,11 @@ def to_numpy(array, allow_missing=True):
             ]
         )
 
-    elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
+    elif (
+        ak.operations.describe.parameters(array).get("__array__") == "datetime64"
+        or ak.operations.describe.parameters(array).get("__array__") == "timedelta64"
+    ):
         return numpy.array([array[i] for i in range(len(array))])
-
-    elif ak.operations.describe.parameters(array).get("__array__") == "timedelta64":
-        return numpy.array(
-            [
-                np.datetime64(
-                    array[i],
-                    ak.operations.describe.parameters(array).get(
-                        "__timedelta64_unit__"
-                    ),
-                )
-                for i in range(len(array))
-            ]
-        )
 
     elif isinstance(array, ak.partition.PartitionedArray):
         tocat = [to_numpy(x, allow_missing=allow_missing) for x in array.partitions]
@@ -999,7 +989,7 @@ def to_list(array):
     elif ak.operations.describe.parameters(array).get("__array__") == "char":
         return ak.behaviors.string.CharBehavior(array).__str__()
 
-    elif isinstance(array, np.datetime64):
+    elif isinstance(array, np.datetime64) or isinstance(array, np.timedelta64):
         return array
 
     elif isinstance(array, ak.highlevel.Array):

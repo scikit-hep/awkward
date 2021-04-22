@@ -33,17 +33,12 @@ def test_date_time():
     # FIXME: this prints '2020-07-27T10:41:11.200000'
     print(ak.to_numpy(array1))
 
+    # assert ak.to_list(ak.from_iter(array1)) == [
+    #     "2020-07-27T10:41:11.200000"
+    # ]
 
-# FIXME:
-# E           ValueError: cannot convert numpy.datetime64('2020-07-27T10:41:11.200000') (type datetime64) to an array element
-# E
-# E           (https://github.com/scikit-hep/awkward-1.0/blob/1.2.2/src/python/content.cpp#L903)
-#
-# awkward/operations/convert.py:956: ValueError
-#
-# assert ak.to_list(ak.from_iter(ak.to_list(array1))) == [
-#     "2020-07-27T10:41:11.200000"
-# ]
+    assert ak.max(array) == numpy_array[0]
+    assert ak.min(array) == numpy_array[1]
 
 
 def test_date_time_units():
