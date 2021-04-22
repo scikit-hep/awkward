@@ -20,7 +20,7 @@ def test_numpy_rhs():
 
     result = np.matmul(transform, vector)
 
-    assert result.tolist() == [5, 16, 12]
+    assert result.tolist() == [[5], [16], [12]]
 
 
 def test_numpy_lhs():
