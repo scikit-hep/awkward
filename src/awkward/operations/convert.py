@@ -259,15 +259,7 @@ def to_numpy(array, allow_missing=True):
         )
 
     elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
-        return numpy.array(
-            [
-                np.datetime64(
-                    array[i],
-                    ak.operations.describe.parameters(array).get("__datetime64_unit__"),
-                )
-                for i in range(len(array))
-            ]
-        )
+        return numpy.array([array[i] for i in range(len(array))])
 
     elif ak.operations.describe.parameters(array).get("__array__") == "timedelta64":
         return numpy.array(
@@ -1007,9 +999,8 @@ def to_list(array):
     elif ak.operations.describe.parameters(array).get("__array__") == "char":
         return ak.behaviors.string.CharBehavior(array).__str__()
 
-    elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
-        tmp = to_numpy(array)
-        return [numpy.datetime_as_string(tmp[i]) for i in range(len(tmp))]
+    elif isinstance(array, np.datetime64):
+        return array
 
     elif isinstance(array, ak.highlevel.Array):
         return [to_list(x) for x in array]
