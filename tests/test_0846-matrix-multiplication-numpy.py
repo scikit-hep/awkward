@@ -16,15 +16,13 @@ def test_numpy_rhs():
         ]
     )
 
-    vector = ak.Array(
-        np.r_[4, 5, 6].reshape(3, 1)    
-    )
+    vector = ak.Array(np.r_[4, 5, 6].reshape(3, 1))
 
     result = np.matmul(transform, vector)
 
     assert result.tolist() == [5, 16, 12]
-    
-    
+
+
 def test_numpy_lhs():
     transform = ak.Array(
         [
@@ -34,10 +32,8 @@ def test_numpy_lhs():
         ]
     )
 
-    vector = ak.Array(
-        np.r_[4, 5, 6].reshape(1, 3)    
-    )
+    vector = ak.Array(np.r_[4, 5, 6].reshape(1, 3))
 
-    result = np.matmul(vector,transform)
+    result = np.matmul(vector, transform)
 
     assert result.tolist() == [[5, 16, 12]]
