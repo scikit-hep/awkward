@@ -2192,7 +2192,7 @@ NumpyArray_from_datetime64(const std::string& name,
     shape,
     strides,
     0,
-    ak::util::dtype_to_itemsize(dtype),
+    py::dtype(array.attr("dtype")).itemsize(),
     ak::util::dtype_to_format(dtype),
     dtype,
     ak::kernel::lib::cpu);
@@ -2223,9 +2223,10 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         else if (module.rfind("jax.", 0) == 0) {
           return NumpyArray_from_jax(name, anyarray, identities, parameters);
         }
-        else {
-          const auto data_type = pybind11::reinterpret_borrow<pybind11::dtype>(pybind11::detail::array_proxy(anyarray.ptr())->descr).kind();
-          if (data_type == 'M'  ||  data_type == 'm') {
+        else if (py::hasattr(anyarray, "dtype")  &&  !py::cast<std::string>(py::str(py::dtype(anyarray.attr("dtype")))).empty()) {
+          const auto& data_type = ak::util::dtype_to_format(ak::util::name_to_dtype(
+            py::cast<std::string>(py::str(py::dtype(anyarray.attr("dtype"))))));
+          if (data_type == "M"  ||  data_type == "m") {
             return NumpyArray_from_datetime64(name, anyarray, identities, parameters);
           }
         }
