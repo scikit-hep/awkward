@@ -13,5 +13,11 @@ def test():
 
     assert array.mask[is_valid].tolist() == [[0, 1, 2, None], [None, None, None, 2, 1]]
 
-    assert ak.sort(array.mask[is_valid]).tolist() == [[0, 1, 2, None], [1, 2, None, None, None]]
-    assert ak.argsort(array.mask[is_valid]).tolist() == [[0, 1, 2, None], [1, 0, None, None, None]]
+    assert ak.sort(array.mask[is_valid]).tolist() == [
+        [0, 1, 2, None],
+        [1, 2, None, None, None],
+    ]
+    assert ak.argsort(array.mask[is_valid]).tolist() == [
+        [0, 1, 2, None],
+        [1, 0, None, None, None],
+    ]
