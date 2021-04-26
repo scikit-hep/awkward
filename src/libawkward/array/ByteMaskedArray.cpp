@@ -1280,86 +1280,13 @@ namespace awkward {
                              bool ascending,
                              bool stable,
                              bool keepdims) const {
-    if (length() == 0 ) {
-      return shallow_copy();
-    }
-
-    int64_t numnull;
-    struct Error err1 = kernel::ByteMaskedArray_numnull(
-      kernel::lib::cpu,   // DERIVE
-      &numnull,
-      mask_.data(),
-      length(),
-      valid_when_);
-    util::handle_error(err1, classname(), identities_.get());
-
-    Index64 nextparents(length() - numnull);
-    Index64 nextcarry(length() - numnull);
-    Index64 outindex(length());
-    struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
-      kernel::lib::cpu,   // DERIVE
-      nextcarry.data(),
-      nextparents.data(),
-      outindex.data(),
-      mask_.data(),
-      parents.data(),
-      length(),
-      valid_when_);
-    util::handle_error(err2, classname(), identities_.get());
-
-    ContentPtr next = content_.get()->carry(nextcarry, false);
-    ContentPtr out = next.get()->sort_next(negaxis,
-                                           starts,
-                                           nextparents,
-                                           outlength,
-                                           ascending,
-                                           stable,
-                                           keepdims);
-
-    std::pair<bool, int64_t> branchdepth = branch_depth();
-    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-      return out;
-    }
-    else {
-      if (RegularArray* raw =
-          dynamic_cast<RegularArray*>(out.get())) {
-        out = raw->toListOffsetArray64(true);
-      }
-      if (ListOffsetArray64* raw =
-          dynamic_cast<ListOffsetArray64*>(out.get())) {
-        Index64 outoffsets(starts.length() + 1);
-        if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
-          throw std::runtime_error(
-            std::string("sort_next with unbranching depth > negaxis expects "
-                        "a ListOffsetArray64 whose offsets start at zero")
-            + FILENAME(__LINE__));
-        }
-        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
-          kernel::lib::cpu,   // DERIVE
-          outoffsets.data(),
-          starts.data(),
-          starts.length(),
-          outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
-
-        IndexedOptionArray64 tmp(Identities::none(),
-                                 parameters_,
-                                 outindex,
-                                 raw->content());
-        return std::make_shared<ListOffsetArray64>(
-          raw->identities(),
-          raw->parameters(),
-          outoffsets,
-          tmp.simplify_optiontype());
-      }
-      else {
-        throw std::runtime_error(
-          std::string("sort_next with unbranching depth > negaxis is only "
-                      "expected to return RegularArray or ListOffsetArray64; "
-                      "instead, it returned ")
-          + out.get()->classname() + FILENAME(__LINE__));
-      }
-    }
+    return toIndexedOptionArray64().get()->sort_next(negaxis,
+                                                     starts,
+                                                     parents,
+                                                     outlength,
+                                                     ascending,
+                                                     stable,
+                                                     keepdims);
   }
 
   const ContentPtr
@@ -1370,82 +1297,13 @@ namespace awkward {
                                 bool ascending,
                                 bool stable,
                                 bool keepdims) const {
-    int64_t numnull;
-    struct Error err1 = kernel::ByteMaskedArray_numnull(
-      kernel::lib::cpu,   // DERIVE
-      &numnull,
-      mask_.data(),
-      length(),
-      valid_when_);
-    util::handle_error(err1, classname(), identities_.get());
-
-    Index64 nextparents(length() - numnull);
-    Index64 nextcarry(length() - numnull);
-    Index64 outindex(length());
-    struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
-      kernel::lib::cpu,   // DERIVE
-      nextcarry.data(),
-      nextparents.data(),
-      outindex.data(),
-      mask_.data(),
-      parents.data(),
-      length(),
-      valid_when_);
-    util::handle_error(err2, classname(), identities_.get());
-
-    ContentPtr next = content_.get()->carry(nextcarry, false);
-    ContentPtr out = next.get()->argsort_next(negaxis,
-                                              starts,
-                                              nextparents,
-                                              outlength,
-                                              ascending,
-                                              stable,
-                                              keepdims);
-
-    std::pair<bool, int64_t> branchdepth = branch_depth();
-    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-      return out;
-    }
-    else {
-      if (RegularArray* raw =
-          dynamic_cast<RegularArray*>(out.get())) {
-        out = raw->toListOffsetArray64(true);
-      }
-      if (ListOffsetArray64* raw =
-          dynamic_cast<ListOffsetArray64*>(out.get())) {
-        Index64 outoffsets(starts.length() + 1);
-        if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
-          throw std::runtime_error(
-            std::string("argsort_next with unbranching depth > negaxis expects "
-                        "a ListOffsetArray64 whose offsets start at zero")
-            + FILENAME(__LINE__));
-        }
-        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
-          kernel::lib::cpu,   // DERIVE
-          outoffsets.data(),
-          starts.data(),
-          starts.length(),
-          outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
-
-        IndexedOptionArray64 tmp(Identities::none(),
-                                 util::Parameters(),
-                                 outindex,
-                                 raw->content());
-        return std::make_shared<ListOffsetArray64>(
-          raw->identities(),
-          raw->parameters(),
-          outoffsets,
-          tmp.simplify_optiontype());
-      }
-      else {
-        throw std::runtime_error(
-          std::string("argsort_next with unbranching depth > negaxis is only "
-                      "expected to return RegularArray or ListOffsetArray64; "
-                      "instead, it returned ")
-          + out.get()->classname() + FILENAME(__LINE__));
-      }
-    }
+    return toIndexedOptionArray64().get()->argsort_next(negaxis,
+                                                        starts,
+                                                        parents,
+                                                        outlength,
+                                                        ascending,
+                                                        stable,
+                                                        keepdims);
   }
 
   const ContentPtr
