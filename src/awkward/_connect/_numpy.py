@@ -144,12 +144,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
 
-        inputs = [deregulate(x) for x in inputs]
-
         if ufunc is numpy.matmul:
             custom_matmul = getfunction_matmul(inputs)
             if custom_matmul is not None:
                 return custom_matmul
+
+        inputs = [deregulate(x) for x in inputs]
 
         if all(
             isinstance(x, ak.layout.NumpyArray)
@@ -290,6 +290,13 @@ matmul_for_numba.numbafied = None
 
 
 def getfunction_matmul(inputs):
+    inputs = [
+        ak._util.recursively_apply(
+            x, (lambda _: _), pass_depth=False, numpy_to_regular=True
+        )
+        for x in inputs
+    ]
+
     if len(inputs) == 2 and all(
         isinstance(x, ak._util.listtypes)
         and isinstance(x.content, ak._util.listtypes)

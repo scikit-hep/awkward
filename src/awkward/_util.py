@@ -563,7 +563,10 @@ def broadcast_and_apply(  # noqa: C901
                 ):
                     return False
             elif isinstance(x, ak.layout.RegularArray):
-                my_offsets = nplike.arange(0, len(x.content), x.size)
+                if x.size == 0:
+                    my_offsets = nplike.empty(0, dtype=np.int64)
+                else:
+                    my_offsets = nplike.arange(0, len(x.content), x.size)
                 if offsets is None:
                     offsets = my_offsets
                 elif not nplike.array_equal(offsets, my_offsets):
