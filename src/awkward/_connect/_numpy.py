@@ -204,7 +204,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         return None
 
     out = ak._util.broadcast_and_apply(
-        inputs, getfunction, behavior, allow_records=False, pass_depth=False
+        inputs,
+        getfunction,
+        behavior,
+        allow_records=False,
+        pass_depth=False,
+        clip_to_masks=True,
     )
     assert isinstance(out, tuple) and len(out) == 1
     return ak._util.wrap(out[0], behavior)

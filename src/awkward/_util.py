@@ -511,6 +511,7 @@ def broadcast_and_apply(  # noqa: C901
     right_broadcast=True,
     numpy_to_regular=False,
     regular_to_jagged=False,
+    clip_to_masks=False,
 ):
     def checklength(inputs):
         length = len(inputs[0])
@@ -739,6 +740,34 @@ def broadcast_and_apply(  # noqa: C901
                         mask = m
                     else:
                         nplike.bitwise_or(mask, m, out=mask)
+
+            if clip_to_masks and all(
+                isinstance(
+                    x,
+                    (
+                        ak.layout.BitMaskedArray,
+                        ak.layout.ByteMaskedArray,
+                        ak.layout.UnmaskedArray,
+                    ),
+                )
+                for x in inputs
+                if isinstance(x, optiontypes)
+            ):
+                index = ak.layout.Index8(mask)
+
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, optiontypes):
+                        nextinputs.append(x.content)
+                    else:
+                        nextinputs.append(x)
+
+                outcontent = apply(nextinputs, depth, user)
+                assert isinstance(outcontent, tuple)
+                return tuple(
+                    ak.layout.ByteMaskedArray(index, x, valid_when=False).simplify()
+                    for x in outcontent
+                )
 
             nextmask = ak.layout.Index8(mask.view(np.int8))
             index = nplike.full(len(mask), -1, dtype=np.int64)
