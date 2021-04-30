@@ -81,17 +81,13 @@ box(const std::shared_ptr<ak::Content>& content) {
                    raw->ptr_lib(),
                    reinterpret_cast<double*>(raw->data())));
         case ak::util::dtype::datetime64:
-          // FIXME: util to trim the string?
           return py::module::import("numpy").attr("datetime64")(
                    reinterpret_cast<uint64_t*>(raw->data()),
-                   raw->parameter("__datetime64_unit__").substr(
-                     1, raw->parameter("__datetime64_unit__").length() - 2));
+                   ak::util::format_to_units(raw->format()));
         case ak::util::dtype::timedelta64:
-          // FIXME: util to trim the string?
           return py::module::import("numpy").attr("timedelta64")(
                    reinterpret_cast<uint64_t*>(raw->data()),
-                   raw->parameter("__timedelta64_unit__").substr(
-                     1, raw->parameter("__timedelta64_unit__").length() - 2));
+                   ak::util::format_to_units(raw->format()));
         default:
           if (raw->ptr_lib() == ak::kernel::lib::cuda) {
             throw std::runtime_error(
@@ -832,6 +828,27 @@ builder_fromiter_iscomplex(const py::handle& obj) {
 }
 
 void
+builder_datetime64(ak::ArrayBuilder& self, const py::handle& obj) {
+  if (py::isinstance<py::str>(obj)) {
+    auto date_time = py::module::import("numpy").attr("datetime64")(obj);
+    auto ptr = date_time.attr("astype")(py::module::import("numpy").attr("int64"));
+    auto units = py::str(py::module::import("numpy").attr("dtype")(date_time)).cast<std::string>();
+    self.datetime64(ptr.cast<int64_t>(), units);
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("datetime64"))) {
+    auto ptr = obj.attr("astype")(py::module::import("numpy").attr("int64"));
+    self.datetime64(ptr.cast<int64_t>(), py::str(obj.attr("dtype")));
+  }
+  else {
+    throw std::invalid_argument(
+      std::string("cannot convert ")
+      + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
+      + obj.attr("__class__").attr("__name__").cast<std::string>()
+      + std::string(") to an array element") + FILENAME(__LINE__));
+  }
+}
+
+void
 builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   if (obj.is(py::none())) {
     self.null();
@@ -899,18 +916,10 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     self.real(obj.cast<double>());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("datetime64"))) {
-    throw std::runtime_error(
-      std::string("FIXME: array builder does not support datetime64 yet:\ncannot convert ")
-      + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
-      + obj.attr("__class__").attr("__name__").cast<std::string>()
-      + std::string(") to an array element") + FILENAME(__LINE__));
+    builder_datetime64(self, obj);
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
-    throw std::runtime_error(
-      std::string("FIXME: array builder does not support timedelta64 yet:\ncannot convert ")
-      + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
-      + obj.attr("__class__").attr("__name__").cast<std::string>()
-      + std::string(") to an array element") + FILENAME(__LINE__));
+    self.timedelta64(obj.cast<int64_t>(), py::str(obj.attr("dtype")));
   }
   else {
     throw std::invalid_argument(
@@ -947,6 +956,8 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       .def("integer", &ak::ArrayBuilder::integer)
       .def("real", &ak::ArrayBuilder::real)
       .def("complex", &ak::ArrayBuilder::complex)
+      .def("datetime64", &builder_datetime64) //ak::ArrayBuilder::datetime64)
+      .def("timedelta64", &ak::ArrayBuilder::timedelta64)
       .def("bytestring",
            [](ak::ArrayBuilder& self, const py::bytes& x) -> void {
         self.bytestring(x.cast<std::string>());
@@ -2211,7 +2222,8 @@ NumpyArray_from_datetime64(const std::string& name,
     strides,
     0,
     py::dtype(array.attr("dtype")).itemsize(),
-    ak::util::dtype_to_format(dtype),
+    // format string from a dtype, start from 1 to remove endianness
+    py::cast<std::string>(py::str(array.attr("dtype").attr("str"))).substr(1),
     dtype,
     ak::kernel::lib::cpu);
 }

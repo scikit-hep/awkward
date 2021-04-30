@@ -62,6 +62,10 @@ namespace awkward {
     const std::string
     dtype_to_format(dtype dt);
 
+    /// @brief Convert a format string into a datetime64 units string.
+    const std::string
+    format_to_units(const std::string& format);
+
     /// @brief Convert a dtype enum into an itemsize.
     int64_t
     dtype_to_itemsize(dtype dt);

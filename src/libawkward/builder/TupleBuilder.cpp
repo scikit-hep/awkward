@@ -193,6 +193,48 @@ namespace awkward {
   }
 
   const BuilderPtr
+  TupleBuilder::datetime64(int64_t x, const std::string& unit) {
+    if (!begun_) {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->datetime64(x, unit);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument(
+        std::string("called 'datetime64' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->datetime64(x, unit));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->datetime64(x, unit);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
+  TupleBuilder::timedelta64(int64_t x, const std::string& unit) {
+    if (!begun_) {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->timedelta64(x, unit);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument(
+        std::string("called 'timedelta64' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->timedelta64(x, unit));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->timedelta64(x, unit);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
   TupleBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());

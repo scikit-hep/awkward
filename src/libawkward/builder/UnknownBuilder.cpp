@@ -12,6 +12,7 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/BoolBuilder.h"
+#include "awkward/builder/DatetimeBuilder.h"
 #include "awkward/builder/Int64Builder.h"
 #include "awkward/builder/Float64Builder.h"
 #include "awkward/builder/Complex128Builder.h"
@@ -119,6 +120,26 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->complex(x);
+    return out;
+  }
+
+  const BuilderPtr
+  UnknownBuilder::datetime64(int64_t x, const std::string& unit) {
+    BuilderPtr out = DatetimeBuilder::fromempty(options_, unit);
+    if (nullcount_ != 0) {
+      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+    }
+    out.get()->datetime64(x, unit);
+    return out;
+  }
+
+  const BuilderPtr
+  UnknownBuilder::timedelta64(int64_t x, const std::string& unit) {
+    BuilderPtr out = DatetimeBuilder::fromempty(options_, unit);
+    if (nullcount_ != 0) {
+      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+    }
+    out.get()->timedelta64(x, unit);
     return out;
   }
 

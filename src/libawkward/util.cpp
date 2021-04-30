@@ -21,6 +21,7 @@ namespace awkward {
 
     dtype
     name_to_dtype(const std::string& name) {
+      std::cout << "name_to_dtype: ";
       if (name == "bool") {
         return util::dtype::boolean;
       }
@@ -70,6 +71,7 @@ namespace awkward {
         return util::dtype::complex256;
       }
       else if (name.rfind("datetime64", 0) == 0) {
+        std::cout << "dtype is datetime64\n";
         return util::dtype::datetime64;
       }
       else if (name.rfind("timedelta64", 0) == 0) {
@@ -279,6 +281,11 @@ namespace awkward {
       default:
         return "";
       }
+    }
+
+    const std::string
+    format_to_units(const std::string& format) {
+      return format.substr(format.find('['), format.find(']'));
     }
 
     int64_t

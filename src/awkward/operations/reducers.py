@@ -548,9 +548,16 @@ def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
                 return x if x < y else y
 
         if isinstance(layout, ak.layout.NumpyArray) and (
-            layout.format == "M" or layout.format == "m"
+            layout.format.startswith("M") or layout.format.startswith("m")
         ):
             return reduce([ak.nplike.of(x).min(x) for x in layout])
+        elif isinstance(layout, ak.layout.ListOffsetArray64) and (
+            layout.content.parameter("__array__") == "datetime64"
+        ):
+            # FIXME:
+            return reduce(
+                [ak.nplike.of(np.datetime64(x.ptr, "s")).min(x) for x in layout]
+            )
 
         tmp = ak._util.completely_flatten(layout)
         return reduce([ak.nplike.of(x).min(x) for x in tmp if len(x) > 0])
@@ -615,7 +622,7 @@ def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
                 return x if x > y else y
 
         if isinstance(layout, ak.layout.NumpyArray) and (
-            layout.format == "M" or layout.format == "m"
+            layout.format.startswith("M") or layout.format.startswith("m")
         ):
             return reduce([ak.nplike.of(x).max(x) for x in layout])
 

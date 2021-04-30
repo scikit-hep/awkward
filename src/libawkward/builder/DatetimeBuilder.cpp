@@ -1,8 +1,9 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/Int64Builder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/DatetimeBuilder.cpp", line)
 
 #include "awkward/Identities.h"
+#include "awkward/array/EmptyArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
@@ -11,177 +12,194 @@
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 
-#include "awkward/builder/Int64Builder.h"
+#include "awkward/builder/DatetimeBuilder.h"
 
 namespace awkward {
   const BuilderPtr
-  Int64Builder::fromempty(const ArrayBuilderOptions& options) {
-    return std::make_shared<Int64Builder>(options,
-                                          GrowableBuffer<int64_t>::empty(options));
+  DatetimeBuilder::fromempty(const ArrayBuilderOptions& options, const std::string& units) {
+    GrowableBuffer<int64_t> content = GrowableBuffer<int64_t>::empty(options);
+    return std::make_shared<DatetimeBuilder>(options,
+                                             content,
+                                             units);
   }
 
-  Int64Builder::Int64Builder(const ArrayBuilderOptions& options,
-                             const GrowableBuffer<int64_t>& buffer)
+  DatetimeBuilder::DatetimeBuilder(const ArrayBuilderOptions& options,
+                                   const GrowableBuffer<int64_t>& content,
+                                   const std::string& units)
       : options_(options)
-      , buffer_(buffer) { }
-
-  const GrowableBuffer<int64_t>
-  Int64Builder::buffer() const {
-    return buffer_;
-  }
+      , content_(content)
+      , units_(units) { }
 
   const std::string
-  Int64Builder::classname() const {
-    return "Int64Builder";
+  DatetimeBuilder::classname() const {
+    return "DatetimeBuilder";
   };
 
   int64_t
-  Int64Builder::length() const {
-    return buffer_.length();
+  DatetimeBuilder::length() const {
+    return content_.length();
   }
 
   void
-  Int64Builder::clear() {
-    buffer_.clear();
+  DatetimeBuilder::clear() {
+    content_.clear();
   }
 
   const ContentPtr
-  Int64Builder::snapshot() const {
-    std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
+  DatetimeBuilder::snapshot() const {
+    std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
+
+    auto dtype = util::name_to_dtype(units_);
+    auto format = std::string(util::dtype_to_format(dtype))
+      .append(std::to_string(util::dtype_to_itemsize(dtype)))
+      .append(util::format_to_units(units_));
     return std::make_shared<NumpyArray>(
              Identities::none(),
              util::Parameters(),
-             buffer_.ptr(),
+             content_.ptr(),
              shape,
              strides,
              0,
              sizeof(int64_t),
-             util::dtype_to_format(util::dtype::int64),
-             util::dtype::int64,
+             format,
+             dtype,
              kernel::lib::cpu);
   }
 
   bool
-  Int64Builder::active() const {
+  DatetimeBuilder::active() const {
     return false;
   }
 
   const BuilderPtr
-  Int64Builder::null() {
+  DatetimeBuilder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::boolean(bool x) {
+  DatetimeBuilder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::integer(int64_t x) {
-    buffer_.append(x);
-    return shared_from_this();
+  DatetimeBuilder::integer(int64_t x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    out.get()->integer(x);
+    return out;
   }
 
   const BuilderPtr
-  Int64Builder::real(double x) {
-    BuilderPtr out = Float64Builder::fromint64(options_, buffer_);
+  DatetimeBuilder::real(double x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->real(x);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::complex(std::complex<double> x) {
-    BuilderPtr out = Complex128Builder::fromint64(options_, buffer_);
+  DatetimeBuilder::complex(std::complex<double> x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->complex(x);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::datetime64(int64_t x, const std::string& unit) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->datetime64(x, unit);
-    return out;
+  DatetimeBuilder::datetime64(int64_t x, const std::string& unit) {
+    if (unit == units_) {
+      content_.append(x);
+      return shared_from_this();
+    }
+    else {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->datetime64(x, unit);
+      return out;
+    }
   }
 
   const BuilderPtr
-  Int64Builder::timedelta64(int64_t x, const std::string& unit) {
+  DatetimeBuilder::timedelta64(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta64(x, unit);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::string(const char* x, int64_t length, const char* encoding) {
+  DatetimeBuilder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::beginlist() {
+  DatetimeBuilder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::endlist() {
+  DatetimeBuilder::endlist() {
     throw std::invalid_argument(
       std::string("called 'end_list' without 'begin_list' at the same level before it")
       + FILENAME(__LINE__));
   }
 
   const BuilderPtr
-  Int64Builder::begintuple(int64_t numfields) {
+  DatetimeBuilder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::index(int64_t index) {
+  DatetimeBuilder::index(int64_t index) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
   }
 
   const BuilderPtr
-  Int64Builder::endtuple() {
+  DatetimeBuilder::endtuple() {
     throw std::invalid_argument(
       std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
   }
 
   const BuilderPtr
-  Int64Builder::beginrecord(const char* name, bool check) {
+  DatetimeBuilder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::field(const char* key, bool check) {
+  DatetimeBuilder::field(const char* key, bool check) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));
   }
 
   const BuilderPtr
-  Int64Builder::endrecord() {
+  DatetimeBuilder::endrecord() {
     throw std::invalid_argument(
       std::string("called 'end_record' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));
   }
 
   const BuilderPtr
-  Int64Builder::append(const ContentPtr& array, int64_t at) {
+  DatetimeBuilder::append(const ContentPtr& array, int64_t at) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->append(array, at);
     return out;
   }
+
+  const std::string&
+  DatetimeBuilder::units() const {
+    return units_;
+  }
+
 }

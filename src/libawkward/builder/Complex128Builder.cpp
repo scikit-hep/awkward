@@ -119,6 +119,20 @@ namespace awkward {
   }
 
   const BuilderPtr
+  Complex128Builder::datetime64(int64_t x, const std::string& unit) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    out.get()->datetime64(x, unit);
+    return out;
+  }
+
+  const BuilderPtr
+  Complex128Builder::timedelta64(int64_t x, const std::string& unit) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    out.get()->timedelta64(x, unit);
+    return out;
+  }
+
+  const BuilderPtr
   Complex128Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);

@@ -493,20 +493,18 @@ def completely_flatten(array):
         return tuple(out)
 
     elif isinstance(array, ak.layout.NumpyArray):
-        if array.format == "M":
+        if array.format.startswith("M"):
             return (
                 ak.nplike.of(array).asarray(
                     array,
-                    ak.operations.describe.parameters(array).get("__datetime64_data__"),
+                    dtype=np.datetime64,
                 ),
             )
-        elif array.format == "m":
+        elif array.format.startswith("m"):
             return (
                 ak.nplike.of(array).asarray(
                     array,
-                    ak.operations.describe.parameters(array).get(
-                        "__timedelta64_data__"
-                    ),
+                    dtype=np.timedelta64,
                 ),
             )
 

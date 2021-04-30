@@ -100,6 +100,7 @@ class NumpyMetadata(Singleton):
 
     nat = numpy.datetime64("NaT")
     datetime_data = numpy.datetime_data
+    issubdtype = numpy.issubdtype
 
 
 if hasattr(numpy, "float16"):

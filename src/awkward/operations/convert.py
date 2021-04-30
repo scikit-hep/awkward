@@ -121,31 +121,6 @@ def from_numpy(
             )
             for i in range(len(array.shape) - 1, 0, -1):
                 data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
-        elif array.dtype.kind == "M":
-            data = ak.layout.NumpyArray(array)
-            asbytes = array.reshape(-1)
-            itemsize = asbytes.dtype.itemsize
-            data = ak.layout.NumpyArray(
-                asbytes,
-                parameters={
-                    "__array__": "datetime64",
-                    "__datetime64_data__": array.dtype.str,
-                    "__datetime64_unit__": str(np.datetime_data(array.dtype)[1])
-                    + np.datetime_data(array.dtype)[0],
-                },
-            )
-        elif array.dtype.kind == "m":
-            asbytes = array.reshape(-1)
-            itemsize = asbytes.dtype.itemsize
-            data = ak.layout.NumpyArray(
-                asbytes,
-                parameters={
-                    "__array__": "timedelta64",
-                    "__timedelta64_data__": array.dtype.str,
-                    "__timedelta64_unit__": str(np.datetime_data(array.dtype)[1])
-                    + np.datetime_data(array.dtype)[0],
-                },
-            )
         else:
             data = ak.layout.NumpyArray(array)
 
@@ -259,8 +234,8 @@ def to_numpy(array, allow_missing=True):
         )
 
     elif (
-        ak.operations.describe.parameters(array).get("__array__") == "datetime64"
-        or ak.operations.describe.parameters(array).get("__array__") == "timedelta64"
+        str(ak.operations.describe.type(array)) == "datetime64"
+        or str(ak.operations.describe.type(array)) == "timedelta64"
     ):
         return numpy.array([array[i] for i in range(len(array))])
 
@@ -689,8 +664,8 @@ def to_jax(array):
         )
 
     elif (
-        ak.operations.describe.parameters(array).get("__array__") == "datetime64"
-        or ak.operations.describe.parameters(array).get("__array__") == "timedelta64"
+        ak.operations.describe.type(array) == "datetime64"
+        or ak.operations.describe.type(array) == "timedelta64"
     ):
         raise ValueError(
             "JAX does not support arrays of datetime64/timedelta64?"
@@ -938,7 +913,20 @@ def from_iter(
             )
     out = ak.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
+        # print("from_iter: ", x)
+        # for y in x:
+        #     print(ak.type(y))
+        #     print(ak.nplike.of(y).datetime_as_string(y))
+        #     print(np.datetime_data(y))
+        #     print(int((y  - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')))
+        #     #print(py::cast<ssize_t>(y.attr("ctypes").attr("data")))
+        # # FIXME: this is to convert datetime64 to integer that is seconds
+        # # out.fromiter(int((y  - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')) for y in x)
+        #
+        # # FIXME: this is to normalize the datetime64 to units in 's'
+        # # out.fromiter(np.datetime64(int((y  - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')), 's') for y in x)
         out.fromiter(x)
+        # print(ak.type(out))
     layout = out.snapshot()
     if highlevel:
         return ak._util.wrap(layout, behavior)
@@ -1011,7 +999,24 @@ def to_list(array):
         return [to_list(x) for x in array.snapshot()]
 
     elif isinstance(array, ak.layout.NumpyArray):
-        return ak.nplike.of(array).asarray(array).tolist()
+        if array.format.startswith("M"):
+            return [
+                np.datetime64(
+                    x,
+                    array.format[array.format.index("[") + 1 : array.format.index("]")],
+                )
+                for x in array
+            ]
+        elif array.format.startswith("m"):
+            return [
+                np.timedelta64(
+                    x,
+                    array.format[array.format.index("[") + 1 : array.format.index("]")],
+                )
+                for x in array
+            ]
+        else:
+            return ak.nplike.of(array).asarray(array).tolist()
 
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         return [to_list(x) for x in array]
