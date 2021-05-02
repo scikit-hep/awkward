@@ -256,7 +256,11 @@ class AuxData(object):
 
         def form_sweep(input_form, blacklist):
             if isinstance(input_form, dict):
-                return {k: form_sweep(v, blacklist) for k, v in input_form.items() if k not in blacklist}
+                return {
+                    k: form_sweep(v, blacklist)
+                    for k, v in input_form.items()
+                    if k not in blacklist
+                }
             else:
                 return input_form
 
@@ -264,6 +268,7 @@ class AuxData(object):
         other_form = form_sweep(self_form, ["primitive", "format", "itemsize"])
 
         return self_form == other_form
+
 
 def special_flatten(array):
     if isinstance(array, ak.Array) and hasattr(array, "_tracers"):
