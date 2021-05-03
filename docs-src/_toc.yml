@@ -129,3 +129,6 @@
       title: "In Numba"
     - file: how-to-specialize-lorentz
       title: "For physics: Lorentz vectors"
+
+- file: how-to-differentiate-using-jax
+  title: "Differentiation using JAX"

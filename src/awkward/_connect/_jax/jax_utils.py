@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import awkward as ak
 import numbers
+import json
 
 import jax
 import jax.tree_util
@@ -250,7 +251,23 @@ class AuxData(object):
         self.array = array
 
     def __eq__(self, other):
-        return self.array.layout.form == other.array.layout.form
+        self_form = json.loads(self.array.layout.form.tojson())
+        other_form = json.loads(self.array.layout.form.tojson())
+
+        def form_sweep(input_form, blacklist):
+            if isinstance(input_form, dict):
+                return {
+                    k: form_sweep(v, blacklist)
+                    for k, v in input_form.items()
+                    if k not in blacklist
+                }
+            else:
+                return input_form
+
+        self_form = form_sweep(self_form, ["primitive", "format", "itemsize"])
+        other_form = form_sweep(self_form, ["primitive", "format", "itemsize"])
+
+        return self_form == other_form
 
 
 def special_flatten(array):
