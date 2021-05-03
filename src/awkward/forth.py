@@ -4,3 +4,9 @@ from __future__ import absolute_import
 
 from awkward._ext import ForthMachine32
 from awkward._ext import ForthMachine64
+
+__all__ = ["ForthMachine32", "ForthMachine64"]
+
+
+def __dir__():
+    return __all__

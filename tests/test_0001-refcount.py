@@ -18,7 +18,7 @@ def test_refcount():
         i = ak.layout.Index32(o)
         n = ak.layout.NumpyArray(c)
         l1 = ak.layout.ListOffsetArray32(i, n)
-        l2 = ak.layout.ListOffsetArray32(i, l1)
+        l2 = ak.layout.ListOffsetArray32(i, l1)  # noqa: F841 (checking refcount)
 
         for statement in order:
             assert sys.getrefcount(o), sys.getrefcount(c) == (3, 3)

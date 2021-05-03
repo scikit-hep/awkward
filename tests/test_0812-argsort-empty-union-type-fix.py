@@ -8,7 +8,7 @@ import awkward as ak  # noqa: F401
 
 
 def test_empty_slice():
-    muon = ak.Array([[{"pt": 1.0}], []], with_name="muon")
+    # muon = ak.Array([[{"pt": 1.0}], []], with_name="muon")
     electron = ak.Array([[], [{"pt": 1.0}]], with_name="electron")
 
     electron = electron[electron.pt > 5]

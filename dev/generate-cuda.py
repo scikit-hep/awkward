@@ -153,9 +153,9 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
         else:
             code = node.id
     elif node.__class__.__name__ == "NameConstant":
-        if node.value == True:
+        if node.value is True:
             code = "true"
-        elif node.value == False:
+        elif node.value is False:
             code = "false"
         else:
             raise Exception("Unhandled NameConstant value {0}".format(node.value))
@@ -243,9 +243,9 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
     elif node.__class__.__name__ == "BitAnd":
         code = "&"
     elif node.__class__.__name__ == "Constant":
-        if node.value == True:
+        if node.value is True:
             code = "true"
-        elif node.value == False:
+        elif node.value is False:
             code = "false"
         else:
             code = node.value

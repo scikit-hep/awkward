@@ -927,7 +927,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
 
-        for attrname, typer, lower in ak._util.numba_attrs(
+        for attrname, typer, _ in ak._util.numba_attrs(
             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
         ):
             if attr == attrname:

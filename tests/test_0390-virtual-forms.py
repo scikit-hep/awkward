@@ -40,7 +40,7 @@ def test_virtual_record():
 
     slicedvirtual = virtual[["x", "y"]]
     assert len(materialize_count) == 0
-    assert slicedvirtual.layout.purelist_parameter("__record__") == None
+    assert slicedvirtual.layout.purelist_parameter("__record__") is None
     assert len(materialize_count) == 0
 
     slicedvirtual = virtual[::2]

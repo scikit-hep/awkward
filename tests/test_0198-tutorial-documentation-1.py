@@ -34,7 +34,6 @@ def test_singletons():
 
 
 def test_firsts():
-    array = ak.singletons(ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]))
     assert ak.to_list(
         ak.firsts(
             ak.singletons(ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])), axis=1

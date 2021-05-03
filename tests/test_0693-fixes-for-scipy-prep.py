@@ -29,7 +29,7 @@ def test_varnewaxis_2():
         ]
     )
     slicer = ak.Array([[3, 4], [0, 1, None, 3]])
-    tmp = array[slicer[:, np.newaxis]].tolist() == [
+    assert array[slicer[:, np.newaxis]].tolist() == [
         [[3, 4], [8, 9], [13, 14]],
         [[15, 16, None, 18], [20, 21, None, 23], [25, 26, None, 28]],
     ]
@@ -45,9 +45,9 @@ def test_varnewaxis_3():
     slicer = ak.Array(
         [[False, False, False, True, True], [True, True, True, True, False]]
     )
-    tmp = array[slicer[:, np.newaxis]].tolist() == [
+    assert array[slicer[:, np.newaxis]].tolist() == [
         [[3, 4], [8, 9], [13, 14]],
-        [[15, 16, 17, 18], [20, 21, 22, 23], [25, 26, 24, 28]],
+        [[15, 16, 17, 18], [20, 21, 22, 23], [25, 26, 27, 28]],
     ]
 
 
@@ -61,7 +61,7 @@ def test_varnewaxis_4():
     slicer = ak.Array(
         [[False, False, False, True, True], [True, True, None, True, False]]
     )
-    tmp = array[slicer[:, np.newaxis]].tolist() == [
+    assert array[slicer[:, np.newaxis]].tolist() == [
         [[3, 4], [8, 9], [13, 14]],
         [[15, 16, None, 18], [20, 21, None, 23], [25, 26, None, 28]],
     ]

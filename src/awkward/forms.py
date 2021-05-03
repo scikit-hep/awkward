@@ -16,3 +16,25 @@ from awkward._ext import RegularForm
 from awkward._ext import UnionForm
 from awkward._ext import UnmaskedForm
 from awkward._ext import VirtualForm
+
+
+__all__ = [
+    "Form",
+    "BitMaskedForm",
+    "ByteMaskedForm",
+    "EmptyForm",
+    "IndexedForm",
+    "IndexedOptionForm",
+    "ListForm",
+    "ListOffsetForm",
+    "NumpyForm",
+    "RecordForm",
+    "RegularForm",
+    "UnionForm",
+    "UnmaskedForm",
+    "VirtualForm",
+]
+
+
+def __dir__():
+    return __all__

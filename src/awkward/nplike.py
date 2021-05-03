@@ -126,6 +126,9 @@ class NumpyLike(Singleton):
         # array[, dtype=]
         return self._module.asarray(*args, **kwargs)
 
+    def isscalar(self, *args, **kwargs):
+        return self._module.isscalar(*args, **kwargs)
+
     def frombuffer(self, *args, **kwargs):
         # array[, dtype=]
         return self._module.frombuffer(*args, **kwargs)
@@ -182,6 +185,9 @@ class NumpyLike(Singleton):
         # haystack, needle, side="right"
         return self._module.searchsorted(*args, **kwargs)
 
+    def argsort(self, *args, **kwargs):
+        return self._module.argsort(*args, **kwargs)
+
     ############################ manipulation
 
     def add(self, *args, **kwargs):
@@ -191,6 +197,10 @@ class NumpyLike(Singleton):
     def cumsum(self, *args, **kwargs):
         # arrays[, out=]
         return self._module.cumsum(*args, **kwargs)
+
+    def cumprod(self, *args, **kwargs):
+        # arrays[, out=]
+        return self._module.cumprod(*args, **kwargs)
 
     def nonzero(self, *args, **kwargs):
         # array
@@ -232,6 +242,10 @@ class NumpyLike(Singleton):
     def broadcast_to(self, *args, **kwargs):
         # array, shape
         return self._module.broadcast_to(*args, **kwargs)
+
+    def append(self, *args, **kwargs):
+        # array, element
+        return self._module.append(*args, **kwargs)
 
     ############################ ufuncs
 

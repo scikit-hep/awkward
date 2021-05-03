@@ -586,24 +586,38 @@ def zip(
         behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
         recordlookup = []
         layouts = []
+        num_scalars = 0
         for n, x in arrays.items():
             recordlookup.append(n)
-            layouts.append(
-                ak.operations.convert.to_layout(
+            try:
+                layout = ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
                 )
-            )
+            except TypeError:
+                num_scalars += 1
+                layout = ak.operations.convert.to_layout(
+                    [x], allow_record=False, allow_other=False
+                )
+            layouts.append(layout)
 
     else:
         behavior = ak._util.behaviorof(*arrays, behavior=behavior)
         recordlookup = None
         layouts = []
+        num_scalars = 0
         for x in arrays:
-            layouts.append(
-                ak.operations.convert.to_layout(
+            try:
+                layout = ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
                 )
-            )
+            except TypeError:
+                num_scalars += 1
+                layout = ak.operations.convert.to_layout(
+                    [x], allow_record=False, allow_other=False
+                )
+            layouts.append(layout)
+
+    to_record = num_scalars == len(arrays)
 
     if with_name is not None:
         if parameters is None:
@@ -640,10 +654,16 @@ def zip(
         regular_to_jagged=True,
     )
     assert isinstance(out, tuple) and len(out) == 1
+    out = out[0]
+
+    if to_record:
+        out = out[0]
+        assert isinstance(out, ak.layout.Record)
+
     if highlevel:
-        return ak._util.wrap(out[0], behavior)
+        return ak._util.wrap(out, behavior)
     else:
-        return out[0]
+        return out
 
 
 def unzip(array):
@@ -4262,7 +4282,6 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 
     See also #ak.numbers_astype.
     """
-    nplike = ak.nplike.of(array)
     to_dtype = np.dtype(to)
 
     def getfunction(layout):
@@ -4307,12 +4326,14 @@ __all__ = [
     if not x.startswith("_")
     and x
     not in (
-        "absolute_import",
         "numbers",
         "json",
         "Iterable",
-        "MutableMapping",
+        "ak",
         "np",
-        "awkward",
     )
 ]
+
+
+def __dir__():
+    return __all__

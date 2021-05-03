@@ -364,6 +364,24 @@ class Array(
                 "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
             )
 
+    @classmethod
+    def _internal_for_jax(cls, layout, jaxtracers, isscalar=False):
+        if isscalar:
+            arr_withtracers = cls(numpy.asarray(layout))
+        else:
+            arr_withtracers = cls(layout)
+        arr_withtracers._tracers = jaxtracers
+        (
+            _dataptrs,
+            _map_ptrs_to_tracers,
+        ) = ak._connect._jax.jax_utils._find_dataptrs_and_map(
+            layout, jaxtracers, isscalar
+        )
+        arr_withtracers._isscalar = isscalar
+        arr_withtracers._dataptrs = _dataptrs
+        arr_withtracers._map_ptrs_to_tracers = _map_ptrs_to_tracers
+        return arr_withtracers
+
     @property
     def caches(self):
         return self._caches
@@ -971,7 +989,10 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return ak._util.wrap(self.layout[where], self._behavior)
+        if not hasattr(self, "_tracers"):
+            return ak._util.wrap(self.layout[where], self._behavior)
+        else:
+            return ak._connect._jax.jax_utils._jaxtracers_getitem(self, where)
 
     def __setitem__(self, where, what):
         """
@@ -1024,18 +1045,23 @@ class Array(
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        if not (
-            isinstance(where, str)
-            or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
-        ):
-            raise TypeError(
-                "only fields may be assigned in-place (by field name)"
-                + ak._util.exception_suffix(__file__)
+        if not hasattr(self, "_tracers"):
+            if not (
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+            ):
+                raise TypeError(
+                    "only fields may be assigned in-place (by field name)"
+                    + ak._util.exception_suffix(__file__)
+                )
+            array = ak.operations.structure.with_field(self.layout, what, where)
+            self._layout = array.layout
+            self._caches = ak._util.find_caches(self.layout)
+            self._numbaview = None
+        else:
+            raise ValueError(
+                "fields cannot be assigned to data involved in a JAX-compiled or JAX-differentiated function"
             )
-        array = ak.operations.structure.with_field(self.layout, what, where)
-        self._layout = array.layout
-        self._caches = ak._util.find_caches(self.layout)
-        self._numbaview = None
 
     def __getattr__(self, where):
         """
@@ -1376,7 +1402,12 @@ class Array(
 
         See also #__array_function__.
         """
-        return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        if not hasattr(self, "_tracers"):
+            return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        else:
+            return ak._connect._jax.jax_utils.array_ufunc(
+                self, ufunc, method, inputs, kwargs
+            )
 
     def __array_function__(self, func, types, args, kwargs):
         """

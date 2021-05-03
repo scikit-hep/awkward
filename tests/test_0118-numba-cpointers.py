@@ -441,13 +441,13 @@ def test_refcount():
         )
     ]
 
-    for i in range(3):
+    for _ in range(3):
 
         @numba.njit
         def f1(x):
             return 3.14
 
-        for j in range(10):
+        for _ in range(10):
             f1(array)
             assert [
                 sys.getrefcount(x) == 2
@@ -459,13 +459,13 @@ def test_refcount():
                 )
             ]
 
-    for i in range(3):
+    for _ in range(3):
 
         @numba.njit
         def f2(x):
             return x
 
-        for j in range(10):
+        for _ in range(10):
             y = f2(array)
             assert [
                 sys.getrefcount(x) == 2
@@ -477,14 +477,14 @@ def test_refcount():
                 )
             ]
 
-    for i in range(3):
+    for _ in range(3):
 
         @numba.njit
         def f3(x):
             return x, x
 
-        for j in range(10):
-            y = f3(array)
+        for _ in range(10):
+            y = f3(array)  # noqa: F841 (checking reference count)
             assert [
                 sys.getrefcount(x) == 2
                 for x in (
@@ -763,13 +763,13 @@ def test_RecordView_refcount():
         )
     ]
 
-    for i in range(3):
+    for _ in range(3):
 
         @numba.njit
         def f1(x):
             return 3.14
 
-        for j in range(10):
+        for _ in range(10):
             f1(record)
             assert [
                 sys.getrefcount(x) == 2
@@ -782,13 +782,13 @@ def test_RecordView_refcount():
                 )
             ]
 
-    for i in range(3):
+    for _ in range(3):
 
         @numba.njit
         def f2(x):
             return x
 
-        for j in range(10):
+        for _ in range(10):
             y = f2(record)
             assert [
                 sys.getrefcount(x) == 2
@@ -801,14 +801,14 @@ def test_RecordView_refcount():
                 )
             ]
 
-    for i in range(3):
+    for _ in range(3):
 
         @numba.njit
         def f3(x):
             return x, x
 
-        for j in range(10):
-            y = f3(record)
+        for _ in range(10):
+            y = f3(record)  # noqa: F841 (checking reference count)
             assert [
                 sys.getrefcount(x) == 2
                 for x in (
