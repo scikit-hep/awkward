@@ -42,6 +42,9 @@ from awkward.highlevel import Array
 from awkward.highlevel import Record
 from awkward.highlevel import ArrayBuilder
 
+# third-party jax connectors
+import awkward._connect._jax
+
 # behaviors
 from awkward.behaviors.mixins import *
 from awkward.behaviors.string import *
@@ -64,3 +67,7 @@ __all__ = [
     for x in list(globals())
     if not x.startswith("_") and x not in ("distutils", "numpy")
 ]
+
+
+def __dir__():
+    return __all__

@@ -39,22 +39,14 @@ def test_tostring():
     content = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
     offsetsA = np.arange(0, 2 * 3 * 5 + 5, 5)
     offsetsB = np.arange(0, 2 * 3 + 3, 3)
-    startsA, stopsA = offsetsA[:-1], offsetsA[1:]
-    startsB, stopsB = offsetsB[:-1], offsetsB[1:]
 
     listoffsetarrayA32 = ak.layout.ListOffsetArray32(
         ak.layout.Index32(offsetsA), content
-    )
-    listarrayA32 = ak.layout.ListArray32(
-        ak.layout.Index32(startsA), ak.layout.Index32(stopsA), content
     )
     modelA = np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7)
 
     listoffsetarrayB32 = ak.layout.ListOffsetArray32(
         ak.layout.Index32(offsetsB), listoffsetarrayA32
-    )
-    listarrayB32 = ak.layout.ListArray32(
-        ak.layout.Index32(startsB), ak.layout.Index32(stopsB), listarrayA32
     )
     modelB = np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
 

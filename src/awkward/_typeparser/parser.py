@@ -105,7 +105,7 @@ def toast(ptnode, high_level, categorical):
         else:
             raise Exception("Unhandled PrimitiveType node")
     elif ptnode.data == "categories":
-        assert high_level == True
+        assert high_level is True
         return toast(ptnode.children[0], high_level, True)
     elif ptnode.data == "unknown":
         if len(ptnode.children) == 0:
@@ -180,7 +180,7 @@ def toast(ptnode, high_level, categorical):
             parameters=parms,
         )
     elif ptnode.data == "option_highlevel":
-        assert high_level == True
+        assert high_level
         parms = {}
         if categorical:
             parms.update({"__categorical__": True})
@@ -237,7 +237,7 @@ def toast(ptnode, high_level, categorical):
             parameters=parms,
         )
     elif ptnode.data == "record_highlevel":
-        assert high_level == True
+        assert high_level
         parms = {"__record__": ptnode.children[0]}
         if categorical:
             parms.update({"__categorical__": True})

@@ -21,6 +21,7 @@ def test_types():
     assert repr(t2) == "?int32"
     assert repr(t3) == "union[int32, float64]"
     assert repr(t4) == "var * int32"
+    assert repr(t4b) == "var * int32"
     assert repr(t5) == "var * var * int32"
     assert repr(t6) == "option[var * int32]"
     assert repr(t2.type) == "int32"
@@ -29,6 +30,7 @@ def test_types():
     assert repr(t3.type(1)) == "float64"
     assert [repr(x) for x in t3.types] == ["int32", "float64"]
     assert repr(t4.type) == "int32"
+    assert repr(t4b.type) == "int32"
     assert repr(t5.type) == "var * int32"
 
 

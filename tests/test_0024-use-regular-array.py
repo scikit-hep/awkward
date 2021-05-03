@@ -36,7 +36,6 @@ def test_empty_array_slice():
 
 def test_nonflat_slice():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
-    numpyarray = ak.layout.NumpyArray(array)
 
     content = ak.layout.NumpyArray(array.reshape(-1))
     inneroffsets = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
@@ -83,7 +82,6 @@ def test_nonflat_slice():
 
 def test_newaxis():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
-    numpyarray = ak.layout.NumpyArray(array)
 
     content = ak.layout.NumpyArray(array.reshape(-1))
     inneroffsets = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))

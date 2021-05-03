@@ -66,7 +66,7 @@ def test_boxing1():
     def f1(x):
         return 3.14
 
-    for i in range(5):
+    for _ in range(5):
         f1(asarray)
         assert (
             sys.getrefcount(asnumpy),
@@ -102,7 +102,7 @@ def test_boxing2():
     def f2(x):
         return x
 
-    for i in range(10):
+    for _ in range(10):
         out = f2(asarray)
 
         assert isinstance(out.layout, ak.partition.PartitionedArray)
@@ -142,7 +142,7 @@ def test_boxing3():
     def f3(x):
         return x, x
 
-    for i in range(10):
+    for _ in range(10):
         out1, out2 = f3(asarray)
         assert isinstance(out1.layout, ak.partition.PartitionedArray)
         assert isinstance(out2.layout, ak.partition.PartitionedArray)
@@ -380,7 +380,7 @@ def test_iter():
             out += xi
         return out
 
-    for i in range(10):
+    for _ in range(10):
         assert f1(array) == 45
         assert sys.getrefcount(asnumpy) == 3
 

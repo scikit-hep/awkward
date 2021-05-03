@@ -201,10 +201,8 @@ def test_listarray_listarray_numpyarray():
     )
     starts1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6]))
     stops1 = ak.layout.Index64(np.array([3, 3, 5, 6, 9]))
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9]))
     starts2 = ak.layout.Index64(np.array([0, 2, 3, 3]))
     stops2 = ak.layout.Index64(np.array([2, 3, 3, 5]))
-    offsets2 = ak.layout.Index64(np.array([0, 2, 3, 3, 5]))
 
     array1 = ak.layout.ListArray64(starts1, stops1, content)
     array2 = ak.layout.ListArray64(starts2, stops2, array1)

@@ -61,7 +61,6 @@ def test_listoffsetarray_basic():
 
 def test_listarray_at():
     array1 = ak.layout.ListArray64(starts1, stops1, content)
-    array2 = ak.layout.ListArray64(starts2, stops2, array1)
     assert ak.to_list(array1[2]) == [4.4, 5.5]
     assert (
         ak.to_list(
@@ -78,7 +77,6 @@ def test_listarray_at():
 
 def test_listoffsetarray_at():
     array1 = ak.layout.ListOffsetArray64(offsets1, content)
-    array2 = ak.layout.ListOffsetArray64(offsets2, array1)
     assert (
         ak.to_list(
             array1[
@@ -140,7 +138,6 @@ def test_listoffsetarray_slice():
 
 def test_listarray_slice_slice():
     array1 = ak.layout.ListArray64(starts1, stops1, content)
-    array2 = ak.layout.ListArray64(starts2, stops2, array1)
     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
     assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
@@ -148,7 +145,6 @@ def test_listarray_slice_slice():
 
 def test_listoffsetarray_slice_slice():
     array1 = ak.layout.ListOffsetArray64(offsets1, content)
-    array2 = ak.layout.ListOffsetArray64(offsets2, array1)
     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
     assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
@@ -252,7 +248,6 @@ def test_listoffsetarray_array_slice():
 
 def test_listarray_array():
     array1 = ak.layout.ListArray64(starts1, stops1, content)
-    array2 = ak.layout.ListArray64(starts2, stops2, array1)
     assert ak.to_list(array1[np.array([2, 0, 0, 1, -1])]) == [
         [4.4, 5.5],
         [1.1, 2.2, 3.3],
@@ -318,7 +313,6 @@ def test_listarray_array():
 
 def test_listoffsetarray_array():
     array1 = ak.layout.ListOffsetArray64(offsets1, content)
-    array2 = ak.layout.ListOffsetArray64(offsets2, array1)
     assert ak.to_list(array1[np.array([2, 0, 0, 1, -1])]) == [
         [4.4, 5.5],
         [1.1, 2.2, 3.3],

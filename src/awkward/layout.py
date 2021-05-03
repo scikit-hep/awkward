@@ -55,3 +55,50 @@ from awkward._ext import SliceGenerator
 from awkward._ext import ArrayCache
 
 from awkward._ext import kernel_lib
+
+
+__all__ = [
+    "Index8",
+    "IndexU8",
+    "Index32",
+    "IndexU32",
+    "Index64",
+    "Identities32",
+    "Identities64",
+    "Iterator",
+    "ArrayBuilder",
+    "TypedArrayBuilder",
+    "_PersistentSharedPtr",
+    "Content",
+    "EmptyArray",
+    "IndexedArray32",
+    "IndexedArrayU32",
+    "IndexedArray64",
+    "IndexedOptionArray32",
+    "IndexedOptionArray64",
+    "ByteMaskedArray",
+    "BitMaskedArray",
+    "UnmaskedArray",
+    "ListArray32",
+    "ListArrayU32",
+    "ListArray64",
+    "ListOffsetArray32",
+    "ListOffsetArrayU32",
+    "ListOffsetArray64",
+    "NumpyArray",
+    "Record",
+    "RecordArray",
+    "RegularArray",
+    "UnionArray8_32",
+    "UnionArray8_U32",
+    "UnionArray8_64",
+    "VirtualArray",
+    "ArrayGenerator",
+    "SliceGenerator",
+    "ArrayCache",
+    "kernel_lib",
+]
+
+
+def __dir__():
+    return __all__

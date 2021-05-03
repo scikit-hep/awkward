@@ -237,6 +237,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "agoose77",
+      "name": "Angus Hollands",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1248413?v=4",
+      "profile": "https://github.com/agoose77",
+      "contributions": [
+        "test",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

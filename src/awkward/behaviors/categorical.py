@@ -342,7 +342,9 @@ def from_categorical(array, highlevel=True):
 
 
 __all__ = [
-    x
-    for x in list(globals())
-    if not x.startswith("_") and x not in ("absolute_import", "np", "awkward")
+    x for x in list(globals()) if not x.startswith("_") and x not in ("ak", "np")
 ]
+
+
+def __dir__():
+    return __all__

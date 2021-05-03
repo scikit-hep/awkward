@@ -453,8 +453,6 @@ def test_recordarray_merge():
 
 
 def test_indexedarray_merge():
-    emptyarray = ak.layout.EmptyArray()
-
     content1 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
     content2 = ak.from_iter([[1, 2], [], [3, 4]], highlevel=False)
     index1 = ak.layout.Index64(np.array([2, 0, -1, 0, 1, 2], dtype=np.int64))

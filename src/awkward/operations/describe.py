@@ -267,6 +267,9 @@ def fields(array):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_")
-    and x not in ("absolute_import", "numbers", "numpy", "np", "awkward")
+    if not x.startswith("_") and x not in ("numbers", "numpy", "ak", "np")
 ]
+
+
+def __dir__():
+    return __all__

@@ -1889,14 +1889,14 @@ class RecordArrayType(ContentType):
         positions.extend([None] * form.numfields)
         sharedptrs.extend([None] * form.numfields)
         if form.istuple:
-            for i, (n, content) in enumerate(form.contents.items()):
+            for i, (_, content) in enumerate(form.contents.items()):
                 positions[
                     pos + cls.CONTENTS + i
                 ] = ak._connect._numba.arrayview.tolookup(
                     content, positions, sharedptrs, arrays
                 )
         else:
-            for i, (n, content) in enumerate(form.contents.items()):
+            for i, (_, content) in enumerate(form.contents.items()):
                 positions[
                     pos + cls.CONTENTS + i
                 ] = ak._connect._numba.arrayview.tolookup(
@@ -1909,7 +1909,7 @@ class RecordArrayType(ContentType):
         contents = []
         if form.istuple:
             recordlookup = None
-            for n, x in form.contents.items():
+            for x in form.contents.values():
                 contents.append(ak._connect._numba.arrayview.tonumbatype(x))
         else:
             recordlookup = []

@@ -1990,17 +1990,25 @@ def to_arrow(
             arrow_type = pyarrow.from_numpy_dtype(numpy_arr.dtype)
 
             if issubclass(numpy_arr.dtype.type, (bool, np.bool_)):
-                if len(numpy_arr) % 8 == 0:
-                    ready_to_pack = numpy_arr
-                else:
-                    ready_to_pack = numpy.empty(
-                        int(numpy.ceil(len(numpy_arr) / 8.0)) * 8, dtype=numpy_arr.dtype
+                if numpy_arr.ndim == 1:
+                    if len(numpy_arr) % 8 == 0:
+                        ready_to_pack = numpy_arr
+                    else:
+                        ready_to_pack = numpy.empty(
+                            int(numpy.ceil(len(numpy_arr) / 8.0)) * 8,
+                            dtype=numpy_arr.dtype,
+                        )
+                        ready_to_pack[: len(numpy_arr)] = numpy_arr
+                        ready_to_pack[len(numpy_arr) :] = 0
+                    numpy_arr = numpy.packbits(
+                        ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1)
                     )
-                    ready_to_pack[: len(numpy_arr)] = numpy_arr
-                    ready_to_pack[len(numpy_arr) :] = 0
-                numpy_arr = numpy.packbits(
-                    ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1)
-                )
+                else:
+                    return recurse(
+                        from_numpy(numpy_arr, regulararray=True, highlevel=False),
+                        mask,
+                        is_option,
+                    )
 
             if numpy_arr.ndim == 1:
                 if mask is not None:
@@ -5145,15 +5153,23 @@ __all__ = [
     if not x.startswith("_")
     and x
     not in (
-        "absolute_import",
         "numbers",
         "json",
         "collections",
         "math",
+        "os",
         "threading",
+        "distutils",
+        "glob",
+        "re",
         "Iterable",
+        "MutableMapping",
         "numpy",
+        "ak",
         "np",
-        "awkward",
     )
 ]
+
+
+def __dir__():
+    return __all__

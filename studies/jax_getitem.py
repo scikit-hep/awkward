@@ -322,8 +322,8 @@ def func_recordarray_11(array):
 def func_recordarray_12(array):
     return 2 * array.y[0, 0] ** 2
 
-value_jvp, jvp_grad = jax.jvp(func_listoffsetarray_4, (test_listoffsetarray,), (test_listoffsetarray_tangent,))
-jit_value = jax.jit(func_listoffsetarray_4)(test_listoffsetarray)
+value_jvp, jvp_grad = jax.jvp(func_numpyarray_3, (test_numpyarray,), (test_numpyarray_tangent,))
+jit_value = jax.jit(func_numpyarray_3)(test_numpyarray)
 # value_vjp, vjp_func = jax.vjp(func_recordarray_12, test_recordarray)
 
 # print(type(value_vjp))
