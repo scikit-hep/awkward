@@ -2670,6 +2670,15 @@ namespace awkward {
             reinterpret_cast<double*>(contiguous_array.data()),
             flatlength >> 1);
           break;
+        case util::dtype::complex64:
+          err = kernel::NumpyArray_fill<std::complex<float>, std::complex<float>>(
+            ptr_lib,
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<std::complex<float>*>(contiguous_array.data()),
+            flatlength);
+            flatlength = flatlength * 2;
+          break;
         default:
           throw std::runtime_error(
             std::string("dtype not in {boolean, int8, int16, int32, int64, "
@@ -2774,6 +2783,24 @@ namespace awkward {
             flatlength_so_far,
             reinterpret_cast<double*>(contiguous_array.data()),
             flatlength >> 1);
+          break;
+        case util::dtype::complex64:
+          err = kernel::NumpyArray_fill<std::complex<float>, std::complex<double>>(
+            ptr_lib,
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<std::complex<float>*>(contiguous_array.data()),
+            flatlength);
+            flatlength = flatlength * 2;
+          break;
+        case util::dtype::complex128:
+          err = kernel::NumpyArray_fill<std::complex<double>, std::complex<double>>(
+            ptr_lib,
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<std::complex<double>*>(contiguous_array.data()),
+            flatlength);
+            flatlength = flatlength * 2;
           break;
         default:
           throw std::runtime_error(
