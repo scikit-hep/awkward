@@ -14,7 +14,7 @@ It is also like Apache Arrow's
 `validity bitmaps <https://arrow.apache.org/docs/format/Columnar.html#validity-bitmaps>`__
 because the bitmap can be omitted when all values are valid.
 
-Below is a simplified implementation of a RecordArray class in pure Python
+Below is a simplified implementation of a UnmaskedArray class in pure Python
 that exhaustively checks validity in its constructor (see
 :doc:`_auto/ak.is_valid`) and can generate random valid arrays. The
 ``random_number()`` function returns a random float and the
