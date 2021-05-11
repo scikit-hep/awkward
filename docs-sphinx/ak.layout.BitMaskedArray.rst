@@ -30,7 +30,7 @@ If the logical size of the array is not a multiple of 8, the ``mask``
 has to be padded. Thus, an explicit ``length`` is also part of the
 class's definition.
 
-Below is a simplified implementation of a RecordArray class in pure Python
+Below is a simplified implementation of a BitMaskedArray class in pure Python
 that exhaustively checks validity in its constructor (see
 :doc:`_auto/ak.is_valid`) and can generate random valid arrays. The
 ``random_number()`` function returns a random float and the

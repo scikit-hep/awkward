@@ -25,7 +25,7 @@ Awkward Array has no direct equivalent for Apache Arrow's
 but an appropriate index may be generated with
 `sparse_index <#ak.layout.UnionArray.sparse_index>`_.
 
-Below is a simplified implementation of a RecordArray class in pure Python
+Below is a simplified implementation of a UnionArray class in pure Python
 that exhaustively checks validity in its constructor (see
 :doc:`_auto/ak.is_valid`) and can generate random valid arrays. The
 ``random_number()`` function returns a random float and the
