@@ -2549,7 +2549,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
                     ak._util.unknowntypes,
                     ak._util.listtypes,
                     ak._util.recordtypes,
-                    ak.layout.NumpyArray
+                    ak.layout.NumpyArray,
                 ),
             ):
                 return lambda: ak.layout.NumpyArray(
