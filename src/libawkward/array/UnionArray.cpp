@@ -1172,11 +1172,11 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->getitem_field(key));
     }
-    return std::make_shared<UnionArrayOf<T, I>>(identities_,
-                                                util::Parameters(),
-                                                tags_,
-                                                index_,
-                                                contents);
+    return UnionArrayOf<T, I>(identities_,
+                              util::Parameters(),
+                              tags_,
+                              index_,
+                              contents).simplify_uniontype(true, false);
   }
 
   template <typename T, typename I>
@@ -1187,11 +1187,11 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->getitem_field(key, only_fields));
     }
-    return std::make_shared<UnionArrayOf<T, I>>(identities_,
-                                                util::Parameters(),
-                                                tags_,
-                                                index_,
-                                                contents);
+    return UnionArrayOf<T, I>(identities_,
+                              util::Parameters(),
+                              tags_,
+                              index_,
+                              contents).simplify_uniontype(true, false);
   }
 
   template <typename T, typename I>
@@ -1202,11 +1202,11 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->getitem_fields(keys));
     }
-    return std::make_shared<UnionArrayOf<T, I>>(identities_,
-                                                util::Parameters(),
-                                                tags_,
-                                                index_,
-                                                contents);
+    return UnionArrayOf<T, I>(identities_,
+                              util::Parameters(),
+                              tags_,
+                              index_,
+                              contents).simplify_uniontype(true, false);
   }
 
   template <typename T, typename I>
@@ -1218,11 +1218,11 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->getitem_fields(keys, only_fields));
     }
-    return std::make_shared<UnionArrayOf<T, I>>(identities_,
-                                                util::Parameters(),
-                                                tags_,
-                                                index_,
-                                                contents);
+    return UnionArrayOf<T, I>(identities_,
+                              util::Parameters(),
+                              tags_,
+                              index_,
+                              contents).simplify_uniontype(true, false);
   }
 
   template <typename T, typename I>

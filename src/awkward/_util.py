@@ -474,7 +474,10 @@ def completely_flatten(array):
     elif isinstance(array, uniontypes):
         out = []
         for i in range(array.numcontents):
-            out.append(completely_flatten(array.project(i)))
+            tmp = completely_flatten(array.project(i))
+            assert isinstance(tmp, tuple)
+            for x in tmp:
+                out.append(x)
         return tuple(out)
 
     elif isinstance(array, optiontypes):
