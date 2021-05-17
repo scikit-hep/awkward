@@ -1302,7 +1302,7 @@ def typeof_PartitionedView(obj, c):
     return PartitionedViewType(obj.type, obj.behavior, obj.fields)
 
 
-class PartitionedViewType(numba.types.Type):
+class PartitionedViewType(numba.types.IterableType, numba.types.Sized):
     stopstype = numba.types.Array(numba.intp, 1, "C")
 
     def __init__(self, type, behavior, fields):
@@ -1316,6 +1316,10 @@ class PartitionedViewType(numba.types.Type):
         self.type = type
         self.behavior = behavior
         self.fields = fields
+
+    @property
+    def iterator_type(self):
+        return PartitionedIteratorType(self)
 
     def toArrayViewType(self):
         return ArrayViewType(self.type, self.behavior, self.fields)

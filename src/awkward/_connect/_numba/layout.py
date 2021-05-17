@@ -1941,10 +1941,18 @@ class RecordArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        for i, contenttype in enumerate(self.contenttypes):
-            contenttype.form_fill(
-                lookup.arrayptrs[pos + self.CONTENTS + i], layout.field(i), lookup
-            )
+        if self.recordlookup is None:
+            for i, contenttype in enumerate(self.contenttypes):
+                contenttype.form_fill(
+                    lookup.arrayptrs[pos + self.CONTENTS + i], layout.field(i), lookup
+                )
+        else:
+            for i, contenttype in enumerate(self.contenttypes):
+                contenttype.form_fill(
+                    lookup.arrayptrs[pos + self.CONTENTS + i],
+                    layout.field(self.recordlookup[i]),
+                    lookup,
+                )
 
     def fieldindex(self, key):
         out = -1
