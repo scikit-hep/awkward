@@ -38,6 +38,16 @@ def test_constructed():
     assert f1(array).tolist() == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]
 
 
+def test_enumerate_Partitioned():
+    @numba.njit
+    def f1(array):
+        for _, _ in enumerate(array):
+            pass
+
+    array = ak.repartition(ak.Array(range(100)), 10)
+    f1(array)
+
+
 pytest.importorskip("pyarrow.parquet")
 
 
