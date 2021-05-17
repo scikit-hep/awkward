@@ -3596,12 +3596,15 @@ def from_parquet(
 
     if columns is None:
         columns = all_columns
+    pa_fields = []
     for x in columns:
         if x not in all_columns:
             raise ValueError(
                 "column {0} not found in schema".format(repr(x))
                 + ak._util.exception_suffix(__file__)
             )
+        pa_fields.append(schema.field(x))
+    schema = pyarrow.schema(pa_fields)
 
     if len(row_groups) == 0:
         out = ak.layout.RecordArray(
