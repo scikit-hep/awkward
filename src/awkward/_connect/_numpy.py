@@ -294,6 +294,8 @@ def getfunction_matmul(inputs):
         ak._util.recursively_apply(
             x, (lambda _: _), pass_depth=False, numpy_to_regular=True
         )
+        if isinstance(x, (ak.layout.Content, ak.layout.Record))
+        else x
         for x in inputs
     ]
 
