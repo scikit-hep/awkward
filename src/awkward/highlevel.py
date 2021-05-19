@@ -990,9 +990,16 @@ class Array(
         have the same dimension as the array being indexed.
         """
         if not hasattr(self, "_tracers"):
-            return ak._util.wrap(self.layout[where], self._behavior)
+            tmp = ak._util.wrap(self.layout[where], self._behavior)
         else:
-            return ak._connect._jax.jax_utils._jaxtracers_getitem(self, where)
+            tmp = ak._connect._jax.jax_utils._jaxtracers_getitem(self, where)
+
+        if isinstance(tmp, ak.behaviors.string.ByteBehavior):
+            return bytes(tmp)
+        elif isinstance(tmp, ak.behaviors.string.CharBehavior):
+            return str(tmp)
+        else:
+            return tmp
 
     def __setitem__(self, where, what):
         """
@@ -1752,7 +1759,14 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        return ak._util.wrap(self.layout[where], self._behavior)
+        tmp = ak._util.wrap(self.layout[where], self._behavior)
+
+        if isinstance(tmp, ak.behaviors.string.ByteBehavior):
+            return bytes(tmp)
+        elif isinstance(tmp, ak.behaviors.string.CharBehavior):
+            return str(tmp)
+        else:
+            return tmp
 
     def __setitem__(self, where, what):
         """
