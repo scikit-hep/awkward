@@ -997,7 +997,7 @@ class Array(
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return str(tmp)
+            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
         else:
             return tmp
 
@@ -1764,7 +1764,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return str(tmp)
+            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
         else:
             return tmp
 
@@ -2300,7 +2300,7 @@ class ArrayBuilder(Iterable, Sized):
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return str(tmp)
+            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
         else:
             return tmp
 
