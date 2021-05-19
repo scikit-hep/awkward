@@ -2295,7 +2295,14 @@ class ArrayBuilder(Iterable, Sized):
 
         See #ak.Array.__getitem__ for a more complete description.
         """
-        return ak._util.wrap(self._layout[where], self._behavior)
+        tmp = ak._util.wrap(self._layout[where], self._behavior)
+
+        if isinstance(tmp, ak.behaviors.string.ByteBehavior):
+            return bytes(tmp)
+        elif isinstance(tmp, ak.behaviors.string.CharBehavior):
+            return str(tmp)
+        else:
+            return tmp
 
     def __iter__(self):
         """
