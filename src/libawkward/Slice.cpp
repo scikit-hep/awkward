@@ -387,8 +387,8 @@ namespace awkward {
     if (std::is_same<T, int64_t>::value) {
       struct Error err = kernel::slicearray_ravel_64(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
-        index_.ptr().get(),
+        index.data(),
+        index_.data(),
         ndim(),
         shape_.data(),
         strides_.data());
