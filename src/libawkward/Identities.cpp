@@ -259,7 +259,7 @@ namespace awkward {
     if (std::is_same<T, int32_t>::value) {
       struct Error err = kernel::Identities_getitem_carry_64<int32_t>(
         kernel::lib::cpu,   // DERIVE
-        reinterpret_cast<int32_t*>(rawout->ptr().get()),
+        reinterpret_cast<int32_t*>(rawout->data()),
         reinterpret_cast<int32_t*>(data()),
         carry.data(),
         carry.length(),
@@ -270,7 +270,7 @@ namespace awkward {
     else if (std::is_same<T, int64_t>::value) {
       struct Error err = kernel::Identities_getitem_carry_64<int64_t>(
         kernel::lib::cpu,   // DERIVE
-        reinterpret_cast<int64_t*>(rawout->ptr().get()),
+        reinterpret_cast<int64_t*>(rawout->data()),
         reinterpret_cast<int64_t*>(data()),
         carry.data(),
         carry.length(),

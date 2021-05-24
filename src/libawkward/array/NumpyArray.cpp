@@ -539,7 +539,7 @@ namespace awkward {
         reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = kernel::new_Identities<int32_t>(
         kernel::lib::cpu,   // DERIVE
-        rawidentities->ptr().get(),
+        rawidentities->data(),
         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -554,7 +554,7 @@ namespace awkward {
         reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err = kernel::new_Identities<int64_t>(
         kernel::lib::cpu,   // DERIVE
-        rawidentities->ptr().get(),
+        rawidentities->data(),
         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -1375,7 +1375,7 @@ namespace awkward {
       reinterpret_cast<uint8_t*>(data()),
       carry.length(),
       strides_[0],
-      carry.ptr().get());
+      carry.data());
     util::handle_error(err, classname(), identities_.get());
 
     IdentitiesPtr identities(nullptr);
@@ -4157,7 +4157,7 @@ namespace awkward {
         reinterpret_cast<uint8_t*>(data()),
         carry.length(),
         stride,
-        carry.ptr().get());
+        carry.data());
       util::handle_error(err, classname(), identities_.get());
 
       IdentitiesPtr identities(nullptr);
@@ -4975,47 +4975,47 @@ namespace awkward {
       std::shared_ptr<void> ptr;
       switch (dtype_) {
       case util::dtype::boolean:
-        ptr = as_type<bool>(reinterpret_cast<bool*>(contiguous_self.ptr().get()),
+        ptr = as_type<bool>(reinterpret_cast<bool*>(contiguous_self.data()),
                             contiguous_self.length(),
                             dtype);
         break;
       case util::dtype::int8:
-        ptr = as_type<int8_t>(reinterpret_cast<int8_t*>(contiguous_self.ptr().get()),
+        ptr = as_type<int8_t>(reinterpret_cast<int8_t*>(contiguous_self.data()),
                               contiguous_self.length(),
                               dtype);
         break;
       case util::dtype::int16:
-        ptr = as_type<int16_t>(reinterpret_cast<int16_t*>(contiguous_self.ptr().get()),
+        ptr = as_type<int16_t>(reinterpret_cast<int16_t*>(contiguous_self.data()),
                                contiguous_self.length(),
                                dtype);
         break;
       case util::dtype::int32:
-        ptr = as_type<int32_t>(reinterpret_cast<int32_t*>(contiguous_self.ptr().get()),
+        ptr = as_type<int32_t>(reinterpret_cast<int32_t*>(contiguous_self.data()),
                                contiguous_self.length(),
                                dtype);
         break;
       case util::dtype::int64:
-        ptr = as_type<int64_t>(reinterpret_cast<int64_t*>(contiguous_self.ptr().get()),
+        ptr = as_type<int64_t>(reinterpret_cast<int64_t*>(contiguous_self.data()),
                                contiguous_self.length(),
                                dtype);
         break;
       case util::dtype::uint8:
-        ptr = as_type<uint8_t>(reinterpret_cast<uint8_t*>(contiguous_self.ptr().get()),
+        ptr = as_type<uint8_t>(reinterpret_cast<uint8_t*>(contiguous_self.data()),
                                contiguous_self.length(),
                                dtype);
         break;
       case util::dtype::uint16:
-        ptr = as_type<uint16_t>(reinterpret_cast<uint16_t*>(contiguous_self.ptr().get()),
+        ptr = as_type<uint16_t>(reinterpret_cast<uint16_t*>(contiguous_self.data()),
                                 contiguous_self.length(),
                                 dtype);
         break;
       case util::dtype::uint32:
-        ptr = as_type<uint32_t>(reinterpret_cast<uint32_t*>(contiguous_self.ptr().get()),
+        ptr = as_type<uint32_t>(reinterpret_cast<uint32_t*>(contiguous_self.data()),
                                 contiguous_self.length(),
                                 dtype);
         break;
       case util::dtype::uint64:
-        ptr = as_type<uint64_t>(reinterpret_cast<uint64_t*>(contiguous_self.ptr().get()),
+        ptr = as_type<uint64_t>(reinterpret_cast<uint64_t*>(contiguous_self.data()),
                                 contiguous_self.length(),
                                 dtype);
         break;
@@ -5025,12 +5025,12 @@ namespace awkward {
           + FILENAME(__LINE__));
         break;
       case util::dtype::float32:
-        ptr = as_type<float>(reinterpret_cast<float*>(contiguous_self.ptr().get()),
+        ptr = as_type<float>(reinterpret_cast<float*>(contiguous_self.data()),
                              contiguous_self.length(),
                              dtype);
         break;
       case util::dtype::float64:
-        ptr = as_type<double>(reinterpret_cast<double*>(contiguous_self.ptr().get()),
+        ptr = as_type<double>(reinterpret_cast<double*>(contiguous_self.data()),
                               contiguous_self.length(),
                               dtype);
         break;
@@ -5040,12 +5040,12 @@ namespace awkward {
           + FILENAME(__LINE__));
         break;
       case util::dtype::complex64:
-        ptr = as_type<std::complex<float>>(reinterpret_cast<std::complex<float>*>(contiguous_self.ptr().get()),
+        ptr = as_type<std::complex<float>>(reinterpret_cast<std::complex<float>*>(contiguous_self.data()),
                                            contiguous_self.length(),
                                            dtype);
         break;
       case util::dtype::complex128:
-        ptr = as_type<std::complex<double>>(reinterpret_cast<std::complex<double>*>(contiguous_self.ptr().get()),
+        ptr = as_type<std::complex<double>>(reinterpret_cast<std::complex<double>*>(contiguous_self.data()),
                                             contiguous_self.length(),
                                             dtype);
         break;
