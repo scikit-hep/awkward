@@ -2031,7 +2031,7 @@ def to_arrow(
                 )
 
         elif isinstance(layout, ak.layout.EmptyArray):
-            return pyarrow.Array.from_buffers(pyarrow.float64(), 0, [None, None])
+            return pyarrow.Array.from_buffers(pyarrow.null(), 0, [None])
 
         elif isinstance(layout, ak.layout.ListOffsetArray32):
             offsets = numpy.asarray(layout.offsets, dtype=np.int32)
@@ -3096,12 +3096,19 @@ def _parquet_schema_to_form(schema):
 
     def maybe_nullable(field, content):
         if field.nullable:
-            return ak.forms.ByteMaskedForm(
-                "i8",
-                content.with_form_key(None),
-                valid_when=True,
-                form_key=content.form_key,
-            )
+            if isinstance(content, ak.forms.EmptyForm):
+                return ak.forms.IndexedOptionForm(
+                    "i64",
+                    content.with_form_key(None),
+                    form_key=content.form_key,
+                )
+            else:
+                return ak.forms.ByteMaskedForm(
+                    "i8",
+                    content.with_form_key(None),
+                    valid_when=True,
+                    form_key=content.form_key,
+                )
         else:
             return content
 
@@ -3176,8 +3183,11 @@ def _parquet_schema_to_form(schema):
             )
 
         elif isinstance(arrow_type, pyarrow.DataType):
-            dtype = np.dtype(arrow_type.to_pandas_dtype())
-            return ak.forms.Form.from_numpy(dtype).with_form_key(col(path))
+            if arrow_type == pyarrow.null():
+                return ak.forms.EmptyForm(form_key=col(path))
+            else:
+                dtype = np.dtype(arrow_type.to_pandas_dtype())
+                return ak.forms.Form.from_numpy(dtype).with_form_key(col(path))
 
         else:
             raise NotImplementedError(
