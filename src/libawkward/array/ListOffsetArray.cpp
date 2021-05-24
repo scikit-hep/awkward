@@ -500,7 +500,7 @@ namespace awkward {
         reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = kernel::new_Identities<int32_t>(
         kernel::lib::cpu,   // DERIVE
-        rawidentities->ptr().get(),
+        rawidentities->data(),
         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -515,7 +515,7 @@ namespace awkward {
         reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err = kernel::new_Identities<int64_t>(
         kernel::lib::cpu,   // DERIVE
-        rawidentities->ptr().get(),
+        rawidentities->data(),
         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
