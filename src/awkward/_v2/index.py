@@ -30,7 +30,7 @@ class Index:
     def  __len__(self):
         return self._len
 
-    #array_str needs to be included in nplike 
+    #array_str needs to be included in nplike
     def __repr__(self):
         return self._nplike.array_str(self._data)
 
@@ -70,12 +70,5 @@ class Index:
         else:
             self._data = self._nplike.asarray(self._data)
             self._nplike = np.ak.nplike.instance()
-
-        
-
-
-
-
-
 
 
