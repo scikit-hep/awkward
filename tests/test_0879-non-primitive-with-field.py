@@ -10,7 +10,7 @@ import awkward as ak  # noqa: F401
 def test():
     x = ak.Array({"x": np.arange(10)})
 
-    xy = ak.with_field(base=x, what=object(), where="y")
+    xy = ak.with_field(base=x, what=None, where="y")
 
     # Try to access the type of a single element
     # This raises a ValueError in #879
