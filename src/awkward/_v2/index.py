@@ -1,49 +1,60 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
+from __future__ import absolute_import
+
 import awkward as ak
 
+np = ak.nplike.NumpyMetadata.instance()
 
-class Index:
+
+class Index(object):
+    _dtype_to_form = {
+        np.dtype(np.int8): "i8",
+        np.dtype(np.uint8): "u8",
+        np.dtype(np.int32): "i32",
+        np.dtype(np.uint32): "u32",
+        np.dtype(np.int64): "i64",
+    }
+
     def __init__(self, data):
         self._nplike = ak.nplike.of(data)
+
         self._data = self._nplike.asarray(data, order="C")
+        if len(self._data.shape) != 1:
+            raise TypeError("an actual error string")
+
         self._T = self._data.dtype
-        if self._data == None:
-            self._len = 0
-        else:
-            self._len = len(self.data)
-        if self._T not in (
-            self._nplike.int8,
-            self._nplike.uint8,
-            self._nplike.int32,
-            self._nplike.uint32,
-            self._nplike.int64,
-            object,
-        ):
-            raise TypeError
+        if self._T not in self._dtype_to_form:
+            raise TypeError("an actual error string")
 
-    # the default for this is float64 so maybe type should also be mentioned
-    def __zeros__(length, nplike):
-        return nplike.zeros(length)
+    @classmethod
+    def zeros(cls, length, nplike, dtype):
+        return nplike.zeros(length, dtype=dtype)
 
-    # the default for this is float64 so maybe type should also be mentioned
-    def __empty__(length, nplike):
-        return nplike.empty(length)
+    @classmethod
+    def empty(cls, length, nplike, dtype):
+        return nplike.empty(length, dtype=dtype)
 
-    def __data__(self):
+    @property
+    def data(self):
         return self._data
 
-    def __nplike__(self):
+    @property
+    def nplike(self):
         return self._nplike
 
     def __len__(self):
-        return self._len
+        if self._data is None:
+            return 0
+        else:
+            return len(self._data)
 
-    # array_str needs to be included in nplike
     def __repr__(self):
+        # FIXME
         return self._nplike.array_str(self._data)
 
-    def __form__(self):
-        type = str(self._T)
-        return type[0] + type.split("t")[1]
+    def form(self):
+        return self._dtype_to_form[self._data.dtype]
 
     def __getitem__(self, index):
         return self._data[index]
@@ -51,29 +62,23 @@ class Index:
     def __setitem__(self, index, value):
         self._data[index] = value
 
-    # the error that might occur from can be handled by the nplike, but if start stop are not in range it returns an empty array, is this behaviour constant with that it's expected?
-    def __getitem_range__(self, start, stop):
-        if start < stop and stop < self._len:
-            return self._data[start:stop]
+    def to64(self):
+        return Index(self._data.astype(np.int64))
+
+    def iscontiguous(self):
+        if self._data is None:
+            return True
         else:
-            print("Illegal start:stop for this length")
-
-    def __to64__(self):
-        self._data = self._data.astype("int64")
-
-    def __iscontiguous__(self):
-        return self._data.strides[0] == self._data.itemsize
+            return self._data.strides == (self._data.itemsize,)
 
     def __copy__(self):
-        return self._data.copy()
-
-    # this is a test implementation
-    def __covert__(self):
-        cp = ak.nplike.Cupy()
-        np = ak.nplike.Numpy()
-        if str(self._nplike) == "Numpy":
-            self._data = self._nplike.asarray(self._data)
-            self._nplike = cp.ak.nplike.instance()
+        if self._data is None:
+            return Index(None)
         else:
-            self._data = self._nplike.asarray(self._data)
-            self._nplike = np.ak.nplike.instance()
+            return Index(self._data.copy())
+
+    def __covert__(self, nplike):
+        if self._data is None:
+            return Index(None)
+        else:
+            return Index(nplike.asarray(self._data))
