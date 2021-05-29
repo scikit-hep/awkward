@@ -7,11 +7,21 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-def test():
-    x = ak.Array({"x": np.arange(10)})
-
-    xy = ak.with_field(base=x, what=None, where="y")
+def test_unknown_type():
+    array = ak.Array({"x": np.arange(10)})
+    array = ak.with_field(base=array, what=None, where="unknown field1")
+    array = ak.with_field(base=array, what=[None], where="unknown field2")
 
     # Try to access the type of a single element
     # This raises a ValueError in #879
-    xy_type = xy.type  # noqa: F841
+    tpe1 = array["unknown field1"].type
+    tpe2 = array["unknown field2"].type
+    assert str(tpe1) == "10 * ?unknown"
+    assert str(tpe2) == "10 * ?unknown"
+
+
+def test_in_place_wrapper_broadcasting():
+    array = ak.Array({"x": np.arange(3)})
+    array["unknown field"] = None
+
+    assert array["unknown field"].tolist() == [None, None, None]
