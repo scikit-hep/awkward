@@ -43,12 +43,10 @@ class Identifier(object):
     def nplike(self):
         return  self._nplike
 
-    @property
     def  __len__(self):
         return len(self._data)
 
-    @property
-    def  __width__(self):
+    def  width(self):
         return self._data.shape[1]
 
     def to64(self):
