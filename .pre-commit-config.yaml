@@ -22,7 +22,7 @@ repos:
 #  args: [--min-py3-version, "3.5"]
 
 - repo: https://github.com/psf/black
-  rev: 21.5b1
+  rev: 21.5b2
   hooks:
   - id: black
 
