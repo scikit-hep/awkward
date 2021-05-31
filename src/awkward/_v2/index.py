@@ -20,7 +20,7 @@ class Index(object):
         self._nplike = ak.nplike.of(data)
 
         self._data = self._nplike.asarray(data, order="C")
-        if len(self._data.shape) != 1:
+        if self._data is not None and len(self._data.shape) != 1:
             raise TypeError("an actual error string")
 
         self._T = self._data.dtype
