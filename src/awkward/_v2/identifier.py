@@ -1,11 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from __future__ import absolute_import
+
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
-class Identifier(Object):
+class Identifier(object):
 
     numrefs = 0
 
@@ -19,9 +20,8 @@ class Identifier(Object):
         self._data = data
         if len(self._data.shape) != 2:
             #FIXME
-            raise TypeError("Data is not two dimensional.")
+            raise TypeError("Identifer data must be 2-dimenional")
         self.nplike = ak.nplike.of(data)
-
 
     @classmethod
     def zeros(cls, ref, fieldloc, length, width, nplike, dtype):
