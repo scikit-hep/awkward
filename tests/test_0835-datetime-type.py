@@ -67,15 +67,98 @@ def test_datetime64_ArrayBuilder():
     ]
 
 
-# def test_sum():
-#
-# def test_count_count_nonzero():
+def test_count():
+    array = ak.Array(
+        [
+            [
+                [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
+                [],
+                [np.datetime64("2027"), np.datetime64("2011")],
+                [np.datetime64("2013")],
+            ],
+            [],
+            [[np.datetime64("2017"), np.datetime64("2019")], [np.datetime64("2023")]],
+        ],
+        check_valid=True,
+    )
+    assert ak.count(array) == 9
+    assert ak.to_list(ak.count(array, axis=-1)) == [[3, 0, 2, 1], [], [2, 1]]
+    assert ak.to_list(ak.count(array, axis=2)) == [[3, 0, 2, 1], [], [2, 1]]
+    assert ak.to_list(ak.count(array, axis=-1, keepdims=True)) == [
+        [[3], [0], [2], [1]],
+        [],
+        [[2], [1]],
+    ]
+    assert ak.to_list(ak.count(array, axis=-2)) == [[3, 2, 1], [], [2, 1]]
+    assert ak.to_list(ak.count(array, axis=1)) == [[3, 2, 1], [], [2, 1]]
+    assert ak.to_list(ak.count(array, axis=-2, keepdims=True)) == [
+        [[3, 2, 1]],
+        [[]],
+        [[2, 1]],
+    ]
+
+
+def test_count_nonzero():
+    array = ak.Array(
+        [
+            [
+                [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
+                [],
+                [np.datetime64("2027"), np.datetime64("2011")],
+                [np.datetime64("2013")],
+            ],
+            [],
+            [[np.datetime64("2017"), np.datetime64("2019")], [np.datetime64("2023")]],
+        ],
+        check_valid=True,
+    )
+
+    assert ak.count_nonzero(array) == 9
+    assert ak.to_list(ak.count_nonzero(array, axis=-1)) == [[3, 0, 2, 1], [], [2, 1]]
+    assert ak.to_list(ak.count_nonzero(array, axis=-2)) == [[3, 2, 1], [], [2, 1]]
+
+    assert ak.to_list(ak.all(array, axis=-1)) == [
+        [False, True, False, True],
+        [],
+        [False, True],
+    ]
+    assert ak.to_list(ak.all(array, axis=-2)) == [
+        [False, False, True],
+        [],
+        [False, True],
+    ]
+
+
 #
 # def test_argmin_argmax():
 #
-# def test_any_all():
-#
+
+
+def test_any_all():
+    array = ak.Array(
+        [
+            [
+                [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
+                [],
+                [np.datetime64("2027"), np.datetime64("2011")],
+                [np.datetime64("2013")],
+            ],
+            [],
+            [[np.datetime64("2017"), np.datetime64("2019")], [np.datetime64("2023")]],
+        ],
+        check_valid=True,
+    )
+
+    assert ak.to_list(ak.any(array, axis=-1)) == [
+        [True, False, True, True],
+        [],
+        [True, True],
+    ]
+    assert ak.to_list(ak.any(array, axis=-2)) == [[True, True, True], [], [True, True]]
+
+
 # def test_prod():
+# def test_sum():
 
 
 def test_min_max():
