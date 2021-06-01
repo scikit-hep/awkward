@@ -194,7 +194,6 @@ def to_numpy(array, allow_missing=True):
 
     See also #ak.from_numpy and #ak.to_cupy.
     """
-
     if isinstance(array, (bool, str, bytes, numbers.Number)):
         return numpy.array([array])[0]
 
@@ -476,15 +475,6 @@ def to_cupy(array):
             + ak._util.exception_suffix(__file__)
         )
 
-    elif (
-        ak.operations.describe.parameters(array).get("__array__") == "datetime64"
-        or ak.operations.describe.parameters(array).get("__array__") == "timedelta64"
-    ):
-        raise ValueError(
-            "CuPy does not support arrays of datetime64/timedelta64"
-            + ak._util.exception_suffix(__file__)
-        )
-
     elif isinstance(array, ak.partition.PartitionedArray):
         return cupy.concatenate([to_cupy(x) for x in array.partitions])
 
@@ -660,15 +650,6 @@ def to_jax(array):
     ):
         raise ValueError(
             "JAX does not support arrays of strings"
-            + ak._util.exception_suffix(__file__)
-        )
-
-    elif (
-        ak.operations.describe.type(array) == "datetime64"
-        or ak.operations.describe.type(array) == "timedelta64"
-    ):
-        raise ValueError(
-            "JAX does not support arrays of datetime64/timedelta64?"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -913,20 +894,7 @@ def from_iter(
             )
     out = ak.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
-        # print("from_iter: ", x)
-        # for y in x:
-        #     print(ak.type(y))
-        #     print(ak.nplike.of(y).datetime_as_string(y))
-        #     print(np.datetime_data(y))
-        #     print(int((y  - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')))
-        #     #print(py::cast<ssize_t>(y.attr("ctypes").attr("data")))
-        # # FIXME: this is to convert datetime64 to integer that is seconds
-        # # out.fromiter(int((y  - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')) for y in x)
-        #
-        # # FIXME: this is to normalize the datetime64 to units in 's'
-        # # out.fromiter(np.datetime64(int((y  - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')), 's') for y in x)
         out.fromiter(x)
-        # print(ak.type(out))
     layout = out.snapshot()
     if highlevel:
         return ak._util.wrap(layout, behavior)

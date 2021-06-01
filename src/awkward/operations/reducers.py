@@ -597,7 +597,6 @@ def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
-
     if axis is None:
 
         def reduce(xs):

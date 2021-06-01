@@ -121,6 +121,7 @@ if hasattr(numpy, "timedelta64"):
 
 class NumpyLike(Singleton):
     ############################ array creation
+
     def array(self, *args, **kwargs):
         # data[, dtype=[, copy=]]
         return self._module.array(*args, **kwargs)

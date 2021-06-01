@@ -2830,9 +2830,13 @@ namespace awkward {
             break;
           // to timedelta64
           case util::dtype::timedelta64:
-            throw std::runtime_error(
-              std::string("FIXME: merge to timedelta64 not implemented")
-              + FILENAME(__LINE__));
+            err = kernel::NumpyArray_fill_scaled<int64_t, int64_t>(
+              ptr_lib,
+              reinterpret_cast<int64_t*>(ptr.get()),
+              flatlength_so_far,
+              reinterpret_cast<int64_t*>(contiguous_array.data()),
+              flatlength,
+              util::scale_from_units(contiguous_array.format(), contiguous_index));
             break;
           default:
             throw std::runtime_error(
