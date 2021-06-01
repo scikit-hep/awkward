@@ -69,9 +69,9 @@ namespace awkward {
     /// the smallest unit (== a larger enum value).
     enum class datetime_units {
       unknown = -1, // unknown
-      Y = 0,   // year
-      M = 1,   // month
-      W = 2,   // week
+      Y = 1,   // year
+      M = 2,   // month
+      W = 3,   // week
       D = 4,   // day
       h = 5,   // hour
       m = 6,   // minute

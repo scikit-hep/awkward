@@ -42,7 +42,7 @@ def test_datetime64_ArrayBuilder():
     builder = ak.layout.ArrayBuilder()
     dt = np.datetime64("2020-03-27T10:41:12", "25us")
     dt1 = np.datetime64("2020-03-27T10:41", "15s")
-
+    dt2 = np.datetime64("2020-05")
     # FIXME: do we need to support this?
     # builder.datetime64(dt.astype(np.int64), "datetime64[s]")
     builder.datetime64(dt1)
@@ -50,6 +50,8 @@ def test_datetime64_ArrayBuilder():
     builder.datetime64(dt)
     builder.datetime64("2021-03-27")
     builder.datetime64("2020-03-27T10:41:13")
+    builder.datetime64(dt2)
+    builder.datetime64("2020-05-01T00:00:00.000000")
     builder.datetime64("2020-07-27T10:41:11.200000")
 
     print(builder.snapshot())
@@ -57,8 +59,10 @@ def test_datetime64_ArrayBuilder():
         np.datetime64("2020-03-27T10:41:00.000000"),
         np.datetime64("2020-03-27T10:41:11.000000"),
         np.datetime64("2020-03-27T10:41:12.000000"),
-        np.datetime64("2021-03-27"),
-        np.datetime64("2020-03-27T10:41:13"),
+        np.datetime64("2021-03-27T00:00:00.000000"),
+        np.datetime64("2020-03-27T10:41:13.000000"),
+        np.datetime64("2020-05-01T20:56:24.000000"),  # FIXME? prescission
+        np.datetime64("2020-05-01T00:00:00.000000"),
         np.datetime64("2020-07-27T10:41:11.200000"),
     ]
 
@@ -102,8 +106,7 @@ def test_min_max():
         [
             np.datetime64("2020-03-27T10:41:11"),
             np.datetime64("2020-01-27T10:41:11"),
-            ## FIXME:
-            np.datetime64("2573-12-31T11:16:48"),
+            np.datetime64("2020-05-01T20:56:24"),
             np.datetime64("2020-01-27T10:41:11"),
             np.datetime64("2020-04-27T10:41:11"),
         ],
@@ -132,7 +135,7 @@ def test_min_max():
     assert ak.to_list(ak.max(array, axis=0)) == [
         np.datetime64("2020-04-27T00:00:00"),
         np.datetime64("2020-03-27T10:41:11"),
-        np.datetime64("2573-12-31T11:16:48"),
+        np.datetime64("2020-05-01T20:56:24"),
         np.datetime64("2020-06-27T10:41:11"),
         np.datetime64("2020-04-27T10:41:11"),
     ]
@@ -142,7 +145,7 @@ def test_min_max():
         np.datetime64("2020-01-27T10:41:11"),
     ]
     assert ak.to_list(ak.max(array, axis=1)) == [
-        np.datetime64("2573-12-31T11:16:48"),
+        np.datetime64("2020-05-01T20:56:24"),
         np.datetime64("2020-06-27T10:41:11"),
         np.datetime64("2020-03-27T10:41:11"),
     ]
