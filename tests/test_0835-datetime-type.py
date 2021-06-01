@@ -118,15 +118,11 @@ def test_count_nonzero():
     assert ak.to_list(ak.count_nonzero(array, axis=-2)) == [[3, 2, 1], [], [2, 1]]
 
     assert ak.to_list(ak.all(array, axis=-1)) == [
-        [False, True, False, True],
+        [True, True, True, True],
         [],
-        [False, True],
+        [True, True],
     ]
-    assert ak.to_list(ak.all(array, axis=-2)) == [
-        [False, False, True],
-        [],
-        [False, True],
-    ]
+    assert ak.to_list(ak.all(array, axis=-2)) == [[True, True, True], [], [True, True]]
 
 
 #
