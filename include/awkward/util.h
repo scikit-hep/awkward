@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <array>
 
 #include "awkward/common.h"
 
@@ -60,11 +61,7 @@ namespace awkward {
 
     /// @brief Convert a dtype enum into a NumPy format string.
     const std::string
-    dtype_to_format(dtype dt);
-
-    /// @brief Convert a format string into a datetime64 units string.
-    const std::string
-    format_to_units(const std::string& format);
+    dtype_to_format(dtype dt, const std::string& format = "");
 
     /// @brief Convert a dtype enum into an itemsize.
     int64_t
@@ -89,6 +86,14 @@ namespace awkward {
     /// @brief True if the dtype is a complex number.
     bool
     is_complex(dtype dt);
+
+    /// @brief True if the dtype is a datetime64.
+    bool
+    is_datetime64(dtype dt);
+
+    /// @brief True if the dtype is a timedelta64.
+    bool
+    is_timedelta64(dtype dt);
 
     /// @brief If the Error struct contains an error message (from a
     /// cpu-kernel through the C interface), raise that error as a C++

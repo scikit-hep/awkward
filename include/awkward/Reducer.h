@@ -213,7 +213,7 @@ namespace awkward {
     /// @param outlength The length of the output array (equal to the number
     /// of groups).
     virtual const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const = 0;
 
@@ -323,7 +323,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -424,7 +424,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -526,7 +526,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -628,7 +628,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -730,7 +730,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -832,7 +832,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -939,7 +939,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -1051,7 +1051,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -1168,7 +1168,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 
@@ -1280,7 +1280,7 @@ namespace awkward {
                        int64_t outlength) const override;
 
     const std::shared_ptr<void>
-      apply_datetime64(const uint64_t* data,
+      apply_datetime64(const int64_t* data,
                        const Index64& parents,
                        int64_t outlength) const override;
 

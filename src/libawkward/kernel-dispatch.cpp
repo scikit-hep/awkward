@@ -11139,6 +11139,34 @@ namespace awkward {
       }
     }
 
+    template <>
+    ERROR NumpyArray_fill_scaled<int64_t, int64_t>(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      int64_t tooffset,
+      const int64_t* fromptr,
+      int64_t length,
+      int64_t scale) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_fill_scaled_toint64_fromint64(
+          reinterpret_cast<int64_t*>(toptr),
+          tooffset,
+          reinterpret_cast<const int64_t*>(fromptr),
+          length,
+          scale);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_scaled<int64_t, int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_fill_scaled<int64_t, int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR ListArray_fill(
       kernel::lib ptr_lib,

@@ -12,6 +12,7 @@
 #include "awkward/kernels.h"
 
 #include "awkward/util.h"
+#include "awkward/datetime64util.h"
 #include "awkward/Identities.h"
 
 namespace rj = rapidjson;
@@ -21,7 +22,6 @@ namespace awkward {
 
     dtype
     name_to_dtype(const std::string& name) {
-      std::cout << "name_to_dtype: ";
       if (name == "bool") {
         return util::dtype::boolean;
       }
@@ -71,7 +71,6 @@ namespace awkward {
         return util::dtype::complex256;
       }
       else if (name.rfind("datetime64", 0) == 0) {
-        std::cout << "dtype is datetime64\n";
         return util::dtype::datetime64;
       }
       else if (name.rfind("timedelta64", 0) == 0) {
@@ -224,7 +223,7 @@ namespace awkward {
     }
 
     const std::string
-    dtype_to_format(dtype dt) {
+    dtype_to_format(dtype dt, const std::string& format) {
       switch (dt) {
       case dtype::boolean:
         return "?";
@@ -275,9 +274,9 @@ namespace awkward {
       case dtype::complex256:
         return "Zg";
       case dtype::datetime64:
-        return "M";
+        return format.empty() ? "M" : format;
       case dtype::timedelta64:
-        return "m";
+        return format.empty() ? "m" : format;
       default:
         return "";
       }
@@ -285,7 +284,29 @@ namespace awkward {
 
     const std::string
     format_to_units(const std::string& format) {
+      // FIXME: check it it already has brackets?
       return format.substr(format.find('['), format.find(']'));
+    }
+
+    const std::string
+    units_to_format(dtype dt, const std::string& units, int64_t step) {
+      std::string result; // FIXME
+      switch (dt) {
+      case dtype::datetime64:
+        result.append("M");
+        break;
+      case dtype::timedelta64:
+        result.append("m");
+        break;
+      default:
+        break;
+      }
+      result.append(std::to_string(dtype_to_itemsize(dt))).append("[");
+      if (step > 1) {
+        result.append(std::to_string(step));
+      }
+      result.append(units).append("]");
+      return result;
     }
 
     int64_t
@@ -394,6 +415,26 @@ namespace awkward {
       case dtype::complex64:
       case dtype::complex128:
       case dtype::complex256:
+        return true;
+      default:
+        return false;
+      }
+    }
+
+    bool
+    is_datetime64(dtype dt) {
+      switch (dt) {
+      case dtype::datetime64:
+        return true;
+      default:
+        return false;
+      }
+    }
+
+    bool
+    is_timedelta64(dtype dt) {
+      switch (dt) {
+      case dtype::timedelta64:
         return true;
       default:
         return false;
@@ -736,6 +777,55 @@ namespace awkward {
         }
       }
       return std::string();
+    }
+
+    std::string
+    datetime64_units(const std::string& format) {
+      auto units(format);
+      std::string chars = "[]1234567890";
+      units.erase(remove_if(units.begin(), units.end(),
+                      [&chars](const char &c) {
+                          return chars.find(c) != std::string::npos;
+                      }),
+                      units.end());
+      return units;
+    }
+
+    std::tuple<std::string, int64_t>
+    datetime64_data(const std::string& format) {
+      std::string next_format(format);
+      int64_t next_interval = 1;
+
+      std::string next_units = next_format.substr(
+        next_format.find_first_of("["),
+        next_format.find_last_of("]"));
+
+      auto begin_pos = next_units.find_first_of("0123456789");
+      if (begin_pos != std::string::npos) {
+        auto end_pos = next_units.find_last_of("0123456789");
+        if (end_pos != std::string::npos) {
+          std::string tmp = next_units.substr(begin_pos, end_pos);
+          next_interval = std::stoi(tmp);
+        }
+      }
+
+      return std::make_tuple(datetime64_units(next_units), next_interval);
+    }
+
+    int64_t
+    scale_from_units(const std::string& format, uint64_t index) {
+      int64_t scale_up = util::units_map.at(index).scale_up;
+      int64_t scale_down = util::units_map.at(index).scale_down;
+
+      std::string other_format;
+      int64_t other_unit_step;
+      std::tie(other_format, other_unit_step) = util::datetime64_data(format);
+      uint64_t other_index = (uint64_t)util::value(util::units_map, other_format);
+      int64_t next_scale_up = util::units_map.at(other_index).scale_up;
+      int64_t next_scale_down = util::units_map.at(other_index).scale_down;
+      int64_t scale_other = other_unit_step * (scale_down * next_scale_up) / (scale_up * next_scale_down);
+
+      return scale_other;
     }
 
   }

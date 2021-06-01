@@ -13,6 +13,7 @@
 #include "awkward/builder/UnionBuilder.h"
 
 #include "awkward/builder/DatetimeBuilder.h"
+#include "awkward/datetime64util.h"
 
 namespace awkward {
   const BuilderPtr

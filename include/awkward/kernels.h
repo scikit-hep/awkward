@@ -2733,6 +2733,14 @@ extern "C" {
     int64_t length);
 
   EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_fill_scaled_toint64_fromint64(
+    int64_t* toptr,
+    int64_t tooffset,
+    const int64_t* fromptr,
+    int64_t length,
+    int64_t scale);
+
+  EXPORT_SYMBOL ERROR
   awkward_NumpyArray_getitem_boolean_nonzero_64(
     int64_t* toptr,
     const int8_t* fromptr,

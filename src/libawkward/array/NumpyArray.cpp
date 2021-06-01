@@ -27,6 +27,7 @@
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/VirtualArray.h"
 #include "awkward/util.h"
+#include "awkward/datetime64util.h"
 
 #include "awkward/array/NumpyArray.h"
 
@@ -1659,6 +1660,8 @@ namespace awkward {
             dtype_ == util::dtype::complex64  ||
             dtype_ == util::dtype::complex128  ||
             dtype_ == util::dtype::complex256  ||
+            dtype_ == util::dtype::datetime64  ||
+            dtype_ == util::dtype::timedelta64  ||
             rawother->dtype() == util::dtype::boolean  ||
             rawother->dtype() == util::dtype::int8  ||
             rawother->dtype() == util::dtype::int16  ||
@@ -1674,7 +1677,9 @@ namespace awkward {
             rawother->dtype() == util::dtype::float128  ||
             rawother->dtype() == util::dtype::complex64  ||
             rawother->dtype() == util::dtype::complex128  ||
-            rawother->dtype() == util::dtype::complex256)) {
+            rawother->dtype() == util::dtype::complex256  ||
+            rawother->dtype() == util::dtype::datetime64  ||
+            rawother->dtype() == util::dtype::timedelta64)) {
         return false;
       }
 
@@ -1684,7 +1689,6 @@ namespace awkward {
           return false;
         }
       }
-
       return true;
     }
     else {
@@ -1814,6 +1818,8 @@ namespace awkward {
 
     util::Parameters parameters(parameters_);
     util::dtype nextdtype = dtype_;
+    std::string nextformat = format_;
+    uint64_t contiguous_index = 0;
     for (auto contiguous_array : contiguous_arrays) {
       util::merge_parameters(parameters, contiguous_array.parameters());
 
@@ -1959,14 +1965,20 @@ namespace awkward {
                thatdtype == util::dtype::boolean) {
         nextdtype = util::dtype::boolean;
       }
-      // else if (nextdtype == util::dtype::datetime64  &&
-      //          thatdtype == util::dtype::datetime64) {
-      //   nextdtype = util::dtype::datetime64;
-      // }
-      // else if (nextdtype == util::dtype::timedelta64  &&
-      //          thatdtype == util::dtype::timedelta64) {
-      //   nextdtype = util::dtype::timedelta64;
-      // }
+      else if (nextdtype == util::dtype::datetime64  &&
+               thatdtype == util::dtype::datetime64) {
+        nextdtype = util::dtype::datetime64;
+        std::string contiguous_format;
+        int64_t contiguous_unit_step;
+        std::tie(contiguous_format, contiguous_unit_step) = util::datetime64_data(contiguous_array.format());
+        uint64_t tmp_index = (uint64_t)util::value(util::units_map, contiguous_format);
+        contiguous_index = tmp_index > contiguous_index ? tmp_index : contiguous_index;
+        nextformat = units_to_format(nextdtype, util::name(util::units_map, contiguous_index /*std::max(from_units, to_units)*/), 1/*next_unit_step*/);
+      }
+      else if (nextdtype == util::dtype::timedelta64  &&
+               thatdtype == util::dtype::timedelta64) {
+        nextdtype = util::dtype::timedelta64;
+      }
     }
 
     int64_t total_flatlength = 0;
@@ -2024,20 +2036,6 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
         break;
-
-      // // to datetime64
-      // case util::dtype::datetime64:
-      //   throw std::runtime_error(
-      //     std::string("FIXME: merge to datetime64 not implemented")
-      //     + FILENAME(__LINE__));
-      //   break;
-
-      // // to timedelta64
-      // case util::dtype::timedelta64:
-      //   throw std::runtime_error(
-      //     std::string("FIXME: merge to timedelta64 not implemented")
-      //     + FILENAME(__LINE__));
-      //   break;
 
       // to int8
       case util::dtype::int8:
@@ -2818,6 +2816,31 @@ namespace awkward {
           + FILENAME(__LINE__));
         break;
 
+      // to datetime64
+      case util::dtype::datetime64:
+        switch (contiguous_array.dtype()) {
+          case util::dtype::datetime64:
+            err = kernel::NumpyArray_fill_scaled<int64_t, int64_t>(
+              ptr_lib,
+              reinterpret_cast<int64_t*>(ptr.get()),
+              flatlength_so_far,
+              reinterpret_cast<int64_t*>(contiguous_array.data()),
+              flatlength,
+              util::scale_from_units(contiguous_array.format(), contiguous_index));
+            break;
+          // to timedelta64
+          case util::dtype::timedelta64:
+            throw std::runtime_error(
+              std::string("FIXME: merge to timedelta64 not implemented")
+              + FILENAME(__LINE__));
+            break;
+          default:
+            throw std::runtime_error(
+              std::string("dtype not in {datetime64, timedelta64}")
+              + FILENAME(__LINE__));
+          }
+          break;
+
       // something's wrong
       default:
         throw std::runtime_error(
@@ -2848,10 +2871,9 @@ namespace awkward {
                                                    strides,
                                                    0,
                                                    (ssize_t)itemsize,
-                                                   util::dtype_to_format(nextdtype),
+                                                   util::dtype_to_format(nextdtype, nextformat),
                                                    nextdtype,
                                                    ptr_lib);
-
     if (tail.empty()) {
       return next;
     }
@@ -3139,12 +3161,16 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: reducers on complex256") + FILENAME(__LINE__));
         break;
-      // case util::dtype::datetime64:
-      //   throw std::runtime_error(
-      //     std::string("FIXME: reducers on datetime64") + FILENAME(__LINE__));
-      // case util::dtype:::timedelta64:
-      //   throw std::runtime_error(
-      //     std:string("FIXME: reducers on timedelta64") + FILENAME(__LINE__));
+      case util::dtype::datetime64:
+        ptr = reducer.apply_datetime64(reinterpret_cast<int64_t*>(data()),
+                                       parents,
+                                       outlength);
+        break;
+      case util::dtype::timedelta64:
+        ptr = reducer.apply_timedelta64(reinterpret_cast<int64_t*>(data()),
+                                        parents,
+                                        outlength);
+        break;
       default:
         throw std::invalid_argument(
           std::string("cannot apply reducers to NumpyArray with format \"")
@@ -3174,7 +3200,7 @@ namespace awkward {
       }
 
       util::dtype dtype = reducer.return_dtype(dtype_);
-      std::string format = util::dtype_to_format(dtype);
+      std::string format = util::dtype_to_format(dtype, format_);
       ssize_t itemsize = util::dtype_to_itemsize(dtype);
 
       std::vector<ssize_t> shape({ (ssize_t)outlength });

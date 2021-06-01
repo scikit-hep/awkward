@@ -100,7 +100,6 @@ namespace awkward {
 
   void
   ArrayBuilder::datetime64(int64_t x, const std::string& unit) {
-    std::cout << "ArrayBuilder::datetime64 " << x << ", " << unit << "\n";
     maybeupdate(builder_.get()->datetime64(x, unit));
   }
 

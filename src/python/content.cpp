@@ -11,6 +11,7 @@
 
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
+#include "awkward/datetime64util.h"
 
 #include "awkward/python/virtual.h"
 
@@ -2254,6 +2255,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           return NumpyArray_from_jax(name, anyarray, identities, parameters);
         }
         else if (py::hasattr(anyarray, "dtype")  &&  !py::cast<std::string>(py::str(py::dtype(anyarray.attr("dtype")))).empty()) {
+          //np.issubdtype(comp.dtype, np.datetime64)
           const auto& data_type = ak::util::dtype_to_format(ak::util::name_to_dtype(
             py::cast<std::string>(py::str(py::dtype(anyarray.attr("dtype"))))));
           if (data_type == "M"  ||  data_type == "m") {

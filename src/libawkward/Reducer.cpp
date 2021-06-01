@@ -163,22 +163,22 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerCount::apply_datetime64(const uint64_t* data,
+  ReducerCount::apply_datetime64(const int64_t* data,
                                  const Index64& parents,
                                  int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerCount::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
-  }
+    return apply_bool(reinterpret_cast<const bool*>(data),
+                      parents,
+                      outlength);
+}
 
   const std::shared_ptr<void>
   ReducerCount::apply_timedelta64(const int64_t* data,
                       const Index64& parents,
                       int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerCount::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
-  }
+    return apply_bool(reinterpret_cast<const bool*>(data),
+                      parents,
+                      outlength);
+}
 
   ////////// count nonzero
 
@@ -432,21 +432,39 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerCountNonzero::apply_datetime64(const uint64_t* data,
+  ReducerCountNonzero::apply_datetime64(const int64_t* data,
                                         const Index64& parents,
                                         int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerCountNonzero::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_countnonzero_64<int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_timedelta64(const int64_t* data,
                                          const Index64& parents,
                                          int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerCountNonzero::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_countnonzero_64<int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   ////////// sum (addition)
@@ -805,21 +823,39 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerSum::apply_datetime64(const uint64_t* data,
+  ReducerSum::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerSum::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_sum_64<int64_t, int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_timedelta64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerSum::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_sum_64<int64_t, int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   ////////// prod (multiplication)
@@ -1178,21 +1214,39 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerProd::apply_datetime64(const uint64_t* data,
+  ReducerProd::apply_datetime64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-   throw std::runtime_error(
-     std::string("FIXME: ReducerProd::apply_datetime64 is not implemented yet ")
-     + FILENAME(__LINE__));
+   kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+   std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+     ptr_lib, outlength*(int64_t)sizeof(int64_t));
+   struct Error err = kernel::reduce_prod_64<int64_t, int64_t>(
+     ptr_lib,
+     ptr.get(),
+     data,
+     parents.data(),
+     parents.length(),
+     outlength);
+   util::handle_error(err, util::quote(name()), nullptr);
+   return ptr;
  }
 
   const std::shared_ptr<void>
   ReducerProd::apply_timedelta64(const int64_t* data,
                                  const Index64& parents,
                                  int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerProd::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_prod_64<int64_t, int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   ////////// any (logical or)
@@ -1447,21 +1501,39 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerAny::apply_datetime64(const uint64_t* data,
+  ReducerAny::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerAny::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*(int64_t)sizeof(bool));
+    struct Error err = kernel::reduce_sum_bool_64<int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_timedelta64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerAny::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*(int64_t)sizeof(bool));
+    struct Error err = kernel::reduce_sum_bool_64<int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   ////////// all (logical and)
@@ -1716,21 +1788,39 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerAll::apply_datetime64(const uint64_t* data,
+  ReducerAll::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerAll::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*(int64_t)sizeof(bool));
+    struct Error err = kernel::reduce_prod_bool_64<int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_timedelta64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerAll::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*(int64_t)sizeof(bool));
+    struct Error err = kernel::reduce_prod_bool_64<int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   ////////// min (minimum, in which infinity is the identity)
@@ -2054,21 +2144,49 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerMin::apply_datetime64(const uint64_t* data,
+  ReducerMin::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerMin::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
+   kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+   std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+     ptr_lib, outlength*(int64_t)sizeof(int64_t));
+   int64_t initial = std::numeric_limits<int64_t>::max();
+   if (has_initial_) {
+     initial = (int64_t)initial_i64_;
+   }
+   struct Error err = kernel::reduce_min_64<int64_t, int64_t>(
+     ptr_lib,
+     ptr.get(),
+     data,
+     parents.data(),
+     parents.length(),
+     outlength,
+     initial);
+   util::handle_error(err, util::quote(name()), nullptr);
+   return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_timedelta64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerMin::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    int64_t initial = std::numeric_limits<int64_t>::max();
+    if (has_initial_) {
+      initial = (int64_t)initial_i64_;
+    }
+    struct Error err = kernel::reduce_min_64<int64_t, int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength,
+      initial);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   ////////// max (maximum, in which -infinity is the identity)
@@ -2392,21 +2510,49 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerMax::apply_datetime64(const uint64_t* data,
+  ReducerMax::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerMax::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    int64_t initial = std::numeric_limits<int64_t>::min();
+    if (has_initial_) {
+      initial = (int64_t)initial_i64_;
+    }
+    struct Error err = kernel::reduce_max_64<int64_t, int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength,
+      initial);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_timedelta64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerMax::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    int64_t initial = std::numeric_limits<int64_t>::min();
+    if (has_initial_) {
+      initial = (int64_t)initial_i64_;
+    }
+    struct Error err = kernel::reduce_max_64<int64_t, int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength,
+      initial);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   ////////// argmin (argument minimum, in which -1 is the identity)
@@ -2666,21 +2812,39 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerArgmin::apply_datetime64(const uint64_t* data,
+  ReducerArgmin::apply_datetime64(const int64_t* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerArgmin::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_argmin_64<int64_t, int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_timedelta64(const int64_t* data,
                                    const Index64& parents,
                                    int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerArgmin::apply_timedelta64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_argmin_64<int64_t, int64_t>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
   }
 
   ////////// argmax (argument maximum, in which -1 is the identity)
@@ -2940,7 +3104,7 @@ namespace awkward {
   }
 
   const std::shared_ptr<void>
-  ReducerArgmax::apply_datetime64(const uint64_t* data,
+  ReducerArgmax::apply_datetime64(const int64_t* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
     throw std::runtime_error(
