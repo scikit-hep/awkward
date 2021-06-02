@@ -123,9 +123,15 @@ namespace awkward {
 
   const BuilderPtr
   DatetimeBuilder::timedelta64(int64_t x, const std::string& unit) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->timedelta64(x, unit);
-    return out;
+    if (unit == units_) {
+      content_.append(x);
+      return shared_from_this();
+    }
+    else {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->timedelta64(x, unit);
+      return out;
+    }
   }
 
   const BuilderPtr

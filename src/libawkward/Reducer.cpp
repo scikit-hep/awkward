@@ -435,36 +435,14 @@ namespace awkward {
   ReducerCountNonzero::apply_datetime64(const int64_t* data,
                                         const Index64& parents,
                                         int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_countnonzero_64<int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_timedelta64(const int64_t* data,
                                          const Index64& parents,
                                          int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_countnonzero_64<int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   ////////// sum (addition)
@@ -826,36 +804,14 @@ namespace awkward {
   ReducerSum::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_sum_64<int64_t, int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_timedelta64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_sum_64<int64_t, int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   ////////// prod (multiplication)
@@ -1217,36 +1173,14 @@ namespace awkward {
   ReducerProd::apply_datetime64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-   kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-   std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-     ptr_lib, outlength*(int64_t)sizeof(int64_t));
-   struct Error err = kernel::reduce_prod_64<int64_t, int64_t>(
-     ptr_lib,
-     ptr.get(),
-     data,
-     parents.data(),
-     parents.length(),
-     outlength);
-   util::handle_error(err, util::quote(name()), nullptr);
-   return ptr;
+   return apply_int64(data, parents, outlength);
  }
 
   const std::shared_ptr<void>
   ReducerProd::apply_timedelta64(const int64_t* data,
                                  const Index64& parents,
                                  int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_prod_64<int64_t, int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   ////////// any (logical or)
@@ -1504,36 +1438,14 @@ namespace awkward {
   ReducerAny::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*(int64_t)sizeof(bool));
-    struct Error err = kernel::reduce_sum_bool_64<int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_timedelta64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*(int64_t)sizeof(bool));
-    struct Error err = kernel::reduce_sum_bool_64<int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   ////////// all (logical and)
@@ -1791,36 +1703,14 @@ namespace awkward {
   ReducerAll::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*(int64_t)sizeof(bool));
-    struct Error err = kernel::reduce_prod_bool_64<int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_timedelta64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*(int64_t)sizeof(bool));
-    struct Error err = kernel::reduce_prod_bool_64<int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   ////////// min (minimum, in which infinity is the identity)
@@ -2751,36 +2641,14 @@ namespace awkward {
   ReducerArgmin::apply_datetime64(const int64_t* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_argmin_64<int64_t, int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_timedelta64(const int64_t* data,
                                    const Index64& parents,
                                    int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_argmin_64<int64_t, int64_t>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    return apply_int64(data, parents, outlength);
   }
 
   ////////// argmax (argument maximum, in which -1 is the identity)
@@ -3043,17 +2911,13 @@ namespace awkward {
   ReducerArgmax::apply_datetime64(const int64_t* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
-    throw std::runtime_error(
-      std::string("FIXME: ReducerArgmax::apply_datetime64 is not implemented yet ")
-      + FILENAME(__LINE__));
+    return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_timedelta64(const int64_t* data,
                                    const Index64& parents,
                                    int64_t outlength) const {
-  throw std::runtime_error(
-    std::string("FIXME: ReducerArgmax::apply_timedelta64 is not implemented yet ")
-    + FILENAME(__LINE__));
+    return apply_int64(data, parents, outlength);
   }
 }

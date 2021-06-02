@@ -850,6 +850,27 @@ builder_datetime64(ak::ArrayBuilder& self, const py::handle& obj) {
 }
 
 void
+builder_timedelta64(ak::ArrayBuilder& self, const py::handle& obj) {
+  if (py::isinstance<py::str>(obj)) {
+    auto date_time = py::module::import("numpy").attr("timedelta64")(obj);
+    auto ptr = date_time.attr("astype")(py::module::import("numpy").attr("int64"));
+    auto units = py::str(py::module::import("numpy").attr("dtype")(date_time)).cast<std::string>();
+    self.timedelta64(ptr.cast<int64_t>(), units);
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
+    auto ptr = obj.attr("astype")(py::module::import("numpy").attr("int64"));
+    self.timedelta64(ptr.cast<int64_t>(), py::str(obj.attr("dtype")));
+  }
+  else {
+    throw std::invalid_argument(
+      std::string("cannot convert ")
+      + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
+      + obj.attr("__class__").attr("__name__").cast<std::string>()
+      + std::string(") to an array element") + FILENAME(__LINE__));
+  }
+}
+
+void
 builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   if (obj.is(py::none())) {
     self.null();
@@ -920,7 +941,7 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     builder_datetime64(self, obj);
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
-    self.timedelta64(obj.cast<int64_t>(), py::str(obj.attr("dtype")));
+    builder_timedelta64(self, obj);
   }
   else {
     throw std::invalid_argument(
@@ -957,8 +978,8 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       .def("integer", &ak::ArrayBuilder::integer)
       .def("real", &ak::ArrayBuilder::real)
       .def("complex", &ak::ArrayBuilder::complex)
-      .def("datetime64", &builder_datetime64) //ak::ArrayBuilder::datetime64)
-      .def("timedelta64", &ak::ArrayBuilder::timedelta64)
+      .def("datetime64", &builder_datetime64)
+      .def("timedelta64", &builder_timedelta64)
       .def("bytestring",
            [](ak::ArrayBuilder& self, const py::bytes& x) -> void {
         self.bytestring(x.cast<std::string>());

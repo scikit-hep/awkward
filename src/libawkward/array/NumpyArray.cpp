@@ -1973,11 +1973,17 @@ namespace awkward {
         std::tie(contiguous_format, contiguous_unit_step) = util::datetime64_data(contiguous_array.format());
         uint64_t tmp_index = (uint64_t)util::value(util::units_map, contiguous_format);
         contiguous_index = tmp_index > contiguous_index ? tmp_index : contiguous_index;
-        nextformat = units_to_format(nextdtype, util::name(util::units_map, contiguous_index /*std::max(from_units, to_units)*/), 1/*next_unit_step*/);
+        nextformat = units_to_format(nextdtype, util::name(util::units_map, contiguous_index), 1);
       }
       else if (nextdtype == util::dtype::timedelta64  &&
                thatdtype == util::dtype::timedelta64) {
         nextdtype = util::dtype::timedelta64;
+        std::string contiguous_format;
+        int64_t contiguous_unit_step;
+        std::tie(contiguous_format, contiguous_unit_step) = util::datetime64_data(contiguous_array.format());
+        uint64_t tmp_index = (uint64_t)util::value(util::units_map, contiguous_format);
+        contiguous_index = tmp_index > contiguous_index ? tmp_index : contiguous_index;
+        nextformat = units_to_format(nextdtype, util::name(util::units_map, contiguous_index), 1);
       }
     }
 
