@@ -2134,6 +2134,8 @@ class ArrayBuilder(Iterable, Sized):
        * #integer: appends an integer.
        * #real: appends a floating-point value.
        * #complex: appends a complex value.
+       * #datetime64: appends a datetime64 value.
+       * #timedelta64: appends a timedelta64 value.
        * #bytestring: appends an unencoded string (raw bytes).
        * #string: appends a UTF-8 encoded string.
        * #begin_list: begins filling a list; must be closed with #end_list.
@@ -2446,6 +2448,20 @@ class ArrayBuilder(Iterable, Sized):
         accumulated array.
         """
         self._layout.complex(x)
+
+    def datetime64(self, x):
+        """
+        Appends a datetime64 value `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.datetime64(x)
+
+    def timedelta64(self, x):
+        """
+        Appends a timedelta64 value `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.timedelta64(x)
 
     def bytestring(self, x):
         """
