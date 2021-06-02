@@ -2825,40 +2825,40 @@ namespace awkward {
       // to datetime64
       case util::dtype::datetime64:
         switch (contiguous_array.dtype()) {
-          case util::dtype::datetime64:
-            err = kernel::NumpyArray_fill_scaled<int64_t, int64_t>(
-              ptr_lib,
-              reinterpret_cast<int64_t*>(ptr.get()),
-              flatlength_so_far,
-              reinterpret_cast<int64_t*>(contiguous_array.data()),
-              flatlength,
-              util::scale_from_units(contiguous_array.format(), contiguous_index));
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype not in {datetime64}")
-              + FILENAME(__LINE__));
-          }
+        case util::dtype::datetime64:
+          err = kernel::NumpyArray_fill_scaled<int64_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int64_t*>(contiguous_array.data()),
+            flatlength,
+            util::scale_from_units(contiguous_array.format(), contiguous_index));
           break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {datetime64}")
+            + FILENAME(__LINE__));
+        }
+        break;
 
       // to timedelta64
       case util::dtype::timedelta64:
         switch (contiguous_array.dtype()) {
-          case util::dtype::timedelta64:
-            err = kernel::NumpyArray_fill_scaled<int64_t, int64_t>(
-              ptr_lib,
-              reinterpret_cast<int64_t*>(ptr.get()),
-              flatlength_so_far,
-              reinterpret_cast<int64_t*>(contiguous_array.data()),
-              flatlength,
-              util::scale_from_units(contiguous_array.format(), contiguous_index));
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype not in {timedelta64}")
-              + FILENAME(__LINE__));
-          }
+        case util::dtype::timedelta64:
+          err = kernel::NumpyArray_fill_scaled<int64_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int64_t*>(contiguous_array.data()),
+            flatlength,
+            util::scale_from_units(contiguous_array.format(), contiguous_index));
           break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {timedelta64}")
+            + FILENAME(__LINE__));
+        }
+        break;
 
       // something's wrong
       default:

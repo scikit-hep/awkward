@@ -221,11 +221,12 @@ def test_any_all():
 
 
 def test_prod():
-        array = ak.Array(np.array(
-            ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
-        ))
-        with pytest.raises(ValueError):
-            ak.prod(array, axis=-1)
+    array = ak.Array(
+        np.array(["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]")
+    )
+    with pytest.raises(ValueError):
+        ak.prod(array, axis=-1)
+
 
 def test_min_max():
     array = ak.Array(
