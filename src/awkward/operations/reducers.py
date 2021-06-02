@@ -16,7 +16,7 @@ def count(array, axis=None, keepdims=False, mask_identity=False):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -107,7 +107,7 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -164,7 +164,7 @@ def sum(array, axis=None, keepdims=False, mask_identity=False):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -357,7 +357,7 @@ def prod(array, axis=None, keepdims=False, mask_identity=False):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -406,7 +406,7 @@ def any(array, axis=None, keepdims=False, mask_identity=False):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -457,7 +457,7 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -508,7 +508,7 @@ def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -569,7 +569,7 @@ def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -630,7 +630,7 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -700,7 +700,7 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this reducer descreases the number of
+        keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -779,7 +779,7 @@ def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this function descreases the number of
+        keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -842,7 +842,7 @@ def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this function descreases the number of
+        keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -924,7 +924,7 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this function descreases the number of
+        keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -1006,7 +1006,7 @@ def std(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this function descreases the number of
+        keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -1059,7 +1059,7 @@ def covar(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this function descreases the number of
+        keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -1128,7 +1128,7 @@ def corr(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this function descreases the number of
+        keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -1210,7 +1210,7 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this function descreases the number of
+        keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
@@ -1404,7 +1404,7 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False):
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
             `-2` is the next level up, etc.
-        keepdims (bool): If False, this function descreases the number of
+        keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
