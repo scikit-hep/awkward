@@ -2834,7 +2834,16 @@ namespace awkward {
               flatlength,
               util::scale_from_units(contiguous_array.format(), contiguous_index));
             break;
-          // to timedelta64
+          default:
+            throw std::runtime_error(
+              std::string("dtype not in {datetime64}")
+              + FILENAME(__LINE__));
+          }
+          break;
+
+      // to timedelta64
+      case util::dtype::timedelta64:
+        switch (contiguous_array.dtype()) {
           case util::dtype::timedelta64:
             err = kernel::NumpyArray_fill_scaled<int64_t, int64_t>(
               ptr_lib,
@@ -2846,7 +2855,7 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-              std::string("dtype not in {datetime64, timedelta64}")
+              std::string("dtype not in {timedelta64}")
               + FILENAME(__LINE__));
           }
           break;

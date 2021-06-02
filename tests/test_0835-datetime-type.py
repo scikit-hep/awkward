@@ -88,8 +88,11 @@ def test_timedelta64_ArrayBuilder():
     builder.timedelta64(np.timedelta64(5, "D"))
     builder.timedelta64(np.timedelta64(5, "s"))
 
-
-#    assert ak.to_list(builder.snapshot()) == []
+    assert ak.to_list(builder.snapshot()) == [
+        np.timedelta64(157680000, "s"),
+        np.timedelta64(432000, "s"),
+        np.timedelta64(5, "s"),
+    ]
 
 
 def test_count():
