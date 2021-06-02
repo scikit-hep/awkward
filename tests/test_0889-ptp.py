@@ -27,24 +27,7 @@ def test_jagged():
             [5],
         ]
     )
+    assert ak.ptp(data, axis=1, mask_identity=False).tolist() == [4, 0, 2, 0]
     assert ak.ptp(data, axis=1).tolist() == [4, None, 2, 0]
     assert ak.ptp(data, axis=0).tolist() == [4, 0, 4, 0, 0]
     assert ak.ptp(data) == 4
-
-
-def test_jagged_initial():
-    data = ak.Array(
-        [
-            [1, 3, 5, 4, 2],
-            [],
-            [2, 3, 1],
-            [5],
-        ]
-    )
-    assert ak.ptp(data, axis=1, mask_identity=False).tolist() == [4, 0, 2, 0]
-    assert ak.ptp(data, axis=1, initial=99, mask_identity=False).tolist() == [
-        4,
-        99,
-        2,
-        0,
-    ]

@@ -621,7 +621,7 @@ def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
 
 
 @ak._connect._numpy.implements("ptp")
-def ptp(arr, axis=None, keepdims=False, initial=0, mask_identity=True):
+def ptp(arr, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
         array: Data from which to find the range of values.
@@ -634,13 +634,9 @@ def ptp(arr, axis=None, keepdims=False, initial=0, mask_identity=True):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
-        initial (None or number): The identity value for an empty group of elements, as
-            an alternative to the numeric type's natural identity (e.g. negative
-            infinity for floating-point types, a minimum integer for integer types).
-            If you use `initial`, you might also want `mask_identity=False`.
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
-            results in the operation's identity.
+            results in the operation's identity of 0.
 
     Returns the range of values in each group of elements from `array` (many
     types supported, including all Awkward Arrays and Records). The range of
@@ -671,7 +667,7 @@ def ptp(arr, axis=None, keepdims=False, initial=0, mask_identity=True):
         arr, axis=axis, keepdims=keepdims
     )
     if not mask_identity:
-        return ak.fill_none(ptp, initial)
+        return ak.fill_none(ptp, 0)
     return ptp
 
 
