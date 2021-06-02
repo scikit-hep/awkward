@@ -664,7 +664,7 @@ def ptp(arr, axis=None, keepdims=False, initial=0, mask_identity=True):
     because there are three lists, the first has a range of `3`, the second is
     empty, and the third has a range of `1`.
 
-    See #ak.ptp for a more complete description of nested list and missing
+    See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
     ptp = ak.max(arr, axis=axis, keepdims=keepdims) - ak.min(
