@@ -1,5 +1,5 @@
 import os
-from hypothesis import given,settings,strategies as st
+from hypothesis import given, settings, strategies as st
 import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
