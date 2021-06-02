@@ -804,7 +804,9 @@ namespace awkward {
   ReducerSum::apply_datetime64(const int64_t* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    return apply_int64(data, parents, outlength);
+    throw std::invalid_argument(
+      std::string("ReducerSum: cannot apply `sum` to datetime64 ")
+      + FILENAME(__LINE__));
   }
 
   const std::shared_ptr<void>
@@ -1173,14 +1175,18 @@ namespace awkward {
   ReducerProd::apply_datetime64(const int64_t* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-   return apply_int64(data, parents, outlength);
+   throw std::invalid_argument(
+     std::string("ReducerProd: cannot apply `prod` to datetime64 ")
+     + FILENAME(__LINE__));
  }
 
   const std::shared_ptr<void>
   ReducerProd::apply_timedelta64(const int64_t* data,
                                  const Index64& parents,
                                  int64_t outlength) const {
-    return apply_int64(data, parents, outlength);
+    throw std::invalid_argument(
+      std::string("ReducerProd: cannot apply `prod` to timedelta64 ")
+      + FILENAME(__LINE__));
   }
 
   ////////// any (logical or)

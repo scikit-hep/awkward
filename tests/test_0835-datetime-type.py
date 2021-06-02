@@ -27,7 +27,6 @@ def test_date_time():
     array1 = ak.Array(np.array(["2020-07-27T10:41:11.200000011"], "datetime64[us]"))
     assert np.datetime64(array1[0], "us") == date_time
 
-    # FIXME: this prints '2020-07-27T10:41:11.200000'
     print(ak.to_numpy(array1))
 
     assert ak.to_list(ak.from_iter(array1)) == [
@@ -221,8 +220,12 @@ def test_any_all():
     assert ak.to_list(ak.any(array, axis=-2)) == [[True, True, True], [], [True, True]]
 
 
-# def test_prod():
-
+def test_prod():
+        array = ak.Array(np.array(
+            ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
+        ))
+        with pytest.raises(ValueError):
+            ak.prod(array, axis=-1)
 
 def test_min_max():
     array = ak.Array(
@@ -230,7 +233,6 @@ def test_min_max():
             [
                 np.datetime64("2020-03-27T10:41:11"),
                 np.datetime64("2020-01-27T10:41:11"),
-                # FIXME: reducer in axis on UnionArray of mixed unit formats
                 np.datetime64("2020-05"),
                 np.datetime64("2020-01-27T10:41:11"),
                 np.datetime64("2020-04-27T10:41:11"),
@@ -350,8 +352,5 @@ def test_sum():
             ]
 
         else:
-            assert ak.to_list(depth.sum(-1)) == [
-                np.datetime64(0 + 1 + 2 + 3, np.datetime_data(array.dtype)[0]),
-                np.datetime64(4 + 5 + 6 + 7, np.datetime_data(array.dtype)[0]),
-                np.datetime64(8 + 9 + 10 + 11, np.datetime_data(array.dtype)[0]),
-            ]
+            with pytest.raises(ValueError):
+                depth.sum(-1)
