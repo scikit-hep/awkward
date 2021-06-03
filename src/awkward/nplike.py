@@ -325,6 +325,10 @@ class NumpyLike(Singleton):
         # array[, axis=]
         return self._module.argmax(*args, **kwargs)
 
+    def array_str(self, *args, **kwargs):
+        # array, max_line_width, precision=None, suppress_small=None
+        return self._module.array_str(*args, **kwargs)
+
 
 class Numpy(NumpyLike):
     def __init__(self):
@@ -498,3 +502,9 @@ or
             return out.item()
         else:
             return out
+
+    def array_str(
+        self, array, max_line_width=None, precision=None, suppress_small=None
+    ):
+        # array, max_line_width, precision=None, suppress_small=None
+        return self._module.array_str(array, max_line_width, precision, suppress_small)
