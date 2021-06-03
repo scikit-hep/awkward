@@ -4,7 +4,6 @@ import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-
 @given(
     st.lists(
         st.integers().filter(lambda x: x > 1), min_size=24, max_size=24, unique=True
