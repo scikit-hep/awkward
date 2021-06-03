@@ -81,6 +81,40 @@ def test_datetime64_ArrayBuilder():
     ]
 
 
+def test_highlevel_datetime64_ArrayBuilder():
+    builder = ak.ArrayBuilder()
+    dt = np.datetime64("2020-03-27T10:41:12", "25us")
+    dt1 = np.datetime64("2020-03-27T10:41", "15s")
+    dt2 = np.datetime64("2020-05")
+    # FIXME: do we need to support this?
+    # builder.datetime64(dt.astype(np.int64), "datetime64[s]")
+    builder.datetime64(dt1)
+    builder.datetime64("2020-03-27T10:41:11")
+    builder.datetime64(dt)
+    builder.datetime64("2021-03-27")
+    builder.datetime64("2020-03-27T10:41:13")
+    builder.timedelta64(np.timedelta64(5, "s"))
+    builder.datetime64(dt2)
+    builder.datetime64("2020-05-01T00:00:00.000000")
+    builder.datetime64("2020-07-27T10:41:11.200000")
+    builder.integer(1)
+    builder.timedelta64(np.timedelta64(5, "s"))
+
+    assert ak.to_list(builder.snapshot()) == [
+        np.datetime64("2020-03-27T10:41:00.000000"),
+        np.datetime64("2020-03-27T10:41:11.000000"),
+        np.datetime64("2020-03-27T10:41:12.000000"),
+        np.datetime64("2021-03-27T00:00:00.000000"),
+        np.datetime64("2020-03-27T10:41:13.000000"),
+        np.timedelta64(5, "s"),
+        np.datetime64("2020-05-01T20:56:24.000000"),
+        np.datetime64("2020-05-01T00:00:00.000000"),
+        np.datetime64("2020-07-27T10:41:11.200000"),
+        1,
+        np.timedelta64(5, "s"),
+    ]
+
+
 def test_timedelta64_ArrayBuilder():
     builder = ak.layout.ArrayBuilder()
     builder.timedelta64(np.timedelta64(5, "Y"))
@@ -91,6 +125,23 @@ def test_timedelta64_ArrayBuilder():
         np.timedelta64(157680000, "s"),
         np.timedelta64(432000, "s"),
         np.timedelta64(5, "s"),
+    ]
+
+
+def test_highlevel_timedelta64_ArrayBuilder():
+    builder = ak.ArrayBuilder()
+    builder.timedelta64(np.timedelta64(5, "Y"))
+    builder.timedelta64(np.timedelta64(5, "D"))
+    builder.timedelta64(np.timedelta64(5, "s"))
+    builder.integer(1)
+    builder.datetime64("2020-05-01T00:00:00.000000")
+
+    assert ak.to_list(builder.snapshot()) == [
+        np.timedelta64(157680000, "s"),
+        np.timedelta64(432000, "s"),
+        np.timedelta64(5, "s"),
+        1,
+        np.datetime64("2020-05-01T00:00:00.000000"),
     ]
 
 
