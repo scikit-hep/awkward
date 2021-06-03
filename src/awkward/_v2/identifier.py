@@ -27,7 +27,7 @@ class Identifier(object):
 
         self._data = self._nplike.asarray(data, order="C")
         if len(self._data.shape) != 2:
-            raise TypeError("Identifer data must be 2-dimensional")
+            raise TypeError("Identifier data must be 2-dimensional")
 
         # TypeError for unsupported types?
         self._T = self._data.dtype
