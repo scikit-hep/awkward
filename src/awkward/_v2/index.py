@@ -47,24 +47,20 @@ class Index(object):
         return len(self._data)
 
     def __repr__(self):
-        return self._nplike.array_str(self._data, max_line_width=30)
+        return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = (
-            indent
-            + pre
-            + "<Index - "
-            + self._dtype_to_form[self._data.dtype]
-            + ' i = "'
-            + self._nplike.array_str(self._data, max_line_width=30)
-            + '" length="'
-            + str(len(self._data))
-            + '" at = '
-            + str(hex(id(self._data)))
-            + '"/>'
-            + post
-        )
-        return out
+        out = [indent, pre, "<Index T="]
+        out.append(repr(self._dtype_to_form[self._data.dtype]))
+        out.append(" length=")
+        out.append(repr(str(len(self._data))))
+        out.append(" at=")
+        out.append(repr(hex(self._data.ctypes.data)))
+        out.append(">")
+        out.append(self._nplike.array_str(self._data, max_line_width=30))
+        out.append("</Index>")
+        out.append(post)
+        return "".join(out)
 
     def form(self):
         return self._dtype_to_form[self._data.dtype]
