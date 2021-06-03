@@ -1,0 +1,13 @@
+- name: awkward_BitMaskedArray_to_IndexedOptionArray
+  args:
+    - {name: toindex, type: "List[int64_t]", dir: out}
+    - {name: frombitmask, type: "Const[List[uint8_t]]", dir: in, role: BitMaskedArray-mask}
+    - {name: bitmasklength, type: "int64_t", dir: in, role: default}
+    - {name: validwhen, type: "bool", dir: in, role: BitMaskedArray-valid_when}
+    - {name: lsb_order, type: "bool", dir: in, role: BitMaskedArray-lsb_order}
+  inputs:
+    - toindex: []
+    - frombitmask: [1, 1, 1, 1, 1]
+    - bitmasklength: 3
+    - validwhen: True
+    - lsb_order: True
