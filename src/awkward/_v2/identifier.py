@@ -24,9 +24,15 @@ class Identifier(object):
 
         self._data = self._nplike.asarray(data, order="C")
         if len(self._data.shape) != 2:
-            raise TypeError("Identifer data must be 2-dimenional")
+            raise TypeError("Identifer data must be 2-dimensional")
+
+        # TypeError for unsupported types?
+        # self._T = self._data.dtype
+        # if self._T not in [np.dtype(np.int32), np.dtype(np.int64)]:
+        #     raise TypeError("Identifier data must be int32, int64")
 
     @classmethod
+    # cpp takes width, length?
     def zeros(cls, ref, fieldloc, length, width, nplike, dtype):
         return Identifier(ref, fieldloc, nplike.zeros((length, width), dtype=dtype))
 
@@ -66,8 +72,30 @@ class Identifier(object):
         return Identifier(self._ref, self._fieldloc, self._data.copy())
 
     def __repr__(self):
-        # FIXME
-        return self._nplike.array_str(self._data)
+        return self._nplike.array_str(self._data, max_line_width=30)
+
+    def _repr(self, indent, pre, post):
+        if self._data.dtype == np.dtype(np.int32):
+            name = "Identities32"
+        elif self._data.dtype == np.dtype(np.int64):
+            name = "Identities64"
+        else:
+            name = "Unrecognized Identities"
+        out = indent + pre + "<" + name + ' ref="' + str(self._ref) + '" fieldloc="'
+        for elem in self._fieldloc:
+            out += str(elem[0]) + ": " + str(elem[1]) + " "
+        out = (
+            out[:-1]
+            + '" width="'
+            + str(self._data.shape[1])
+            + '" length="'
+            + str(len(self._data))
+            + '" at="'
+            + str(hex(id(self._data)))
+            + '"/>'
+            + post
+        )
+        return out
 
     def convert_to(self, nplike):
         return Identifier(self._ref, self._fieldloc, nplike.asarray(self._data))
