@@ -37,7 +37,10 @@ that exhaustively checks validity in its constructor (see
             return len(self.content)
 
         def __getitem__(self, where):
-            return self.content[where]
+            if isinstance(where, int):
+                return self.content[where]
+            else:
+                return UnmaskedArray(self.content[where])
 
         def __repr__(self):
             return "UnmaskedArray(" + repr(self.content) + ")"
