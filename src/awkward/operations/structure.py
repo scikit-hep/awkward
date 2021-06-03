@@ -959,7 +959,12 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
                 nplike = ak.nplike.of(*inputs)
                 base, what = inputs
                 if isinstance(base, ak.layout.RecordArray):
-                    if not isinstance(what, ak.layout.Content):
+                    if what is None:
+                        what = ak.layout.IndexedOptionArray64(
+                            ak.layout.Index64(nplike.full(len(base), -1, np.int64)),
+                            ak.layout.EmptyArray(),
+                        )
+                    elif not isinstance(what, ak.layout.Content):
                         what = ak.layout.NumpyArray(nplike.repeat(what, len(base)))
                     if base.istuple and where is None:
                         recordlookup = None
