@@ -1507,6 +1507,8 @@ def minimally_touching_string(limit_length, layout, behavior):
                         key = ""
                     sp = ", "
                 yield "}"
+            elif isinstance(x, (np.datetime64, np.timedelta64)):
+                yield space + str(x)
             elif isinstance(x, (float, np.floating)):
                 yield space + "{0:.3g}".format(x)
             else:
@@ -1572,6 +1574,8 @@ def minimally_touching_string(limit_length, layout, behavior):
                     if i != 0:
                         yield ", "
                 yield "{"
+            elif isinstance(x, (np.datetime64, np.timedelta64)):
+                yield str(x) + space
             elif isinstance(x, (float, np.floating)):
                 yield "{0:.3g}".format(x) + space
             else:

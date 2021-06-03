@@ -2420,7 +2420,29 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
 
       return py::module::import("jax.dlpack").attr("from_dlpack")
                         (py::capsule(dlm_tensor, "dltensor", ak::dlpack::pycapsule_deleter));
-    }));
+    })
+      .def_property_readonly("view_int64", [](ak::NumpyArray& self) {
+        if (self.itemsize() != 8) {
+          throw std::invalid_argument(
+            std::string("NumpyArray itemsize != 8")
+            + FILENAME(__LINE__));
+        }
+        ak::util::dtype dt = ak::util::dtype::int64;
+        return ak::NumpyArray(
+          self.identities(),
+          self.parameters(),
+          self.ptr(),
+          self.shape(),
+          self.strides(),
+          self.byteoffset(),
+          self.itemsize(),
+          dtype_to_format(dt),
+          dt,
+          self.ptr_lib()
+        );
+      })
+
+  );
 }
 
 ////////// RecordArray

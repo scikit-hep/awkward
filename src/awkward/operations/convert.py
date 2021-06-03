@@ -1845,7 +1845,7 @@ def to_layout(
     array,
     allow_record=True,
     allow_other=False,
-    numpytype=(np.number, np.bool_, np.str_, np.bytes_),
+    numpytype=(np.number, np.bool_, np.str_, np.bytes_, np.datetime64, np.timedelta64),
 ):
     """
     Args:

@@ -73,7 +73,7 @@ def test_datetime64_ArrayBuilder():
         np.datetime64("2020-03-27T10:41:12.000000"),
         np.datetime64("2021-03-27T00:00:00.000000"),
         np.datetime64("2020-03-27T10:41:13.000000"),
-        np.datetime64("2020-05-01T20:56:24.000000"),  # FIXME? prescission
+        np.datetime64("2020-05-01T20:56:24.000000"),  # FIXME? precision
         np.datetime64("2020-05-01T00:00:00.000000"),
         np.datetime64("2020-07-27T10:41:11.200000"),
     ]
@@ -404,3 +404,21 @@ def test_sum():
         else:
             with pytest.raises(ValueError):
                 depth.sum(-1)
+
+
+def test_more():
+    nparray = np.array(
+        [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
+    )
+    akarray = ak.Array(nparray)
+
+    assert (akarray[1:] - akarray[:-1]).tolist() == [np.timedelta64(60, "m")]
+    assert ak.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(60, "m")
+    assert ak.sum(akarray[1:] - akarray[:-1], axis=0) == [np.timedelta64(60, "m")]
+
+    with pytest.raises(np.core._exceptions.UFuncTypeError):
+        akarray[1:] + akarray[:-1]
+    with pytest.raises(np.core._exceptions.UFuncTypeError):
+        akarray * 2
+
+    assert ak.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
