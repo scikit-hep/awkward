@@ -967,22 +967,13 @@ def to_list(array):
         return [to_list(x) for x in array.snapshot()]
 
     elif isinstance(array, ak.layout.NumpyArray):
-        if array.format.startswith("M"):
-            return [
-                np.datetime64(
-                    x,
-                    array.format[array.format.index("[") + 1 : array.format.index("]")],
-                )
-                for x in array
-            ]
-        elif array.format.startswith("m"):
-            return [
-                np.timedelta64(
-                    x,
-                    array.format[array.format.index("[") + 1 : array.format.index("]")],
-                )
-                for x in array
-            ]
+        if array.format.startswith("M") or array.format.startswith("m"):
+            return (
+                ak.nplike.of(array)
+                .asarray(array.view_int64)
+                .view(array.format)
+                .tolist()
+            )
         else:
             return ak.nplike.of(array).asarray(array).tolist()
 
