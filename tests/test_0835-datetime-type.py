@@ -84,8 +84,6 @@ def test_highlevel_datetime64_ArrayBuilder():
     dt = np.datetime64("2020-03-27T10:41:12", "25us")
     dt1 = np.datetime64("2020-03-27T10:41", "15s")
     dt2 = np.datetime64("2020-05")
-    # FIXME: do we need to support this?
-    # builder.datetime64(dt.astype(np.int64), "datetime64[s]")
     builder.datetime64(dt1)
     builder.datetime64("2020-03-27T10:41:11")
     builder.datetime64(dt)
