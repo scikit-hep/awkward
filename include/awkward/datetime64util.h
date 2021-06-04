@@ -84,9 +84,11 @@ namespace awkward {
       as = 13, // attosecond
     };
 
+    // One calendar common year has 365 days: 31536000 seconds
+    // One calendar leap year has 366 days: 31622400 seconds
     const std::array<const NameValuePair<datetime_units>, 14> units_map {
       {{datetime_units::unknown, "unknown", 1, 1},
-      {datetime_units::Y, "Y", 31556952, 1},
+      {datetime_units::Y, "Y", 31556952, 1}, // seconds in average Gregorian year
       {datetime_units::M, "M", 2629746, 1},
       {datetime_units::W, "W", 604800, 1},
       {datetime_units::D, "D", 86400, 1},
