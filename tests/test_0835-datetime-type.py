@@ -6,6 +6,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+import datetime
+
 
 def test_date_time():
 
@@ -68,15 +70,26 @@ def test_datetime64_ArrayBuilder():
 
     print(builder.snapshot())
     assert ak.to_list(builder.snapshot()) == [
-        np.datetime64("2020-03-27T10:41:00.000000"),
-        np.datetime64("2020-03-27T10:41:11.000000"),
-        np.datetime64("2020-03-27T10:41:12.000000"),
-        np.datetime64("2021-03-27T00:00:00.000000"),
-        np.datetime64("2020-03-27T10:41:13.000000"),
-        np.datetime64("2020-05-01T20:56:24.000000"),  # FIXME? precision
-        np.datetime64("2020-05-01T00:00:00.000000"),
-        np.datetime64("2020-07-27T10:41:11.200000"),
+        datetime.datetime(2020, 3, 27, 10, 41),
+        datetime.datetime(2020, 3, 27, 10, 41, 11),
+        datetime.datetime(2020, 3, 27, 10, 41, 12),
+        datetime.datetime(2021, 3, 27, 0, 0),
+        datetime.datetime(2020, 3, 27, 10, 41, 13),
+        datetime.datetime(2020, 5, 1, 20, 56, 24),
+        datetime.datetime(2020, 5, 1, 0, 0),
+        datetime.datetime(2020, 7, 27, 10, 41, 11, 200000),
     ]
+    #
+    # [
+    #     np.datetime64("2020-03-27T10:41:00.000000"),
+    #     np.datetime64("2020-03-27T10:41:11.000000"),
+    #     np.datetime64("2020-03-27T10:41:12.000000"),
+    #     np.datetime64("2021-03-27T00:00:00.000000"),
+    #     np.datetime64("2020-03-27T10:41:13.000000"),
+    #     np.datetime64("2020-05-01T20:56:24.000000"),  # FIXME? precision
+    #     np.datetime64("2020-05-01T00:00:00.000000"),
+    #     np.datetime64("2020-07-27T10:41:11.200000"),
+    # ]
 
 
 def test_highlevel_datetime64_ArrayBuilder():
@@ -118,10 +131,15 @@ def test_timedelta64_ArrayBuilder():
     builder.timedelta64(np.timedelta64(5, "s"))
 
     assert ak.to_list(builder.snapshot()) == [
-        np.timedelta64(157680000, "s"),
-        np.timedelta64(432000, "s"),
-        np.timedelta64(5, "s"),
+        datetime.timedelta(1825),
+        datetime.timedelta(5),
+        datetime.timedelta(0, 5),
     ]
+    # [
+    #     np.timedelta64(157680000, "s"),
+    #     np.timedelta64(432000, "s"),
+    #     np.timedelta64(5, "s"),
+    # ]
 
 
 def test_highlevel_timedelta64_ArrayBuilder():
@@ -376,27 +394,28 @@ def test_sum():
 
         if np.issubdtype(array.dtype, np.timedelta64):
             assert ak.to_list(depth.sum(-1)) == [
-                np.timedelta64(0 + 1 + 2 + 3, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(4 + 5 + 6 + 7, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(8 + 9 + 10 + 11, np.datetime_data(array.dtype)[0]),
+                datetime.timedelta(6),
+                datetime.timedelta(22),
+                datetime.timedelta(38),
             ]
+
             assert ak.to_list(depth.sum(1)) == [
-                np.timedelta64(0 + 1 + 2 + 3, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(4 + 5 + 6 + 7, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(8 + 9 + 10 + 11, np.datetime_data(array.dtype)[0]),
+                datetime.timedelta(6),
+                datetime.timedelta(22),
+                datetime.timedelta(38),
             ]
 
             assert ak.to_list(depth.sum(-2)) == [
-                np.timedelta64(0 + 4 + 8, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(1 + 5 + 9, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(2 + 6 + 10, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(3 + 7 + 11, np.datetime_data(array.dtype)[0]),
+                datetime.timedelta(12),
+                datetime.timedelta(15),
+                datetime.timedelta(18),
+                datetime.timedelta(21),
             ]
             assert ak.to_list(depth.sum(0)) == [
-                np.timedelta64(0 + 4 + 8, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(1 + 5 + 9, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(2 + 6 + 10, np.datetime_data(array.dtype)[0]),
-                np.timedelta64(3 + 7 + 11, np.datetime_data(array.dtype)[0]),
+                datetime.timedelta(12),
+                datetime.timedelta(15),
+                datetime.timedelta(18),
+                datetime.timedelta(21),
             ]
 
         else:
@@ -410,6 +429,7 @@ def test_sum():
 #     )
 #     akarray = ak.Array(nparray)
 #
+#     print(akarray[1:])
 #     assert (akarray[1:] - akarray[:-1]).tolist() == [np.timedelta64(60, "m")]
 #     assert ak.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(60, "m")
 #     assert ak.sum(akarray[1:] - akarray[:-1], axis=0) == [np.timedelta64(60, "m")]
