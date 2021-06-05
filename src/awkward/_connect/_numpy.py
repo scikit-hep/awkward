@@ -115,13 +115,22 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             while isinstance(node, ak.layout.RegularArray):
                 shape.append(node.size)
                 node = node.content
-            nparray = ak.nplike.of(node).asarray(node)
-            nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
-            return ak.layout.NumpyArray(
-                nparray,
-                node.identities,
-                node.parameters,
-            )
+            if node.format.startswith("M") or node.format.startswith("m"):
+                nparray = ak.nplike.of(node).asarray(node.view_int64).view(node.format)
+                nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
+                return ak.layout.NumpyArray(
+                    nparray,
+                    node.identities,
+                    node.parameters,
+                )
+            else:
+                nparray = ak.nplike.of(node).asarray(node)
+                nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
+                return ak.layout.NumpyArray(
+                    nparray,
+                    node.identities,
+                    node.parameters,
+                )
 
     def getfunction(inputs):
         signature = [ufunc]
@@ -134,7 +143,15 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 elif array is not None:
                     signature.append(array)
                 elif isinstance(x, ak.layout.NumpyArray):
-                    signature.append(ak.nplike.of(x).asarray(x).dtype.type)
+                    if x.format.startswith("M") or x.format.startswith("m"):
+                        signature.append(
+                            ak.nplike.of(x)
+                            .asarray(x.view_int64)
+                            .view(x.format)
+                            .dtype.type
+                        )
+                    else:
+                        signature.append(ak.nplike.of(x).asarray(x).dtype.type)
                 else:
                     signature.append(None)
             else:
@@ -152,13 +169,26 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         inputs = [deregulate(x) for x in inputs]
 
         if all(
-            isinstance(x, ak.layout.NumpyArray)
+            (
+                isinstance(x, ak.layout.NumpyArray)
+                and not (x.format.startswith("M") or x.format.startswith("m"))
+            )
             or not isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
             for x in inputs
         ):
             nplike = ak.nplike.of(*inputs)
             result = getattr(ufunc, method)(
                 *[nplike.asarray(x) for x in inputs], **kwargs
+            )
+            return lambda: (ak.operations.convert.from_numpy(result, highlevel=False),)
+        elif all(
+            isinstance(x, ak.layout.NumpyArray)
+            and (x.format.startswith("M") or x.format.startswith("m"))
+            for x in inputs
+        ):
+            nplike = ak.nplike.of(*inputs)
+            result = getattr(ufunc, method)(
+                *[nplike.asarray(x.view_int64).view(x.format) for x in inputs], **kwargs
             )
             return lambda: (ak.operations.convert.from_numpy(result, highlevel=False),)
 
