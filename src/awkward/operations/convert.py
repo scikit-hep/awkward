@@ -892,6 +892,9 @@ def from_iter(
                 "cannot produce an array from a dict"
                 + ak._util.exception_suffix(__file__)
             )
+    # elif isinstance(array, np.datetime64) or isinstance(array, np.timedelta64):
+    #     return array
+
     out = ak.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
         out.fromiter(x)

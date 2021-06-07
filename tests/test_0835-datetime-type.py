@@ -135,11 +135,23 @@ def test_timedelta64_ArrayBuilder():
         datetime.timedelta(5),
         datetime.timedelta(0, 5),
     ]
-    # [
-    #     np.timedelta64(157680000, "s"),
-    #     np.timedelta64(432000, "s"),
-    #     np.timedelta64(5, "s"),
-    # ]
+
+
+@pytest.mark.skipif(
+    ak._util.py27,
+    reason="Python 2.7 to_list returns datetime.timedelta see the test above",
+)
+def test_timedelta64_ArrayBuilder_py3():
+    builder = ak.layout.ArrayBuilder()
+    builder.timedelta64(np.timedelta64(5, "Y"))
+    builder.timedelta64(np.timedelta64(5, "D"))
+    builder.timedelta64(np.timedelta64(5, "s"))
+
+    assert ak.to_list(builder.snapshot()) == [
+        np.timedelta64(157680000, "s"),
+        np.timedelta64(432000, "s"),
+        np.timedelta64(5, "s"),
+    ]
 
 
 def test_highlevel_timedelta64_ArrayBuilder():
@@ -433,9 +445,28 @@ def test_more():
     assert ak.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(60, "m")
     assert ak.sum(akarray[1:] - akarray[:-1], axis=0) == [np.timedelta64(60, "m")]
 
+
+@pytest.mark.skipif(
+    ak._util.py27,
+    reason="Python 2.7 module 'numpy.core' has no attribute '_exceptions'",
+)
+def test_ufunc_sum():
+    nparray = np.array(
+        [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
+    )
+    akarray = ak.Array(nparray)
+
     with pytest.raises(np.core._exceptions.UFuncTypeError):
         akarray[1:] + akarray[:-1]
+
+
+def test_ufunc_mul():
+    nparray = np.array(
+        [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
+    )
+    akarray = ak.Array(nparray)
+
     with pytest.raises(ValueError):  # FIXME?: np.core._exceptions.UFuncTypeError):
         akarray * 2
 
-    # assert ak.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
+    assert ak.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")

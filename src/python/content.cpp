@@ -4,6 +4,7 @@
 
 #include <pybind11/numpy.h>
 #include <pybind11/complex.h>
+#include <pybind11/chrono.h>
 
 #include "awkward/type/Type.h"
 #include "awkward/Reducer.h"
@@ -928,6 +929,12 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance<py::array>(obj)) {
     builder_fromiter(self, obj.attr("tolist")());
   }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("datetime64"))) {
+    builder_datetime64(self, obj);
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
+    builder_timedelta64(self, obj);
+  }
   else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
     self.boolean(obj.cast<bool>());
   }
@@ -937,13 +944,8 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
     self.real(obj.cast<double>());
   }
-  else if (py::isinstance(obj, py::module::import("numpy").attr("datetime64"))) {
-    builder_datetime64(self, obj);
-  }
-  else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
-    builder_timedelta64(self, obj);
-  }
   else {
+
     throw std::invalid_argument(
       std::string("cannot convert ")
       + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
