@@ -41,8 +41,8 @@ def test():
 
     container = {
         "part0-node0-offsets": np.array([0, 2, 3, 3, 6], dtype=np.int64),
-        "part0-node2-data": np.array([1, 2, 3, 4, 5, 6]),
-        "part0-node3-data": np.array([10, 20, 30, 40, 50, 60]),
+        "part0-node2-data": np.array([1, 2, 3, 4, 5, 6], dtype=np.int64),
+        "part0-node3-data": np.array([10, 20, 30, 40, 50, 60], dtype=np.int64),
     }
 
     assert ak.from_buffers(form, 4, container).tolist() == [
