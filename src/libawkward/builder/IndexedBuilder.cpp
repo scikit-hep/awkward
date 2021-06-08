@@ -90,17 +90,17 @@ namespace awkward {
 
   template <typename T>
   const BuilderPtr
-  IndexedBuilder<T>::datetime64(int64_t x, const std::string& unit) {
+  IndexedBuilder<T>::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->datetime64(x, unit);
+    out.get()->datetime(x, unit);
     return out;
   }
 
   template <typename T>
   const BuilderPtr
-  IndexedBuilder<T>::timedelta64(int64_t x, const std::string& unit) {
+  IndexedBuilder<T>::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->timedelta64(x, unit);
+    out.get()->timedelta(x, unit);
     return out;
   }
 

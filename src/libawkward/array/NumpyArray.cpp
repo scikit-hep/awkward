@@ -27,7 +27,7 @@
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/VirtualArray.h"
 #include "awkward/util.h"
-#include "awkward/datetime64util.h"
+#include "awkward/datetime_util.h"
 
 #include "awkward/array/NumpyArray.h"
 
@@ -1970,7 +1970,7 @@ namespace awkward {
         nextdtype = util::dtype::datetime64;
         std::string contiguous_format;
         int64_t contiguous_unit_step;
-        std::tie(contiguous_format, contiguous_unit_step) = util::datetime64_data(contiguous_array.format());
+        std::tie(contiguous_format, contiguous_unit_step) = util::datetime_data(contiguous_array.format());
         uint64_t tmp_index = (uint64_t)util::value(util::units_map, contiguous_format);
         contiguous_index = tmp_index > contiguous_index ? tmp_index : contiguous_index;
         nextformat = units_to_format(nextdtype, util::name(util::units_map, contiguous_index), 1);
@@ -1980,7 +1980,7 @@ namespace awkward {
         nextdtype = util::dtype::timedelta64;
         std::string contiguous_format;
         int64_t contiguous_unit_step;
-        std::tie(contiguous_format, contiguous_unit_step) = util::datetime64_data(contiguous_array.format());
+        std::tie(contiguous_format, contiguous_unit_step) = util::datetime_data(contiguous_array.format());
         uint64_t tmp_index = (uint64_t)util::value(util::units_map, contiguous_format);
         contiguous_index = tmp_index > contiguous_index ? tmp_index : contiguous_index;
         nextformat = units_to_format(nextdtype, util::name(util::units_map, contiguous_index), 1);

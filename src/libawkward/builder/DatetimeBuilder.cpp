@@ -13,7 +13,7 @@
 #include "awkward/builder/UnionBuilder.h"
 
 #include "awkward/builder/DatetimeBuilder.h"
-#include "awkward/datetime64util.h"
+#include "awkward/datetime_util.h"
 
 namespace awkward {
   const BuilderPtr
@@ -109,27 +109,27 @@ namespace awkward {
   }
 
   const BuilderPtr
-  DatetimeBuilder::datetime64(int64_t x, const std::string& unit) {
+  DatetimeBuilder::datetime(int64_t x, const std::string& unit) {
     if (unit == units_) {
       content_.append(x);
       return shared_from_this();
     }
     else {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-      out.get()->datetime64(x, unit);
+      out.get()->datetime(x, unit);
       return out;
     }
   }
 
   const BuilderPtr
-  DatetimeBuilder::timedelta64(int64_t x, const std::string& unit) {
+  DatetimeBuilder::timedelta(int64_t x, const std::string& unit) {
     if (unit == units_) {
       content_.append(x);
       return shared_from_this();
     }
     else {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-      out.get()->timedelta64(x, unit);
+      out.get()->timedelta(x, unit);
       return out;
     }
   }

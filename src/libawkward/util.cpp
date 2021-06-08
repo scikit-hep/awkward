@@ -12,7 +12,7 @@
 #include "awkward/kernels.h"
 
 #include "awkward/util.h"
-#include "awkward/datetime64util.h"
+#include "awkward/datetime_util.h"
 #include "awkward/Identities.h"
 
 namespace rj = rapidjson;
@@ -70,10 +70,10 @@ namespace awkward {
       else if (name == "complex256") {
         return util::dtype::complex256;
       }
-      else if (name.rfind("datetime64", 0) == 0) {
+      else if (name.rfind("datetime", 0) == 0) {
         return util::dtype::datetime64;
       }
-      else if (name.rfind("timedelta64", 0) == 0) {
+      else if (name.rfind("timedelta", 0) == 0) {
         return util::dtype::timedelta64;
       }
       else {
@@ -117,9 +117,9 @@ namespace awkward {
       case util::dtype::complex256:
         return "complex256";
       case util::dtype::datetime64:
-        return "datetime64";
+        return "datetime";
       case util::dtype::timedelta64:
-        return "timedelta64";
+        return "timedelta";
       default:
         return "unknown";
       }
@@ -421,25 +421,25 @@ namespace awkward {
       }
     }
 
-    bool
-    is_datetime64(dtype dt) {
-      switch (dt) {
-      case dtype::datetime64:
-        return true;
-      default:
-        return false;
-      }
-    }
-
-    bool
-    is_timedelta64(dtype dt) {
-      switch (dt) {
-      case dtype::timedelta64:
-        return true;
-      default:
-        return false;
-      }
-    }
+    // bool
+    // is_datetime64(dtype dt) {
+    //   switch (dt) {
+    //   case dtype::datetime64:
+    //     return true;
+    //   default:
+    //     return false;
+    //   }
+    // }
+    //
+    // bool
+    // is_timedelta64(dtype dt) {
+    //   switch (dt) {
+    //   case dtype::timedelta64:
+    //     return true;
+    //   default:
+    //     return false;
+    //   }
+    // }
 
     void
     handle_error(const struct Error& err,
@@ -780,7 +780,7 @@ namespace awkward {
     }
 
     std::string
-    datetime64_units(const std::string& format) {
+    datetime_units(const std::string& format) {
       auto units(format);
       std::string chars = "[]1234567890";
       units.erase(remove_if(units.begin(), units.end(),
@@ -792,7 +792,7 @@ namespace awkward {
     }
 
     std::tuple<std::string, int64_t>
-    datetime64_data(const std::string& format) {
+    datetime_data(const std::string& format) {
       std::string next_format(format);
       int64_t next_interval = 1;
 
@@ -809,7 +809,7 @@ namespace awkward {
         }
       }
 
-      return std::make_tuple(datetime64_units(next_units), next_interval);
+      return std::make_tuple(datetime_units(next_units), next_interval);
     }
 
     int64_t
@@ -819,7 +819,7 @@ namespace awkward {
 
       std::string other_format;
       int64_t other_unit_step;
-      std::tie(other_format, other_unit_step) = util::datetime64_data(format);
+      std::tie(other_format, other_unit_step) = util::datetime_data(format);
       uint64_t other_index = (uint64_t)util::value(util::units_map, other_format);
       int64_t next_scale_up = util::units_map.at(other_index).scale_up;
       int64_t next_scale_down = util::units_map.at(other_index).scale_down;

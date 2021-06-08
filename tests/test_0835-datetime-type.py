@@ -16,7 +16,7 @@ def test_date_time():
     )
 
     array = ak.Array(numpy_array)
-    assert str(array.type) == "3 * datetime64"
+    assert str(array.type) == "3 * datetime"
     assert array.tolist() == [
         np.datetime64("2020-07-27T10:41:11"),
         np.datetime64("2019-01-01T00:00:00"),
@@ -44,7 +44,7 @@ def test_time_delta():
     numpy_array = np.array(["41", "1", "20"], "timedelta64[D]")
 
     array = ak.Array(numpy_array)
-    assert str(array.type) == "3 * timedelta64"
+    assert str(array.type) == "3 * timedelta"
     assert array.tolist() == [
         np.timedelta64("41", "D"),
         np.timedelta64("1", "D"),
@@ -59,14 +59,14 @@ def test_datetime64_ArrayBuilder():
     dt = np.datetime64("2020-03-27T10:41:12", "25us")
     dt1 = np.datetime64("2020-03-27T10:41", "15s")
     dt2 = np.datetime64("2020-05")
-    builder.datetime64(dt1)
-    builder.datetime64("2020-03-27T10:41:11")
-    builder.datetime64(dt)
-    builder.datetime64("2021-03-27")
-    builder.datetime64("2020-03-27T10:41:13")
-    builder.datetime64(dt2)
-    builder.datetime64("2020-05-01T00:00:00.000000")
-    builder.datetime64("2020-07-27T10:41:11.200000")
+    builder.datetime(dt1)
+    builder.datetime("2020-03-27T10:41:11")
+    builder.datetime(dt)
+    builder.datetime("2021-03-27")
+    builder.datetime("2020-03-27T10:41:13")
+    builder.datetime(dt2)
+    builder.datetime("2020-05-01T00:00:00.000000")
+    builder.datetime("2020-07-27T10:41:11.200000")
 
     print(builder.snapshot())
     assert ak.to_list(builder.snapshot()) == [
@@ -97,17 +97,17 @@ def test_highlevel_datetime64_ArrayBuilder():
     dt = np.datetime64("2020-03-27T10:41:12", "25us")
     dt1 = np.datetime64("2020-03-27T10:41", "15s")
     dt2 = np.datetime64("2020-05")
-    builder.datetime64(dt1)
-    builder.datetime64("2020-03-27T10:41:11")
-    builder.datetime64(dt)
-    builder.datetime64("2021-03-27")
-    builder.datetime64("2020-03-27T10:41:13")
-    builder.timedelta64(np.timedelta64(5, "s"))
-    builder.datetime64(dt2)
-    builder.datetime64("2020-05-01T00:00:00.000000")
-    builder.datetime64("2020-07-27T10:41:11.200000")
+    builder.datetime(dt1)
+    builder.datetime("2020-03-27T10:41:11")
+    builder.datetime(dt)
+    builder.datetime("2021-03-27")
+    builder.datetime("2020-03-27T10:41:13")
+    builder.timedelta(np.timedelta64(5, "s"))
+    builder.datetime(dt2)
+    builder.datetime("2020-05-01T00:00:00.000000")
+    builder.datetime("2020-07-27T10:41:11.200000")
     builder.integer(1)
-    builder.timedelta64(np.timedelta64(5, "s"))
+    builder.timedelta(np.timedelta64(5, "s"))
 
     assert ak.to_list(builder.snapshot()) == [
         np.datetime64("2020-03-27T10:41:00.000000"),
@@ -126,9 +126,9 @@ def test_highlevel_datetime64_ArrayBuilder():
 
 def test_timedelta64_ArrayBuilder():
     builder = ak.layout.ArrayBuilder()
-    builder.timedelta64(np.timedelta64(5, "Y"))
-    builder.timedelta64(np.timedelta64(5, "D"))
-    builder.timedelta64(np.timedelta64(5, "s"))
+    builder.timedelta(np.timedelta64(5, "Y"))
+    builder.timedelta(np.timedelta64(5, "D"))
+    builder.timedelta(np.timedelta64(5, "s"))
 
     assert ak.to_list(builder.snapshot()) == [
         datetime.timedelta(1825),
@@ -143,9 +143,9 @@ def test_timedelta64_ArrayBuilder():
 )
 def test_timedelta64_ArrayBuilder_py3():
     builder = ak.layout.ArrayBuilder()
-    builder.timedelta64(np.timedelta64(5, "Y"))
-    builder.timedelta64(np.timedelta64(5, "D"))
-    builder.timedelta64(np.timedelta64(5, "s"))
+    builder.timedelta(np.timedelta64(5, "Y"))
+    builder.timedelta(np.timedelta64(5, "D"))
+    builder.timedelta(np.timedelta64(5, "s"))
 
     assert ak.to_list(builder.snapshot()) == [
         np.timedelta64(157680000, "s"),
@@ -156,11 +156,11 @@ def test_timedelta64_ArrayBuilder_py3():
 
 def test_highlevel_timedelta64_ArrayBuilder():
     builder = ak.ArrayBuilder()
-    builder.timedelta64(np.timedelta64(5, "Y"))
-    builder.timedelta64(np.timedelta64(5, "D"))
-    builder.timedelta64(np.timedelta64(5, "s"))
+    builder.timedelta(np.timedelta64(5, "Y"))
+    builder.timedelta(np.timedelta64(5, "D"))
+    builder.timedelta(np.timedelta64(5, "s"))
     builder.integer(1)
-    builder.datetime64("2020-05-01T00:00:00.000000")
+    builder.datetime("2020-05-01T00:00:00.000000")
 
     assert ak.to_list(builder.snapshot()) == [
         np.timedelta64(157680000, "s"),
@@ -447,7 +447,7 @@ def test_more():
 
 
 @pytest.mark.skipif(
-    ak._util.py27 and np.__version__ > "1.13",
+    ak._util.py27 and np.__version__ > "1.13.1",
     reason="Python 2.7 module 'numpy.core' has no attribute '_exceptions'",
 )
 def test_ufunc_sum():

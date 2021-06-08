@@ -67,10 +67,10 @@ namespace awkward {
       complex(std::complex<double> x) override;
 
     const BuilderPtr
-      datetime64(int64_t x, const std::string& unit) override;
+      datetime(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
-      timedelta64(int64_t x, const std::string& unit) override;
+      timedelta(int64_t x, const std::string& unit) override;
 
     const BuilderPtr
       string(const char* x, int64_t length, const char* encoding) override;

@@ -94,16 +94,16 @@ namespace awkward {
   }
 
   const BuilderPtr
-  BoolBuilder::datetime64(int64_t x, const std::string& unit) {
+  BoolBuilder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->datetime64(x, unit);
+    out.get()->datetime(x, unit);
     return out;
   }
 
   const BuilderPtr
-  BoolBuilder::timedelta64(int64_t x, const std::string& unit) {
+  BoolBuilder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->timedelta64(x, unit);
+    out.get()->timedelta(x, unit);
     return out;
   }
 

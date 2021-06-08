@@ -257,7 +257,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  UnionBuilder::datetime64(int64_t x, const std::string& unit) {
+  UnionBuilder::datetime(int64_t x, const std::string& unit) {
     if (current_ == -1) {
       BuilderPtr tofill(nullptr);
       int8_t i = 0;
@@ -275,18 +275,18 @@ namespace awkward {
         contents_.push_back(tofill);
       }
       int64_t len = tofill.get()->length();
-      tofill.get()->datetime64(x, unit);
+      tofill.get()->datetime(x, unit);
       tags_.append(i);
       index_.append(len);
     }
     else {
-      contents_[(size_t)current_].get()->datetime64(x, unit);
+      contents_[(size_t)current_].get()->datetime(x, unit);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  UnionBuilder::timedelta64(int64_t x, const std::string& unit) {
+  UnionBuilder::timedelta(int64_t x, const std::string& unit) {
     if (current_ == -1) {
       BuilderPtr tofill(nullptr);
       int8_t i = 0;
@@ -304,12 +304,12 @@ namespace awkward {
         contents_.push_back(tofill);
       }
       int64_t len = tofill.get()->length();
-      tofill.get()->timedelta64(x, unit);
+      tofill.get()->timedelta(x, unit);
       tags_.append(i);
       index_.append(len);
     }
     else {
-      contents_[(size_t)current_].get()->timedelta64(x, unit);
+      contents_[(size_t)current_].get()->timedelta(x, unit);
     }
     return shared_from_this();
   }

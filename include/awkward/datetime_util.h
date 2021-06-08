@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#ifndef AWKWARD_DATETIME64_UTIL_H_
-#define AWKWARD_DATETIME64_UTIL_H_
+#ifndef AWKWARD_DATETIME_UTIL_H_
+#define AWKWARD_DATETIME_UTIL_H_
 
 #include <string>
 #include <vector>
@@ -18,11 +18,11 @@
 namespace awkward {
 
   namespace util {
-    /// @brief Convert a format string into a datetime64 units string.
+    /// @brief Convert a format string into a datetime units string.
     const std::string
     format_to_units(const std::string& format);
 
-    /// @brief Convert a datetime64 units string into a format string.
+    /// @brief Convert a datetime units string into a format string.
     const std::string
     units_to_format(dtype dt, const std::string& units, int64_t step);
 
@@ -64,8 +64,8 @@ namespace awkward {
       return std::begin(a)->value;
     }
 
-    /// @brief Valid datetime64 units.
-    /// Different units of two datetime64 type Arrays will be normalized to
+    /// @brief Valid datetime units.
+    /// Different units of two datetime type Arrays will be normalized to
     /// the smallest unit (== a larger enum value).
     enum class datetime_units {
       unknown = -1, // unknown
@@ -103,10 +103,10 @@ namespace awkward {
       {datetime_units::as, "as", 1, 1000000000000000000}}
     };
 
-    std::tuple<std::string, int64_t> datetime64_data(const std::string& format);
+    std::tuple<std::string, int64_t> datetime_data(const std::string& format);
 
     int64_t scale_from_units(const std::string& format, uint64_t index);
   }
 }
 
-#endif // AWKWARD_DATETIME64_UTIL_H_
+#endif // AWKWARD_DATETIME_UTIL_H_

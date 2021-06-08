@@ -132,27 +132,27 @@ namespace awkward {
   }
 
   const BuilderPtr
-  ListBuilder::datetime64(int64_t x, const std::string& unit) {
+  ListBuilder::datetime(int64_t x, const std::string& unit) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-      out.get()->datetime64(x, unit);
+      out.get()->datetime(x, unit);
       return out;
     }
     else {
-      maybeupdate(content_.get()->datetime64(x, unit));
+      maybeupdate(content_.get()->datetime(x, unit));
       return shared_from_this();
     }
   }
 
   const BuilderPtr
-  ListBuilder::timedelta64(int64_t x, const std::string& unit) {
+  ListBuilder::timedelta(int64_t x, const std::string& unit) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-      out.get()->timedelta64(x, unit);
+      out.get()->timedelta(x, unit);
       return out;
     }
     else {
-      maybeupdate(content_.get()->timedelta64(x, unit));
+      maybeupdate(content_.get()->timedelta(x, unit));
       return shared_from_this();
     }
   }

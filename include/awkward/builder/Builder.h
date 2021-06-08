@@ -78,13 +78,13 @@ namespace awkward {
     virtual const BuilderPtr
       complex(std::complex<double> x) = 0;
 
-    /// @brief Adds a datetime64 value `x` to the accumulated data.
+    /// @brief Adds a datetime value `x` to the accumulated data.
     virtual const BuilderPtr
-      datetime64(int64_t x, const std::string& unit) = 0;
+      datetime(int64_t x, const std::string& unit) = 0;
 
-    /// @brief Adds a timedelta64 value `x` to the accumulated data.
+    /// @brief Adds a timedelta value `x` to the accumulated data.
     virtual const BuilderPtr
-      timedelta64(int64_t x, const std::string& unit) = 0;
+      timedelta(int64_t x, const std::string& unit) = 0;
 
     /// @brief Adds a string value `x` with a given `length` and `encoding`
     /// to the accumulated data.

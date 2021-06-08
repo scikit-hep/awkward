@@ -233,8 +233,8 @@ def to_numpy(array, allow_missing=True):
         )
 
     elif (
-        str(ak.operations.describe.type(array)) == "datetime64"
-        or str(ak.operations.describe.type(array)) == "timedelta64"
+        str(ak.operations.describe.type(array)) == "datetime"
+        or str(ak.operations.describe.type(array)) == "timedelta"
     ):
         return numpy.array([array[i] for i in range(len(array))])
 
@@ -892,8 +892,6 @@ def from_iter(
                 "cannot produce an array from a dict"
                 + ak._util.exception_suffix(__file__)
             )
-    # elif isinstance(array, np.datetime64) or isinstance(array, np.timedelta64):
-    #     return array
 
     out = ak.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:

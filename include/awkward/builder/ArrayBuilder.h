@@ -120,13 +120,13 @@ namespace awkward {
     void
       complex(std::complex<double> x);
 
-    /// @brief Adds a datetime64 value `x` to the accumulated data.
+    /// @brief Adds a datetime value `x` to the accumulated data.
     void
-      datetime64(int64_t x, const std::string& unit);
+      datetime(int64_t x, const std::string& unit);
 
-    /// @brief Adds a timedelta64 value `x` to the accumulated data.
+    /// @brief Adds a timedelta value `x` to the accumulated data.
     void
-      timedelta64(int64_t x, const std::string& unit);
+      timedelta(int64_t x, const std::string& unit);
 
     /// @brief Adds an unencoded, null-terminated bytestring value `x` to the
     /// accumulated data.

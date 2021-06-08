@@ -137,16 +137,16 @@ namespace awkward {
   }
 
   const BuilderPtr
-  StringBuilder::datetime64(int64_t x, const std::string& unit) {
+  StringBuilder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->datetime64(x, unit);
+    out.get()->datetime(x, unit);
     return out;
   }
 
   const BuilderPtr
-  StringBuilder::timedelta64(int64_t x, const std::string& unit) {
+  StringBuilder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->timedelta64(x, unit);
+    out.get()->timedelta(x, unit);
     return out;
   }
 

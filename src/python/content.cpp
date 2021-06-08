@@ -12,7 +12,7 @@
 
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
-#include "awkward/datetime64util.h"
+#include "awkward/datetime_util.h"
 
 #include "awkward/python/virtual.h"
 
@@ -830,16 +830,16 @@ builder_fromiter_iscomplex(const py::handle& obj) {
 }
 
 void
-builder_datetime64(ak::ArrayBuilder& self, const py::handle& obj) {
+builder_datetime(ak::ArrayBuilder& self, const py::handle& obj) {
   if (py::isinstance<py::str>(obj)) {
     auto date_time = py::module::import("numpy").attr("datetime64")(obj);
     auto ptr = date_time.attr("astype")(py::module::import("numpy").attr("int64"));
     auto units = py::str(py::module::import("numpy").attr("dtype")(date_time)).cast<std::string>();
-    self.datetime64(ptr.cast<int64_t>(), units);
+    self.datetime(ptr.cast<int64_t>(), units);
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("datetime64"))) {
     auto ptr = obj.attr("astype")(py::module::import("numpy").attr("int64"));
-    self.datetime64(ptr.cast<int64_t>(), py::str(obj.attr("dtype")));
+    self.datetime(ptr.cast<int64_t>(), py::str(obj.attr("dtype")));
   }
   else {
     throw std::invalid_argument(
@@ -851,16 +851,16 @@ builder_datetime64(ak::ArrayBuilder& self, const py::handle& obj) {
 }
 
 void
-builder_timedelta64(ak::ArrayBuilder& self, const py::handle& obj) {
+builder_timedelta(ak::ArrayBuilder& self, const py::handle& obj) {
   if (py::isinstance<py::str>(obj)) {
     auto date_time = py::module::import("numpy").attr("timedelta64")(obj);
     auto ptr = date_time.attr("astype")(py::module::import("numpy").attr("int64"));
     auto units = py::str(py::module::import("numpy").attr("dtype")(date_time)).cast<std::string>();
-    self.timedelta64(ptr.cast<int64_t>(), units);
+    self.timedelta(ptr.cast<int64_t>(), units);
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
     auto ptr = obj.attr("astype")(py::module::import("numpy").attr("int64"));
-    self.timedelta64(ptr.cast<int64_t>(), py::str(obj.attr("dtype")));
+    self.timedelta(ptr.cast<int64_t>(), py::str(obj.attr("dtype")));
   }
   else {
     throw std::invalid_argument(
@@ -930,10 +930,10 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     builder_fromiter(self, obj.attr("tolist")());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("datetime64"))) {
-    builder_datetime64(self, obj);
+    builder_datetime(self, obj);
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
-    builder_timedelta64(self, obj);
+    builder_timedelta(self, obj);
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
     self.boolean(obj.cast<bool>());
@@ -980,8 +980,8 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       .def("integer", &ak::ArrayBuilder::integer)
       .def("real", &ak::ArrayBuilder::real)
       .def("complex", &ak::ArrayBuilder::complex)
-      .def("datetime64", &builder_datetime64)
-      .def("timedelta64", &builder_timedelta64)
+      .def("datetime", &builder_datetime)
+      .def("timedelta", &builder_timedelta)
       .def("bytestring",
            [](ak::ArrayBuilder& self, const py::bytes& x) -> void {
         self.bytestring(x.cast<std::string>());
@@ -2225,10 +2225,10 @@ NumpyArray_from_jax(const std::string& name,
 }
 
 const ak::NumpyArray
-NumpyArray_from_datetime64(const std::string& name,
-                           const py::object& array,
-                           const py::object& identities,
-                           const py::object& parameters) {
+NumpyArray_from_datetime(const std::string& name,
+                         const py::object& array,
+                         const py::object& identities,
+                         const py::object& parameters) {
   const std::vector<ssize_t> shape = array.attr("shape").cast<std::vector<ssize_t>>();
   const std::vector<ssize_t> strides = array.attr("strides").cast<std::vector<ssize_t>>();
 
@@ -2278,11 +2278,10 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           return NumpyArray_from_jax(name, anyarray, identities, parameters);
         }
         else if (py::hasattr(anyarray, "dtype")  &&  !py::cast<std::string>(py::str(py::dtype(anyarray.attr("dtype")))).empty()) {
-          //np.issubdtype(comp.dtype, np.datetime64)
           const auto& data_type = ak::util::dtype_to_format(ak::util::name_to_dtype(
             py::cast<std::string>(py::str(py::dtype(anyarray.attr("dtype"))))));
           if (data_type == "M"  ||  data_type == "m") {
-            return NumpyArray_from_datetime64(name, anyarray, identities, parameters);
+            return NumpyArray_from_datetime(name, anyarray, identities, parameters);
           }
         }
 

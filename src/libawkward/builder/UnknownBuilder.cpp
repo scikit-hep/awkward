@@ -124,22 +124,22 @@ namespace awkward {
   }
 
   const BuilderPtr
-  UnknownBuilder::datetime64(int64_t x, const std::string& unit) {
+  UnknownBuilder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = DatetimeBuilder::fromempty(options_, unit);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
-    out.get()->datetime64(x, unit);
+    out.get()->datetime(x, unit);
     return out;
   }
 
   const BuilderPtr
-  UnknownBuilder::timedelta64(int64_t x, const std::string& unit) {
+  UnknownBuilder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = DatetimeBuilder::fromempty(options_, unit);
     if (nullcount_ != 0) {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
-    out.get()->timedelta64(x, unit);
+    out.get()->timedelta(x, unit);
     return out;
   }
 

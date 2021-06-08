@@ -102,16 +102,16 @@ namespace awkward {
   }
 
   const BuilderPtr
-  Int64Builder::datetime64(int64_t x, const std::string& unit) {
+  Int64Builder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->datetime64(x, unit);
+    out.get()->datetime(x, unit);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::timedelta64(int64_t x, const std::string& unit) {
+  Int64Builder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->timedelta64(x, unit);
+    out.get()->timedelta(x, unit);
     return out;
   }
 
