@@ -115,7 +115,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             while isinstance(node, ak.layout.RegularArray):
                 shape.append(node.size)
                 node = node.content
-            if node.format.startswith("M") or node.format.startswith("m"):
+            if node.format.upper().startswith("M"):
                 nparray = ak.nplike.of(node).asarray(node.view_int64).view(node.format)
                 nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
                 return ak.layout.NumpyArray(
@@ -143,7 +143,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 elif array is not None:
                     signature.append(array)
                 elif isinstance(x, ak.layout.NumpyArray):
-                    if x.format.startswith("M") or x.format.startswith("m"):
+                    if x.format.upper().startswith("M"):
                         signature.append(
                             ak.nplike.of(x)
                             .asarray(x.view_int64)
@@ -171,7 +171,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         if all(
             (
                 isinstance(x, ak.layout.NumpyArray)
-                and not (x.format.startswith("M") or x.format.startswith("m"))
+                and not (x.format.upper().startswith("M"))
             )
             or not isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
             for x in inputs
@@ -182,8 +182,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             )
             return lambda: (ak.operations.convert.from_numpy(result, highlevel=False),)
         elif all(
-            isinstance(x, ak.layout.NumpyArray)
-            and (x.format.startswith("M") or x.format.startswith("m"))
+            isinstance(x, ak.layout.NumpyArray) and (x.format.upper().startswith("M"))
             for x in inputs
         ):
             nplike = ak.nplike.of(*inputs)

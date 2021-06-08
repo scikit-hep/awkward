@@ -447,7 +447,7 @@ def test_more():
 
 
 @pytest.mark.skipif(
-    ak._util.py27 and np.__version__ > "1.13.1",
+    ak._util.py27 or np.__version__ <= "1.13.1",
     reason="Python 2.7 module 'numpy.core' has no attribute '_exceptions'",
 )
 def test_ufunc_sum():

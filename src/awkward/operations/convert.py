@@ -232,11 +232,8 @@ def to_numpy(array, allow_missing=True):
             ]
         )
 
-    elif (
-        str(ak.operations.describe.type(array)) == "datetime"
-        or str(ak.operations.describe.type(array)) == "timedelta"
-    ):
-        return numpy.array([array[i] for i in range(len(array))])
+    elif array.format.upper().startswith("M"):
+        return array
 
     elif isinstance(array, ak.partition.PartitionedArray):
         tocat = [to_numpy(x, allow_missing=allow_missing) for x in array.partitions]
@@ -968,7 +965,7 @@ def to_list(array):
         return [to_list(x) for x in array.snapshot()]
 
     elif isinstance(array, ak.layout.NumpyArray):
-        if array.format.startswith("M") or array.format.startswith("m"):
+        if array.format.upper().startswith("M"):
             return (
                 ak.nplike.of(array)
                 .asarray(array.view_int64)

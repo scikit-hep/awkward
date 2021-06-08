@@ -493,7 +493,7 @@ def completely_flatten(array):
         return tuple(out)
 
     elif isinstance(array, ak.layout.NumpyArray):
-        if array.format.startswith("M") or array.format.startswith("m"):
+        if array.format.upper().startswith("M"):
             return (ak.nplike.of(array).asarray(array.view_int64).view(array.format),)
         else:
             return (ak.nplike.of(array).asarray(array),)
