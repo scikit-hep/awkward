@@ -421,26 +421,6 @@ namespace awkward {
       }
     }
 
-    // bool
-    // is_datetime64(dtype dt) {
-    //   switch (dt) {
-    //   case dtype::datetime64:
-    //     return true;
-    //   default:
-    //     return false;
-    //   }
-    // }
-    //
-    // bool
-    // is_timedelta64(dtype dt) {
-    //   switch (dt) {
-    //   case dtype::timedelta64:
-    //     return true;
-    //   default:
-    //     return false;
-    //   }
-    // }
-
     void
     handle_error(const struct Error& err,
                  const std::string& classname,

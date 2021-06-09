@@ -3271,12 +3271,12 @@ namespace awkward {
           std::string("FIXME: reducers on complex256") + FILENAME(__LINE__));
         break;
       case util::dtype::datetime64:
-        ptr = reducer.apply_datetime64(reinterpret_cast<int64_t*>(data()),
+        ptr = reducer.apply_datetime(reinterpret_cast<int64_t*>(data()),
                                        parents,
                                        outlength);
         break;
       case util::dtype::timedelta64:
-        ptr = reducer.apply_timedelta64(reinterpret_cast<int64_t*>(data()),
+        ptr = reducer.apply_timedelta(reinterpret_cast<int64_t*>(data()),
                                         parents,
                                         outlength);
         break;
