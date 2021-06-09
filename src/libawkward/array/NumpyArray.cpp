@@ -3272,13 +3272,13 @@ namespace awkward {
         break;
       case util::dtype::datetime64:
         ptr = reducer.apply_datetime(reinterpret_cast<int64_t*>(data()),
-                                       parents,
-                                       outlength);
+                                     parents,
+                                     outlength);
         break;
       case util::dtype::timedelta64:
         ptr = reducer.apply_timedelta(reinterpret_cast<int64_t*>(data()),
-                                        parents,
-                                        outlength);
+                                      parents,
+                                      outlength);
         break;
       default:
         throw std::invalid_argument(

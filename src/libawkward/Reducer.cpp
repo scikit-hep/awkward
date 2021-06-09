@@ -164,8 +164,8 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerCount::apply_datetime(const int64_t* data,
-                                 const Index64& parents,
-                                 int64_t outlength) const {
+                               const Index64& parents,
+                               int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
                       parents,
                       outlength);
@@ -173,8 +173,8 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerCount::apply_timedelta(const int64_t* data,
-                      const Index64& parents,
-                      int64_t outlength) const {
+                                const Index64& parents,
+                                int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
                       parents,
                       outlength);
@@ -433,15 +433,15 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_datetime(const int64_t* data,
-                                        const Index64& parents,
-                                        int64_t outlength) const {
+                                      const Index64& parents,
+                                      int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_timedelta(const int64_t* data,
-                                         const Index64& parents,
-                                         int64_t outlength) const {
+                                       const Index64& parents,
+                                       int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
@@ -802,8 +802,8 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerSum::apply_datetime(const int64_t* data,
-                               const Index64& parents,
-                               int64_t outlength) const {
+                             const Index64& parents,
+                             int64_t outlength) const {
     throw std::invalid_argument(
       std::string("ReducerSum: cannot apply `sum` to datetime64 ")
       + FILENAME(__LINE__));
@@ -811,8 +811,8 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerSum::apply_timedelta(const int64_t* data,
-                                const Index64& parents,
-                                int64_t outlength) const {
+                              const Index64& parents,
+                              int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
@@ -1173,8 +1173,8 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerProd::apply_datetime(const int64_t* data,
-                                const Index64& parents,
-                                int64_t outlength) const {
+                              const Index64& parents,
+                              int64_t outlength) const {
    throw std::invalid_argument(
      std::string("ReducerProd: cannot apply `prod` to datetime64 ")
      + FILENAME(__LINE__));
@@ -1182,8 +1182,8 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerProd::apply_timedelta(const int64_t* data,
-                                 const Index64& parents,
-                                 int64_t outlength) const {
+                               const Index64& parents,
+                               int64_t outlength) const {
     throw std::invalid_argument(
       std::string("ReducerProd: cannot apply `prod` to timedelta64 ")
       + FILENAME(__LINE__));
@@ -1442,15 +1442,15 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerAny::apply_datetime(const int64_t* data,
-                               const Index64& parents,
-                               int64_t outlength) const {
+                             const Index64& parents,
+                             int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_timedelta(const int64_t* data,
-                                const Index64& parents,
-                                int64_t outlength) const {
+                              const Index64& parents,
+                              int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
@@ -1707,15 +1707,15 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerAll::apply_datetime(const int64_t* data,
-                               const Index64& parents,
-                               int64_t outlength) const {
+                             const Index64& parents,
+                             int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_timedelta(const int64_t* data,
-                                const Index64& parents,
-                                int64_t outlength) const {
+                              const Index64& parents,
+                              int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
@@ -2041,15 +2041,15 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerMin::apply_datetime(const int64_t* data,
-                               const Index64& parents,
-                               int64_t outlength) const {
+                             const Index64& parents,
+                             int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_timedelta(const int64_t* data,
-                                const Index64& parents,
-                                int64_t outlength) const {
+                              const Index64& parents,
+                              int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
@@ -2375,15 +2375,15 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerMax::apply_datetime(const int64_t* data,
-                               const Index64& parents,
-                               int64_t outlength) const {
+                             const Index64& parents,
+                             int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_timedelta(const int64_t* data,
-                                const Index64& parents,
-                                int64_t outlength) const {
+                              const Index64& parents,
+                              int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
@@ -2645,15 +2645,15 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_datetime(const int64_t* data,
-                                  const Index64& parents,
-                                  int64_t outlength) const {
+                                const Index64& parents,
+                                int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_timedelta(const int64_t* data,
-                                   const Index64& parents,
-                                   int64_t outlength) const {
+                                 const Index64& parents,
+                                 int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
@@ -2915,15 +2915,15 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_datetime(const int64_t* data,
-                                  const Index64& parents,
-                                  int64_t outlength) const {
+                                const Index64& parents,
+                                int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_timedelta(const int64_t* data,
-                                   const Index64& parents,
-                                   int64_t outlength) const {
+                                 const Index64& parents,
+                                 int64_t outlength) const {
     return apply_int64(data, parents, outlength);
   }
 }

@@ -214,8 +214,8 @@ namespace awkward {
     /// of groups).
     virtual const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const = 0;
+                     const Index64& parents,
+                     int64_t outlength) const = 0;
 
     /// @brief Apply the reducer algorithm to an array of timedelta64
     ///  values.
@@ -227,8 +227,8 @@ namespace awkward {
     /// of groups).
     virtual const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const = 0;
+                      const Index64& parents,
+                      int64_t outlength) const = 0;
 
   };
 
@@ -324,13 +324,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerCountNonzero
@@ -425,13 +425,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerSum
@@ -527,13 +527,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerProd
@@ -629,13 +629,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerAny
@@ -731,13 +731,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerAll
@@ -833,13 +833,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerMin
@@ -940,13 +940,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   private:
     double initial_f64_;
     uint64_t initial_u64_;
@@ -1052,13 +1052,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   private:
     double initial_f64_;
     uint64_t initial_u64_;
@@ -1169,13 +1169,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerArgmax
@@ -1281,13 +1281,13 @@ namespace awkward {
 
     const std::shared_ptr<void>
       apply_datetime(const int64_t* data,
-                       const Index64& parents,
-                       int64_t outlength) const override;
+                     const Index64& parents,
+                     int64_t outlength) const override;
 
     const std::shared_ptr<void>
       apply_timedelta(const int64_t* data,
-                        const Index64& parents,
-                        int64_t outlength) const override;
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
 }
