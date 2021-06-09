@@ -686,6 +686,82 @@ namespace awkward {
     }
   }
 
+  template <typename T>
+  void tostring_as_datetime(kernel::lib ptr_lib,
+                   std::stringstream& out,
+                   T* ptr,
+                   ssize_t stride,
+                   int64_t length,
+                   util::dtype dtype,
+                   const std::string& format) {
+    const std::string units = util::format_to_units(format);
+    std::string this_format;
+    int64_t this_unit_step;
+    std::tie(this_format, this_unit_step) = util::datetime_data(format);
+    uint64_t this_index = (uint64_t)util::value(util::units_map, this_format);
+    int64_t scale = util::scale_from_units(format, (uint64_t)util::datetime_units::s);
+
+    if (length <= 10) {
+      for (int64_t i = 0;  i < length;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i));
+        if (i != 0) {
+          out << " ";
+        }
+        if (dtype == util::dtype::datetime64) {
+          time_t time = (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale;
+          out << asctime(gmtime(&time));
+        }
+        else if (dtype == util::dtype::timedelta64) {
+          out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << " " << util::format_to_units(format);
+        }
+        else {
+          out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+        }
+      }
+    }
+    else {
+      for (int64_t i = 0;  i < 5;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i));
+        if (i != 0) {
+          out << " ";
+        }
+        if (dtype == util::dtype::datetime64) {
+          time_t time = (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale;
+          out << asctime(gmtime(&time));
+        }
+        else if (dtype == util::dtype::timedelta64) {
+          out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << " " << util::format_to_units(format);
+        }
+        else {
+          out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+        }
+      }
+      out << " ... ";
+      for (int64_t i = length - 5;  i < length;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i));
+        if (i != length - 5) {
+          out << " ";
+        }
+        if (dtype == util::dtype::datetime64) {
+          time_t time = (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale;
+          out << asctime(gmtime(&time));
+        }
+        else if (dtype == util::dtype::timedelta64) {
+          out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << " " << util::format_to_units(format);
+        }
+        else {
+          out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+        }
+      }
+    }
+  }
+
   const TypePtr
   NumpyArray::type(const util::TypeStrs& typestrs) const {
     return form(true).get()->type(typestrs);
@@ -847,6 +923,24 @@ namespace awkward {
                                   strides_[0] >> 1,
                                   length(),
                                   dtype_);
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::datetime64) {
+      tostring_as_datetime<int64_t>(ptr_lib(),
+                                    out,
+                                    reinterpret_cast<int64_t*>(data()),
+                                    strides_[0],
+                                    length(),
+                                    dtype_,
+                                    format_);
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::timedelta64) {
+      tostring_as_datetime<int64_t>(ptr_lib(),
+                                    out,
+                                    reinterpret_cast<int64_t*>(data()),
+                                    strides_[0],
+                                    length(),
+                                    dtype_,
+                                    format_);
     }
     else {
       out << "0x ";
