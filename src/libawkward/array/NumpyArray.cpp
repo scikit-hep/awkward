@@ -695,10 +695,6 @@ namespace awkward {
                    util::dtype dtype,
                    const std::string& format) {
     const std::string units = util::format_to_units(format);
-    std::string this_format;
-    int64_t this_unit_step;
-    std::tie(this_format, this_unit_step) = util::datetime_data(format);
-    uint64_t this_index = (uint64_t)util::value(util::units_map, this_format);
     int64_t scale = util::scale_from_units(format, (uint64_t)util::datetime_units::s);
 
     if (length <= 10) {
@@ -714,7 +710,7 @@ namespace awkward {
         }
         else if (dtype == util::dtype::timedelta64) {
           out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
-          out << " " << util::format_to_units(format);
+          out << units;
         }
         else {
           out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -734,7 +730,7 @@ namespace awkward {
         }
         else if (dtype == util::dtype::timedelta64) {
           out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
-          out << " " << util::format_to_units(format);
+          out << units;
         }
         else {
           out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -753,7 +749,7 @@ namespace awkward {
         }
         else if (dtype == util::dtype::timedelta64) {
           out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
-          out << " " << util::format_to_units(format);
+          out << units;
         }
         else {
           out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
