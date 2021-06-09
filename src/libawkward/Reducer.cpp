@@ -805,7 +805,7 @@ namespace awkward {
                              const Index64& parents,
                              int64_t outlength) const {
     throw std::invalid_argument(
-      std::string("ReducerSum: cannot apply `sum` to datetime64 ")
+      std::string("ReducerSum: cannot apply `sum` to datetime ")
       + FILENAME(__LINE__));
   }
 
@@ -1176,7 +1176,7 @@ namespace awkward {
                               const Index64& parents,
                               int64_t outlength) const {
    throw std::invalid_argument(
-     std::string("ReducerProd: cannot apply `prod` to datetime64 ")
+     std::string("ReducerProd: cannot apply `prod` to datetime ")
      + FILENAME(__LINE__));
  }
 
@@ -1185,7 +1185,7 @@ namespace awkward {
                                const Index64& parents,
                                int64_t outlength) const {
     throw std::invalid_argument(
-      std::string("ReducerProd: cannot apply `prod` to timedelta64 ")
+      std::string("ReducerProd: cannot apply `prod` to timedelta ")
       + FILENAME(__LINE__));
   }
 

@@ -204,7 +204,7 @@ namespace awkward {
                        const Index64& parents,
                        int64_t outlength) const = 0;
 
-    /// @brief Apply the reducer algorithm to an array of datetime64
+    /// @brief Apply the reducer algorithm to an array of datetime
     ///  values.
     ///
     /// @param data The array to reduce.
@@ -217,7 +217,7 @@ namespace awkward {
                      const Index64& parents,
                      int64_t outlength) const = 0;
 
-    /// @brief Apply the reducer algorithm to an array of timedelta64
+    /// @brief Apply the reducer algorithm to an array of timedelta
     ///  values.
     ///
     /// @param data The array to reduce.

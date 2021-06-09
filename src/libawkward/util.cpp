@@ -284,13 +284,19 @@ namespace awkward {
 
     const std::string
     format_to_units(const std::string& format) {
-      // FIXME: check it it already has brackets?
-      return format.substr(format.find('['), format.find(']'));
+      auto pos_from = format.find('[');
+      if (pos_from != std::string::npos) {
+        auto pos_to = format.find(']');
+        if (pos_to != std::string::npos) {
+          return format.substr(format.find('['), format.find(']'));
+        }
+      }
+      return std::string("[no units]");
     }
 
     const std::string
     units_to_format(dtype dt, const std::string& units, int64_t step) {
-      std::string result; // FIXME
+      std::string result;
       switch (dt) {
       case dtype::datetime64:
         result.append("M");
