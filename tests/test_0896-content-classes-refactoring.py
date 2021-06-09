@@ -7,19 +7,22 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-@pytest.mark.skip(reason="need to implement EmptyArray")
 def test_EmptyArray():
     a = ak._v2.array.emptyarray.EmptyArray()
     assert len(a) == 0
     with pytest.raises(IndexError):
         a[0]
     assert isinstance(a[10:20], ak._v2.array.emptyarray.EmptyArray)
+    assert repr(a) == "EmptyArray()"
     assert len(a[10:20]) == 0
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
+    with pytest.raises(AssertionError):
+        a["bad", 4, 4]
 
 
-@pytest.mark.skip(reason="need to implement NumpyArray")
 def test_NumpyArray():
     a = ak._v2.array.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
@@ -37,6 +40,8 @@ def test_NumpyArray():
     assert len(a[2:]) == 2
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
 
     b = ak._v2.array.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
@@ -51,9 +56,10 @@ def test_NumpyArray():
     assert b[1][2][1:][2] == 28
     with pytest.raises(IndexError):
         b["bad"]
+    with pytest.raises(IndexError):
+        b["bad", "good", "ok"]
 
 
-@pytest.mark.skip(reason="need to implement RegularArray and NumpyArray")
 def test_RegularArray_NumpyArray():
     # 6.6 is inaccessible
     a = ak._v2.array.regulararray.RegularArray(
@@ -78,6 +84,8 @@ def test_RegularArray_NumpyArray():
         a[1][3]
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
 
     b = ak._v2.array.regulararray.RegularArray(
         ak._v2.array.emptyarray.EmptyArray(), 0, zeros_length=10
@@ -90,15 +98,16 @@ def test_RegularArray_NumpyArray():
     assert len(b[7:100]) == 3
     with pytest.raises(IndexError):
         b["bad"]
+    with pytest.raises(IndexError):
+        b["bad", "good", "ok"]
 
 
-@pytest.mark.skip(reason="need to implement ListArray and NumpyArray")
 def test_ListArray_NumpyArray():
     # 200 is inaccessible in stops
     # 6.6, 7.7, and 8.8 are inaccessible in content
     a = ak._v2.array.listarray.ListArray(
-        ak._v2.index.Index(np.array([4, 100, 1])),
-        ak._v2.index.Index(np.array([7, 100, 3, 200])),
+        ak._v2.index.Index(np.array([4, 100, 1], dtype=np.int64)),
+        ak._v2.index.Index(np.array([7, 100, 3, 200], dtype=np.int64)),
         ak._v2.array.numpyarray.NumpyArray(
             np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
         ),
@@ -124,9 +133,10 @@ def test_ListArray_NumpyArray():
     assert len(a[-2:100]) == 2
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
 
 
-@pytest.mark.skip(reason="need to implement ListOffsetArray and NumpyArray")
 def test_ListOffsetArray_NumpyArray():
     # 6.6 and 7.7 are inaccessible
     a = ak._v2.array.listoffsetarray.ListOffsetArray(
@@ -154,9 +164,10 @@ def test_ListOffsetArray_NumpyArray():
     assert len(a[-2:100]) == 2
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
 
 
-@pytest.mark.skip(reason="need to implement RecordArray, Record, and NumpyArray")
 def test_RecordArray_NumpyArray():
     # 5.5 is inaccessible
     a = ak._v2.array.recordarray.RecordArray(
@@ -186,6 +197,9 @@ def test_RecordArray_NumpyArray():
     assert a["y"][-3] == 2.2
     with pytest.raises(IndexError):
         a["z"]
+    with pytest.raises(IndexError):
+        a["x", "z"]
+    assert len(a["x", "y"]) == 2
 
     # 5.5 is inaccessible
     b = ak._v2.array.recordarray.RecordArray(
@@ -235,7 +249,6 @@ def test_RecordArray_NumpyArray():
         d["0"]
 
 
-@pytest.mark.skip(reason="need to implement IndexedArray and NumpyArray")
 def test_IndexedArray_NumpyArray():
     # 4.4 is inaccessible; 3.3 and 5.5 appear twice
     a = ak._v2.array.indexedarray.IndexedArray(
@@ -270,9 +283,10 @@ def test_IndexedArray_NumpyArray():
     assert a[-4:][1] == 5.5
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
 
 
-@pytest.mark.skip(reason="need to implement IndexedOptionArray and NumpyArray")
 def test_IndexedOptionArray_NumpyArray():
     # 1.1 and 4.4 are inaccessible; 3.3 appears twice
     a = ak._v2.array.indexedoptionarray.IndexedOptionArray(
@@ -309,13 +323,14 @@ def test_IndexedOptionArray_NumpyArray():
     assert a[-4:][2] == 6.6
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
 
 
-@pytest.mark.skip(reason="need to implement ByteMaskedArray and NumpyArray")
 def test_ByteMaskedArray_NumpyArray():
     # 2.2, 4.4, and 6.6 are inaccessible
     a = ak._v2.array.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([True, False, True, False, True])),
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
         ak._v2.array.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
@@ -345,10 +360,12 @@ def test_ByteMaskedArray_NumpyArray():
     assert a[-3:][2] == 5.5
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
 
     # 2.2, 4.4, and 6.6 are inaccessible
     b = ak._v2.array.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([False, True, False, True, False])),
+        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
         ak._v2.array.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
@@ -378,6 +395,8 @@ def test_ByteMaskedArray_NumpyArray():
     assert b[-3:][2] == 5.5
     with pytest.raises(IndexError):
         b["bad"]
+    with pytest.raises(IndexError):
+        b["bad", "good", "ok"]
 
 
 @pytest.mark.skip(reason="need to implement BitMaskedArray and NumpyArray")
@@ -388,20 +407,21 @@ def test_BitMaskedArray_NumpyArray():
             np.packbits(
                 np.array(
                     [
-                        True,
-                        True,
-                        True,
-                        True,
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                        True,
-                    ]
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    dtype=np.uint8,
                 )
             )
         ),
@@ -463,20 +483,21 @@ def test_BitMaskedArray_NumpyArray():
             np.packbits(
                 np.array(
                     [
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        True,
-                        True,
-                        True,
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                    ]
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    dtype=np.uint8,
                 )
             )
         ),
@@ -538,23 +559,24 @@ def test_BitMaskedArray_NumpyArray():
             np.packbits(
                 np.array(
                     [
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        True,
-                        True,
-                        True,
-                        False,
-                        False,
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                        True,
-                    ]
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    dtype=np.uint8,
                 )
             )
         ),
@@ -616,23 +638,24 @@ def test_BitMaskedArray_NumpyArray():
             np.packbits(
                 np.array(
                     [
-                        True,
-                        True,
-                        True,
-                        True,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                    ]
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    dtype=np.uint8,
                 )
             )
         ),
@@ -689,7 +712,6 @@ def test_BitMaskedArray_NumpyArray():
         d["bad"]
 
 
-@pytest.mark.skip(reason="need to implement UnmaskedArray and NumpyArray")
 def test_UnmaskedArray_NumpyArray():
     a = ak._v2.array.unmaskedarray.UnmaskedArray(
         ak._v2.array.numpyarray.NumpyArray(
@@ -711,7 +733,6 @@ def test_UnmaskedArray_NumpyArray():
         a["bad"]
 
 
-@pytest.mark.skip(reason="need to implement UnionArray and NumpyArray")
 def test_UnionArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
@@ -753,9 +774,10 @@ def test_UnionArray_NumpyArray():
     assert a[-4:][2] == 3.0
     with pytest.raises(IndexError):
         a["bad"]
+    with pytest.raises(IndexError):
+        a["bad", "good", "ok"]
 
 
-@pytest.mark.skip(reason="need to implement RegularArray, RecordArray, and NumpyArray")
 def test_RegularArray_RecordArray_NumpyArray():
     # 6.6 is inaccessible
     a = ak._v2.array.regulararray.RegularArray(
@@ -803,7 +825,6 @@ def test_RegularArray_RecordArray_NumpyArray():
         b["nest"]["bad"]
 
 
-@pytest.mark.skip(reason="need to implement ListArray, RecordArray, and NumpyArray")
 def test_ListArray_RecordArray_NumpyArray():
     # 200 is inaccessible in stops
     # 6.6, 7.7, and 8.8 are inaccessible in content
@@ -842,9 +863,6 @@ def test_ListArray_RecordArray_NumpyArray():
         a["nest"]["bad"]
 
 
-@pytest.mark.skip(
-    reason="need to implement ListOffsetArray, RecordArray, and NumpyArray"
-)
 def test_ListOffsetArray_RecordArray_NumpyArray():
     # 6.6 and 7.7 are inaccessible
     a = ak._v2.array.listoffsetarray.ListOffsetArray(
@@ -877,7 +895,6 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
         a["nest"]["bad"]
 
 
-@pytest.mark.skip(reason="need to implement IndexedArray, RecordArray, and NumpyArray")
 def test_IndexedArray_RecordArray_NumpyArray():
     # 4.4 is inaccessible; 3.3 and 5.5 appear twice
     a = ak._v2.array.indexedarray.IndexedArray(
@@ -921,9 +938,6 @@ def test_IndexedArray_RecordArray_NumpyArray():
         a["nest"]["bad"]
 
 
-@pytest.mark.skip(
-    reason="need to implement IndexedOptionArray, RecordArray, and NumpyArray"
-)
 def test_IndexedOptionArray_RecordArray_NumpyArray():
     # 1.1 and 4.4 are inaccessible; 3.3 appears twice
     a = ak._v2.array.indexedoptionarray.IndexedOptionArray(
@@ -969,13 +983,10 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
         a["nest"]["bad"]
 
 
-@pytest.mark.skip(
-    reason="need to implement ByteMaskedArray, RecordArray, and NumpyArray"
-)
 def test_ByteMaskedArray_RecordArray_NumpyArray():
     # 2.2, 4.4, and 6.6 are inaccessible
     a = ak._v2.array.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([True, False, True, False, True])),
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
         ak._v2.array.recordarray.RecordArray(
             [
                 ak._v2.array.numpyarray.NumpyArray(
@@ -1015,7 +1026,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
 
     # 2.2, 4.4, and 6.6 are inaccessible
     b = ak._v2.array.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([False, True, False, True, False])),
+        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
         ak._v2.array.recordarray.RecordArray(
             [
                 ak._v2.array.numpyarray.NumpyArray(
@@ -1159,20 +1170,21 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
             np.packbits(
                 np.array(
                     [
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        True,
-                        True,
-                        True,
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                    ]
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    dtype=np.int8,
                 )
             )
         ),
@@ -1254,23 +1266,24 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
             np.packbits(
                 np.array(
                     [
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        True,
-                        True,
-                        True,
-                        False,
-                        False,
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                        True,
-                    ]
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    dtype=np.int8,
                 )
             )
         ),
@@ -1352,23 +1365,24 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
             np.packbits(
                 np.array(
                     [
-                        True,
-                        True,
-                        True,
-                        True,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                    ]
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    dtype=np.int8,
                 )
             )
         ),
@@ -1445,7 +1459,6 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         d["nest"]["bad"]
 
 
-@pytest.mark.skip(reason="need to implement UnmaskedArray, RecordArray, and NumpyArray")
 def test_UnmaskedArray_RecordArray_NumpyArray():
     a = ak._v2.array.unmaskedarray.UnmaskedArray(
         ak._v2.array.recordarray.RecordArray(
@@ -1472,7 +1485,6 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
         a["nest"]["bad"]
 
 
-@pytest.mark.skip(reason="need to implement UnionArray, RecordArray, and NumpyArray")
 def test_UnionArray_RecordArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
