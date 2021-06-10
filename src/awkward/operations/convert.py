@@ -2655,6 +2655,18 @@ def _from_arrow(
             out = ak.layout.ListOffsetArray64(offsets, content)
             # No return yet!
 
+        elif isinstance(tpe, pyarrow.lib.FixedSizeListType):
+            assert tpe.num_buffers == 1
+            mask = buffers.pop(0)
+            list_size = tpe.list_size
+            offsets = ak.layout.Index32(numpy.array([0, list_size], dtype=np.int32))
+            content = popbuffers(array.values, tpe.value_type, buffers)
+            if not tpe.value_field.nullable:
+                content = content.content
+
+            out = ak.layout.ListOffsetArray32(offsets, content)
+            # No return yet!
+
         elif isinstance(tpe, pyarrow.lib.UnionType):
             if tpe.mode == "sparse":
                 assert tpe.num_buffers == 2
