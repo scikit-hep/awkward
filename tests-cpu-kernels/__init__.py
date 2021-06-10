@@ -3,15 +3,9 @@
 from __future__ import absolute_import
 
 import ctypes
-import warnings
 
 import awkward as ak
 
-
-warnings.warn(
-    "HERE {0} {1}".format(repr(ak._cpu_kernels.libpath), ak._cpu_kernels.lib),
-    UserWarning,
-)
 
 lib = ak._cpu_kernels.lib
 
