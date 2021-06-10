@@ -105,7 +105,7 @@ namespace awkward {
 
     std::tuple<std::string, int64_t> datetime_data(const std::string& format);
 
-    int64_t scale_from_units(const std::string& format, uint64_t index);
+    double scale_from_units(const std::string& format, uint64_t index);
   }
 }
 

@@ -126,12 +126,12 @@ def test_highlevel_datetime64_ArrayBuilder():
 
 def test_timedelta64_ArrayBuilder():
     builder = ak.layout.ArrayBuilder()
-    builder.timedelta(np.timedelta64(5, "Y"))
+    builder.timedelta(np.timedelta64(5, "W"))
     builder.timedelta(np.timedelta64(5, "D"))
     builder.timedelta(np.timedelta64(5, "s"))
 
     assert ak.to_list(builder.snapshot()) == [
-        datetime.timedelta(1825),
+        datetime.timedelta(weeks=5),
         datetime.timedelta(5),
         datetime.timedelta(0, 5),
     ]
@@ -143,28 +143,28 @@ def test_timedelta64_ArrayBuilder():
 )
 def test_timedelta64_ArrayBuilder_py3():
     builder = ak.layout.ArrayBuilder()
-    builder.timedelta(np.timedelta64(5, "Y"))
+    builder.timedelta(np.timedelta64(5, "W"))
     builder.timedelta(np.timedelta64(5, "D"))
     builder.timedelta(np.timedelta64(5, "s"))
 
     assert ak.to_list(builder.snapshot()) == [
-        np.timedelta64(157680000, "s"),
-        np.timedelta64(432000, "s"),
+        np.timedelta64(5 * 7 * 24 * 60 * 60, "s"),
+        np.timedelta64(5 * 24 * 60 * 60, "s"),
         np.timedelta64(5, "s"),
     ]
 
 
 def test_highlevel_timedelta64_ArrayBuilder():
     builder = ak.ArrayBuilder()
-    builder.timedelta(np.timedelta64(5, "Y"))
+    builder.timedelta(np.timedelta64(5, "W"))
     builder.timedelta(np.timedelta64(5, "D"))
     builder.timedelta(np.timedelta64(5, "s"))
     builder.integer(1)
     builder.datetime("2020-05-01T00:00:00.000000")
 
     assert ak.to_list(builder.snapshot()) == [
-        np.timedelta64(157680000, "s"),
-        np.timedelta64(432000, "s"),
+        np.timedelta64(5 * 7 * 24 * 60 * 60, "s"),
+        np.timedelta64(5 * 24 * 60 * 60, "s"),
         np.timedelta64(5, "s"),
         1,
         np.datetime64("2020-05-01T00:00:00.000000"),
@@ -516,4 +516,31 @@ def test_from_pandas():
         np.datetime64("2019-09-02T09:30:00"),
         np.datetime64("2019-09-13T09:30:00"),
         np.datetime64("2019-09-21T20:00:00"),
+    ]
+
+
+pyarrow = pytest.importorskip("pyarrow")
+
+
+def test_from_arrow():
+    array = ak.from_arrow(
+        pyarrow.array(
+            [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
+            type=pyarrow.date64(),
+        )
+    )
+    assert array.tolist() == [
+        np.datetime64("2002-01-23T00:00:00.000"),
+        np.datetime64("2019-02-20T00:00:00.000"),
+    ]
+
+    array = ak.from_arrow(
+        pyarrow.array(
+            [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
+            type=pyarrow.date32(),
+        )
+    )
+    assert array.tolist() == [
+        np.datetime64("2002-01-23T00:00:00.000"),
+        np.datetime64("2019-02-20T00:00:00.000"),
     ]

@@ -695,7 +695,8 @@ namespace awkward {
                    util::dtype dtype,
                    const std::string& format) {
     const std::string units = util::format_to_units(format);
-    int64_t scale = util::scale_from_units(format, (uint64_t)util::datetime_units::s);
+    double scale = util::scale_from_units(format, (uint64_t)util::datetime_units::s);
+    char outbuf[30];
 
     if (length <= 10) {
       for (int64_t i = 0;  i < length;  i++) {
@@ -705,8 +706,9 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::datetime64) {
-          time_t time = (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale;
-          out << asctime(gmtime(&time));
+          time_t time = (int64_t)(kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale);
+          strftime(outbuf, 30, "%Y-%m-%dT%H:%M:%S", gmtime(&time));
+          out << outbuf;
         }
         else if (dtype == util::dtype::timedelta64) {
           out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -725,8 +727,9 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::datetime64) {
-          time_t time = (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale;
-          out << asctime(gmtime(&time));
+          time_t time = (int64_t)(kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale);
+          strftime(outbuf, 30, "%Y-%m-%dT%H:%M:%S", gmtime(&time));
+          out << outbuf;
         }
         else if (dtype == util::dtype::timedelta64) {
           out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -744,8 +747,9 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::datetime64) {
-          time_t time = (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale;
-          out << asctime(gmtime(&time));
+          time_t time = (int64_t)(kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) * scale);
+          strftime(outbuf, 30, "%Y-%m-%dT%H:%M:%S", gmtime(&time));
+          out << outbuf;
         }
         else if (dtype == util::dtype::timedelta64) {
           out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);

@@ -10,9 +10,9 @@ awkward_NumpyArray_fill_scaled(TO* toptr,
                                int64_t tooffset,
                                const FROM* fromptr,
                                int64_t length,
-                               int64_t scale) {
+                               double scale) {
   for (int64_t i = 0; i < length; i++) {
-    toptr[tooffset + i] = (TO)fromptr[i] * scale;
+    toptr[tooffset + i] = (TO)(fromptr[i] * scale);
   }
   return success();
 }
@@ -21,7 +21,7 @@ awkward_NumpyArray_fill_scaled_toint64_fromint64(int64_t* toptr,
                                                  int64_t tooffset,
                                                  const int64_t* fromptr,
                                                  int64_t length,
-                                                 int64_t scale) {
+                                                 double scale) {
   return awkward_NumpyArray_fill_scaled<int64_t, int64_t>(
       toptr, tooffset, fromptr, length, scale);
 }

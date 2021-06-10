@@ -798,7 +798,7 @@ namespace awkward {
       return std::make_tuple(datetime_units(next_units), next_interval);
     }
 
-    int64_t
+    double
     scale_from_units(const std::string& format, uint64_t index) {
       int64_t scale_up = util::units_map.at(index).scale_up;
       int64_t scale_down = util::units_map.at(index).scale_down;
@@ -806,11 +806,12 @@ namespace awkward {
       std::string other_format;
       int64_t other_unit_step;
       std::tie(other_format, other_unit_step) = util::datetime_data(format);
+
       uint64_t other_index = (uint64_t)util::value(util::units_map, other_format);
       int64_t next_scale_up = util::units_map.at(other_index).scale_up;
       int64_t next_scale_down = util::units_map.at(other_index).scale_down;
-      int64_t scale_other = other_unit_step * (scale_down * next_scale_up) / (scale_up * next_scale_down);
-      return scale_other;
+
+      return (double)other_unit_step * (scale_down * next_scale_up) / (scale_up * next_scale_down);
     }
 
   }

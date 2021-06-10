@@ -1095,7 +1095,7 @@ namespace awkward {
       int64_t tooffset,
       const FROM* fromptr,
       int64_t length,
-      int64_t scale);
+      double scale);
 
     template <typename FROM, typename TO>
     ERROR ListArray_fill(

@@ -2588,6 +2588,10 @@ def from_arrow(array, highlevel=True, behavior=None):
     return _from_arrow(array, True, highlevel=highlevel, behavior=behavior)
 
 
+_from_arrow_date64 = re.compile(r"^date64\[(.*)\]$")
+_from_arrow_date32 = re.compile(r"^date32\[(.*)\]$")
+
+
 def _from_arrow(
     array, pass_empty_field, struct_only=None, highlevel=True, behavior=None
 ):
@@ -2800,9 +2804,28 @@ def _from_arrow(
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             data = buffers.pop(0)
-            out = ak.layout.NumpyArray(
-                numpy.frombuffer(data, dtype=tpe.to_pandas_dtype())
-            )
+            asstr = str(tpe)
+            m = _from_arrow_date64.match(asstr)
+            if m is not None:
+                unit = m.group(1)
+                out = ak.layout.NumpyArray(
+                    numpy.frombuffer(data, dtype=np.dtype("M8[{0}]".format(unit)))
+                )
+            else:
+                m = _from_arrow_date32.match(asstr)
+                if m is not None:
+                    unit = m.group(1)
+                    if unit == "day":
+                        unit = "D"
+                    out = ak.layout.NumpyArray(
+                        numpy.frombuffer(data, dtype=np.int32)
+                        .astype(np.int64)
+                        .view(np.dtype("M8[{0}]".format(unit)))
+                    )
+                else:
+                    out = ak.layout.NumpyArray(
+                        numpy.frombuffer(data, dtype=tpe.to_pandas_dtype())
+                    )
             # No return yet!
 
         else:

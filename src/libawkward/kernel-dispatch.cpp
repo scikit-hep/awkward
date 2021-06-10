@@ -11146,7 +11146,7 @@ namespace awkward {
       int64_t tooffset,
       const int64_t* fromptr,
       int64_t length,
-      int64_t scale) {
+      double scale) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_fill_scaled_toint64_fromint64(
           reinterpret_cast<int64_t*>(toptr),
