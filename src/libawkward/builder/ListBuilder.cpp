@@ -132,6 +132,32 @@ namespace awkward {
   }
 
   const BuilderPtr
+  ListBuilder::datetime(int64_t x, const std::string& unit) {
+    if (!begun_) {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->datetime(x, unit);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->datetime(x, unit));
+      return shared_from_this();
+    }
+  }
+
+  const BuilderPtr
+  ListBuilder::timedelta(int64_t x, const std::string& unit) {
+    if (!begun_) {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->timedelta(x, unit);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->timedelta(x, unit));
+      return shared_from_this();
+    }
+  }
+
+  const BuilderPtr
   ListBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());

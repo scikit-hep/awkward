@@ -1089,6 +1089,15 @@ namespace awkward {
       int64_t length);
 
     template <typename FROM, typename TO>
+    ERROR NumpyArray_fill_scaled(
+      kernel::lib ptr_lib,
+      TO* toptr,
+      int64_t tooffset,
+      const FROM* fromptr,
+      int64_t length,
+      double scale);
+
+    template <typename FROM, typename TO>
     ERROR ListArray_fill(
       kernel::lib ptr_lib,
       TO* tostarts,

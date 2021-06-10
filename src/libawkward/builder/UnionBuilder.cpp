@@ -10,6 +10,7 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/BoolBuilder.h"
+#include "awkward/builder/DatetimeBuilder.h"
 #include "awkward/builder/Int64Builder.h"
 #include "awkward/builder/Float64Builder.h"
 #include "awkward/builder/StringBuilder.h"
@@ -251,6 +252,64 @@ namespace awkward {
     }
     else {
       contents_[(size_t)current_].get()->complex(x);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
+  UnionBuilder::datetime(int64_t x, const std::string& unit) {
+    if (current_ == -1) {
+      BuilderPtr tofill(nullptr);
+      int8_t i = 0;
+      for (auto content : contents_) {
+        if (DatetimeBuilder* raw = dynamic_cast<DatetimeBuilder*>(content.get())) {
+          if (raw->units() == unit) {
+            tofill = content;
+            break;
+          }
+        }
+        i++;
+      }
+      if (tofill.get() == nullptr) {
+        tofill = DatetimeBuilder::fromempty(options_, unit);
+        contents_.push_back(tofill);
+      }
+      int64_t len = tofill.get()->length();
+      tofill.get()->datetime(x, unit);
+      tags_.append(i);
+      index_.append(len);
+    }
+    else {
+      contents_[(size_t)current_].get()->datetime(x, unit);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
+  UnionBuilder::timedelta(int64_t x, const std::string& unit) {
+    if (current_ == -1) {
+      BuilderPtr tofill(nullptr);
+      int8_t i = 0;
+      for (auto content : contents_) {
+        if (DatetimeBuilder* raw = dynamic_cast<DatetimeBuilder*>(content.get())) {
+          if (raw->units() == unit) {
+            tofill = content;
+            break;
+          }
+        }
+        i++;
+      }
+      if (tofill.get() == nullptr) {
+        tofill = DatetimeBuilder::fromempty(options_, unit);
+        contents_.push_back(tofill);
+      }
+      int64_t len = tofill.get()->length();
+      tofill.get()->timedelta(x, unit);
+      tags_.append(i);
+      index_.append(len);
+    }
+    else {
+      contents_[(size_t)current_].get()->timedelta(x, unit);
     }
     return shared_from_this();
   }

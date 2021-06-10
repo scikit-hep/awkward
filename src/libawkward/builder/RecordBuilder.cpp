@@ -231,6 +231,48 @@ namespace awkward {
   }
 
   const BuilderPtr
+  RecordBuilder::datetime(int64_t x, const std::string& unit) {
+    if (!begun_) {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->datetime(x, unit);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument(
+        std::string("called 'datetime' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->datetime(x, unit));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->datetime(x, unit);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
+  RecordBuilder::timedelta(int64_t x, const std::string& unit) {
+    if (!begun_) {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->timedelta(x, unit);
+      return out;
+    }
+    else if (nextindex_ == -1) {
+      throw std::invalid_argument(
+        std::string("called 'timedelta' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
+    }
+    else if (!contents_[(size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->timedelta(x, unit));
+    }
+    else {
+      contents_[(size_t)nextindex_].get()->timedelta(x, unit);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
   RecordBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());

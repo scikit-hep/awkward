@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Reducer.cpp", line)
+
 #include <limits>
 
 #include "awkward/kernels.h"
@@ -159,6 +161,24 @@ namespace awkward {
                       parents,
                       outlength);
   }
+
+  const std::shared_ptr<void>
+  ReducerCount::apply_datetime(const int64_t* data,
+                               const Index64& parents,
+                               int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data),
+                      parents,
+                      outlength);
+}
+
+  const std::shared_ptr<void>
+  ReducerCount::apply_timedelta(const int64_t* data,
+                                const Index64& parents,
+                                int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data),
+                      parents,
+                      outlength);
+}
 
   ////////// count nonzero
 
@@ -409,6 +429,20 @@ namespace awkward {
       outlength);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerCountNonzero::apply_datetime(const int64_t* data,
+                                      const Index64& parents,
+                                      int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
+  const std::shared_ptr<void>
+  ReducerCountNonzero::apply_timedelta(const int64_t* data,
+                                       const Index64& parents,
+                                       int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
   }
 
   ////////// sum (addition)
@@ -766,6 +800,22 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerSum::apply_datetime(const int64_t* data,
+                             const Index64& parents,
+                             int64_t outlength) const {
+    throw std::invalid_argument(
+      std::string("ReducerSum: cannot apply `sum` to datetime ")
+      + FILENAME(__LINE__));
+  }
+
+  const std::shared_ptr<void>
+  ReducerSum::apply_timedelta(const int64_t* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
   ////////// prod (multiplication)
 
   const std::string
@@ -1121,6 +1171,24 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerProd::apply_datetime(const int64_t* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+   throw std::invalid_argument(
+     std::string("ReducerProd: cannot apply `prod` to datetime ")
+     + FILENAME(__LINE__));
+ }
+
+  const std::shared_ptr<void>
+  ReducerProd::apply_timedelta(const int64_t* data,
+                               const Index64& parents,
+                               int64_t outlength) const {
+    throw std::invalid_argument(
+      std::string("ReducerProd: cannot apply `prod` to timedelta ")
+      + FILENAME(__LINE__));
+  }
+
   ////////// any (logical or)
 
   const std::string
@@ -1372,6 +1440,20 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerAny::apply_datetime(const int64_t* data,
+                             const Index64& parents,
+                             int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
+  const std::shared_ptr<void>
+  ReducerAny::apply_timedelta(const int64_t* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
   ////////// all (logical and)
 
   const std::string
@@ -1621,6 +1703,20 @@ namespace awkward {
       outlength);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerAll::apply_datetime(const int64_t* data,
+                             const Index64& parents,
+                             int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
+  const std::shared_ptr<void>
+  ReducerAll::apply_timedelta(const int64_t* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
   }
 
   ////////// min (minimum, in which infinity is the identity)
@@ -1943,6 +2039,20 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerMin::apply_datetime(const int64_t* data,
+                             const Index64& parents,
+                             int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
+  const std::shared_ptr<void>
+  ReducerMin::apply_timedelta(const int64_t* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
   ////////// max (maximum, in which -infinity is the identity)
 
   ReducerMax::ReducerMax(double initial_f64,
@@ -2263,6 +2373,20 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerMax::apply_datetime(const int64_t* data,
+                             const Index64& parents,
+                             int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
+  const std::shared_ptr<void>
+  ReducerMax::apply_timedelta(const int64_t* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
   ////////// argmin (argument minimum, in which -1 is the identity)
 
   const std::string
@@ -2519,6 +2643,20 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerArgmin::apply_datetime(const int64_t* data,
+                                const Index64& parents,
+                                int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
+  const std::shared_ptr<void>
+  ReducerArgmin::apply_timedelta(const int64_t* data,
+                                 const Index64& parents,
+                                 int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
   ////////// argmax (argument maximum, in which -1 is the identity)
 
   const std::string
@@ -2773,5 +2911,19 @@ namespace awkward {
       outlength);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerArgmax::apply_datetime(const int64_t* data,
+                                const Index64& parents,
+                                int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
+  }
+
+  const std::shared_ptr<void>
+  ReducerArgmax::apply_timedelta(const int64_t* data,
+                                 const Index64& parents,
+                                 int64_t outlength) const {
+    return apply_int64(data, parents, outlength);
   }
 }

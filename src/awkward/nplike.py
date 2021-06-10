@@ -98,6 +98,10 @@ class NumpyMetadata(Singleton):
     nan = numpy.nan
     inf = numpy.inf
 
+    nat = numpy.datetime64("NaT")
+    datetime_data = numpy.datetime_data
+    issubdtype = numpy.issubdtype
+
 
 if hasattr(numpy, "float16"):
     NumpyMetadata.float16 = numpy.float16
@@ -332,6 +336,9 @@ class NumpyLike(Singleton):
     def array_str(self, *args, **kwargs):
         # array, max_line_width, precision=None, suppress_small=None
         return self._module.array_str(*args, **kwargs)
+
+    def datetime_as_string(self, *args, **kwargs):
+        return self._module.datetime_as_string(*args, **kwargs)
 
 
 class Numpy(NumpyLike):

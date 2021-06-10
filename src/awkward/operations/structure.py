@@ -4197,8 +4197,8 @@ _dtype_to_string = {
     np.dtype(np.float64): "float64",
     np.dtype(np.complex64): "complex64",
     np.dtype(np.complex128): "complex128",
-    # np.dtype(np.datetime64): "datetime64",
-    # np.dtype(np.timedelta64): "timedelta64",
+    np.dtype(np.datetime64): "datetime64",
+    np.dtype(np.timedelta64): "timedelta64",
 }
 
 if hasattr(np, "float16"):
