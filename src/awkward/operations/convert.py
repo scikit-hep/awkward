@@ -2658,12 +2658,11 @@ def _from_arrow(
         elif isinstance(tpe, pyarrow.lib.FixedSizeListType):
             assert tpe.num_buffers == 1
             mask = buffers.pop(0)
-            offsets = ak.layout.Index32(numpy.array([0, tpe.list_size], dtype=np.int32))
             content = popbuffers(array.values, tpe.value_type, buffers)
             if not tpe.value_field.nullable:
                 content = content.content
 
-            out = ak.layout.ListOffsetArray32(offsets, content)
+            out = ak.layout.RegularArray(content, tpe.list_size)
             # No return yet!
 
         elif isinstance(tpe, pyarrow.lib.UnionType):
