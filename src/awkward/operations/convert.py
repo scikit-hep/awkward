@@ -2588,8 +2588,24 @@ def from_arrow(array, highlevel=True, behavior=None):
     return _from_arrow(array, True, highlevel=highlevel, behavior=behavior)
 
 
-_from_arrow_date64 = re.compile(r"^date64\[(.*)\]$")
-_from_arrow_date32 = re.compile(r"^date32\[(.*)\]$")
+_pyarrow_to_numpy_dtype = {
+    "date32": (True, np.dtype("M8[D]")),
+    "date64": (False, np.dtype("M8[ms]")),
+    "date32[day]": (True, np.dtype("M8[D]")),
+    "date64[ms]": (False, np.dtype("M8[ms]")),
+    "time32[s]": (True, np.dtype("M8[s]")),
+    "time32[ms]": (True, np.dtype("M8[ms]")),
+    "time64[us]": (False, np.dtype("M8[us]")),
+    "time64[ns]": (False, np.dtype("M8[ns]")),
+    "timestamp[s]": (False, np.dtype("M8[s]")),
+    "timestamp[ms]": (False, np.dtype("M8[ms]")),
+    "timestamp[us]": (False, np.dtype("M8[us]")),
+    "timestamp[ns]": (False, np.dtype("M8[ns]")),
+    "duration[s]": (False, np.dtype("m8[s]")),
+    "duration[ms]": (False, np.dtype("m8[ms]")),
+    "duration[us]": (False, np.dtype("m8[us]")),
+    "duration[ns]": (False, np.dtype("m8[ns]")),
+}
 
 
 def _from_arrow(
@@ -2804,28 +2820,13 @@ def _from_arrow(
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             data = buffers.pop(0)
-            asstr = str(tpe)
-            m = _from_arrow_date64.match(asstr)
-            if m is not None:
-                unit = m.group(1)
-                out = ak.layout.NumpyArray(
-                    numpy.frombuffer(data, dtype=np.dtype("M8[{0}]".format(unit)))
-                )
-            else:
-                m = _from_arrow_date32.match(asstr)
-                if m is not None:
-                    unit = m.group(1)
-                    if unit == "day":
-                        unit = "D"
-                    out = ak.layout.NumpyArray(
-                        numpy.frombuffer(data, dtype=np.int32)
-                        .astype(np.int64)
-                        .view(np.dtype("M8[{0}]".format(unit)))
-                    )
-                else:
-                    out = ak.layout.NumpyArray(
-                        numpy.frombuffer(data, dtype=tpe.to_pandas_dtype())
-                    )
+
+            to64, dt = _pyarrow_to_numpy_dtype.get(str(tpe), (False, None))
+            if to64:
+                data = numpy.frombuffer(data, dtype=np.int32).astype(np.int64)
+            if dt is None:
+                dt = tpe.to_pandas_dtype()
+            out = ak.layout.NumpyArray(numpy.frombuffer(data, dtype=dt))
             # No return yet!
 
         else:
