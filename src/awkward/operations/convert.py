@@ -4690,9 +4690,19 @@ def _form_to_layout(
         node_cache_key = key_format(
             form_key=form.form.form_key, attribute="virtual", partition=partnum
         )
-        return ak.layout.VirtualArray(
-            generator, lazy_cache, "{0}({1})".format(lazy_cache_key, node_cache_key)
-        )
+
+        if isinstance(form.form, (ak.forms.NumpyForm, ak.forms.EmptyForm)):
+            # If it's a leaf node, the node_cache_key completely determines
+            # uniqueness of the subtree (because it's the whole subtree).
+            nested_cache_key = "{0}({1})".format(lazy_cache_key, node_cache_key)
+        else:
+            # Otherwise, the node_cache_key for the root of the subtree might
+            # be the same in two places whereas the nested content differs.
+            nested_cache_key = "{0}({1}:{2})".format(
+                lazy_cache_key, node_cache_key, _from_buffers_key()
+            )
+
+        return ak.layout.VirtualArray(generator, lazy_cache, nested_cache_key)
 
     else:
         raise AssertionError(

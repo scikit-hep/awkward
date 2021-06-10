@@ -1,134 +1,136 @@
-- file: quickstart
-  title: "Quickstart"
+format: jb-article
+root: quickstart
+title: "Awkward Array"
 
-- file: what-is-awkward
-  title: "What is an Awkward Array?"
+sections:
+  - file: what-is-awkward
+    title: "What is an Awkward Array?"
 
-- file: how-to-convert
-  title: "Converting arrays"
-  sections:
-    - file: how-to-convert-numpy
-      title: "NumPy"
-    - file: how-to-convert-python
-      title: "Python objects"
-    - file: how-to-convert-json
-      title: "JSON"
-    - file: how-to-convert-uproot
-      title: "ROOT via Uproot"
-    - file: how-to-convert-arrow
-      title: "Arrow and Parquet"
-    - file: how-to-convert-pandas
-      title: "Pandas"
-    - file: how-to-convert-buffers
-      title: "Generic buffers"
+  - file: how-to-convert
+    title: "Converting arrays"
+    sections:
+      - file: how-to-convert-numpy
+        title: "NumPy"
+      - file: how-to-convert-python
+        title: "Python objects"
+      - file: how-to-convert-json
+        title: "JSON"
+      - file: how-to-convert-uproot
+        title: "ROOT via Uproot"
+      - file: how-to-convert-arrow
+        title: "Arrow and Parquet"
+      - file: how-to-convert-pandas
+        title: "Pandas"
+      - file: how-to-convert-buffers
+        title: "Generic buffers"
 
-- file: how-to-create
-  title: "Creating new arrays"
-  sections:
-    - file: how-to-create-arraybuilder
-      title: "ArrayBuilder (easy & general)"
-    - file: how-to-create-layout
-      title: "Layout (faster)"
-    - file: how-to-create-unflatten-group
-      title: "Unflattening and grouping"
-    - file: how-to-create-records
-      title: "Arrays of records"
-    - file: how-to-create-strings
-      title: "Arrays of strings"
-    - file: how-to-create-categorical
-      title: "Arrays of categories"
-    - file: how-to-create-lazy
-      title: "Lazy arrays"
-    - file: how-to-create-partitioned
-      title: "Partitioned arrays"
+  - file: how-to-create
+    title: "Creating new arrays"
+    sections:
+      - file: how-to-create-arraybuilder
+        title: "ArrayBuilder (easy & general)"
+      - file: how-to-create-layout
+        title: "Layout (faster)"
+      - file: how-to-create-unflatten-group
+        title: "Unflattening and grouping"
+      - file: how-to-create-records
+        title: "Arrays of records"
+      - file: how-to-create-strings
+        title: "Arrays of strings"
+      - file: how-to-create-categorical
+        title: "Arrays of categories"
+      - file: how-to-create-lazy
+        title: "Lazy arrays"
+      - file: how-to-create-partitioned
+        title: "Partitioned arrays"
 
-- file: how-to-examine
-  title: "Examining arrays"
-  sections:
-    - file: how-to-examine-type
-      title: "Data type"
-    - file: how-to-examine-single-item
-      title: "Single item detail"
-    - file: how-to-examine-list-fields
-      title: "Listing fields/keys/columns"
-    - file: how-to-examine-simple-slicing
-      title: "Simple slicing"
-    - file: how-to-examine-checking-validity
-      title: "Checking validity"
+  - file: how-to-examine
+    title: "Examining arrays"
+    sections:
+      - file: how-to-examine-type
+        title: "Data type"
+      - file: how-to-examine-single-item
+        title: "Single item detail"
+      - file: how-to-examine-list-fields
+        title: "Listing fields/keys/columns"
+      - file: how-to-examine-simple-slicing
+        title: "Simple slicing"
+      - file: how-to-examine-checking-validity
+        title: "Checking validity"
 
-- file: how-to-math
-  title: "Numerical math"
-  sections:
-    - file: how-to-math-numpy
-      title: "NumPy functions"
-    - file: how-to-math-broadcasting
-      title: "Awkward broadcasting"
-    - file: how-to-math-reducing
-      title: "Reducing (sum/min/any/all)"
-    - file: how-to-math-statistics
-      title: "Statistics (mean/var/std)"
-    - file: how-to-math-argminmax
-      title: "Using argmin/argmax"
-    - file: how-to-math-gpu
-      title: "On GPUs"
+  - file: how-to-math
+    title: "Numerical math"
+    sections:
+      - file: how-to-math-numpy
+        title: "NumPy functions"
+      - file: how-to-math-broadcasting
+        title: "Awkward broadcasting"
+      - file: how-to-math-reducing
+        title: "Reducing (sum/min/any/all)"
+      - file: how-to-math-statistics
+        title: "Statistics (mean/var/std)"
+      - file: how-to-math-argminmax
+        title: "Using argmin/argmax"
+      - file: how-to-math-gpu
+        title: "On GPUs"
 
-- file: how-to-filter
-  title: "Filtering data"
-  sections:
-    - file: how-to-filter-num
-      title: "By number of items"
-    - file: how-to-filter-cut-mask
-      title: "Cuts vs. masks"
-    - file: how-to-filter-jagged
-      title: "Slicing lists within arrays"
-    - file: how-to-filter-masked
-      title: "Slices with missing values"
+  - file: how-to-filter
+    title: "Filtering data"
+    sections:
+      - file: how-to-filter-num
+        title: "By number of items"
+      - file: how-to-filter-cut-mask
+        title: "Cuts vs. masks"
+      - file: how-to-filter-jagged
+        title: "Slicing lists within arrays"
+      - file: how-to-filter-masked
+        title: "Slices with missing values"
 
-- file: how-to-restructure
-  title: "Restructuring data"
-  sections:
-    - file: how-to-restructure-zip-project
-      title: "Zip/unzip and project"
-    - file: how-to-restructure-add-fields
-      title: "Adding fields to records"
-    - file: how-to-restructure-rename-records
-      title: "Renaming records"
-    - file: how-to-restructure-flatten
-      title: "Flattening for plots"
-    - file: how-to-restructure-pad
-      title: "Padding/clipping for machine learning"
-    - file: how-to-restructure-concatenate
-      title: "Concatenating and interleaving"
-    - file: how-to-restructure-sort
-      title: "Sorting"
+  - file: how-to-restructure
+    title: "Restructuring data"
+    sections:
+      - file: how-to-restructure-zip-project
+        title: "Zip/unzip and project"
+      - file: how-to-restructure-add-fields
+        title: "Adding fields to records"
+      - file: how-to-restructure-rename-records
+        title: "Renaming records"
+      - file: how-to-restructure-flatten
+        title: "Flattening for plots"
+      - file: how-to-restructure-pad
+        title: "Padding/clipping for machine learning"
+      - file: how-to-restructure-concatenate
+        title: "Concatenating and interleaving"
+      - file: how-to-restructure-sort
+        title: "Sorting"
 
-- file: how-to-combinatorics
-  title: "Combinatorics"
-  sections:
-    - file: how-to-combinatorics-cartesian-combinations
-      title: 'Cartesian product and "n choose k"'
-    - file: how-to-combinatorics-best-match
-      title: "Best match between collections"
+  - file: how-to-combinatorics
+    title: "Combinatorics"
+    sections:
+      - file: how-to-combinatorics-cartesian-combinations
+        title: 'Cartesian product and "n choose k"'
+      - file: how-to-combinatorics-best-match
+        title: "Best match between collections"
 
-- file: how-to-use-in-numba
-  title: "Using arrays in Numba"
-  sections:
-    - file: how-to-use-in-numba-features
-      title: "Supported features"
-    - file: how-to-use-in-numba-arraybuilder
-      title: "Building array output"
+  - file: how-to-use-in-numba
+    title: "Using arrays in Numba"
+    sections:
+      - file: how-to-use-in-numba-features
+        title: "Supported features"
+      - file: how-to-use-in-numba-arraybuilder
+        title: "Building array output"
 
-- file: how-to-specialize
-  title: "Specialized behavior"
-  sections:
-    - file: how-to-specialize-subclass
-      title: "Subclassing Array/Record"
-    - file: how-to-specialize-override-numpy
-      title: "Overriding NumPy functions"
-    - file: how-to-specialize-in-numba
-      title: "In Numba"
-    - file: how-to-specialize-lorentz
-      title: "For physics: Lorentz vectors"
+  - file: how-to-specialize
+    title: "Specialized behavior"
+    sections:
+      - file: how-to-specialize-subclass
+        title: "Subclassing Array/Record"
+      - file: how-to-specialize-override-numpy
+        title: "Overriding NumPy functions"
+      - file: how-to-specialize-in-numba
+        title: "In Numba"
+      - file: how-to-specialize-lorentz
+        title: "For physics: Lorentz vectors"
 
-- file: how-to-differentiate-using-jax
-  title: "Differentiation using JAX"
+  - file: how-to-differentiate-using-jax
+    title: "Differentiation using JAX"

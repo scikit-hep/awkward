@@ -507,7 +507,7 @@ class NumpyArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, positions, sharedptrs, arrays):
-        array = ak.nplike.of(layout).asarray(layout)
+        array = ak.nplike.of(layout).ascontiguousarray(layout)
         assert len(array.shape) == 1
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)

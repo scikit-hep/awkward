@@ -126,6 +126,10 @@ class NumpyLike(Singleton):
         # array[, dtype=]
         return self._module.asarray(*args, **kwargs)
 
+    def ascontiguousarray(self, *args, **kwargs):
+        # array[, dtype=]
+        return self._module.ascontiguousarray(*args, **kwargs)
+
     def isscalar(self, *args, **kwargs):
         return self._module.isscalar(*args, **kwargs)
 
@@ -394,6 +398,24 @@ or
                 return out
         else:
             return self._module.asarray(array, dtype=dtype)
+
+    def ascontiguousarray(self, array, dtype=None):
+        if isinstance(
+            array,
+            (
+                ak.highlevel.Array,
+                ak.highlevel.Record,
+                ak.layout.Content,
+                ak.layout.Record,
+            ),
+        ):
+            out = ak.operations.convert.to_cupy(array)
+            if dtype is not None and out.dtype != dtype:
+                return self._module.ascontiguousarray(out, dtype=dtype)
+            else:
+                return out
+        else:
+            return self._module.ascontiguousarray(array, dtype=dtype)
 
     def frombuffer(self, *args, **kwargs):
         np_array = numpy.frombuffer(*args, **kwargs)
