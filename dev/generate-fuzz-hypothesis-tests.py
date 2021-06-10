@@ -5,6 +5,7 @@ import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+<<<<<<< HEAD
 @composite
 def generate(draw, elements=st.integers()):
     #size=draw(st.integers().filter(lambda x: x > 1))
@@ -18,6 +19,16 @@ def generate(draw, elements=st.integers()):
 
 def gen_input():
     ex=generate().example()
+=======
+
+@given(
+    st.lists(
+        st.integers().filter(lambda x: x > 1), min_size=24, max_size=24, unique=True
+    )
+)
+@settings(max_examples=1)
+def gen_input(x):
+>>>>>>> 78fbcc906d32ceed43d0fc49376e50699b2e4080
     doc = None
     with open(
         os.path.join(
