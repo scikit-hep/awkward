@@ -1,13 +1,8 @@
-- name: awkward_BitMaskedArray_to_IndexedOptionArray
-  args:
-    - {name: toindex, type: "List[int64_t]", dir: out}
-    - {name: frombitmask, type: "Const[List[uint8_t]]", dir: in, role: BitMaskedArray-mask}
-    - {name: bitmasklength, type: "int64_t", dir: in, role: default}
-    - {name: validwhen, type: "bool", dir: in, role: BitMaskedArray-valid_when}
-    - {name: lsb_order, type: "bool", dir: in, role: BitMaskedArray-lsb_order}
-  inputs:
-    - toindex: []
-    - frombitmask: [1, 1, 1, 1, 1]
-    - bitmasklength: 3
-    - validwhen: True
-    - lsb_order: True
+[{args: [{dir: out, name: toindex, type: 'List[int64_t]'}, {dir: in, name: frombitmask,
+        role: BitMaskedArray-mask, type: 'Const[List[uint8_t]]'}, {dir: in, name: bitmasklength,
+        role: default, type: int64_t}, {dir: in, name: validwhen, role: BitMaskedArray-valid_when,
+        type: bool}, {dir: in, name: lsb_order, role: BitMaskedArray-lsb_order, type: bool}],
+    inputs: [{bitmasklength: false, frombitmask: [13781, 11011, -27180, -29456, -68297041877437882790631668247770533085],
+        lsb_order: true, toindex: [-1346238344, -24934, -54795738005088929236936798422733384399,
+          10767, -3301526446882308427], validwhen: 4}, {frombitmask: [1, 1, 1, 1,
+          1]}, {bitmasklength: 3}, {validwhen: true}, {lsb_order: true}], name: awkward_BitMaskedArray_to_IndexedOptionArray}]

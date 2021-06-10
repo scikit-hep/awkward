@@ -168,7 +168,6 @@ class Specification(object):
                     tempdict["inargs"], self.args
                 ) and self.validateoverflow(tempdict):
                     allvals.append(tempdict)
-
         return allvals
 
 
