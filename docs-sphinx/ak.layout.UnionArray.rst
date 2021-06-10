@@ -43,9 +43,9 @@ that exhaustively checks validity in its constructor (see
             for x in tags:
                 assert isinstance(x, int)
                 assert 0 <= x < len(contents)
-            for i, x in enumerate(index):
-                assert isinstance(x, int)
-                assert 0 <= x < len(contents[tags[i]])
+            for i, x in enumerate(tags):
+                assert isinstance(index[i], numbers.Integral)
+                assert 0 <= index[i] < len(contents[x])
             self.tags = tags
             self.index = index
             self.contents = contents

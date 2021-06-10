@@ -74,7 +74,7 @@ that exhaustively checks validity in its constructor (see
                     return RecordArray([], self.recordlookup, stop - start)
                 else:
                     return RecordArray([x[where] for x in self.contents], self.recordlookup,
-                                       self.length)
+                                       where.stop - where.start)
             elif isinstance(where, str):
                 if self.recordlookup is None:
                     try:
@@ -83,14 +83,14 @@ that exhaustively checks validity in its constructor (see
                         pass
                     else:
                         if i < len(self.contents):
-                            return self.contents[i]
+                            return self.contents[i][0:len(self)]
                 else:
                     try:
                         i = self.recordlookup.index(where)
                     except ValueError:
                         pass
                     else:
-                        return self.contents[i]
+                        return self.contents[i][0:len(self)]
                 raise ValueError("field " + repr(where) + " not found")
             else:
                 raise AssertionError(where)

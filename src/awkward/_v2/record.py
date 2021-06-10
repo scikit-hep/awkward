@@ -11,7 +11,6 @@ import numbers
 
 import awkward as ak
 
-
 class Record(object):
     def __init__(self, array, at):
         assert isinstance(array, ak._v2.contents.recordarray.RecordArray)

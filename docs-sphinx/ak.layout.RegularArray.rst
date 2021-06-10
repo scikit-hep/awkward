@@ -35,7 +35,7 @@ that exhaustively checks validity in its constructor (see
             assert isinstance(zeros_length, int)
             assert size >= 0
             if size != 0:
-                length = len(self.content) // self.size   # floor division
+                length = len(content) // size   # floor division
             else:
                 assert zeros_length >= 0
                 length = zeros_length
@@ -68,7 +68,7 @@ that exhaustively checks validity in its constructor (see
                 raise AssertionError(where)
 
         def __repr__(self):
-            if size == 0:
+            if self.size == 0:
                 zeros_length = ", " + repr(self.length)
             else:
                 zeros_length = ""
