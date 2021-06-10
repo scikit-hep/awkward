@@ -970,10 +970,16 @@ def to_list(array):
     elif isinstance(array, ak.layout.NumpyArray):
         if array.format.upper().startswith("M"):
             return (
-                ak.nplike.of(array)
-                .asarray(array.view_int64)
-                .view(array.format)
-                .tolist()
+                [
+                    x
+                    for x in ak.nplike.of(array)
+                    .asarray(array.view_int64)
+                    .view(array.format)
+                ]
+                # FIXME: .tolist() returns
+                # [[1567416600000000000], [1568367000000000000], [1569096000000000000]]
+                # instead of [numpy.datetime64('2019-09-02T09:30:00'), numpy.datetime64('2019-09-13T09:30:00'), numpy.datetime64('2019-09-21T20:00:00')]
+                # see test_from_pandas() test
             )
         else:
             return ak.nplike.of(array).asarray(array).tolist()

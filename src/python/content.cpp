@@ -2252,35 +2252,6 @@ NumpyArray_from_datetime(const std::string& name,
     ak::kernel::lib::cpu);
 }
 
-const ak::NumpyArray
-NumpyArray_from_pandas_datetime(const std::string& name,
-                                const py::object& array,
-                                const py::object& identities,
-                                const py::object& parameters) {
-  const std::vector<ssize_t> shape = array.attr("shape").cast<std::vector<ssize_t>>();
-  const std::vector<ssize_t> strides = array.attr("strides").cast<std::vector<ssize_t>>();
-
-  void* ptr = reinterpret_cast<void*>(
-    py::cast<ssize_t>(array.attr("ctypes").attr("data")));
-
-  ak::util::dtype dtype= ak::util::name_to_dtype(
-    py::cast<std::string>(py::str(array.attr("dtype"))));
-
-  auto out = ak::NumpyArray(
-    unbox_identities_none(identities),
-    dict2parameters(parameters),
-    std::shared_ptr<void>(ptr, pyobject_deleter<void>(array.ptr())),
-    shape,
-    strides,
-    0,
-    py::dtype(array.attr("dtype")).itemsize(),
-    py::cast<std::string>(py::str(array.attr("dtype").attr("str"))).substr(1),
-    dtype,
-    ak::kernel::lib::cpu);
-    //std::cout << out.tostring() << "\n";
-    return out;
-}
-
 py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content>
 make_NumpyArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::NumpyArray,
@@ -2300,6 +2271,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                            const py::object& identities,
                            const py::object& parameters) -> ak::NumpyArray {
         std::string module = anyarray.get_type().attr("__module__").cast<std::string>();
+
         if (module.rfind("cupy.", 0) == 0) {
           return NumpyArray_from_cupy(name, anyarray, identities, parameters);
         }
@@ -2313,13 +2285,21 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
             return NumpyArray_from_datetime(name, anyarray, identities, parameters);
           }
         }
-        else if (module.rfind("pandas.", 0) == 0) {
-          if (py::cast<bool>(anyarray.attr("_is_datelike_mixed_type"))) {
-            return NumpyArray_from_pandas_datetime(name, anyarray.attr("values"), identities, parameters);
-          }
-        }
 
         py::array array = anyarray.cast<py::array>();
+
+        if (!PyObject_CheckBuffer(anyarray.ptr())) {
+          // anyarray does not support buffer protocol
+          if (py::hasattr(array, "dtype")  &&
+            !py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))).empty()) {
+            const auto& data_type = ak::util::dtype_to_format(ak::util::name_to_dtype(
+              py::cast<std::string>(py::str(py::dtype(array.attr("dtype"))))));
+            if (data_type == "M"  ||  data_type == "m") {
+              // it's a datetime or timedelta
+              return NumpyArray_from_datetime(name, array, identities, parameters);
+            }
+          }
+        }
 
         py::buffer_info info = array.request();
         if (info.ndim == 0) {

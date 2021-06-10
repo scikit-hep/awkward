@@ -472,6 +472,32 @@ def test_ufunc_mul():
     assert ak.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
 
 
+def test_NumpyArray_layout():
+    array0 = ak.layout.NumpyArray(
+        ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"]
+    )
+
+    assert ak.to_list(array0) == [
+        "2019-09-02T09:30:00",
+        "2019-09-13T09:30:00",
+        "2019-09-21T20:00:00",
+    ]
+
+    array = ak.layout.NumpyArray(
+        [
+            np.datetime64("2019-09-02T09:30:00"),
+            np.datetime64("2019-09-13T09:30:00"),
+            np.datetime64("2019-09-21T20:00:00"),
+        ]
+    )
+
+    assert ak.to_list(array) == [
+        np.datetime64("2019-09-02T09:30:00"),
+        np.datetime64("2019-09-13T09:30:00"),
+        np.datetime64("2019-09-21T20:00:00"),
+    ]
+
+
 pandas = pytest.importorskip("pandas")
 
 
@@ -479,11 +505,14 @@ def test_from_pandas():
     values = {"time": ["20190902093000", "20190913093000", "20190921200000"]}
     df = pandas.DataFrame(values, columns=["time"])
     df["time"] = pandas.to_datetime(df["time"], format="%Y%m%d%H%M%S")
-    print(df.dtypes)
-    print(df)
-    # FIXME: array = ak.layout.NumpyArray(df)
-    array = ak.Array(df.values)
+    array = ak.layout.NumpyArray(df)
     assert ak.to_list(array) == [
+        np.datetime64("2019-09-02T09:30:00"),
+        np.datetime64("2019-09-13T09:30:00"),
+        np.datetime64("2019-09-21T20:00:00"),
+    ]
+    array2 = ak.Array(df.values)
+    assert ak.to_list(array2) == [
         np.datetime64("2019-09-02T09:30:00"),
         np.datetime64("2019-09-13T09:30:00"),
         np.datetime64("2019-09-21T20:00:00"),
