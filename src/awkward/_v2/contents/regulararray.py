@@ -31,7 +31,7 @@ class RegularArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<RegularArray>\n"]
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent + "    <size>" + repr(self._size) + '</size> \n')
+        out.append(indent + "    <size>" + repr(self._size) + "</size> \n")
         out.append(indent)
         out.append("</RegularArray>")
         out.append(post)

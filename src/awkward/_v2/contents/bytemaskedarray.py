@@ -27,7 +27,9 @@ class ByteMaskedArray(Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ByteMaskedArray>\n"]
-        out.append(indent + "    <valid_when>" + str(self._valid_when) + "</valid_when>\n")
+        out.append(
+            indent + "    <valid_when>" + str(self._valid_when) + "</valid_when>\n"
+        )
         out.append(indent + "    <mask>" + str(self._mask._data) + "</mask>\n")
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)

@@ -20,24 +20,20 @@ class NumpyArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<NumpyArray>\n"]
         if hasattr(self._data, "shape") and len(self._data.shape) != 0:
-            out.append(indent + "    <dtype>" + str(self._data.dtype) + '</dtype>\n')
-            out.append(indent + "    <shape>" + repr(self._data.shape) + '</shape>\n')
-            out.append(indent + "    <array>" + '\n    ' + indent)
+            out.append(indent + "    <dtype>" + str(self._data.dtype) + "</dtype>\n")
+            out.append(indent + "    <shape>" + repr(self._data.shape) + "</shape>\n")
+            out.append(indent + "    <array>" + "\n    " + indent)
             out.append(
                 self._nplike.array_str(self._data, max_line_width=30).replace(
                     "\n", "\n" + indent + "    "
                 )
             )
             out.append("\n" + indent + "    </array>")
-        #FIXME print option for lists pretty print?
-        else: 
-            out.append(indent + "    <length>" + str(len(self._data)) + '</length>\n')
-            out.append(indent + "    <array>" + '\n    ' + indent)
-            out.append(
-                str(self._data).replace(
-                    "\n", "\n" + indent + "    "
-                )
-            )
+        # FIXME print option for lists pretty print?
+        else:
+            out.append(indent + "    <length>" + str(len(self._data)) + "</length>\n")
+            out.append(indent + "    <array>" + "\n    " + indent)
+            out.append(str(self._data).replace("\n", "\n" + indent + "    "))
             out.append("\n" + indent + "    </array>")
         out.append("\n" + indent)
         out.append("</NumpyArray>")

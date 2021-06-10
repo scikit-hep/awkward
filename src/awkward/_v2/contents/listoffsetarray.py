@@ -29,7 +29,12 @@ class ListOffsetArray(Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListOffsetArray>\n"]
-        out.append(indent + "    <offsets>" + " ".join(str(x) for x in self._offsets) + "</offsets>\n")
+        out.append(
+            indent
+            + "    <offsets>"
+            + " ".join(str(x) for x in self._offsets)
+            + "</offsets>\n"
+        )
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)
         out.append("</ListOffsetArray>")

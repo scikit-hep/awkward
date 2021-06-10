@@ -33,7 +33,9 @@ class BitMaskedArray(Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<BitMaskedArray>\n"]
-        out.append(indent + "    <valid_when>" + str(self._valid_when) + "</valid_when>\n")
+        out.append(
+            indent + "    <valid_when>" + str(self._valid_when) + "</valid_when>\n"
+        )
         out.append(indent + "    <length>" + str(self._length) + "</valid_when>\n")
         out.append(indent + "    <lsb_order>" + str(self._lsb_order) + "</lsb_order>\n")
         out.append(indent + "    <mask>" + str(self._mask._data) + "</mask>\n")
