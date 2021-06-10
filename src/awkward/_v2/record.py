@@ -6,7 +6,6 @@ from __future__ import absolute_import
 class Record(dict):
     # FIX ME the documentation points to ak.layout.Record.__init__(array, at), but the test is sending a zip object
     def __init__(self, input):
-        assert isinstance(input, zip)
         self.input = input
 
     def __getitem__(self, where):
