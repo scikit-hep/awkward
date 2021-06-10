@@ -2658,8 +2658,7 @@ def _from_arrow(
         elif isinstance(tpe, pyarrow.lib.FixedSizeListType):
             assert tpe.num_buffers == 1
             mask = buffers.pop(0)
-            list_size = tpe.list_size
-            offsets = ak.layout.Index32(numpy.array([0, list_size], dtype=np.int32))
+            offsets = ak.layout.Index32(numpy.array([0, tpe.list_size], dtype=np.int32))
             content = popbuffers(array.values, tpe.value_type, buffers)
             if not tpe.value_field.nullable:
                 content = content.content
