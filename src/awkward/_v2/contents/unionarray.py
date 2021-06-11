@@ -30,7 +30,13 @@ class UnionArray(Content):
         out.append(indent + "    <tags>" + str(self._tags._data) + "</tags>\n")
         out.append(indent + "    <index>" + str(self._index._data) + "</index>\n")
         for x in self._contents:
-            out.append(x._repr(indent + "    ", "<content i=\"" + repr(self._contents.index(x)) + "\">", "</content>\n"))
+            out.append(
+                x._repr(
+                    indent + "    ",
+                    '<content i="' + repr(self._contents.index(x)) + '">',
+                    "</content>\n",
+                )
+            )
         out.append(indent)
         out.append("</UnionArray>")
         out.append(post)
@@ -46,7 +52,9 @@ class UnionArray(Content):
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
         return UnionArray(
-            Index(self._tags[start:stop]), Index(self._index[start:stop]), self._contents
+            Index(self._tags[start:stop]),
+            Index(self._index[start:stop]),
+            self._contents,
         )
 
     def _getitem_field(self, where):

@@ -9,6 +9,7 @@ import numpy as np
 from awkward._v2.contents.content import Content
 from awkward._v2.record import Record
 
+
 class RecordArray(Content):
     def __init__(self, contents, recordlookup, length=None):
         assert isinstance(contents, list)

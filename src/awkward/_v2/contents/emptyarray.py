@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from awkward._v2.contents.content import Content
 
+
 class EmptyArray(Content):
     def __init__(self):
         pass

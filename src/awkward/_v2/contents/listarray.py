@@ -31,8 +31,18 @@ class ListArray(Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListArray>\n"]
-        out.append(indent + "    <starts>" + " ".join(str(x) for x in self._starts) + "</starts>\n")
-        out.append(indent + "    <stops>" + " ".join(str(x) for x in self._stops) + "</stops>\n")
+        out.append(
+            indent
+            + "    <starts>"
+            + " ".join(str(x) for x in self._starts)
+            + "</starts>\n"
+        )
+        out.append(
+            indent
+            + "    <stops>"
+            + " ".join(str(x) for x in self._stops)
+            + "</stops>\n"
+        )
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)
         out.append("</ListArray>")
