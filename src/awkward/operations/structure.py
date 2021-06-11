@@ -2159,7 +2159,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
         return out
 
 
-def simplify(array, axis=None, highlevel=True):
+def packed(array, axis=None, highlevel=True):
     """
     Args:
         array: Array to simplify.
