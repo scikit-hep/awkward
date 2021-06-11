@@ -55,7 +55,9 @@ def test_NumpyType():
     assert str(ak._v2.types.NumpyType("complex64")) == "complex64"
     assert str(ak._v2.types.NumpyType("complex128")) == "complex128"
     assert str(ak._v2.types.NumpyType("complex256")) == "complex256"
-    assert str(ak._v2.types.NumpyType("bool", {"x": 123})) == 'bool[parameters={"x": 123}]'
+    assert (
+        str(ak._v2.types.NumpyType("bool", {"x": 123})) == 'bool[parameters={"x": 123}]'
+    )
     assert str(ak._v2.types.NumpyType("bool", None, "override")) == "override"
     assert str(ak._v2.types.NumpyType("bool", {"x": 123}, "override")) == "override"
     assert (
@@ -236,7 +238,9 @@ def test_NumpyType():
 
 @pytest.mark.skip(reason="unimplemented RegularType")
 def test_RegularType():
-    assert str(ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10)) == "10 * unknown"
+    assert (
+        str(ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10)) == "10 * unknown"
+    )
     assert str(ak._v2.types.RegularType(ak._v2.types.UnknownType(), 0)) == "0 * unknown"
     with pytest.raises(ValueError):
         ak._v2.types.RegularType(ak._v2.types.UnknownType(), -1)
@@ -249,11 +253,19 @@ def test_RegularType():
         == "override"
     )
     assert (
-        str(ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10, {"x": 123}, "override"))
+        str(
+            ak._v2.types.RegularType(
+                ak._v2.types.UnknownType(), 10, {"x": 123}, "override"
+            )
+        )
         == "override"
     )
     assert (
-        str(ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10, {"__categorical__": True}))
+        str(
+            ak._v2.types.RegularType(
+                ak._v2.types.UnknownType(), 10, {"__categorical__": True}
+            )
+        )
         == "categorical[type=10 * unknown]"
     )
     assert (
@@ -342,14 +354,17 @@ def test_ListType():
         == '[var * unknown, parameters={"x": 123}]'
     )
     assert (
-        str(ak._v2.types.ListType(ak._v2.types.UnknownType(), None, "override")) == "override"
+        str(ak._v2.types.ListType(ak._v2.types.UnknownType(), None, "override"))
+        == "override"
     )
     assert (
         str(ak._v2.types.ListType(ak._v2.types.UnknownType(), {"x": 123}, "override"))
         == "override"
     )
     assert (
-        str(ak._v2.types.ListType(ak._v2.types.UnknownType(), {"__categorical__": True}))
+        str(
+            ak._v2.types.ListType(ak._v2.types.UnknownType(), {"__categorical__": True})
+        )
         == "categorical[type=var * unknown]"
     )
     assert (
@@ -510,7 +525,9 @@ def test_RecordType():
     assert (
         str(
             ak._v2.types.RecordType(
-                [ak._v2.types.UnknownType(), ak._v2.types.NumpyType("bool")], None, {"x": 123}
+                [ak._v2.types.UnknownType(), ak._v2.types.NumpyType("bool")],
+                None,
+                {"x": 123},
             )
         )
         == 'tuple[[unknown, bool], parameters={"x": 123}]'
@@ -808,7 +825,11 @@ def test_OptionType():
         == "option[var * unknown]"
     )
     assert (
-        str(ak._v2.types.OptionType(ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10)))
+        str(
+            ak._v2.types.OptionType(
+                ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10)
+            )
+        )
         == "option[10 * unknown]"
     )
     assert (
@@ -816,7 +837,11 @@ def test_OptionType():
         == 'option[unknown, parameters={"x": 123}]'
     )
     assert (
-        str(ak._v2.types.OptionType(ak._v2.types.ListType(ak._v2.types.UnknownType()), {"x": 123}))
+        str(
+            ak._v2.types.OptionType(
+                ak._v2.types.ListType(ak._v2.types.UnknownType()), {"x": 123}
+            )
+        )
         == 'option[var * unknown, parameters={"x": 123}]'
     )
     assert (
@@ -828,7 +853,8 @@ def test_OptionType():
         == 'option[10 * unknown, parameters={"x": 123}]'
     )
     assert (
-        str(ak._v2.types.OptionType(ak._v2.types.UnknownType(), None, "override")) == "override"
+        str(ak._v2.types.OptionType(ak._v2.types.UnknownType(), None, "override"))
+        == "override"
     )
     assert (
         str(
@@ -841,7 +867,9 @@ def test_OptionType():
     assert (
         str(
             ak._v2.types.OptionType(
-                ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10), None, "override"
+                ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10),
+                None,
+                "override",
             )
         )
         == "override"
@@ -853,7 +881,9 @@ def test_OptionType():
     assert (
         str(
             ak._v2.types.OptionType(
-                ak._v2.types.ListType(ak._v2.types.UnknownType()), {"x": 123}, "override"
+                ak._v2.types.ListType(ak._v2.types.UnknownType()),
+                {"x": 123},
+                "override",
             )
         )
         == "override"
@@ -861,19 +891,26 @@ def test_OptionType():
     assert (
         str(
             ak._v2.types.OptionType(
-                ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10), {"x": 123}, "override"
+                ak._v2.types.RegularType(ak._v2.types.UnknownType(), 10),
+                {"x": 123},
+                "override",
             )
         )
         == "override"
     )
     assert (
-        str(ak._v2.types.OptionType(ak._v2.types.UnknownType(), {"__categorical__": True}))
+        str(
+            ak._v2.types.OptionType(
+                ak._v2.types.UnknownType(), {"__categorical__": True}
+            )
+        )
         == "categorical[type=?unknown]"
     )
     assert (
         str(
             ak._v2.types.OptionType(
-                ak._v2.types.ListType(ak._v2.types.UnknownType()), {"__categorical__": True}
+                ak._v2.types.ListType(ak._v2.types.UnknownType()),
+                {"__categorical__": True},
             )
         )
         == "categorical[type=option[var * unknown]]"
@@ -944,7 +981,9 @@ def test_OptionType():
     assert (
         str(
             ak._v2.types.OptionType(
-                ak._v2.types.UnknownType(), {"x": 123, "__categorical__": True}, "override"
+                ak._v2.types.UnknownType(),
+                {"x": 123, "__categorical__": True},
+                "override",
             )
         )
         == "categorical[type=override]"
@@ -975,7 +1014,11 @@ def test_OptionType():
         == "OptionType(UnknownType())"
     )
     assert (
-        repr(ak._v2.types.OptionType(type=ak._v2.types.ListType(ak._v2.types.UnknownType())))
+        repr(
+            ak._v2.types.OptionType(
+                type=ak._v2.types.ListType(ak._v2.types.UnknownType())
+            )
+        )
         == "OptionType(ListType(UnknownType()))"
     )
     assert (
@@ -993,7 +1036,11 @@ def test_OptionType():
 @pytest.mark.skip(reason="unimplemented UnionType")
 def test_UnionType():
     assert (
-        str(ak._v2.types.UnionType([ak._v2.types.UnknownType(), ak._v2.types.NumpyType("bool")]))
+        str(
+            ak._v2.types.UnionType(
+                [ak._v2.types.UnknownType(), ak._v2.types.NumpyType("bool")]
+            )
+        )
         == "union[unknown, bool]"
     )
     assert (
@@ -1007,7 +1054,9 @@ def test_UnionType():
     assert (
         str(
             ak._v2.types.UnionType(
-                [ak._v2.types.UnknownType(), ak._v2.types.NumpyType("bool")], None, "override"
+                [ak._v2.types.UnknownType(), ak._v2.types.NumpyType("bool")],
+                None,
+                "override",
             )
         )
         == "override"
