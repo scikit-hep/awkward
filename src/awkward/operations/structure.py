@@ -2205,24 +2205,7 @@ def packed(array, axis=None, highlevel=True):
                 ak.layout.ListArray64,
             ),
         ):
-            starts = nplike.asarray(layout.starts)
-            stops = nplike.asarray(layout.stops)
-            intervals = stops - starts
-            indices = nplike.repeat(
-                stops - nplike.cumsum(intervals), intervals
-            ) + nplike.arange(nplike.sum(intervals))
-            inner = ak.layout.IndexedArray64(ak.layout.Index64(indices), layout.content)
-
-            outer_offsets = nplike.asarray(layout.compact_offsets64(True))
-            outer_starts = outer_offsets[:-1]
-            outer_stops = outer_offsets[1:]
-            return ak.layout.ListArray64(
-                ak.layout.Index64(outer_starts),
-                ak.layout.Index64(outer_stops),
-                apply(inner, depth + 1, posaxis),
-                layout.identities,
-                layout.parameters,
-            )
+            return apply(layout.toListOffsetArray64(True), depth, posaxis)
 
         # ListOffsetArray performs resizing
         if isinstance(
