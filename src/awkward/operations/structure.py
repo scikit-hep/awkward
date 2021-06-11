@@ -2170,8 +2170,6 @@ def packed(array, axis=None, highlevel=True):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
     """
-    nplike = ak.nplike.of(array)
-
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
@@ -2216,16 +2214,13 @@ def packed(array, axis=None, highlevel=True):
                 ak.layout.ListOffsetArrayU32,
             ),
         ):
-            offsets = nplike.asarray(layout.offsets)
-            indices = nplike.arange(offsets[0], offsets[-1])
-            inner = ak.layout.IndexedArray64(ak.layout.Index64(indices), layout.content)
+            new_layout = layout.toListOffsetArray64(True)
 
-            outer_offsets = nplike.asarray(layout.compact_offsets64(True))
             return ak.layout.ListOffsetArray64(
-                ak.layout.Index64(outer_offsets),
-                apply(inner, depth + 1, posaxis),
-                layout.identities,
-                layout.parameters,
+                new_layout.offsets,
+                apply(new_layout.content, depth + 1, posaxis),
+                new_layout.identities,
+                new_layout.parameters,
             )
 
         # ByteMaskedArray
