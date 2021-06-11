@@ -2176,7 +2176,7 @@ def packed(array, axis=None, highlevel=True):
         array, allow_record=False, allow_other=False
     )
 
-    def getfunction(layout, depth, posaxis, apply):
+    def apply(layout, depth, posaxis):
         # Do not handle arrays which either leave length + order unchanged
         # or are proxies to other arrays (e.g. VirtualArray)
         if isinstance(
@@ -2188,11 +2188,11 @@ def packed(array, axis=None, highlevel=True):
                 ak.layout.RegularArray,
             ),
         ):
-            return posaxis
+            return layout
 
         # Project indexed arrays
         if isinstance(layout, ak._util.indexedoptiontypes + ak._util.indexedtypes):
-            return lambda: apply(layout.project(), depth, posaxis)
+            return apply(layout.project(), depth, posaxis)
 
         # ListArray performs both ordering and resizing
         if isinstance(
@@ -2214,12 +2214,13 @@ def packed(array, axis=None, highlevel=True):
             outer_offsets = nplike.asarray(layout.compact_offsets64(True))
             outer_starts = outer_offsets[:-1]
             outer_stops = outer_offsets[1:]
-            outer = ak.layout.ListArray64(
+            return ak.layout.ListArray64(
                 ak.layout.Index64(outer_starts),
                 ak.layout.Index64(outer_stops),
                 apply(inner, depth + 1, posaxis),
+                layout.identities,
+                layout.parameters,
             )
-            return lambda: outer
 
         # ListOffsetArray performs resizing
         if isinstance(
@@ -2235,10 +2236,12 @@ def packed(array, axis=None, highlevel=True):
             inner = ak.layout.IndexedArray64(ak.layout.Index64(indices), layout.content)
 
             outer_offsets = nplike.asarray(layout.compact_offsets64(True))
-            outer = ak.layout.ListOffsetArray64(
-                ak.layout.Index64(outer_offsets), apply(inner, depth + 1, posaxis)
+            return ak.layout.ListOffsetArray64(
+                ak.layout.Index64(outer_offsets),
+                apply(inner, depth + 1, posaxis),
+                layout.identities,
+                layout.parameters,
             )
-            return lambda: outer
 
         # ByteMaskedArray
         # BitMasked
@@ -2251,9 +2254,7 @@ def packed(array, axis=None, highlevel=True):
         # Finally, fall through to failure
         raise NotImplementedError
 
-    out = ak._util.recursively_apply(
-        layout, getfunction, pass_user=True, pass_apply=True
-    )
+    out = apply(layout, 1, axis)
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
