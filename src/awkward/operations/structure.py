@@ -2177,13 +2177,15 @@ def packed(array, axis=None, highlevel=True):
     )
 
     def apply(layout, depth, posaxis):
+        if isinstance(layout, ak.layout.NumpyArray):
+            return layout.contiguous()
+
         # Do not handle arrays which either leave length + order unchanged
         # or are proxies to other arrays (e.g. VirtualArray)
         if isinstance(
             layout,
             (
                 ak.layout.EmptyArray,
-                ak.layout.NumpyArray,
                 ak.layout.VirtualArray,
                 ak.layout.RegularArray,
             ),
