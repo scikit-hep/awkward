@@ -2088,7 +2088,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
     else:
 
-        def getfunction(layout, depth, posaxis):
+        def getfunction(layout, depth, posaxis, apply):
             posaxis = layout.axis_wrap_if_negative(posaxis)
             if posaxis == depth and isinstance(layout, ak._util.listtypes):
                 # We are one *above* the level where we want to apply this.
@@ -2130,6 +2130,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                         getfunction,
                         pass_depth=True,
                         pass_user=True,
+                        pass_apply=True,
                         user=axis,
                     )
                 )
@@ -2140,6 +2141,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                 getfunction,
                 pass_depth=True,
                 pass_user=True,
+                pass_apply=True,
                 user=axis,
             )
 
@@ -2155,6 +2157,103 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
         return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
+
+
+def simplify(array, axis=None, highlevel=True):
+    """
+    Args:
+        array: Array to simplify.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+    """
+    nplike = ak.nplike.of(array)
+
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+
+    def getfunction(layout, depth, posaxis, apply):
+        # RegularArrays cannot change length or ordering
+        if isinstance(layout, ak.layout.RegularArray):
+            return posaxis
+
+        # Project indexed arrays
+        if isinstance(layout, ak._util.indexedoptiontypes + ak._util.indexedtypes):
+            return lambda: apply(layout.project(), depth, posaxis)
+
+        # EmptyArray doesnt have contents
+        if isinstance(layout, (ak.layout.EmptyArray, ak.layout.NumpyArray)):
+            return posaxis
+
+        # ListArray performs both ordering and resizing
+        if isinstance(
+            layout,
+            (
+                ak.layout.ListArray32,
+                ak.layout.ListArrayU32,
+                ak.layout.ListArray64,
+            ),
+        ):
+            starts = nplike.asarray(layout.starts)
+            stops = nplike.asarray(layout.stops)
+            intervals = stops - starts
+            indices = nplike.repeat(
+                stops - nplike.cumsum(intervals), intervals
+            ) + nplike.arange(nplike.sum(intervals))
+            inner = ak.layout.IndexedArray64(ak.layout.Index64(indices), layout.content)
+
+            outer_offsets = nplike.asarray(layout.compact_offsets64(True))
+            outer_starts = outer_offsets[:-1]
+            outer_stops = outer_offsets[1:]
+            outer = ak.layout.ListArray64(
+                ak.layout.Index64(outer_starts),
+                ak.layout.Index64(outer_stops),
+                apply(inner, depth + 1, posaxis),
+            )
+            return lambda: outer
+
+        # ListOffsetArray performs resizing
+        if isinstance(
+            layout,
+            (
+                ak.layout.ListOffsetArray32,
+                ak.layout.ListOffsetArray64,
+                ak.layout.ListOffsetArrayU32,
+            ),
+        ):
+            offsets = nplike.asarray(layout.offsets)
+            indices = nplike.arange(offsets[0], offsets[-1])
+            inner = ak.layout.IndexedArray64(ak.layout.Index64(indices), layout.content)
+
+            outer_offsets = nplike.asarray(layout.compact_offsets64(True))
+            outer = ak.layout.ListOffsetArray64(
+                ak.layout.Index64(outer_offsets), apply(inner, depth + 1, posaxis)
+            )
+            return lambda: outer
+
+        # ByteMaskedArray
+        # BitMasked
+        # Unmasked
+        # RecordArray
+        # Record
+        # UnionArray
+        # VirtualArray
+        # Partitioned
+
+        # Finally, fall through to failure
+        raise NotImplementedError
+
+    out = ak._util.recursively_apply(
+        layout, getfunction, pass_user=True, pass_apply=True
+    )
+
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array))
+    return out
 
 
 def local_index(array, axis=-1, highlevel=True, behavior=None):
