@@ -1452,6 +1452,21 @@ def test_EmptyForm():
     "class": "EmptyArray"
 }"""
     )
+    assert (
+        str(
+            ak._v2.forms.emptyform.EmptyForm(
+                has_identities=True, parameters={"x": 123}, form_key="hello"
+            )
+        )
+        == """{
+    "class": "EmptyArray",
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
     assert repr(ak._v2.forms.emptyform.EmptyForm()) == "EmptyForm()"
     assert (
         repr(
@@ -2058,16 +2073,550 @@ def test_NumpyForm():
     }
 
 
+@pytest.mark.skip(reason="unimplemented RegularForm")
 def test_RegularForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.regularform.RegularForm(ak._v2.forms.emptyform.EmptyForm(), 10)
+        )
+        == """{
+    "class": "RegularArray",
+    "size": 10,
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.regularform.RegularForm(
+                ak._v2.forms.emptyform.EmptyForm(),
+                10,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "RegularArray",
+    "size": 10,
+    "content": {
+        "class": "EmptyArray"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        repr(
+            ak._v2.forms.regularform.RegularForm(
+                content=ak._v2.forms.emptyform.EmptyForm(), size=10
+            )
+        )
+        == "RegularForm(EmptyForm(), 10)"
+    )
+    assert (
+        repr(
+            ak._v2.forms.regularform.RegularForm(
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                size=10,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "RegularForm(EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.regularform.RegularForm(
+        ak._v2.forms.emptyform.EmptyForm(), 10
+    ).tolist(verbose=False) == {
+        "class": "RegularArray",
+        "size": 10,
+        "content": {"class": "EmptyArray"},
+    }
+    assert ak._v2.forms.regularform.RegularForm(
+        ak._v2.forms.emptyform.EmptyForm(), 10
+    ).tolist() == {
+        "class": "RegularArray",
+        "size": 10,
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.regularform.RegularForm(
+        content=ak._v2.forms.emptyform.EmptyForm(),
+        size=10,
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "RegularArray",
+        "size": 10,
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {"class": "RegularArray", "size": 10, "content": {"class": "EmptyArray"}}
+    ).tolist() == {
+        "class": "RegularArray",
+        "size": 10,
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "RegularArray",
+            "size": 10,
+            "content": {"class": "EmptyArray"},
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "RegularArray",
+        "size": 10,
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
+@pytest.mark.skip(reason="unimplemented ListForm")
 def test_ListForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.listform.ListForm(
+                "i32", "i32", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "ListArray",
+    "starts": "i32",
+    "stops": "i32",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.listform.ListForm(
+                "u32", "u32", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "ListArray",
+    "starts": "u32",
+    "stops": "u32",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.listform.ListForm(
+                "i64", "i64", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "ListArray",
+    "starts": "i64",
+    "stops": "i64",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.listform.ListForm(
+                "i32",
+                "i32",
+                ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "ListArray",
+    "starts": "i32",
+    "stops": "i32",
+    "content": {
+        "class": "EmptyArray"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        repr(
+            ak._v2.forms.listform.ListForm(
+                starts="i32", stops="i32", content=ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == "ListForm('i32', 'i32', EmptyForm())"
+    )
+    assert (
+        repr(
+            ak._v2.forms.listform.ListForm(
+                starts="i32",
+                stops="i32",
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "ListForm('i32', 'i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.listform.ListForm(
+        "i32", "i32", ak._v2.forms.emptyform.EmptyForm()
+    ).tolist(verbose=False) == {
+        "class": "ListArray",
+        "starts": "i32",
+        "stops": "i32",
+        "content": {"class": "EmptyArray"},
+    }
+    assert ak._v2.forms.listform.ListForm(
+        "i32", "i32", ak._v2.forms.emptyform.EmptyForm()
+    ).tolist() == {
+        "class": "ListArray",
+        "starts": "i32",
+        "stops": "i32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.listform.ListForm(
+        starts="i32",
+        stops="i32",
+        content=ak._v2.forms.emptyform.EmptyForm(),
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "ListArray",
+        "starts": "i32",
+        "stops": "i32",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ListArray",
+            "starts": "i32",
+            "stops": "i32",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "ListArray",
+        "starts": "i32",
+        "stops": "i32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ListArray",
+            "starts": "u32",
+            "stops": "u32",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "ListArray",
+        "starts": "u32",
+        "stops": "u32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ListArray",
+            "starts": "i64",
+            "stops": "i64",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "ListArray",
+        "starts": "i64",
+        "stops": "i64",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ListArray",
+            "starts": "i32",
+            "stops": "i32",
+            "content": {"class": "EmptyArray"},
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "ListArray",
+        "starts": "i32",
+        "stops": "i32",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
+@pytest.mark.skip(reason="unimplemented ListOffsetForm")
 def test_ListOffsetForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.listoffsetform.ListOffsetForm(
+                "i32", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "ListOffsetArray",
+    "offsets": "i32",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.listoffsetform.ListOffsetForm(
+                "u32", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "ListOffsetArray",
+    "offsets": "u32",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.listoffsetform.ListOffsetForm(
+                "i64", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "ListOffsetArray",
+    "offsets": "i64",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.listoffsetform.ListOffsetForm(
+                "i32",
+                ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "ListOffsetArray",
+    "offsets": "i32",
+    "content": {
+        "class": "EmptyArray"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        repr(
+            ak._v2.forms.listoffsetform.ListOffsetForm(
+                offsets="i32", content=ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == "ListForm('i32', EmptyForm())"
+    )
+    assert (
+        repr(
+            ak._v2.forms.listoffsetform.ListOffsetForm(
+                offsets="i32",
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "ListForm('i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.listoffsetform.ListOffsetForm(
+        "i32", ak._v2.forms.emptyform.EmptyForm()
+    ).tolist(verbose=False) == {
+        "class": "ListOffsetArray",
+        "offsets": "i32",
+        "content": {"class": "EmptyArray"},
+    }
+    assert ak._v2.forms.listoffsetform.ListOffsetForm(
+        "i32", ak._v2.forms.emptyform.EmptyForm()
+    ).tolist() == {
+        "class": "ListOffsetArray",
+        "offsets": "i32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.listoffsetform.ListOffsetForm(
+        offsets="i32",
+        content=ak._v2.forms.emptyform.EmptyForm(),
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "ListOffsetArray",
+        "offsets": "i32",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ListOffsetArray",
+            "offsets": "i32",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "ListOffsetArray",
+        "offsets": "i32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ListOffsetArray",
+            "offsets": "u32",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "ListOffsetArray",
+        "offsets": "u32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ListOffsetArray",
+            "offsets": "i64",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "ListOffsetArray",
+        "offsets": "i64",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ListOffsetArray",
+            "offsets": "i32",
+            "content": {"class": "EmptyArray"},
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "ListOffsetArray",
+        "offsets": "i32",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
 def test_RecordForm():
