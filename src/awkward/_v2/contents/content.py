@@ -5,7 +5,6 @@ from __future__ import absolute_import
 from collections.abc import Iterable
 import numbers
 
-
 class Content(object):
     def __getitem__(self, where):
         if isinstance(where, numbers.Integral):
