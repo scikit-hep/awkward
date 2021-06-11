@@ -2177,17 +2177,22 @@ def simplify(array, axis=None, highlevel=True):
     )
 
     def getfunction(layout, depth, posaxis, apply):
-        # RegularArrays cannot change length or ordering
-        if isinstance(layout, ak.layout.RegularArray):
+        # Do not handle arrays which either leave length + order unchanged
+        # or are proxies to other arrays (e.g. VirtualArray)
+        if isinstance(
+            layout,
+            (
+                ak.layout.EmptyArray,
+                ak.layout.NumpyArray,
+                ak.layout.VirtualArray,
+                ak.layout.RegularArray,
+            ),
+        ):
             return posaxis
 
         # Project indexed arrays
         if isinstance(layout, ak._util.indexedoptiontypes + ak._util.indexedtypes):
             return lambda: apply(layout.project(), depth, posaxis)
-
-        # EmptyArray doesnt have contents
-        if isinstance(layout, (ak.layout.EmptyArray, ak.layout.NumpyArray)):
-            return posaxis
 
         # ListArray performs both ordering and resizing
         if isinstance(
@@ -2241,7 +2246,6 @@ def simplify(array, axis=None, highlevel=True):
         # RecordArray
         # Record
         # UnionArray
-        # VirtualArray
         # Partitioned
 
         # Finally, fall through to failure
