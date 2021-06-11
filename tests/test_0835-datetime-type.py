@@ -506,10 +506,11 @@ def test_from_pandas():
     df = pandas.DataFrame(values, columns=["time"])
     df["time"] = pandas.to_datetime(df["time"], format="%Y%m%d%H%M%S")
     array = ak.layout.NumpyArray(df)
+    # somewhat expected behavior when providing `ns` resolution
     assert ak.to_list(array) == [
-        np.datetime64("2019-09-02T09:30:00"),
-        np.datetime64("2019-09-13T09:30:00"),
-        np.datetime64("2019-09-21T20:00:00"),
+        [1567416600000000000],
+        [1568367000000000000],
+        [1569096000000000000],
     ]
     array2 = ak.Array(df.values)
     assert ak.to_list(array2) == [
