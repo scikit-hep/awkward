@@ -2621,7 +2621,344 @@ def test_ListOffsetForm():
 
 @pytest.mark.skip(reason="unimplemented RecordForm")
 def test_RecordForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.recordform.RecordForm(
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                None,
+            )
+        )
+        == """{
+    "class": "RecordArray",
+    "contents": [
+        {
+            "class": "EmptyArray"
+        },
+        "bool"
+    ]
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.recordform.RecordForm(
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                ["x", "y"],
+            )
+        )
+        == """{
+    "class": "RecordArray",
+    "contents": {
+        "x": {
+            "class": "EmptyArray"
+        },
+        "y": "bool"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.recordform.RecordForm(
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                None,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "RecordArray",
+    "contents": [
+        {
+            "class": "EmptyArray"
+        },
+        "bool"
+    ],
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.recordform.RecordForm(
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                ["x", "y"],
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "RecordArray",
+    "contents": {
+        "x": {
+            "class": "EmptyArray"
+        },
+        "y": "bool"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+
+    assert (
+        repr(
+            ak._v2.forms.recordform.RecordForm(
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                None,
+            )
+        )
+        == "RecordForm([EmptyForm(), NumpyForm('bool')], None)"
+    )
+    assert (
+        repr(
+            ak._v2.forms.recordform.RecordForm(
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                ["x", "y"],
+            )
+        )
+        == "RecordForm([EmptyForm(), NumpyForm('bool')], ['x', 'y'])"
+    )
+    assert (
+        repr(
+            ak._v2.forms.recordform.RecordForm(
+                contents=[
+                    ak._v2.forms.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
+                recordlookup=None,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "RecordForm([EmptyForm(), NumpyForm('bool')], None, has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+    assert (
+        repr(
+            ak._v2.forms.recordform.RecordForm(
+                contents=[
+                    ak._v2.forms.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
+                recordlookup=["x", "y"],
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "RecordForm([EmptyForm(), NumpyForm('bool')], ['x', 'y'], has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.recordform.RecordForm(
+        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        None,
+    ).tolist(verbose=False) == {
+        "class": "RecordArray",
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
+    }
+    assert ak._v2.forms.recordform.RecordForm(
+        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        ["x", "y"],
+    ).tolist(verbose=False) == {
+        "class": "RecordArray",
+        "contents": {
+            "x": {"class": "EmptyArray"},
+            "y": "bool",
+        },
+    }
+    assert ak._v2.forms.recordform.RecordForm(
+        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        None,
+    ).tolist() == {
+        "class": "RecordArray",
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.recordform.RecordForm(
+        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        ["x", "y"],
+    ).tolist() == {
+        "class": "RecordArray",
+        "contents": {
+            "x": {
+                "class": "EmptyArray",
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            "y": {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.recordform.RecordForm(
+        content=[ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        recordlookup=None,
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "RecordArray",
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.recordform.RecordForm(
+        content=[ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        recordlookup=["x", "y"],
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "RecordArray",
+        "contents": {
+            "x": {"class": "EmptyArray"},
+            "y": "bool",
+        },
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "RecordArray",
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+        }
+    ).tolist() == {
+        "class": "RecordArray",
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "RecordArray",
+            "contents": {
+                "x": {"class": "EmptyArray"},
+                "y": "bool",
+            },
+        }
+    ).tolist() == {
+        "class": "RecordArray",
+        "contents": {
+            "x": {
+                "class": "EmptyArray",
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            "y": {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "RecordArray",
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist(verbose=False) == {
+        "class": "RecordArray",
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "RecordArray",
+            "contents": {
+                "x": {"class": "EmptyArray"},
+                "y": "bool",
+            },
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist(verbose=False) == {
+        "class": "RecordArray",
+        "contents": {
+            "x": {"class": "EmptyArray"},
+            "y": "bool",
+        },
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
 @pytest.mark.skip(reason="unimplemented IndexedForm")
