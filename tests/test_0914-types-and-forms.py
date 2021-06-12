@@ -3859,7 +3859,309 @@ def test_UnmaskedForm():
 
 @pytest.mark.skip(reason="unimplemented UnionForm")
 def test_UnionForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.unionform.UnionForm(
+                "i8",
+                "i32",
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+            )
+        )
+        == """{
+    "class": "UnionArray",
+    "tags": "i8",
+    "index": "i32",
+    "contents": [
+        {
+            "class": "EmptyArray"
+        },
+        "bool"
+    ]
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.unionform.UnionForm(
+                "i8",
+                "u32",
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+            )
+        )
+        == """{
+    "class": "UnionArray",
+    "tags": "i8",
+    "index": "u32",
+    "contents": [
+        {
+            "class": "EmptyArray"
+        },
+        "bool"
+    ]
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.unionform.UnionForm(
+                "i8",
+                "i64",
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+            )
+        )
+        == """{
+    "class": "UnionArray",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        {
+            "class": "EmptyArray"
+        },
+        "bool"
+    ]
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.unionform.UnionForm(
+                "i8",
+                "i32",
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "UnionArray",
+    "tags": "i8",
+    "index": "i32",
+    "contents": [
+        {
+            "class": "EmptyArray"
+        },
+        "bool"
+    ],
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+
+    assert (
+        repr(
+            ak._v2.forms.unionform.UnionForm(
+                "i8",
+                "i32",
+                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+            )
+        )
+        == "UnionForm('i8', 'i32', [EmptyForm(), NumpyForm('bool')])"
+    )
+    assert (
+        repr(
+            ak._v2.forms.unionform.UnionForm(
+                tags="i8",
+                index="i32",
+                contents=[
+                    ak._v2.forms.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "UnionForm('i8', 'i32', [EmptyForm(), NumpyForm('bool')], has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.unionform.UnionForm(
+        "i8",
+        "i32",
+        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+    ).tolist(verbose=False) == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "i32",
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
+    }
+    assert ak._v2.forms.unionform.UnionForm(
+        "i8",
+        "i32",
+        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+    ).tolist() == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "i32",
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.unionform.UnionForm(
+        tags="i8",
+        index="i32",
+        content=[ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "i32",
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "i32",
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+        }
+    ).tolist() == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "i32",
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "u32",
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+        }
+    ).tolist() == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "u32",
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "i64",
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+        }
+    ).tolist() == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "i64",
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identities": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "UnionArray",
+            "tags": "i8",
+            "index": "i32",
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist(verbose=False) == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "i32",
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
 @pytest.mark.skip(reason="unimplemented VirtualForm")
