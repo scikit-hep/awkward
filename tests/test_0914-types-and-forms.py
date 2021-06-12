@@ -372,7 +372,7 @@ def test_RegularType():
     assert (
         repr(
             ak._v2.types.regulartype.RegularType(
-                type=ak._v2.types.unknowntype.UnknownType(), size=10
+                content=ak._v2.types.unknowntype.UnknownType(), size=10
             )
         )
         == "RegularType(UnknownType(), 10)"
@@ -380,7 +380,7 @@ def test_RegularType():
     assert (
         repr(
             ak._v2.types.regulartype.RegularType(
-                type=ak._v2.types.unknowntype.UnknownType(),
+                content=ak._v2.types.unknowntype.UnknownType(),
                 size=10,
                 parameters={"__categorical__": True},
                 typestr="override",
@@ -391,7 +391,7 @@ def test_RegularType():
     assert (
         repr(
             ak._v2.types.regulartype.RegularType(
-                type=ak._v2.types.numpytype.NumpyType(
+                content=ak._v2.types.numpytype.NumpyType(
                     primitive="uint8", parameters={"__array__": "char"}
                 ),
                 parameters={"__array__": "string"},
@@ -403,7 +403,7 @@ def test_RegularType():
     assert (
         repr(
             ak._v2.types.regulartype.RegularType(
-                type=ak._v2.types.numpytype.NumpyType(
+                content=ak._v2.types.numpytype.NumpyType(
                     primitive="uint8", parameters={"__array__": "byte"}
                 ),
                 parameters={"__array__": "bytestring"},
@@ -492,14 +492,14 @@ def test_ListType():
 
     assert (
         repr(
-            ak._v2.types.listtype.ListType(type=ak._v2.types.unknowntype.UnknownType())
+            ak._v2.types.listtype.ListType(content=ak._v2.types.unknowntype.UnknownType())
         )
         == "ListType(UnknownType())"
     )
     assert (
         repr(
             ak._v2.types.listtype.ListType(
-                type=ak._v2.types.unknowntype.UnknownType(),
+                content=ak._v2.types.unknowntype.UnknownType(),
                 parameters={"__categorical__": True},
                 typestr="override",
             )
@@ -509,7 +509,7 @@ def test_ListType():
     assert (
         repr(
             ak._v2.types.listtype.ListType(
-                type=ak._v2.types.numpytype.NumpyType(
+                content=ak._v2.types.numpytype.NumpyType(
                     primitive="uint8", parameters={"__array__": "char"}
                 ),
                 parameters={"__array__": "string"},
@@ -520,7 +520,7 @@ def test_ListType():
     assert (
         repr(
             ak._v2.types.listtype.ListType(
-                type=ak._v2.types.numpytype.NumpyType(
+                content=ak._v2.types.numpytype.NumpyType(
                     primitive="uint8", parameters={"__array__": "byte"}
                 ),
                 parameters={"__array__": "bytestring"},
@@ -966,7 +966,7 @@ def test_RecordType():
     assert (
         repr(
             ak._v2.types.recordtype.RecordType(
-                types=[
+                contents=[
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
@@ -978,7 +978,7 @@ def test_RecordType():
     assert (
         repr(
             ak._v2.types.recordtype.RecordType(
-                types=[
+                contents=[
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
@@ -990,7 +990,7 @@ def test_RecordType():
     assert (
         repr(
             ak._v2.types.recordtype.RecordType(
-                types=[
+                contents=[
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
@@ -1004,7 +1004,7 @@ def test_RecordType():
     assert (
         repr(
             ak._v2.types.recordtype.RecordType(
-                types=[
+                contents=[
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
@@ -1254,7 +1254,7 @@ def test_OptionType():
     assert (
         repr(
             ak._v2.types.optiontype.OptionType(
-                type=ak._v2.types.unknowntype.UnknownType()
+                content=ak._v2.types.unknowntype.UnknownType()
             )
         )
         == "OptionType(UnknownType())"
@@ -1262,7 +1262,7 @@ def test_OptionType():
     assert (
         repr(
             ak._v2.types.optiontype.OptionType(
-                type=ak._v2.types.listtype.ListType(
+                content=ak._v2.types.listtype.ListType(
                     ak._v2.types.unknowntype.UnknownType()
                 )
             )
@@ -1272,7 +1272,7 @@ def test_OptionType():
     assert (
         repr(
             ak._v2.types.optiontype.OptionType(
-                type=ak._v2.types.regulartype.RegularType(
+                content=ak._v2.types.regulartype.RegularType(
                     ak._v2.types.unknowntype.UnknownType(), 10
                 ),
                 parameters={"x": 123, "__categorical__": True},
@@ -1388,7 +1388,7 @@ def test_UnionType():
     assert (
         repr(
             ak._v2.types.uniontype.UnionType(
-                types=[
+                contents=[
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ]
@@ -1399,7 +1399,7 @@ def test_UnionType():
     assert (
         repr(
             ak._v2.types.uniontype.UnionType(
-                types=[
+                contents=[
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
@@ -1437,7 +1437,7 @@ def test_ArrayType():
     assert (
         repr(
             ak._v2.arraytype.ArrayType(
-                type=ak._v2.types.unknowntype.UnknownType(), length=10
+                content=ak._v2.types.unknowntype.UnknownType(), length=10
             )
         )
         == "ArrayType(UnknownType(), 10)"
