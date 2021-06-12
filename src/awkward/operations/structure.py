@@ -2230,13 +2230,8 @@ def packed(array, axis=None, highlevel=True):
                 new_layout.parameters,
             )
 
-        # ByteMaskedArray
-        # BitMasked
-        # Unmasked
-        # RecordArray
-        # Record
-        # UnionArray
-        # Partitioned
+        if isinstance(layout, ak.layout.UnmaskedArray):
+            return ak.layout.UnmaskedArray(apply(layout.content, depth, posaxis))
 
         # Finally, fall through to failure
         raise NotImplementedError
