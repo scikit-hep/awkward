@@ -2088,7 +2088,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
     else:
 
-        def getfunction(layout, depth, posaxis, apply):
+        def getfunction(layout, depth, posaxis):
             posaxis = layout.axis_wrap_if_negative(posaxis)
             if posaxis == depth and isinstance(layout, ak._util.listtypes):
                 # We are one *above* the level where we want to apply this.
@@ -2130,7 +2130,6 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                         getfunction,
                         pass_depth=True,
                         pass_user=True,
-                        pass_apply=True,
                         user=axis,
                     )
                 )
@@ -2141,7 +2140,6 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                 getfunction,
                 pass_depth=True,
                 pass_user=True,
-                pass_apply=True,
                 user=axis,
             )
 
