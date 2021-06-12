@@ -492,7 +492,9 @@ def test_ListType():
 
     assert (
         repr(
-            ak._v2.types.listtype.ListType(content=ak._v2.types.unknowntype.UnknownType())
+            ak._v2.types.listtype.ListType(
+                content=ak._v2.types.unknowntype.UnknownType()
+            )
         )
         == "ListType(UnknownType())"
     )
