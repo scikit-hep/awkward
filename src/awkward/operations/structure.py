@@ -2191,7 +2191,14 @@ def packed(array, axis=None, highlevel=True):
             return layout
 
         # Project indexed arrays
-        if isinstance(layout, ak._util.indexedoptiontypes + ak._util.indexedtypes):
+        if isinstance(layout, ak._util.indexedoptiontypes):
+            if isinstance(layout.content, ak._util.optiontypes):
+                return apply(layout.simplify(), depth, posaxis)
+
+            return apply(layout.project(), depth, posaxis)
+
+        # Project indexed arrays
+        if isinstance(layout, ak._util.indexedtypes):
             return apply(layout.project(), depth, posaxis)
 
         # ListArray performs both ordering and resizing
