@@ -233,8 +233,8 @@ def to_numpy(array, allow_missing=True):
         )
 
     elif (
-        str(ak.operations.describe.type(array)) == "datetime"
-        or str(ak.operations.describe.type(array)) == "timedelta"
+        str(ak.operations.describe.type(array)) == "datetime64"
+        or str(ak.operations.describe.type(array)) == "timedelta64"
     ):
         return array
 
