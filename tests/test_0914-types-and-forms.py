@@ -4166,4 +4166,164 @@ def test_UnionForm():
 
 @pytest.mark.skip(reason="unimplemented VirtualForm")
 def test_VirtualForm():
-    pass
+    assert (
+        str(ak._v2.forms.virtualform.VirtualForm(None, False))
+        == """{
+    "class": "VirtualArray",
+    "form": null,
+    "has_length": false
+}"""
+    )
+    assert (
+        str(ak._v2.forms.virtualform.VirtualForm(None, True))
+        == """{
+    "class": "VirtualArray",
+    "form": null,
+    "has_length": true
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.virtualform.VirtualForm(
+                ak._v2.forms.emptyform.EmptyForm(), False
+            )
+        )
+        == """{
+    "class": "VirtualArray",
+    "form": {
+        "class": "EmptyArray"
+    },
+    "has_length": false
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.virtualform.VirtualForm(
+                ak._v2.forms.emptyform.EmptyForm(), True
+            )
+        )
+        == """{
+    "class": "VirtualArray",
+    "form": {
+        "class": "EmptyArray"
+    },
+    "has_length": true
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.virtualform.VirtualForm(
+                form=None,
+                has_length=False,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "VirtualArray",
+    "form": null,
+    "has_length": false,
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+
+    assert (
+        repr(ak._v2.forms.virtualform.VirtualForm(None, False))
+        == "VirtualForm(None, False)"
+    )
+    assert (
+        repr(ak._v2.forms.virtualform.VirtualForm(None, True))
+        == "VirtualForm(None, True)"
+    )
+    assert (
+        repr(
+            ak._v2.forms.virtualform.VirtualForm(
+                ak._v2.forms.emptyform.EmptyForm(), False
+            )
+        )
+        == "VirtualForm(EmptyForm(), False)"
+    )
+    assert (
+        repr(
+            ak._v2.forms.virtualform.VirtualForm(
+                ak._v2.forms.emptyform.EmptyForm(), True
+            )
+        )
+        == "VirtualForm(EmptyForm(), True)"
+    )
+    assert (
+        repr(
+            ak._v2.forms.virtualform.VirtualForm(
+                form=None,
+                has_length=False,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "VirtualForm(None, False, has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.virtualform.VirtualForm(None, False).tolist(verbose=False) == {
+        "class": "VirtualArray",
+        "form": None,
+        "has_length": False,
+    }
+    assert ak._v2.forms.virtualform.VirtualForm(None, False).tolist() == {
+        "class": "VirtualArray",
+        "form": None,
+        "has_length": False,
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.virtualform.VirtualForm(
+        form=None,
+        has_length=False,
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "VirtualArray",
+        "form": None,
+        "has_length": False,
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "VirtualArray",
+            "form": None,
+            "has_length": False,
+        }
+    ).tolist() == {
+        "class": "VirtualArray",
+        "form": None,
+        "has_length": False,
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "VirtualArray",
+            "form": None,
+            "has_length": False,
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "VirtualArray",
+        "form": None,
+        "has_length": False,
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
