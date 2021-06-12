@@ -70,10 +70,10 @@ namespace awkward {
       else if (name == "complex256") {
         return util::dtype::complex256;
       }
-      else if (name.rfind("datetime", 0) == 0) {
+      else if (name.rfind("datetime64", 0) == 0) {
         return util::dtype::datetime64;
       }
-      else if (name.rfind("timedelta", 0) == 0) {
+      else if (name.rfind("timedelta64", 0) == 0) {
         return util::dtype::timedelta64;
       }
       else {
@@ -117,9 +117,9 @@ namespace awkward {
       case util::dtype::complex256:
         return "complex256";
       case util::dtype::datetime64:
-        return "datetime";
+        return "datetime64";
       case util::dtype::timedelta64:
-        return "timedelta";
+        return "timedelta64";
       default:
         return "unknown";
       }

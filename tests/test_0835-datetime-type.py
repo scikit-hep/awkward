@@ -16,7 +16,7 @@ def test_date_time():
     )
 
     array = ak.Array(numpy_array)
-    assert str(array.type) == "3 * datetime"
+    assert str(array.type) == "3 * datetime64"
     assert array.tolist() == [
         np.datetime64("2020-07-27T10:41:11"),
         np.datetime64("2019-01-01T00:00:00"),
@@ -44,7 +44,7 @@ def test_time_delta():
     numpy_array = np.array(["41", "1", "20"], "timedelta64[D]")
 
     array = ak.Array(numpy_array)
-    assert str(array.type) == "3 * timedelta"
+    assert str(array.type) == "3 * timedelta64"
     assert array.tolist() == [
         np.timedelta64("41", "D"),
         np.timedelta64("1", "D"),
