@@ -2492,7 +2492,7 @@ def test_ListOffsetForm():
                 offsets="i32", content=ak._v2.forms.emptyform.EmptyForm()
             )
         )
-        == "ListForm('i32', EmptyForm())"
+        == "ListOffsetForm('i32', EmptyForm())"
     )
     assert (
         repr(
@@ -2504,7 +2504,7 @@ def test_ListOffsetForm():
                 form_key="hello",
             )
         )
-        == "ListForm('i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "ListOffsetForm('i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.listoffsetform.ListOffsetForm(
@@ -2619,33 +2619,912 @@ def test_ListOffsetForm():
     }
 
 
+@pytest.mark.skip(reason="unimplemented RecordForm")
 def test_RecordForm():
     pass
 
 
+@pytest.mark.skip(reason="unimplemented IndexedForm")
 def test_IndexedForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.indexedform.IndexedForm(
+                "i32", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "IndexedArray",
+    "index": "i32",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.indexedform.IndexedForm(
+                "u32", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "IndexedArray",
+    "index": "u32",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.indexedform.IndexedForm(
+                "i64", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "IndexedArray",
+    "index": "i64",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.indexedform.IndexedForm(
+                "i32",
+                ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "IndexedArray",
+    "index": "i32",
+    "content": {
+        "class": "EmptyArray"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        repr(
+            ak._v2.forms.indexedform.IndexedForm(
+                index="i32", content=ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == "IndexedForm('i32', EmptyForm())"
+    )
+    assert (
+        repr(
+            ak._v2.forms.indexedform.IndexedForm(
+                index="i32",
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "IndexedForm('i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.indexedform.IndexedForm(
+        "i32", ak._v2.forms.emptyform.EmptyForm()
+    ).tolist(verbose=False) == {
+        "class": "IndexedArray",
+        "index": "i32",
+        "content": {"class": "EmptyArray"},
+    }
+    assert ak._v2.forms.indexedform.IndexedForm(
+        "i32", ak._v2.forms.emptyform.EmptyForm()
+    ).tolist() == {
+        "class": "IndexedArray",
+        "index": "i32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.indexedform.IndexedForm(
+        index="i32",
+        content=ak._v2.forms.emptyform.EmptyForm(),
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "IndexedArray",
+        "index": "i32",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "IndexedArray",
+            "index": "i32",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "IndexedArray",
+        "index": "i32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "IndexedArray",
+            "index": "u32",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "IndexedArray",
+        "index": "u32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "IndexedArray",
+            "index": "i64",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "IndexedArray",
+        "index": "i64",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "IndexedArray",
+            "index": "i32",
+            "content": {"class": "EmptyArray"},
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "IndexedArray",
+        "index": "i32",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
+@pytest.mark.skip(reason="unimplemented IndexedOptionForm")
 def test_IndexedOptionForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.indexedoptionform.IndexedOptionForm(
+                "i32", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "IndexedOptionArray",
+    "index": "i32",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.indexedoptionform.IndexedOptionForm(
+                "i64", ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == """{
+    "class": "IndexedOptionArray",
+    "index": "i64",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.indexedoptionform.IndexedOptionForm(
+                "i32",
+                ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "IndexedOptionArray",
+    "index": "i32",
+    "content": {
+        "class": "EmptyArray"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        repr(
+            ak._v2.forms.indexedoptionform.IndexedOptionForm(
+                index="i32", content=ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == "IndexedOptionForm('i32', EmptyForm())"
+    )
+    assert (
+        repr(
+            ak._v2.forms.indexedoptionform.IndexedOptionForm(
+                index="i32",
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "IndexedOptionForm('i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.indexedoptionform.IndexedOptionForm(
+        "i32", ak._v2.forms.emptyform.EmptyForm()
+    ).tolist(verbose=False) == {
+        "class": "IndexedOptionArray",
+        "index": "i32",
+        "content": {"class": "EmptyArray"},
+    }
+    assert ak._v2.forms.indexedoptionform.IndexedOptionForm(
+        "i32", ak._v2.forms.emptyform.EmptyForm()
+    ).tolist() == {
+        "class": "IndexedOptionArray",
+        "index": "i32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.indexedoptionform.IndexedOptionForm(
+        index="i32",
+        content=ak._v2.forms.emptyform.EmptyForm(),
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "IndexedOptionArray",
+        "index": "i32",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "IndexedOptionArray",
+            "index": "i32",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "IndexedOptionArray",
+        "index": "i32",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "IndexedOptionArray",
+            "index": "i64",
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "IndexedOptionArray",
+        "index": "i64",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "IndexedOptionArray",
+            "index": "i32",
+            "content": {"class": "EmptyArray"},
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "IndexedOptionArray",
+        "index": "i32",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
+@pytest.mark.skip(reason="unimplemented ByteMaskedForm")
 def test_ByteMaskedForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.bytemaskedform.ByteMaskedForm(
+                "i8", ak._v2.forms.emptyform.EmptyForm(), True
+            )
+        )
+        == """{
+    "class": "ByteMaskedArray",
+    "mask": "i8",
+    "valid_when": true,
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.bytemaskedform.ByteMaskedForm(
+                "i8", ak._v2.forms.emptyform.EmptyForm(), False
+            )
+        )
+        == """{
+    "class": "ByteMaskedArray",
+    "mask": "i8",
+    "valid_when": false,
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.bytemaskedform.ByteMaskedForm(
+                "i8",
+                ak._v2.forms.emptyform.EmptyForm(),
+                True,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "ByteMaskedArray",
+    "mask": "i8",
+    "valid_when": true,
+    "content": {
+        "class": "EmptyArray"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        repr(
+            ak._v2.forms.bytemaskedform.ByteMaskedForm(
+                mask="i8", content=ak._v2.forms.emptyform.EmptyForm(), valid_when=True
+            )
+        )
+        == "ByteMaskedForm('i8', EmptyForm(), True)"
+    )
+    assert (
+        repr(
+            ak._v2.forms.bytemaskedform.ByteMaskedForm(
+                mask="i8",
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                valid_when=True,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "ByteMaskedForm('i8', EmptyForm(), True, has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.bytemaskedform.ByteMaskedForm(
+        "i8", ak._v2.forms.emptyform.EmptyForm(), True
+    ).tolist(verbose=False) == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": True,
+        "content": {"class": "EmptyArray"},
+    }
+    assert ak._v2.forms.bytemaskedform.ByteMaskedForm(
+        "i8", ak._v2.forms.emptyform.EmptyForm(), True
+    ).tolist() == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": True,
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.bytemaskedform.ByteMaskedForm(
+        mask="i8",
+        content=ak._v2.forms.emptyform.EmptyForm(),
+        valid_when=True,
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": True,
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ByteMaskedArray",
+            "mask": "i8",
+            "valid_when": True,
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": True,
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ByteMaskedArray",
+            "mask": "i64",
+            "valid_when": True,
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "ByteMaskedArray",
+        "mask": "i64",
+        "valid_when": True,
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "ByteMaskedArray",
+            "mask": "i8",
+            "valid_when": True,
+            "content": {"class": "EmptyArray"},
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": True,
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
+@pytest.mark.skip(reason="unimplemented BitMaskedForm")
 def test_BitMaskedForm():
-    pass
+    assert (
+        str(
+            ak._v2.forms.bitmaskedform.BitMaskedForm(
+                "u8", ak._v2.forms.emptyform.EmptyForm(), True, True
+            )
+        )
+        == """{
+    "class": "BitMaskedArray",
+    "mask": "u8",
+    "valid_when": true,
+    "lsb_order": true,
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.bitmaskedform.BitMaskedForm(
+                "u8", ak._v2.forms.emptyform.EmptyForm(), False, True
+            )
+        )
+        == """{
+    "class": "BitMaskedArray",
+    "mask": "u8",
+    "valid_when": false,
+    "lsb_order": true,
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.bitmaskedform.BitMaskedForm(
+                "u8", ak._v2.forms.emptyform.EmptyForm(), True, False
+            )
+        )
+        == """{
+    "class": "BitMaskedArray",
+    "mask": "u8",
+    "valid_when": true,
+    "lsb_order": false,
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.bitmaskedform.BitMaskedForm(
+                "u8", ak._v2.forms.emptyform.EmptyForm(), False, False
+            )
+        )
+        == """{
+    "class": "BitMaskedArray",
+    "mask": "u8",
+    "valid_when": false,
+    "lsb_order": false,
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.bitmaskedform.BitMaskedForm(
+                "u8",
+                ak._v2.forms.emptyform.EmptyForm(),
+                True,
+                False,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "BitMaskedArray",
+    "mask": "u8",
+    "valid_when": true,
+    "lsb_order": false,
+    "content": {
+        "class": "EmptyArray"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        repr(
+            ak._v2.forms.bitmaskedform.BitMaskedForm(
+                mask="u8",
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                valid_when=True,
+                lsb_order=False,
+            )
+        )
+        == "BitMaskedForm('u8', EmptyForm(), True, False)"
+    )
+    assert (
+        repr(
+            ak._v2.forms.bitmaskedform.BitMaskedForm(
+                mask="u8",
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                valid_when=True,
+                lsb_order=False,
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "BitMaskedForm('u8', EmptyForm(), True, False, has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.bitmaskedform.BitMaskedForm(
+        "u8", ak._v2.forms.emptyform.EmptyForm(), True, False
+    ).tolist(verbose=False) == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": False,
+        "content": {"class": "EmptyArray"},
+    }
+    assert ak._v2.forms.bitmaskedform.BitMaskedForm(
+        "u8", ak._v2.forms.emptyform.EmptyForm(), True, False
+    ).tolist() == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": False,
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.bitmaskedform.BitMaskedForm(
+        mask="u8",
+        content=ak._v2.forms.emptyform.EmptyForm(),
+        valid_when=True,
+        lsb_order=False,
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": False,
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "BitMaskedArray",
+            "mask": "u8",
+            "valid_when": True,
+            "lsb_order": False,
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": False,
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "BitMaskedArray",
+            "mask": "i64",
+            "valid_when": True,
+            "lsb_order": False,
+            "content": {"class": "EmptyArray"},
+        }
+    ).tolist() == {
+        "class": "BitMaskedArray",
+        "mask": "i64",
+        "valid_when": True,
+        "lsb_order": False,
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "BitMaskedArray",
+            "mask": "u8",
+            "valid_when": True,
+            "lsb_order": False,
+            "content": {"class": "EmptyArray"},
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": False,
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
+@pytest.mark.skip(reason="unimplemented UnmaskedForm")
 def test_UnmaskedForm():
-    pass
+    assert (
+        str(ak._v2.forms.unmaskedform.UnmaskedForm(ak._v2.forms.emptyform.EmptyForm()))
+        == """{
+    "class": "UnmaskedArray",
+    "content": {
+        "class": "EmptyArray"
+    }
+}"""
+    )
+    assert (
+        str(
+            ak._v2.forms.unmaskedform.UnmaskedForm(
+                ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == """{
+    "class": "UnmaskedArray",
+    "content": {
+        "class": "EmptyArray"
+    },
+    "has_identities": true,
+    "parameters": {
+        "x": 123
+    },
+    "form_key": "hello"
+}"""
+    )
+    assert (
+        repr(
+            ak._v2.forms.unmaskedform.UnmaskedForm(
+                content=ak._v2.forms.emptyform.EmptyForm()
+            )
+        )
+        == "UnmaskedForm(EmptyForm())"
+    )
+    assert (
+        repr(
+            ak._v2.forms.unmaskedform.UnmaskedForm(
+                content=ak._v2.forms.emptyform.EmptyForm(),
+                has_identities=True,
+                parameters={"x": 123},
+                form_key="hello",
+            )
+        )
+        == "UnmaskedForm(EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+    )
+
+    assert ak._v2.forms.unmaskedform.UnmaskedForm(
+        ak._v2.forms.emptyform.EmptyForm()
+    ).tolist(verbose=False) == {
+        "class": "UnmaskedArray",
+        "content": {"class": "EmptyArray"},
+    }
+    assert ak._v2.forms.unmaskedform.UnmaskedForm(
+        ak._v2.forms.emptyform.EmptyForm()
+    ).tolist() == {
+        "class": "UnmaskedArray",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.unmaskedform.UnmaskedForm(
+        content=ak._v2.forms.emptyform.EmptyForm(),
+        has_identities=True,
+        parameters={"x": 123},
+        form_key="hello",
+    ).tolist(verbose=False) == {
+        "class": "UnmaskedArray",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak._v2.forms.from_iter(
+        {"class": "UnmaskedArray", "content": {"class": "EmptyArray"}}
+    ).tolist() == {
+        "class": "UnmaskedArray",
+        "content": {
+            "class": "EmptyArray",
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.from_iter(
+        {
+            "class": "UnmaskedArray",
+            "content": {"class": "EmptyArray"},
+            "has_identities": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).tolist() == {
+        "class": "UnmaskedArray",
+        "content": {"class": "EmptyArray"},
+        "has_identities": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
 
 
+@pytest.mark.skip(reason="unimplemented UnionForm")
 def test_UnionForm():
     pass
 
 
+@pytest.mark.skip(reason="unimplemented VirtualForm")
 def test_VirtualForm():
     pass
