@@ -2171,6 +2171,7 @@ def packed(array, axis=None, highlevel=True):
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
+    nplike = ak.nplike.of(layout)
 
     def apply(layout, depth, posaxis):
         if isinstance(layout, ak.layout.NumpyArray):
@@ -2230,6 +2231,36 @@ def packed(array, axis=None, highlevel=True):
 
         if isinstance(layout, ak.layout.UnmaskedArray):
             return ak.layout.UnmaskedArray(apply(layout.content, depth, posaxis))
+
+        if isinstance(layout, ak._util.uniontypes):
+            simplified = layout.simplify()
+
+            # If we managed to lose the drop type entirely
+            if not isinstance(simplified, ak._util.uniontypes):
+                return apply(simplified, depth, posaxis)
+
+            # Pack simplified layout
+            tags = nplike.asarray(simplified.tags)
+            index = nplike.asarray(simplified.index)
+            contents = [None] * len(simplified.contents)
+
+            # Compact indices
+            for i, content in enumerate(simplified.contents):
+                is_i = tags == i
+
+                # Wrap content in IndexedArray to old indices, in order to
+                # simplify the index for all types
+                wrapped_content = ak.layout.IndexedArray64(
+                    ak.layout.Index64(index[is_i]), content
+                )
+                contents[i] = apply(wrapped_content, depth, posaxis)
+                index[is_i] = nplike.arange(nplike.sum(is_i))
+
+            return ak.layout.UnionArray8_64(
+                ak.layout.Index8(tags),
+                ak.layout.Index64(index),
+                contents,
+            )
 
         # Finally, fall through to failure
         raise NotImplementedError
