@@ -17,3 +17,8 @@ def test_indexed_numpy_array():
 
     assert isinstance(packed, ak.layout.NumpyArray)
     assert len(packed) == len(index)
+
+
+def test_empty_array():
+    layout = ak.layout.EmptyArray()
+    assert ak.packed(layout, highlevel=False) is layout
