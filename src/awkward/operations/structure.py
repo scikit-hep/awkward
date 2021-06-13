@@ -2184,11 +2184,7 @@ def packed(array, axis=None, highlevel=True):
         # or are proxies to other arrays (e.g. VirtualArray)
         if isinstance(
             layout,
-            (
-                ak.layout.EmptyArray,
-                ak.layout.VirtualArray,
-                ak.layout.RegularArray,
-            ),
+            (ak.layout.EmptyArray, ak.layout.VirtualArray),
         ):
             return layout
 
@@ -2280,6 +2276,22 @@ def packed(array, axis=None, highlevel=True):
                 len(layout),
                 layout.identities,
                 layout.parameters,
+            )
+
+        if isinstance(layout, ak.layout.RegularArray):
+            if not len(layout):
+                return layout
+
+            content = layout.content
+
+            # Truncate content if it is larger than a perfect
+            # multiple of the RegularArray size
+            n, r = divmod(len(content), layout.size)
+            if r:
+                content = truncate(content, r * layout.size)
+
+            return ak.layout.RegularArray(
+                apply(content, depth + 1, posaxis), layout.size
             )
 
         # Finally, fall through to failure
