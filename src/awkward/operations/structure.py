@@ -2294,6 +2294,20 @@ def packed(array, axis=None, highlevel=True):
                 apply(content, depth + 1, posaxis), layout.size
             )
 
+        if isinstance(layout, ak.layout.BitMaskedArray):
+            if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
+                return apply(layout.toIndexedOptionArray64(), depth, posaxis)
+
+            return ak.layout.BitMaskedArray(
+                layout.mask,
+                apply(truncate(layout.content, len(layout)), depth, posaxis),
+                layout.valid_when,
+                len(layout),
+                layout.lsb_order,
+                layout.identities,
+                layout.parameters,
+            )
+
         # Finally, fall through to failure
         raise NotImplementedError
 
