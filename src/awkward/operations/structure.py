@@ -2193,7 +2193,15 @@ def packed(array, axis=None, highlevel=True):
             if isinstance(layout.content, ak._util.optiontypes):
                 return apply(layout.simplify(), depth, posaxis)
 
-            return apply(layout.project(), depth, posaxis)
+            index = nplike.asarray(layout.index)
+
+            n_options = nplike.sum(index < 0)
+            index[:n_options] = -1
+            index[n_options:] = nplike.arange(len(index) - n_options)
+
+            return ak.layout.IndexedOptionArray64(
+                ak.layout.Index64(index), apply(layout.project(), depth, posaxis)
+            )
 
         # Project indexed arrays
         if isinstance(layout, ak._util.indexedtypes):
