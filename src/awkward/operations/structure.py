@@ -2228,25 +2228,26 @@ def packed(array, axis=None, highlevel=True):
                 new_layout.parameters,
             )
 
+        # UnmaskedArray just wraps another array
         if isinstance(layout, ak.layout.UnmaskedArray):
             return ak.layout.UnmaskedArray(apply(layout.content, depth, posaxis))
 
         # UnionArrays can be simplified
         # and their contents too
         if isinstance(layout, ak._util.uniontypes):
-            simplified = layout.simplify()
+            layout = layout.simplify()
 
             # If we managed to lose the drop type entirely
-            if not isinstance(simplified, ak._util.uniontypes):
-                return apply(simplified, depth, posaxis)
+            if not isinstance(layout, ak._util.uniontypes):
+                return apply(layout, depth, posaxis)
 
             # Pack simplified layout
-            tags = nplike.asarray(simplified.tags)
-            index = nplike.asarray(simplified.index)
-            contents = [None] * len(simplified.contents)
+            tags = nplike.asarray(layout.tags)
+            index = nplike.asarray(layout.index)
+            contents = [None] * len(layout.contents)
 
             # Compact indices
-            for i, content in enumerate(simplified.contents):
+            for i, content in enumerate(layout.contents):
                 is_i = tags == i
 
                 # Wrap content in IndexedArray to old indices, in order to
@@ -2261,8 +2262,8 @@ def packed(array, axis=None, highlevel=True):
                 ak.layout.Index8(tags),
                 ak.layout.Index64(index),
                 contents,
-                simplified.identities,
-                simplified.parameters,
+                layout.identities,
+                layout.parameters,
             )
 
         # RecordArray contents can be truncated
@@ -2278,6 +2279,7 @@ def packed(array, axis=None, highlevel=True):
                 layout.parameters,
             )
 
+        # RegularArrays can change length
         if isinstance(layout, ak.layout.RegularArray):
             if not len(layout):
                 return layout
@@ -2294,7 +2296,10 @@ def packed(array, axis=None, highlevel=True):
                 apply(content, depth + 1, posaxis), layout.size
             )
 
+        # BitMaskedArrays can change length
         if isinstance(layout, ak.layout.BitMaskedArray):
+            layout = layout.simplify()
+
             if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
                 return apply(layout.toIndexedOptionArray64(), depth, posaxis)
 
@@ -2308,7 +2313,10 @@ def packed(array, axis=None, highlevel=True):
                 layout.parameters,
             )
 
+        # ByteMaskedArrays can change length
         if isinstance(layout, ak.layout.ByteMaskedArray):
+            layout = layout.simplify()
+
             if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
                 return apply(layout.toIndexedOptionArray64(), depth, posaxis)
 
