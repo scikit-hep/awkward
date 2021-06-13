@@ -2254,15 +2254,10 @@ def packed(array, axis=None, highlevel=True):
             new_index = nplike.zeros_like(index)
 
             # Compact indices
-            for i, content in enumerate(layout.contents):
+            for i in range(len(layout.contents)):
                 is_i = tags == i
 
-                # Wrap content in IndexedArray to old indices, in order to
-                # simplify the index for all types
-                wrapped_content = ak.layout.IndexedArray64(
-                    ak.layout.Index64(index[is_i]), content
-                )
-                new_contents[i] = apply(wrapped_content, depth, posaxis)
+                new_contents[i] = apply(layout.project(i), depth, posaxis)
                 new_index[is_i] = nplike.arange(nplike.sum(is_i))
 
             return ak.layout.UnionArray8_64(
