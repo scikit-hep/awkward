@@ -2260,6 +2260,8 @@ def packed(array, axis=None, highlevel=True):
                 ak.layout.Index8(tags),
                 ak.layout.Index64(index),
                 contents,
+                simplified.identities,
+                simplified.parameters,
             )
 
         # Finally, fall through to failure
