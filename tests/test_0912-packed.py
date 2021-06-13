@@ -22,3 +22,22 @@ def test_indexed_numpy_array():
 def test_empty_array():
     layout = ak.layout.EmptyArray()
     assert ak.packed(layout, highlevel=False) is layout
+
+
+def test_virtual_array():
+    n_called = [0]
+
+    def generate():
+        n_called[0] += 1
+        return ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+
+    generator = ak.layout.ArrayGenerator(
+        generate, form=ak.forms.NumpyForm([], 8, "d"), length=5
+    )
+    layout = ak.layout.VirtualArray(generator)
+    assert n_called[0] == 0
+    packed = ak.packed(layout, highlevel=False)
+    assert n_called[0] == 1
+
+    assert isinstance(packed, ak.layout.NumpyArray)
+    assert ak.to_list(packed) == [1.1, 2.2, 3.3, 4.4, 5.5]
