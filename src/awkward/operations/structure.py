@@ -2173,6 +2173,9 @@ def packed(array, axis=None, highlevel=True):
     )
     nplike = ak.nplike.of(layout)
 
+    def truncate(layout, n):
+        return ak.layout.IndexedArray64(ak.layout.Index64(nplike.arange(n)), layout)
+
     def apply(layout, depth, posaxis):
         if isinstance(layout, ak.layout.NumpyArray):
             return layout.contiguous()
@@ -2232,6 +2235,8 @@ def packed(array, axis=None, highlevel=True):
         if isinstance(layout, ak.layout.UnmaskedArray):
             return ak.layout.UnmaskedArray(apply(layout.content, depth, posaxis))
 
+        # UnionArrays can be simplified
+        # and their contents too
         if isinstance(layout, ak._util.uniontypes):
             simplified = layout.simplify()
 
@@ -2262,6 +2267,19 @@ def packed(array, axis=None, highlevel=True):
                 contents,
                 simplified.identities,
                 simplified.parameters,
+            )
+
+        # RecordArray contents can be truncated
+        if isinstance(layout, ak.layout.RecordArray):
+            return ak.layout.RecordArray(
+                [
+                    apply(truncate(c, len(layout)), depth, posaxis)
+                    for c in layout.contents
+                ],
+                layout.recordlookup,
+                len(layout),
+                layout.identities,
+                layout.parameters,
             )
 
         # Finally, fall through to failure
