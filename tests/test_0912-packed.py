@@ -13,7 +13,7 @@ def test_indexed_numpy_array():
     layout = ak.layout.IndexedArray64(index, content)
 
     packed = ak.packed(layout, highlevel=False)
-    assert ak.to_list(layout) == ak.to_list(packed)
+    assert ak.to_list(packed) == ak.to_list(layout)
 
     assert isinstance(packed, ak.layout.NumpyArray)
     assert len(packed) == len(index)
@@ -40,4 +40,4 @@ def test_virtual_array():
     assert n_called[0] == 1
 
     assert isinstance(packed, ak.layout.NumpyArray)
-    assert ak.to_list(packed) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(packed) == ak.to_list(layout)
