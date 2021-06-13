@@ -7,6 +7,16 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
+def test_numpy_array():
+    matrix = np.arange(64).reshape(8, -1)
+    layout = ak.layout.NumpyArray(matrix[:, 0])
+    assert not layout.iscontiguous
+
+    packed = ak.packed(layout, highlevel=False)
+    assert ak.to_list(packed) == ak.to_list(layout)
+    assert packed.iscontiguous
+
+
 def test_indexed_numpy_array():
     index = ak.layout.Index64(np.array([0, 1, 2, 3, 6, 7, 8]))
     content = ak.layout.NumpyArray(np.arange(10))
