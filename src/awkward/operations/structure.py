@@ -2190,12 +2190,14 @@ def packed(array, axis=None, highlevel=True):
                 return apply(layout.simplify(), depth, posaxis)
 
             index = nplike.asarray(layout.index)
-            n_options = nplike.sum(index < 0)
-            index[:n_options] = -1
-            index[n_options:] = nplike.arange(len(index) - n_options)
+            new_index = nplike.zeros_like(index)
+
+            is_none = index < 0
+            new_index[is_none] = -1
+            new_index[~is_none] = nplike.arange(len(new_index) - nplike.sum(is_none))
 
             return ak.layout.IndexedOptionArray64(
-                ak.layout.Index64(index), apply(layout.project(), depth, posaxis)
+                ak.layout.Index64(new_index), apply(layout.project(), depth, posaxis)
             )
 
         # Project indexed arrays
@@ -2247,7 +2249,9 @@ def packed(array, axis=None, highlevel=True):
             # Pack simplified layout
             tags = nplike.asarray(layout.tags)
             index = nplike.asarray(layout.index)
-            contents = [None] * len(layout.contents)
+
+            new_contents = [None] * len(layout.contents)
+            new_index = nplike.zeros_like(index)
 
             # Compact indices
             for i, content in enumerate(layout.contents):
@@ -2258,13 +2262,13 @@ def packed(array, axis=None, highlevel=True):
                 wrapped_content = ak.layout.IndexedArray64(
                     ak.layout.Index64(index[is_i]), content
                 )
-                contents[i] = apply(wrapped_content, depth, posaxis)
-                index[is_i] = nplike.arange(nplike.sum(is_i))
+                new_contents[i] = apply(wrapped_content, depth, posaxis)
+                new_index[is_i] = nplike.arange(nplike.sum(is_i))
 
             return ak.layout.UnionArray8_64(
                 ak.layout.Index8(tags),
-                ak.layout.Index64(index),
-                contents,
+                ak.layout.Index64(new_index),
+                new_contents,
                 layout.identities,
                 layout.parameters,
             )
