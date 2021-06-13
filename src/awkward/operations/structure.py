@@ -2180,12 +2180,8 @@ def packed(array, axis=None, highlevel=True):
         if isinstance(layout, ak.layout.NumpyArray):
             return layout.contiguous()
 
-        # Do not handle arrays which either leave length + order unchanged
-        # or are proxies to other arrays (e.g. VirtualArray)
-        if isinstance(
-            layout,
-            (ak.layout.EmptyArray, ak.layout.VirtualArray),
-        ):
+        # EmptyArray is a no-op
+        if isinstance(layout, ak.layout.EmptyArray):
             return layout
 
         # Project indexed arrays
@@ -2194,7 +2190,6 @@ def packed(array, axis=None, highlevel=True):
                 return apply(layout.simplify(), depth, posaxis)
 
             index = nplike.asarray(layout.index)
-
             n_options = nplike.sum(index < 0)
             index[:n_options] = -1
             index[n_options:] = nplike.arange(len(index) - n_options)
@@ -2335,6 +2330,9 @@ def packed(array, axis=None, highlevel=True):
                 layout.identities,
                 layout.parameters,
             )
+
+        if isinstance(layout, ak.layout.VirtualArray):
+            return apply(layout.array, depth, posaxis)
 
         # Finally, fall through to failure
         raise NotImplementedError
