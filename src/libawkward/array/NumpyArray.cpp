@@ -5688,6 +5688,9 @@ namespace awkward {
         std::string("FIXME: as_type for complex256 not implemented")
         + FILENAME(__LINE__));
       break;
+    case util::dtype::datetime64:
+       ptr = cast_to_type<int64_t>(data, length);
+       break;
     default:
       throw std::invalid_argument(
         std::string("cannot recast NumpyArray with format \"")
