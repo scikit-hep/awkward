@@ -82,6 +82,23 @@ def test_unmasked_array():
     assert ak.to_list(packed) == ak.to_list(layout)
 
 
+def test_union_array():
+    a = ak.layout.NumpyArray(np.arange(4))
+    b = ak.layout.NumpyArray(np.arange(4) + 4)
+    c = ak.layout.RegularArray(ak.layout.NumpyArray(np.arange(12)), 3)
+    layout = ak.layout.UnionArray8_64(
+        ak.layout.Index8([1, 1, 2, 2, 0, 0]),
+        ak.layout.Index64([0, 1, 0, 1, 0, 1]),
+        [a, b, c],
+    )
+    packed = ak.packed(layout, highlevel=False)
+    assert ak.to_list(packed) == ak.to_list(layout)
+    # Check that it merges like contents
+    assert len(packed.contents) == 2
+    index_0 = np.asarray(packed.index)[np.asarray(packed.tags) == 0]
+    assert index_0.tolist() == [0, 1, 2, 3]
+
+
 def test_virtual_array():
     n_called = [0]
 
