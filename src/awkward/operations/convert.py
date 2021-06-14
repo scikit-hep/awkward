@@ -3980,7 +3980,10 @@ def to_buffers(
         >>> ak.partitions(reconstituted)
         [3, 1, 3, 1]
 
-    See also #ak.from_buffers.
+    If you intend to use this function for saving data, you may want to pack it
+    first with #ak.packed.
+
+    See also #ak.from_buffers and #ak.packed.
     """
     if container is None:
         container = {}
