@@ -2180,11 +2180,11 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             return layout.contiguous()
 
         # EmptyArray is a no-op
-        if isinstance(layout, ak.layout.EmptyArray):
+        elif isinstance(layout, ak.layout.EmptyArray):
             return layout
 
         # Project indexed arrays
-        if isinstance(layout, ak._util.indexedoptiontypes):
+        elif isinstance(layout, ak._util.indexedoptiontypes):
             if isinstance(layout.content, ak._util.optiontypes):
                 return apply(layout.simplify(), depth, posaxis)
 
@@ -2200,11 +2200,11 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             )
 
         # Project indexed arrays
-        if isinstance(layout, ak._util.indexedtypes):
+        elif isinstance(layout, ak._util.indexedtypes):
             return apply(layout.project(), depth, posaxis)
 
         # ListArray performs both ordering and resizing
-        if isinstance(
+        elif isinstance(
             layout,
             (
                 ak.layout.ListArray32,
@@ -2215,7 +2215,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             return apply(layout.toListOffsetArray64(True), depth, posaxis)
 
         # ListOffsetArray performs resizing
-        if isinstance(
+        elif isinstance(
             layout,
             (
                 ak.layout.ListOffsetArray32,
@@ -2232,12 +2232,12 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             )
 
         # UnmaskedArray just wraps another array
-        if isinstance(layout, ak.layout.UnmaskedArray):
+        elif isinstance(layout, ak.layout.UnmaskedArray):
             return ak.layout.UnmaskedArray(apply(layout.content, depth, posaxis))
 
         # UnionArrays can be simplified
         # and their contents too
-        if isinstance(layout, ak._util.uniontypes):
+        elif isinstance(layout, ak._util.uniontypes):
             layout = layout.simplify()
 
             # If we managed to lose the drop type entirely
@@ -2267,7 +2267,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             )
 
         # RecordArray contents can be truncated
-        if isinstance(layout, ak.layout.RecordArray):
+        elif isinstance(layout, ak.layout.RecordArray):
             return ak.layout.RecordArray(
                 [
                     apply(truncate(c, len(layout)), depth, posaxis)
@@ -2280,7 +2280,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             )
 
         # RegularArrays can change length
-        if isinstance(layout, ak.layout.RegularArray):
+        elif isinstance(layout, ak.layout.RegularArray):
             if not len(layout):
                 return layout
 
@@ -2297,7 +2297,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             )
 
         # BitMaskedArrays can change length
-        if isinstance(layout, ak.layout.BitMaskedArray):
+        elif isinstance(layout, ak.layout.BitMaskedArray):
             layout = layout.simplify()
 
             if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
@@ -2314,7 +2314,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             )
 
         # ByteMaskedArrays can change length
-        if isinstance(layout, ak.layout.ByteMaskedArray):
+        elif isinstance(layout, ak.layout.ByteMaskedArray):
             layout = layout.simplify()
 
             if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
@@ -2328,7 +2328,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
                 layout.parameters,
             )
 
-        if isinstance(layout, ak.layout.VirtualArray):
+        elif isinstance(layout, ak.layout.VirtualArray):
             return apply(layout.array, depth, posaxis)
 
         # Finally, fall through to failure
