@@ -2164,9 +2164,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
     nplike = ak.nplike.of(layout)
 
     def truncate(layout, n):
-        return ak.layout.IndexedArray64(
-            ak.layout.Index64(nplike.arange(n)), layout
-        ).project()
+        return layout[:n]
 
     def apply(layout, depth, posaxis):
         if posaxis is not None:
