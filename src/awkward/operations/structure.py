@@ -2157,7 +2157,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
         return out
 
 
-def packed(array, axis=None, highlevel=True):
+def packed(array, axis=None, highlevel=True, behavior=None):
     """
     Args:
         array: Array to simplify.
@@ -2167,6 +2167,8 @@ def packed(array, axis=None, highlevel=True):
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
     """
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
@@ -2339,7 +2341,7 @@ def packed(array, axis=None, highlevel=True):
     out = apply(layout, 1, axis)
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     return out
 
 
