@@ -127,6 +127,19 @@ def test_bit_masked_aray():
     assert len(packed.content) == 8
 
 
+def test_byte_masked_aray():
+    mask = ak.layout.Index8(np.array([1, 0, 1, 0, 1, 0, 1, 0]))
+    content = ak.layout.NumpyArray(np.arange(16))
+    layout = ak.layout.ByteMaskedArray(
+        mask,
+        content,
+        False,
+    )
+    packed = ak.packed(layout, highlevel=False)
+    assert ak.to_list(packed) == ak.to_list(layout)
+    assert len(packed.content) == 8
+
+
 def test_virtual_array():
     n_called = [0]
 
