@@ -60,6 +60,19 @@ def test_list_array():
     assert packed.offsets[0] == 0
 
 
+def test_list_offset_array():
+    content = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6]))
+    layout = ak.layout.ListOffsetArray64(offsets, content)
+
+    packed = ak.packed(layout, highlevel=False)
+    assert ak.to_list(packed) == ak.to_list(layout)
+    assert isinstance(packed, ak.layout.ListOffsetArray64)
+    assert packed.offsets[0] == 0
+
+
 def test_virtual_array():
     n_called = [0]
 
