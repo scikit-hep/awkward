@@ -1584,7 +1584,7 @@ def concatenate(
                     if isinstance(x, ak._util.optiontypes) and isinstance(
                         x.content, ak._util.listtypes
                     ):
-                        nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
+                        nextinputs.append(fill_none(x, [], highlevel=False))
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
@@ -2700,7 +2700,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
         return out
 
 
-def fill_none(array, value, axis=None, highlevel=True, behavior=None):
+def fill_none(array, value, axis=0, highlevel=True, behavior=None):
     """
     Args:
         array: Data in which to replace None with a given value.
