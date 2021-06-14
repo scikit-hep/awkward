@@ -2332,7 +2332,12 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             return apply(layout.array, depth, posaxis)
 
         # Finally, fall through to failure
-        raise NotImplementedError
+        else:
+            raise AssertionError(
+                "unrecognized layout: "
+                + repr(layout)
+                + ak._util.exception_suffix(__file__)
+            )
 
     out = apply(layout, 1, axis)
 
