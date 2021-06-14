@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import numbers
 import json
+import warnings
 
 try:
     from collections.abc import Iterable
@@ -2700,7 +2701,10 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
         return out
 
 
-def fill_none(array, value, axis=0, highlevel=True, behavior=None):
+AXIS_UNSET = object()
+
+
+def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
     """
     Args:
         array: Data in which to replace None with a given value.
@@ -2746,14 +2750,17 @@ def fill_none(array, value, axis=0, highlevel=True, behavior=None):
     )
     nplike = ak.nplike.of(arraylayout)
 
-    def getfunction(layout, depth, posaxis, apply):
-        # If the user specifies an axis
-        if posaxis is not None:
-            posaxis = layout.axis_wrap_if_negative(posaxis)
-            # Then only apply to that axis
-            if posaxis != depth - 1:
-                return posaxis
-
+    # Add a condition for the "old" behaviour
+    if axis is AXIS_UNSET:
+        if ak.deprecations_as_errors:
+            raise ValueError(
+                "ak.fill_none needs an explicit axis because the default will change in version 1.4.0"
+            )
+        warnings.warn(
+            """In version 1.4.0 (target date: August 1, 2021), the default axis for fill_none will be `None`
+(Set ak.deprecations_as_errors = True to get a stack trace now.)""",
+            FutureWarning,
+        )
         if (
             isinstance(value, Iterable)
             and not (
@@ -2777,14 +2784,52 @@ def fill_none(array, value, axis=0, highlevel=True, behavior=None):
             valuelayout = ak.operations.convert.to_layout(
                 [value], allow_record=False, allow_other=False
             )
-        if isinstance(layout, ak._util.optiontypes):
-            return lambda: apply(layout.fillna(valuelayout), depth, posaxis)
-        else:
-            return posaxis
+        out = arraylayout.fillna(valuelayout)
+    # Otherwise implement new explicit axis
+    else:
 
-    out = ak._util.recursively_apply(
-        arraylayout, getfunction, pass_user=True, pass_apply=True, user=axis
-    )
+        def getfunction(layout, depth, posaxis, apply):
+            # If the user specifies an axis
+            if posaxis is not None:
+                posaxis = layout.axis_wrap_if_negative(posaxis)
+                # Then only apply to that axis
+                if posaxis != depth - 1:
+                    return posaxis
+
+            if (
+                isinstance(value, Iterable)
+                and not (
+                    isinstance(value, (str, bytes))
+                    or (ak._util.py27 and isinstance(value, ak._util.unicode))
+                )
+                or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
+            ):
+                valuelayout = ak.operations.convert.to_layout(
+                    value, allow_record=True, allow_other=False
+                )
+                if isinstance(valuelayout, ak.layout.Record):
+                    valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
+                elif len(valuelayout) == 0:
+                    offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
+                    valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
+                else:
+                    valuelayout = ak.layout.RegularArray(
+                        valuelayout, len(valuelayout), 1
+                    )
+
+            else:
+                valuelayout = ak.operations.convert.to_layout(
+                    [value], allow_record=False, allow_other=False
+                )
+            if isinstance(layout, ak._util.optiontypes):
+                return lambda: apply(layout.fillna(valuelayout), depth, posaxis)
+            else:
+                return posaxis
+
+        out = ak._util.recursively_apply(
+            arraylayout, getfunction, pass_user=True, pass_apply=True, user=axis
+        )
+
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
