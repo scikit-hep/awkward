@@ -2705,10 +2705,12 @@ def fill_none(array, value, axis=None, highlevel=True, behavior=None):
     Args:
         array: Data in which to replace None with a given value.
         value: Data with which to replace None.
-        axis (int): The dimension at which this operation is applied. The
-            outermost dimension is `0`, followed by `1`, etc., and negative
-            values count backward from the innermost: `-1` is the innermost
-            dimension, `-2` is the next level up, etc.
+        axis (None or int): If None, replace all None values in the array
+            with the given value; if an int, The dimension at which this
+            operation is applied. The outermost dimension is `0`, followed
+            by `1`, etc., and negative values count backward from the
+            innermost: `-1` is the innermost  dimension, `-2` is the next
+            level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
