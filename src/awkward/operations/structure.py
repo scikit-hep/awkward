@@ -2159,7 +2159,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
 def _packed(array, axis=None, highlevel=True, behavior=None):
     layout = ak.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False
+        array, allow_record=True, allow_other=False
     )
     nplike = ak.nplike.of(layout)
 
