@@ -111,10 +111,10 @@ def test_record_array():
 
 def test_regular_array():
     content = ak.layout.NumpyArray(np.arange(10))
-    layout = ak.layout.RegularArray(content, 4)
+    layout = ak.layout.RegularArray(content, 3)
     packed = ak.packed(layout, highlevel=False)
     assert ak.to_list(packed) == ak.to_list(layout)
-    assert len(packed.content) == 8
+    assert len(packed.content) == 9
     assert packed.size == layout.size
 
 
@@ -127,7 +127,7 @@ def test_bit_masked_aray():
     assert len(packed.content) == 8
 
 
-def test_byte_masked_aray():
+def test_byte_masked_array():
     mask = ak.layout.Index8(np.array([1, 0, 1, 0, 1, 0, 1, 0]))
     content = ak.layout.NumpyArray(np.arange(16))
     layout = ak.layout.ByteMaskedArray(
