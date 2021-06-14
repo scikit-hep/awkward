@@ -2289,7 +2289,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             # Truncate content if it is larger than a perfect
             # multiple of the RegularArray size
             n, r = divmod(len(content), layout.size)
-            if r:
+            if r != 0:
                 content = truncate(content, n * layout.size)
 
             return ak.layout.RegularArray(
