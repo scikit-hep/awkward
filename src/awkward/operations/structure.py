@@ -4239,10 +4239,13 @@ def values_astype(array, to, highlevel=True, behavior=None):
     to_dtype = np.dtype(to)
     to_str = _dtype_to_string.get(to_dtype)
     if to_str is None:
-        raise ValueError(
-            "cannot use {0} to cast the numeric type of an array".format(to_dtype)
-            + ak._util.exception_suffix(__file__)
-        )
+        if to_dtype.name.startswith("datetime64"):
+            to_str = to_dtype.name
+        else:
+            raise ValueError(
+                "cannot use {0} to cast the numeric type of an array".format(to_dtype)
+                + ak._util.exception_suffix(__file__)
+            )
 
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
