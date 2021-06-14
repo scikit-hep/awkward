@@ -109,6 +109,15 @@ def test_record_array():
     assert len(packed.contents[1]) == 5
 
 
+def test_regular_array():
+    content = ak.layout.NumpyArray(np.arange(10))
+    layout = ak.layout.RegularArray(content, 4)
+    packed = ak.packed(layout, highlevel=False)
+    assert ak.to_list(packed) == ak.to_list(layout)
+    assert len(packed.content) == 8
+    assert packed.size == layout.size
+
+
 def test_virtual_array():
     n_called = [0]
 
