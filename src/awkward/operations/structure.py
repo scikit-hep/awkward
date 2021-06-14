@@ -2701,6 +2701,50 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
         return out
 
 
+def _fill_none_deprecated(array, value, highlevel=True, behavior=None):
+    arraylayout = ak.operations.convert.to_layout(
+        array, allow_record=True, allow_other=False
+    )
+    nplike = ak.nplike.of(arraylayout)
+
+    if isinstance(arraylayout, ak.partition.PartitionedArray):
+        out = ak.partition.apply(
+            lambda x: fill_none(x, value, highlevel=False), arraylayout
+        )
+
+    else:
+        if (
+            isinstance(value, Iterable)
+            and not (
+                isinstance(value, (str, bytes))
+                or (ak._util.py27 and isinstance(value, ak._util.unicode))
+            )
+            or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
+        ):
+            valuelayout = ak.operations.convert.to_layout(
+                value, allow_record=True, allow_other=False
+            )
+            if isinstance(valuelayout, ak.layout.Record):
+                valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
+            elif len(valuelayout) == 0:
+                offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
+                valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
+            else:
+                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+
+        else:
+            valuelayout = ak.operations.convert.to_layout(
+                [value], allow_record=False, allow_other=False
+            )
+
+        out = arraylayout.fillna(valuelayout)
+
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
+    else:
+        return out
+
+
 AXIS_UNSET = object()
 
 
@@ -2745,10 +2789,6 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
 
     The values could be floating-point numbers or strings.
     """
-    arraylayout = ak.operations.convert.to_layout(
-        array, allow_record=True, allow_other=False
-    )
-    nplike = ak.nplike.of(arraylayout)
 
     # Add a condition for the "old" behaviour
     if axis is AXIS_UNSET:
@@ -2761,41 +2801,24 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
 (Set ak.deprecations_as_errors = True to get a stack trace now.)""",
             FutureWarning,
         )
-        if (
-            isinstance(value, Iterable)
-            and not (
-                isinstance(value, (str, bytes))
-                or (ak._util.py27 and isinstance(value, ak._util.unicode))
-            )
-            or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
-        ):
-            valuelayout = ak.operations.convert.to_layout(
-                value, allow_record=True, allow_other=False
-            )
-            if isinstance(valuelayout, ak.layout.Record):
-                valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
-            elif len(valuelayout) == 0:
-                offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
-                valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
-            else:
-                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+        return _fill_none_deprecated(
+            array, value, highlevel=highlevel, behavior=behavior
+        )
 
-        else:
-            valuelayout = ak.operations.convert.to_layout(
-                [value], allow_record=False, allow_other=False
-            )
-        out = arraylayout.fillna(valuelayout)
-    # Otherwise implement new explicit axis
-    else:
+    arraylayout = ak.operations.convert.to_layout(
+        array, allow_record=True, allow_other=False
+    )
+    nplike = ak.nplike.of(arraylayout)
 
-        def getfunction(layout, depth, posaxis, apply):
-            # If the user specifies an axis
-            if posaxis is not None:
-                posaxis = layout.axis_wrap_if_negative(posaxis)
-                # Then only apply to that axis
-                if posaxis != depth - 1:
-                    return posaxis
+    def getfunction(layout, depth, posaxis, apply):
+        # If the user specifies an axis
+        if posaxis is not None:
+            posaxis = layout.axis_wrap_if_negative(posaxis)
+            # Then only apply to that axis
+            if posaxis != depth - 1:
+                return posaxis
 
+        if isinstance(layout, ak._util.optiontypes):
             if (
                 isinstance(value, Iterable)
                 and not (
@@ -2816,19 +2839,18 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
                     valuelayout = ak.layout.RegularArray(
                         valuelayout, len(valuelayout), 1
                     )
-
             else:
                 valuelayout = ak.operations.convert.to_layout(
                     [value], allow_record=False, allow_other=False
                 )
-            if isinstance(layout, ak._util.optiontypes):
-                return lambda: apply(layout.fillna(valuelayout), depth, posaxis)
-            else:
-                return posaxis
+            return lambda: apply(layout.fillna(valuelayout), depth, posaxis)
 
-        out = ak._util.recursively_apply(
-            arraylayout, getfunction, pass_user=True, pass_apply=True, user=axis
-        )
+        else:
+            return posaxis
+
+    out = ak._util.recursively_apply(
+        arraylayout, getfunction, pass_user=True, pass_apply=True, user=axis
+    )
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
