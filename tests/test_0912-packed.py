@@ -157,3 +157,17 @@ def test_virtual_array():
 
     assert isinstance(packed, ak.layout.NumpyArray)
     assert ak.to_list(packed) == ak.to_list(layout)
+
+
+def test_axis():
+    content_0 = ak.layout.NumpyArray(np.arange(10))
+
+    offsets_1 = ak.layout.Index64(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+    content_1 = ak.layout.ListOffsetArray64(offsets_1, content_0)
+
+    layout = ak.layout.RegularArray(content_1, 3)
+
+    packed = ak.operations.structure._packed(layout, axis=0, highlevel=False)
+    assert ak.to_list(layout) == ak.to_list(packed)
+
+    assert np.asarray(packed.content.content).tolist() == np.asarray(content_0).tolist()
