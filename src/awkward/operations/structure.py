@@ -2157,28 +2157,25 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
         return out
 
 
-def packed(array, axis=None, highlevel=True, behavior=None):
-    """
-    Args:
-        array: Array to simplify.
-        axis (int): The dimension at which this operation is applied. The
-            outermost dimension is `0`, followed by `1`, etc., and negative
-            values count backward from the innermost: `-1` is the innermost
-            dimension, `-2` is the next level up, etc.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
-    """
+def _packed(array, axis=None, highlevel=True, behavior=None):
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     nplike = ak.nplike.of(layout)
 
     def truncate(layout, n):
-        return ak.layout.IndexedArray64(ak.layout.Index64(nplike.arange(n)), layout)
+        return ak.layout.IndexedArray64(
+            ak.layout.Index64(nplike.arange(n)), layout
+        ).project()
 
     def apply(layout, depth, posaxis):
+        if posaxis is not None:
+            # If a particular axis was given
+            posaxis = layout.axis_wrap_if_negative(posaxis)
+            # Do not proceed past that axis
+            if posaxis < depth - 1:
+                return layout
+
         if isinstance(layout, ak.layout.NumpyArray):
             return layout.contiguous()
 
@@ -2342,6 +2339,18 @@ def packed(array, axis=None, highlevel=True, behavior=None):
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     return out
+
+
+def packed(array, highlevel=True, behavior=None):
+    """
+    Args:
+        array: Array to simplify.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+    """
+    return _packed(array, highlevel=highlevel, behavior=behavior)
 
 
 def local_index(array, axis=-1, highlevel=True, behavior=None):
