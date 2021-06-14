@@ -2227,7 +2227,6 @@ def packed(array, axis=None, highlevel=True, behavior=None):
             ),
         ):
             new_layout = layout.toListOffsetArray64(True)
-
             return ak.layout.ListOffsetArray64(
                 new_layout.offsets,
                 apply(new_layout.content, depth + 1, posaxis),
@@ -2294,7 +2293,7 @@ def packed(array, axis=None, highlevel=True, behavior=None):
             # multiple of the RegularArray size
             n, r = divmod(len(content), layout.size)
             if r:
-                content = truncate(content, r * layout.size)
+                content = truncate(content, n * layout.size)
 
             return ak.layout.RegularArray(
                 apply(content, depth + 1, posaxis), layout.size
