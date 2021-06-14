@@ -73,6 +73,15 @@ def test_list_offset_array():
     assert packed.offsets[0] == 0
 
 
+def test_unmasked_array():
+    content = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    layout = ak.layout.UnmaskedArray(content)
+    packed = ak.packed(layout, highlevel=False)
+    assert ak.to_list(packed) == ak.to_list(layout)
+
+
 def test_virtual_array():
     n_called = [0]
 
