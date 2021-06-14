@@ -2329,6 +2329,11 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
         elif isinstance(layout, ak.layout.VirtualArray):
             return apply(layout.array, depth, posaxis)
 
+        elif isinstance(layout, ak.partition.PartitionedArray):
+            return ak.partition.IrregularlyPartitionedArray(
+                [apply(x, depth, posaxis) for x in layout.partitions]
+            )
+
         # Finally, fall through to failure
         else:
             raise AssertionError(
