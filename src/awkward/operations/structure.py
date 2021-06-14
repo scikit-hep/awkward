@@ -1584,7 +1584,7 @@ def concatenate(
                     if isinstance(x, ak._util.optiontypes) and isinstance(
                         x.content, ak._util.listtypes
                     ):
-                        nextinputs.append(fill_none(x, [], highlevel=False))
+                        nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
@@ -2700,7 +2700,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
         return out
 
 
-def fill_none(array, value, axis=1, highlevel=True, behavior=None):
+def fill_none(array, value, axis=None, highlevel=True, behavior=None):
     """
     Args:
         array: Data in which to replace None with a given value.
@@ -2744,46 +2744,44 @@ def fill_none(array, value, axis=1, highlevel=True, behavior=None):
     )
     nplike = ak.nplike.of(arraylayout)
 
-    def getfunction(layout, depth, posaxis):
-        posaxis = layout.axis_wrap_if_negative(posaxis)
-        if posaxis != depth - 1:
-            return posaxis
-        else:
-            if isinstance(layout, ak.partition.PartitionedArray):
-                return lambda: ak.partition.apply(
-                    lambda x: fill_none(x, value, highlevel=False), layout
-                )
+    def getfunction(layout, depth, posaxis, apply):
+        # If the user specifies an axis
+        if posaxis is not None:
+            posaxis = layout.axis_wrap_if_negative(posaxis)
+            # Then only apply to that axis
+            if posaxis != depth - 1:
+                return posaxis
 
-            if (
-                isinstance(value, Iterable)
-                and not (
-                    isinstance(value, (str, bytes))
-                    or (ak._util.py27 and isinstance(value, ak._util.unicode))
-                )
-                or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
-            ):
-                valuelayout = ak.operations.convert.to_layout(
-                    value, allow_record=True, allow_other=False
-                )
-                if isinstance(valuelayout, ak.layout.Record):
-                    valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
-                elif len(valuelayout) == 0:
-                    offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
-                    valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
-                else:
-                    valuelayout = ak.layout.RegularArray(
-                        valuelayout, len(valuelayout), 1
-                    )
-
+        if (
+            isinstance(value, Iterable)
+            and not (
+                isinstance(value, (str, bytes))
+                or (ak._util.py27 and isinstance(value, ak._util.unicode))
+            )
+            or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
+        ):
+            valuelayout = ak.operations.convert.to_layout(
+                value, allow_record=True, allow_other=False
+            )
+            if isinstance(valuelayout, ak.layout.Record):
+                valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
+            elif len(valuelayout) == 0:
+                offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
+                valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
             else:
-                valuelayout = ak.operations.convert.to_layout(
-                    [value], allow_record=False, allow_other=False
-                )
+                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
 
-            return lambda: layout.fillna(valuelayout)
+        else:
+            valuelayout = ak.operations.convert.to_layout(
+                [value], allow_record=False, allow_other=False
+            )
+        if isinstance(layout, ak._util.optiontypes):
+            return lambda: apply(layout.fillna(valuelayout), depth, posaxis)
+        else:
+            return posaxis
 
     out = ak._util.recursively_apply(
-        arraylayout, getfunction, pass_user=True, user=axis
+        arraylayout, getfunction, pass_user=True, pass_apply=True, user=axis
     )
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
