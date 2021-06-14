@@ -2206,6 +2206,7 @@ def packed(array, axis=None, highlevel=True, behavior=None):
         if isinstance(layout, ak._util.indexedtypes):
             return apply(layout.project(), depth, posaxis)
 
+        # ListOffsetArray performs resizing
         # ListArray performs both ordering and resizing
         if isinstance(
             layout,
@@ -2213,14 +2214,6 @@ def packed(array, axis=None, highlevel=True, behavior=None):
                 ak.layout.ListArray32,
                 ak.layout.ListArrayU32,
                 ak.layout.ListArray64,
-            ),
-        ):
-            return apply(layout.toListOffsetArray64(True), depth, posaxis)
-
-        # ListOffsetArray performs resizing
-        if isinstance(
-            layout,
-            (
                 ak.layout.ListOffsetArray32,
                 ak.layout.ListOffsetArray64,
                 ak.layout.ListOffsetArrayU32,
