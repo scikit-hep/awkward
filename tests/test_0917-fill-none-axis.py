@@ -21,6 +21,10 @@ def test_fill_none_axis_1():
 
 
 def test_fill_none_axis_none():
-    # Check default axis is all
-    filled = ak.fill_none(array, 10)
+    filled = ak.fill_none(array, 10, axis=None)
     assert ak.to_list(filled) == [[10, 2], 10, [4, 10]]
+
+
+def test_fill_none_axis_default():
+    filled = ak.fill_none(array, 10)
+    assert ak.to_list(filled) == [[None, 2], 10, [4, None]]
