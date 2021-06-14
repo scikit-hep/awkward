@@ -99,6 +99,16 @@ def test_union_array():
     assert index_0.tolist() == [0, 1, 2, 3]
 
 
+def test_record_array():
+    a = ak.layout.NumpyArray(np.arange(10))
+    b = ak.layout.NumpyArray(np.arange(10) * 2 + 4)
+    layout = ak.layout.RecordArray([a, b], None, 5)
+    packed = ak.packed(layout, highlevel=False)
+    assert ak.to_list(packed) == ak.to_list(layout)
+    assert len(packed.contents[0]) == 5
+    assert len(packed.contents[1]) == 5
+
+
 def test_virtual_array():
     n_called = [0]
 
