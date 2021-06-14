@@ -1100,6 +1100,7 @@ def recursively_apply(
     getfunction,
     pass_depth=True,
     pass_user=False,
+    pass_apply=False,
     user=None,
     keep_parameters=True,
     numpy_to_regular=False,
@@ -1113,6 +1114,8 @@ def recursively_apply(
             args = args + (depth,)
         if pass_user:
             args = args + (user,)
+        if pass_apply:
+            args = args + (apply,)
 
         custom = getfunction(layout, *args)
         if callable(custom):
