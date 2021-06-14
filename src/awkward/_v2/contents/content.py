@@ -2,8 +2,12 @@
 
 from __future__ import absolute_import
 
-from collections.abc import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 import numbers
+
 
 class Content(object):
     def __getitem__(self, where):
