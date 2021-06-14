@@ -159,6 +159,23 @@ def test_virtual_array():
     assert ak.to_list(packed) == ak.to_list(layout)
 
 
+def test_partitioned_array():
+    index_0 = ak.layout.Index64(np.array([0, 1, 2, 3, 6, 7, 8]))
+    content_0 = ak.layout.NumpyArray(np.arange(10))
+    content = ak.layout.IndexedArray64(index_0, content_0)
+    layout = ak.partitioned((content, content), highlevel=False)
+    packed = ak.packed(layout, highlevel=False)
+
+    assert ak.to_list(layout) == ak.to_list(packed)
+    assert isinstance(packed, ak.partition.PartitionedArray)
+
+    assert isinstance(packed.partitions[0], ak.layout.NumpyArray)
+    assert len(packed.partitions[0]) == len(index_0)
+
+    assert isinstance(packed.partitions[1], ak.layout.NumpyArray)
+    assert len(packed.partitions[1]) == len(index_0)
+
+
 def test_axis():
     content_0 = ak.layout.NumpyArray(np.arange(10))
 
