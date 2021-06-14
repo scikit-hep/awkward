@@ -2334,6 +2334,12 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
                 [apply(x, depth, posaxis) for x in layout.partitions]
             )
 
+        elif isinstance(layout, ak.layout.Record):
+            return ak.layout.Record(
+                apply(layout.array, depth, posaxis),
+                layout.at,
+            )
+
         # Finally, fall through to failure
         else:
             raise AssertionError(
