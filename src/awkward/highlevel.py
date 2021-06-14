@@ -1448,7 +1448,8 @@ class Array(
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self.layout)
+        packed = ak.operations.structure.packed(self.layout, highlevel=False)
+        form, length, container = ak.operations.convert.to_buffers(packed)
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -2033,12 +2034,13 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self.layout.array)
+        packed = ak.operations.structure.packed(self._layout, highlevel=False)
+        form, length, container = ak.operations.convert.to_buffers(packed.array)
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form, length, container, behavior, self.layout.at
+        return form, length, container, behavior, packed.at
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
