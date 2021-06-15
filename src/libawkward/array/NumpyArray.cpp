@@ -995,8 +995,8 @@ namespace awkward {
   void
   NumpyArray::nbytes_part(std::map<size_t, int64_t>& largest) const {
     int64_t len = 1;
-    if (!shape_.empty()) {
-      len = shape_[0];
+    for (auto size: shape_) {
+      len *= size;
     }
     size_t x = (size_t)ptr_.get();
     auto it = largest.find(x);
