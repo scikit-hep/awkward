@@ -30,3 +30,19 @@ def test_modulo_units():
 
     array2 = ak.values_astype(ak.Array([1]), np.dtype("datetime64[10s/2]"))
     assert array2.to_list() == [np.datetime64("1970-01-01T00:00:05.000", "5000ms")]
+
+
+def test_float_values_astype_datetime():
+    array = ak.Array([1.9999, 1567416600000, 0, None, 11, 0.555])
+    assert str(array.type) == "6 * ?float64"
+
+    dt_array = ak.values_astype(array, "datetime64[ms]")
+    assert str(dt_array.type) == "6 * ?datetime64"
+    assert dt_array.to_list() == [
+        np.datetime64("1970-01-01T00:00:00.001"),
+        np.datetime64("2019-09-02T09:30:00.000"),
+        np.datetime64("1970-01-01T00:00:00.000"),
+        None,
+        np.datetime64("1970-01-01T00:00:00.011"),
+        np.datetime64("1970-01-01T00:00:00.000"),
+    ]
