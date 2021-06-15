@@ -78,6 +78,57 @@ The function that reverses [ak.to_buffers](https://awkward-array.readthedocs.io/
 ak.from_buffers(form, length, container)
 ```
 
+Minimizing the size of the output buffers
+-----------------------------------------
+
+The [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html)/[ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) functions exactly preserve an array, warts and all. Often, you'll want to only write [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html) arrays. "Packing" replaces an array structure with an equivalent structure that has no unreachable elements—data that you can't see as part of the array, and therefore probably don't want to write.
+
+Here is an example of an array in need of packing:
+
+```{code-cell} ipython3
+unpacked = ak.Array(
+    ak.layout.ListArray64(
+        ak.layout.Index64(np.array([4, 10, 1])),
+        ak.layout.Index64(np.array([7, 10, 3])),
+        ak.layout.NumpyArray(
+            np.array([999, 4.4, 5.5, 999, 1.1, 2.2, 3.3, 999])
+        )
+    )
+)
+unpacked
+```
+
+This [ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) is in a strange order and the `999` values are unreachable. (Also, using `starts[1] == stops[1] == 10` to represent an empty list is a little odd, though allowed by the specification.)
+
+The [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) function dutifully writes the `999` values into the output, even though they're not visible in the array.
+
+```{code-cell} ipython3
+ak.to_buffers(unpacked)
+```
+
+If the intended purpose of calling [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) is to write to a file or send data over a network, this is wasted space. It can be trimmed by calling the [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html) function.
+
+```{code-cell} ipython3
+packed = ak.packed(unpacked)
+packed
+```
+
+At high-level, the array appears to be the same, but its low-level structure is quite different:
+
+```{code-cell} ipython3
+unpacked.layout
+```
+
+```{code-cell} ipython3
+packed.layout
+```
+
+This version of the array is more concise when written with [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html):
+
+```{code-cell} ipython3
+ak.to_buffers(packed)
+```
+
 Saving Awkward Arrays to HDF5
 -----------------------------
 
@@ -89,10 +140,10 @@ group = file.create_group("awkward")
 group
 ```
 
-We can fill this `group` as a `container` by passing it in to [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html).
+We can fill this `group` as a `container` by passing it in to [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html). (See the previous section for more on [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html).)
 
 ```{code-cell} ipython3
-form, length, container = ak.to_buffers(ak_array, container=group)
+form, length, container = ak.to_buffers(ak.packed(ak_array), container=group)
 ```
 
 ```{code-cell} ipython3
