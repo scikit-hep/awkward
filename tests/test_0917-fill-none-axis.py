@@ -26,6 +26,8 @@ def test_fill_none_axis_none():
 
 
 def test_fill_none_axis_deprecated():
+    ak.deprecations_as_errors = False
+
     filled = ak.fill_none(array, 10)
     assert ak.to_list(filled) == [[None, 2], 10, [4, None]]
 
