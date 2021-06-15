@@ -49,7 +49,7 @@ PYBIND11_MODULE(_ext, m) {
 
   make_Iterator(m, "Iterator");
   make_ArrayBuilder(m, "ArrayBuilder");
-  make_TypedArrayBuilder(m, "TypedArrayBuilder");
+  make_LayoutBuilder(m, "LayoutBuilder");
   make_PersistentSharedPtr(m, "_PersistentSharedPtr");
   make_Content(m, "Content");
 
