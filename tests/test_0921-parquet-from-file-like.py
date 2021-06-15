@@ -8,6 +8,9 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
+pytest.importorskip("pyarrow.parquet")
+
+
 def test():
     array = ak.Array([1, 2, 3])
     file_ = io.BytesIO()
