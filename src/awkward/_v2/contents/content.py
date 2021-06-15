@@ -8,16 +8,47 @@ except ImportError:
     from collections import Iterable
 import numbers
 
+import awkward as ak
+
+np = ak.nplike.NumpyMetadata.instance()
+
 
 class Content(object):
     def __getitem__(self, where):
         if isinstance(where, numbers.Integral):
             return self._getitem_at(where)
+
         elif isinstance(where, slice) and where.step is None:
             return self._getitem_range(where)
+
         elif isinstance(where, str):
             return self._getitem_field(where)
+
+        elif where is np.newaxis:
+            raise NotImplementedError("needs _getitem_next")
+
+        elif where is Ellipsis:
+            raise NotImplementedError("needs _getitem_next")
+
+        elif isinstance(where, tuple):
+            raise NotImplementedError("needs _getitem_next")
+
+        elif isinstance(where, ak.highlevel.Array):
+            raise NotImplementedError("needs _getitem_next")
+
+        elif isinstance(where, Content):
+            raise NotImplementedError("needs _getitem_next")
+
         elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
             return self._getitem_fields(where)
+
+        elif isinstance(where, Iterable):
+            raise NotImplementedError("needs _getitem_next")
+
         else:
-            raise AssertionError(where)
+            raise TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "and integer or boolean arrays (possibly with variable-length nested "
+                "lists or missing values) are valid indices for slicing, not"
+                "\n\n    {0}".format(repr(where))
+            )

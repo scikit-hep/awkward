@@ -17,9 +17,7 @@ def test_EmptyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
-    with pytest.raises(AssertionError):
-        a["bad", 4, 4]
+        a[["bad", "good", "ok"]]
 
 
 def test_NumpyArray():
@@ -40,7 +38,7 @@ def test_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
+        a[["bad", "good", "ok"]]
 
     b = ak._v2.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
@@ -56,7 +54,7 @@ def test_NumpyArray():
     with pytest.raises(IndexError):
         b["bad"]
     with pytest.raises(IndexError):
-        b["bad", "good", "ok"]
+        b[["bad", "good", "ok"]]
 
 
 def test_RegularArray_NumpyArray():
@@ -84,7 +82,7 @@ def test_RegularArray_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
+        a[["bad", "good", "ok"]]
 
     b = ak._v2.contents.regulararray.RegularArray(
         ak._v2.contents.emptyarray.EmptyArray(), 0, zeros_length=10
@@ -98,7 +96,7 @@ def test_RegularArray_NumpyArray():
     with pytest.raises(IndexError):
         b["bad"]
     with pytest.raises(IndexError):
-        b["bad", "good", "ok"]
+        b[["bad", "good", "ok"]]
 
 
 def test_ListArray_NumpyArray():
@@ -133,7 +131,7 @@ def test_ListArray_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
+        a[["bad", "good", "ok"]]
 
 
 def test_ListOffsetArray_NumpyArray():
@@ -164,7 +162,7 @@ def test_ListOffsetArray_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
+        a[["bad", "good", "ok"]]
 
 
 def test_RecordArray_NumpyArray():
@@ -197,8 +195,8 @@ def test_RecordArray_NumpyArray():
     with pytest.raises(IndexError):
         a["z"]
     with pytest.raises(IndexError):
-        a["x", "z"]
-    assert len(a["x", "y"]) == 2
+        a[["x", "z"]]
+    assert len(a[["x", "y"]]) == 2
 
     # 5.5 is inaccessible
     b = ak._v2.contents.recordarray.RecordArray(
@@ -228,7 +226,7 @@ def test_RecordArray_NumpyArray():
     assert b["1"][-3] == 2.2
     with pytest.raises(IndexError):
         a["2"]
-    assert len(b["0", "1"]) == 2
+    assert len(b[["0", "1"]]) == 2
 
     c = ak._v2.contents.recordarray.RecordArray([], [], 10)
     assert len(c) == 10
@@ -284,7 +282,7 @@ def test_IndexedArray_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
+        a[["bad", "good", "ok"]]
 
 
 def test_IndexedOptionArray_NumpyArray():
@@ -324,7 +322,7 @@ def test_IndexedOptionArray_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
+        a[["bad", "good", "ok"]]
 
 
 def test_ByteMaskedArray_NumpyArray():
@@ -361,7 +359,7 @@ def test_ByteMaskedArray_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
+        a[["bad", "good", "ok"]]
 
     # 2.2, 4.4, and 6.6 are inaccessible
     b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
@@ -396,7 +394,7 @@ def test_ByteMaskedArray_NumpyArray():
     with pytest.raises(IndexError):
         b["bad"]
     with pytest.raises(IndexError):
-        b["bad", "good", "ok"]
+        b[["bad", "good", "ok"]]
 
 
 def test_BitMaskedArray_NumpyArray():
@@ -774,7 +772,7 @@ def test_UnionArray_NumpyArray():
     with pytest.raises(IndexError):
         a["bad"]
     with pytest.raises(IndexError):
-        a["bad", "good", "ok"]
+        a[["bad", "good", "ok"]]
 
 
 def test_RegularArray_RecordArray_NumpyArray():
