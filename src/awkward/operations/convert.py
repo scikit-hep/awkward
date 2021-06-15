@@ -232,6 +232,12 @@ def to_numpy(array, allow_missing=True):
             ]
         )
 
+    elif (
+        str(ak.operations.describe.type(array)) == "datetime64"
+        or str(ak.operations.describe.type(array)) == "timedelta64"
+    ):
+        return array
+
     elif isinstance(array, ak.partition.PartitionedArray):
         tocat = [to_numpy(x, allow_missing=allow_missing) for x in array.partitions]
         if any(isinstance(x, numpy.ma.MaskedArray) for x in tocat):
@@ -886,6 +892,7 @@ def from_iter(
                 "cannot produce an array from a dict"
                 + ak._util.exception_suffix(__file__)
             )
+
     out = ak.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
         out.fromiter(x)
@@ -939,6 +946,9 @@ def to_list(array):
     elif ak.operations.describe.parameters(array).get("__array__") == "char":
         return ak.behaviors.string.CharBehavior(array).__str__()
 
+    elif isinstance(array, np.datetime64) or isinstance(array, np.timedelta64):
+        return array
+
     elif isinstance(array, ak.highlevel.Array):
         return [to_list(x) for x in array]
 
@@ -958,7 +968,21 @@ def to_list(array):
         return [to_list(x) for x in array.snapshot()]
 
     elif isinstance(array, ak.layout.NumpyArray):
-        return ak.nplike.of(array).asarray(array).tolist()
+        if array.format.upper().startswith("M"):
+            return (
+                [
+                    x
+                    for x in ak.nplike.of(array)
+                    .asarray(array.view_int64)
+                    .view(array.format)
+                ]
+                # FIXME: .tolist() returns
+                # [[1567416600000000000], [1568367000000000000], [1569096000000000000]]
+                # instead of [numpy.datetime64('2019-09-02T09:30:00'), numpy.datetime64('2019-09-13T09:30:00'), numpy.datetime64('2019-09-21T20:00:00')]
+                # see test_from_pandas() test
+            )
+        else:
+            return ak.nplike.of(array).asarray(array).tolist()
 
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         return [to_list(x) for x in array]
@@ -1819,7 +1843,7 @@ def to_layout(
     array,
     allow_record=True,
     allow_other=False,
-    numpytype=(np.number, np.bool_, np.str_, np.bytes_),
+    numpytype=(np.number, np.bool_, np.str_, np.bytes_, np.datetime64, np.timedelta64),
 ):
     """
     Args:
@@ -2031,7 +2055,7 @@ def to_arrow(
                 )
 
         elif isinstance(layout, ak.layout.EmptyArray):
-            return pyarrow.Array.from_buffers(pyarrow.float64(), 0, [None, None])
+            return pyarrow.Array.from_buffers(pyarrow.null(), 0, [None])
 
         elif isinstance(layout, ak.layout.ListOffsetArray32):
             offsets = numpy.asarray(layout.offsets, dtype=np.int32)
@@ -2564,6 +2588,26 @@ def from_arrow(array, highlevel=True, behavior=None):
     return _from_arrow(array, True, highlevel=highlevel, behavior=behavior)
 
 
+_pyarrow_to_numpy_dtype = {
+    "date32": (True, np.dtype("M8[D]")),
+    "date64": (False, np.dtype("M8[ms]")),
+    "date32[day]": (True, np.dtype("M8[D]")),
+    "date64[ms]": (False, np.dtype("M8[ms]")),
+    "time32[s]": (True, np.dtype("M8[s]")),
+    "time32[ms]": (True, np.dtype("M8[ms]")),
+    "time64[us]": (False, np.dtype("M8[us]")),
+    "time64[ns]": (False, np.dtype("M8[ns]")),
+    "timestamp[s]": (False, np.dtype("M8[s]")),
+    "timestamp[ms]": (False, np.dtype("M8[ms]")),
+    "timestamp[us]": (False, np.dtype("M8[us]")),
+    "timestamp[ns]": (False, np.dtype("M8[ns]")),
+    "duration[s]": (False, np.dtype("m8[s]")),
+    "duration[ms]": (False, np.dtype("m8[ms]")),
+    "duration[us]": (False, np.dtype("m8[us]")),
+    "duration[ns]": (False, np.dtype("m8[ns]")),
+}
+
+
 def _from_arrow(
     array, pass_empty_field, struct_only=None, highlevel=True, behavior=None
 ):
@@ -2653,6 +2697,16 @@ def _from_arrow(
                 content = content.content
 
             out = ak.layout.ListOffsetArray64(offsets, content)
+            # No return yet!
+
+        elif isinstance(tpe, pyarrow.lib.FixedSizeListType):
+            assert tpe.num_buffers == 1
+            mask = buffers.pop(0)
+            content = popbuffers(array.values, tpe.value_type, buffers)
+            if not tpe.value_field.nullable:
+                content = content.content
+
+            out = ak.layout.RegularArray(content, tpe.list_size)
             # No return yet!
 
         elif isinstance(tpe, pyarrow.lib.UnionType):
@@ -2776,9 +2830,13 @@ def _from_arrow(
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             data = buffers.pop(0)
-            out = ak.layout.NumpyArray(
-                numpy.frombuffer(data, dtype=tpe.to_pandas_dtype())
-            )
+
+            to64, dt = _pyarrow_to_numpy_dtype.get(str(tpe), (False, None))
+            if to64:
+                data = numpy.frombuffer(data, dtype=np.int32).astype(np.int64)
+            if dt is None:
+                dt = tpe.to_pandas_dtype()
+            out = ak.layout.NumpyArray(numpy.frombuffer(data, dtype=dt))
             # No return yet!
 
         else:
@@ -3096,12 +3154,19 @@ def _parquet_schema_to_form(schema):
 
     def maybe_nullable(field, content):
         if field.nullable:
-            return ak.forms.ByteMaskedForm(
-                "i8",
-                content.with_form_key(None),
-                valid_when=True,
-                form_key=content.form_key,
-            )
+            if isinstance(content, ak.forms.EmptyForm):
+                return ak.forms.IndexedOptionForm(
+                    "i64",
+                    content.with_form_key(None),
+                    form_key=content.form_key,
+                )
+            else:
+                return ak.forms.ByteMaskedForm(
+                    "i8",
+                    content.with_form_key(None),
+                    valid_when=True,
+                    form_key=content.form_key,
+                )
         else:
             return content
 
@@ -3176,8 +3241,11 @@ def _parquet_schema_to_form(schema):
             )
 
         elif isinstance(arrow_type, pyarrow.DataType):
-            dtype = np.dtype(arrow_type.to_pandas_dtype())
-            return ak.forms.Form.from_numpy(dtype).with_form_key(col(path))
+            if arrow_type == pyarrow.null():
+                return ak.forms.EmptyForm(form_key=col(path))
+            else:
+                dtype = np.dtype(arrow_type.to_pandas_dtype())
+                return ak.forms.Form.from_numpy(dtype).with_form_key(col(path))
 
         else:
             raise NotImplementedError(
@@ -3545,7 +3613,11 @@ def from_parquet(
             relative_to = source
             source = sorted(glob.glob(source + "/**/*.parquet", recursive=True))
 
-    if not isinstance(source, str) and isinstance(source, Iterable):
+    if (
+        not isinstance(source, str)
+        and isinstance(source, Iterable)
+        and not hasattr(source, "read")
+    ):
         source = [_regularize_path(x) for x in source]
         if relative_to is None:
             relative_to = os.path.commonpath(source)
@@ -3912,7 +3984,10 @@ def to_buffers(
         >>> ak.partitions(reconstituted)
         [3, 1, 3, 1]
 
-    See also #ak.from_buffers.
+    If you intend to use this function for saving data, you may want to pack it
+    first with #ak.packed.
+
+    See also #ak.from_buffers and #ak.packed.
     """
     if container is None:
         container = {}
@@ -4680,9 +4755,19 @@ def _form_to_layout(
         node_cache_key = key_format(
             form_key=form.form.form_key, attribute="virtual", partition=partnum
         )
-        return ak.layout.VirtualArray(
-            generator, lazy_cache, "{0}({1})".format(lazy_cache_key, node_cache_key)
-        )
+
+        if isinstance(form.form, (ak.forms.NumpyForm, ak.forms.EmptyForm)):
+            # If it's a leaf node, the node_cache_key completely determines
+            # uniqueness of the subtree (because it's the whole subtree).
+            nested_cache_key = "{0}({1})".format(lazy_cache_key, node_cache_key)
+        else:
+            # Otherwise, the node_cache_key for the root of the subtree might
+            # be the same in two places whereas the nested content differs.
+            nested_cache_key = "{0}({1}:{2})".format(
+                lazy_cache_key, node_cache_key, _from_buffers_key()
+            )
+
+        return ak.layout.VirtualArray(generator, lazy_cache, nested_cache_key)
 
     else:
         raise AssertionError(

@@ -92,7 +92,7 @@ def test_lazy_buffers():
     assert ak.to_list(ak.num(out.listcollection)) == [3, 3, 3]
     assert set(canary.ops) == {("get", "kitty-node1-offsets")}
     assert "hello" in cache
-    assert "hello(kitty-node1-virtual)" in cache
+    assert any(x.startswith("hello(kitty-node1-virtual") for x in cache)
     canary.ops = []
     cache.clear()
 
@@ -109,9 +109,9 @@ def test_lazy_buffers():
         ("get", "kitty-node16-data"),
     }
     assert "hello" in cache
-    assert "hello(kitty-node11-virtual)" in cache
-    assert "hello(kitty-node13-virtual)" in cache
-    assert "hello(kitty-node16-virtual)" in cache
+    assert any(x.startswith("hello(kitty-node11-virtual") for x in cache)
+    assert any(x.startswith("hello(kitty-node13-virtual") for x in cache)
+    assert any(x.startswith("hello(kitty-node16-virtual") for x in cache)
     canary.ops = []
     cache.clear()
 
@@ -121,7 +121,7 @@ def test_lazy_buffers():
         ("get", "kitty-node18-data"),
     }
     assert "hello" in cache
-    assert "hello(kitty-node17-virtual)" in cache
+    assert any(x.startswith("hello(kitty-node17-virtual") for x in cache)
     canary.ops = []
     cache.clear()
 

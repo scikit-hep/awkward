@@ -98,6 +98,10 @@ class NumpyMetadata(Singleton):
     nan = numpy.nan
     inf = numpy.inf
 
+    nat = numpy.datetime64("NaT")
+    datetime_data = numpy.datetime_data
+    issubdtype = numpy.issubdtype
+
 
 if hasattr(numpy, "float16"):
     NumpyMetadata.float16 = numpy.float16
@@ -125,6 +129,10 @@ class NumpyLike(Singleton):
     def asarray(self, *args, **kwargs):
         # array[, dtype=]
         return self._module.asarray(*args, **kwargs)
+
+    def ascontiguousarray(self, *args, **kwargs):
+        # array[, dtype=]
+        return self._module.ascontiguousarray(*args, **kwargs)
 
     def isscalar(self, *args, **kwargs):
         return self._module.isscalar(*args, **kwargs)
@@ -325,6 +333,13 @@ class NumpyLike(Singleton):
         # array[, axis=]
         return self._module.argmax(*args, **kwargs)
 
+    def array_str(self, *args, **kwargs):
+        # array, max_line_width, precision=None, suppress_small=None
+        return self._module.array_str(*args, **kwargs)
+
+    def datetime_as_string(self, *args, **kwargs):
+        return self._module.datetime_as_string(*args, **kwargs)
+
 
 class Numpy(NumpyLike):
     def __init__(self):
@@ -390,6 +405,24 @@ or
                 return out
         else:
             return self._module.asarray(array, dtype=dtype)
+
+    def ascontiguousarray(self, array, dtype=None):
+        if isinstance(
+            array,
+            (
+                ak.highlevel.Array,
+                ak.highlevel.Record,
+                ak.layout.Content,
+                ak.layout.Record,
+            ),
+        ):
+            out = ak.operations.convert.to_cupy(array)
+            if dtype is not None and out.dtype != dtype:
+                return self._module.ascontiguousarray(out, dtype=dtype)
+            else:
+                return out
+        else:
+            return self._module.ascontiguousarray(array, dtype=dtype)
 
     def frombuffer(self, *args, **kwargs):
         np_array = numpy.frombuffer(*args, **kwargs)
@@ -498,3 +531,9 @@ or
             return out.item()
         else:
             return out
+
+    def array_str(
+        self, array, max_line_width=None, precision=None, suppress_small=None
+    ):
+        # array, max_line_width, precision=None, suppress_small=None
+        return self._module.array_str(array, max_line_width, precision, suppress_small)

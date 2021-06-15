@@ -1455,7 +1455,8 @@ class Array(
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self.layout)
+        packed = ak.operations.structure.packed(self.layout, highlevel=False)
+        form, length, container = ak.operations.convert.to_buffers(packed)
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -2047,12 +2048,13 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self.layout.array)
+        packed = ak.operations.structure.packed(self._layout, highlevel=False)
+        form, length, container = ak.operations.convert.to_buffers(packed.array)
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form, length, container, behavior, self.layout.at
+        return form, length, container, behavior, packed.at
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
@@ -2148,6 +2150,8 @@ class ArrayBuilder(Iterable, Sized):
        * #integer: appends an integer.
        * #real: appends a floating-point value.
        * #complex: appends a complex value.
+       * #datetime: appends a datetime value.
+       * #timedelta: appends a timedelta value.
        * #bytestring: appends an unencoded string (raw bytes).
        * #string: appends a UTF-8 encoded string.
        * #begin_list: begins filling a list; must be closed with #end_list.
@@ -2467,6 +2471,20 @@ class ArrayBuilder(Iterable, Sized):
         accumulated array.
         """
         self._layout.complex(x)
+
+    def datetime(self, x):
+        """
+        Appends a datetime value `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.datetime(x)
+
+    def timedelta(self, x):
+        """
+        Appends a timedelta value `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.timedelta(x)
 
     def bytestring(self, x):
         """

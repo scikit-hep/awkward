@@ -513,12 +513,12 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
         case ak::util::dtype::complex256:
           dt = "c32";
           break;
-        // case ak::util::dtype::datetime64:
-        //   dt = "?";
-        //   break;
-        // case ak::util::dtype::timedelta64:
-        //   dt = "?";
-        //   break;
+        case ak::util::dtype::datetime64:
+          dt = "?";
+          break;
+        case ak::util::dtype::timedelta64:
+          dt = "?";
+          break;
         default:
           // FIXME: record arrays; need to parse 'format'
           dt = "O";

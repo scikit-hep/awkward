@@ -41,8 +41,8 @@ namespace awkward {
         complex64,
         complex128,
         complex256,
-        // datetime64,
-        // timedelta64,
+        datetime64,
+        timedelta64,
         size
     };
 
@@ -60,7 +60,7 @@ namespace awkward {
 
     /// @brief Convert a dtype enum into a NumPy format string.
     const std::string
-    dtype_to_format(dtype dt);
+    dtype_to_format(dtype dt, const std::string& format = "");
 
     /// @brief Convert a dtype enum into an itemsize.
     int64_t

@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-How to create arrays with layouts (faster)
+How to create arrays with LayoutBuilder (medium)
 ==========================================
 
 **This is a stub:** I intend to write this article, but haven't yet.

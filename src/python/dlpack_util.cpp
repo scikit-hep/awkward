@@ -39,10 +39,12 @@ namespace awkward {
         return {kDLFloat, 64, 1};
       case ak::util::dtype::float128:
         return {kDLFloat, 128, 1};
-      // case ak::util::dtype::datetime64:
-      //   return 8;
-      // case ak::util::dtype::timedelta64:
-      //   return 8;
+      case ak::util::dtype::datetime64:
+        return {kDLInt, 8, 1};
+      case ak::util::dtype::timedelta64:
+        return {kDLInt, 8, 1};
+      default:
+        break;
       }
       throw std::runtime_error(
         std::string("unrecognized dtype: ") + std::to_string((int64_t)dt) + FILENAME(__LINE__)
