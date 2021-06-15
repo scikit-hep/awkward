@@ -8,8 +8,6 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    ak.deprecations_as_errors = True
-
     array = ak.to_categorical(ak.Array([321, 1.1, 123, 1.1, 999, 1.1, 2.0]))
     assert ak.to_list(array * 10) == [3210, 11, 1230, 11, 9990, 11, 20]
 

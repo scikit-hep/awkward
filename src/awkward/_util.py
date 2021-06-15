@@ -46,21 +46,17 @@ def exception_suffix(filename):
     )
 
 
-def deprecate(exception, version, date=None):
-    if ak.deprecations_as_errors:
-        raise exception
+def deprecate(message, version, date=None, category=FutureWarning):
+    if date is None:
+        date = ""
     else:
-        if date is None:
-            date = ""
-        else:
-            date = " (target date: " + date + ")"
-        message = """In version {0}{1}, this will be an error.
-(Set ak.deprecations_as_errors = True to get a stack trace now.)
+        date = " (target date: " + date + ")"
+    warning = """In version {0}{1}, this will be an error.
 
-{2}: {3}""".format(
-            version, date, type(exception).__name__, str(exception)
-        )
-        warnings.warn(message, FutureWarning)
+{2}""".format(
+        version, date, message
+    )
+    warnings.warn(warning, category)
 
 
 virtualtypes = (ak.layout.VirtualArray,)
