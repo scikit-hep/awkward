@@ -8,13 +8,15 @@ import awkward as ak  # noqa: F401
 
 
 def test_values_astype_datetime():
-    array = ak.values_astype(
-        ak.Array([1567416600000]), "datetime64[ms]"
-    )  # np.datetime64)
-    assert str(array.type) == "1 * datetime64"
-    assert array.to_list() == [np.datetime64("2019-09-02T09:30:00")]
+    array1 = ak.values_astype(ak.Array([1567416600000]), "datetime64[ms]")
+    assert str(array1.type) == "1 * datetime64"
+    assert array1.to_list() == [np.datetime64("2019-09-02T09:30:00")]
 
-    # arr = ak.Array(['2019-09-02T09:30:00',  None])
-    arr = ak.Array([1567416600000000, None])  # default unit is 'us'
-    dt_arr = ak.values_astype(arr, np.datetime64)
-    assert dt_arr.to_list() == [np.datetime64("2019-09-02T09:30:00"), None]
+    array2 = ak.values_astype(ak.Array([1567416600000]), np.dtype("M8[ms]"))
+    assert str(array2.type) == "1 * datetime64"
+    assert array2.to_list() == [np.datetime64("2019-09-02T09:30:00")]
+
+    array3 = ak.values_astype(
+        ak.Array([1567416600000000, None]), np.datetime64  # default unit is 'us'
+    )
+    assert array3.to_list() == [np.datetime64("2019-09-02T09:30:00"), None]

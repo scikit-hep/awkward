@@ -4234,6 +4234,21 @@ def values_astype(array, to, highlevel=True, behavior=None):
         >>> ak.values_astype(array, np.int32)
         <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int32'>
 
+    Note, when converting values to a `np.datetime64` type that is unitless, a
+    default '[us]' unit is assumed - until further specified as numpy dtypes.
+
+    For example,
+
+        >>> array = ak.Array([1567416600000])
+        >>> ak.values_astype(array, "datetime64[ms]")
+        <Array [2019-09-02T09:30:00.000] type='1 * datetime64'>
+
+    or
+
+        >>> array = ak.Array([1567416600000])
+        >>> ak.values_astype(array, np.dtype("M8[ms]"))
+        <Array [2019-09-02T09:30:00.000] type='1 * datetime64'>
+
     See also #ak.strings_astype.
     """
     to_dtype = np.dtype(to)
