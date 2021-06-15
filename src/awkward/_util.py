@@ -46,12 +46,18 @@ def exception_suffix(filename):
     )
 
 
-def deprecate(message, version, date=None, category=FutureWarning):
+# Enable warnings for the Awkward package
+warnings.filterwarnings("default", module="awkward.*")
+
+
+def deprecate(message, version, date=None, category=DeprecationWarning):
     if date is None:
         date = ""
     else:
         date = " (target date: " + date + ")"
     warning = """In version {0}{1}, this will be an error.
+
+To raise these warnings as errors, run `warnings.filterwarnings("error", module="awkward.*")`.
 
 {2}""".format(
         version, date, message
