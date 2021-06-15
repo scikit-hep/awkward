@@ -4,7 +4,6 @@ from __future__ import absolute_import
 
 import numbers
 import json
-import warnings
 
 try:
     from collections.abc import Iterable
@@ -2792,14 +2791,12 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
 
     # Add a condition for the "old" behaviour
     if axis is AXIS_UNSET:
-        if ak.deprecations_as_errors:
-            raise ValueError(
+        ak._util.deprecate(
+            FutureWarning(
                 "ak.fill_none needs an explicit axis because the default will change in version 1.4.0"
-            )
-        warnings.warn(
-            """In version 1.4.0 (target date: August 1, 2021), the default axis for fill_none will be `None`
-(Set ak.deprecations_as_errors = True to get a stack trace now.)""",
-            FutureWarning,
+            ),
+            "1.4.0",
+            date="August 1, 2021",
         )
         return _fill_none_deprecated(
             array, value, highlevel=highlevel, behavior=behavior
