@@ -3613,7 +3613,11 @@ def from_parquet(
             relative_to = source
             source = sorted(glob.glob(source + "/**/*.parquet", recursive=True))
 
-    if not isinstance(source, str) and isinstance(source, Iterable):
+    if (
+        not isinstance(source, str)
+        and isinstance(source, Iterable)
+        and not hasattr(source, "read")
+    ):
         source = [_regularize_path(x) for x in source]
         if relative_to is None:
             relative_to = os.path.commonpath(source)
