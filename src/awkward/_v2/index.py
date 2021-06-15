@@ -23,8 +23,8 @@ class Index(object):
         if len(self._data.shape) != 1:
             raise TypeError("Index data must be one-dimensional")
 
-        self._T = self._data.dtype
-        if self._T not in self._dtype_to_form:
+        self._dtype = self._data.dtype
+        if self._dtype not in self._dtype_to_form:
             raise TypeError("Index data must be int8, uint8, int32, uint32, int64")
 
     @classmethod
@@ -42,6 +42,10 @@ class Index(object):
     @property
     def nplike(self):
         return self._nplike
+
+    @property
+    def dtype(self):
+        return self._dtype
 
     def __len__(self):
         return len(self._data)

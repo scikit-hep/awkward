@@ -11,7 +11,10 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class IndexedOptionArray(Content):
     def __init__(self, index, content):
-        assert isinstance(index, Index) and index._T in (np.int32, np.int64)
+        assert isinstance(index, Index) and index.dtype in (
+            np.dtype(np.int32),
+            np.dtype(np.int64),
+        )
         assert isinstance(content, Content)
         self._index = index
         self._content = content

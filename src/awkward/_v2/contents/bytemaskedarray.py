@@ -11,7 +11,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class ByteMaskedArray(Content):
     def __init__(self, mask, content, valid_when):
-        assert isinstance(mask, Index) and mask._T == np.uint8
+        assert isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)
         assert isinstance(content, Content)
         assert isinstance(valid_when, bool)
         assert len(mask) <= len(content)

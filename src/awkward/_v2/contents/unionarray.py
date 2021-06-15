@@ -11,8 +11,12 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class UnionArray(Content):
     def __init__(self, tags, index, contents):
-        assert isinstance(tags, Index) and tags._T == np.int8
-        assert isinstance(index, Index) and index._T in (np.int32, np.uint32, np.int64)
+        assert isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)
+        assert isinstance(index, Index) and index.dtype in (
+            np.dtype(np.int32),
+            np.dtype(np.uint32),
+            np.dtype(np.int64),
+        )
         assert isinstance(contents, list)
         assert len(index) >= len(tags)  # usually equal
         self._tags = tags

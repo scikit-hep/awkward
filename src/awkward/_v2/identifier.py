@@ -29,8 +29,8 @@ class Identifier(object):
         if len(self._data.shape) != 2:
             raise TypeError("Identifier data must be 2-dimensional")
 
-        self._T = self._data.dtype
-        if self._T not in (np.dtype(np.int32), np.dtype(np.int64)):
+        self._dtype = self._data.dtype
+        if self._dtype not in (np.dtype(np.int32), np.dtype(np.int64)):
             raise TypeError("Identifier data must be int32, int64")
 
     @classmethod
@@ -57,6 +57,10 @@ class Identifier(object):
     @property
     def nplike(self):
         return self._nplike
+
+    @property
+    def dtype(self):
+        return self._dtype
 
     def __len__(self):
         return len(self._data)

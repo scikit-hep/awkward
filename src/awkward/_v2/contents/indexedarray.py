@@ -11,7 +11,11 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class IndexedArray(Content):
     def __init__(self, index, content):
-        assert isinstance(index, Index) and index._T in (np.int32, np.uint32, np.int64)
+        assert isinstance(index, Index) and index.dtype in (
+            np.dtype(np.int32),
+            np.dtype(np.uint32),
+            np.dtype(np.int64),
+        )
         assert isinstance(content, Content)
         self.index = index
         self.content = content

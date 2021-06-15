@@ -13,7 +13,7 @@ import numpy as np
 
 class BitMaskedArray(Content):
     def __init__(self, mask, content, valid_when, length, lsb_order):
-        assert isinstance(mask, Index) and mask._T == np.uint8
+        assert isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)
         assert isinstance(content, Content)
         assert isinstance(valid_when, bool)
         assert isinstance(length, numbers.Integral) and length >= 0

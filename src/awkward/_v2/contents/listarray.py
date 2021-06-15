@@ -11,12 +11,12 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class ListArray(Content):
     def __init__(self, starts, stops, content):
-        assert isinstance(starts, Index) and starts._T in (
-            np.int32,
-            np.uint32,
-            np.int64,
+        assert isinstance(starts, Index) and starts.dtype in (
+            np.dtype(np.int32),
+            np.dtype(np.uint32),
+            np.dtype(np.int64),
         )
-        assert isinstance(stops, Index) and starts._T == stops._T
+        assert isinstance(stops, Index) and starts.dtype == stops.dtype
         assert isinstance(content, Content)
         assert len(stops) >= len(starts)  # usually equal
         self._starts = starts

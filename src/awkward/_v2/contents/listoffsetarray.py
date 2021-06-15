@@ -11,10 +11,10 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class ListOffsetArray(Content):
     def __init__(self, offsets, content):
-        assert isinstance(offsets, Index) and offsets._T in (
-            np.int32,
-            np.uint32,
-            np.int64,
+        assert isinstance(offsets, Index) and offsets.dtype in (
+            np.dtype(np.int32),
+            np.dtype(np.uint32),
+            np.dtype(np.int64),
         )
         assert isinstance(content, Content)
         assert len(offsets) != 0
