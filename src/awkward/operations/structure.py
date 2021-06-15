@@ -2753,12 +2753,12 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
     Args:
         array: Data in which to replace None with a given value.
         value: Data with which to replace None.
-        axis int: The dimension at which this
+        axis (None or int): If None, replace all None values in the array
+            with the given value; if an int, The dimension at which this
             operation is applied. The outermost dimension is `0`, followed
             by `1`, etc., and negative values count backward from the
             innermost: `-1` is the innermost  dimension, `-2` is the next
-            level up, etc. If not supplied, the deprecated behaviour to
-            fill the first optiontype axis is used.
+            level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -2811,10 +2811,12 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
     nplike = ak.nplike.of(arraylayout)
 
     def getfunction(layout, depth, posaxis, apply):
-        posaxis = layout.axis_wrap_if_negative(posaxis)
-        # Then only apply to that axis
-        if posaxis != depth - 1:
-            return posaxis
+        # If the user specifies an axis
+        if posaxis is not None:
+            posaxis = layout.axis_wrap_if_negative(posaxis)
+            # Then only apply to that axis
+            if posaxis != depth - 1:
+                return posaxis
 
         if isinstance(layout, ak._util.optiontypes):
             if (
