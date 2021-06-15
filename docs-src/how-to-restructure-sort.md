@@ -14,10 +14,24 @@ kernelspec:
 How to sort arrays and inner arrays
 ===================================
 
-**This is a stub:** I intend to write this article, but haven't yet.
+Sorting puts Awkward Array elements in an ordered sequence: numeric or lexicographical, ascending or descending.
 
-If you need it soon, create an issue saying so and I'll make it a higher priority.
+By default, `ak.sort` sorts the elements in non-descending order. The order of equivalent elements is guaranteed to be preserved.
 
-[![](img/github-issues-documentation.png)](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=docs&template=documentation.md&title=)
+The back-end is an `std::stable_sort` with complexity `O(N·log(N)2)`, where `N = std::distance(first, last)` applications of a comparator. If an additional memory is available, then the complexity is `O(N·log(N))`.
 
-The text of your issue doesn't have to be much more than a link to this page, so I can be sure which page you're referring to. If you add details about how and why you need it, however, I may be able to tailor the text to help you more.
+```{code-cell} ipython3
+import awkward as ak
+ak.sort(ak.Array([[7, 5, 7], [], [2], [8, 2]]))
+```
+
+Sorting in axis
+---------------
+
+An optional `axis` parameter defines an axis along which to sort. The default is `axis=-1`, which is the last axis.
+
+Awkward Array axes are defined similar to Numpy axes. In a two-dimentional Awkward Array they are the directions along the rows and columns.
+
+[![](img/axis.jpg)]
+
+In Akward Array, axis 0 is the "first" axis.
