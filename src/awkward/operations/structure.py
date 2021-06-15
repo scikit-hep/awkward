@@ -2011,6 +2011,10 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
+    # Pack the layout above the axis that will be unflattened. This ensures that
+    # the `counts` array, which is computed through these layouts, aligns with
+    # the layout to be unflattened (#910)
+    layout = _packed(layout, axis=axis - 1, highlevel=False)
 
     if isinstance(counts, (numbers.Integral, np.integer)):
         current_offsets = None
