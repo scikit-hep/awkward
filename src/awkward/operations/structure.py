@@ -2793,7 +2793,7 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
     if axis is AXIS_UNSET:
         ak._util.deprecate(
             FutureWarning(
-                "ak.fill_none needs an explicit axis because the default will change in version 1.4.0"
+                "ak.fill_none needs an explicit axis because the default will change to `axis=-1` in version 1.4.0"
             ),
             "1.4.0",
             date="August 1, 2021",
