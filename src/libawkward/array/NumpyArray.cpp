@@ -5198,6 +5198,11 @@ namespace awkward {
           std::string("cannot recast NumpyArray with format \"")
           + format_ + std::string("\"") + FILENAME(__LINE__));
       }
+      std::string nextformat = util::dtype_to_format(dtype);
+      if (dtype == util::dtype::datetime64) {
+        nextformat.append(std::to_string(dtype_to_itemsize(dtype)));
+        nextformat.append(util::format_to_units(name));
+      }
 
       return std::make_shared<NumpyArray>(identities,
                                           contiguous_self.parameters(),
@@ -5206,7 +5211,7 @@ namespace awkward {
                                           strides,
                                           0,
                                           (ssize_t)util::dtype_to_itemsize(dtype),
-                                          util::dtype_to_format(dtype),
+                                          nextformat,
                                           dtype,
                                           ptr_lib_);
     }
@@ -5688,6 +5693,9 @@ namespace awkward {
         std::string("FIXME: as_type for complex256 not implemented")
         + FILENAME(__LINE__));
       break;
+    case util::dtype::datetime64:
+       ptr = cast_to_type<int64_t>(data, length);
+       break;
     default:
       throw std::invalid_argument(
         std::string("cannot recast NumpyArray with format \"")

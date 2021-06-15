@@ -291,7 +291,7 @@ namespace awkward {
           return format.substr(format.find('['), format.find(']'));
         }
       }
-      return std::string("[no units]");
+      return std::string("[us]");
     }
 
     const std::string
