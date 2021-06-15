@@ -336,8 +336,6 @@ def test_lazy():
 
 
 def test_lazy_partitioned():
-    ak.deprecations_as_errors = False
-
     array = ak.repartition(ak.Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 3)
     form, length, container = ak.to_buffers(array)
     assert length == [3, 3, 3, 1]

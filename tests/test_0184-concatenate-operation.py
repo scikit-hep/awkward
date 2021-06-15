@@ -298,8 +298,6 @@ def test_numpyarray_concatenate():
 
 
 def test_numbers_and_records_concatenate():
-    ak.deprecations_as_errors = True
-
     numbers = [
         ak.Array(
             [

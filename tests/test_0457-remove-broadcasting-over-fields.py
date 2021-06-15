@@ -8,8 +8,6 @@ import awkward as ak  # noqa: F401
 
 
 def test_this_should_raise_a_warning():
-    ak.deprecations_as_errors = True
-
     one = ak.Array([{"x": 1}, {"x": 2}, {"x": 3}])
     two = ak.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}])
 
