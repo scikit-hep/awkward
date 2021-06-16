@@ -23,6 +23,18 @@ class ListArray(Content):
         self._stops = stops
         self._content = content
 
+    @property
+    def starts(self):
+        return self._starts
+
+    @property
+    def stops(self):
+        return self._stops
+
+    @property
+    def content(self):
+        return self._content
+
     def __len__(self):
         return len(self._starts)
 
@@ -30,19 +42,11 @@ class ListArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<ListArray>\n"]
-        out.append(
-            indent
-            + "    <starts>"
-            + " ".join(str(x) for x in self._starts)
-            + "</starts>\n"
-        )
-        out.append(
-            indent
-            + "    <stops>"
-            + " ".join(str(x) for x in self._stops)
-            + "</stops>\n"
-        )
+        out = [indent, pre, "<ListArray len="]
+        out.append(repr(str(len(self))))
+        out.append(">\n")
+        out.append(self._starts._repr(indent + "    ", "<starts>", "</starts>\n"))
+        out.append(self._stops._repr(indent + "    ", "<stops>", "</stops>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)
         out.append("</ListArray>")

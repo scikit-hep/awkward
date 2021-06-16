@@ -11,13 +11,25 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class ByteMaskedArray(Content):
     def __init__(self, mask, content, valid_when):
-        assert isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)
+        assert isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)
         assert isinstance(content, Content)
         assert isinstance(valid_when, bool)
         assert len(mask) <= len(content)
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
+
+    @property
+    def mask(self):
+        return self._mask
+
+    @property
+    def content(self):
+        return self._content
+
+    @property
+    def valid_when(self):
+        return self._valid_when
 
     def __len__(self):
         return len(self._mask)
@@ -26,11 +38,12 @@ class ByteMaskedArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<ByteMaskedArray>\n"]
-        out.append(
-            indent + "    <valid_when>" + str(self._valid_when) + "</valid_when>\n"
-        )
-        out.append(indent + "    <mask>" + str(self._mask._data) + "</mask>\n")
+        out = [indent, pre, "<ByteMaskedArray len="]
+        out.append(repr(str(len(self))))
+        out.append(" valid_when=")
+        out.append(repr(str(self._valid_when)))
+        out.append(">\n")
+        out.append(self._mask._repr(indent + "    ", "<mask>", "</mask>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)
         out.append("</ByteMaskedArray>")

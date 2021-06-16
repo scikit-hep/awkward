@@ -23,6 +23,18 @@ class UnionArray(Content):
         self._index = index
         self._contents = contents
 
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def index(self):
+        return self._index
+
+    @property
+    def contents(self):
+        return self._contents
+
     def __len__(self):
         return len(self._tags)
 
@@ -30,17 +42,15 @@ class UnionArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<UnionArray>\n"]
-        out.append(indent + "    <tags>" + str(self._tags._data) + "</tags>\n")
-        out.append(indent + "    <index>" + str(self._index._data) + "</index>\n")
-        for x in self._contents:
-            out.append(
-                x._repr(
-                    indent + "    ",
-                    '<content i="' + repr(self._contents.index(x)) + '">',
-                    "</content>\n",
-                )
-            )
+        out = [indent, pre, "<UnionArray len="]
+        out.append(repr(str(len(self))))
+        out.append(">\n")
+        out.append(self._tags._repr(indent + "    ", "<tags>", "</tags>\n"))
+        out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
+        for i, x in enumerate(self._contents):
+            out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
+            out.append(x._repr(indent + "        ", "", "\n"))
+            out.append("{0}    </content>\n".format(indent))
         out.append(indent)
         out.append("</UnionArray>")
         out.append(post)

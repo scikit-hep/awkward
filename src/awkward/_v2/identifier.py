@@ -28,9 +28,7 @@ class Identifier(object):
         self._data = self._nplike.asarray(data, order="C")
         if len(self._data.shape) != 2:
             raise TypeError("Identifier data must be 2-dimensional")
-
-        self._dtype = self._data.dtype
-        if self._dtype not in (np.dtype(np.int32), np.dtype(np.int64)):
+        if self._data.dtype not in (np.dtype(np.int32), np.dtype(np.int64)):
             raise TypeError("Identifier data must be int32, int64")
 
     @classmethod
@@ -60,7 +58,11 @@ class Identifier(object):
 
     @property
     def dtype(self):
-        return self._dtype
+        return self._data.dtype
+
+    @property
+    def shape(self):
+        return self._data.shape
 
     def __len__(self):
         return len(self._data)
@@ -81,24 +83,24 @@ class Identifier(object):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<Identifier ref=" + repr(str(self._ref)) + " fieldloc="]
+        out = [indent, pre, "<Identifier ref="]
+        out.append(repr(str(self._ref)))
+        out.append(" fieldloc=")
         out.append(repr(str(self._fieldloc)))
-        out.append(" length=")
-        out.append(repr(str(len(self._data))))
-        out.append(" width=")
-        out.append(repr(str(self._data.shape[1])))
-        out.append(" at=")
-        out.append(repr(hex(self._data.ctypes.data)))
-        out.append(">\n")
-        out.append(indent + "    ")
-        out.append(
-            self._nplike.array_str(self._data, max_line_width=30).replace(
-                "\n", "\n" + indent + "    "
-            )
-        )
-        out.append("\n")
-        out.append(indent)
-        out.append("</Identifier>")
+        out.append(" dtype=")
+        out.append(repr(str(self.dtype)))
+        out.append(" shape=")
+        out.append(repr(str(self.shape)))
+
+        arraystr_lines = self._nplike.array_str(
+            self._data, max_line_width=max(80 - len(indent) - 4, 40)
+        ).split("\n")
+        if len(arraystr_lines) > 9:
+            arraystr_lines = arraystr_lines[:4] + [" ..."] + arraystr_lines[-4:]
+        out.append(">\n" + indent + "    ")
+        out.append(("\n" + indent + "    ").join(arraystr_lines))
+        out.append("\n" + indent + "</Identifier>")
+
         out.append(post)
         return "".join(out)
 

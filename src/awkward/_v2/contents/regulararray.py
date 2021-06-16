@@ -22,6 +22,14 @@ class RegularArray(Content):
         self._size = size
         self._length = length
 
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def content(self):
+        return self._content
+
     def __len__(self):
         return self._length
 
@@ -29,9 +37,12 @@ class RegularArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<RegularArray>\n"]
+        out = [indent, pre, "<RegularArray len="]
+        out.append(repr(str(len(self))))
+        out.append(" size=")
+        out.append(repr(str(self._size)))
+        out.append(">\n")
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent + "    <size>" + repr(self._size) + "</size> \n")
         out.append(indent)
         out.append("</RegularArray>")
         out.append(post)

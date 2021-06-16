@@ -13,7 +13,7 @@ class EmptyArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        return indent + pre + "<EmptyArray/>" + post
+        return indent + pre + "<EmptyArray len='0'/>" + post
 
     def __len__(self):
         return 0

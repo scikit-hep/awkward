@@ -17,19 +17,29 @@ class IndexedArray(Content):
             np.dtype(np.int64),
         )
         assert isinstance(content, Content)
-        self.index = index
-        self.content = content
+        self._index = index
+        self._content = content
+
+    @property
+    def index(self):
+        return self._index
+
+    @property
+    def content(self):
+        return self._content
 
     def __len__(self):
-        return len(self.index)
+        return len(self._index)
 
     def __repr__(self):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<IndexedArray>\n"]
-        out.append(indent + "    <index>" + str(self.index._data) + "</index>\n")
-        out.append(self.content._repr(indent + "    ", "<content>", "</content>\n"))
+        out = [indent, pre, "<IndexedArray len="]
+        out.append(repr(str(len(self))))
+        out.append(">\n")
+        out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
+        out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)
         out.append("</IndexedArray>")
         out.append(post)
@@ -40,13 +50,13 @@ class IndexedArray(Content):
             where += len(self)
         if 0 > where or where >= len(self):
             raise IndexError("array index out of bounds")
-        return self.content[self.index[where]]
+        return self._content[self._index[where]]
 
     def _getitem_range(self, where):
-        return IndexedArray(Index(self.index[where.start : where.stop]), self.content)
+        return IndexedArray(Index(self._index[where.start : where.stop]), self._content)
 
     def _getitem_field(self, where):
-        return IndexedArray(self.index, self.content[where])
+        return IndexedArray(self._index, self._content[where])
 
     def _getitem_fields(self, where):
-        return IndexedArray(self.index, self.content[where])
+        return IndexedArray(self._index, self._content[where])

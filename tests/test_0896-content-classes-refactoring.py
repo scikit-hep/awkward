@@ -196,7 +196,7 @@ def test_RecordArray_NumpyArray():
         a["z"]
     with pytest.raises(IndexError):
         a[["x", "z"]]
-    assert len(a[["x", "y"]]) == 2
+    assert len(a[["x", "y"]]) == 5
 
     # 5.5 is inaccessible
     b = ak._v2.contents.recordarray.RecordArray(
@@ -226,7 +226,7 @@ def test_RecordArray_NumpyArray():
     assert b["1"][-3] == 2.2
     with pytest.raises(IndexError):
         a["2"]
-    assert len(b[["0", "1"]]) == 2
+    assert len(b[["0", "1"]]) == 5
 
     c = ak._v2.contents.recordarray.RecordArray([], [], 10)
     assert len(c) == 10
@@ -328,7 +328,7 @@ def test_IndexedOptionArray_NumpyArray():
 def test_ByteMaskedArray_NumpyArray():
     # 2.2, 4.4, and 6.6 are inaccessible
     a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.uint8)),
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
@@ -363,7 +363,7 @@ def test_ByteMaskedArray_NumpyArray():
 
     # 2.2, 4.4, and 6.6 are inaccessible
     b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.uint8)),
+        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
@@ -989,7 +989,7 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
 def test_ByteMaskedArray_RecordArray_NumpyArray():
     # 2.2, 4.4, and 6.6 are inaccessible
     a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.uint8)),
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
         ak._v2.contents.recordarray.RecordArray(
             [
                 ak._v2.contents.numpyarray.NumpyArray(
@@ -1029,7 +1029,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
 
     # 2.2, 4.4, and 6.6 are inaccessible
     b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.uint8)),
+        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
         ak._v2.contents.recordarray.RecordArray(
             [
                 ak._v2.contents.numpyarray.NumpyArray(

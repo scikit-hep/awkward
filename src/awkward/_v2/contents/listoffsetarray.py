@@ -21,6 +21,14 @@ class ListOffsetArray(Content):
         self._offsets = offsets
         self._content = content
 
+    @property
+    def offsets(self):
+        return self._offsets
+
+    @property
+    def content(self):
+        return self._content
+
     def __len__(self):
         return len(self._offsets) - 1
 
@@ -28,13 +36,10 @@ class ListOffsetArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<ListOffsetArray>\n"]
-        out.append(
-            indent
-            + "    <offsets>"
-            + " ".join(str(x) for x in self._offsets)
-            + "</offsets>\n"
-        )
+        out = [indent, pre, "<ListOffsetArray len="]
+        out.append(repr(str(len(self))))
+        out.append(">\n")
+        out.append(self._offsets._repr(indent + "    ", "<offsets>", "</offsets>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)
         out.append("</ListOffsetArray>")

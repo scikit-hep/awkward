@@ -25,6 +25,22 @@ class BitMaskedArray(Content):
         self._length = length
         self._lsb_order = lsb_order
 
+    @property
+    def mask(self):
+        return self._mask
+
+    @property
+    def content(self):
+        return self._content
+
+    @property
+    def valid_when(self):
+        return self._valid_when
+
+    @property
+    def lsb_order(self):
+        return self._lsb_order
+
     def __len__(self):
         return self._length
 
@@ -32,13 +48,14 @@ class BitMaskedArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<BitMaskedArray>\n"]
-        out.append(
-            indent + "    <valid_when>" + str(self._valid_when) + "</valid_when>\n"
-        )
-        out.append(indent + "    <length>" + str(self._length) + "</valid_when>\n")
-        out.append(indent + "    <lsb_order>" + str(self._lsb_order) + "</lsb_order>\n")
-        out.append(indent + "    <mask>" + str(self._mask._data) + "</mask>\n")
+        out = [indent, pre, "<BitMaskedArray len="]
+        out.append(repr(str(len(self))))
+        out.append(" valid_when=")
+        out.append(repr(str(self._valid_when)))
+        out.append(" lsb_order=")
+        out.append(repr(str(self._lsb_order)))
+        out.append(">\n")
+        out.append(self._mask._repr(indent + "    ", "<mask>", "</mask>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)
         out.append("</BitMaskedArray>")
@@ -62,9 +79,14 @@ class BitMaskedArray(Content):
     def _getitem_range(self, where):
         # In general, slices must convert BitMaskedArray to ByteMaskedArray.
         if self._lsb_order:
-            bytemask = np.unpackbits(self._mask).reshape(-1, 8)[:, ::-1].reshape(-1)
+            bytemask = (
+                np.unpackbits(self._mask)
+                .reshape(-1, 8)[:, ::-1]
+                .reshape(-1)
+                .view(np.int8)
+            )
         else:
-            bytemask = np.unpackbits(self._mask)
+            bytemask = np.unpackbits(self._mask).view(np.int8)
         start, stop, step = where.indices(len(self))
         return ByteMaskedArray(
             Index(bytemask[start:stop]),

@@ -19,6 +19,14 @@ class IndexedOptionArray(Content):
         self._index = index
         self._content = content
 
+    @property
+    def index(self):
+        return self._index
+
+    @property
+    def content(self):
+        return self._content
+
     def __len__(self):
         return len(self._index)
 
@@ -26,8 +34,10 @@ class IndexedOptionArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<IndexedOptionArray>\n"]
-        out.append(indent + "    <index>" + str(self._index._data) + "</index>\n")
+        out = [indent, pre, "<IndexedOptionArray len="]
+        out.append(repr(str(len(self))))
+        out.append(">\n")
+        out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
         out.append(indent)
         out.append("</IndexedOptionArray>")

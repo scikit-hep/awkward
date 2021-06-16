@@ -30,6 +30,18 @@ class RecordArray(Content):
         self._recordlookup = recordlookup
         self._length = length
 
+    @property
+    def contents(self):
+        return self._contents
+
+    @property
+    def recordlookup(self):
+        return self._recordlookup
+
+    @property
+    def is_tuple(self):
+        return self._recordlookup is None
+
     def __len__(self):
         return self._length
 
@@ -37,14 +49,71 @@ class RecordArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<RecordArray>\n"]
-        out.append(indent + "    <length>" + str(self._length) + "</length>\n")
-        for x in self._contents:
-            out.append(x._repr(indent + "    ", "<content>", "</content>\n"))
+        out = [indent, pre, "<RecordArray len="]
+        out.append(repr(str(len(self))))
+        out.append(" is_tuple=")
+        out.append(repr(str(self.is_tuple)))
+        out.append(">\n")
+        if self._recordlookup is None:
+            for i, x in enumerate(self._contents):
+                out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
+                out.append(x._repr(indent + "        ", "", "\n"))
+                out.append("{0}    </content>\n".format(indent))
+        else:
+            for i, x in enumerate(self._contents):
+                out.append(
+                    "{0}    <content index={1} key={2}>\n".format(
+                        indent, repr(str(i)), repr(self._recordlookup[i])
+                    )
+                )
+                out.append(x._repr(indent + "        ", "", "\n"))
+                out.append("{0}    </content>\n".format(indent))
         out.append(indent)
         out.append("</RecordArray>")
         out.append(post)
         return "".join(out)
+
+    def index_to_key(self, index):
+        if 0 <= index < len(self._contents):
+            if self._recordlookup is None:
+                return str(index)
+            else:
+                return self._recordlookup[index]
+        else:
+            raise IndexError(
+                "no index {0} in record with {1} fields".format(
+                    index, len(self._contents)
+                )
+            )
+
+    def key_to_index(self, key):
+        if self._recordlookup is None:
+            try:
+                i = int(key)
+            except ValueError:
+                pass
+            else:
+                if 0 <= i < len(self._contents):
+                    return i
+        else:
+            try:
+                i = self._recordlookup.index(key)
+            except ValueError:
+                pass
+            else:
+                return i
+        raise IndexError(
+            "no field {0} in record with {1} fields".format(
+                repr(key), len(self._contents)
+            )
+        )
+
+    def content(self, index_or_key):
+        if isinstance(index_or_key, numbers.Integral):
+            index = index_or_key
+        else:
+            index = self.key_to_index(index_or_key)
+        return self._contents[index][: self._length]
 
     def _getitem_at(self, where):
         if where < 0:
@@ -76,42 +145,14 @@ class RecordArray(Content):
             )
 
     def _getitem_field(self, where):
-        if self._recordlookup is None:
-            try:
-                i = int(where)
-            except ValueError:
-                pass
-            else:
-                if i < len(self._contents):
-                    return self._contents[i][: len(self)]
-        else:
-            try:
-                i = self._recordlookup.index(where)
-            except ValueError:
-                pass
-            else:
-                return self._contents[i][: len(self)]
-        raise IndexError("field " + repr(where) + " not found")
+        return self.content(where)
 
     def _getitem_fields(self, where):
+        indexes = [self.key_to_index(key) for key in where]
         if self._recordlookup is None:
-            try:
-                i = [int(x) for x in where]
-            except ValueError:
-                pass
-            else:
-                out = [
-                    self._contents[elem][: len(self)]
-                    for elem in i
-                    if elem < len(self._contents)
-                ]
-                return RecordArray(out, list(where), len(where))
+            return RecordArray([self.content(i) for i in indexes], None)
         else:
-            try:
-                i = [self._recordlookup.index(field) for field in where]
-            except ValueError:
-                pass
-            else:
-                out = [self._contents[elem][: len(self)] for elem in i]
-                return RecordArray(out, list(where), len(where))
-        raise IndexError("fields " + repr(where) + " not found")
+            return RecordArray(
+                [self.content(i) for i in indexes],
+                [self._recordlookup[i] for i in indexes],
+            )
