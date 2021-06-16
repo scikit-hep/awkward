@@ -8,7 +8,9 @@ from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
 
-import numpy as np
+import awkward as ak
+
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class BitMaskedArray(Content):
@@ -80,13 +82,13 @@ class BitMaskedArray(Content):
         # In general, slices must convert BitMaskedArray to ByteMaskedArray.
         if self._lsb_order:
             bytemask = (
-                np.unpackbits(self._mask)
+                self._mask.nplike.unpackbits(self._mask)
                 .reshape(-1, 8)[:, ::-1]
                 .reshape(-1)
                 .view(np.int8)
             )
         else:
-            bytemask = np.unpackbits(self._mask).view(np.int8)
+            bytemask = self._mask.nplike.unpackbits(self._mask).view(np.int8)
         start, stop, step = where.indices(len(self))
         return ByteMaskedArray(
             Index(bytemask[start:stop]),

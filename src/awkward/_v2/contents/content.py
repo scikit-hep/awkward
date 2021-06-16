@@ -21,6 +21,9 @@ class Content(object):
         elif isinstance(where, slice) and where.step is None:
             return self._getitem_range(where)
 
+        elif isinstance(where, slice):
+            raise NotImplementedError("needs _getitem_next")
+
         elif isinstance(where, str):
             return self._getitem_field(where)
 
@@ -48,7 +51,8 @@ class Content(object):
         else:
             raise TypeError(
                 "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-                "and integer or boolean arrays (possibly with variable-length nested "
-                "lists or missing values) are valid indices for slicing, not"
-                "\n\n    {0}".format(repr(where))
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(where)
             )

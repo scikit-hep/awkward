@@ -10,16 +10,22 @@ except ImportError:
 import numbers
 
 import awkward as ak
+from awkward._v2.contents.content import Content
+
+
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class Record(object):
     def __init__(self, array, at):
         assert isinstance(array, ak._v2.contents.recordarray.RecordArray)
-        # FIXME this is not a correct way to check as len of array is min of the new recordarry but the index can be larger as it's the index of the original RecordArray
-        # if 0 > at or at >= len(array):
-        #     raise IndexError("array index out of bounds")
-        self._array = array
-        self._at = at
+        if 0 <= at < len(array):
+            self._array = array
+            self._at = at
+        else:
+            raise ValueError(
+                "Record at={0} for array of length {1}".format(at, len(array))
+            )
 
     @property
     def array(self):
@@ -33,23 +39,55 @@ class Record(object):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<Record>\n"]
-        out.append(indent + "    <at>" + str(self._at) + "</at>\n")
-        out.append(self._array._repr(indent + "    ", "<content>", "</content>\n"))
+        out = [indent, pre, "<Record at="]
+        out.append(repr(str(self._at)))
+        out.append(">\n")
+        out.append(self._array._repr(indent + "    ", "<array>", "</array>\n"))
         out.append(indent)
         out.append("</Record>")
         out.append(post)
         return "".join(out)
 
     def __getitem__(self, where):
-        if isinstance(where, numbers.Integral) or isinstance(where, slice):
+        if isinstance(where, numbers.Integral):
+            raise IndexError("scalar Record cannot be sliced by an integer")
+
+        elif isinstance(where, slice):
+            raise IndexError("scalar Record cannot be sliced by a range slice (`:`)")
+
+        elif isinstance(where, str):
+            return self._getitem_field(where)
+
+        elif where is np.newaxis:
+            raise IndexError("scalar Record cannot be sliced by np.newaxis (`None`)")
+
+        elif where is Ellipsis:
+            raise IndexError("scalar Record cannot be sliced by an ellipsis (`...`)")
+
+        elif isinstance(where, tuple):
+            raise NotImplementedError("needs _getitem_next")
+
+        elif isinstance(where, ak.highlevel.Array):
+            raise IndexError("scalar Record cannot be sliced by an array")
+
+        elif isinstance(where, Content):
+            raise IndexError("scalar Record cannot be sliced by an array")
+
+        elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
+            return self._getitem_fields(where)
+
+        elif isinstance(where, Iterable):
+            raise IndexError("scalar Record cannot be sliced by an array")
+
+        else:
             raise TypeError(
-                "scalar Record can only be sliced by field name (string); try "
+                "only field name (str) or names (non-tuple iterable of str) "
+                "are valid indices for slicing a scalar record, not\n\n    "
                 + repr(where)
             )
-        elif isinstance(where, str):
-            return self._array._getitem_field(where)
-        elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
-            return self._array._getitem_fields(where)
-        else:
-            raise AssertionError(where)
+
+    def _getitem_field(self, where):
+        return self._array._getitem_field(where)._getitem_at(self._at)
+
+    def _getitem_fields(self, where):
+        return self._array._getitem_fields(where)._getitem_at(self._at)

@@ -4,8 +4,6 @@ from __future__ import absolute_import
 
 import numbers
 
-import numpy as np
-
 from awkward._v2.contents.content import Content
 from awkward._v2.record import Record
 
@@ -18,8 +16,7 @@ class RecordArray(Content):
             length = min([len(x) for x in contents])
         assert isinstance(length, numbers.Integral)
         for x in contents:
-            # FIXME this conflicts with return of recordarray and building Content
-            # assert isinstance(x, Content)
+            assert isinstance(x, Content)
             assert len(x) >= length
         assert recordlookup is None or isinstance(recordlookup, list)
         if isinstance(recordlookup, list):
@@ -120,14 +117,7 @@ class RecordArray(Content):
             where += len(self)
         if 0 > where or where >= len(self):
             raise IndexError("array index out of bounds")
-        record = [np.asarray([x[where]]) for x in self._contents]
-        length = min([len(x) for x in record]) if len(record) > 0 else 0
-        if self._recordlookup is None:
-            return Record(
-                RecordArray(record, [str(x) for x in range(len(record))], length), where
-            )
-        else:
-            return Record(RecordArray(record, self._recordlookup, length), where)
+        return Record(self, where)
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
