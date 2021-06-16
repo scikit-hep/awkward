@@ -20,7 +20,10 @@ If you're willing to think about your data in a columnar way, directly construct
 
 ```{code-cell} ipython3
 import awkward as ak
+import numpy as np
+```
 
+```{code-cell} ipython3
 builder = ak.ArrayBuilder()
 
 with builder.list():
@@ -102,38 +105,142 @@ There are five Index specializations, and each [ak.layout.Content](https://awkwa
 
 +++
 
+Parameters
+----------
+
+Each layout node can have arbitrary metadata, called "parameters." Some parameters have built-in meanings, which are described below, and others can be given meanings by defining functions in [ak.behavior](https://awkward-array.readthedocs.io/en/latest/ak.behavior.html).
+
++++
+
 EmptyArray
 ----------
 
-[ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html)
+[ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html). EmptyArray is a trivial node type: it can only represent empty arrays with unknown type.
 
-+++
+```{code-cell} ipython3
+ak.layout.EmptyArray()
+```
+
+```{code-cell} ipython3
+ak.Array(ak.layout.EmptyArray())
+```
+
+Since this is such a simple node type, let's use it to show examples of adding parameters.
+
+```{code-cell} ipython3
+ak.layout.EmptyArray(parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}})
+```
 
 NumpyArray
 ----------
 
-[ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html)
+[ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html). NumpyArray represents data the same way as a NumPy [np.ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html). That is, it can be multidimensional, but only rectilinear arrays.
+
+```{code-cell} ipython3
+ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+```
+
+```{code-cell} ipython3
+ak.layout.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]], np.int16))
+```
+
+```{code-cell} ipython3
+ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])[::2])
+```
+
+```{code-cell} ipython3
+ak.layout.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]], np.int16)[:, 1:])
+```
+
+In most array structures, the NumpyArrays only need to be 1-dimensional, since regular-length dimensions can be represented by [ak.layout.RegularArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RegularArray.html) and variable-length dimensions can be represented by [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) or [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html).
+
+The [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html) function has a `regulararray` argument to choose between putting multiple dimensions into the NumpyArray node or nesting a 1-dimensional NumpyArray in RegularArray nodes.
+
+```{code-cell} ipython3
+ak.from_numpy(np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=False, highlevel=False)
+```
+
+```{code-cell} ipython3
+ak.from_numpy(np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=True, highlevel=False)
+```
+
+All of these representations look the same in an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) (high-level view).
+
+```{code-cell} ipython3
+ak.Array(ak.layout.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]])))
+```
+
+```{code-cell} ipython3
+ak.Array(ak.layout.RegularArray(ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6])), 3))
+```
+
+If you are _producing_ arrays, you can pick any representation that is convenient. If you are _consuming_ arrays, you need to be aware of the different representations.
 
 +++
 
 RegularArray
 ------------
 
-[ak.layout.RegularArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RegularArray.html)
+[ak.layout.RegularArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RegularArray.html) represents regular-length lists (lists with all the same length). This was shown above as being equivalent to dimensions in a [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html), but it can also contain irregular data.
+
+```{code-cell} ipython3
+layout = ak.layout.RegularArray(
+    ak.from_iter([1, 2, 3, 4, 5, 6], highlevel=False),
+    3,
+)
+layout
+```
+
+```{code-cell} ipython3
+ak.Array(layout)
+```
+
+```{code-cell} ipython3
+layout = ak.layout.RegularArray(
+    ak.from_iter([[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5]], highlevel=False),
+    3,
+)
+layout
+```
+
+```{code-cell} ipython3
+ak.Array(layout)
+```
+
+The data type for a RegularArray is [ak.types.RegularType](https://awkward-array.readthedocs.io/en/latest/ak.types.RegularType.html), printed above as the "`3 *`" in the type above. (The "`2 *`" describes the length of the array itself, which is always "regular" in the sense that there's only one of them, equal to itself.)
+
+The "`var *`" is the type of variable-length lists, nested inside of the RegularArray.
+
++++
+
+RegularArray is the first array type that can have unreachable data: the length of its nested content might not evenly divide the RegularArray's regular `size`.
+
+```{code-cell} ipython3
+ak.Array(
+    ak.layout.RegularArray(
+        ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7])),
+        3,
+    )
+)
+```
+
+In the high-level array, we only see `[[1, 2, 3], [4, 5, 6]]` and not `7`. Since the 7 items in the nested NumpyArray can't be subdivided into lists of length 3. This `7` exists in the underlying physical data, but in the high-level view, it is as though it did not.
 
 +++
 
 ListArray
 ---------
 
-[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html)
+[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) and [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`").
+
+[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) is the most general. It takes two Indexes, `starts` and `stops`, 
 
 +++
 
 ListOffsetArray
 ---------------
 
-[ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html)
+[ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) and [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`").
 
 +++
 
