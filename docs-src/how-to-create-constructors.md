@@ -233,7 +233,22 @@ ListArray
 
 [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) and [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`").
 
-[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) is the most general. It takes two Indexes, `starts` and `stops`, 
+[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) is the most general. It takes two Indexes, `starts` and `stops`, which indicate where each nested list starts and stops.
+
+```{code-cell} ipython3
+layout = ak.layout.ListArray64(
+    ak.layout.Index64(np.array([0, 3, 3])),
+    ak.layout.Index64(np.array([3, 3, 5])),
+    ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+)
+layout
+```
+
+```{code-cell} ipython3
+ak.Array(layout)
+```
+
+The nested content, `[1.1, 2.2, 3.3, 4.4, 5.5]` is divided into three lists, `[1.1, 2.2, 3.3]`, `[]`, `[4.4, 5.5]` by `starts=[0, 3, 3]` and `stops=[3, 3, 5]`. That is to say, the first list is drawn from indexes `0` through `3` of the content, the second is empty (from `3` to `3`), and the third is drawn from indexes `3` through `5`.
 
 +++
 
