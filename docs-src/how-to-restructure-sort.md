@@ -32,6 +32,6 @@ An optional `axis` parameter defines an axis along which to sort. The default is
 
 Awkward Array axes are defined similar to Numpy axes. In a two-dimentional Awkward Array they are the directions along the rows and columns.
 
-[![](img/axis.jpg)]
+[![](img/sorting-axis.svg)]
 
 In Akward Array, axis 0 is the "first" axis.
