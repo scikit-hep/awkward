@@ -3,8 +3,8 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: '0.10'
-    jupytext_version: 1.5.2
+    format_version: 0.13
+    jupytext_version: 1.10.3
 kernelspec:
   display_name: Python 3
   language: python
@@ -16,7 +16,7 @@ How to convert to/from Python objects
 
 Builtin Python objects like dicts and lists can be converted into Awkward Arrays, and all Awkward Arrays can be converted into Python objects. Awkward type information, such as the distinction between fixed-size and variable-length lists, is lost in the transformation to Python objects.
 
-```{code-cell} ipython3
+```{code-cell}
 import awkward as ak
 import numpy as np
 import pandas as pd
@@ -27,12 +27,12 @@ From Python to Awkward
 
 The function for Python → Awkward conversion is [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html).
 
-```{code-cell} ipython3
+```{code-cell}
 py_objects = [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 py_objects
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array = ak.from_iter(py_objects)
 ak_array
 ```
@@ -43,11 +43,11 @@ Note that this should be considered a slow, memory-intensive function: not only 
 
 This is also the fallback operation of the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) and [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) constructors. Usually, small examples are built by passing Python objects directly to these constructors.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Record({"x": 1, "y": [1.1, 2.2]})
 ```
 
@@ -56,21 +56,21 @@ From Awkward to Python
 
 The function for Awkward → Python conversion is [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html).
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 ak_array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.to_list(ak_array)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_record = ak.Record({"x": 1, "y": [1.1, 2.2]})
 ak_record
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.to_list(ak_record)
 ```
 
@@ -78,18 +78,18 @@ Note that this should be considered a slow, memory-intensive function, like [ak.
 
 Awkward Arrays and Records have a `tolist` method (note: no underscore), which is an analogy of [NumPy's tolist](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.tolist.html). For small datasets (or a small slice of a dataset), this is a convenient way to get a quick view.
 
-```{code-cell} ipython3
+```{code-cell}
 x = ak.Array(np.arange(1000))
 y = ak.Array(np.tile(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]), 100))
 ak_array = ak.zip({"x": x, "y": y})
 ak_array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array[100].tolist()
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array[100:110].tolist()
 ```
 
@@ -98,59 +98,59 @@ Pandas-style constructor
 
 As we have seen, the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor interprets an iterable argument as the data that it is meant to represent, as in:
 
-```{code-cell} ipython3
+```{code-cell}
 py_objects1 = [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 py_objects1
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(py_objects1)
 ```
 
 But sometimes, you have several iterables that you want to use as columns of a table. The [Pandas DataFrame constructor](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html) interprets a dict of iterables as columns:
 
-```{code-cell} ipython3
+```{code-cell}
 py_objects2 = ["one", "two", "three"]
 py_objects2
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 pd.DataFrame({"x": py_objects1, "y": py_objects2})
 ```
 
 And so does the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor:
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array = ak.Array({"x": py_objects1, "y": py_objects2})
 ak_array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.type(ak_array)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.to_list(ak_array)
 ```
 
 Note that this is the transpose of the way the data would be interpreted if it were in a list, rather than a dict. The `"x"` and `"y"` values are interpreted as being interleaved in each record. There is no potential for conflict between the [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html)-style and Pandas-style constructors because [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) applied to a dict would always return an [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html), rather than an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html).
 
-```{code-cell} ipython3
+```{code-cell}
 ak_record = ak.from_iter({"x": py_objects1, "y": py_objects2})
 ak_record
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.type(ak_record)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.to_list(ak_record)
 ```
 
 The [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) function applied to a dict is also equivalent to the [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) constructor.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Record({"x": py_objects1, "y": py_objects2})
 ```
 
@@ -161,27 +161,27 @@ Python `float`, `int`, and `bool` (so-called "primitive" types) are converted to
 
 All floating-point Awkward types are converted to Python's `float`, all integral Awkward types are converted to Python's `int`, and Awkward's boolean type is converted to Python's `bool`.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1.1, 2.2, 3.3])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1.1, 2.2, 3.3]).tolist()
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1, 2, 3, 4, 5])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1, 2, 3, 4, 5]).tolist()
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([True, False, True, False, False])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([True, False, True, False, False]).tolist()
 ```
 
@@ -192,19 +192,19 @@ Python lists, as well as iterables other than dict, tuple, str, and bytes, are c
 
 Awkward's variable-length and fixed-size lists are converted into Python lists with [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html).
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).tolist()
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([[1, 2, 3], [4, 5, 6]])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([[1, 2, 3], [4, 5, 6]]).tolist()
 ```
 
@@ -214,16 +214,16 @@ Advanced topic: the rest of this section may be skipped if you don't care about 
 
 Note that a NumPy array is an iterable, so [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) iterates over it, constructing variable-length Awkward lists. By contrast, [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html) casts the data (without iteration) into fixed-size Awkward lists.
 
-```{code-cell} ipython3
+```{code-cell}
 np_array = np.array([[100, 200], [101, 201], [103, 203]])
 np_array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.from_iter(np_array)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.from_numpy(np_array)
 ```
 
@@ -231,53 +231,53 @@ Note that the types differ: `var * int64` vs `2 * int64`. The [ak.Array](https:/
 
 This can be particularly subtle when NumPy arrays are nested within iterables.
 
-```{code-cell} ipython3
+```{code-cell}
 np_array = np.array([[100, 200], [101, 201], [103, 203]])
 np_array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 # This is a NumPy array: constructor uses ak.from_numpy to get an array of fixed-size lists.
 ak.Array(np_array)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 py_objects = [np.array([100, 200]), np.array([101, 201]), np.array([103, 203])]
 py_objects
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 # This is a list that contains NumPy arrays: constructor uses ak.from_iter to get an array of variable-length lists.
 ak.Array(py_objects)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 np_array_dtype_O = np.array([[100, 200], [101, 201], [103, 203]], dtype="O")
 np_array_dtype_O
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 # This NumPy array has dtype="O", so it cannot be cast without iteration: constructor uses ak.from_iter.
 ak.Array(np_array_dtype_O)
 ```
 
 The logic behind this policy is that only NumPy arrays with `dtype != "O"` are guaranteed to have fixed-size contents. Other cases must have `var` type lists.
 
-```{code-cell} ipython3
+```{code-cell}
 py_objects = [np.array([1.1, 2.2, 3.3]), np.array([]), np.array([4.4, 5.5])]
 py_objects
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(py_objects)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 np_array_dtype_O = np.array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], dtype="O")
 np_array_dtype_O
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(np_array_dtype_O)
 ```
 
@@ -286,19 +286,19 @@ Conversion of strings and bytestrings
 
 Python strings (type `str`) are converted to and from Awkward's UTF-8 encoded strings and Python bytestrings (type `bytes`) are converted to and from Awkward's unencoded bytestrings.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(["one", "two", "three", "four"])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(["one", "two", "three", "four"]).tolist()
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([b"one", b"two", b"three", b"four"])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([b"one", b"two", b"three", b"four"]).tolist()
 ```
 
@@ -308,23 +308,23 @@ Advanced topic: the rest of this section may be skipped if you don't care about 
 
 Awkward's strings and bytestrings are not distinct types, but specializations of variable-length lists. Whereas a list might be internally represented by a [ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) or a [ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html),
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
 ```
 
 Strings and bytestrings are just [ListArrays](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) and [ListOffsetArrays](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) of one-byte integers with special parameters:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(["one", "two", "three", "four"]).layout
 ```
 
 These parameters indicate that the arrays of strings should have special behaviors, such as equality-per-string, rather than equality-per-character.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([[1.1, 2.2], [], [3.3]]) == ak.Array([[1.1, 200], [], [3.3]])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(["one", "two", "three", "four"]) == ak.Array(["one", "TWO", "thirty three", "four"])
 ```
 
@@ -332,15 +332,15 @@ ak.Array(["one", "two", "three", "four"]) == ak.Array(["one", "TWO", "thirty thr
 
 Special behaviors for strings are implemented using the same [ak.behavior](https://awkward-array.readthedocs.io/en/latest/ak.behavior.html) mechanism that you might use to give special behaviors to Arrays and Records.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.behavior["string"]
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.behavior["bytestring"]
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.behavior[np.equal, "string", "string"]
 ```
 
@@ -357,23 +357,23 @@ Python tuples are converted to and from Awkward's record type with unnamed field
 
 In the following example, the `"x"` field has type `int64` and the `"y"` field has type `var * int64`.
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_rec = ak.Array([{"x": 1, "y": [1, 2]}, {"x": 2, "y": []}])
 ak_array_rec
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_rec.tolist()
 ```
 
 Here is the corresponding example with tuples:
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_tup = ak.Array([(1, [1, 2]), (2, [])])
 ak_array_tup
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_tup.tolist()
 ```
 
@@ -381,40 +381,40 @@ Both of these Awkward types, `{"x": int64, "y": var * int64}` and `(int64, var *
 
 Both can be extracted using strings between square brackets, though the strings must be `"0"` and `"1"` for the tuple.
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_rec["y"]
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_rec["y", 1]
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_tup["1"]
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_tup["1", 1]
 ```
 
 Note the difference in meaning between the `"1"` and the `1` in the above example. For safety, you may want to use the `slot[0-9]` methods with tuples:
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_tup.slot1
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak_array_tup.slot1[1]
 ```
 
 Or possibly [ak.unzip](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unzip.html):
 
-```{code-cell} ipython3
+```{code-cell}
 x, y = ak.unzip(ak_array_rec)
 y
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 slot0, slot1 = ak.unzip(ak_array_tup)
 slot1
 ```
@@ -423,25 +423,25 @@ That way, you can name the variables anything you like.
 
 If fields are missing from some records, the missing values are filled in with None (option type: more on that below).
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([{"x": 1, "y": [1, 2]}, {"x": 2}])
 ```
 
 If some tuples have different lengths, the resulting Awkward Array is taken to be heterogeneous (union type: more on that below).
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([(1, [1, 2]), (2,)])
 ```
 
 An Awkward Record is a scalar drawn from a record array, so an [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) can be built from a single dict with string-valued keys.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Record({"x": 1, "y": [1, 2], "z": 3.3})
 ```
 
 The same is not true for tuples. The [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) constructor expects named fields.
 
-```{code-cell} ipython3
+```{code-cell}
 # ak.Record((1, [1, 2], 3.3))   would raise TypeError
 ```
 
@@ -450,11 +450,11 @@ Missing values: Python None
 
 Python's None can appear anywhere in the structure parsed by [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html). It makes all data at that level of nesting have option type and is represented in [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html) as None.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1.1, 2.2, None, 3.3, None, 4.4])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1.1, 2.2, None, 3.3, None, 4.4]).tolist()
 ```
 
@@ -464,7 +464,7 @@ Advanced topic: the rest of this section describes the equivalence of missing re
 
 As described above, fields that are absent from some records but not others are filled in with None. As a consequence, conversions from Python to Awkward Array back to Python don't necessarily result in the original expression:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([
     {"x": 1.1, "y": [1]                    },
     {"x": 2.2,                 "z": "two"  },
@@ -474,7 +474,7 @@ ak.Array([
 
 This is a deliberate choice. It would have been possible to convert records with missing fields into arrays with union type (more on that below), for which [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html) would result in the original expression,
 
-```{code-cell} ipython3
+```{code-cell}
 ak.concatenate([
     ak.Array([{"x": 1.1, "y": [1]                    }]),
     ak.Array([{"x": 2.2,                 "z": "two"  }]),
@@ -488,7 +488,7 @@ The memory use of union arrays scales with the number of different types, up to 
 
 Tuples of different lengths, on the other hand, are assumed to be different types because mistaking slot $i$ for slot $i + 1$ would create unions anyway.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([
     (1.1, [1]               ),
     (2.2,            "two"  ),
@@ -505,37 +505,37 @@ Most Awkward operations are defined on union typed Arrays, but they're not gener
 
 The following example mixes numbers (`float64`) with lists (`var * int64`).
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1.1, 2.2, [], [1], [1, 2], 3.3])
 ```
 
 The [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html) function converts it back into a heterogeneous Python list.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1.1, 2.2, [], [1], [1, 2], 3.3]).tolist()
 ```
 
 Any types may be mixed: numbers and lists, lists and records, missing data, etc.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([[1, 2, 3], {"x": 1, "y": 2}, None])
 ```
 
 One exception is that numerical data are merged without creating a union type: integers are expanded to floating point numbers.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1, 2, 3, 4, 5.5, 6.6, 7.7, 8, 9])
 ```
 
 But booleans are not merged with integers.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1, 2, 3, True, True, False, 4, 5])
 ```
 
 As described above, records with different sets of fields are presumed to be a single record type with missing values.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.type(ak.Array([
     {"x": 1.1, "y": [1]                    },
     {"x": 2.2,                 "z": "two"  },
@@ -545,7 +545,7 @@ ak.type(ak.Array([
 
 But tuples with different lengths are presumed to be distinct types.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.type(ak.Array([
     (1.1, [1]               ),
     (2.2,            "two"  ),

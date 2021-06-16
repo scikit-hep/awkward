@@ -3,8 +3,8 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: '0.10'
-    jupytext_version: 1.5.2
+    format_version: 0.13
+    jupytext_version: 1.10.3
 kernelspec:
   display_name: Python 3
   language: python
@@ -21,7 +21,7 @@ To find out which version you're using:
    * if you `import uproot3`, then it's Uproot 3;
    * if you `import uproot` or `import uproot4`, then it's Uproot 4.
 
-```{code-cell} ipython3
+```{code-cell}
 import awkward as ak
 import numpy as np
 import uproot3
@@ -35,21 +35,21 @@ By default, Uproot 4 delivers data from ROOT files as Awkward 1 arrays, even tho
 
 To start, open a file and look at the objects it contains.
 
-```{code-cell} ipython3
+```{code-cell}
 up4_file = uproot.open("http://scikit-hep.org/uproot3/examples/HZZ.root")
 up4_file.classnames()
 ```
 
 From the above, we learn that `"events"` is a TTree, so we read its metadata with:
 
-```{code-cell} ipython3
+```{code-cell}
 up4_events = up4_file["events"]
 up4_events
 ```
 
 And then look at its branches and their types.
 
-```{code-cell} ipython3
+```{code-cell}
 up4_events.show()
 ```
 
@@ -57,56 +57,56 @@ Some of these branches have a single value per event (e.g. `"MET_px"` has type `
 
 Regardless of type, they would all be returned as Awkward Arrays:
 
-```{code-cell} ipython3
+```{code-cell}
 array = up4_events["MET_px"].array()
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 type(array)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 array = up4_events["Muon_Px"].array()
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 type(array)
 ```
 
 Because `library="ak"` is the default. Setting it to another value, like `library="np"`, returns non-Awkward arrays.
 
-```{code-cell} ipython3
+```{code-cell}
 array = up4_events["MET_px"].array(library="np")
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 type(array)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 array = up4_events["Muon_Px"].array(library="np")
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 type(array)
 ```
 
 Uproot's `arrays` method (plural) returns a "package" of related arrays, which for the Awkward library means arrays presented as records.
 
-```{code-cell} ipython3
+```{code-cell}
 arrays = up4_events.arrays(["Muon_Px", "Muon_Py", "Muon_Pz"])
 arrays
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.type(arrays)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 arrays["Muon_Px"]
 ```
 
@@ -114,35 +114,35 @@ With `arrays`, the `how="zip"` option attempts to [ak.zip](https://awkward-array
 
 Note that the [ak.type](https://awkward-array.readthedocs.io/en/latest/_auto/ak.type.html) below is `var * {all fields}`, rather than `{field: var, field: var, ...}`.
 
-```{code-cell} ipython3
+```{code-cell}
 arrays = up4_events.arrays(["Muon_Px", "Muon_Py", "Muon_Pz"], how="zip")
 arrays
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.type(arrays)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 arrays.Muon.Px
 ```
 
 If some of the branches cannot be combined because they have different multiplicities, they are kept separate.
 
-```{code-cell} ipython3
+```{code-cell}
 arrays = up4_events.arrays(["Muon_Px", "Muon_Py", "Muon_Pz", "Jet_Px", "Jet_Py", "Jet_Pz"], how="zip")
 arrays
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.type(arrays)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 arrays.Muon.Px
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 arrays.Jet.Px
 ```
 
@@ -162,21 +162,21 @@ Uproot 4 is recommended unless you're dealing with legacy software built on Upro
 
 To start, open a file and look at the objects it contains.
 
-```{code-cell} ipython3
+```{code-cell}
 up3_file = uproot3.open("http://scikit-hep.org/uproot3/examples/HZZ.root")
 up3_file.classnames()
 ```
 
 From the above, we learn that `"events"` is a TTree, so we read its metadata with:
 
-```{code-cell} ipython3
+```{code-cell}
 up3_events = up3_file["events"]
 up3_events
 ```
 
 And then look at its branches and their types.
 
-```{code-cell} ipython3
+```{code-cell}
 up3_events.show()
 ```
 
@@ -184,35 +184,35 @@ Some of these branches have a single value per event (e.g. `"MET_px"` has interp
 
 Data that can be interpreted `asdtype` are returned as NumPy arrays:
 
-```{code-cell} ipython3
+```{code-cell}
 array = up3_events.array("MET_px")
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 type(array)
 ```
 
 NumPy arrays can be converted to Awkward 1 (i.e. "new library") by passing them to the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor or the [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html) function.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(array)
 ```
 
 And data that require `asjagged` or other specialized interpretations are returned as Awkward Arrays:
 
-```{code-cell} ipython3
+```{code-cell}
 array = up3_events.array("Muon_Px")
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 type(array)
 ```
 
 Awkward 0 arrays can be converted to Awkward 1 by passing them to the [ak.from_awkward0](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_awkward0.html) function. (There's also an [ak.to_awkward0](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_awkward0.html) for the other direction; conversions are usually zero-copy and quick.)
 
-```{code-cell} ipython3
+```{code-cell}
 ak.from_awkward0(array)
 ```
 
@@ -222,14 +222,14 @@ ak.from_awkward0(array)
 
 Uproot 3's `arrays` method (plural) returns "packages" of related arrays as Python dicts:
 
-```{code-cell} ipython3
+```{code-cell}
 arrays = up3_events.arrays(["Muon_Px", "Muon_Py", "Muon_Pz"])
 arrays
 ```
 
 Be careful of the bytestring keys (dict key type is `bytes`, rather than `str`) and note that you can only convert all of the arrays with a loop: they are separate entities.
 
-```{code-cell} ipython3
+```{code-cell}
 {name.decode(): ak.from_awkward0(array) for name, array in arrays.items()}
 ```
 
@@ -240,14 +240,14 @@ Since ROOT file-writing is only implemented in Uproot 3, you'll need to take int
 
 To open a flie for writing, use `uproot.recreate`, rather than `uproot.open`.
 
-```{code-cell} ipython3
+```{code-cell}
 file = uproot3.recreate("/tmp/example.root")
 file
 ```
 
 The `uproot3.newtree` function creates a tree that can be written. The data types for each branch have to be specified.
 
-```{code-cell} ipython3
+```{code-cell}
 file["tree1"] = uproot3.newtree({"branch1": int, "branch2": np.float32})
 ```
 
@@ -255,43 +255,43 @@ The method for writing is `extend`, which can be called as many times as needed 
 
 The chunks should be large (each represents a ROOT TBasket) and must include equal-length arrays for each branch.
 
-```{code-cell} ipython3
+```{code-cell}
 file["tree1"].extend({"branch1": np.array([0, 1, 2, 3, 4]),
                       "branch2": np.array([0.0, 1.1, 2.2, 3.3, 4.4], dtype=np.float32)})
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 file["tree1"].extend({"branch1": np.array([5, 6, 7, 8, 9]),
                       "branch2": np.array([5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float32)})
 ```
 
 To write a jagged array, it must be in Awkward 0 format. You may need to use [ak.to_awkward0](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_awkward0.html).
 
-```{code-cell} ipython3
+```{code-cell}
 ak0_array = ak.to_awkward0(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]))
 ak0_array
 ```
 
 And you will need its `counts`. (This is the Awkward 0 equivalent of [ak.num](https://awkward-array.readthedocs.io/en/latest/_auto/ak.num.html).
 
-```{code-cell} ipython3
+```{code-cell}
 ak0_array.counts
 ```
 
 The branch's type has to be constructed with the `uproot3.newbranch` function and has to include a `size`, into which the counts will be written.
 
-```{code-cell} ipython3
+```{code-cell}
 file["tree2"] = uproot3.newtree({"branch3": uproot3.newbranch(np.dtype("f8"), size="n")})
 ```
 
 Fill each chunk by assigning the branch data and the counts in each `extend`.
 
-```{code-cell} ipython3
+```{code-cell}
 file["tree2"].extend({"branch3": ak0_array, "n": ak0_array.counts})
 ```
 
 File-closure could also be enforced by putting `uproot3.recreate` in a context manager (Python `with` statement).
 
-```{code-cell} ipython3
+```{code-cell}
 file.close()
 ```
