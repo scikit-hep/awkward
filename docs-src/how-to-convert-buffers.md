@@ -16,7 +16,7 @@ Generic buffers
 
 Most of the conversion functions target a particular library: NumPy, Arrow, Pandas, or Python itself. As a catch-all for other storage formats, Awkward Arrays can be converted to and from sets of named buffers. The buffers are not (usually) intelligible on their own; the length of the array and a JSON document are needed to reconstitute the original structure. This section will demonstrate how an array-set can be used to store an Awkward Array in an HDF5 file, which ordinarily wouldn't be able to represent nested, irregular data structures.
 
-```{code-cell}
+```{code-cell} ipython3
 import awkward as ak
 import numpy as np
 import h5py
@@ -28,7 +28,7 @@ From Awkward to buffers
 
 Consider the following complex array:
 
-```{code-cell}
+```{code-cell} ipython3
 ak_array = ak.Array([
     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
     [],
@@ -39,7 +39,7 @@ ak_array
 
 The [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) function decomposes it into a set of one-dimensional arrays (a zero-copy operation).
 
-```{code-cell}
+```{code-cell} ipython3
 form, length, container = ak.to_buffers(ak_array)
 ```
 
@@ -53,19 +53,19 @@ The [Form](https://awkward-array.readthedocs.io/en/latest/ak.forms.Form.html) is
 
 It is usually presented as JSON, and has a compact JSON format (when [Form.tojson](https://awkward-array.readthedocs.io/en/latest/ak.forms.Form.html#ak-forms-form-tojson) is invoked).
 
-```{code-cell}
+```{code-cell} ipython3
 form
 ```
 
 In this case, the `length` is just an integer. It would be a list of integers if `ak_array` was partitioned.
 
-```{code-cell}
+```{code-cell} ipython3
 length
 ```
 
 This `container` is a new dict, but it could have been a user-specified [MutableMapping](https://docs.python.org/3/library/collections.abc.html#collections-abstract-base-classes) if passed into [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) as an argument.
 
-```{code-cell}
+```{code-cell} ipython3
 container
 ```
 
@@ -74,7 +74,7 @@ From buffers to Awkward
 
 The function that reverses [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) is [ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html). Its first three arguments are `form`, `length`, and `container`.
 
-```{code-cell}
+```{code-cell} ipython3
 ak.from_buffers(form, length, container)
 ```
 
@@ -85,7 +85,7 @@ The [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_b
 
 Here is an example of an array in need of packing:
 
-```{code-cell}
+```{code-cell} ipython3
 unpacked = ak.Array(
     ak.layout.ListArray64(
         ak.layout.Index64(np.array([4, 10, 1])),
@@ -102,30 +102,30 @@ This [ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListAr
 
 The [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) function dutifully writes the `999` values into the output, even though they're not visible in the array.
 
-```{code-cell}
+```{code-cell} ipython3
 ak.to_buffers(unpacked)
 ```
 
 If the intended purpose of calling [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) is to write to a file or send data over a network, this is wasted space. It can be trimmed by calling the [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html) function.
 
-```{code-cell}
+```{code-cell} ipython3
 packed = ak.packed(unpacked)
 packed
 ```
 
 At high-level, the array appears to be the same, but its low-level structure is quite different:
 
-```{code-cell}
+```{code-cell} ipython3
 unpacked.layout
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 packed.layout
 ```
 
 This version of the array is more concise when written with [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html):
 
-```{code-cell}
+```{code-cell} ipython3
 ak.to_buffers(packed)
 ```
 
@@ -134,7 +134,7 @@ Saving Awkward Arrays to HDF5
 
 The [h5py](https://www.h5py.org/) library presents each group in an HDF5 file as a [MutableMapping](https://docs.python.org/3/library/collections.abc.html#collections-abstract-base-classes), which we can use as a container for an array-set. We must also save the `form` and `length` as metadata for the array to be retrievable.
 
-```{code-cell}
+```{code-cell} ipython3
 file = h5py.File("/tmp/example.hdf5", "w")
 group = file.create_group("awkward")
 group
@@ -142,34 +142,34 @@ group
 
 We can fill this `group` as a `container` by passing it in to [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html). (See the previous section for more on [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html).)
 
-```{code-cell}
+```{code-cell} ipython3
 form, length, container = ak.to_buffers(ak.packed(ak_array), container=group)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 container
 ```
 
 Now the HDF5 group has been filled with array pieces.
 
-```{code-cell}
+```{code-cell} ipython3
 container.keys()
 ```
 
 Here's one.
 
-```{code-cell}
+```{code-cell} ipython3
 np.asarray(container["part0-node0-offsets"])
 ```
 
 Now we need to add the other information to the group as metadata. Since HDF5 accepts string-valued metadata, we can put it all in as JSON or numbers.
 
-```{code-cell}
+```{code-cell} ipython3
 group.attrs["form"] = form.tojson()
 group.attrs["form"]
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 group.attrs["length"] = json.dumps(length)   # JSON-encode it because it might be a list
 group.attrs["length"]
 ```
@@ -181,7 +181,7 @@ With that, we can reconstitute the array by supplying [ak.from_buffers](https://
 
 The group can't be used as a `container` as-is, since subscripting it returns `h5py.Dataset` objects, rather than arrays.
 
-```{code-cell}
+```{code-cell} ipython3
 reconstituted = ak.from_buffers(
     ak.forms.Form.fromjson(group.attrs["form"]),
     json.loads(group.attrs["length"]),
@@ -192,7 +192,7 @@ reconstituted
 
 Like [ak.from_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_parquet.html), [ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) has the option to read lazily, only accessing record fields and partitions that are accessed.
 
-```{code-cell}
+```{code-cell} ipython3
 class LazyGet:
     def __init__(self, group):
         self.group = group
@@ -211,25 +211,25 @@ lazy = ak.from_buffers(
 
 The `LazyGet` class prints out any keys that actually get read from the HDF5 file, when they get read. Nothing has been printed yet.
 
-```{code-cell}
+```{code-cell} ipython3
 lazy.x
 ```
 
 Now that we have looked at the `"x"` field, `"node0-offsets"` (for the outer list structure) and `"node2"` (the `"x"` values) have been read.
 
-```{code-cell}
+```{code-cell} ipython3
 lazy.x
 ```
 
 They were only read once.
 
-```{code-cell}
+```{code-cell} ipython3
 lazy.y
 ```
 
 Looking at the `"y"` field causes the `"node3-offsets"` (inner list structure) and `"node4"` (`"y"` values) to be read.
 
-```{code-cell}
+```{code-cell} ipython3
 lazy.y
 ```
 
