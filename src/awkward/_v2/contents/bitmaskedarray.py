@@ -15,12 +15,49 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class BitMaskedArray(Content):
     def __init__(self, mask, content, valid_when, length, lsb_order):
-        assert isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)
-        assert isinstance(content, Content)
-        assert isinstance(valid_when, bool)
-        assert isinstance(length, numbers.Integral) and length >= 0
-        assert isinstance(lsb_order, bool)
-        assert len(mask) <= len(content)
+        if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
+            raise TypeError(
+                "{0} 'mask' must be an Index with dtype=uint8, not {1}".format(
+                    type(self).__name__, repr(mask)
+                )
+            )
+        if not isinstance(content, Content):
+            raise TypeError(
+                "{0} 'content' must be a Content subtype, not {1}".format(
+                    type(self).__name__, repr(content)
+                )
+            )
+        if not isinstance(valid_when, bool):
+            raise TypeError(
+                "{0} 'valid_when' must be boolean, not {1}".format(
+                    type(self).__name__, repr(valid_when)
+                )
+            )
+        if not isinstance(length, numbers.Integral):
+            raise TypeError(
+                "{0} 'length' must be an integer, not {1}".format(
+                    type(self).__name__, repr(length)
+                )
+            )
+        if not isinstance(lsb_order, bool):
+            raise TypeError(
+                "{0} 'lsb_order' must be boolean, not {1}".format(
+                    type(self).__name__, repr(lsb_order)
+                )
+            )
+        if not length <= len(mask) * 8:
+            raise ValueError(
+                "{0} 'length' ({1}) must be <= len(mask) * 8 ({2})".format(
+                    type(self).__name__, length, len(mask) * 8
+                )
+            )
+        if not length <= len(content):
+            raise ValueError(
+                "{0} 'length' ({1}) must be <= len(content) ({2})".format(
+                    type(self).__name__, length, len(content)
+                )
+            )
+
         self._mask = mask
         self._content = content
         self._valid_when = valid_when

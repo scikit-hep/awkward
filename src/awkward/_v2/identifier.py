@@ -32,7 +32,6 @@ class Identifier(object):
             raise TypeError("Identifier data must be int32, int64")
 
     @classmethod
-    # cpp takes width, length?
     def zeros(cls, ref, fieldloc, length, width, nplike, dtype):
         return Identifier(ref, fieldloc, nplike.zeros((length, width), dtype=dtype))
 

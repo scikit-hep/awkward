@@ -11,14 +11,33 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class ListArray(Content):
     def __init__(self, starts, stops, content):
-        assert isinstance(starts, Index) and starts.dtype in (
+        if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),
             np.dtype(np.uint32),
             np.dtype(np.int64),
-        )
-        assert isinstance(stops, Index) and starts.dtype == stops.dtype
-        assert isinstance(content, Content)
-        assert len(stops) >= len(starts)  # usually equal
+        ):
+            raise TypeError(
+                "{0} 'starts' must be an Index with dtype in (int32, uint32, int64), "
+                "not {1}".format(type(self).__name__, repr(starts))
+            )
+        if not (isinstance(stops, Index) and starts.dtype == stops.dtype):
+            raise TypeError(
+                "{0} 'stops' must be an Index with the same dtype as 'starts' ({1}), "
+                "not {2}".format(type(self).__name__, repr(starts.dtype), repr(stops))
+            )
+        if not isinstance(content, Content):
+            raise TypeError(
+                "{0} 'content' must be a Content subtype, not {1}".format(
+                    type(self).__name__, repr(content)
+                )
+            )
+        if not len(starts) <= len(stops):
+            raise ValueError(
+                "{0} len(starts) ({1}) must be <= len(stops) ({2})".format(
+                    type(self).__name__, len(starts), len(stops)
+                )
+            )
+
         self._starts = starts
         self._stops = stops
         self._content = content

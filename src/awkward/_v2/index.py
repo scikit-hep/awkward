@@ -6,16 +6,16 @@ import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
+_dtype_to_form = {
+    np.dtype(np.int8): "i8",
+    np.dtype(np.uint8): "u8",
+    np.dtype(np.int32): "i32",
+    np.dtype(np.uint32): "u32",
+    np.dtype(np.int64): "i64",
+}
+
 
 class Index(object):
-    _dtype_to_form = {
-        np.dtype(np.int8): "i8",
-        np.dtype(np.uint8): "u8",
-        np.dtype(np.int32): "i32",
-        np.dtype(np.uint32): "u32",
-        np.dtype(np.int64): "i64",
-    }
-
     _expected_dtype = None
 
     def __init__(self, data):
@@ -24,8 +24,23 @@ class Index(object):
         self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
         if len(self._data.shape) != 1:
             raise TypeError("Index data must be one-dimensional")
-        if self._data.dtype not in self._dtype_to_form:
-            raise TypeError("Index data must be int8, uint8, int32, uint32, int64")
+
+        if self._data.dtype == np.dtype(np.int8):
+            self.__class__ = Index8
+        elif self._data.dtype == np.dtype(np.uint8):
+            self.__class__ = IndexU8
+        elif self._data.dtype == np.dtype(np.int32):
+            self.__class__ = Index32
+        elif self._data.dtype == np.dtype(np.uint32):
+            self.__class__ = IndexU32
+        elif self._data.dtype == np.dtype(np.int64):
+            self.__class__ = Index64
+        else:
+            raise TypeError(
+                "Index data must be int8, uint8, int32, uint32, int64, not {0}".format(
+                    repr(self._data.dtype)
+                )
+            )
 
     @classmethod
     def zeros(cls, length, nplike, dtype):
@@ -82,7 +97,7 @@ class Index(object):
         return "".join(out)
 
     def form(self):
-        return self._dtype_to_form[self._data.dtype]
+        return _dtype_to_form[self._data.dtype]
 
     def __getitem__(self, where):
         return self._data[where]

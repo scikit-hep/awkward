@@ -2,6 +2,10 @@
 
 from __future__ import absolute_import
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 import numbers
 
 from awkward._v2.contents.content import Content
@@ -10,19 +14,65 @@ from awkward._v2.record import Record
 
 class RecordArray(Content):
     def __init__(self, contents, recordlookup, length=None):
-        assert isinstance(contents, list)
-        if length is None:
-            assert len(contents) != 0
-            length = min([len(x) for x in contents])
-        assert isinstance(length, numbers.Integral)
-        for x in contents:
-            assert isinstance(x, Content)
-            assert len(x) >= length
-        assert recordlookup is None or isinstance(recordlookup, list)
-        if isinstance(recordlookup, list):
-            assert len(recordlookup) == len(contents)
-            for x in recordlookup:
-                assert isinstance(x, str)
+        if not isinstance(contents, Iterable):
+            raise TypeError(
+                "{0} 'contents' must be iterable, not {1}".format(
+                    type(self).__name__, repr(contents)
+                )
+            )
+        if not isinstance(contents, list):
+            contents = list(contents)
+
+        if len(contents) == 0 and length is None:
+            raise TypeError(
+                "{0} if len(contents) == 0, a 'length' must be specified".format(
+                    type(self).__name__
+                )
+            )
+        elif length is None:
+            length = min(len(x) for x in contents)
+        if not (isinstance(length, numbers.Integral) and length >= 0):
+            raise TypeError(
+                "{0} 'length' must be a non-negative integer or None, not {1}".format(
+                    type(self).__name__, repr(length)
+                )
+            )
+        for content in contents:
+            if not isinstance(content, Content):
+                raise TypeError(
+                    "{0} all 'contents' must be Content subclasses, not {1}".format(
+                        type(self).__name__, repr(content)
+                    )
+                )
+            if not len(content) >= length:
+                raise ValueError(
+                    "{0} len(content) ({1}) must be <= length ({2}) for all 'contents'".format(
+                        type(self).__name__, len(content), length
+                    )
+                )
+
+        if isinstance(recordlookup, Iterable):
+            if not isinstance(recordlookup, list):
+                recordlookup = list(recordlookup)
+            if not all(isinstance(x, str) for x in recordlookup):
+                raise TypeError(
+                    "{0} 'recordlookup' must all be strings, not {1}".format(
+                        type(self).__name__, repr(recordlookup)
+                    )
+                )
+            if not len(contents) == len(recordlookup):
+                raise ValueError(
+                    "{0} len(contents) ({1}) must be equal to len(recordlookup) ({2})".format(
+                        type(self).__name__, len(contents), len(recordlookup)
+                    )
+                )
+        elif recordlookup is not None:
+            raise TypeError(
+                "{0} 'recordlookup' must be iterable or None, not {1}".format(
+                    type(self).__name__, repr(recordlookup)
+                )
+            )
+
         self._contents = contents
         self._recordlookup = recordlookup
         self._length = length

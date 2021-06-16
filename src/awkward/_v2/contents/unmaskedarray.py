@@ -7,7 +7,13 @@ from awkward._v2.contents.content import Content
 
 class UnmaskedArray(Content):
     def __init__(self, content):
-        assert isinstance(content, Content)
+        if not isinstance(content, Content):
+            raise TypeError(
+                "{0} 'content' must be a Content subtype, not {1}".format(
+                    type(self).__name__, repr(content)
+                )
+            )
+
         self._content = content
 
     @property

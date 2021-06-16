@@ -9,18 +9,31 @@ from awkward._v2.contents.content import Content
 
 class RegularArray(Content):
     def __init__(self, content, size, zeros_length=0):
-        assert isinstance(content, Content)
-        assert isinstance(size, numbers.Integral)
-        assert isinstance(zeros_length, numbers.Integral)
-        assert size >= 0
-        if size != 0:
-            length = len(content) // size  # floor division
-        else:
-            assert zeros_length >= 0
-            length = zeros_length
+        if not isinstance(content, Content):
+            raise TypeError(
+                "{0} 'content' must be a Content subtype, not {1}".format(
+                    type(self).__name__, repr(content)
+                )
+            )
+        if not (isinstance(size, numbers.Integral) and size >= 0):
+            raise TypeError(
+                "{0} 'size' must be a non-negative integer, not {1}".format(
+                    type(self).__name__, size
+                )
+            )
+        if not (isinstance(zeros_length, numbers.Integral) and zeros_length >= 0):
+            raise TypeError(
+                "{0} 'zeros_length' must be a non-negative integer, not {1}".format(
+                    type(self).__name__, zeros_length
+                )
+            )
+
         self._content = content
         self._size = size
-        self._length = length
+        if size != 0:
+            self._length = len(content) // size  # floor division
+        else:
+            self._length = zeros_length
 
     @property
     def size(self):

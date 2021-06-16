@@ -44,7 +44,7 @@ class NumpyArray(Content):
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
             "\n"
         )
-        if len(arraystr_lines) > 1:  # or this array has an Identifier
+        if len(arraystr_lines) > 1:  # if or this array has an Identifier
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
