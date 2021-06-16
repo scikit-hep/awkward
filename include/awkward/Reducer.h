@@ -203,6 +203,33 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const = 0;
+
+    /// @brief Apply the reducer algorithm to an array of datetime
+    ///  values.
+    ///
+    /// @param data The array to reduce.
+    /// @param parents An integer array indicating which group each element
+    /// belongs to.
+    /// @param outlength The length of the output array (equal to the number
+    /// of groups).
+    virtual const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const = 0;
+
+    /// @brief Apply the reducer algorithm to an array of timedelta
+    ///  values.
+    ///
+    /// @param data The array to reduce.
+    /// @param parents An integer array indicating which group each element
+    /// belongs to.
+    /// @param outlength The length of the output array (equal to the number
+    /// of groups).
+    virtual const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const = 0;
+
   };
 
   /// @class ReducerCount
@@ -294,6 +321,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerCountNonzero
@@ -385,6 +422,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerSum
@@ -477,6 +524,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerProd
@@ -569,6 +626,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerAny
@@ -661,6 +728,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerAll
@@ -753,6 +830,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerMin
@@ -850,6 +937,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   private:
     double initial_f64_;
     uint64_t initial_u64_;
@@ -952,6 +1049,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   private:
     double initial_f64_;
     uint64_t initial_u64_;
@@ -1059,6 +1166,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
   /// @class ReducerArgmax
@@ -1161,6 +1278,16 @@ namespace awkward {
       apply_complex128(const std::complex<double>* data,
                        const Index64& parents,
                        int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_datetime(const int64_t* data,
+                     const Index64& parents,
+                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_timedelta(const int64_t* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
   };
 
 }

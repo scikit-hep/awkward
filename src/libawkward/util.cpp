@@ -12,6 +12,7 @@
 #include "awkward/kernels.h"
 
 #include "awkward/util.h"
+#include "awkward/datetime_util.h"
 #include "awkward/Identities.h"
 
 namespace rj = rapidjson;
@@ -69,12 +70,12 @@ namespace awkward {
       else if (name == "complex256") {
         return util::dtype::complex256;
       }
-      // else if (name == "datetime64") {
-      //   return util::dtype::datetime64;
-      // }
-      // else if (name == "timedelta64") {
-      //   return util::dtype::timedelta64;
-      // }
+      else if (name.rfind("datetime64", 0) == 0) {
+        return util::dtype::datetime64;
+      }
+      else if (name.rfind("timedelta64", 0) == 0) {
+        return util::dtype::timedelta64;
+      }
       else {
         return util::dtype::NOT_PRIMITIVE;
       }
@@ -115,10 +116,10 @@ namespace awkward {
         return "complex128";
       case util::dtype::complex256:
         return "complex256";
-        // case datetime64:
-        //   return "datetime64";
-        // case timedelta64:
-        //   return "timedelta64";
+      case util::dtype::datetime64:
+        return "datetime64";
+      case util::dtype::timedelta64:
+        return "timedelta64";
       default:
         return "unknown";
       }
@@ -210,19 +211,19 @@ namespace awkward {
       else if (fmt == std::string("Zg")) {
         return dtype::complex256;
       }
-      // else if (fmt == std::string("M")) {
-      //   return dtype::datetime64;
-      // }
-      // else if (fmt == std::string("m")) {
-      //   return dtype::timedelta64;
-      // }
+      else if (fmt == std::string("M")) {
+        return dtype::datetime64;
+      }
+      else if (fmt == std::string("m")) {
+        return dtype::timedelta64;
+      }
       else {
         return dtype::NOT_PRIMITIVE;
       }
     }
 
     const std::string
-    dtype_to_format(dtype dt) {
+    dtype_to_format(dtype dt, const std::string& format) {
       switch (dt) {
       case dtype::boolean:
         return "?";
@@ -272,13 +273,46 @@ namespace awkward {
         return "Zd";
       case dtype::complex256:
         return "Zg";
-      // case dtype::datetime64:
-      //   return "M";
-      // case dtype::timedelta64:
-      //   return "m";
+      case dtype::datetime64:
+        return format.empty() ? "M" : format;
+      case dtype::timedelta64:
+        return format.empty() ? "m" : format;
       default:
         return "";
       }
+    }
+
+    const std::string
+    format_to_units(const std::string& format) {
+      auto pos_from = format.find('[');
+      if (pos_from != std::string::npos) {
+        auto pos_to = format.find(']');
+        if (pos_to != std::string::npos) {
+          return format.substr(format.find('['), format.find(']'));
+        }
+      }
+      return std::string("[us]");
+    }
+
+    const std::string
+    units_to_format(dtype dt, const std::string& units, int64_t step) {
+      std::string result;
+      switch (dt) {
+      case dtype::datetime64:
+        result.append("M");
+        break;
+      case dtype::timedelta64:
+        result.append("m");
+        break;
+      default:
+        break;
+      }
+      result.append(std::to_string(dtype_to_itemsize(dt))).append("[");
+      if (step > 1) {
+        result.append(std::to_string(step));
+      }
+      result.append(units).append("]");
+      return result;
     }
 
     int64_t
@@ -316,10 +350,10 @@ namespace awkward {
         return 16;
       case dtype::complex256:
         return 32;
-      // case dtype::datetime64:
-      //   return 8;
-      // case dtype::timedelta64:
-      //   return 8;
+      case dtype::datetime64:
+        return 8;
+      case dtype::timedelta64:
+        return 8;
       default:
         return 0;
       }
@@ -729,6 +763,55 @@ namespace awkward {
         }
       }
       return std::string();
+    }
+
+    std::string
+    datetime_units(const std::string& format) {
+      auto units(format);
+      std::string chars = "[]1234567890";
+      units.erase(remove_if(units.begin(), units.end(),
+                      [&chars](const char &c) {
+                          return chars.find(c) != std::string::npos;
+                      }),
+                      units.end());
+      return units;
+    }
+
+    std::tuple<std::string, int64_t>
+    datetime_data(const std::string& format) {
+      std::string next_format(format);
+      int64_t next_interval = 1;
+
+      std::string next_units = next_format.substr(
+        next_format.find_first_of("["),
+        next_format.find_last_of("]"));
+
+      auto begin_pos = next_units.find_first_of("0123456789");
+      if (begin_pos != std::string::npos) {
+        auto end_pos = next_units.find_last_of("0123456789");
+        if (end_pos != std::string::npos) {
+          std::string tmp = next_units.substr(begin_pos, end_pos);
+          next_interval = std::stoi(tmp);
+        }
+      }
+
+      return std::make_tuple(datetime_units(next_units), next_interval);
+    }
+
+    double
+    scale_from_units(const std::string& format, uint64_t index) {
+      int64_t scale_up = util::units_map.at(index).scale_up;
+      int64_t scale_down = util::units_map.at(index).scale_down;
+
+      std::string other_format;
+      int64_t other_unit_step;
+      std::tie(other_format, other_unit_step) = util::datetime_data(format);
+
+      uint64_t other_index = (uint64_t)util::value(util::units_map, other_format);
+      int64_t next_scale_up = util::units_map.at(other_index).scale_up;
+      int64_t next_scale_down = util::units_map.at(other_index).scale_down;
+
+      return (double)other_unit_step * (scale_down * next_scale_up) / (scale_up * next_scale_down);
     }
 
   }

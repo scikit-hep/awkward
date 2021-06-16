@@ -46,21 +46,23 @@ def exception_suffix(filename):
     )
 
 
-def deprecate(exception, version, date=None):
-    if ak.deprecations_as_errors:
-        raise exception
-    else:
-        if date is None:
-            date = ""
-        else:
-            date = " (target date: " + date + ")"
-        message = """In version {0}{1}, this will be an error.
-(Set ak.deprecations_as_errors = True to get a stack trace now.)
+# Enable warnings for the Awkward package
+warnings.filterwarnings("default", module="awkward.*")
 
-{2}: {3}""".format(
-            version, date, type(exception).__name__, str(exception)
-        )
-        warnings.warn(message, FutureWarning)
+
+def deprecate(message, version, date=None, category=DeprecationWarning):
+    if date is None:
+        date = ""
+    else:
+        date = " (target date: " + date + ")"
+    warning = """In version {0}{1}, this will be an error.
+
+To raise these warnings as errors, run `warnings.filterwarnings("error", module="awkward.*")`.
+
+{2}""".format(
+        version, date, message
+    )
+    warnings.warn(warning, category)
 
 
 virtualtypes = (ak.layout.VirtualArray,)
@@ -493,7 +495,10 @@ def completely_flatten(array):
         return tuple(out)
 
     elif isinstance(array, ak.layout.NumpyArray):
-        return (ak.nplike.of(array).asarray(array),)
+        if array.format.upper().startswith("M"):
+            return (ak.nplike.of(array).asarray(array.view_int64).view(array.format),)
+        else:
+            return (ak.nplike.of(array).asarray(array),)
 
     else:
         raise RuntimeError(
@@ -1097,6 +1102,7 @@ def recursively_apply(
     getfunction,
     pass_depth=True,
     pass_user=False,
+    pass_apply=False,
     user=None,
     keep_parameters=True,
     numpy_to_regular=False,
@@ -1110,6 +1116,8 @@ def recursively_apply(
             args = args + (depth,)
         if pass_user:
             args = args + (user,)
+        if pass_apply:
+            args = args + (apply,)
 
         custom = getfunction(layout, *args)
         if callable(custom):
@@ -1482,6 +1490,8 @@ def minimally_touching_string(limit_length, layout, behavior):
                         key = ""
                     sp = ", "
                 yield "}"
+            elif isinstance(x, (np.datetime64, np.timedelta64)):
+                yield space + str(x)
             elif isinstance(x, (float, np.floating)):
                 yield space + "{0:.3g}".format(x)
             else:
@@ -1547,6 +1557,8 @@ def minimally_touching_string(limit_length, layout, behavior):
                     if i != 0:
                         yield ", "
                 yield "{"
+            elif isinstance(x, (np.datetime64, np.timedelta64)):
+                yield str(x) + space
             elif isinstance(x, (float, np.floating)):
                 yield "{0:.3g}".format(x) + space
             else:

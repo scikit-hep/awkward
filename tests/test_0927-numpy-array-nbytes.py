@@ -8,9 +8,6 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    array = ak.to_categorical(ak.Array([321, 1.1, 123, 1.1, 999, 1.1, 2.0]))
-    assert ak.to_list(array * 10) == [3210, 11, 1230, 11, 9990, 11, 20]
-
-    array = ak.Array(["HAL"])
-    with pytest.raises(ValueError):
-        array + 1
+    np_data = np.random.random(size=(4, 100 * 1024 * 1024 // 8 // 4))
+    array = ak.from_numpy(np_data, regulararray=False)
+    assert np_data.nbytes == array.nbytes

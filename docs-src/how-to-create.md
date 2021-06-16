@@ -15,7 +15,8 @@ Creating arrays
 ===============
 
    * **[ArrayBuilder (easy & general)](how-to-create-arraybuilder)**
-   * **[Layout (faster)](how-to-create-layout)**
+   * **[LayoutBuilder (medium)](how-to-create-layoutbuilder)**
+   * **[Direct constructors (faster)](how-to-create-constructors)**
    * **[Unflattening and grouping](how-to-create-unflatten-group)**
    * **[Arrays of records](how-to-create-records)**
    * **[Arrays of strings](how-to-create-strings)**

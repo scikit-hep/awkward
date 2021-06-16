@@ -4481,6 +4481,23 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_NumpyArray_fill_scaled
+    specializations:
+      - name: awkward_NumpyArray_fill_scaled_toint64_fromint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: scale, type: "float", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_NumpyArray_fill_scaled(toptr, tooffset, fromptr, length, scale):
+          for i in range(length):
+              toptr[tooffset + i] = fromptr[i] * scale
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_getitem_boolean_nonzero
     specializations:
       - name: awkward_NumpyArray_getitem_boolean_nonzero_64

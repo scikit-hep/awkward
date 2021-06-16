@@ -1,9 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#ifndef AWKWARD_LISTBUILDER_H_
-#define AWKWARD_LISTBUILDER_H_
-
-#include <vector>
+#ifndef AWKWARD_DATETIMEBUILDER_H_
+#define AWKWARD_DATETIMEBUILDER_H_
 
 #include "awkward/common.h"
 #include "awkward/builder/GrowableBuffer.h"
@@ -12,33 +10,27 @@
 namespace awkward {
   class ArrayBuilderOptions;
 
-  /// @class ListBuilder
+  /// @class DatetimeBuilder
   ///
-  /// @brief Builder node that accumulates lists.
-  class LIBAWKWARD_EXPORT_SYMBOL ListBuilder: public Builder {
+  /// @brief Builder node that accumulates integers (`int64_t`).
+  class LIBAWKWARD_EXPORT_SYMBOL DatetimeBuilder: public Builder {
   public:
-    /// @brief Create an empty ListBuilder.
+    /// @brief Create an empty DatetimeBuilder.
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const ArrayBuilderOptions& options, const std::string& units);
 
-    /// @brief Create a ListBuilder from a full set of parameters.
+    /// @brief Create an DatetimeBuilder from a full set of parameters.
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
-    /// @param offsets Contains the accumulated offsets (like
-    /// {@link ListOffsetArrayOf#offsets ListOffsetArray::offsets}).
-    /// @param content Builder for the data in the nested lists.
-    /// @param begun If `true`, the ListBuilder is in a state after
-    /// #beginlist and before #endlist and is #active; if `false`,
-    /// it is not.
-    ListBuilder(const ArrayBuilderOptions& options,
-                const GrowableBuffer<int64_t>& offsets,
-                const BuilderPtr& content,
-                bool begun);
+    /// @param buffer Contains the accumulated integers.
+    DatetimeBuilder(const ArrayBuilderOptions& options,
+                    const GrowableBuffer<int64_t>& content,
+                    const std::string& units);
 
-    /// @brief User-friendly name of this class: `"ListBuilder"`.
+    /// @brief User-friendly name of this class: `"DatetimeBuilder"`.
     const std::string
       classname() const override;
 
@@ -53,8 +45,7 @@ namespace awkward {
 
     /// @copydoc Builder::active()
     ///
-    /// Calling #beginlist makes a ListBuilder active; #endlist makes it
-    /// inactive.
+    /// A DatetimeBuilder is never active.
     bool
       active() const override;
 
@@ -109,15 +100,14 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
+    const std::string&
+      units() const;
+
   private:
     const ArrayBuilderOptions options_;
-    GrowableBuffer<int64_t> offsets_;
-    BuilderPtr content_;
-    bool begun_;
-
-    void
-      maybeupdate(const BuilderPtr& tmp);
+    GrowableBuffer<int64_t> content_;
+    const std::string units_;
   };
 }
 
-#endif // AWKWARD_LISTBUILDER_H_
+#endif // AWKWARD_DATETIMEBUILDER_H_

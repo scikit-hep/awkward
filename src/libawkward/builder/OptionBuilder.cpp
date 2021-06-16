@@ -136,6 +136,32 @@ namespace awkward {
   }
 
   const BuilderPtr
+  OptionBuilder::datetime(int64_t x, const std::string& unit) {
+    if (!content_.get()->active()) {
+      int64_t length = content_.get()->length();
+      maybeupdate(content_.get()->datetime(x, unit));
+      index_.append(length);
+    }
+    else {
+      content_.get()->datetime(x, unit);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
+  OptionBuilder::timedelta(int64_t x, const std::string& unit) {
+    if (!content_.get()->active()) {
+      int64_t length = content_.get()->length();
+      maybeupdate(content_.get()->timedelta(x, unit));
+      index_.append(length);
+    }
+    else {
+      content_.get()->timedelta(x, unit);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
   OptionBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!content_.get()->active()) {
       int64_t len = content_.get()->length();

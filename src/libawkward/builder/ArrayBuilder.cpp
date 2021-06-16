@@ -99,6 +99,16 @@ namespace awkward {
   }
 
   void
+  ArrayBuilder::datetime(int64_t x, const std::string& unit) {
+    maybeupdate(builder_.get()->datetime(x, unit));
+  }
+
+  void
+  ArrayBuilder::timedelta(int64_t x, const std::string& unit) {
+    maybeupdate(builder_.get()->timedelta(x, unit));
+  }
+
+  void
   ArrayBuilder::bytestring(const char* x) {
     maybeupdate(builder_.get()->string(x, -1, no_encoding));
   }
