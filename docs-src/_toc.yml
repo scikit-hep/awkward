@@ -30,9 +30,9 @@ sections:
       - file: how-to-create-arraybuilder
         title: "ArrayBuilder (easy & general)"
       - file: how-to-create-layoutbuilder
-        title: "LayoutBuilder (medium) [todo]"
+        title: "LayoutBuilder (more control) [todo]"
       - file: how-to-create-constructors
-        title: "Direct constructors (faster) [todo]"
+        title: "Direct constructors (fastest)"
       - file: how-to-create-unflatten-group
         title: "Unflattening and grouping [todo]"
       - file: how-to-create-records
