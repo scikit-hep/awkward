@@ -753,9 +753,55 @@ ak.type(layout)
 Content >: UnionArray
 ---------------------
 
-[ak.layout.UnionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnionArray.html)
+[ak.layout.UnionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnionArray.html) and [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) are the only two node types that have multiple `contents`, not just a single `content` (and the property is pluralized to reflect this fact). RecordArrays represent a "[product type](https://en.wikipedia.org/wiki/Product_type)," data containing records with fields _x_, _y_, and _z_ have _x_'s type AND _y_'s type AND _z_'s type, whereas UnionArrays represent a "[sum type](https://en.wikipedia.org/wiki/Tagged_union)," data that are _x_'s type OR _y_'s type OR _z_'s type.
 
-+++
+In addition, [ak.layout.UnionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnionArray.html) has two [ak.layout.Index](https://awkward-array.readthedocs.io/en/latest/ak.layout.Index.html)-typed attributes, `tags` and `index`; it is the most complex node type. The `tags` specify which `content` array to draw each array element from, and the `index` specifies which element from that `content`.
+
+The UnionArray element at index `i` is therefore:
+
+```python
+contents[tags[i]][index[i]]
+```
+
+Although the ability to make arrays with mixed data type is very expressive, not all operations support union type (including iteration in Numba). If you intend to make union-type data for an application, be sure to verify that it will work by generating some test data using [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html).
+
+Awkward Array's UnionArray is equivalent to Apache Arrow's [dense union](https://arrow.apache.org/docs/format/Columnar.html#dense-union). Awkward Array has no counterpart for Apache Arrow's [sparse union](https://arrow.apache.org/docs/format/Columnar.html#sparse-union) (which has no `index`). [ak.from_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrow.html) generates an `index` on demand when reading sparse union from Arrow.
+
+```{code-cell}
+layout = ak.layout.UnionArray8_64(
+    ak.layout.Index8( np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
+    ak.layout.Index64(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])),
+    [
+        ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])),
+        ak.from_iter([[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5], [6], [6, 7], [6, 7, 8], [6, 7, 8, 9]], highlevel=False),
+        ak.from_iter(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"], highlevel=False)
+    ]
+)
+layout
+```
+
+```{code-cell}
+ak.to_list(layout)
+```
+
+The `index` can be used to prevent the need to set up "dummy values" for all contents other than the one specified by a given tag. The above example could thus be more compact with the following (no unreachable data):
+
+```{code-cell}
+layout = ak.layout.UnionArray8_64(
+    ak.layout.Index8( np.array([0, 1, 2, 0, 0, 1, 1, 2, 2, 0], np.int8)),
+    ak.layout.Index64(np.array([0, 0, 0, 1, 2, 1, 2, 1, 2, 3])),
+    [
+        ak.layout.NumpyArray(np.array([0.0, 3.3, 4.4, 9.9])),
+        ak.from_iter([[1], [1, 2, 3, 4, 5], [6]], highlevel=False),
+        ak.from_iter(["two", "seven", "eight"], highlevel=False)
+    ]
+)
+layout
+```
+
+```{code-cell}
+ak.to_list(layout)
+```
 
 Content >: VirtualArray
 -----------------------
