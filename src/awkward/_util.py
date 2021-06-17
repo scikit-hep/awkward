@@ -46,21 +46,23 @@ def exception_suffix(filename):
     )
 
 
-def deprecate(exception, version, date=None):
-    if ak.deprecations_as_errors:
-        raise exception
-    else:
-        if date is None:
-            date = ""
-        else:
-            date = " (target date: " + date + ")"
-        message = """In version {0}{1}, this will be an error.
-(Set ak.deprecations_as_errors = True to get a stack trace now.)
+# Enable warnings for the Awkward package
+warnings.filterwarnings("default", module="awkward.*")
 
-{2}: {3}""".format(
-            version, date, type(exception).__name__, str(exception)
-        )
-        warnings.warn(message, FutureWarning)
+
+def deprecate(message, version, date=None, category=DeprecationWarning):
+    if date is None:
+        date = ""
+    else:
+        date = " (target date: " + date + ")"
+    warning = """In version {0}{1}, this will be an error.
+
+To raise these warnings as errors, run `warnings.filterwarnings("error", module="awkward.*")`.
+
+{2}""".format(
+        version, date, message
+    )
+    warnings.warn(warning, category)
 
 
 virtualtypes = (ak.layout.VirtualArray,)
@@ -1100,6 +1102,7 @@ def recursively_apply(
     getfunction,
     pass_depth=True,
     pass_user=False,
+    pass_apply=False,
     user=None,
     keep_parameters=True,
     numpy_to_regular=False,
@@ -1113,6 +1116,8 @@ def recursively_apply(
             args = args + (depth,)
         if pass_user:
             args = args + (user,)
+        if pass_apply:
+            args = args + (apply,)
 
         custom = getfunction(layout, *args)
         if callable(custom):

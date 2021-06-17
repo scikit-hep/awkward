@@ -990,9 +990,16 @@ class Array(
         have the same dimension as the array being indexed.
         """
         if not hasattr(self, "_tracers"):
-            return ak._util.wrap(self.layout[where], self._behavior)
+            tmp = ak._util.wrap(self.layout[where], self._behavior)
         else:
-            return ak._connect._jax.jax_utils._jaxtracers_getitem(self, where)
+            tmp = ak._connect._jax.jax_utils._jaxtracers_getitem(self, where)
+
+        if isinstance(tmp, ak.behaviors.string.ByteBehavior):
+            return bytes(tmp)
+        elif isinstance(tmp, ak.behaviors.string.CharBehavior):
+            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+        else:
+            return tmp
 
     def __setitem__(self, where, what):
         """
@@ -1448,7 +1455,8 @@ class Array(
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self.layout)
+        packed = ak.operations.structure.packed(self.layout, highlevel=False)
+        form, length, container = ak.operations.convert.to_buffers(packed)
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -1752,7 +1760,14 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        return ak._util.wrap(self.layout[where], self._behavior)
+        tmp = ak._util.wrap(self.layout[where], self._behavior)
+
+        if isinstance(tmp, ak.behaviors.string.ByteBehavior):
+            return bytes(tmp)
+        elif isinstance(tmp, ak.behaviors.string.CharBehavior):
+            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+        else:
+            return tmp
 
     def __setitem__(self, where, what):
         """
@@ -2033,12 +2048,13 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self.layout.array)
+        packed = ak.operations.structure.packed(self._layout, highlevel=False)
+        form, length, container = ak.operations.convert.to_buffers(packed.array)
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form, length, container, behavior, self.layout.at
+        return form, length, container, behavior, packed.at
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
@@ -2283,7 +2299,14 @@ class ArrayBuilder(Iterable, Sized):
 
         See #ak.Array.__getitem__ for a more complete description.
         """
-        return ak._util.wrap(self._layout[where], self._behavior)
+        tmp = ak._util.wrap(self._layout[where], self._behavior)
+
+        if isinstance(tmp, ak.behaviors.string.ByteBehavior):
+            return bytes(tmp)
+        elif isinstance(tmp, ak.behaviors.string.CharBehavior):
+            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+        else:
+            return tmp
 
     def __iter__(self):
         """

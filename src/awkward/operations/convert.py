@@ -233,8 +233,8 @@ def to_numpy(array, allow_missing=True):
         )
 
     elif (
-        str(ak.operations.describe.type(array)) == "datetime"
-        or str(ak.operations.describe.type(array)) == "timedelta"
+        str(ak.operations.describe.type(array)) == "datetime64"
+        or str(ak.operations.describe.type(array)) == "timedelta64"
     ):
         return array
 
@@ -3613,7 +3613,11 @@ def from_parquet(
             relative_to = source
             source = sorted(glob.glob(source + "/**/*.parquet", recursive=True))
 
-    if not isinstance(source, str) and isinstance(source, Iterable):
+    if (
+        not isinstance(source, str)
+        and isinstance(source, Iterable)
+        and not hasattr(source, "read")
+    ):
         source = [_regularize_path(x) for x in source]
         if relative_to is None:
             relative_to = os.path.commonpath(source)
@@ -3980,7 +3984,10 @@ def to_buffers(
         >>> ak.partitions(reconstituted)
         [3, 1, 3, 1]
 
-    See also #ak.from_buffers.
+    If you intend to use this function for saving data, you may want to pack it
+    first with #ak.packed.
+
+    See also #ak.from_buffers and #ak.packed.
     """
     if container is None:
         container = {}
