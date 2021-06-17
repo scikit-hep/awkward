@@ -18,12 +18,12 @@ If you're willing to think about your data in a columnar way, directly construct
 
 "Thinking about data in a columnar way" is the crucial difference between this method and [ArrayBuilder](how-to-create-arraybuilder) and [LayoutBuilder](how-to-create-layoutbuilder). Both of the builders let you think about a data structure the way you would think about Python objects, in which all fields of a given record or elements of a list are "together" and one record or list is "separate" from another record or list. For example,
 
-```{code-cell} ipython3
+```{code-cell}
 import awkward as ak
 import numpy as np
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 builder = ak.ArrayBuilder()
 
 with builder.list():
@@ -62,7 +62,7 @@ array = builder.snapshot()
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 array.tolist()
 ```
 
@@ -70,7 +70,7 @@ gets all of the items in the first list separately from the items in the second 
 
 By contrast, the physical data are laid out in columns, with all _x_ values next to each other, regardless of which records or lists they're in, and all the _y_ values next to each other in another buffer.
 
-```{code-cell} ipython3
+```{code-cell}
 array.layout
 ```
 
@@ -112,43 +112,43 @@ Each layout node can have arbitrary metadata, called "parameters." Some paramete
 
 +++
 
-EmptyArray
-----------
+Content > EmptyArray
+--------------------
 
 [ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html). EmptyArray is a trivial node type: it can only represent empty arrays with unknown type.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.layout.EmptyArray()
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(ak.layout.EmptyArray())
 ```
 
 Since this is such a simple node type, let's use it to show examples of adding parameters.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.layout.EmptyArray(parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}})
 ```
 
-NumpyArray
-----------
+Content > NumpyArray
+--------------------
 
 [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html). NumpyArray represents data the same way as a NumPy [np.ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html). That is, it can be multidimensional, but only rectilinear arrays.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.layout.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]], np.int16))
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])[::2])
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.layout.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]], np.int16)[:, 1:])
 ```
 
@@ -156,21 +156,21 @@ In most array structures, the NumpyArrays only need to be 1-dimensional, since r
 
 The [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html) function has a `regulararray` argument to choose between putting multiple dimensions into the NumpyArray node or nesting a 1-dimensional NumpyArray in RegularArray nodes.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.from_numpy(np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=False, highlevel=False)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.from_numpy(np.array([[1, 2, 3], [4, 5, 6]], np.int16), regulararray=True, highlevel=False)
 ```
 
 All of these representations look the same in an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) (high-level view).
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(ak.layout.NumpyArray(np.array([[1, 2, 3], [4, 5, 6]])))
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(ak.layout.RegularArray(ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6])), 3))
 ```
 
@@ -178,12 +178,12 @@ If you are _producing_ arrays, you can pick any representation that is convenien
 
 +++
 
-RegularArray
-------------
+Content > RegularArray
+----------------------
 
 [ak.layout.RegularArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RegularArray.html) represents regular-length lists (lists with all the same length). This was shown above as being equivalent to dimensions in a [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html), but it can also contain irregular data.
 
-```{code-cell} ipython3
+```{code-cell}
 layout = ak.layout.RegularArray(
     ak.from_iter([1, 2, 3, 4, 5, 6], highlevel=False),
     3,
@@ -191,11 +191,11 @@ layout = ak.layout.RegularArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(layout)
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 layout = ak.layout.RegularArray(
     ak.from_iter([[], [1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5]], highlevel=False),
     3,
@@ -203,7 +203,7 @@ layout = ak.layout.RegularArray(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(layout)
 ```
 
@@ -215,7 +215,7 @@ The "`var *`" is the type of variable-length lists, nested inside of the Regular
 
 RegularArray is the first array type that can have unreachable data: the length of its nested content might not evenly divide the RegularArray's regular `size`.
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(
     ak.layout.RegularArray(
         ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7])),
@@ -228,14 +228,14 @@ In the high-level array, we only see `[[1, 2, 3], [4, 5, 6]]` and not `7`. Since
 
 +++
 
-ListArray
----------
+Content > ListArray
+-------------------
 
 [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) and [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`").
 
 [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) is the most general. It takes two Indexes, `starts` and `stops`, which indicate where each nested list starts and stops.
 
-```{code-cell} ipython3
+```{code-cell}
 layout = ak.layout.ListArray64(
     ak.layout.Index64(np.array([0, 3, 3])),
     ak.layout.Index64(np.array([3, 3, 5])),
@@ -244,7 +244,7 @@ layout = ak.layout.ListArray64(
 layout
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(layout)
 ```
 
@@ -252,64 +252,156 @@ The nested content, `[1.1, 2.2, 3.3, 4.4, 5.5]` is divided into three lists, `[1
 
 +++
 
-ListOffsetArray
----------------
+Content > ListOffsetArray
+-------------------------
 
 [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) and [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`").
 
 +++
 
-RecordArray and Record
-----------------------
+Nested lists
+------------
+
+As with all non-leaf Content nodes, arbitrarily deep nested lists can be built by nesting RegularArrays, ListArrays, and ListOffsetArrays. In each case, the `starts`, `stops`, or `offsets` only index the next level down in structure.
+
+For example, here is an array of 5 lists, whose length is approximately 20 each.
+
+```{code-cell}
+layout = ak.layout.ListOffsetArray64(
+    ak.layout.Index64(np.array([0, 18, 42, 59, 83, 100])),
+    ak.layout.NumpyArray(np.arange(100))
+)
+array = ak.Array(layout)
+array[0], array[1], array[2], array[3], array[4]
+```
+
+Making an array of 3 lists that contains these 5 lists requires us to make indexes that go up to 5, not 100.
+
+```{code-cell}
+array = ak.Array(
+    ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 3, 3, 5])),
+        layout,
+    )
+)
+array[0], array[1], array[2]
+```
+
+Strings and bytestrings
+-----------------------
+
+As described above, any Content node can have any parameters, but some have special meanings. Most parameters are intended to associate runtime behaviors with data structures, the way that methods add computational abilities to a class. Unicode strings and raw bytestrings are an example of this.
+
+Awkward Array has no "StringArray" type because such a thing would be stored, sliced, and operated upon in most circumatances as a list-type array (RegularArray, ListArray, ListOffsetArray) of bytes. A parameter named "`__array__`" adds behaviors, such as the string interpretation, to arrays.
+
+   * `"__array__": "byte"` interprets an [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) as raw bytes in a bytestring,
+   * `"__array__": "char"` interprets an [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) as characters in a Unicode-encoded string,
+   * `"__array__": "bytestring"` interprets a list-type array ([ak.layout.RegularArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RegularArray.html), [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html), [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html)) as a raw bytestring,
+   * `"__array__": "string"` interprets a list-type array ([ak.layout.RegularArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RegularArray.html), [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html), [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html)) as a Unicode-encoded string.
+
+The [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) must be directly nested within the list-type array, which can be checked with [ak.is_valid](https://awkward-array.readthedocs.io/en/latest/_auto/ak.is_valid.html) and [ak.validity_error](https://awkward-array.readthedocs.io/en/latest/_auto/ak.validity_error.html).
+
++++
+
+Here is an example of a raw bytestring:
+
+```{code-cell}
+ak.Array(
+    ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 3, 8, 11, 15])),
+        ak.layout.NumpyArray(
+            np.array([104, 101, 121, 116, 104, 101, 114, 101, 121, 111, 117, 103, 117, 121, 115], np.uint8),
+            parameters={"__array__": "byte"}
+        ),
+        parameters={"__array__": "bytestring"}
+    )
+)
+```
+
+And here is an example of a Unicode-encoded string (UTF-8):
+
+```{code-cell}
+ak.Array(
+    ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 3, 12, 15, 19])),
+        ak.layout.NumpyArray(
+            np.array([104, 101, 121, 226, 128, 148, 226, 128, 148, 226, 128, 148, 121, 111, 117, 103, 117, 121, 115], np.uint8),
+            parameters={"__array__": "char"}
+        ),
+        parameters={"__array__": "string"}
+    )
+)
+```
+
+As with any other lists, strings can be nested within lists. Only the [ak.layout.RegularArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RegularArray.html)/[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html)/[ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) corresponding to the strings should have the `"__array__": "string"` or `"bytestring"` parameter.
+
+```{code-cell}
+ak.Array(
+    ak.layout.ListOffsetArray64(
+        ak.layout.Index64([0, 2, 4]),
+        ak.layout.ListOffsetArray64(
+            ak.layout.Index64(np.array([0, 3, 12, 15, 19])),
+            ak.layout.NumpyArray(
+                np.array([104, 101, 121, 226, 128, 148, 226, 128, 148, 226, 128, 148, 121, 111, 117, 103, 117, 121, 115], np.uint8),
+                parameters={"__array__": "char"}
+            ),
+            parameters={"__array__": "string"}
+        )
+    )
+)
+```
+
+Content > RecordArray and Record
+--------------------------------
 
 [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html)
 
 +++
 
-IndexedArray
-------------
+Content > IndexedArray
+----------------------
 
 [ak.layout.IndexedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedArray.html)
 
 +++
 
-IndexedOptionArray
-------------------
+Content > IndexedOptionArray
+----------------------------
 
 [ak.layout.IndexedOptionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedOptionArray.html)
 
 +++
 
-ByteMaskedArray
----------------
+Content > ByteMaskedArray
+-------------------------
 
 [ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html)
 
 +++
 
-BitMaskedArray
---------------
+Content > BitMaskedArray
+------------------------
 
 [ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html)
 
 +++
 
-UnmaskedArray
--------------
+Content > UnmaskedArray
+-----------------------
 
 [ak.layout.UnmaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnmaskedArray.html)
 
 +++
 
-UnionArray
-----------
+Content > UnionArray
+--------------------
 
 [ak.layout.UnionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnionArray.html)
 
 +++
 
-VirtualArray
-------------
+Content > VirtualArray
+----------------------
 
 [ak.layout.VirtualArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.VirtualArray.html)
 
@@ -331,17 +423,17 @@ The [ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fr
 
 Every [ak.layout.Content](https://awkward-array.readthedocs.io/en/latest/ak.layout.Content.html) subclass has a corresponding [ak.forms.Form](https://awkward-array.readthedocs.io/en/latest/ak.forms.Form.html), and you can see a layout's Form through its `form` property.
 
-```{code-cell} ipython3
+```{code-cell}
 array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 array.layout
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 # Abbreviated JSON representation
 array.layout.form
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 # Full JSON representation
 print(array.layout.form.tojson(pretty=True))
 ```
