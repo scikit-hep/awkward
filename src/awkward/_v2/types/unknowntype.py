@@ -7,13 +7,13 @@ from awkward._v2.types.type import Type
 
 class UnknownType(Type):
     def __init__(self, parameters=None, typestr="unknown"):
-        if parameters != None and not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be of type dict, not {1}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr != None and not isinstance(typestr, str):
+        if typestr is not None and not isinstance(typestr, str):
             raise TypeError(
                 "{0} 'typestr' must be of type string, not {1}".format(
                     type(self).__name__, repr(typestr)
@@ -31,7 +31,7 @@ class UnknownType(Type):
         return self._typestr
 
     def __str__(self):
-        if self._parameters == None:
+        if self._parameters is None:
             return self._typestr
         elif (
             self._typestr == "override"
@@ -40,7 +40,7 @@ class UnknownType(Type):
             return "override"
         elif (
             "__categorical__" in self._parameters.keys()
-            and self._parameters["__categorical__"] == True
+            and self._parameters["__categorical__"] is True
         ):
             if len(self._parameters) == 1:
                 return "categorical[type={0}]".format(self._typestr)
@@ -61,7 +61,7 @@ class UnknownType(Type):
             )
 
     def __repr__(self):
-        if self._parameters == None and self._typestr == "unknown":
+        if self._parameters is None and self._typestr == "unknown":
             return "UnknownType()"
         else:
             return 'UnknownType(parameters={0}, typestr="{1}")'.format(

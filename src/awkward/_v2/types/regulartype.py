@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 import json
-import re
 from awkward._v2.types.type import Type
 
 
@@ -16,11 +15,11 @@ class RegularType(Type):
             )
         if not isinstance(size, int) or size < 0:
             raise ValueError(
-                "{0} 'size' must be of a positive integer".format(
+                "{0} 'size' must be of a positive integer, not {1}".format(
                     type(self).__name__, repr(size)
                 )
             )
-        if parameters != None and not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be of type dict, not {1}".format(
                     type(self).__name__, repr(parameters)
@@ -41,14 +40,14 @@ class RegularType(Type):
 
     def __str__(self):
         if self._typestr == "override" and (
-            self._parameters == None or "__categorical__" not in self._parameters.keys()
+            self._parameters is None or "__categorical__" not in self._parameters.keys()
         ):
             return "override"
-        elif self._parameters == None:
+        elif self._parameters is None:
             return "{0} * {1}".format(repr(self._size), self._typestr)
         elif (
             "__categorical__" in self._parameters.keys()
-            and self._parameters["__categorical__"] == True
+            and self._parameters["__categorical__"] is True
         ):
             if len(self._parameters) == 1:
                 if self._typestr == "override":
@@ -77,7 +76,7 @@ class RegularType(Type):
             )
 
     def __repr__(self):
-        if self._parameters == None and self._typestr == "unknown":
+        if self._parameters is None and self._typestr == "unknown":
             return "RegularType({0}, {1})".format(repr(self._content), repr(self._size))
         elif self._typestr == "unknown":
             return "RegularType({0}, {1}, parameters={2})".format(

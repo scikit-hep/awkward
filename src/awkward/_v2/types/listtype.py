@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 import json
-import re
 from awkward._v2.types.type import Type
 
 
@@ -14,7 +13,7 @@ class ListType(Type):
                     type(self).__name__, repr(content)
                 )
             )
-        if parameters != None and not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be of type dict, not {1}".format(
                     type(self).__name__, repr(parameters)
@@ -38,14 +37,14 @@ class ListType(Type):
 
     def __str__(self):
         if self._typestr == "override" and (
-            self._parameters == None or "__categorical__" not in self._parameters.keys()
+            self._parameters is None or "__categorical__" not in self._parameters.keys()
         ):
             return "override"
-        elif self._parameters == None:
+        elif self._parameters is None:
             return "var * {0}".format(self._typestr)
         elif (
             "__categorical__" in self._parameters.keys()
-            and self._parameters["__categorical__"] == True
+            and self._parameters["__categorical__"] is True
         ):
             if len(self._parameters) == 1:
                 if self._typestr == "override":
@@ -71,7 +70,7 @@ class ListType(Type):
             )
 
     def __repr__(self):
-        if self._parameters == None and self._typestr == "unknown":
+        if self._parameters is None and self._typestr == "unknown":
             return "ListType({0})".format(repr(self._content))
         elif self._typestr == "unknown":
             return "ListType({0}, parameters={1})".format(

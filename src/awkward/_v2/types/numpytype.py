@@ -35,13 +35,13 @@ class NumpyType(Type):
                     type(self).__name__, repr(accepted_types), repr(parameters)
                 )
             )
-        if parameters != None and not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be of type dict, not {1}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr != None and not isinstance(typestr, str):
+        if typestr is not None and not isinstance(typestr, str):
             raise TypeError(
                 "{0} 'typestr' must be of type string, not {1}".format(
                     type(self).__name__, repr(typestr)
@@ -64,15 +64,15 @@ class NumpyType(Type):
         return self._typestr
 
     def __str__(self):
-        if self._parameters == None and self._typestr == "unknown":
+        if self._parameters is None and self._typestr == "unknown":
             return self._primitive
         elif self._typestr == "override" and (
-            self._parameters == None or "__categorical__" not in self._parameters.keys()
+            self._parameters is None or "__categorical__" not in self._parameters.keys()
         ):
             return "override"
         elif (
             "__categorical__" in self._parameters.keys()
-            and self._parameters["__categorical__"] == True
+            and self._parameters["__categorical__"] is True
         ):
             if len(self._parameters) == 1:
                 if self._typestr == "override":
@@ -116,7 +116,7 @@ class NumpyType(Type):
             )
 
     def __repr__(self):
-        if self._parameters == None and self._typestr == "unknown":
+        if self._parameters is None and self._typestr == "unknown":
             return 'NumpyType("{0}")'.format(self._primitive)
         elif self._typestr == "unknown":
             return 'NumpyType("{0}", parameters={1})'.format(

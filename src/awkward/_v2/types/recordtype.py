@@ -77,12 +77,12 @@ class RecordType(Type):
         elif self._recordlookup is None and self._parameters is None:
             return primitives
 
-        elif self._recordlookup is not None and self._parameters == None:
+        elif self._recordlookup is not None and self._parameters is None:
             return primitives
 
         elif (
             "__categorical__" in self._parameters.keys()
-            and self._parameters["__categorical__"] == True
+            and self._parameters["__categorical__"] is True
         ):
             if len(self._parameters) == 1:
                 if self._typestr == "override":
