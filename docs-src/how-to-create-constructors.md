@@ -803,10 +803,105 @@ layout
 ak.to_list(layout)
 ```
 
+[ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) is by far the easiest way to create UnionArrays for small tests.
+
++++
+
 Content >: VirtualArray
 -----------------------
 
-[ak.layout.VirtualArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.VirtualArray.html)
+[ak.layout.VirtualArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.VirtualArray.html) represents data to be generated on demand. It takes a Python function, an optional cache, and optional information about the data to be generated as arguments. Since the Python function is bound to the Python process and might invoke objects such as file handles, network connections, or data without a generic serialization, VirtualArrays can't be serialized in files or byte streams, but they are frequently used to lazily load data from a file.
+
+```{code-cell}
+def generate():
+    print("generating")
+    return ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+layout = ak.layout.VirtualArray(ak.layout.ArrayGenerator(generate))
+layout
+```
+
+```{code-cell}
+ak.Array(layout)[2]
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+This VirtualArray has no hints and no cache, so it must call `generate` every time it is accessed for any information, such as "What is your length?" or "What is element `2`?" (which can happen many times when determining how much to print in a string repr). To reduce the number of calls to `generate`, we can
+
+   * provide more information about the array that will be generated, such as its `length` and its `form`,
+   * provide a cache, so that the array will not need to be generated more than once (until it gets evicted from cache).
+
+```{code-cell}
+layout = ak.layout.VirtualArray(
+    ak.layout.ArrayGenerator(generate, length=3)
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)[2]
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+```{code-cell}
+import json
+
+form = ak.forms.Form.fromjson(json.dumps({
+    "class": "ListOffsetArray64",
+    "offsets": "i64",
+    "content": "float64",
+}))
+
+layout = ak.layout.VirtualArray(
+    ak.layout.ArrayGenerator(generate, length=3, form=form)
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)[2]
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+The `cache` can be any Python object that satisfies Python's [MutableMapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping) protocol, but the data are only [weakly referenced](https://docs.python.org/3/library/weakref.html) by the VirtualArray. The weak reference ensures that that VirtualArray cannot reference itself through this cache, since a cyclic reference would not be caught by the Python garbage collector (since the Awkward Array nodes are implemented in C++, not Python). As another technicality, Python `dict` objects can't be weakly referenced.
+
+Strong references to the `cache` are held by the high-level [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) objects, so just be sure to keep a reference to the desired cache until the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) is constructed (i.e. in the same function scope).
+
+```{code-cell}
+import cachetools
+
+cache = cachetools.LRUCache(np.inf)   # infinite-lifetime cache, alternative to dict
+
+layout = ak.layout.VirtualArray(
+    ak.layout.ArrayGenerator(generate),
+    cache=ak.layout.ArrayCache(cache),
+)
+
+array = ak.Array(layout)
+```
+
+```{code-cell}
+layout
+```
+
+```{code-cell}
+array
+```
+
+```{code-cell}
+array
+```
+
+VirtualArrays are admittedly tricky to set up properly, but most of these technical issues will be eliminated by Awkward Array 2.0, which will [replace the C++ layer with Python](https://indico.cern.ch/event/1032972/).
 
 +++
 
