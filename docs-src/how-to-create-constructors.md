@@ -88,10 +88,24 @@ The node types (with validity rules for each) are documented under [ak.layout.Co
 
 +++
 
-Contents and Indexes
---------------------
+Content classes
+---------------
 
 [ak.layout.Content](https://awkward-array.readthedocs.io/en/latest/ak.layout.Content.html) is the _abstract_ superclass of all node types. All Content nodes that you would create are concrete subclasses of this class. The superclass is useful for checking `isinstance(some_object, ak.layout.Content)`, since there are some attributes that are only allowed to be Content nodes.
+
+Sections in this document about a subclass of Content are named "`Content >: XYZ`" (using the "[is superclass of](https://stackoverflow.com/q/7759361/1623645)" operator).
+
++++
+
+Parameters
+----------
+
+Each layout node can have arbitrary metadata, called "parameters." Some parameters have built-in meanings, which are described below, and others can be given meanings by defining functions in [ak.behavior](https://awkward-array.readthedocs.io/en/latest/ak.behavior.html).
+
++++
+
+Index classes
+-------------
 
 [ak.layout.Index](https://awkward-array.readthedocs.io/en/latest/ak.layout.Index.html) instances are buffers of integers that are used to give structure to an array. For instance, the `offsets` in the ListOffsetArrays, above, are Indexes, but the NumpyArray of _y_ list contents are not. [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) is a subclass of [ak.layout.Content](https://awkward-array.readthedocs.io/en/latest/ak.layout.Content.html), and [ak.layout.Index](https://awkward-array.readthedocs.io/en/latest/ak.layout.Index.html) is not. Indexes are more restricted than general NumPy arrays (must be one-dimensional, C-contiguous integers; dtypes are also prescribed) because they are frequently manipulated by Awkward Array operations, such as slicing.
 
@@ -105,15 +119,8 @@ There are five Index specializations, and each [ak.layout.Content](https://awkwa
 
 +++
 
-Parameters
-----------
-
-Each layout node can have arbitrary metadata, called "parameters." Some parameters have built-in meanings, which are described below, and others can be given meanings by defining functions in [ak.behavior](https://awkward-array.readthedocs.io/en/latest/ak.behavior.html).
-
-+++
-
-Content > EmptyArray
---------------------
+Content >: EmptyArray
+---------------------
 
 [ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) (A third, corner-case "leaf type" is a [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) with zero fields).
 
@@ -133,8 +140,8 @@ Since this is such a simple node type, let's use it to show examples of adding p
 ak.layout.EmptyArray(parameters={"name1": "value1", "name2": {"more": ["complex", "value"]}})
 ```
 
-Content > NumpyArray
---------------------
+Content >: NumpyArray
+---------------------
 
 [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html). (A third, corner-case "leaf type" is a [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) with zero fields)
 
@@ -182,8 +189,8 @@ If you are _producing_ arrays, you can pick any representation that is convenien
 
 +++
 
-Content > RegularArray
-----------------------
+Content >: RegularArray
+-----------------------
 
 [ak.layout.RegularArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RegularArray.html) represents regular-length lists (lists with all the same length). This was shown above as being equivalent to dimensions in a [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html), but it can also contain irregular data.
 
@@ -232,12 +239,10 @@ In the high-level array, we only see `[[1, 2, 3], [4, 5, 6]]` and not `7`. Since
 
 +++
 
-Content > ListArray
--------------------
+Content >: ListArray
+--------------------
 
-[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) and [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`").
-
-[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) is the most general. It takes two Indexes, `starts` and `stops`, which indicate where each nested list starts and stops.
+[ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) and [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`"). [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) is the most general. It takes two Indexes, `starts` and `stops`, which indicate where each nested list starts and stops.
 
 ```{code-cell}
 layout = ak.layout.ListArray64(
@@ -256,10 +261,44 @@ The nested content, `[1.1, 2.2, 3.3, 4.4, 5.5]` is divided into three lists, `[1
 
 +++
 
-Content > ListOffsetArray
--------------------------
+Content >: ListOffsetArray
+--------------------------
 
-[ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) and [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`").
+[ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) and [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) are the two node types that describe variable-length lists ([ak.types.ListType](https://awkward-array.readthedocs.io/en/latest/ak.types.ListType.html), represented in type strings as "`var *`"). [ak.layout.ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html) is an important special case, in which
+
+```python
+starts = offsets[:-1]
+stops  = offsets[1:]
+```
+
+for a single array `offsets`. If we were only representing arrays and not doing computations on them, we would always use ListOffsetArrays, because they are the most compact. Knowing that a node is a ListOffsetArray can also simplify the implementation of some operations. In a sense, operations that produce ListArrays (previous section) can be thought of as delaying the part of the operation that would propagate down into the `content`, as an optimization.
+
+```{code-cell}
+layout = ak.layout.ListOffsetArray64(
+    ak.layout.Index64(np.array([0, 3, 3, 5])),
+    ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+The length of the `offsets` array is one larger than the length of the array itself; an empty array has an `offsets` of length 1.
+
+However, the `offsets` does not need to start at `0` or stop at `len(content)`.
+
+```{code-cell}
+ak.Array(
+    ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([1, 3, 3, 4])),
+        ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+    )
+)
+```
+
+In the above, `offsets[0] == 1` means that the `1.1` in the `content` is unreachable, and `offsets[-1] == 4` means that the `5.5` is unreachable. Just as in ListArrays, unreachable data in ListOffsetArrays usually comes about because we don't want computations to always propagate all the way down large trees.
 
 +++
 
@@ -355,8 +394,8 @@ ak.Array(
 )
 ```
 
-Content > RecordArray
----------------------
+Content >: RecordArray
+----------------------
 
 [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) and [ak.layout.UnionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnionArray.html) are the only two node types that have multiple `contents`, not just a single `content` (and the property is pluralized to reflect this fact). RecordArrays represent a "[product type](https://en.wikipedia.org/wiki/Product_type)," data containing records with fields _x_, _y_, and _z_ have _x_'s type AND _y_'s type AND _z_'s type, whereas UnionArrays represent a "[sum type](https://en.wikipedia.org/wiki/Tagged_union)," data that are _x_'s type OR _y_'s type OR _z_'s type.
 
@@ -548,50 +587,178 @@ ak.behavior["*", "Special"] = SpecialArray
 ak.Array(layout).len_y()
 ```
 
-Content > IndexedArray
-----------------------
-
-[ak.layout.IndexedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedArray.html)
-
-+++
-
-Content > IndexedOptionArray
-----------------------------
-
-[ak.layout.IndexedOptionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedOptionArray.html)
-
-+++
-
-Content > ByteMaskedArray
--------------------------
-
-[ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html)
-
-+++
-
-Content > BitMaskedArray
-------------------------
-
-[ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html)
-
-+++
-
-Content > UnmaskedArray
+Content >: IndexedArray
 -----------------------
 
-[ak.layout.UnmaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnmaskedArray.html)
+[ak.layout.IndexedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedArray.html) is the only Content node that has exactly the same type as its `content`. An IndexedArray rearranges the elements of its `content`, as though it were a lazily applied array-slice.
+
+```{code-cell}
+layout = ak.layout.IndexedArray64(
+    ak.layout.Index64(np.array([2, 0, 0, 1, 2])),
+    ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3])),
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+As such, IndexedArrays can be used to (lazily) remove items, permute items, and/or duplicate items.
+
+IndexedArrays are used as an optimization when performing some operations on [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html), to avoid propagating them down to every field. This is more relevant for RecordArrays than other nodes because RecordArrays can contain multiple `contents` (and UnionArrays, which also have multiple `contents`, have an `index` to merge an array-slice into).
+
+For example, slicing the following `recordarray` by `[3, 2, 4, 4, 1, 0, 3]` does not affect any of the RecordArray's fields.
+
+```{code-cell}
+recordarray = ak.layout.RecordArray(
+    [
+        ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
+        ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2], [3]], highlevel=False),
+    ],
+    None,
+)
+recordarray
+```
+
+```{code-cell}
+recordarray[[3, 2, 4, 4, 1, 0, 3]]
+```
+
+Categorical data
+----------------
+
+IndexedArrays, with the `"__array__": "categorical"` parameter, can represent categorical data (sometimes called dictionary-encoding).
+
+```{code-cell}
+layout = ak.layout.IndexedArray64(
+    ak.layout.Index64(np.array([2, 2, 1, 4, 0, 5, 3, 3, 0, 1])),
+    ak.from_iter(["zero", "one", "two", "three", "four", "five"], highlevel=False),
+    parameters={"__array__": "categorical"}
+)
+ak.to_list(layout)
+```
+
+The above has only one copy of strings from `"zero"` to `"five"`, but they are effectively replicated 10 times in the array.
+
+Any IndexedArray can perform this lazy replication, but labeling it as `"__array__": "categorical"` is a promise that the `content` contains only unique values.
+
+Functions like [ak.to_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrow.html) and [ak.to_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_parquet.html) will project (eagerly evaluate) an IndexedArray that is not labeled as `"__array__": "categorical"` and dictionary-encode an IndexedArray that is. This distinguishes between the use of IndexedArrays as invisible optimizations and intentional, user-visible ones.
 
 +++
 
-Content > UnionArray
---------------------
+Content >: IndexedOptionArray
+-----------------------------
+
+[ak.layout.IndexedOptionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedOptionArray.html) is the most general of the four nodes that allow for missing data ([ak.layout.IndexedOptionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedOptionArray.html), [ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html), [ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html), and [ak.layout.UnmaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnmaskedArray.html)). Missing data is also known as "[option type](https://en.wikipedia.org/wiki/Option_type)" (denoted by a question mark `?` or the word `option` in type strings).
+
+[ak.layout.IndexedOptionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedOptionArray.html) is an [ak.layout.IndexedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedArray.html) in which negative values in the `index` are interpreted as missing. Since it has an `index`, the `content` does not need to have "dummy values" at each index of a missing value. It is therefore more compact for record-type data with many missing values, but [ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html) and especially [ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html) are more compact for numerical data or data without many missing values.
+
+```{code-cell}
+layout = ak.layout.IndexedOptionArray64(
+    ak.layout.Index64(np.array([2, -1, 0, -1, -1, 1, 2])),
+    ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3])),
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+Because of its flexibility, most operations that output potentially missing values use an IndexedOptionArray. [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html) and conversions to/from Arrow or Parquet convert it back into a more compact type.
+
++++
+
+Content >: ByteMaskedArray
+--------------------------
+
+[ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html) is the simplest of the four nodes that allow for missing data ([ak.layout.IndexedOptionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedOptionArray.html), [ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html), [ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html), and [ak.layout.UnmaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnmaskedArray.html)). Missing data is also known as "[option type](https://en.wikipedia.org/wiki/Option_type)" (denoted by a question mark `?` or the word `option` in type strings).
+
+[ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html) is most similar to NumPy's [masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html), except that Awkward ByteMaskedArrays can contain any data type and variable-length structures. The `valid_when` parameter lets you choose whether `True` means an element is valid (not masked/not `None`) or `False` means an element is valid.
+
+```{code-cell}
+layout = ak.layout.ByteMaskedArray(
+    ak.layout.Index8(np.array([False, False, True, True, False, True, False], np.int8)),
+    ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    valid_when=False,
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+Content >: BitMaskedArray
+-------------------------
+
+[ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html) is the most compact of the four nodes that allow for missing data ([ak.layout.IndexedOptionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedOptionArray.html), [ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html), [ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html), and [ak.layout.UnmaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnmaskedArray.html)). Missing data is also known as "[option type](https://en.wikipedia.org/wiki/Option_type)" (denoted by a question mark `?` or the word `option` in type strings).
+
+[ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html) is just like [ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html) except that the booleans are bit-packed. It is motivated primarily by Apache Arrow, which uses bit-packed masks; supporting bit-packed masks in Awkward Array allows us to represent Arrow data directly. Most operations immediately convert BitMaskedArrays into ByteMaskedArrays.
+
+Since bits always come in groups of at least 8, an explicit `length` must be supplied to the constructor. Also, `lsb_order=True` or `False` determines whether the bytes are interpreted [least-significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Least_significant_bit) first or [most-significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Most_significant_bit) first, respectively.
+
+```{code-cell}
+layout = ak.layout.BitMaskedArray(
+    ak.layout.IndexU8(np.packbits(np.array([False, False, True, True, False, True, False], np.uint8))),
+    ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    valid_when=False,
+    length=7,
+    lsb_order=True,
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+Changing only the `lsb_order` changes the interpretation in important ways!
+
+```{code-cell}
+ak.Array(
+    ak.layout.BitMaskedArray(
+        layout.mask,
+        layout.content,
+        layout.valid_when,
+        len(layout),
+        lsb_order=False,
+    )
+)
+```
+
+Content >: UnmaskedArray
+------------------------
+
+[ak.layout.UnmaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnmaskedArray.html) describes formally missing data, but in a case in which no data are actually missing. It is a corner case of the four nodes that allow for missing data ([ak.layout.IndexedOptionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedOptionArray.html), [ak.layout.ByteMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ByteMaskedArray.html), [ak.layout.BitMaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.BitMaskedArray.html), and [ak.layout.UnmaskedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnmaskedArray.html)). Missing data is also known as "[option type](https://en.wikipedia.org/wiki/Option_type)" (denoted by a question mark `?` or the word `option` in type strings).
+
+```{code-cell}
+layout = ak.layout.UnmaskedArray(
+    ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+The only distinguishing feature of an UnmaskedArray is the question mark `?` or `option` in its type.
+
+```{code-cell}
+ak.type(layout)
+```
+
+Content >: UnionArray
+---------------------
 
 [ak.layout.UnionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnionArray.html)
 
 +++
 
-Content > VirtualArray
-----------------------
+Content >: VirtualArray
+-----------------------
 
 [ak.layout.VirtualArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.VirtualArray.html)
 
