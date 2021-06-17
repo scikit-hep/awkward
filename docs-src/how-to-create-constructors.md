@@ -115,7 +115,9 @@ Each layout node can have arbitrary metadata, called "parameters." Some paramete
 Content > EmptyArray
 --------------------
 
-[ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html). EmptyArray is a trivial node type: it can only represent empty arrays with unknown type.
+[ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) (A third, corner-case "leaf type" is a [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) with zero fields).
+
+EmptyArray is a trivial node type: it can only represent empty arrays with unknown type.
 
 ```{code-cell}
 ak.layout.EmptyArray()
@@ -134,7 +136,9 @@ ak.layout.EmptyArray(parameters={"name1": "value1", "name2": {"more": ["complex"
 Content > NumpyArray
 --------------------
 
-[ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html). NumpyArray represents data the same way as a NumPy [np.ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html). That is, it can be multidimensional, but only rectilinear arrays.
+[ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html) is one of the two possible leaf types of a layout tree; the other is [ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html). (A third, corner-case "leaf type" is a [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) with zero fields)
+
+NumpyArray represents data the same way as a NumPy [np.ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html). That is, it can be multidimensional, but only rectilinear arrays.
 
 ```{code-cell}
 ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
@@ -351,12 +355,198 @@ ak.Array(
 )
 ```
 
-Content > RecordArray and Record
---------------------------------
+Content > RecordArray
+---------------------
 
-[ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html)
+[ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) and [ak.layout.UnionArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.UnionArray.html) are the only two node types that have multiple `contents`, not just a single `content` (and the property is pluralized to reflect this fact). RecordArrays represent a "[product type](https://en.wikipedia.org/wiki/Product_type)," data containing records with fields _x_, _y_, and _z_ have _x_'s type AND _y_'s type AND _z_'s type, whereas UnionArrays represent a "[sum type](https://en.wikipedia.org/wiki/Tagged_union)," data that are _x_'s type OR _y_'s type OR _z_'s type.
+
+RecordArrays have no [ak.layout.Index](https://awkward-array.readthedocs.io/en/latest/ak.layout.Index.html)-valued properties; they may be thought of as metadata-only groupings of Content nodes. Since the RecordArray node holds an _array_ for each field, it is a "[struct of arrays](https://en.wikipedia.org/wiki/AoS_and_SoA)," rather than an "array of structs."
 
 +++
+
+RecordArray fields are ordered and provided as an ordered list of `contents` and field names (the `recordlookup`).
+
+```{code-cell}
+layout = ak.layout.RecordArray(
+    [
+        ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
+        ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2], [3]], highlevel=False),
+    ],
+    [
+        "x",
+        "y",
+    ],
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+```{code-cell}
+ak.to_list(layout)
+```
+
+RecordArray fields do not need to have names. If the `recordlookup` is `None`, the RecordArray is interpreted as an array of tuples. (The word "tuple," in statically typed environments, usually means a fixed-length type in which each element may be a different type.)
+
+```{code-cell}
+layout = ak.layout.RecordArray(
+    [
+        ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
+        ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2], [3]], highlevel=False),
+    ],
+    None,
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+```{code-cell}
+ak.to_list(layout)
+```
+
+Since the RecordArray node holds an array for each of its fields, it is possible for these arrays to have different lengths. In such a case, the length of the RecordArray can be given explicitly or it is taken to be the length of the shortest field-array.
+
+```{code-cell}
+content0 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7, 8]))
+content1 = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+content2 = ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2, 1], [3, 2], [3]], highlevel=False)
+print(f"{len(content0) = }, {len(content1) = }, {len(content2) = }")
+
+layout = ak.layout.RecordArray([content0, content1, content2], ["x", "y", "z"])
+print(f"{len(layout) = }")
+```
+
+```{code-cell}
+layout = ak.layout.RecordArray([content0, content1, content2], ["x", "y", "z"], length=3)
+print(f"{len(layout) = }")
+```
+
+RecordArrays are also allowed to have zero fields. This is an unusual case, but it is one that allows a RecordArray to be a leaf node (like [ak.layout.EmptyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.EmptyArray.html) and [ak.layout.NumpyArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.NumpyArray.html)). If a RecordArray has no fields, a length _must_ be given.
+
+```{code-cell}
+ak.Array(ak.layout.RecordArray([], [], length=5))
+```
+
+```{code-cell}
+ak.Array(ak.layout.RecordArray([], None, length=5))
+```
+
+Scalar Records
+--------------
+
+An [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) is an _array_ of records. Just as you can extract a scalar number from an array of numbers, you can extract a scalar record. Unlike numbers, records may still be sliced in some ways like Awkward Arrays:
+
+```{code-cell}
+array = ak.Array(
+    ak.layout.RecordArray(
+        [
+            ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
+            ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2], [3]], highlevel=False),
+        ],
+        [
+            "x",
+            "y",
+        ],
+    )
+)
+record = array[2]
+record
+```
+
+```{code-cell}
+record["y", -1]
+```
+
+Therefore, we need an [ak.layout.Record](https://awkward-array.readthedocs.io/en/latest/ak.layout.Record.html) type, but this Record is not an array, so it is not a subclass of [ak.layout.Content](https://awkward-array.readthedocs.io/en/latest/ak.layout.Content.html).
+
+Due to the columnar orientation of Awkward Array, a RecordArray does not contain Records, a Record contains a RecordArray.
+
+```{code-cell}
+record.layout
+```
+
+It can be built by passing a RecordArray as its first argument and the item of interest in its second argument.
+
+```{code-cell}
+layout = ak.layout.Record(
+    ak.layout.RecordArray(
+        [
+            ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
+            ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2], [3]], highlevel=False),
+        ],
+        [
+            "x",
+            "y",
+        ],
+    ),
+    2
+)
+record = ak.Record(layout)   # note the high-level ak.Record, rather than ak.Array
+record
+```
+
+Naming record types
+-------------------
+
+The records discussed so far are generic. Naming a record not only makes it easier to read type strings, it's also how [ak.behavior](https://awkward-array.readthedocs.io/en/latest/ak.behavior.html) overloads functions and adds methods to records as though they were classes in object-oriented programming.
+
+A name is given to an [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) node through its "`__record__`" parameter.
+
+```{code-cell}
+layout = ak.layout.RecordArray(
+    [
+        ak.from_iter([1.1, 2.2, 3.3, 4.4, 5.5], highlevel=False),
+        ak.from_iter([[1], [1, 2], [1, 2, 3], [3, 2], [3]], highlevel=False),
+    ],
+    [
+        "x",
+        "y",
+    ],
+    parameters={"__record__": "Special"}
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+```{code-cell}
+ak.type(layout)
+```
+
+Behavioral overloads are presented in more depth in [ak.behavior](https://awkward-array.readthedocs.io/en/latest/ak.behavior.html), but here are three examples:
+
+```{code-cell}
+ak.behavior[np.sqrt, "Special"] = lambda special: np.sqrt(special.x)
+
+np.sqrt(ak.Array(layout))
+```
+
+```{code-cell}
+class SpecialRecord(ak.Record):
+    def len_y(self):
+        return len(self.y)
+
+ak.behavior["Special"] = SpecialRecord
+
+ak.Record(layout[2]).len_y()
+```
+
+```{code-cell}
+class SpecialArray(ak.Array):
+    def len_y(self):
+        return ak.num(self.y)
+
+ak.behavior["*", "Special"] = SpecialArray
+
+ak.Array(layout).len_y()
+```
 
 Content > IndexedArray
 ----------------------
