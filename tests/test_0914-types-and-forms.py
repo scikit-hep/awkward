@@ -7,7 +7,6 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-@pytest.mark.skip(reason="unimplemented UnknownType")
 def test_UnknownType():
     assert str(ak._v2.types.unknowntype.UnknownType()) == "unknown"
     assert (
@@ -38,11 +37,10 @@ def test_UnknownType():
                 parameters={"__categorical__": True}, typestr="override"
             )
         )
-        == "UnknownType(parameters={'__categorical__': True}, typestr='override')"
+        == 'UnknownType(parameters={"__categorical__": true}, typestr="override")'
     )
 
 
-@pytest.mark.skip(reason="unimplemented NumpyType")
 def test_NumpyType():
     assert str(ak._v2.types.numpytype.NumpyType("bool")) == "bool"
     assert str(ak._v2.types.numpytype.NumpyType("int8")) == "int8"
@@ -235,9 +233,8 @@ def test_NumpyType():
     assert (
         str(ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "byte"})) == "byte"
     )
-
     assert (
-        repr(ak._v2.types.numpytype.NumpyType(primitive="bool")) == "NumpyType('bool')"
+        repr(ak._v2.types.numpytype.NumpyType(primitive="bool")) == 'NumpyType("bool")'
     )
     assert (
         repr(
@@ -247,7 +244,7 @@ def test_NumpyType():
                 typestr="override",
             )
         )
-        == "NumpyType('bool', parameters={'__categorical__': True}, typestr='override')"
+        == 'NumpyType("bool", parameters={"__categorical__": true}, typestr="override")'
     )
     assert (
         repr(
@@ -275,7 +272,6 @@ def test_NumpyType():
     )
 
 
-@pytest.mark.skip(reason="unimplemented RegularType")
 def test_RegularType():
     assert (
         str(
@@ -352,8 +348,8 @@ def test_RegularType():
         str(
             ak._v2.types.regulartype.RegularType(
                 ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "char"}),
-                {"__array__": "string"},
                 10,
+                {"__array__": "string"},
             )
         )
         == "string[10]"
@@ -362,11 +358,11 @@ def test_RegularType():
         str(
             ak._v2.types.regulartype.RegularType(
                 ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "byte"}),
-                {"__array__": "bytestring"},
                 10,
+                {"__array__": "bytestring"},
             )
         )
-        == "bytes[10]"
+        == "bytestring[10]"
     )
 
     assert (
@@ -386,7 +382,7 @@ def test_RegularType():
                 typestr="override",
             )
         )
-        == 'RegularType(UnknownType(), 10, parameters={"__categorical__": True}, typestr="override")'
+        == 'RegularType(UnknownType(), 10, parameters={"__categorical__": true}, typestr="override")'
     )
     assert (
         repr(
@@ -398,8 +394,9 @@ def test_RegularType():
                 size=10,
             )
         )
-        == 'RegularType(NumpyType("uint8", parameters={"__array__": "char"}), parameters={"__array__": "string"}, 10)'
+        == 'RegularType(NumpyType("uint8", parameters={"__array__": "char"}), 10, parameters={"__array__": "string"})'
     )
+    # FIXME assumed size was misstyped :'RegularType(NumpyType("uint8", parameters={"__array__": "byte"}), parameters={"__array__": "bytestring"}, 10)'
     assert (
         repr(
             ak._v2.types.regulartype.RegularType(
@@ -410,11 +407,10 @@ def test_RegularType():
                 size=10,
             )
         )
-        == 'RegularType(NumpyType("uint8", parameters={"__array__": "byte"}), parameters={"__array__": "bytestring"}, 10)'
+        == 'RegularType(NumpyType("uint8", parameters={"__array__": "byte"}), 10, parameters={"__array__": "bytestring"})'
     )
 
 
-@pytest.mark.skip(reason="unimplemented ListType")
 def test_ListType():
     assert (
         str(ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()))
@@ -487,7 +483,7 @@ def test_ListType():
                 {"__array__": "bytestring"},
             )
         )
-        == "bytes"
+        == "bytestring"
     )
 
     assert (
@@ -506,7 +502,7 @@ def test_ListType():
                 typestr="override",
             )
         )
-        == 'ListType(UnknownType(), parameters={"__categorical__": True}, typestr="override")'
+        == 'ListType(UnknownType(), parameters={"__categorical__": true}, typestr="override")'
     )
     assert (
         repr(
@@ -532,7 +528,6 @@ def test_ListType():
     )
 
 
-@pytest.mark.skip(reason="unimplemented RecordType")
 def test_RecordType():
     assert (
         str(
@@ -756,7 +751,8 @@ def test_RecordType():
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
                 None,
-                {"__categorical__": "True"},
+                # FIXME assumed it's True as opposed to "True"
+                {"__categorical__": True},
             )
         )
         == "categorical[type=(unknown, bool)]"
@@ -769,7 +765,7 @@ def test_RecordType():
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
-                {"__categorical__": "True"},
+                {"__categorical__": True},
             )
         )
         == 'categorical[type={"x": unknown, "y": bool}]'
@@ -1001,7 +997,20 @@ def test_RecordType():
                 typestr="override",
             )
         )
-        == 'RecordType([UnknownType(), NumpyType("bool")], None, parameters={"__record__": "Name", "x": 123, "__categorical__": True}, typestr="override")'
+        == 'RecordType([UnknownType(), NumpyType("bool")], None, parameters={"__record__": "Name", "x": 123, "__categorical__": true}, typestr="override")'
+    )
+    assert (
+        repr(
+            ak._v2.types.recordtype.RecordType(
+                contents=[
+                    ak._v2.types.unknowntype.UnknownType(),
+                    ak._v2.types.numpytype.NumpyType("bool"),
+                ],
+                recordlookup=None,
+                parameters={"__record__": "Name", "x": 123, "__categorical__": True},
+            )
+        )
+        == 'RecordType([UnknownType(), NumpyType("bool")], None, parameters={"__record__": "Name", "x": 123, "__categorical__": true})'
     )
     assert (
         repr(
@@ -1015,15 +1024,14 @@ def test_RecordType():
                 typestr="override",
             )
         )
-        == 'RecordType([UnknownType(), NumpyType("bool")], ["x", "y"], parameters={"__record__": "Name", "x": 123, "__categorical__": True}, typestr="override")'
+        == 'RecordType([UnknownType(), NumpyType("bool")], ["x", "y"], parameters={"__record__": "Name", "x": 123, "__categorical__": true}, typestr="override")'
     )
 
 
-@pytest.mark.skip(reason="unimplemented OptionType")
 def test_OptionType():
     assert (
         str(ak._v2.types.optiontype.OptionType(ak._v2.types.unknowntype.UnknownType()))
-        == "?unknown"
+        == "unknown"
     )
     assert (
         str(
@@ -1137,7 +1145,7 @@ def test_OptionType():
                 ak._v2.types.unknowntype.UnknownType(), {"__categorical__": True}
             )
         )
-        == "categorical[type=?unknown]"
+        == "categorical[type=unknown]"
     )
     assert (
         str(
@@ -1281,7 +1289,7 @@ def test_OptionType():
                 typestr="override",
             )
         )
-        == 'OptionType(RegularType(UnknownType(), 10), parameters={"x": 123, "__categorical__": True}, typestr="override")'
+        == 'OptionType(RegularType(UnknownType(), 10), parameters={"x": 123, "__categorical__": true}, typestr="override")'
     )
 
 
