@@ -3541,6 +3541,7 @@ def _partial_schema_from_columns(schema, columns):
 
 def _from_parquet_dataset(
     source,
+    metadata_filename,
     columns,
     row_groups,
     use_threads,
@@ -3555,7 +3556,6 @@ def _from_parquet_dataset(
     pyarrow = _import_pyarrow("ak.from_parquet")
     import pyarrow.parquet
 
-    metadata_filename = os.path.join(source, "_metadata")
     file = pyarrow.parquet.ParquetFile(metadata_filename, **options)
     schema = file.schema_arrow
     if row_groups is None:
@@ -3969,6 +3969,7 @@ def from_parquet(
         if os.path.exists(metadata_filename):
             layout = _from_parquet_dataset(
                 source,
+                metadata_filename,
                 columns,
                 row_groups,
                 use_threads,
