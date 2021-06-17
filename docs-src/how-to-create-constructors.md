@@ -813,6 +813,7 @@ Content >: VirtualArray
 [ak.layout.VirtualArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.VirtualArray.html) represents data to be generated on demand. It takes a Python function, an optional cache, and optional information about the data to be generated as arguments. Since the Python function is bound to the Python process and might invoke objects such as file handles, network connections, or data without a generic serialization, VirtualArrays can't be serialized in files or byte streams, but they are frequently used to lazily load data from a file.
 
 ```{code-cell}
+# The generator function can also take arguments, see the documentation.
 def generate():
     print("generating")
     return ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
@@ -887,6 +888,8 @@ layout = ak.layout.VirtualArray(
 )
 
 array = ak.Array(layout)
+
+# only now is it safe for "cache" to go out of scope
 ```
 
 ```{code-cell}
@@ -903,14 +906,67 @@ array
 
 VirtualArrays are admittedly tricky to set up properly, but most of these technical issues will be eliminated by Awkward Array 2.0, which will [replace the C++ layer with Python](https://indico.cern.ch/event/1032972/).
 
+The high-level [ak.virtual](https://awkward-array.readthedocs.io/en/latest/_auto/ak.virtual.html) function is an easier way to create a VirtualArray, but if the VirtualArray is to be embedded within another structure, the cache must not go out of scope before the final [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) wrapper is built.
+
+VirtualArrays are frequently used as fields of a large RecordArray, so that only the fields that are accessed need to be read. Another common use-case is to put a VirtualArray in each partition of a PartitionedArray (see below), so that partitions load on demand.
+
+VirtualArrays can be used in Numba-compiled function and they are read on demand, but are not thread-safe (because they need to acquire a Python context to call the generate function).
+
 +++
 
 PartitionedArray and IrregularlyPartitionedArray
 ------------------------------------------------
 
-[ak.partition.PartitionedArray](https://awkward-array.readthedocs.io/en/latest/_auto/ak.partition.PartitionedArray.html)'s subclass, [ak.partition.IrregularlyPartitionedArray](https://awkward-array.readthedocs.io/en/latest/_auto/ak.partition.IrregularlyPartitionedArray.html), is not a [ak.layout.Content](https://awkward-array.readthedocs.io/en/latest/ak.layout.Content.html) subclass, deliberately preventing it from being used within a layout tree. It can, however, be the _root_ of a layout tree within an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html). This reflects our view that partitioning is only useful (and easiest to get right) for whole arrays, not internal nodes of a columnar structure.
+[ak.partition.PartitionedArray](https://awkward-array.readthedocs.io/en/latest/_auto/ak.partition.PartitionedArray.html)'s subclass, [ak.partition.IrregularlyPartitionedArray](https://awkward-array.readthedocs.io/en/latest/_auto/ak.partition.IrregularlyPartitionedArray.html), is not a [ak.layout.Content](https://awkward-array.readthedocs.io/en/latest/ak.layout.Content.html) subclass, deliberately preventing it from being used within a layout tree. It can, however, be the _root_ of a layout tree within an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html). This reflects our view that partitioning is only useful (and easiest to get right) for whole arrays, not internal nodes of a columnar structure. The name "IrregularlyPartitionedArray" for the only concrete class was chosen to allow for regularly partitioned arrays in the future (which would not need a set of `stops`).
+
+Each partition is an individually contiguous array of the same type. The whole sequence is presented as though it were a single array. (PartitionedArray is lazy concatenation.)
+
+```{code-cell}
+layout = ak.partition.IrregularlyPartitionedArray(
+    [
+        ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2])),
+        ak.layout.NumpyArray(np.array([3.3])),
+        ak.layout.NumpyArray(np.array([], np.float64)),
+        ak.layout.NumpyArray(np.array([4.4, 5.5, 6.6, 7.7])),
+        ak.layout.NumpyArray(np.array([8.8, 9.9])),
+    ],
+    [
+        3, 4, 4, 8, 10
+    ],
+)
+layout
+```
+
+```{code-cell}
+ak.Array(layout)
+```
+
+The second argument of the constructor is the `stops`, the index at which each partition stops. It has the same meaning as [ak.layout.ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html)'s `stops`, but a corresponding `starts` is not needed because these counts are strictly monatonic and the first start is assumed to be `0`.
+
+Note that the `stops` are managed in Python: generally, the partitions must be large to be efficient. (`stops` can also be inferred if not given.)
 
 +++
+
+Partitions can also be constructed with the high-level [ak.partitioned](https://awkward-array.readthedocs.io/en/latest/_auto/ak.partitioned.html) function, and since partitions are always at the root of an array tree, the high-level function would always be sufficient. An unpartitioned array can also be turned into a partitioned one with [ak.repartition](https://awkward-array.readthedocs.io/en/latest/_auto/ak.repartition.html).
+
++++
+
+The following example combines PartitionedArrays with VirtualArrays to make a lazy array:
+
+```{code-cell}
+form = ak.forms.Form.from_numpy(np.dtype("int64"))
+
+array = ak.partitioned([
+    ak.virtual(lambda count: ak.Array(np.arange(count * 3)), args=(i,), length=i * 3, form=form)
+    for i in range(4)
+])
+
+array.layout
+```
+
+```{code-cell}
+array.tolist()
+```
 
 Relationship to ak.from_buffers
 -------------------------------
