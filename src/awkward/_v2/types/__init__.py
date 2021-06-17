@@ -11,3 +11,5 @@ import awkward._v2.types.regulartype  # noqa: F401
 import awkward._v2.types.listtype  # noqa: F401
 import awkward._v2.types.recordtype  # noqa: F401
 import awkward._v2.types.optiontype  # noqa: F401
+import awkward._v2.types.uniontype  # noqa: F401
+import awkward._v2.types.arraytype  # noqa: F401

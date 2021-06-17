@@ -1293,7 +1293,6 @@ def test_OptionType():
     )
 
 
-@pytest.mark.skip(reason="unimplemented UnionType")
 def test_UnionType():
     assert (
         str(
@@ -1417,36 +1416,37 @@ def test_UnionType():
                 typestr="override",
             )
         )
-        == 'UnionType([UnknownType(), NumpyType("bool")], parameters={"x": 123, "__categorical__": True}, typestr="override")'
+        == 'UnionType([UnknownType(), NumpyType("bool")], parameters={"x": 123, "__categorical__": true}, typestr="override")'
     )
 
 
-@pytest.mark.skip(reason="unimplemented ArrayType")
 def test_ArrayType():
     assert (
-        str(ak._v2.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), 10))
+        str(
+            ak._v2.types.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), 10)
+        )
         == "10 * unknown"
     )
     assert (
-        str(ak._v2.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), 0))
+        str(ak._v2.types.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), 0))
         == "0 * unknown"
     )
     with pytest.raises(ValueError):
-        ak._v2.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), -1)
+        ak._v2.types.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), -1)
 
     # ArrayType should not have these arguments (should not be a Type subclass)
     with pytest.raises(TypeError):
-        ak._v2.arraytype.ArrayType(
+        ak._v2.types.arraytype.ArrayType(
             ak._v2.types.unknowntype.UnknownType(), 10, {"x": 123}
         )
     with pytest.raises(TypeError):
-        ak._v2.arraytype.ArrayType(
+        ak._v2.types.arraytype.ArrayType(
             ak._v2.types.unknowntype.UnknownType(), 10, None, "override"
         )
 
     assert (
         repr(
-            ak._v2.arraytype.ArrayType(
+            ak._v2.types.arraytype.ArrayType(
                 content=ak._v2.types.unknowntype.UnknownType(), length=10
             )
         )
