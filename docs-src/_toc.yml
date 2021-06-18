@@ -27,16 +27,12 @@ sections:
   - file: how-to-create
     title: "Creating new arrays"
     sections:
-      - file: how-to-create-arraybuilder
-        title: "ArrayBuilder (easy & general)"
-      - file: how-to-create-layoutbuilder
-        title: "LayoutBuilder (more control) [todo]"
-      - file: how-to-create-constructors
-        title: "Direct constructors (fastest)"
-      - file: how-to-create-unflatten-group
-        title: "Unflattening and grouping [todo]"
+      - file: how-to-create-lists
+        title: "Arrays of lists [todo]"
       - file: how-to-create-records
         title: "Arrays of records [todo]"
+      - file: how-to-create-missing
+        title: "Arrays of missing data [todo]"
       - file: how-to-create-strings
         title: "Arrays of strings [todo]"
       - file: how-to-create-categorical
@@ -45,6 +41,14 @@ sections:
         title: "Lazy arrays [todo]"
       - file: how-to-create-partitioned
         title: "Partitioned arrays [todo]"
+      - file: how-to-create-unflatten-group
+        title: "Unflattening and grouping [todo]"
+      - file: how-to-create-arraybuilder
+        title: "ArrayBuilder (easy & general)"
+      - file: how-to-create-layoutbuilder
+        title: "LayoutBuilder (more control) [todo]"
+      - file: how-to-create-constructors
+        title: "Direct constructors (fastest)"
 
   - file: how-to-examine
     title: "Examining arrays"
@@ -98,9 +102,9 @@ sections:
       - file: how-to-restructure-rename-records
         title: "Renaming records [todo]"
       - file: how-to-restructure-flatten
-        title: "Flattening for plots [todo]"
+        title: "Flattening for plots"
       - file: how-to-restructure-pad
-        title: "Padding/clipping for machine learning [todo]"
+        title: "Padding/clipping for machine learning"
       - file: how-to-restructure-concatenate
         title: "Concatenating and interleaving [todo]"
       - file: how-to-restructure-sort
