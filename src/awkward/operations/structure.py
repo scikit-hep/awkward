@@ -4125,7 +4125,7 @@ def materialized(array, highlevel=True, behavior=None):
         return out
 
 
-def with_cache(array, cache, highlevel=True, behavior=None):
+def with_cache(array, cache, behavior=None):
     """
     Args:
         array: Data to search for nested virtual arrays.
@@ -4135,8 +4135,6 @@ def with_cache(array, cache, highlevel=True, behavior=None):
             re-generated if `__getitem__` raises a `KeyError`. This mapping may
             evict elements according to any caching algorithm (LRU, LFR, RR,
             TTL, etc.). If "new", a new dict (keep-forever cache) is created.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -4177,13 +4175,9 @@ def with_cache(array, cache, highlevel=True, behavior=None):
 
     def getfunction(layout):
         if isinstance(layout, ak.layout.VirtualArray):
-            if cache is None:
-                newcache = layout.cache
-            elif layout.cache is None:
-                newcache = cache
             return lambda: ak.layout.VirtualArray(
                 layout.generator,
-                newcache,
+                cache,
                 layout.cache_key,
                 layout.identities,
                 layout.parameters,
@@ -4194,10 +4188,7 @@ def with_cache(array, cache, highlevel=True, behavior=None):
     out = ak._util.recursively_apply(
         ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
 
 
 @ak._connect._numpy.implements("size")

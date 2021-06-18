@@ -7,16 +7,22 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-def test():
-    def func():
-        return ak.Array([1, 2, 3, 4, 5])
+def func():
+    return ak.Array([1, 2, 3, 4, 5])
 
-    generator = ak.layout.ArrayGenerator(func, (), length=5)
+
+generator = ak.layout.ArrayGenerator(func, (), length=5)
+
+
+def test():
     hold_cache = ak._util.MappingProxy({})
     cache = ak.layout.ArrayCache(hold_cache)
     layout = ak.layout.VirtualArray(generator, cache=cache)
+    array = ak.Array(layout)
+
     cache_2 = {}
-    layout_2 = ak.with_cache(layout, cache_2, highlevel=False)
-    ak.materialized(layout_2)
+    array_2 = ak.with_cache(array, cache_2)
+    ak.materialized(array_2)
+
     assert len(cache_2) > 0
     assert len(cache) == 0
