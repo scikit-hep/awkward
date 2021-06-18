@@ -2226,9 +2226,10 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
             ),
         ):
             new_layout = layout.toListOffsetArray64(True)
+            new_length = new_layout.stops[-1]
             return ak.layout.ListOffsetArray64(
                 new_layout.offsets,
-                apply(new_layout.content, depth + 1, posaxis),
+                apply(truncate(new_layout.content, new_length), depth + 1, posaxis),
                 new_layout.identities,
                 new_layout.parameters,
             )
