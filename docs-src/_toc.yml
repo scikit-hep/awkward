@@ -98,7 +98,7 @@ sections:
       - file: how-to-restructure-rename-records
         title: "Renaming records [todo]"
       - file: how-to-restructure-flatten
-        title: "Flattening for plots [todo]"
+        title: "Flattening for plots"
       - file: how-to-restructure-pad
         title: "Padding/clipping for machine learning [todo]"
       - file: how-to-restructure-concatenate

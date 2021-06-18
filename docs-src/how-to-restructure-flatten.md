@@ -14,10 +14,10 @@ kernelspec:
 How to flatten arrays, especially for plotting
 ==============================================
 
-**This is a stub:** I intend to write this article, but haven't yet.
+In a data analysis, it is important to plot your data frequently, and the interactive nature of array-at-a-time functions facilitate that.
 
-If you need it soon, create an issue saying so and I'll make it a higher priority.
+However, plotting views your data as a generic set or sequence—the structure of nested lists and records can't be captured by standard plots. Histograms (including 2-dimensional heatmaps) take input data to be an unordered set, as do scatter plots. Connected-line plots, such as time-series, use the sequential order of the data, but there aren't many visualizations that show nestedness. (Maybe there will be, in the future.)
 
-[![](img/github-issues-documentation.png)](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=docs&template=documentation.md&title=)
+As such, these standard plotting routines expect simple structures, either a single flat array (in which the order may be relevant or irrelevant) or several same-length arrays (in which the relative or absolute order is relevant). Encountering an Awkward Array, they may try to call `np.asarray` on it, which only works if the array can be made rectilinear or they may try to iterate over it in Python, which can be prohibitively slow if the dataset is large.
 
-The text of your issue doesn't have to be much more than a link to this page, so I can be sure which page you're referring to. If you add details about how and why you need it, however, I may be able to tailor the text to help you more.
++++
