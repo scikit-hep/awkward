@@ -4169,6 +4169,16 @@ def with_cache(array, cache, highlevel=True, behavior=None):
 
     See #ak.virtual.
     """
+    if not highlevel:
+        raise NotImplementedError(
+            "ak.with_cache cannot allow highlevel=False because the only strong references\n"
+            "to caches are held by ak.Array objects; VirtualArrays only hold weak references,\n"
+            "which would go out of scope with this function. This will be fixed in Awkward 2.0,\n"
+            "when VirtualArrays are reimplemented in Python and can safely hold strong\n"
+            "references to caches.\n\n"
+            "For now, use highlevel=True and extract the layout from the output array."
+        )
+
     if cache == "new":
         hold_cache = ak._util.MappingProxy({})
         cache = ak.layout.ArrayCache(hold_cache)
@@ -4180,7 +4190,7 @@ def with_cache(array, cache, highlevel=True, behavior=None):
         if isinstance(layout, ak.layout.VirtualArray):
             if cache is None:
                 newcache = layout.cache
-            elif layout.cache is None:
+            else:
                 newcache = cache
             return lambda: ak.layout.VirtualArray(
                 layout.generator,
