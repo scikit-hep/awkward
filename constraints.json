@@ -37,12 +37,12 @@
                     "var":"lsb_order",
                     "role":"Stores the lsb order",
                     "strategy_name":"booleans",
-                    "constraints": {                      
+                    "constraints": {
                     }
                 }
             ]
         }
-        
+
     ]
-    
+
 }
