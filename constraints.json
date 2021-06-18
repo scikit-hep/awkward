@@ -1,0 +1,48 @@
+{
+    "kernels":[
+        {
+            "name":"awkward_BitMaskedArray_to_ByteMaskedArray",
+            "arguments":[
+                {
+                    "name":"BitMaskedArray-mask",
+                    "var":"mask",
+                    "role":"Stores the mask array",
+                    "strategy_name":"lists",
+                    "constraints": {
+                        "min_size":0,
+                        "max_size":6,
+                        "unique":true
+                    }
+                },
+                {
+                    "name":"BitMaskedArray-bitmasklength",
+                    "var":"bitmasklength",
+                    "role":"Stores the mask array length",
+                    "strategy_name":"integers",
+                    "constraints": {
+                        "min_value":0,
+                        "max_value":6
+                    }
+                },
+                {
+                    "name":"BitMaskedArray-validwhen",
+                    "var":"validwhen",
+                    "role":"Stores the validwhen",
+                    "strategy_name":"booleans",
+                    "constraints": {
+                    }
+                },
+                {
+                    "name":"BitMaskedArray-lsborder",
+                    "var":"lsb_order",
+                    "role":"Stores the lsb order",
+                    "strategy_name":"booleans",
+                    "constraints": {                      
+                    }
+                }
+            ]
+        }
+        
+    ]
+    
+}
