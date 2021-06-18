@@ -14,4 +14,4 @@ kernelspec:
 How to pad and clip arrays, particularly for machine learning
 =============================================================
 
-HERE
+Most applications of arrays expect

@@ -397,3 +397,102 @@ This still has list structures and missing values, so it's ready for [ak.flatten
 ```{code-cell} ipython3
 ak.flatten(array[maximize_by].z, axis=None)
 ```
+
+Concatenating independently restructured arrays
+-----------------------------------------------
+
+Sometimes, what you want to do can't be a single expression. Suppose we have this data:
+
+```{code-cell} ipython3
+array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]])
+array
+```
+
+and we want to combine all _x_ values and the maximum _y_ value in a plot. This requires a different expression on `array.x` from `array.y`.
+
+```{code-cell} ipython3
+ak.flatten(array.x)
+```
+
+```{code-cell} ipython3
+ak.flatten(ak.max(array.y, axis=2), axis=None)
+```
+
+To get all of these into one array (because the plotting function only accepts one argument), you'll need to [ak.concatenate](https://awkward-array.readthedocs.io/en/latest/_auto/ak.concatenate.html) them.
+
+```{code-cell} ipython3
+ak.concatenate([
+    ak.flatten(array.x),
+    ak.flatten(ak.max(array.y, axis=2), axis=None),
+])
+```
+
+Maintaining alignment between arrays with missing values
+--------------------------------------------------------
+
+Dropping missing values with [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) doesn't keep track of where they were removed. This is a problem if the plotting library takes separate sequences for the x-axis and y-axis, and these must be aligned.
+
+Instead of [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html), you can use [ak.is_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.is_none.html).
+
+```{code-cell} ipython3
+array = ak.Array([
+    {"x": 1, "y": 5.5},
+    {"x": 2, "y": 3.3},
+    {"x": None, "y": 2.2},
+    {"x": 4, "y": None},
+    {"x": 5, "y": 1.1},
+])
+array
+```
+
+```{code-cell} ipython3
+ak.is_none(array.x)
+```
+
+```{code-cell} ipython3
+ak.is_none(array.y)
+```
+
+```{code-cell} ipython3
+to_keep = ~(ak.is_none(array.x) | ak.is_none(array.y))
+to_keep
+```
+
+```{code-cell} ipython3
+array.x[to_keep], array.y[to_keep]
+```
+
+Actually drawing structure
+--------------------------
+
+If need be, you can change the plotter to match the data.
+
+```{code-cell} ipython3
+array = ak.Array([
+    [{"x": 1, "y": 3.3}, {"x": 2, "y": 1.1}, {"x": 3, "y": 2.2}],
+    [],
+    [{"x": 4, "y": 5.5}, {"x": 5, "y": 4.4}],
+    [{"x": 5, "y": 1.1}, {"x": 4, "y": 3.3}, {"x": 2, "y": 5.5}, {"x": 1, "y": 4.4}],
+])
+array
+```
+
+```{code-cell} ipython3
+import matplotlib.pyplot as plt
+import matplotlib.path
+import matplotlib.patches
+
+fig, ax = plt.subplots()
+
+for line in array:
+    if len(line) > 0:
+        vertices = np.dstack([np.asarray(line.x), np.asarray(line.y)])[0]
+        codes = [matplotlib.path.Path.MOVETO] + [matplotlib.path.Path.LINETO] * (len(line) - 1)
+        path = matplotlib.path.Path(vertices, codes)
+        ax.add_patch(matplotlib.patches.PathPatch(path, facecolor="none"))
+
+ax.set_xlim(0, 6)
+ax.set_ylim(0, 6);
+```
+
+(The above example assumes that `len(array)` is small enough to iterate over in Python, but vectorizes over each list in the `array`. It was adapted from the [Matplotlib path tutorial](https://matplotlib.org/stable/tutorials/advanced/path_tutorial.html).)
