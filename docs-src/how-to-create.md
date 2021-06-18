@@ -14,12 +14,14 @@ kernelspec:
 Creating arrays
 ===============
 
-   * **[ArrayBuilder (easy & general)](how-to-create-arraybuilder)**
-   * **[LayoutBuilder (more control)](how-to-create-layoutbuilder)**
-   * **[Direct constructors (fastest)](how-to-create-constructors)**
-   * **[Unflattening and grouping](how-to-create-unflatten-group)**
+   * **[Arrays of lists](how-to-create-lists)**
    * **[Arrays of records](how-to-create-records)**
+   * **[Arrays of missing data](how-to-create-missing)**
    * **[Arrays of strings](how-to-create-strings)**
    * **[Arrays of categories](how-to-create-categorical)**
    * **[Lazy arrays](how-to-create-lazy)**
    * **[Partitioned arrays](how-to-create-partitioned)**
+   * **[Unflattening and grouping](how-to-create-unflatten-group)**
+   * **[ArrayBuilder (easy & general)](how-to-create-arraybuilder)**
+   * **[LayoutBuilder (more control)](how-to-create-layoutbuilder)**
+   * **[Direct constructors (fastest)](how-to-create-constructors)**
