@@ -37,6 +37,7 @@ After destructuring, you might _still_ need to call `np.asarray` on the output b
 
 ```{code-cell} ipython3
 import awkward as ak
+import numpy as np
 ```
 
 ak.flatten with axis=None
@@ -349,5 +350,50 @@ Or just concatenate everything so that we don't lose the lists with only one val
 ak.flatten(ak.sort(array, axis=1)[:, -2:])
 ```
 
-Maximizing/minimizing lists of records
+Minimizing/maximizing lists of records
 --------------------------------------
+
+Unlike numbers, records do not have an ordering: you cannot call [ak.min](https://awkward-array.readthedocs.io/en/latest/_auto/ak.min.html) on an array of records. But usually, what you want to do instead is to find the minimum or maximum of some quantity calculated from the records and pick records (or record fields) from that.
+
+```{code-cell} ipython3
+array = ak.Array([
+    [{"x": 2, "y": 2, "z": 2.2}, {"x": 1, "y": 1, "z": 1.1}, {"x": 3, "y": 3, "z": 3.3}],
+    [],
+    [{"x": 5, "y": 5, "z": 5.5}, {"x": 4, "y": 4, "z": 4.4}],
+    [{"x": 7, "y": 7, "z": 7.7}, {"x": 9, "y": 9, "z": 9.9}, {"x": 8, "y": 8, "z": 8.8}, {"x": 6, "y": 6, "z": 6.6}],
+])
+array
+```
+
+The [ak.argmin](https://awkward-array.readthedocs.io/en/latest/_auto/ak.argmin.html) and [ak.argmax](https://awkward-array.readthedocs.io/en/latest/_auto/ak.argmax.html) functions return the integer index where the minimum or maximum of some numeric formula can be found.
+
+```{code-cell} ipython3
+np.sqrt(array.x**2 + array.y**2)
+```
+
+```{code-cell} ipython3
+ak.argmax(np.sqrt(array.x**2 + array.y**2), axis=1)
+```
+
+These integer indexes can be used as slices if they don't eliminate a dimension, which can be requested via `keepdims=True`. This makes a length-1 list for each reduced output.
+
+```{code-cell} ipython3
+maximize_by = ak.argmax(np.sqrt(array.x**2 + array.y**2), axis=1, keepdims=True)
+maximize_by
+```
+
+Applying this to the original `array`, we get the "best" record in each list, according to `maximize_by`.
+
+```{code-cell} ipython3
+array[maximize_by]
+```
+
+```{code-cell} ipython3
+array[maximize_by].tolist()
+```
+
+This still has list structures and missing values, so it's ready for [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html), assuming that we extract the appropriate record field to plot.
+
+```{code-cell} ipython3
+ak.flatten(array[maximize_by].z, axis=None)
+```
