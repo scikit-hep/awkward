@@ -100,7 +100,7 @@ sections:
       - file: how-to-restructure-flatten
         title: "Flattening for plots"
       - file: how-to-restructure-pad
-        title: "Padding/clipping for machine learning [todo]"
+        title: "Padding/clipping for machine learning"
       - file: how-to-restructure-concatenate
         title: "Concatenating and interleaving [todo]"
       - file: how-to-restructure-sort
