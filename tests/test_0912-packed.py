@@ -71,6 +71,7 @@ def test_list_offset_array():
     assert ak.to_list(packed) == ak.to_list(layout)
     assert isinstance(packed, ak.layout.ListOffsetArray64)
     assert packed.offsets[0] == 0
+    assert len(packed.content) == packed.offsets[-1]
 
 
 def test_unmasked_array():
