@@ -4125,7 +4125,7 @@ def materialized(array, highlevel=True, behavior=None):
         return out
 
 
-def with_cache(array, cache, behavior=None):
+def with_cache(array, cache, highlevel=True, behavior=None):
     """
     Args:
         array: Data to search for nested virtual arrays.
@@ -4135,6 +4135,8 @@ def with_cache(array, cache, behavior=None):
             re-generated if `__getitem__` raises a `KeyError`. This mapping may
             evict elements according to any caching algorithm (LRU, LFR, RR,
             TTL, etc.). If "new", a new dict (keep-forever cache) is created.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -4166,6 +4168,16 @@ def with_cache(array, cache, behavior=None):
 
     See #ak.virtual.
     """
+    if not highlevel:
+        raise NotImplementedError(
+            "ak.with_cache cannot allow highlevel=False because the only strong references\n"
+            "to caches are held by ak.Array objects; VirtualArrays only hold weak references,\n"
+            "which would go out of scope with this function. This will be fixed in Awkward 2.0,\n"
+            "when VirtualArrays are reimplemented in Python and can safely hold strong\n"
+            "references to caches.\n\n"
+            "For now, use highlevel=True and extract the layout from the output array."
+        )
+
     if cache == "new":
         hold_cache = ak._util.MappingProxy({})
         cache = ak.layout.ArrayCache(hold_cache)
@@ -4175,9 +4187,13 @@ def with_cache(array, cache, behavior=None):
 
     def getfunction(layout):
         if isinstance(layout, ak.layout.VirtualArray):
+            if cache is None:
+                newcache = layout.cache
+            else:
+                newcache = cache
             return lambda: ak.layout.VirtualArray(
                 layout.generator,
-                cache,
+                newcache,
                 layout.cache_key,
                 layout.identities,
                 layout.parameters,
@@ -4188,7 +4204,10 @@ def with_cache(array, cache, behavior=None):
     out = ak._util.recursively_apply(
         ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
-    return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
+    else:
+        return out
 
 
 @ak._connect._numpy.implements("size")
