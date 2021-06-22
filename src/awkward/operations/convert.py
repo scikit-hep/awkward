@@ -3968,7 +3968,7 @@ def from_parquet(
     if isinstance(source, str) and os.path.isdir(source):
         metadata_filename = os.path.join(source, "_metadata")
         if os.path.exists(metadata_filename):
-            layout = _from_parquet_dataset(
+            return _from_parquet_dataset(
                 source,
                 metadata_filename,
                 columns,
@@ -3986,7 +3986,7 @@ def from_parquet(
             relative_to = source
             source = sorted(glob.glob(source + "/**/*.parquet", recursive=True))
 
-            layout = _from_parquet_list_of_files(
+            return _from_parquet_list_of_files(
                 source,
                 relative_to,
                 columns,
@@ -4006,7 +4006,7 @@ def from_parquet(
         and isinstance(source, Iterable)
         and not hasattr(source, "read")
     ):
-        layout = _from_parquet_list_of_files(
+        return _from_parquet_list_of_files(
             source,
             None,
             columns,
@@ -4022,7 +4022,7 @@ def from_parquet(
         )
 
     else:
-        layout = _from_parquet_file(
+        return _from_parquet_file(
             source,
             columns,
             row_groups,
@@ -4034,13 +4034,6 @@ def from_parquet(
             behavior,
             options,
         )
-
-    if highlevel:
-        return ak._util.wrap(layout, behavior)
-    else:
-        return layout
-
-    raise RuntimeError
 
 
 def to_buffers(
