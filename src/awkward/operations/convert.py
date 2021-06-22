@@ -3467,34 +3467,34 @@ class _ParquetFileReader(_ParquetReader):
 
         if options is None:
             options = {}
-        self.file = pyarrow.parquet.ParquetFile(source, **options)
+        self._file = pyarrow.parquet.ParquetFile(source, **options)
 
         if row_groups is None:
-            row_groups = range(self.file.num_row_groups)
+            row_groups = range(self._file.num_row_groups)
 
-        schema = self.file.schema_arrow
+        schema = self._file.schema_arrow
         if columns is None:
             columns = schema.names
-
-        self.use_threads = use_threads
-
         schema = _partial_schema_from_columns(schema, columns)
+
+        self._use_threads = use_threads
+
         super(_ParquetFileReader, self).__init__(
             schema, row_groups, columns, partition_columns=[]
         )
 
     @property
     def row_group_metadata(self):
-        return [self.file.metadata.row_group(i) for i in self.row_groups]
+        return [self._file.metadata.row_group(i) for i in self.row_groups]
 
     def read(self, row_group, column_name):
-        return self.file.read_row_group(
-            row_group, [column_name], use_threads=self.use_threads
+        return self._file.read_row_group(
+            row_group, [column_name], use_threads=self._use_threads
         )
 
     def read_batches(self):
-        return self.file.read_row_groups(
-            self.row_groups, columns=self.columns, use_threads=self.use_threads
+        return self._file.read_row_groups(
+            self.row_groups, columns=self.columns, use_threads=self._use_threads
         )
 
 
@@ -3514,30 +3514,28 @@ class _ParquetDatasetReader(_ParquetReader):
         if options is None:
             options = {}
 
-        self.metadata_file = pyarrow.parquet.ParquetFile(metadata_filename, **options)
+        self._metadata_file = pyarrow.parquet.ParquetFile(metadata_filename, **options)
 
         if row_groups is None:
-            row_groups = range(self.metadata_file.num_row_groups)
+            row_groups = range(self._metadata_file.num_row_groups)
 
-        schema = self.metadata_file.schema_arrow
+        schema = self._metadata_file.schema_arrow
         if columns is None:
             columns = schema.names
-
         schema = _partial_schema_from_columns(schema, columns)
 
         if include_partition_columns:
             paths_and_counts = self._get_paths_and_counts(
-                self.metadata_file, row_groups
+                self._metadata_file, row_groups
             )
             partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
         else:
             partition_columns = []
 
-        self.use_threads = use_threads
-        self.options = options
-        self.row_groups = row_groups
-        self.lookup = self._build_row_group_lookup(directory, self.metadata_file)
-        self.open_files = {}
+        self._use_threads = use_threads
+        self._lookup = self._build_row_group_lookup(directory, self._metadata_file)
+        self._options = options
+        self._open_files = {}
 
         super(_ParquetDatasetReader, self).__init__(
             schema, row_groups, columns, partition_columns
@@ -3587,18 +3585,18 @@ class _ParquetDatasetReader(_ParquetReader):
 
     @property
     def row_group_metadata(self):
-        return [self.metadata_file.metadata.row_group(i) for i in self.row_groups]
+        return [self._metadata_file.metadata.row_group(i) for i in self.row_groups]
 
     def read(self, row_group, column_name):
         import pyarrow.parquet
 
-        filename, local_row_group = self.lookup[row_group]
-        if filename not in self.open_files:
-            self.open_files[filename] = pyarrow.parquet.ParquetFile(
-                filename, **self.options
+        filename, local_row_group = self._lookup[row_group]
+        if filename not in self._open_files:
+            self._open_files[filename] = pyarrow.parquet.ParquetFile(
+                filename, **self._options
             )
-        return self.open_files[filename].read_row_group(
-            local_row_group, [column_name], use_threads=self.use_threads
+        return self._open_files[filename].read_row_group(
+            local_row_group, [column_name], use_threads=self._use_threads
         )
 
     def read_batches(self):
@@ -3606,12 +3604,12 @@ class _ParquetDatasetReader(_ParquetReader):
 
         batches = []
         for i in self.row_groups:
-            file_path, local_row_group = self.lookup[i]
-            local_file = pyarrow.parquet.ParquetFile(file_path, **self.options)
+            file_path, local_row_group = self._lookup[i]
+            local_file = pyarrow.parquet.ParquetFile(file_path, **self._options)
 
             batches.extend(
                 local_file.read_row_group(
-                    local_row_group, self.columns, use_threads=self.use_threads
+                    local_row_group, self.columns, use_threads=self._use_threads
                 ).to_batches()
             )
         return batches
@@ -3641,11 +3639,10 @@ class _ParquetDatasetOfFilesReader(_ParquetReader):
 
         if columns is None:
             columns = schema.names
-
         schema = _partial_schema_from_columns(schema, columns)
 
-        self.lookup = lookup
-        self.use_threads = use_threads
+        self._lookup = lookup
+        self._use_threads = use_threads
         super(_ParquetDatasetOfFilesReader, self).__init__(
             schema, row_groups, columns, partition_columns
         )
@@ -3680,23 +3677,23 @@ class _ParquetDatasetOfFilesReader(_ParquetReader):
     def row_group_metadata(self):
         return [
             f.metadata.row_group(g)
-            for f, g in (self.lookup[g] for g in self.row_groups)
+            for f, g in (self._lookup[g] for g in self.row_groups)
         ]
 
     def read(self, row_group, column_name):
-        file, local_row_group = self.lookup[row_group]
+        file, local_row_group = self._lookup[row_group]
         return file.read_row_group(
-            local_row_group, [column_name], use_threads=self.use_threads
+            local_row_group, [column_name], use_threads=self._use_threads
         )
 
     def read_batches(self):
         batches = []
         for i in self.row_groups:
-            single_file, local_row_group = self.lookup[i]
+            single_file, local_row_group = self._lookup[i]
 
             batches.extend(
                 single_file.read_row_group(
-                    local_row_group, self.columns, use_threads=self.use_threads
+                    local_row_group, self.columns, use_threads=self._use_threads
                 ).to_batches()
             )
         return batches
