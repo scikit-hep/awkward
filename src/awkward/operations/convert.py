@@ -3268,6 +3268,45 @@ class _ParquetGenerator(object):
     def __init__(self, reader):
         self._reader = reader
 
+    def _find_first_column(self, form, struct_only):
+        if isinstance(form, ak.forms.VirtualForm):
+            return self._find_first_column(form.form, struct_only)
+        elif isinstance(form, ak.forms.RecordForm):
+            assert form.numfields != 0
+            struct_only.insert(0, form.key(0))
+            return self._find_first_column(form.content(0), struct_only)
+        elif isinstance(form, ak.forms.ListOffsetForm):
+            if form.parameter("__array__") in ("string", "bytestring"):
+                return form
+            else:
+                return self._find_first_column(form.content, struct_only)
+        else:
+            return form
+
+    def _convert_arrow_to_awkward(self, table, struct_only, masked, unpack):
+        out = _from_arrow(table, False, struct_only=struct_only, highlevel=False)
+        for item in unpack:
+            if item is None:
+                out = out.content
+            else:
+                out = out.field(item)
+        if masked:
+            if isinstance(out, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)):
+                out = out.toByteMaskedArray()
+            elif isinstance(out, ak.layout.ListOffsetArray32) and isinstance(
+                out.content, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)
+            ):
+                out = ak.layout.ListOffsetArray32(
+                    out.offsets, out.content.toByteMaskedArray()
+                )
+            elif isinstance(out, ak.layout.ListOffsetArray64) and isinstance(
+                out.content, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)
+            ):
+                out = ak.layout.ListOffsetArray64(
+                    out.offsets, out.content.toByteMaskedArray()
+                )
+        return out
+
     def _create_record_array(
         self, row_group, unpack, length, form, lazy_cache, lazy_cache_key
     ):
@@ -3305,7 +3344,7 @@ class _ParquetGenerator(object):
         self, row_group, unpack, form, lazy_cache, lazy_cache_key
     ):
         struct_only = [x for x in unpack[:0:-1] if x is not None]
-        sampleform = _ParquetFile_first_column(form, struct_only)
+        sampleform = self._find_first_column(form, struct_only)
 
         assert sampleform.form_key.startswith("col:") or sampleform.form_key.startswith(
             "lst:"
@@ -3379,7 +3418,7 @@ class _ParquetGenerator(object):
             table = self._reader.read(row_group, column_name)
             struct_only = [column_name.split(".")[-1]]
             struct_only.extend([x for x in unpack[:0:-1] if x is not None])
-            return _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack)
+            return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
 
     def get(self, row_group, unpack, form, struct_only):
         assert form.form_key.startswith("col:") or form.form_key.startswith("lst:")
@@ -3388,7 +3427,7 @@ class _ParquetGenerator(object):
         if masked:
             form = form.content
         table = self._reader.read(row_group, column_name)
-        return _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack)
+        return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
 
 
 class _ParquetFileReader(object):
@@ -3495,47 +3534,6 @@ def _parquet_partitions_to_awkward(paths_and_counts):
             )
         )
     return indexedarrays
-
-
-def _ParquetFile_first_column(form, struct_only):
-    if isinstance(form, ak.forms.VirtualForm):
-        return _ParquetFile_first_column(form.form, struct_only)
-    elif isinstance(form, ak.forms.RecordForm):
-        assert form.numfields != 0
-        struct_only.insert(0, form.key(0))
-        return _ParquetFile_first_column(form.content(0), struct_only)
-    elif isinstance(form, ak.forms.ListOffsetForm):
-        if form.parameter("__array__") in ("string", "bytestring"):
-            return form
-        else:
-            return _ParquetFile_first_column(form.content, struct_only)
-    else:
-        return form
-
-
-def _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack):
-    out = _from_arrow(table, False, struct_only=struct_only, highlevel=False)
-    for item in unpack:
-        if item is None:
-            out = out.content
-        else:
-            out = out.field(item)
-    if masked:
-        if isinstance(out, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)):
-            out = out.toByteMaskedArray()
-        elif isinstance(out, ak.layout.ListOffsetArray32) and isinstance(
-            out.content, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)
-        ):
-            out = ak.layout.ListOffsetArray32(
-                out.offsets, out.content.toByteMaskedArray()
-            )
-        elif isinstance(out, ak.layout.ListOffsetArray64) and isinstance(
-            out.content, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)
-        ):
-            out = ak.layout.ListOffsetArray64(
-                out.offsets, out.content.toByteMaskedArray()
-            )
-    return out
 
 
 def _partial_schema_from_columns(schema, columns):
