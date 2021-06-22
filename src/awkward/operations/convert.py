@@ -3692,8 +3692,8 @@ def _parquet_partition_values(path):
 def _parquet_partitions_to_awkward(paths_and_counts):
     path, count = paths_and_counts[0]
     columns = [column for column, value in _parquet_partition_values(path)]
-    values = [[]] * len(columns)
-    indexes = [[]] * len(columns)
+    values = [[] for _ in columns]
+    indexes = [[] for _ in columns]
     for path, count in paths_and_counts:
         for i, (column, value) in enumerate(_parquet_partition_values(path)):
             if i >= len(columns) or column != columns[i]:
