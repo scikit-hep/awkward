@@ -152,3 +152,108 @@ ak.flatten(unflattened)
 ```{code-cell} ipython3
 ak.num(unflattened)
 ```
+
+With ArrayBuilder
+-----------------
+
+[ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can also construct arrays of lists using the `begin_list`/`end_list` methods or the `list` context manager.
+
+(This is what [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) uses internally to accumulate lists.)
+
+```{code-cell} ipython3
+builder = ak.ArrayBuilder()
+
+builder.begin_list()
+builder.append(1)
+builder.append(2)
+builder.append(3)
+builder.end_list()
+
+builder.begin_list()
+builder.end_list()
+
+builder.begin_list()
+builder.append(4)
+builder.append(5)
+builder.end_list()
+
+array = builder.snapshot()
+array
+```
+
+```{code-cell} ipython3
+builder = ak.ArrayBuilder()
+
+with builder.list():
+    builder.append(1)
+    builder.append(2)
+    builder.append(3)
+
+with builder.list():
+    pass
+
+with builder.list():
+    builder.append(4)
+    builder.append(5)
+
+array = builder.snapshot()
+array
+```
+
+In Numba
+--------
+
+Functions that Numba Just-In-Time (JIT) compiles can use [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) or construct flat data and "counts" arrays for [ak.unflatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unflatten.html).
+
+([At this time](https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#language), Numba can't use context managers, the `with` statement, in fully compiled code. [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context. Similarly, `ak.*` functions like [ak.unflatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unflatten.html) can't be called inside a JIT-compiled function, but can be outside.)
+
+```{code-cell} ipython3
+import numba as nb
+```
+
+```{code-cell} ipython3
+@nb.jit
+def append_list(builder, start, stop):
+    builder.begin_list()
+    for x in range(start, stop):
+        builder.append(x)
+    builder.end_list()
+
+@nb.jit
+def example(builder):
+    append_list(builder, 1, 4)
+    append_list(builder, 999, 999)
+    append_list(builder, 4, 6)
+    return builder
+
+builder = example(ak.ArrayBuilder())
+
+array = builder.snapshot()
+array
+```
+
+```{code-cell} ipython3
+@nb.jit
+def append_list(i, data, j, counts, start, stop):
+    for x in range(start, stop):
+        data[i] = x
+        i += 1
+    counts[j] = stop - start
+    j += 1
+    return i, j
+
+@nb.jit
+def example():
+    data = np.empty(5, np.int64)
+    counts = np.empty(3, np.int64)
+    i, j = 0, 0
+    i, j = append_list(i, data, j, counts, 1, 4)
+    i, j = append_list(i, data, j, counts, 999, 999)
+    i, j = append_list(i, data, j, counts, 4, 6)
+    return data, counts
+
+data, counts = example()
+
+array = ak.unflatten(data, counts)
+array
+```
