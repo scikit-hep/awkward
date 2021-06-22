@@ -125,6 +125,9 @@ def test_IndexedOffsetArray():
         [0, 1, 2],
     ]
 
+    array2 = ak.Array([None, None, 1, -1, 30]).layout
+    assert ak.to_list(array2.sort(0, True, False)) == [-1, 1, 30, None, None]
+
     array3 = ak.Array(
         [[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]]
     ).layout
@@ -404,12 +407,16 @@ def test_ByteMaskedArray():
         [0.0, 1.1, 2.2],
         [],
         [6.6, 7.7, 8.8, 9.9],
+        None,
+        None,
     ]
 
     assert ak.to_list(array.sort(0, False, False)) == [
         [6.6, 7.7, 8.8],
         [],
         [0.0, 1.1, 2.2, 9.9],
+        None,
+        None,
     ]
 
     assert ak.to_list(array.argsort(1, True, False)) == [

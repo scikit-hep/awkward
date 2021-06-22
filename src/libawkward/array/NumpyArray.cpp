@@ -3569,15 +3569,6 @@ namespace awkward {
                                          dtype_,
                                          ptr_lib_);
 
-      if (keepdims) {
-        out = std::make_shared<RegularArray>(
-          Identities::none(),
-          util::Parameters(),
-          out,
-          parents.length() / starts.length(),
-          length());
-      }
-
       return out;
     }
   }

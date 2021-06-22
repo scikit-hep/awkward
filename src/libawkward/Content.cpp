@@ -1182,7 +1182,7 @@ namespace awkward {
       return out.get()->getitem_nothing();
     }
     else {
-      return out.get()->getitem_at_nowrap(0);
+      return out;
     }
   }
 

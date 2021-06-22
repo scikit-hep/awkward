@@ -2471,6 +2471,9 @@ namespace awkward {
                                               parameters_,
                                               outindex,
                                               raw->content());
+        if (inject_nones) {
+          return tmp.simplify_optiontype();
+        }
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),

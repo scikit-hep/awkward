@@ -19,6 +19,7 @@
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/NumpyArray.h"
+#include "awkward/array/RegularArray.h"
 #include "awkward/array/VirtualArray.h"
 
 #include "awkward/array/RecordArray.h"
@@ -1620,13 +1621,20 @@ namespace awkward {
                                                  ascending,
                                                  stable,
                                                  keepdims);
+      next = std::make_shared<RegularArray>(
+        Identities::none(),
+        util::Parameters(),
+        next,
+        next.get()->length(),
+        next.get()->length());
+
       contents.push_back(next);
     }
     return std::make_shared<RecordArray>(Identities::none(),
                                          parameters_,
                                          contents,
                                          recordlookup_,
-                                         outlength);
+                                         outlength).get()->getitem_at_nowrap(0);
   }
 
   const ContentPtr
