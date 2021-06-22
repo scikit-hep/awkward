@@ -3265,91 +3265,104 @@ def _parquet_schema_to_form(schema):
 
 
 class _ParquetGenerator(object):
+    def __init__(self, reader):
+        self._reader = reader
+
+    def _create_record_array(
+        self, row_group, unpack, length, form, lazy_cache, lazy_cache_key
+    ):
+        contents = []
+        recordlookup = []
+        for i in range(form.numfields):
+            name = form.key(i)
+            subform = form.content(i).form
+            generator = ak.layout.ArrayGenerator(
+                self,
+                (
+                    row_group,
+                    unpack + (name,),
+                    length,
+                    subform,
+                    lazy_cache,
+                    lazy_cache_key,
+                ),
+                length=length,
+                form=subform,
+            )
+            if subform.form_key is None:
+                field_cache = None
+                cache_key = None
+            else:
+                field_cache = lazy_cache
+                cache_key = "{0}:{1}[{2}]".format(
+                    lazy_cache_key, subform.form_key, row_group
+                )
+            contents.append(ak.layout.VirtualArray(generator, field_cache, cache_key))
+            recordlookup.append(name)
+        return ak.layout.RecordArray(contents, recordlookup, length)
+
+    def _create_list_offset_array(
+        self, row_group, unpack, form, lazy_cache, lazy_cache_key
+    ):
+        struct_only = [x for x in unpack[:0:-1] if x is not None]
+        sampleform = _ParquetFile_first_column(form, struct_only)
+
+        assert sampleform.form_key.startswith("col:") or sampleform.form_key.startswith(
+            "lst:"
+        )
+        samplekey = "{0}:off:{1}:{2}[{3}]".format(
+            lazy_cache_key,
+            sampleform.form_key[4:],
+            ".".join("" if x is None else x for x in unpack),
+            row_group,
+        )
+        sample = None
+        if lazy_cache is not None:
+            try:
+                sample = lazy_cache.mutablemapping[samplekey]
+            except KeyError:
+                pass
+        if sample is None:
+            sample = self.get(row_group, unpack, sampleform, struct_only)
+        if lazy_cache is not None:
+            lazy_cache.mutablemapping[samplekey] = sample
+
+        offsets = [sample.offsets]
+        sublength = offsets[-1][-1]
+        sample = sample.content
+        recordform = form.content
+        unpack = unpack + (None,)
+        while not isinstance(recordform, ak.forms.RecordForm):
+            offsets.append(sample.offsets)
+            sublength = offsets[-1][-1]
+            sample = sample.content
+            recordform = recordform.content
+            unpack = unpack + (None,)
+
+        out = self(row_group, unpack, sublength, recordform, lazy_cache, lazy_cache_key)
+        for off in offsets[::-1]:
+            if isinstance(off, ak.layout.Index32):
+                out = ak.layout.ListOffsetArray32(off, out)
+            elif isinstance(off, ak.layout.Index64):
+                out = ak.layout.ListOffsetArray64(off, out)
+            else:
+                raise AssertionError(
+                    "unexpected Index type: {0}".format(off)
+                    + ak._util.exception_suffix(__file__)
+                )
+        return out
+
     def __call__(self, row_group, unpack, length, form, lazy_cache, lazy_cache_key):
         if form.form_key is None:
             if isinstance(form, ak.forms.RecordForm):
-                contents = []
-                recordlookup = []
-                for i in range(form.numfields):
-                    name = form.key(i)
-                    subform = form.content(i).form
-                    generator = ak.layout.ArrayGenerator(
-                        self,
-                        (
-                            row_group,
-                            unpack + (name,),
-                            length,
-                            subform,
-                            lazy_cache,
-                            lazy_cache_key,
-                        ),
-                        length=length,
-                        form=subform,
-                    )
-                    if subform.form_key is None:
-                        field_cache = None
-                        cache_key = None
-                    else:
-                        field_cache = lazy_cache
-                        cache_key = "{0}:{1}[{2}]".format(
-                            lazy_cache_key, subform.form_key, row_group
-                        )
-                    contents.append(
-                        ak.layout.VirtualArray(generator, field_cache, cache_key)
-                    )
-                    recordlookup.append(name)
-                return ak.layout.RecordArray(contents, recordlookup, length)
+                return self._create_record_array(
+                    row_group, unpack, length, form, lazy_cache, lazy_cache_key
+                )
 
             elif isinstance(form, ak.forms.ListOffsetForm):
-                struct_only = [x for x in unpack[:0:-1] if x is not None]
-                sampleform = _ParquetFile_first_column(form, struct_only)
-
-                assert sampleform.form_key.startswith(
-                    "col:"
-                ) or sampleform.form_key.startswith("lst:")
-                samplekey = "{0}:off:{1}:{2}[{3}]".format(
-                    lazy_cache_key,
-                    sampleform.form_key[4:],
-                    ".".join("" if x is None else x for x in unpack),
-                    row_group,
+                return self._create_list_offset_array(
+                    row_group, unpack, form, lazy_cache, lazy_cache_key
                 )
-                sample = None
-                if lazy_cache is not None:
-                    try:
-                        sample = lazy_cache.mutablemapping[samplekey]
-                    except KeyError:
-                        pass
-                if sample is None:
-                    sample = self.get(row_group, unpack, sampleform, struct_only)
-                if lazy_cache is not None:
-                    lazy_cache.mutablemapping[samplekey] = sample
-
-                offsets = [sample.offsets]
-                sublength = offsets[-1][-1]
-                sample = sample.content
-                recordform = form.content
-                unpack = unpack + (None,)
-                while not isinstance(recordform, ak.forms.RecordForm):
-                    offsets.append(sample.offsets)
-                    sublength = offsets[-1][-1]
-                    sample = sample.content
-                    recordform = recordform.content
-                    unpack = unpack + (None,)
-
-                out = self(
-                    row_group, unpack, sublength, recordform, lazy_cache, lazy_cache_key
-                )
-                for off in offsets[::-1]:
-                    if isinstance(off, ak.layout.Index32):
-                        out = ak.layout.ListOffsetArray32(off, out)
-                    elif isinstance(off, ak.layout.Index64):
-                        out = ak.layout.ListOffsetArray64(off, out)
-                    else:
-                        raise AssertionError(
-                            "unexpected Index type: {0}".format(off)
-                            + ak._util.exception_suffix(__file__)
-                        )
-                return out
 
             else:
                 raise AssertionError(
@@ -3363,7 +3376,7 @@ class _ParquetGenerator(object):
             masked = isinstance(form, ak.forms.ByteMaskedForm)
             if masked:
                 form = form.content
-            table = self.read(row_group, column_name)
+            table = self._reader.read(row_group, column_name)
             struct_only = [column_name.split(".")[-1]]
             struct_only.extend([x for x in unpack[:0:-1] if x is not None])
             return _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack)
@@ -3374,14 +3387,11 @@ class _ParquetGenerator(object):
         masked = isinstance(form, ak.forms.ByteMaskedForm)
         if masked:
             form = form.content
-        table = self.read(row_group, column_name)
+        table = self._reader.read(row_group, column_name)
         return _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack)
 
-    def read(self, row_group, column_name):
-        raise NotImplementedError
 
-
-class _ParquetFileGenerator(_ParquetGenerator):
+class _ParquetFileReader(object):
     def __init__(self, file, use_threads):
         self.file = file
         self.use_threads = use_threads
@@ -3389,6 +3399,53 @@ class _ParquetFileGenerator(_ParquetGenerator):
     def read(self, row_group, column_name):
         return self.file.read_row_group(
             row_group, [column_name], use_threads=self.use_threads
+        )
+
+
+class _ParquetDatasetReader(object):
+    def __init__(self, pq, directory, metadata_file, use_threads, options):
+        self.pq = pq
+        self.use_threads = use_threads
+        self.options = options
+
+        self.lookup = []
+        last_filename = None
+        for i in range(metadata_file.num_row_groups):
+            filename = metadata_file.metadata.row_group(i).column(0).file_path
+            if last_filename is None:
+                if filename == "":
+                    raise ValueError(
+                        "Parquet _metadata file does not contain file paths "
+                        "(e.g. was not made with 'set_file_path')"
+                        + ak._util.exception_suffix(__file__)
+                    )
+                last_filename = filename
+                start_i = 0
+            elif filename != "" and last_filename != filename:
+                last_filename = filename
+                start_i = i
+            self.lookup.append((os.path.join(directory, last_filename), i - start_i))
+
+        self.open_files = {}
+
+    def read(self, row_group, column_name):
+        filename, local_row_group = self.lookup[row_group]
+        if filename not in self.open_files:
+            self.open_files[filename] = self.pq.ParquetFile(filename, **self.options)
+        return self.open_files[filename].read_row_group(
+            local_row_group, [column_name], use_threads=self.use_threads
+        )
+
+
+class _ParquetDatasetOfFilesReader(object):
+    def __init__(self, lookup, use_threads):
+        self.lookup = lookup
+        self.use_threads = use_threads
+
+    def read(self, row_group, column_name):
+        file, local_row_group = self.lookup[row_group]
+        return file.read_row_group(
+            local_row_group, [column_name], use_threads=self.use_threads
         )
 
 
@@ -3435,53 +3492,6 @@ def _parquet_partitions_to_awkward(paths_and_counts):
             )
         )
     return indexedarrays
-
-
-class _ParquetDatasetGenerator(_ParquetGenerator):
-    def __init__(self, pq, directory, metadata_file, use_threads, options):
-        self.pq = pq
-        self.use_threads = use_threads
-        self.options = options
-
-        self.lookup = []
-        last_filename = None
-        for i in range(metadata_file.num_row_groups):
-            filename = metadata_file.metadata.row_group(i).column(0).file_path
-            if last_filename is None:
-                if filename == "":
-                    raise ValueError(
-                        "Parquet _metadata file does not contain file paths "
-                        "(e.g. was not made with 'set_file_path')"
-                        + ak._util.exception_suffix(__file__)
-                    )
-                last_filename = filename
-                start_i = 0
-            elif filename != "" and last_filename != filename:
-                last_filename = filename
-                start_i = i
-            self.lookup.append((os.path.join(directory, last_filename), i - start_i))
-
-        self.open_files = {}
-
-    def read(self, row_group, column_name):
-        filename, local_row_group = self.lookup[row_group]
-        if filename not in self.open_files:
-            self.open_files[filename] = self.pq.ParquetFile(filename, **self.options)
-        return self.open_files[filename].read_row_group(
-            local_row_group, [column_name], use_threads=self.use_threads
-        )
-
-
-class _ParquetDatasetOfFilesGenerator(_ParquetGenerator):
-    def __init__(self, lookup, use_threads):
-        self.lookup = lookup
-        self.use_threads = use_threads
-
-    def read(self, row_group, column_name):
-        file, local_row_group = self.lookup[row_group]
-        return file.read_row_group(
-            local_row_group, [column_name], use_threads=self.use_threads
-        )
 
 
 def _ParquetFile_first_column(form, struct_only):
@@ -3601,8 +3611,8 @@ def _from_parquet_dataset(
     schema, columns = _partial_schema_from_columns(schema, columns)
 
     if lazy:
-        state = _ParquetDatasetGenerator(
-            pyarrow.parquet, source, file, use_threads, options
+        state = _ParquetGenerator(
+            _ParquetDatasetReader(pyarrow.parquet, source, file, use_threads, options)
         )
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
 
@@ -3726,7 +3736,7 @@ def _from_parquet_list_of_files(
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
-        state = _ParquetDatasetOfFilesGenerator(lookup, use_threads)
+        state = _ParquetGenerator(_ParquetDatasetOfFilesReader(lookup, use_threads))
         lengths = [f.metadata.row_group(g).num_rows for f, g in sublookup]
         form = _parquet_schema_to_form(schema)
         out = _generate_outer_lazy_array(
@@ -3883,7 +3893,7 @@ def _from_parquet_file(
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
-        state = _ParquetFileGenerator(file, use_threads)
+        state = _ParquetGenerator(_ParquetFileReader(file, use_threads))
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
         form = _parquet_schema_to_form(schema)
         out = _generate_outer_lazy_array(
