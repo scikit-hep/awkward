@@ -418,6 +418,13 @@ def wrap(content, behavior):
         return content
 
 
+def maybe_wrap(content, behavior, highlevel):
+    if highlevel:
+        return ak._util.wrap(content, behavior)
+    else:
+        return content
+
+
 def extra(args, kwargs, defaults):
     out = []
     for i in range(len(defaults)):

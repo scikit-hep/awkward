@@ -3648,10 +3648,7 @@ def _from_parquet_dataset(
             fields = [x[1] for x in partition_columns] + out.contents
             out = ak.layout.RecordArray(fields, field_names)
 
-    if highlevel:
-        return ak._util.wrap(out, behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 def _from_parquet_list_of_files(
@@ -3743,18 +3740,15 @@ def _from_parquet_list_of_files(
         out = _from_arrow(batches, False, highlevel=False)
         assert isinstance(out, ak.layout.RecordArray) and not out.istuple
 
-        if partition_columns == [] and schema.names == [""]:
+        if partition_columns != []:
+            field_names, fields = zip(*partition_columns)
+            out = ak.layout.RecordArray(
+                fields + tuple(out.contents), field_names + tuple(out.keys())
+            )
+        elif schema.names == [""]:
             out = out[""]
 
-        if partition_columns != []:
-            field_names = [x[0] for x in partition_columns] + out.keys()
-            fields = [x[1] for x in partition_columns] + out.contents
-            out = ak.layout.RecordArray(fields, field_names)
-
-    if highlevel:
-        return ak._util.wrap(out, behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 def _generate_outer_lazy_array(
@@ -3903,10 +3897,7 @@ def _from_parquet_file(
         if schema.names == [""]:
             out = out[""]
 
-    if highlevel:
-        return ak._util.wrap(out, behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 def from_parquet(
