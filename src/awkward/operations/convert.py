@@ -3268,20 +3268,34 @@ class _ParquetGenerator(object):
     def __init__(self, reader):
         self._reader = reader
 
-    def _find_first_column(self, form, struct_only):
-        if isinstance(form, ak.forms.VirtualForm):
-            return self._find_first_column(form.form, struct_only)
-        elif isinstance(form, ak.forms.RecordForm):
-            assert form.numfields != 0
-            struct_only.insert(0, form.key(0))
-            return self._find_first_column(form.content(0), struct_only)
-        elif isinstance(form, ak.forms.ListOffsetForm):
-            if form.parameter("__array__") in ("string", "bytestring"):
-                return form
+    def __call__(self, row_group, unpack, length, form, lazy_cache, lazy_cache_key):
+        if form.form_key is None:
+            if isinstance(form, ak.forms.RecordForm):
+                return self._create_record_array(
+                    row_group, unpack, length, form, lazy_cache, lazy_cache_key
+                )
+
+            elif isinstance(form, ak.forms.ListOffsetForm):
+                return self._create_list_offset_array(
+                    row_group, unpack, form, lazy_cache, lazy_cache_key
+                )
+
             else:
-                return self._find_first_column(form.content, struct_only)
+                raise AssertionError(
+                    "unexpected Form: {0}".format(type(form))
+                    + ak._util.exception_suffix(__file__)
+                )
+
         else:
-            return form
+            assert form.form_key.startswith("col:") or form.form_key.startswith("lst:")
+            column_name = form.form_key[4:]
+            masked = isinstance(form, ak.forms.ByteMaskedForm)
+            if masked:
+                form = form.content
+            table = self._reader.read(row_group, column_name)
+            struct_only = [column_name.split(".")[-1]]
+            struct_only.extend([x for x in unpack[:0:-1] if x is not None])
+            return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
 
     def _convert_arrow_to_awkward(self, table, struct_only, masked, unpack):
         out = _from_arrow(table, False, struct_only=struct_only, highlevel=False)
@@ -3391,34 +3405,20 @@ class _ParquetGenerator(object):
                 )
         return out
 
-    def __call__(self, row_group, unpack, length, form, lazy_cache, lazy_cache_key):
-        if form.form_key is None:
-            if isinstance(form, ak.forms.RecordForm):
-                return self._create_record_array(
-                    row_group, unpack, length, form, lazy_cache, lazy_cache_key
-                )
-
-            elif isinstance(form, ak.forms.ListOffsetForm):
-                return self._create_list_offset_array(
-                    row_group, unpack, form, lazy_cache, lazy_cache_key
-                )
-
+    def _find_first_column(self, form, struct_only):
+        if isinstance(form, ak.forms.VirtualForm):
+            return self._find_first_column(form.form, struct_only)
+        elif isinstance(form, ak.forms.RecordForm):
+            assert form.numfields != 0
+            struct_only.insert(0, form.key(0))
+            return self._find_first_column(form.content(0), struct_only)
+        elif isinstance(form, ak.forms.ListOffsetForm):
+            if form.parameter("__array__") in ("string", "bytestring"):
+                return form
             else:
-                raise AssertionError(
-                    "unexpected Form: {0}".format(type(form))
-                    + ak._util.exception_suffix(__file__)
-                )
-
+                return self._find_first_column(form.content, struct_only)
         else:
-            assert form.form_key.startswith("col:") or form.form_key.startswith("lst:")
-            column_name = form.form_key[4:]
-            masked = isinstance(form, ak.forms.ByteMaskedForm)
-            if masked:
-                form = form.content
-            table = self._reader.read(row_group, column_name)
-            struct_only = [column_name.split(".")[-1]]
-            struct_only.extend([x for x in unpack[:0:-1] if x is not None])
-            return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
+            return form
 
     def get(self, row_group, unpack, form, struct_only):
         assert form.form_key.startswith("col:") or form.form_key.startswith("lst:")
