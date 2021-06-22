@@ -603,16 +603,14 @@ namespace awkward {
                         const Index64& parents,
                         int64_t outlength,
                         bool ascending,
-                        bool stable,
-                        bool keepdims) const {
+                        bool stable) const {
     ContentPtr asnumpy = toNumpyArray("d", 8, util::dtype::float64);
     return asnumpy.get()->sort_next(negaxis,
                                     starts,
                                     parents,
                                     outlength,
                                     ascending,
-                                    stable,
-                                    keepdims);
+                                    stable);
   }
 
   const ContentPtr

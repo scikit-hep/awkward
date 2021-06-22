@@ -2369,8 +2369,7 @@ namespace awkward {
                                          const Index64& parents,
                                          int64_t outlength,
                                          bool ascending,
-                                         bool stable,
-                                         bool keepdims) const {
+                                         bool stable) const {
     if (length() == 0 ) {
       return shallow_copy();
     }
@@ -2406,7 +2405,6 @@ namespace awkward {
     bool inject_nones = false;
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (numnull > 0  &&  !branchdepth.first  &&  negaxis != branchdepth.second) {
-      keepdims = false;
       inject_nones = true;
     }
     ContentPtr out = next.get()->sort_next(negaxis,
@@ -2414,8 +2412,7 @@ namespace awkward {
                                            nextparents,
                                            outlength,
                                            ascending,
-                                           stable,
-                                           keepdims);
+                                           stable);
 
     Index64 nextoutindex(parents_length);
     struct Error err3 = kernel::IndexedArray_local_preparenext_64(

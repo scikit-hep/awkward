@@ -1691,15 +1691,13 @@ namespace awkward {
                                   const Index64& parents,
                                   int64_t outlength,
                                   bool ascending,
-                                  bool stable,
-                                  bool keepdims) const {
+                                  bool stable) const {
     return toListOffsetArray64(true).get()->sort_next(negaxis,
                                                       starts,
                                                       parents,
                                                       outlength,
                                                       ascending,
-                                                      stable,
-                                                      keepdims);
+                                                      stable);
   }
 
   template <>
@@ -1709,8 +1707,7 @@ namespace awkward {
     const Index64& parents,
     int64_t outlength,
     bool ascending,
-    bool stable,
-    bool keepdims) const {
+    bool stable) const {
 
     if (length() == 0 ) {
       return shallow_copy();
@@ -1815,7 +1812,7 @@ namespace awkward {
 
       ContentPtr outcontent = nextcontent.get()->sort_next(
         negaxis - 1, nextstarts, nextparents, nextcontent.get()->length(),
-        ascending, stable, false);
+        ascending, stable);
 
       Index64 outcarry(nextlen);
       struct Error err5 = kernel::ListOffsetArray_local_preparenext_64(
@@ -1857,7 +1854,7 @@ namespace awkward {
 
       ContentPtr outcontent = trimmed.get()->sort_next(
         negaxis, util::make_starts(offsets_), nextparents,
-        offsets_.length() - 1, ascending, stable, false);
+        offsets_.length() - 1, ascending, stable);
 
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            parameters_,

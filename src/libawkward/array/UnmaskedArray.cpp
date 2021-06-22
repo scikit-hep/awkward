@@ -968,8 +968,7 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength,
                            bool ascending,
-                           bool stable,
-                           bool keepdims) const {
+                           bool stable) const {
     if (length() == 0) {
       return shallow_copy();
     }
@@ -978,8 +977,7 @@ namespace awkward {
                                                              parents,
                                                              outlength,
                                                              ascending,
-                                                             stable,
-                                                             keepdims);
+                                                             stable);
     if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
       UnmaskedArray tmp(Identities::none(),
                         parameters_,

@@ -354,8 +354,7 @@ namespace awkward {
                   const Index64& parents,
                   int64_t outlength,
                   bool ascending,
-                  bool stable,
-                  bool keepdims) const {
+                  bool stable) const {
     throw std::runtime_error(
       std::string("undefined operation: None::sort_next")
       + FILENAME(__LINE__));
