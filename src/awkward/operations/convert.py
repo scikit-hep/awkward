@@ -3433,9 +3433,9 @@ class _ParquetGenerator(object):
 
 
 class _ParquetReader(object):
-    def __init__(self, row_groups, schema, columns, partition_columns):
-        self.row_groups = row_groups
+    def __init__(self, schema, row_groups, columns, partition_columns):
         self.schema = schema
+        self.row_groups = row_groups
         self.columns = columns
         self.partition_columns = partition_columns
 
@@ -3460,17 +3460,28 @@ class _ParquetReader(object):
 
 
 class _ParquetFileReader(_ParquetReader):
-    def __init__(self, source, row_groups, columns, use_threads, options):
+    def __init__(
+        self, source, use_threads, row_groups=None, columns=None, options=None
+    ):
         import pyarrow.parquet
 
+        if options is None:
+            options = {}
         self.file = pyarrow.parquet.ParquetFile(source, **options)
-        self.use_threads = use_threads
 
         if row_groups is None:
             row_groups = range(self.file.num_row_groups)
 
-        schema, columns = _partial_schema_from_columns(self.file.schema_arrow, columns)
-        super(_ParquetFileReader, self).__init__(row_groups, schema, columns, [])
+        schema = self.file.schema_arrow
+        if columns is None:
+            columns = schema.names
+
+        self.use_threads = use_threads
+
+        schema = _partial_schema_from_columns(schema, columns)
+        super(_ParquetFileReader, self).__init__(
+            schema, row_groups, columns, partition_columns=[]
+        )
 
     @property
     def row_group_metadata(self):
@@ -3492,40 +3503,51 @@ class _ParquetDatasetReader(_ParquetReader):
         self,
         directory,
         metadata_filename,
-        row_groups,
-        columns,
         use_threads,
         include_partition_columns,
-        options,
+        row_groups=None,
+        columns=None,
+        options=None,
     ):
-
         import pyarrow.parquet
+
+        if options is None:
+            options = {}
 
         self.metadata_file = pyarrow.parquet.ParquetFile(metadata_filename, **options)
 
         if row_groups is None:
             row_groups = range(self.metadata_file.num_row_groups)
 
+        schema = self.metadata_file.schema_arrow
+        if columns is None:
+            columns = schema.names
+
+        schema = _partial_schema_from_columns(schema, columns)
+
         if include_partition_columns:
-            paths_and_counts = _get_dataset_paths_and_counts(
+            paths_and_counts = self._get_paths_and_counts(
                 self.metadata_file, row_groups
             )
             partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
         else:
             partition_columns = []
 
-        schema, columns = _partial_schema_from_columns(
-            self.metadata_file.schema_arrow, columns
-        )
-
         self.use_threads = use_threads
         self.options = options
         self.row_groups = row_groups
+        self.lookup = self._build_row_group_lookup(directory, self.metadata_file)
+        self.open_files = {}
 
-        self.lookup = []
+        super(_ParquetDatasetReader, self).__init__(
+            schema, row_groups, columns, partition_columns
+        )
+
+    def _build_row_group_lookup(self, directory, metadata_file):
         last_filename = None
-        for i in range(self.metadata_file.num_row_groups):
-            filename = self.metadata_file.metadata.row_group(i).column(0).file_path
+        lookup = []
+        for i in range(metadata_file.num_row_groups):
+            filename = metadata_file.metadata.row_group(i).column(0).file_path
             if last_filename is None:
                 if filename == "":
                     raise ValueError(
@@ -3538,13 +3560,28 @@ class _ParquetDatasetReader(_ParquetReader):
             elif filename != "" and last_filename != filename:
                 last_filename = filename
                 start_i = i
-            self.lookup.append((os.path.join(directory, last_filename), i - start_i))
+            lookup.append((os.path.join(directory, last_filename), i - start_i))
+        return lookup
 
-        self.open_files = {}
-
-        super(_ParquetDatasetReader, self).__init__(
-            row_groups, schema, columns, partition_columns
-        )
+    def _get_paths_and_counts(self, file, row_groups):
+        paths_and_counts = []
+        last_filename = None
+        for i in row_groups:
+            filename = file.metadata.row_group(i).column(0).file_path
+            if last_filename is None:
+                if filename == "":
+                    raise ValueError(
+                        "Parquet _metadata file does not contain file paths "
+                        "(e.g. was not made with 'set_file_path')"
+                        + ak._util.exception_suffix(__file__)
+                    )
+                last_filename = filename
+                paths_and_counts.append([filename, 0])
+            elif filename != "" and last_filename != filename:
+                last_filename = filename
+                paths_and_counts.append([filename, 0])
+            paths_and_counts[-1][-1] += file.metadata.row_group(i).num_rows
+        return paths_and_counts
 
     @property
     def row_group_metadata(self):
@@ -3583,12 +3620,35 @@ class _ParquetDatasetOfFilesReader(_ParquetReader):
         self,
         source,
         relative_to,
-        row_groups,
-        columns,
         include_partition_columns,
         use_threads,
-        options,
+        row_groups=None,
+        columns=None,
+        options=None,
     ):
+        schema, lookup, paths_and_counts = self._get_dataset_metadata(
+            source, relative_to, options
+        )
+        if row_groups is None:
+            row_groups = range(len(lookup))
+
+        if include_partition_columns:
+            partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
+        else:
+            partition_columns = []
+
+        if columns is None:
+            columns = schema.names
+
+        schema = _partial_schema_from_columns(schema, columns)
+
+        self.lookup = lookup
+        self.use_threads = use_threads
+        super(_ParquetDatasetOfFilesReader, self).__init__(
+            schema, row_groups, columns, partition_columns
+        )
+
+    def _get_dataset_metadata(self, source, relative_to, options):
         import pyarrow.parquet
 
         schema = None
@@ -3611,21 +3671,7 @@ class _ParquetDatasetOfFilesReader(_ParquetReader):
             paths_and_counts.append(
                 (os.path.relpath(filename, relative_to), single_file.metadata.num_rows)
             )
-        if row_groups is None:
-            row_groups = range(len(lookup))
-
-        if include_partition_columns:
-            partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
-        else:
-            partition_columns = []
-
-        schema, columns = _partial_schema_from_columns(schema, columns)
-
-        self.lookup = lookup
-        self.use_threads = use_threads
-        super(_ParquetDatasetOfFilesReader, self).__init__(
-            row_groups, schema, columns, partition_columns
-        )
+        return schema, lookup, paths_and_counts
 
     @property
     def row_group_metadata(self):
@@ -3700,42 +3746,15 @@ def _parquet_partitions_to_awkward(paths_and_counts):
 
 def _partial_schema_from_columns(schema, columns):
     pyarrow = _import_pyarrow("ak.from_parquet")
-
-    all_columns = schema.names
-
-    if columns is None:
-        columns = all_columns
-
     pa_fields = []
     for x in columns:
-        if x not in all_columns:
+        if x not in schema.names:
             raise ValueError(
                 "column {0} not found in schema".format(repr(x))
                 + ak._util.exception_suffix(__file__)
             )
         pa_fields.append(schema.field(x))
-    return pyarrow.schema(pa_fields), columns
-
-
-def _get_dataset_paths_and_counts(file, row_groups):
-    paths_and_counts = []
-    last_filename = None
-    for i in row_groups:
-        filename = file.metadata.row_group(i).column(0).file_path
-        if last_filename is None:
-            if filename == "":
-                raise ValueError(
-                    "Parquet _metadata file does not contain file paths "
-                    "(e.g. was not made with 'set_file_path')"
-                    + ak._util.exception_suffix(__file__)
-                )
-            last_filename = filename
-            paths_and_counts.append([filename, 0])
-        elif filename != "" and last_filename != filename:
-            last_filename = filename
-            paths_and_counts.append([filename, 0])
-        paths_and_counts[-1][-1] += file.metadata.row_group(i).num_rows
-    return paths_and_counts
+    return pyarrow.schema(pa_fields)
 
 
 def _create_partitioned_array_from_form(
@@ -3891,10 +3910,10 @@ def from_parquet(
             reader = _ParquetDatasetReader(
                 source,
                 metadata_filename,
-                row_groups,
-                columns,
                 use_threads,
                 include_partition_columns,
+                row_groups,
+                columns,
                 options,
             )
         else:
@@ -3906,10 +3925,10 @@ def from_parquet(
             reader = _ParquetDatasetOfFilesReader(
                 source,
                 relative_to,
-                row_groups,
-                columns,
                 use_threads,
                 include_partition_columns,
+                row_groups,
+                columns,
                 options,
             )
 
@@ -3923,15 +3942,15 @@ def from_parquet(
         reader = _ParquetDatasetOfFilesReader(
             source,
             relative_to,
-            row_groups,
-            columns,
             use_threads,
             include_partition_columns,
+            row_groups,
+            columns,
             options,
         )
 
     else:
-        reader = _ParquetFileReader(source, row_groups, columns, use_threads, options)
+        reader = _ParquetFileReader(source, use_threads, row_groups, columns, options)
 
     if reader.is_empty:
         return reader.empty_like()
