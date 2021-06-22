@@ -3593,12 +3593,12 @@ def _from_parquet_dataset(
         state = _ParquetDataset(pyarrow.parquet, source, file, use_threads, options)
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
 
-        lazy_cache = _regularize_lazy_cache(lazy_cache)
+        lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         form = _parquet_schema_to_form(schema)
 
-        return _generate_outer_lazy_array(
+        out = _generate_outer_lazy_array(
             form,
             state,
             row_groups,
@@ -3647,6 +3647,10 @@ def _from_parquet_dataset(
             field_names = [x[0] for x in partition_columns] + out.keys()
             fields = [x[1] for x in partition_columns] + out.contents
             out = ak.layout.RecordArray(fields, field_names)
+
+    if highlevel:
+        return ak._util.wrap(out, behavior)
+    else:
         return out
 
 
@@ -3715,12 +3719,12 @@ def _from_parquet_list_of_files(
         for single_file, local_row_group in sublookup:
             lengths.append(single_file.metadata.row_group(local_row_group).num_rows)
 
-        lazy_cache = _regularize_lazy_cache(lazy_cache)
+        lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         form = _parquet_schema_to_form(schema)
 
-        return _generate_outer_lazy_array(
+        out = _generate_outer_lazy_array(
             form,
             state,
             row_groups,
@@ -3750,6 +3754,10 @@ def _from_parquet_list_of_files(
             field_names = [x[0] for x in partition_columns] + out.keys()
             fields = [x[1] for x in partition_columns] + out.contents
             out = ak.layout.RecordArray(fields, field_names)
+
+    if highlevel:
+        return ak._util.wrap(out, behavior)
+    else:
         return out
 
 
@@ -3818,10 +3826,13 @@ def _generate_outer_lazy_array(
 
 
 def _regularize_lazy_cache(lazy_cache):
+    hold_cache = None
     if lazy_cache is None:
-        return lazy_cache
+        pass
     # Wrap existing ArrayCache's internal cache
-    elif not isinstance(lazy_cache, ak.layout.ArrayCache):
+    elif isinstance(lazy_cache, ak.layout.ArrayCache):
+        pass
+    else:
         if lazy_cache == "new":
             hold_cache = ak._util.MappingProxy({})
         elif lazy_cache == "attach":
@@ -3830,9 +3841,8 @@ def _regularize_lazy_cache(lazy_cache):
             hold_cache = ak._util.MappingProxy.maybe_wrap(lazy_cache)
             if not isinstance(hold_cache, MutableMapping):
                 raise TypeError("lazy_cache must be a MutableMapping")
-        return ak.layout.ArrayCache(hold_cache)
-    else:
-        return lazy_cache
+        lazy_cache = ak.layout.ArrayCache(hold_cache)
+    return lazy_cache, hold_cache
 
 
 def _regularize_parquet_lazy_cache_key(lazy_cache_key):
@@ -3871,12 +3881,12 @@ def _from_parquet_file(
     if lazy:
         state = _ParquetFile(file, use_threads)
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
-        lazy_cache = _regularize_lazy_cache(lazy_cache)
+        lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         form = _parquet_schema_to_form(schema)
 
-        return _generate_outer_lazy_array(
+        out = _generate_outer_lazy_array(
             form,
             state,
             row_groups,
@@ -3898,6 +3908,9 @@ def _from_parquet_file(
         if schema.names == [""]:
             out = out[""]
 
+    if highlevel:
+        return ak._util.wrap(out, behavior)
+    else:
         return out
 
 
@@ -3955,7 +3968,6 @@ def from_parquet(
         row_groups = [row_groups]
 
     source = _regularize_path(source)
-    layout = None
 
     if isinstance(source, str) and os.path.isdir(source):
         metadata_filename = os.path.join(source, "_metadata")
