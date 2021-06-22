@@ -28,7 +28,7 @@ sections:
     title: "Creating new arrays"
     sections:
       - file: how-to-create-lists
-        title: "Arrays of lists [todo]"
+        title: "Arrays of lists"
       - file: how-to-create-records
         title: "Arrays of records [todo]"
       - file: how-to-create-missing
