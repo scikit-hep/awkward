@@ -1163,12 +1163,11 @@ namespace awkward {
                                ascending,
                                stable,
                                true);
-
     if (out.get()->length() == 0) {
       return out.get()->getitem_nothing();
     }
     else {
-      return out.get()->getitem_at_nowrap(0);
+      return out;
     }
   }
 

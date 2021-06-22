@@ -32,7 +32,9 @@ An optional `axis` parameter defines an axis along which to sort. The default is
 
 Awkward Array axes are defined similar to Numpy axes. Unlike other operations, sorting does not support `axis=None`.
 
-[![](img/sorting-axis.svg)]
+---
+[![Sorting axis](img/sorting-axis.svg)](img/sorting-axis.svg)
+---
 
 In Akward Array, `axis=0` is the "first" axis and `axis=-1` is the last axis.
 
@@ -61,8 +63,7 @@ import awkward as ak
 array = ak.Array([[None, None, 3, 2], [1]])
 ak.sort(array)
 ```
-
-`None` values are dropped when sorting a one dimentinal option type array:
+or:
 
 ```{code-cell} ipython3
 import awkward as ak

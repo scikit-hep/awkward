@@ -3415,7 +3415,6 @@ namespace awkward {
     if (length() == 0 ) {
       return shallow_copy();
     }
-
     if (shape_.empty()) {
       throw std::runtime_error(
         std::string("attempting to sort a scalar") + FILENAME(__LINE__));
@@ -3568,15 +3567,6 @@ namespace awkward {
                                          format_,
                                          dtype_,
                                          ptr_lib_);
-
-      if (keepdims) {
-        out = std::make_shared<RegularArray>(
-          Identities::none(),
-          util::Parameters(),
-          out,
-          parents.length() / starts.length(),
-          length());
-      }
 
       return out;
     }

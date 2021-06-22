@@ -2374,7 +2374,6 @@ namespace awkward {
     if (length() == 0 ) {
       return shallow_copy();
     }
-
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
 
@@ -2441,7 +2440,6 @@ namespace awkward {
                                            parents_length,
                                            0);
     }
-
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
@@ -2471,6 +2469,10 @@ namespace awkward {
                                               parameters_,
                                               outindex,
                                               raw->content());
+
+        if (inject_nones) {
+          return tmp.simplify_optiontype();
+        }
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
@@ -2490,7 +2492,6 @@ namespace awkward {
           + FILENAME(__LINE__));
       }
     }
-
     return out;
   }
 

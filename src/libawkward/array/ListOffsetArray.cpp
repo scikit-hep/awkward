@@ -1748,15 +1748,7 @@ namespace awkward {
 
       ContentPtr out = carry(tocarry, false);
 
-      if (keepdims) {
-        return std::make_shared<RegularArray>(Identities::none(),
-                                              util::Parameters(),
-                                              out,
-                                              out.get()->length());
-      }
-      else {
-        return out;
-      }
+      return out;
     }
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -1839,13 +1831,6 @@ namespace awkward {
                                                            parameters_,
                                                            offsets_,
                                                            outcontent);
-      if (keepdims) {
-        out = std::make_shared<RegularArray>(Identities::none(),
-                                             util::Parameters(),
-                                             out,
-                                             out.get()->length(),
-                                             length());
-      }
       return out;
     }
     else {
@@ -1878,13 +1863,6 @@ namespace awkward {
                                                            parameters_,
                                                            offsets_,
                                                            outcontent);
-      if (keepdims) {
-        out = std::make_shared<RegularArray>(Identities::none(),
-                                             util::Parameters(),
-                                             out,
-                                             out.get()->length(),
-                                             length());
-      }
       return out;
     }
   }
