@@ -3543,7 +3543,8 @@ class _ParquetDatasetReader(_ParquetReader):
             schema, row_groups, columns, partition_columns
         )
 
-    def _build_row_group_lookup(self, directory, metadata_file):
+    @staticmethod
+    def _build_row_group_lookup(directory, metadata_file):
         last_filename = None
         lookup = []
         for i in range(metadata_file.num_row_groups):
@@ -3563,7 +3564,8 @@ class _ParquetDatasetReader(_ParquetReader):
             lookup.append((os.path.join(directory, last_filename), i - start_i))
         return lookup
 
-    def _get_paths_and_counts(self, file, row_groups):
+    @staticmethod
+    def _get_paths_and_counts(file, row_groups):
         paths_and_counts = []
         last_filename = None
         for i in row_groups:
@@ -3648,7 +3650,8 @@ class _ParquetDatasetOfFilesReader(_ParquetReader):
             schema, row_groups, columns, partition_columns
         )
 
-    def _get_dataset_metadata(self, source, relative_to, options):
+    @staticmethod
+    def _get_dataset_metadata(source, relative_to, options):
         import pyarrow.parquet
 
         schema = None
