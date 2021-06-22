@@ -3403,8 +3403,7 @@ class _ParquetFileReader(object):
 
 
 class _ParquetDatasetReader(object):
-    def __init__(self, pq, directory, metadata_file, use_threads, options):
-        self.pq = pq
+    def __init__(self, directory, metadata_file, use_threads, options):
         self.use_threads = use_threads
         self.options = options
 
@@ -3429,9 +3428,13 @@ class _ParquetDatasetReader(object):
         self.open_files = {}
 
     def read(self, row_group, column_name):
+        import pyarrow.parquet
+
         filename, local_row_group = self.lookup[row_group]
         if filename not in self.open_files:
-            self.open_files[filename] = self.pq.ParquetFile(filename, **self.options)
+            self.open_files[filename] = pyarrow.parquet.ParquetFile(
+                filename, **self.options
+            )
         return self.open_files[filename].read_row_group(
             local_row_group, [column_name], use_threads=self.use_threads
         )
@@ -3612,7 +3615,7 @@ def _from_parquet_dataset(
 
     if lazy:
         state = _ParquetGenerator(
-            _ParquetDatasetReader(pyarrow.parquet, source, file, use_threads, options)
+            _ParquetDatasetReader(source, file, use_threads, options)
         )
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
 
