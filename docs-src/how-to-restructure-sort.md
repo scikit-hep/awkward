@@ -85,3 +85,25 @@ Stable sort
 -----------
 
 By default, the order of equivalent elements is guaranteed to be preserved. To switch to a quick sort, set a parameter `stable=False`.
+
+Sorting records
+---------------
+
+When sorting records, sorting applies to numbers, the records themselves are not sorted.
+
+```{code-cell} ipython3
+array = ak.Array(
+      [
+          {"x": 0.0, "y": []},
+          {"x": 11.11, "y": [1]},
+          {"x": 2.2, "y": [0, 2]},
+          {"x": 33.33, "y": [3, -1, 10]},
+          {"x": 4.4, "y": [-2, 0, 4, 14]},
+          {"x": 5.5, "y": [25, 15, 5]},
+          {"x": 6.6, "y": [26, 6]},
+          {"x": 77.77, "y": [77]},
+          {"x": 8.8, "y": []},
+      ]
+  )
+ak.sort(array)
+```
