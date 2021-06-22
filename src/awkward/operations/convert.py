@@ -3432,34 +3432,23 @@ class _ParquetGenerator(object):
         return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
 
 
-class _ParquetReader(object):
-    def get_batches(self, row_groups, columns):
-        raise NotImplementedError
-
-    def get_row_group_metadata(self, row_groups):
-        raise NotImplementedError
-
-    def read(self, row_group, column_name):
-        raise NotImplementedError
-
-
 class _ParquetConverter(object):
     def __init__(self, reader):
         self._reader = reader
 
     def convert_lazy(
-        self, schema, partition_columns, row_groups, columns, lazy_cache, lazy_cache_key
+        self, schema, partition_columns, columns, lazy_cache, lazy_cache_key
     ):
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
-        lengths = [r.num_rows for r in self._reader.get_row_group_metadata(row_groups)]
+        lengths = [r.num_rows for r in self._reader.row_group_metadata]
         state = _ParquetGenerator(self._reader)
 
         form = _parquet_schema_to_form(schema)
         return _create_partitioned_array_from_form(
             form,
             state,
-            row_groups,
+            self._reader.row_groups,
             lengths,
             columns,
             schema.names,
@@ -3468,25 +3457,47 @@ class _ParquetConverter(object):
             lazy_cache_key,
         )
 
-    def convert(self, row_groups, columns):
-        batches = self._reader.get_batches(row_groups, columns)
+    def convert(self, columns):
+        batches = self._reader.get_batches(columns)
         out = _from_arrow(batches, False, highlevel=False)
         assert isinstance(out, ak.layout.RecordArray) and not out.istuple
         return out
 
 
+class _ParquetReader(object):
+    def __init__(self, row_groups):
+        self.row_groups = row_groups
+
+    @property
+    def is_empty(self):
+        return len(self.row_groups) == 0
+
+    def get_batches(self, columns):
+        raise NotImplementedError
+
+    @property
+    def row_group_metadata(self):
+        raise NotImplementedError
+
+    def read(self, row_group, column_name):
+        raise NotImplementedError
+
+
 class _ParquetFileReader(_ParquetReader):
-    def __init__(self, file, use_threads):
+    def __init__(self, file, row_groups, use_threads):
+        super(_ParquetFileReader, self).__init__(row_groups)
+
         self.file = file
         self.use_threads = use_threads
 
-    def get_batches(self, row_groups, columns):
+    def get_batches(self, columns):
         return self.file.read_row_groups(
-            row_groups, columns=columns, use_threads=self.use_threads
+            self.row_groups, columns=columns, use_threads=self.use_threads
         )
 
-    def get_row_group_metadata(self, row_groups):
-        return [self.file.metadata.row_group(i) for i in row_groups]
+    @property
+    def row_group_metadata(self):
+        return [self.file.metadata.row_group(i) for i in self.row_groups]
 
     def read(self, row_group, column_name):
         return self.file.read_row_group(
@@ -3495,10 +3506,12 @@ class _ParquetFileReader(_ParquetReader):
 
 
 class _ParquetDatasetReader(_ParquetReader):
-    def __init__(self, directory, metadata_file, use_threads, options):
+    def __init__(self, directory, metadata_file, row_groups, use_threads, options):
+        super(_ParquetDatasetReader, self).__init__(row_groups)
         self.use_threads = use_threads
         self.options = options
         self.metadata_file = metadata_file
+        self.row_groups = row_groups
 
         self.lookup = []
         last_filename = None
@@ -3520,11 +3533,11 @@ class _ParquetDatasetReader(_ParquetReader):
 
         self.open_files = {}
 
-    def get_batches(self, row_groups, columns):
+    def get_batches(self, columns):
         import pyarrow.parquet
 
         batches = []
-        for i in row_groups:
+        for i in self.row_groups:
             file_path, local_row_group = self.lookup[i]
             local_file = pyarrow.parquet.ParquetFile(file_path, **self.options)
 
@@ -3535,8 +3548,9 @@ class _ParquetDatasetReader(_ParquetReader):
             )
         return batches
 
-    def get_row_group_metadata(self, row_groups):
-        return [self.metadata_file.metadata.row_group(i) for i in row_groups]
+    @property
+    def row_group_metadata(self):
+        return [self.metadata_file.metadata.row_group(i) for i in self.row_groups]
 
     def read(self, row_group, column_name):
         import pyarrow.parquet
@@ -3552,13 +3566,14 @@ class _ParquetDatasetReader(_ParquetReader):
 
 
 class _ParquetDatasetOfFilesReader(_ParquetReader):
-    def __init__(self, lookup, use_threads):
+    def __init__(self, lookup, row_groups, use_threads):
+        super(_ParquetDatasetOfFilesReader, self).__init__(row_groups)
         self.lookup = lookup
         self.use_threads = use_threads
 
-    def get_batches(self, row_groups, columns):
+    def get_batches(self, columns):
         batches = []
-        for i in row_groups:
+        for i in self.row_groups:
             single_file, local_row_group = self.lookup[i]
 
             batches.extend(
@@ -3568,9 +3583,11 @@ class _ParquetDatasetOfFilesReader(_ParquetReader):
             )
         return batches
 
-    def get_row_group_metadata(self, row_groups):
+    @property
+    def row_group_metadata(self):
         return [
-            f.metadata.row_group(g) for f, g in (self.lookup[g] for g in row_groups)
+            f.metadata.row_group(g)
+            for f, g in (self.lookup[g] for g in self.row_groups)
         ]
 
     def read(self, row_group, column_name):
@@ -3693,24 +3710,24 @@ def _from_parquet_dataset(
     else:
         partition_columns = []
 
-    if len(row_groups) == 0:
-        return ak.layout.RecordArray(
-            [ak.layout.EmptyArray() for x in columns], columns, 0
-        )
-
     schema, columns = _partial_schema_from_columns(schema, columns)
-    reader = _ParquetDatasetReader(source, file, use_threads, options)
+    reader = _ParquetDatasetReader(source, file, row_groups, use_threads, options)
+
+    if reader.is_empty:
+        return ak.layout.RecordArray(
+            [ak.layout.EmptyArray() for _ in columns], columns, 0
+        )
 
     converter = _ParquetConverter(reader)
     if lazy:
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
         out = converter.convert_lazy(
-            schema, partition_columns, row_groups, columns, lazy_cache, lazy_cache_key
+            schema, partition_columns, columns, lazy_cache, lazy_cache_key
         )
 
     else:
-        out = converter.convert(row_groups, columns)
+        out = converter.convert(columns)
 
         if partition_columns == [] and schema.names == [""]:
             out = out[""]
@@ -3766,29 +3783,29 @@ def _from_parquet_list_of_files(
     if row_groups is None:
         row_groups = range(len(lookup))
 
-    if len(row_groups) == 0:
-        return ak.layout.RecordArray(
-            [ak.layout.EmptyArray() for x in columns], columns, 0
-        )
-
     if include_partition_columns:
         partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
     else:
         partition_columns = []
 
     schema, columns = _partial_schema_from_columns(schema, columns)
-    reader = _ParquetDatasetOfFilesReader(lookup, use_threads)
+    reader = _ParquetDatasetOfFilesReader(lookup, row_groups, use_threads)
+
+    if reader.is_empty:
+        return ak.layout.RecordArray(
+            [ak.layout.EmptyArray() for _ in columns], columns, 0
+        )
 
     converter = _ParquetConverter(reader)
     if lazy:
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
         out = converter.convert_lazy(
-            schema, partition_columns, row_groups, columns, lazy_cache, lazy_cache_key
+            schema, partition_columns, columns, lazy_cache, lazy_cache_key
         )
 
     else:
-        out = converter.convert(row_groups, columns)
+        out = converter.convert(columns)
 
         if partition_columns != []:
             field_names, fields = zip(*partition_columns)
@@ -3910,24 +3927,22 @@ def _from_parquet_file(
     if row_groups is None:
         row_groups = range(file.num_row_groups)
 
-    if len(row_groups) == 0:
+    schema, columns = _partial_schema_from_columns(file.schema_arrow, columns)
+    reader = _ParquetFileReader(file, row_groups, use_threads)
+
+    if reader.is_empty:
         return ak.layout.RecordArray(
             [ak.layout.EmptyArray() for _ in columns], columns, 0
         )
-
-    schema, columns = _partial_schema_from_columns(file.schema_arrow, columns)
-    reader = _ParquetFileReader(file, use_threads)
 
     converter = _ParquetConverter(reader)
     if lazy:
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
-        out = converter.convert_lazy(
-            schema, [], row_groups, columns, lazy_cache, lazy_cache_key
-        )
+        out = converter.convert_lazy(schema, [], columns, lazy_cache, lazy_cache_key)
 
     else:
-        out = converter.convert(row_groups, columns)
+        out = converter.convert(columns)
 
         if schema.names == [""]:
             out = out[""]
