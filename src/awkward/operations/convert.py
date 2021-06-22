@@ -3463,7 +3463,7 @@ class _ArrowReader(object):
 
 class _ParquetFileReader(_ArrowReader):
     def __init__(
-        self, source, use_threads, row_groups=None, columns=None, options=None
+        self, source, row_groups=None, columns=None, use_threads=True, options=None
     ):
         import pyarrow.parquet
 
@@ -3503,10 +3503,10 @@ class _ParquetDatasetReader(_ArrowReader):
         self,
         directory,
         metadata_filename,
-        use_threads,
-        include_partition_columns,
         row_groups=None,
         columns=None,
+        use_threads=True,
+        include_partition_columns=True,
         options=None,
     ):
         import pyarrow.parquet
@@ -3605,10 +3605,10 @@ class _ParquetDatasetOfFilesReader(_ArrowReader):
         self,
         source,
         relative_to,
-        include_partition_columns,
-        use_threads,
         row_groups=None,
         columns=None,
+        use_threads=True,
+        include_partition_columns=True,
         options=None,
     ):
         schema, lookup, paths_and_counts = self._get_dataset_metadata(
@@ -3887,10 +3887,10 @@ def from_parquet(
             reader = _ParquetDatasetReader(
                 source,
                 metadata_filename,
-                use_threads,
-                include_partition_columns,
                 row_groups,
                 columns,
+                use_threads,
+                include_partition_columns,
                 options,
             )
         else:
@@ -3902,10 +3902,10 @@ def from_parquet(
             reader = _ParquetDatasetOfFilesReader(
                 source,
                 relative_to,
-                use_threads,
-                include_partition_columns,
                 row_groups,
                 columns,
+                use_threads,
+                include_partition_columns,
                 options,
             )
 
@@ -3919,15 +3919,15 @@ def from_parquet(
         reader = _ParquetDatasetOfFilesReader(
             source,
             relative_to,
-            use_threads,
-            include_partition_columns,
             row_groups,
             columns,
+            use_threads,
+            include_partition_columns,
             options,
         )
 
     else:
-        reader = _ParquetFileReader(source, use_threads, row_groups, columns, options)
+        reader = _ParquetFileReader(source, row_groups, columns, use_threads, options)
 
     if reader.is_empty:
         return ak.layout.RecordArray(
