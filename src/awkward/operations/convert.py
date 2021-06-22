@@ -3539,6 +3539,27 @@ def _partial_schema_from_columns(schema, columns):
     return pyarrow.schema(pa_fields), columns
 
 
+def _get_dataset_paths_and_counts(file, row_groups):
+    paths_and_counts = []
+    last_filename = None
+    for i in row_groups:
+        filename = file.metadata.row_group(i).column(0).file_path
+        if last_filename is None:
+            if filename == "":
+                raise ValueError(
+                    "Parquet _metadata file does not contain file paths "
+                    "(e.g. was not made with 'set_file_path')"
+                    + ak._util.exception_suffix(__file__)
+                )
+            last_filename = filename
+            paths_and_counts.append([filename, 0])
+        elif filename != "" and last_filename != filename:
+            last_filename = filename
+            paths_and_counts.append([filename, 0])
+        paths_and_counts[-1][-1] += file.metadata.row_group(i).num_rows
+    return paths_and_counts
+
+
 def _from_parquet_dataset(
     source,
     metadata_filename,
@@ -3560,24 +3581,9 @@ def _from_parquet_dataset(
     schema = file.schema_arrow
     if row_groups is None:
         row_groups = range(file.num_row_groups)
-    paths_and_counts = []
-    last_filename = None
-    for i in row_groups:
-        filename = file.metadata.row_group(i).column(0).file_path
-        if last_filename is None:
-            if filename == "":
-                raise ValueError(
-                    "Parquet _metadata file does not contain file paths "
-                    "(e.g. was not made with 'set_file_path')"
-                    + ak._util.exception_suffix(__file__)
-                )
-            last_filename = filename
-            paths_and_counts.append([filename, 0])
-        elif filename != "" and last_filename != filename:
-            last_filename = filename
-            paths_and_counts.append([filename, 0])
-        paths_and_counts[-1][-1] += file.metadata.row_group(i).num_rows
+
     if include_partition_columns:
+        paths_and_counts = _get_dataset_paths_and_counts(file, row_groups)
         partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
     else:
         partition_columns = []
