@@ -3264,11 +3264,7 @@ def _parquet_schema_to_form(schema):
     return ak.forms.RecordForm(contents, schema.names)
 
 
-class _ParquetFile(object):
-    def __init__(self, file, use_threads):
-        self.file = file
-        self.use_threads = use_threads
-
+class _ParquetGenerator(object):
     def __call__(self, row_group, unpack, length, form, lazy_cache, lazy_cache_key):
         if form.form_key is None:
             if isinstance(form, ak.forms.RecordForm):
@@ -3382,6 +3378,15 @@ class _ParquetFile(object):
         return _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack)
 
     def read(self, row_group, column_name):
+        raise NotImplementedError
+
+
+class _ParquetFileGenerator(_ParquetGenerator):
+    def __init__(self, file, use_threads):
+        self.file = file
+        self.use_threads = use_threads
+
+    def read(self, row_group, column_name):
         return self.file.read_row_group(
             row_group, [column_name], use_threads=self.use_threads
         )
@@ -3403,8 +3408,8 @@ def _parquet_partition_values(path):
 def _parquet_partitions_to_awkward(paths_and_counts):
     path, count = paths_and_counts[0]
     columns = [column for column, value in _parquet_partition_values(path)]
-    values = [[] for _ in columns]
-    indexes = [[] for _ in columns]
+    values = [[]] * len(columns)
+    indexes = [[]] * len(columns)
     for path, count in paths_and_counts:
         for i, (column, value) in enumerate(_parquet_partition_values(path)):
             if i >= len(columns) or column != columns[i]:
@@ -3432,7 +3437,7 @@ def _parquet_partitions_to_awkward(paths_and_counts):
     return indexedarrays
 
 
-class _ParquetDataset(_ParquetFile):
+class _ParquetDatasetGenerator(_ParquetGenerator):
     def __init__(self, pq, directory, metadata_file, use_threads, options):
         self.pq = pq
         self.use_threads = use_threads
@@ -3467,7 +3472,7 @@ class _ParquetDataset(_ParquetFile):
         )
 
 
-class _ParquetDatasetOfFiles(_ParquetFile):
+class _ParquetDatasetOfFilesGenerator(_ParquetGenerator):
     def __init__(self, lookup, use_threads):
         self.lookup = lookup
         self.use_threads = use_threads
@@ -3596,7 +3601,9 @@ def _from_parquet_dataset(
     schema, columns = _partial_schema_from_columns(schema, columns)
 
     if lazy:
-        state = _ParquetDataset(pyarrow.parquet, source, file, use_threads, options)
+        state = _ParquetDatasetGenerator(
+            pyarrow.parquet, source, file, use_threads, options
+        )
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
 
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
@@ -3650,9 +3657,8 @@ def _from_parquet_dataset(
             out = out[""]
 
         if partition_columns != []:
-            field_names = [x[0] for x in partition_columns] + out.keys()
-            fields = [x[1] for x in partition_columns] + out.contents
-            out = ak.layout.RecordArray(fields, field_names)
+            field_names, fields = zip(*partition_columns)
+            out = ak.layout.RecordArray(fields + out.contents, field_names + out.keys())
 
     return ak._util.maybe_wrap(out, behavior, highlevel)
 
@@ -3677,6 +3683,7 @@ def _from_parquet_list_of_files(
     source = [_regularize_path(x) for x in source]
     if relative_to is None:
         relative_to = os.path.commonpath(source)
+
     schema = None
     lookup = []
     paths_and_counts = []
@@ -3703,25 +3710,24 @@ def _from_parquet_list_of_files(
     else:
         sublookup = [lookup[g] for g in row_groups]
 
-    if include_partition_columns:
-        partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
-    else:
-        partition_columns = []
-
     if len(row_groups) == 0:
         return ak.layout.RecordArray(
             [ak.layout.EmptyArray() for x in columns], columns, 0
         )
 
+    if include_partition_columns:
+        partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
+    else:
+        partition_columns = []
+
     schema, columns = _partial_schema_from_columns(schema, columns)
 
     if lazy:
-        state = _ParquetDatasetOfFiles(lookup, use_threads)
-        lengths = [f.metadata.row_group(g).num_rows for f, g in sublookup]
-
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
+        state = _ParquetDatasetOfFilesGenerator(lookup, use_threads)
+        lengths = [f.metadata.row_group(g).num_rows for f, g in sublookup]
         form = _parquet_schema_to_form(schema)
         out = _generate_outer_lazy_array(
             form,
@@ -3874,13 +3880,12 @@ def _from_parquet_file(
     schema, columns = _partial_schema_from_columns(file.schema_arrow, columns)
 
     if lazy:
-        state = _ParquetFile(file, use_threads)
-        lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
+        state = _ParquetFileGenerator(file, use_threads)
+        lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
         form = _parquet_schema_to_form(schema)
-
         out = _generate_outer_lazy_array(
             form,
             state,
