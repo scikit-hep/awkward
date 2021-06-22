@@ -14,10 +14,42 @@ kernelspec:
 How to create arrays of records
 ===============================
 
-**This is a stub:** I intend to write this article, but haven't yet.
+In Awkward Array, a "record" is a structure containing a fixed-length set of typed, possibly named fields. This is a "struct" in C or an "object" in Python (though the association of executable methods to record types is looser than the binding of methods to classes in object oriented languages).
 
-If you need it soon, create an issue saying so and I'll make it a higher priority.
+All methods in Awkward Array are implemented as "[structs of arrays](https://en.wikipedia.org/wiki/AoS_and_SoA)," rather than arrays of structs, so making and breaking records are inexpensive operations that you can perform frequently in data analysis.
 
-[![](img/github-issues-documentation.png)](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=docs&template=documentation.md&title=)
+```{code-cell} ipython3
+import awkward as ak
+import numpy as np
+```
 
-The text of your issue doesn't have to be much more than a link to this page, so I can be sure which page you're referring to. If you add details about how and why you need it, however, I may be able to tailor the text to help you more.
+From a list of Python dicts
+---------------------------
+
+Records have a natural representation in JSON and Python as dicts, but only if all dicts in a series have the same set of field names. The [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) invokes [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) whenever presented with a list (or other non-string, non-dict iterable).
+
+```{code-cell} ipython3
+python_dicts = [
+    {"x": 1, "y": 1.1, "z": "one"},
+    {"x": 2, "y": 2.2, "z": "two"},
+    {"x": 3, "y": 3.3, "z": "three"},
+    {"x": 4, "y": 4.4, "z": "four"},
+    {"x": 5, "y": 5.5, "z": "five"},
+]
+python_dicts
+```
+
+```{code-cell} ipython3
+awkward_array = ak.Array(python_dicts)
+awkward_array
+```
+
+It is important that all of the dicts in the series have the same set of field names, since Awkward Array has to identify all of the records as having a single type:
+
+```{code-cell} ipython3
+awkward_array.type
+```
+
+```{code-cell} ipython3
+
+```
