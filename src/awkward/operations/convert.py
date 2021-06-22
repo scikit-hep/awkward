@@ -3594,9 +3594,7 @@ def _from_parquet_dataset(
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
 
         lazy_cache = _regularize_lazy_cache(lazy_cache)
-
-        if lazy_cache_key is None:
-            lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
+        lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         form = _parquet_schema_to_form(schema)
 
@@ -3718,9 +3716,7 @@ def _from_parquet_list_of_files(
             lengths.append(single_file.metadata.row_group(local_row_group).num_rows)
 
         lazy_cache = _regularize_lazy_cache(lazy_cache)
-
-        if lazy_cache_key is None:
-            lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
+        lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         form = _parquet_schema_to_form(schema)
 
@@ -3839,6 +3835,12 @@ def _regularize_lazy_cache(lazy_cache):
         return lazy_cache
 
 
+def _regularize_parquet_lazy_cache_key(lazy_cache_key):
+    if lazy_cache_key is None:
+        lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
+    return lazy_cache_key
+
+
 def _from_parquet_file(
     source,
     columns,
@@ -3870,9 +3872,7 @@ def _from_parquet_file(
         state = _ParquetFile(file, use_threads)
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
         lazy_cache = _regularize_lazy_cache(lazy_cache)
-
-        if lazy_cache_key is None:
-            lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
+        lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         form = _parquet_schema_to_form(schema)
 
