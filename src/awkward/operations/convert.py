@@ -3856,22 +3856,19 @@ def _from_parquet_file(
     import pyarrow.parquet
 
     file = pyarrow.parquet.ParquetFile(source, **options)
-    schema = file.schema_arrow
-    partition_columns = []
     if row_groups is None:
         row_groups = range(file.num_row_groups)
 
     if len(row_groups) == 0:
         return ak.layout.RecordArray(
-            [ak.layout.EmptyArray() for x in columns], columns, 0
+            [ak.layout.EmptyArray() for _ in columns], columns, 0
         )
 
-    schema, columns = _partial_schema_from_columns(schema, columns)
+    schema, columns = _partial_schema_from_columns(file.schema_arrow, columns)
 
     if lazy:
         state = _ParquetFile(file, use_threads)
         lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
-
         lazy_cache = _regularize_lazy_cache(lazy_cache)
 
         if lazy_cache_key is None:
@@ -3886,7 +3883,7 @@ def _from_parquet_file(
             lengths,
             columns,
             schema.names,
-            partition_columns,
+            [],
             lazy_cache,
             lazy_cache_key,
         )
@@ -3898,13 +3895,9 @@ def _from_parquet_file(
         out = _from_arrow(batches, False, highlevel=False)
         assert isinstance(out, ak.layout.RecordArray) and not out.istuple
 
-        if partition_columns == [] and schema.names == [""]:
+        if schema.names == [""]:
             out = out[""]
 
-        if partition_columns != []:
-            field_names = [x[0] for x in partition_columns] + out.keys()
-            fields = [x[1] for x in partition_columns] + out.contents
-            out = ak.layout.RecordArray(fields, field_names)
         return out
 
 
