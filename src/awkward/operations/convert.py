@@ -3698,9 +3698,8 @@ def _from_parquet_list_of_files(
         row_groups = range(len(lookup))
         sublookup = lookup
     else:
-        sublookup = []
-        for row_group in row_groups:
-            sublookup.append(lookup[row_group])
+        sublookup = [lookup[g] for g in row_groups]
+
     if include_partition_columns:
         partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
     else:
