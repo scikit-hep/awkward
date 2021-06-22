@@ -3498,51 +3498,6 @@ class _ParquetFileReader(_ArrowReader):
         )
 
 
-class _ArrowDatasetReader(_ArrowReader):
-    def __init__(
-        self,
-        source,
-        use_threads=True,
-        include_partition_columns=True,
-        row_groups=None,
-        columns=None,
-        options=None,
-    ):
-        import pyarrow.dataset
-
-        if options is None:
-            options = {}
-        self._dataset = pyarrow.dataset.dataset(source, **options)
-
-        self._fragments = [
-            g for f in self._dataset.get_fragments() for g in f.split_by_row_group()
-        ]
-        if row_groups is None:
-            row_groups = range(len(self._fragments))
-
-        schema = self._dataset.schema
-        if columns is None:
-            columns = schema.names
-        schema = _partial_schema_from_columns(schema, columns)
-
-        self._use_threads = use_threads
-
-        super(_ArrowDatasetReader, self).__init__(
-            schema, row_groups, columns, partition_columns=[]  # TODO
-        )
-
-    @property
-    def row_group_metadata(self):
-        return [g for i in self.row_groups for g in self._fragments[i].row_groups]
-
-    def read_row_group(self, row_group, columns=None):
-        if columns is None:
-            columns = self.columns
-
-        fragment = self._fragments[row_group]
-        return fragment.to_table(use_threads=self._use_threads, columns=columns)
-
-
 class _ParquetDatasetReader(_ArrowReader):
     def __init__(
         self,
