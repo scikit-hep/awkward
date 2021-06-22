@@ -3431,10 +3431,10 @@ class _ParquetGenerator(object):
 
 
 class _ParquetReader(object):
-    def get_row_group_metadata(self):
+    def get_row_group_metadata(self, row_groups):
         raise NotImplementedError
 
-    def read(self):
+    def read(self, row_group, column_name):
         raise NotImplementedError
 
 
