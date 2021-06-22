@@ -13,10 +13,10 @@ import glob
 import re
 
 try:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Sequence
     from collections.abc import MutableMapping
 except ImportError:
-    from collections import Iterable
+    from collections import Iterable, Sequence
     from collections import MutableMapping
 
 import awkward as ak
@@ -2904,7 +2904,7 @@ def _from_arrow(
                 return ak.operations.structure.concatenate(arrays, highlevel=False)
 
         elif (
-            isinstance(obj, Iterable)
+            isinstance(obj, Sequence)
             and len(obj) > 0
             and all(isinstance(x, pyarrow.lib.RecordBatch) for x in obj)
             and any(len(x) > 0 for x in obj)
@@ -3715,15 +3715,12 @@ def _from_parquet_list_of_files(
 
     if lazy:
         state = _ParquetDatasetOfFiles(lookup, use_threads)
-        lengths = []
-        for single_file, local_row_group in sublookup:
-            lengths.append(single_file.metadata.row_group(local_row_group).num_rows)
+        lengths = [f.metadata.row_group(g).num_rows for f, g in sublookup]
 
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         form = _parquet_schema_to_form(schema)
-
         out = _generate_outer_lazy_array(
             form,
             state,
