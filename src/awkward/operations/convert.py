@@ -3433,7 +3433,7 @@ class _ParquetGenerator(object):
         return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
 
 
-class _ArrowReader(object):
+class _Dataset(object):
     def __init__(self, schema, row_groups, columns, partition_columns):
         self.schema = schema
         self.row_groups = row_groups
@@ -3462,7 +3462,7 @@ class _ArrowReader(object):
         return batches
 
 
-class _ParquetFileReader(_ArrowReader):
+class _ParquetFileDataset(_Dataset):
     def __init__(
         self, source, row_groups=None, columns=None, use_threads=True, options=None
     ):
@@ -3482,7 +3482,7 @@ class _ParquetFileReader(_ArrowReader):
 
         self._use_threads = use_threads
 
-        super(_ParquetFileReader, self).__init__(
+        super(_ParquetFileDataset, self).__init__(
             schema, row_groups, columns, partition_columns=[]
         )
 
@@ -3499,7 +3499,7 @@ class _ParquetFileReader(_ArrowReader):
         )
 
 
-class _ParquetDatasetReader(_ArrowReader):
+class _ParquetDataset(_Dataset):
     def __init__(
         self,
         directory,
@@ -3537,7 +3537,7 @@ class _ParquetDatasetReader(_ArrowReader):
         self._lookup = self._build_row_group_lookup(directory, self._metadata_file)
         self._options = options
 
-        super(_ParquetDatasetReader, self).__init__(
+        super(_ParquetDataset, self).__init__(
             schema, row_groups, columns, partition_columns
         )
 
@@ -3601,7 +3601,7 @@ class _ParquetDatasetReader(_ArrowReader):
         )
 
 
-class _ParquetDatasetOfFilesReader(_ArrowReader):
+class _ParquetMultiFileDataset(_Dataset):
     def __init__(
         self,
         source,
@@ -3629,7 +3629,7 @@ class _ParquetDatasetOfFilesReader(_ArrowReader):
 
         self._lookup = lookup
         self._use_threads = use_threads
-        super(_ParquetDatasetOfFilesReader, self).__init__(
+        super(_ParquetMultiFileDataset, self).__init__(
             schema, row_groups, columns, partition_columns
         )
 
@@ -3885,7 +3885,7 @@ def from_parquet(
     if isinstance(source, str) and os.path.isdir(source):
         metadata_filename = os.path.join(source, "_metadata")
         if os.path.exists(metadata_filename):
-            reader = _ParquetDatasetReader(
+            reader = _ParquetDataset(
                 source,
                 metadata_filename,
                 row_groups,
@@ -3900,7 +3900,7 @@ def from_parquet(
                 _regularize_path(x)
                 for x in sorted(glob.glob(source + "/**/*.parquet", recursive=True))
             ]
-            reader = _ParquetDatasetOfFilesReader(
+            reader = _ParquetMultiFileDataset(
                 source,
                 relative_to,
                 row_groups,
@@ -3917,7 +3917,7 @@ def from_parquet(
     ):
         source = [_regularize_path(x) for x in source]
         relative_to = os.path.commonpath(source)
-        reader = _ParquetDatasetOfFilesReader(
+        reader = _ParquetMultiFileDataset(
             source,
             relative_to,
             row_groups,
@@ -3928,7 +3928,7 @@ def from_parquet(
         )
 
     else:
-        reader = _ParquetFileReader(source, row_groups, columns, use_threads, options)
+        reader = _ParquetFileDataset(source, row_groups, columns, use_threads, options)
 
     if reader.is_empty:
         return ak.layout.RecordArray(
