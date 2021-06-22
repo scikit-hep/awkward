@@ -1109,14 +1109,13 @@ namespace awkward {
                                   parents,
                                   1,
                                   ascending,
-                                  stable,
-                                  true);
+                                  stable);
 
      if (out.get()->length() == 0) {
        return out.get()->getitem_nothing();
      }
      else {
-       return out.get()->getitem_at_nowrap(0);
+       return out;
      }
   }
 

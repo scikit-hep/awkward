@@ -1090,8 +1090,7 @@ namespace awkward {
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,
-                   bool stable,
-                   bool keepdims) const override {
+                   bool stable) const override {
       std::shared_ptr<int64_t> ptr =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
                                   length_*sizeof(int64_t));

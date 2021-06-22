@@ -528,16 +528,14 @@ namespace awkward {
                        const Index64& parents,
                        int64_t outlength,
                        bool ascending,
-                       bool stable,
-                       bool keepdims) const {
+                       bool stable) const {
     ContentPtr next = array_.get()->getitem_at_nowrap(at_);
     return next.get()->argsort_next(negaxis,
                                     starts,
                                     parents,
                                     outlength,
                                     ascending,
-                                    stable,
-                                    keepdims);
+                                    stable);
   }
 
   const ContentPtr

@@ -127,6 +127,7 @@ def test_IndexedOffsetArray():
 
     array2 = ak.Array([None, None, 1, -1, 30]).layout
     assert ak.to_list(array2.sort(0, True, False)) == [-1, 1, 30, None, None]
+    assert ak.to_list(array2.argsort(0, True, False)) == [1, 0, 2, None, None]
 
     array3 = ak.Array(
         [[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]]
@@ -401,7 +402,13 @@ def test_ByteMaskedArray():
     )
     mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
     array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-    assert ak.to_list(array.argsort(0, True, False)) == [[0, 0, 0], [], [1, 1, 1, 0]]
+    assert ak.to_list(array.argsort(0, True, False)) == [
+        [0, 0, 0],
+        [],
+        [1, 1, 1, 0],
+        None,
+        None,
+    ]
 
     assert ak.to_list(array.sort(0, True, False)) == [
         [0.0, 1.1, 2.2],

@@ -619,8 +619,7 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength,
                            bool ascending,
-                           bool stable,
-                           bool keepdims) const {
+                           bool stable) const {
     ContentPtr asnumpy = toNumpyArray(util::dtype_to_format(util::dtype::int64),
                                       8,
                                       util::dtype::int64);
@@ -629,8 +628,7 @@ namespace awkward {
                                                  parents,
                                                  outlength,
                                                  ascending,
-                                                 stable,
-                                                 keepdims);
+                                                 stable);
     return out;
   }
 

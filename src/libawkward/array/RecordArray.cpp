@@ -1641,8 +1641,7 @@ namespace awkward {
                             const Index64& parents,
                             int64_t outlength,
                             bool ascending,
-                            bool stable,
-                            bool keepdims) const {
+                            bool stable) const {
     if (length() == 0) {
       return std::make_shared<NumpyArray>(Index64(0));
     }
@@ -1654,8 +1653,13 @@ namespace awkward {
                                                     parents,
                                                     outlength,
                                                     ascending,
-                                                    stable,
-                                                    keepdims);
+                                                    stable);
+      next = std::make_shared<RegularArray>(
+        Identities::none(),
+        util::Parameters(),
+        next,
+        next.get()->length(),
+        next.get()->length());
       contents.push_back(next);
     }
     return std::make_shared<RecordArray>(
@@ -1663,7 +1667,7 @@ namespace awkward {
       util::Parameters(),
       contents,
       recordlookup_,
-      outlength);
+      outlength).get()->getitem_at_nowrap(0);
   }
 
   const ContentPtr

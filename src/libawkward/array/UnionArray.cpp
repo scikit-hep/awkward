@@ -2123,8 +2123,7 @@ namespace awkward {
                                    const Index64& parents,
                                    int64_t outlength,
                                    bool ascending,
-                                   bool stable,
-                                   bool keepdims) const {
+                                   bool stable) const {
     if (length() == 0) {
       return std::make_shared<NumpyArray>(Index64(0));
     }
@@ -2140,8 +2139,7 @@ namespace awkward {
                                           parents,
                                           outlength,
                                           ascending,
-                                          stable,
-                                          keepdims);
+                                          stable);
   }
 
   template <typename T, typename I>

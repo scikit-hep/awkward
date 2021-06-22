@@ -230,8 +230,7 @@ namespace awkward {
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,
-                   bool stable,
-                   bool keepdims) const override;
+                   bool stable) const override;
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr

@@ -3577,8 +3577,7 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength,
                            bool ascending,
-                           bool stable,
-                           bool keepdims) const {
+                           bool stable) const {
     if (shape_.empty()) {
       throw std::runtime_error(
         std::string("attempting to argsort a scalar") + FILENAME(__LINE__));
@@ -3589,8 +3588,7 @@ namespace awkward {
                                                   parents,
                                                   outlength,
                                                   ascending,
-                                                  stable,
-                                                  keepdims);
+                                                  stable);
     }
     else {
       std::shared_ptr<Content> out;
@@ -3741,14 +3739,6 @@ namespace awkward {
                                          dtype,
                                          ptr_lib_);
 
-      if (keepdims) {
-        out = std::make_shared<RegularArray>(
-          Identities::none(),
-          util::Parameters(),
-          out,
-          parents.length() / starts.length(),
-          length());
-      }
       return out;
     }
   }

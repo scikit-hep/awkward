@@ -453,8 +453,7 @@ namespace awkward {
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,
-                   bool stable,
-                   bool keepdims) const override;
+                   bool stable) const override;
 
     const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;
