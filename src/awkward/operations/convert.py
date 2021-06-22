@@ -3430,10 +3430,21 @@ class _ParquetGenerator(object):
         return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
 
 
-class _ParquetFileReader(object):
+class _ParquetReader(object):
+    def get_row_group_metadata(self):
+        raise NotImplementedError
+
+    def read(self):
+        raise NotImplementedError
+
+
+class _ParquetFileReader(_ParquetReader):
     def __init__(self, file, use_threads):
         self.file = file
         self.use_threads = use_threads
+
+    def get_row_group_metadata(self, row_groups):
+        return [self.file.metadata.row_group(i) for i in row_groups]
 
     def read(self, row_group, column_name):
         return self.file.read_row_group(
@@ -3441,10 +3452,11 @@ class _ParquetFileReader(object):
         )
 
 
-class _ParquetDatasetReader(object):
+class _ParquetDatasetReader(_ParquetReader):
     def __init__(self, directory, metadata_file, use_threads, options):
         self.use_threads = use_threads
         self.options = options
+        self.metadata_file = metadata_file
 
         self.lookup = []
         last_filename = None
@@ -3466,6 +3478,9 @@ class _ParquetDatasetReader(object):
 
         self.open_files = {}
 
+    def get_row_group_metadata(self, row_groups):
+        return [self.metadata_file.metadata.row_group(i) for i in row_groups]
+
     def read(self, row_group, column_name):
         import pyarrow.parquet
 
@@ -3479,10 +3494,15 @@ class _ParquetDatasetReader(object):
         )
 
 
-class _ParquetDatasetOfFilesReader(object):
+class _ParquetDatasetOfFilesReader(_ParquetReader):
     def __init__(self, lookup, use_threads):
         self.lookup = lookup
         self.use_threads = use_threads
+
+    def get_row_group_metadata(self, row_groups):
+        return [
+            f.metadata.row_group(g) for f, g in (self.lookup[g] for g in row_groups)
+        ]
 
     def read(self, row_group, column_name):
         file, local_row_group = self.lookup[row_group]
@@ -3612,17 +3632,16 @@ def _from_parquet_dataset(
     schema, columns = _partial_schema_from_columns(schema, columns)
 
     if lazy:
-        state = _ParquetGenerator(
-            _ParquetDatasetReader(source, file, use_threads, options)
-        )
-        lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
+        reader = _ParquetDatasetReader(source, file, use_threads, options)
+        state = _ParquetGenerator(reader)
+        lengths = [r.num_rows for r in reader.get_row_group_metadata(row_groups)]
 
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         form = _parquet_schema_to_form(schema)
 
-        out = _generate_outer_lazy_array(
+        out = _create_partitioned_array_from_form(
             form,
             state,
             row_groups,
@@ -3736,11 +3755,12 @@ def _from_parquet_list_of_files(
     if lazy:
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
+        reader = _ParquetDatasetOfFilesReader(lookup, use_threads)
+        lengths = [r.num_rows for r in reader.get_row_group_metadata(row_groups)]
+        state = _ParquetGenerator(reader)
 
-        state = _ParquetGenerator(_ParquetDatasetOfFilesReader(lookup, use_threads))
-        lengths = [f.metadata.row_group(g).num_rows for f, g in sublookup]
         form = _parquet_schema_to_form(schema)
-        out = _generate_outer_lazy_array(
+        out = _create_partitioned_array_from_form(
             form,
             state,
             row_groups,
@@ -3774,7 +3794,7 @@ def _from_parquet_list_of_files(
     return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
-def _generate_outer_lazy_array(
+def _create_partitioned_array_from_form(
     form,
     state,
     row_groups,
@@ -3893,11 +3913,11 @@ def _from_parquet_file(
     if lazy:
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
-
-        state = _ParquetGenerator(_ParquetFileReader(file, use_threads))
-        lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
+        reader = _ParquetFileReader(file, use_threads)
+        lengths = [r.num_rows for r in reader.get_row_group_metadata(row_groups)]
+        state = _ParquetGenerator(reader)
         form = _parquet_schema_to_form(schema)
-        out = _generate_outer_lazy_array(
+        out = _create_partitioned_array_from_form(
             form,
             state,
             row_groups,
@@ -3908,6 +3928,7 @@ def _from_parquet_file(
             lazy_cache,
             lazy_cache_key,
         )
+
     else:
         batches = file.read_row_groups(
             row_groups, columns=columns, use_threads=use_threads
