@@ -3267,7 +3267,7 @@ def _parquet_schema_to_form(schema):
 
 class _LazyDatasetGenerator(object):
     def __init__(self, reader):
-        self._reader = reader
+        self._dataset = reader
 
     def __call__(self, row_group, columns, length, form, lazy_cache, lazy_cache_key):
         if form.form_key is None:
@@ -3293,7 +3293,7 @@ class _LazyDatasetGenerator(object):
             masked = isinstance(form, ak.forms.ByteMaskedForm)
             if masked:
                 form = form.content
-            table = self._reader.read_row_group(row_group, [column_name])
+            table = self._dataset.read_row_group(row_group, [column_name])
             struct_only = [column_name.split(".")[-1]]
             struct_only.extend([x for x in columns[:0:-1] if x is not None])
             return self._convert_arrow_to_awkward(table, struct_only, masked, columns)
@@ -3429,7 +3429,7 @@ class _LazyDatasetGenerator(object):
         masked = isinstance(form, ak.forms.ByteMaskedForm)
         if masked:
             form = form.content
-        table = self._reader.read_row_group(row_group, [column_name])
+        table = self._dataset.read_row_group(row_group, [column_name])
         return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
 
 
@@ -3885,7 +3885,7 @@ def from_parquet(
     if isinstance(source, str) and os.path.isdir(source):
         metadata_filename = os.path.join(source, "_metadata")
         if os.path.exists(metadata_filename):
-            reader = _ParquetDataset(
+            dataset = _ParquetDataset(
                 source,
                 metadata_filename,
                 row_groups,
@@ -3900,7 +3900,7 @@ def from_parquet(
                 _regularize_path(x)
                 for x in sorted(glob.glob(source + "/**/*.parquet", recursive=True))
             ]
-            reader = _ParquetMultiFileDataset(
+            dataset = _ParquetMultiFileDataset(
                 source,
                 relative_to,
                 row_groups,
@@ -3917,7 +3917,7 @@ def from_parquet(
     ):
         source = [_regularize_path(x) for x in source]
         relative_to = os.path.commonpath(source)
-        reader = _ParquetMultiFileDataset(
+        dataset = _ParquetMultiFileDataset(
             source,
             relative_to,
             row_groups,
@@ -3928,45 +3928,45 @@ def from_parquet(
         )
 
     else:
-        reader = _ParquetFileDataset(source, row_groups, columns, use_threads, options)
+        dataset = _ParquetFileDataset(source, row_groups, columns, use_threads, options)
 
-    if reader.is_empty:
+    if dataset.is_empty:
         return ak.layout.RecordArray(
-            [ak.layout.EmptyArray() for _ in reader.columns], reader.columns, 0
+            [ak.layout.EmptyArray() for _ in dataset.columns], dataset.columns, 0
         )
 
     if lazy:
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
-        lengths = [r.num_rows for r in reader.row_group_metadata]
-        state = _LazyDatasetGenerator(reader)
+        lengths = [r.num_rows for r in dataset.row_group_metadata]
+        state = _LazyDatasetGenerator(dataset)
 
-        form = _parquet_schema_to_form(reader.schema)
+        form = _parquet_schema_to_form(dataset.schema)
         out = _create_partitioned_array_from_form(
             form,
             state,
-            reader.row_groups,
+            dataset.row_groups,
             lengths,
-            reader.columns,
-            reader.schema.names,
-            reader.partition_columns,
+            dataset.columns,
+            dataset.schema.names,
+            dataset.partition_columns,
             lazy_cache,
             lazy_cache_key,
         )
 
     else:
-        batches = reader.read_row_group_batches()
+        batches = dataset.read_row_group_batches()
         out = _from_arrow(batches, False, highlevel=False)
         assert isinstance(out, ak.layout.RecordArray) and not out.istuple
 
-        if reader.partition_columns != []:
-            field_names, fields = zip(*reader.partition_columns)
+        if dataset.partition_columns != []:
+            field_names, fields = zip(*dataset.partition_columns)
             out = ak.layout.RecordArray(
                 fields + tuple(out.contents), field_names + tuple(out.keys())
             )
 
-        elif reader.schema.names == [""]:
+        elif dataset.schema.names == [""]:
             out = out[""]
 
     return ak._util.maybe_wrap(out, behavior, highlevel)
