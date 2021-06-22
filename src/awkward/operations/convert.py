@@ -3678,7 +3678,7 @@ def _from_parquet_list_of_files(
     lookup = []
     paths_and_counts = []
     for filename in source:
-        single_file = pyarrow.parquet.ParquetFile(filename)
+        single_file = pyarrow.parquet.ParquetFile(filename, **options)
         if schema is None:
             schema = single_file.schema_arrow
             first_filename = filename
@@ -3856,7 +3856,6 @@ def _from_parquet_file(
     columns,
     row_groups,
     use_threads,
-    include_partition_columns,
     lazy,
     lazy_cache,
     lazy_cache_key,
@@ -4031,7 +4030,6 @@ def from_parquet(
             columns,
             row_groups,
             use_threads,
-            include_partition_columns,
             lazy,
             lazy_cache,
             lazy_cache_key,
