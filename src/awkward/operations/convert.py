@@ -3265,7 +3265,7 @@ def _parquet_schema_to_form(schema):
     return ak.forms.RecordForm(contents, schema.names)
 
 
-class _ParquetGenerator(object):
+class _LazyDatasetGenerator(object):
     def __init__(self, reader):
         self._reader = reader
 
@@ -3940,7 +3940,7 @@ def from_parquet(
         lazy_cache_key = _regularize_parquet_lazy_cache_key(lazy_cache_key)
 
         lengths = [r.num_rows for r in reader.row_group_metadata]
-        state = _ParquetGenerator(reader)
+        state = _LazyDatasetGenerator(reader)
 
         form = _parquet_schema_to_form(reader.schema)
         out = _create_partitioned_array_from_form(
