@@ -3443,11 +3443,6 @@ class _ParquetReader(object):
     def is_empty(self):
         return len(self.row_groups) == 0
 
-    def empty_like(self):
-        return ak.layout.RecordArray(
-            [ak.layout.EmptyArray() for _ in self.columns], self.columns, 0
-        )
-
     @property
     def row_group_metadata(self):
         raise NotImplementedError
@@ -3953,7 +3948,9 @@ def from_parquet(
         reader = _ParquetFileReader(source, use_threads, row_groups, columns, options)
 
     if reader.is_empty:
-        return reader.empty_like()
+        return ak.layout.RecordArray(
+            [ak.layout.EmptyArray() for _ in reader.columns], reader.columns, 0
+        )
 
     if lazy:
         lazy_cache, hold_cache = _regularize_lazy_cache(lazy_cache)
