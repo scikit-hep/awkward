@@ -6,7 +6,7 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-import json
+
 from awkward._v2.types.type import Type
 
 
@@ -29,8 +29,14 @@ class UnionType(Type):
                 )
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
-                "{0} 'parameters' must be of type dict, not {1}".format(
+                "{0} 'parameters' must be of type dict or None, not {1}".format(
                     type(self).__name__, repr(parameters)
+                )
+            )
+        if typestr is not None and not isinstance(typestr, str):
+            raise TypeError(
+                "{0} 'typestr' must be of type string or None, not {1}".format(
+                    type(self).__name__, repr(typestr)
                 )
             )
         self._contents = contents
@@ -42,57 +48,20 @@ class UnionType(Type):
         return self._contents
 
     def __str__(self):
-        primitives = []
-        for c in self._contents:
-            if hasattr(c, "primitive"):
-                primitives.append(c.primitive)
-            else:
-                primitives.append("unknown")
-        primitives = (", ").join(primitives)
-        if self._typestr == "override" and (
-            self._parameters is None or "__categorical__" not in self._parameters.keys()
-        ):
-            return "override"
-        elif self._parameters is None:
-            return "union[{0}]".format(primitives)
-        elif (
-            "__categorical__" in self._parameters.keys()
-            and self._parameters["__categorical__"] is True
-        ):
-            if len(self._parameters) == 1:
-                if self._typestr == "override":
-                    return "categorical[type={0}]".format(self._typestr)
-                else:
-                    return "categorical[type=union[{0}]]".format(primitives)
-            else:
-                if self._typestr == "override":
-                    return "categorical[type={0}]".format(self._typestr)
-                else:
-                    return "categorical[type=union[{0}, parameters={1}]]".format(
-                        primitives,
-                        json.dumps(
-                            {
-                                k: self._parameters[k]
-                                for k in set(list(self._parameters.keys()))
-                                - {"__categorical__"}
-                            }
-                        ),
-                    )
+        if self._typestr is not None:
+            out = self._typestr
+
         else:
-            return "union[{0}, parameters={1}]".format(
-                primitives,
-                json.dumps(self._parameters),
-            )
+            children = [str(x) for x in self._contents]
+            params = self._str_parameters()
+
+            if params is None:
+                out = "union[{0}]".format(", ".join(children))
+            else:
+                out = "union[{0}, {1}]".format(", ".join(children), params)
+
+        return self._str_categorical_begin() + out + self._str_categorical_end()
 
     def __repr__(self):
-        contents_list = (", ").join(repr(x) for x in self._contents)
-        if self._parameters is None and self._typestr is None:
-            return "UnionType([{0}])".format(contents_list)
-        elif self._typestr is None:
-            return "UnionType([{0}], parameters={1})".format(
-                contents_list, json.dumps(self._parameters)
-            )
-        else:
-            return 'UnionType([{0}], parameters={1}, typestr="{2}")'.format(
-                contents_list, json.dumps(self._parameters), self._typestr
-            )
+        args = [repr(self._contents)] + self._repr_args()
+        return "{0}({1})".format(type(self).__name__, ", ".join(args))

@@ -6,12 +6,14 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
+
 import json
+
 from awkward._v2.types.type import Type
 
 
 class RecordType(Type):
-    def __init__(self, contents, recordlookup, parameters=None, typestr="unknown"):
+    def __init__(self, contents, recordlookup, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{0} 'contents' must be iterable, not {1}".format(
@@ -35,8 +37,14 @@ class RecordType(Type):
             )
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
-                "{0} 'parameters' must be of type dict, not {1}".format(
+                "{0} 'parameters' must be of type dict or None, not {1}".format(
                     type(self).__name__, repr(parameters)
+                )
+            )
+        if typestr is not None and not isinstance(typestr, str):
+            raise TypeError(
+                "{0} 'typestr' must be of type string or None, not {1}".format(
+                    type(self).__name__, repr(typestr)
                 )
             )
         self._contents = contents
@@ -52,132 +60,54 @@ class RecordType(Type):
     def recordlookup(self):
         return self._recordlookup
 
+    @property
+    def is_tuple(self):
+        return self._recordlookup is None
+
+    _str_parameters_exclude = ("__categorical__", "__record__")
+
     def __str__(self):
-        primitives_list = []
-        for c in self._contents:
-            if hasattr(c, "primitive"):
-                primitives_list.append(c.primitive)
-            else:
-                primitives_list.append("unknown")
-        if self._recordlookup is None:
-            primitives = "(" + (", ").join(primitives_list) + ")"
+        if self._typestr is not None:
+            out = self._typestr
+
         else:
-            out = []
-            for i in range(len(self._recordlookup)):
-                out.append(
-                    '"' + str(self._recordlookup[i]) + '": ' + primitives_list[i]
-                )
-            primitives = "{" + ", ".join(out) + "}"
+            children = [str(x) for x in self._contents]
+            params = self._str_parameters()
+            name = self.parameter("__record__")
 
-        if self._typestr == "override" and (
-            self._parameters is None or "__categorical__" not in self._parameters.keys()
-        ):
-            return "override"
-
-        elif self._recordlookup is None and self._parameters is None:
-            return primitives
-
-        elif self._recordlookup is not None and self._parameters is None:
-            return primitives
-
-        elif (
-            "__categorical__" in self._parameters.keys()
-            and self._parameters["__categorical__"] is True
-        ):
-            if len(self._parameters) == 1:
-                if self._typestr == "override":
-                    return "categorical[type={0}]".format(self._typestr)
+            if params is None:
+                if self.is_tuple:
+                    if name is None:
+                        out = "(" + ", ".join(children) + ")"
+                    else:
+                        out = name + "[" + ", ".join(children) + "]"
                 else:
-                    return "categorical[type={0}]".format(primitives)
+                    pairs = [k + ": " + v for k, v in zip(self._recordlookup, children)]
+                    if name is None:
+                        out = "{" + ", ".join(pairs) + "}"
+                    else:
+                        out = name + "[" + ", ".join(pairs) + "]"
+
             else:
-                if self._typestr == "override":
-                    return "categorical[type={0}]".format(self._typestr)
-                elif "__record__" in self._parameters.keys():
-                    if len(self._parameters) == 2:
-                        return "categorical[type={0}[{1}]]".format(
-                            self._parameters["__record__"], primitives[1:-1]
+                if self.is_tuple:
+                    if name is None:
+                        out = "tuple[[{0}], {1}]".format(", ".join(children), params)
+                    else:
+                        out = "{0}[{1}, {2}]".format(name, ", ".join(children), params)
+                else:
+                    if name is None:
+                        keys = [json.dumps(x) for x in self._recordlookup]
+                        out = "struct[[{0}], [{1}], {2}]".format(
+                            ", ".join(keys), ", ".join(children), params
                         )
                     else:
-                        return "categorical[type={0}[{1}, parameters={2}]]".format(
-                            self._parameters["__record__"],
-                            primitives[1:-1],
-                            json.dumps(
-                                {
-                                    k: self._parameters[k]
-                                    for k in set(list(self._parameters.keys()))
-                                    - {"__categorical__", "__record__"}
-                                }
-                            ),
-                        )
-                else:
-                    if self._recordlookup is None:
-                        return "categorical[type=tuple[[{0}], parameters={1}]]".format(
-                            primitives[1:-1],
-                            json.dumps(
-                                {
-                                    k: self._parameters[k]
-                                    for k in set(list(self._parameters.keys()))
-                                    - {"__categorical__"}
-                                }
-                            ),
-                        )
-                    else:
-                        return "categorical[type=struct[{0}, [{1}], parameters={2}]]".format(
-                            json.dumps(self._recordlookup),
-                            ", ".join(primitives_list),
-                            json.dumps(
-                                {
-                                    k: self._parameters[k]
-                                    for k in set(list(self._parameters.keys()))
-                                    - {"__categorical__"}
-                                }
-                            ),
-                        )
+                        pairs = [
+                            k + ": " + v for k, v in zip(self._recordlookup, children)
+                        ]
+                        out = "{0}[{1}, {2}]".format(name, ", ".join(pairs), params)
 
-        elif "__array__" in self._parameters.keys():
-            return "{0}".format(self._parameters["__array__"])
-
-        elif "__record__" in self._parameters.keys():
-            if len(self._parameters) == 1:
-                return "{0}[{1}]".format(
-                    self._parameters["__record__"], primitives[1:-1]
-                )
-            else:
-                return "{0}[{1}, parameters={2}]".format(
-                    self._parameters["__record__"],
-                    primitives[1:-1],
-                    json.dumps(
-                        {
-                            k: self._parameters[k]
-                            for k in set(list(self._parameters.keys())) - {"__record__"}
-                        }
-                    ),
-                )
-        else:
-            if self._recordlookup is None:
-                return "tuple[[{0}], parameters={1}]".format(
-                    primitives[1:-1], json.dumps(self._parameters)
-                )
-            else:
-                return "struct[{0}, [{1}], parameters={2}]".format(
-                    json.dumps(self._recordlookup),
-                    ", ".join(primitives_list),
-                    json.dumps(self._parameters),
-                )
+        return self._str_categorical_begin() + out + self._str_categorical_end()
 
     def __repr__(self):
-        contents_list = (", ").join(repr(x) for x in self._contents)
-        lookup = (
-            "None" if self._recordlookup is None else json.dumps(self._recordlookup)
-        )
-        if self._parameters is None and self._typestr == "unknown":
-            return "RecordType([{0}], {1})".format(contents_list, lookup)
-        elif self._typestr == "unknown":
-            return "RecordType([{0}], {1}, parameters={2})".format(
-                contents_list, self._recordlookup, json.dumps(self._parameters)
-            )
-        else:
-
-            return 'RecordType([{0}], {1}, parameters={2}, typestr="{3}")'.format(
-                contents_list, lookup, json.dumps(self._parameters), self._typestr
-            )
+        args = [repr(self._contents), repr(self._recordlookup)] + self._repr_args()
+        return "{0}({1})".format(type(self).__name__, ", ".join(args))

@@ -37,7 +37,7 @@ def test_UnknownType():
                 parameters={"__categorical__": True}, typestr="override"
             )
         )
-        == 'UnknownType(parameters={"__categorical__": true}, typestr="override")'
+        == "UnknownType(parameters={'__categorical__': True}, typestr='override')"
     )
 
 
@@ -234,7 +234,7 @@ def test_NumpyType():
         str(ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "byte"})) == "byte"
     )
     assert (
-        repr(ak._v2.types.numpytype.NumpyType(primitive="bool")) == 'NumpyType("bool")'
+        repr(ak._v2.types.numpytype.NumpyType(primitive="bool")) == "NumpyType('bool')"
     )
     assert (
         repr(
@@ -244,7 +244,7 @@ def test_NumpyType():
                 typestr="override",
             )
         )
-        == 'NumpyType("bool", parameters={"__categorical__": true}, typestr="override")'
+        == "NumpyType('bool', parameters={'__categorical__': True}, typestr='override')"
     )
     assert (
         repr(
@@ -252,7 +252,7 @@ def test_NumpyType():
                 primitive="datetime64", parameters={"__unit__": "s"}
             )
         )
-        == 'NumpyType("datetime64", parameters={"__unit__": "s"})'
+        == "NumpyType('datetime64', parameters={'__unit__': 's'})"
     )
     assert (
         repr(
@@ -260,7 +260,7 @@ def test_NumpyType():
                 primitive="uint8", parameters={"__array__": "char"}
             )
         )
-        == 'NumpyType("uint8", parameters={"__array__": "char"})'
+        == "NumpyType('uint8', parameters={'__array__': 'char'})"
     )
     assert (
         repr(
@@ -268,7 +268,7 @@ def test_NumpyType():
                 primitive="uint8", parameters={"__array__": "byte"}
             )
         )
-        == 'NumpyType("uint8", parameters={"__array__": "byte"})'
+        == "NumpyType('uint8', parameters={'__array__': 'byte'})"
     )
 
 
@@ -362,7 +362,7 @@ def test_RegularType():
                 {"__array__": "bytestring"},
             )
         )
-        == "bytestring[10]"
+        == "bytes[10]"
     )
 
     assert (
@@ -382,7 +382,7 @@ def test_RegularType():
                 typestr="override",
             )
         )
-        == 'RegularType(UnknownType(), 10, parameters={"__categorical__": true}, typestr="override")'
+        == "RegularType(UnknownType(), 10, parameters={'__categorical__': True}, typestr='override')"
     )
     assert (
         repr(
@@ -394,9 +394,8 @@ def test_RegularType():
                 size=10,
             )
         )
-        == 'RegularType(NumpyType("uint8", parameters={"__array__": "char"}), 10, parameters={"__array__": "string"})'
+        == "RegularType(NumpyType('uint8', parameters={'__array__': 'char'}), 10, parameters={'__array__': 'string'})"
     )
-    # FIXME assumed size was misstyped :'RegularType(NumpyType("uint8", parameters={"__array__": "byte"}), parameters={"__array__": "bytestring"}, 10)'
     assert (
         repr(
             ak._v2.types.regulartype.RegularType(
@@ -407,7 +406,7 @@ def test_RegularType():
                 size=10,
             )
         )
-        == 'RegularType(NumpyType("uint8", parameters={"__array__": "byte"}), 10, parameters={"__array__": "bytestring"})'
+        == "RegularType(NumpyType('uint8', parameters={'__array__': 'byte'}), 10, parameters={'__array__': 'bytestring'})"
     )
 
 
@@ -483,7 +482,7 @@ def test_ListType():
                 {"__array__": "bytestring"},
             )
         )
-        == "bytestring"
+        == "bytes"
     )
 
     assert (
@@ -502,7 +501,7 @@ def test_ListType():
                 typestr="override",
             )
         )
-        == 'ListType(UnknownType(), parameters={"__categorical__": true}, typestr="override")'
+        == "ListType(UnknownType(), parameters={'__categorical__': True}, typestr='override')"
     )
     assert (
         repr(
@@ -513,7 +512,7 @@ def test_ListType():
                 parameters={"__array__": "string"},
             )
         )
-        == 'ListType(NumpyType("uint8", parameters={"__array__": "char"}), parameters={"__array__": "string"})'
+        == "ListType(NumpyType('uint8', parameters={'__array__': 'char'}), parameters={'__array__': 'string'})"
     )
     assert (
         repr(
@@ -524,7 +523,7 @@ def test_ListType():
                 parameters={"__array__": "bytestring"},
             )
         )
-        == 'ListType(NumpyType("uint8", parameters={"__array__": "byte"}), parameters={"__array__": "bytestring"})'
+        == "ListType(NumpyType('uint8', parameters={'__array__': 'byte'}), parameters={'__array__': 'bytestring'})"
     )
 
 
@@ -551,7 +550,7 @@ def test_RecordType():
                 ["x", "y"],
             )
         )
-        == '{"x": unknown, "y": bool}'
+        == "{x: unknown, y: bool}"
     )
     assert (
         str(
@@ -577,7 +576,7 @@ def test_RecordType():
                 {"__record__": "Name"},
             )
         )
-        == 'Name["x": unknown, "y": bool]'
+        == "Name[x: unknown, y: bool]"
     )
     assert (
         str(
@@ -685,7 +684,7 @@ def test_RecordType():
                 {"__record__": "Name", "x": 123},
             )
         )
-        == 'Name["x": unknown, "y": bool, parameters={"x": 123}]'
+        == 'Name[x: unknown, y: bool, parameters={"x": 123}]'
     )
     assert (
         str(
@@ -768,7 +767,7 @@ def test_RecordType():
                 {"__categorical__": True},
             )
         )
-        == 'categorical[type={"x": unknown, "y": bool}]'
+        == "categorical[type={x: unknown, y: bool}]"
     )
     assert (
         str(
@@ -794,7 +793,7 @@ def test_RecordType():
                 {"__record__": "Name", "__categorical__": True},
             )
         )
-        == 'categorical[type=Name["x": unknown, "y": bool]]'
+        == "categorical[type=Name[x: unknown, y: bool]]"
     )
     assert (
         str(
@@ -902,7 +901,7 @@ def test_RecordType():
                 {"__record__": "Name", "x": 123, "__categorical__": True},
             )
         )
-        == 'categorical[type=Name["x": unknown, "y": bool, parameters={"x": 123}]]'
+        == 'categorical[type=Name[x: unknown, y: bool, parameters={"x": 123}]]'
     )
     assert (
         str(
@@ -971,7 +970,7 @@ def test_RecordType():
                 recordlookup=None,
             )
         )
-        == 'RecordType([UnknownType(), NumpyType("bool")], None)'
+        == "RecordType([UnknownType(), NumpyType('bool')], None)"
     )
     assert (
         repr(
@@ -983,7 +982,7 @@ def test_RecordType():
                 recordlookup=["x", "y"],
             )
         )
-        == 'RecordType([UnknownType(), NumpyType("bool")], ["x", "y"])'
+        == "RecordType([UnknownType(), NumpyType('bool')], ['x', 'y'])"
     )
     assert (
         repr(
@@ -997,7 +996,7 @@ def test_RecordType():
                 typestr="override",
             )
         )
-        == 'RecordType([UnknownType(), NumpyType("bool")], None, parameters={"__record__": "Name", "x": 123, "__categorical__": true}, typestr="override")'
+        == "RecordType([UnknownType(), NumpyType('bool')], None, parameters={'__record__': 'Name', 'x': 123, '__categorical__': True}, typestr='override')"
     )
     assert (
         repr(
@@ -1010,7 +1009,7 @@ def test_RecordType():
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
             )
         )
-        == 'RecordType([UnknownType(), NumpyType("bool")], None, parameters={"__record__": "Name", "x": 123, "__categorical__": true})'
+        == "RecordType([UnknownType(), NumpyType('bool')], None, parameters={'__record__': 'Name', 'x': 123, '__categorical__': True})"
     )
     assert (
         repr(
@@ -1024,14 +1023,14 @@ def test_RecordType():
                 typestr="override",
             )
         )
-        == 'RecordType([UnknownType(), NumpyType("bool")], ["x", "y"], parameters={"__record__": "Name", "x": 123, "__categorical__": true}, typestr="override")'
+        == "RecordType([UnknownType(), NumpyType('bool')], ['x', 'y'], parameters={'__record__': 'Name', 'x': 123, '__categorical__': True}, typestr='override')"
     )
 
 
 def test_OptionType():
     assert (
         str(ak._v2.types.optiontype.OptionType(ak._v2.types.unknowntype.UnknownType()))
-        == "unknown"
+        == "?unknown"
     )
     assert (
         str(
@@ -1145,7 +1144,7 @@ def test_OptionType():
                 ak._v2.types.unknowntype.UnknownType(), {"__categorical__": True}
             )
         )
-        == "categorical[type=unknown]"
+        == "categorical[type=?unknown]"
     )
     assert (
         str(
@@ -1289,7 +1288,7 @@ def test_OptionType():
                 typestr="override",
             )
         )
-        == 'OptionType(RegularType(UnknownType(), 10), parameters={"x": 123, "__categorical__": true}, typestr="override")'
+        == "OptionType(RegularType(UnknownType(), 10), parameters={'x': 123, '__categorical__': True}, typestr='override')"
     )
 
 
@@ -1403,7 +1402,7 @@ def test_UnionType():
                 ]
             )
         )
-        == 'UnionType([UnknownType(), NumpyType("bool")])'
+        == "UnionType([UnknownType(), NumpyType('bool')])"
     )
     assert (
         repr(
@@ -1416,7 +1415,7 @@ def test_UnionType():
                 typestr="override",
             )
         )
-        == 'UnionType([UnknownType(), NumpyType("bool")], parameters={"x": 123, "__categorical__": true}, typestr="override")'
+        == "UnionType([UnknownType(), NumpyType('bool')], parameters={'x': 123, '__categorical__': True}, typestr='override')"
     )
 
 
