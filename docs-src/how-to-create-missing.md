@@ -14,10 +14,38 @@ kernelspec:
 How to create arrays of missing data
 ====================================
 
-**This is a stub:** I intend to write this article, but haven't yet.
+Data at any level of an Awkward Array can be "missing," represented by `None` in Python.
 
-If you need it soon, create an issue saying so and I'll make it a higher priority.
+Some of this functionality is like NumPy's [masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html), but NumPy masked arrays can only declare numerical values to be missing (not, for instance, a row of a 2-dimensional array) and they represent missing data with `np.ma.masked` instead of `None`.
 
-[![](img/github-issues-documentation.png)](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=docs&template=documentation.md&title=)
+Pandas users are accustomed to using floating-point `NaN` (not a number) values for missing data, though Pandas has introduced a [first-class missing value](https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html#missing-data-na) (`pd.NA`) in version 1.0. Awkward Array's approach is like this, but data in an Awkward Array are never Python objects, so there's no specialized Python object representing it, other than `None` when all the data are converted from or to Python with [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) and [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html).
 
-The text of your issue doesn't have to be much more than a link to this page, so I can be sure which page you're referring to. If you add details about how and why you need it, however, I may be able to tailor the text to help you more.
+```{code-cell} ipython3
+
+```
+
+```{code-cell} ipython3
+
+```
+
+```{code-cell} ipython3
+
+```
+
+```{code-cell} ipython3
+
+```
+
+```{code-cell} ipython3
+
+```
+
+Missing data are not `NaN`!
+
+```{code-cell} ipython3
+
+```
+
+```{code-cell} ipython3
+
+```
