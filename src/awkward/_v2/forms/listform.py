@@ -7,7 +7,13 @@ from awkward._v2.forms.form import Form
 
 class ListForm(Form):
     def __init__(
-        self, starts, stops, content, has_identities=False, parameters={}, form_key=None
+        self,
+        starts,
+        stops,
+        content,
+        has_identities=False,
+        parameters=None,
+        form_key=None,
     ):
         if not isinstance(starts, str):
             raise TypeError(
@@ -59,7 +65,7 @@ class ListForm(Form):
     @property
     def stops(self):
         return self._stops
-    
+
     @property
     def content(self):
         return self._content

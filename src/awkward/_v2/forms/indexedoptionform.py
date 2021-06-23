@@ -4,13 +4,14 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
+
 class IndexedOptionForm(Form):
     def __init__(
         self,
         index,
         content,
         has_identities=False,
-        parameters={},
+        parameters=None,
         form_key=None,
     ):
         if not isinstance(index, str):

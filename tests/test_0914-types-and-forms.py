@@ -41,6 +41,7 @@ def test_UnknownType():
     )
 
 
+# @pytest.skipif(ak._util.win, reason="NumPy does not have float16, float128, and complex256 -- on Windows")
 def test_NumpyType():
     assert str(ak._v2.types.numpytype.NumpyType("bool")) == "bool"
     assert str(ak._v2.types.numpytype.NumpyType("int8")) == "int8"
@@ -1522,6 +1523,8 @@ def test_EmptyForm():
     }
 
 
+# @pytest.skipif(ak._util.win, reason="NumPy does not have float16, float128, and complex256 -- on Windows")
+@pytest.mark.skip(reason="unimplemented RecordForm")
 def test_NumpyForm():
     assert (
         str(ak._v2.forms.numpyform.NumpyForm("bool"))
@@ -3868,7 +3871,10 @@ def test_UnionForm():
             ak._v2.forms.unionform.UnionForm(
                 "i8",
                 "i32",
-                [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
             )
         )
         == """{

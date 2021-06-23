@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
+
 class ByteMaskedForm(Form):
     def __init__(
         self,
@@ -11,7 +12,7 @@ class ByteMaskedForm(Form):
         content,
         valid_when,
         has_identities=False,
-        parameters={},
+        parameters=None,
         form_key=None,
     ):
         if not isinstance(mask, str):
@@ -70,7 +71,11 @@ class ByteMaskedForm(Form):
         return self._valid_when
 
     def __repr__(self):
-        args = [repr(self._mask), repr(self._content), repr(self._valid_when)] + self._repr_args()
+        args = [
+            repr(self._mask),
+            repr(self._content),
+            repr(self._valid_when),
+        ] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose=True):

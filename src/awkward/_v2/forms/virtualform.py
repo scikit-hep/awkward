@@ -4,13 +4,14 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
+
 class VirtualForm(Form):
     def __init__(
         self,
         form,
         has_length,
         has_identities=False,
-        parameters={},
+        parameters=None,
         form_key=None,
     ):
         if form is not None and not isinstance(form, Form):
@@ -64,6 +65,8 @@ class VirtualForm(Form):
     def _tolist_part(self, verbose=True):
         out = {}
         out["class"] = "VirtualArray"
-        out["form"] = self._form.tolist(verbose=verbose) if self._form is not None else None
+        out["form"] = (
+            self._form.tolist(verbose=verbose) if self._form is not None else None
+        )
         out["has_length"] = self._has_length
         return out

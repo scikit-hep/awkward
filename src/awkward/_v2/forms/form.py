@@ -8,6 +8,7 @@ import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
+
 class Form(object):
     @property
     def has_identities(self):
@@ -34,12 +35,12 @@ class Form(object):
         out = self._tolist_part(verbose=verbose)
         if verbose:
             out["has_identities"] = self._has_identities
-            out["parameters"] = self._parameters
+            out["parameters"] = {} if self._parameters is None else self._parameters
             out["form_key"] = self._form_key
         else:
             if self._has_identities:
                 out["has_identities"] = self._has_identities
-            if len(self._parameters) > 0:
+            if self._parameters is not None and len(self._parameters) > 0:
                 out["parameters"] = self._parameters
             if self._form_key is not None:
                 out["form_key"] = self._form_key

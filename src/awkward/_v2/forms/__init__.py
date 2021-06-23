@@ -88,7 +88,7 @@ def from_iter(input):
             mask=input["mask"],
             content=from_iter(input["content"]),
             valid_when=input["valid_when"],
-            lsb_order =  input["lsb_order"],
+            lsb_order=input["lsb_order"],
             has_identities=has_identities,
             parameters=parameters,
             form_key=form_key,

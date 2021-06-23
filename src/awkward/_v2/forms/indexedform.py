@@ -4,13 +4,14 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
+
 class IndexedForm(Form):
     def __init__(
         self,
         index,
-        content=[],
+        content=None,
         has_identities=False,
-        parameters={},
+        parameters=None,
         form_key=None,
     ):
         if not isinstance(index, str):
@@ -27,8 +28,8 @@ class IndexedForm(Form):
             )
         if has_identities is not None and not isinstance(has_identities, bool):
             raise TypeError(
-            "{0} 'has_identities' must be of type bool or None, not {1}".format(
-                type(self).__name__, repr(has_identities)
+                "{0} 'has_identities' must be of type bool or None, not {1}".format(
+                    type(self).__name__, repr(has_identities)
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):

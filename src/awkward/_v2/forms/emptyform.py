@@ -6,7 +6,7 @@ from awkward._v2.forms.form import Form
 
 
 class EmptyForm(Form):
-    def __init__(self, has_identities=False, parameters={}, form_key=None):
+    def __init__(self, has_identities=False, parameters=None, form_key=None):
         if has_identities is not None and not isinstance(has_identities, bool):
             raise TypeError(
                 "{0} 'has_identities' must be of type bool or None, not {1}".format(

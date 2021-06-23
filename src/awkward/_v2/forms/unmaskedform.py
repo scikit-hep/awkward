@@ -4,12 +4,13 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
+
 class UnmaskedForm(Form):
     def __init__(
         self,
         content,
         has_identities=False,
-        parameters={},
+        parameters=None,
         form_key=None,
     ):
         if not isinstance(content, Form):

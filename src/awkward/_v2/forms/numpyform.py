@@ -7,7 +7,7 @@ try:
 except ImportError:
     from collections import Iterable
 
-import copy
+# import copy
 
 from awkward._v2.forms.form import Form
 
@@ -45,14 +45,15 @@ for primitive, dtype in _primitive_to_dtype.items():
     _dtype_to_primitive[dtype] = primitive
 
 
-def from_dtype(dtype, parameters={}, inner_shape=[]):
+def from_dtype(dtype, parameters=None, inner_shape=None):
     if "[" in str(dtype):
         dtype = str(dtype).split("[")
         # WIP
-        params = copy.deepcopy(parameters)
-        params["__unit__"] = dtype[1][:-1]
+        # params = copy.deepcopy(parameters)
+        # params["__unit__"] = dtype[1][:-1]
+        parameters["__unit__"] = dtype[1][:-1]
         dtype = dtype[0]
-        return NumpyForm(dtype, parameters=params, inner_shape=inner_shape)
+        return NumpyForm(dtype, parameters=parameters, inner_shape=inner_shape)
     else:
         return NumpyForm(
             _dtype_to_primitive[dtype], parameters=parameters, inner_shape=inner_shape
@@ -75,9 +76,9 @@ class NumpyForm(Form):
     def __init__(
         self,
         primitive,
-        inner_shape=[],
+        inner_shape=None,
         has_identities=False,
-        parameters={},
+        parameters=None,
         form_key=None,
     ):
         if primitive not in _primitive_to_dtype:
@@ -88,14 +89,12 @@ class NumpyForm(Form):
                     repr(primitive),
                 )
             )
-        if not isinstance(inner_shape, Iterable):
+        if inner_shape is not None and not isinstance(inner_shape, Iterable):
             raise TypeError(
                 "{0} 'inner_shape' must be iterable, not {1}".format(
                     type(self).__name__, repr(inner_shape)
                 )
             )
-        if not isinstance(inner_shape, list):
-            inner_shape = list(inner_shape)
         if has_identities is not None and not isinstance(has_identities, bool):
             raise TypeError(
                 "{0} 'has_identities' must be of type bool or None, not {1}".format(
@@ -140,8 +139,8 @@ class NumpyForm(Form):
         out["class"] = "NumpyArray"
         out["primitive"] = self._primitive
         if verbose:
-            out["inner_shape"] = self._inner_shape
+            out["inner_shape"] = [] if self._inner_shape is None else self._inner_shape
         else:
-            if len(self._inner_shape) > 0:
+            if self._inner_shape is not None and len(self._inner_shape) > 0:
                 out["inner_shape"] = self._inner_shape
         return out

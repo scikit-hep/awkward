@@ -4,12 +4,10 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
-import awkward as ak
-
 
 class RegularForm(Form):
     def __init__(
-        self, content, size, has_identities=False, parameters={}, form_key=None
+        self, content, size, has_identities=False, parameters=None, form_key=None
     ):
         if not isinstance(content, Form):
             raise TypeError(
