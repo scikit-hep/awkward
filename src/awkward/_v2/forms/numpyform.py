@@ -60,18 +60,6 @@ def from_dtype(dtype, parameters=None, inner_shape=None):
         )
 
 
-def from_iter(input):
-    if isinstance(input, str):
-        return NumpyForm(primitive=input)
-    else:
-        primitive = input["primitive"]
-        inner_shape = input["inner_shape"] if "inner_shape" in input else []
-        has_identities = input["has_identities"] if "has_identities" in input else False
-        parameters = input["parameters"] if "parameters" in input else {}
-        form_key = input["form_key"] if "form_key" in input else None
-        return NumpyForm(primitive, inner_shape, has_identities, parameters, form_key)
-
-
 class NumpyForm(Form):
     def __init__(
         self,

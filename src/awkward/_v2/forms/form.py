@@ -33,17 +33,12 @@ class Form(object):
 
     def tolist(self, toplevel=False, verbose=True):
         out = self._tolist_part(verbose=verbose)
-        if verbose:
+        if verbose or self._has_identities:
             out["has_identities"] = self._has_identities
+        if verbose or self._parameters is not None and len(self._parameters) > 0:
             out["parameters"] = {} if self._parameters is None else self._parameters
+        if verbose or self._form_key is not None:
             out["form_key"] = self._form_key
-        else:
-            if self._has_identities:
-                out["has_identities"] = self._has_identities
-            if self._parameters is not None and len(self._parameters) > 0:
-                out["parameters"] = self._parameters
-            if self._form_key is not None:
-                out["form_key"] = self._form_key
         return out
 
     def to_json(self):

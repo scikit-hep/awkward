@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import awkward._v2.forms.emptyform  # noqa: F401
 import awkward._v2.forms.numpyform  # noqa: F401
 import awkward._v2.forms.regularform  # noqa: F401
@@ -18,14 +20,29 @@ import awkward._v2.forms.virtualform  # noqa: F401
 
 
 def from_iter(input):
-    has_identities = input["has_identities"] if "has_identities" in input else False
-    parameters = input["parameters"] if "parameters" in input else {}
-    form_key = input["form_key"] if "form_key" in input else None
+
+    has_identities = input.get("has_identities", False)
+    parameters = input.get("parameters", {})
+    form_key = input.get("form_key", None)
     if "EmptyArray" == input["class"]:
         return awkward._v2.forms.emptyform.EmptyForm(
             has_identities, parameters, form_key
         )
-    if "RegularArray" == input["class"]:
+    elif "NumpyArray" == input["class"]:
+        if isinstance(input, str):
+            return awkward._v2.forms.numpyform.NumpyForm(primitive=input)
+        else:
+            primitive = input["primitive"]
+            inner_shape = input["inner_shape"] if "inner_shape" in input else []
+            has_identities = (
+                input["has_identities"] if "has_identities" in input else False
+            )
+            parameters = input["parameters"] if "parameters" in input else {}
+            form_key = input["form_key"] if "form_key" in input else None
+            return awkward._v2.forms.numpyform.NumpyForm(
+                primitive, inner_shape, has_identities, parameters, form_key
+            )
+    elif "RegularArray" == input["class"]:
         return awkward._v2.forms.regularform.RegularForm(
             content=from_iter(input["content"]),
             size=input["size"],
@@ -33,7 +50,7 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
-    if "ListArray" == input["class"]:
+    elif "ListArray" == input["class"]:
         return awkward._v2.forms.listform.ListForm(
             starts=input["starts"],
             stops=input["stops"],
@@ -42,7 +59,7 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
-    if "ListOffsetArray" == input["class"]:
+    elif "ListOffsetArray" == input["class"]:
         return awkward._v2.forms.listoffsetform.ListOffsetForm(
             offsets=input["offsets"],
             content=from_iter(input["content"]),
@@ -50,7 +67,7 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
-    if "IndexedArray" == input["class"]:
+    elif "IndexedArray" == input["class"]:
         return awkward._v2.forms.indexedform.IndexedForm(
             index=input["index"],
             content=from_iter(input["content"]),
@@ -58,7 +75,7 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
-    if "IndexedOptionArray" == input["class"]:
+    elif "IndexedOptionArray" == input["class"]:
         return awkward._v2.forms.indexedoptionform.IndexedOptionForm(
             index=input["index"],
             content=from_iter(input["content"]),
@@ -66,7 +83,7 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
-    if "IndexedOptionArray" == input["class"]:
+    elif "IndexedOptionArray" == input["class"]:
         return awkward._v2.forms.indexedoptionform.IndexedOptionForm(
             index=input["index"],
             content=from_iter(input["content"]),
@@ -74,7 +91,7 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
-    if "ByteMaskedArray" == input["class"]:
+    elif "ByteMaskedArray" == input["class"]:
         return awkward._v2.forms.bytemaskedform.ByteMaskedForm(
             mask=input["mask"],
             content=from_iter(input["content"]),
@@ -83,7 +100,7 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
-    if "BitMaskedArray" == input["class"]:
+    elif "BitMaskedArray" == input["class"]:
         return awkward._v2.forms.bitmaskedform.BitMaskedForm(
             mask=input["mask"],
             content=from_iter(input["content"]),
@@ -93,14 +110,14 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
-    if "UnmaskedArray" == input["class"]:
+    elif "UnmaskedArray" == input["class"]:
         return awkward._v2.forms.unmaskedform.UnmaskedForm(
             content=from_iter(input["content"]),
             has_identities=has_identities,
             parameters=parameters,
             form_key=form_key,
         )
-    if "VirtualArray" == input["class"]:
+    elif "VirtualArray" == input["class"]:
         return awkward._v2.forms.virtualform.VirtualForm(
             form=input["form"],
             has_length=input["has_length"],
@@ -108,6 +125,14 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
+    else:
+        raise ValueError(
+            "Input class: {0} was not recognised".format(repr(input["class"]))
+        )
+
+
+def from_json(input):
+    return from_iter(json.loads(input))
 
 
 def numpy_form(input):
