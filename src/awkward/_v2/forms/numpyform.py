@@ -7,57 +7,30 @@ try:
 except ImportError:
     from collections import Iterable
 
-# import copy
-
 from awkward._v2.forms.form import Form
 
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
-_primitive_to_dtype = {
-    "bool": np.dtype(np.bool_),
-    "int8": np.dtype(np.int8),
-    "uint8": np.dtype(np.uint8),
-    "int16": np.dtype(np.int16),
-    "uint16": np.dtype(np.uint16),
-    "int32": np.dtype(np.int32),
-    "uint32": np.dtype(np.uint32),
-    "int64": np.dtype(np.int64),
-    "uint64": np.dtype(np.uint64),
-    "float32": np.dtype(np.float32),
-    "float64": np.dtype(np.float64),
-    "complex64": np.dtype(np.complex64),
-    "complex128": np.dtype(np.complex128),
-    "datetime64": np.dtype(np.datetime64),
-    "timedelta64": np.dtype(np.timedelta64),
-}
-
-if hasattr(np, "float16"):
-    _primitive_to_dtype["float16"] = np.dtype(np.float16)
-if hasattr(np, "float128"):
-    _primitive_to_dtype["float128"] = np.dtype(np.float128)
-if hasattr(np, "complex256"):
-    _primitive_to_dtype["complex256"] = np.dtype(np.complex256)
-
-_dtype_to_primitive = {}
-for primitive, dtype in _primitive_to_dtype.items():
-    _dtype_to_primitive[dtype] = primitive
-
 
 def from_dtype(dtype, parameters=None, inner_shape=None):
-    if "[" in str(dtype):
+    if dtype.subdtype is not None:
+        inner_shape = dtype.shape
+        dtype = dtype.subdtype[0]
+    if str(dtype) in ["datetime64[s]", "timedelta64[s]"] and "[" in str(dtype):
         dtype = str(dtype).split("[")
-        # WIP
-        # params = copy.deepcopy(parameters)
-        # params["__unit__"] = dtype[1][:-1]
+        parameters = parameters if parameters is not None else {}
         parameters["__unit__"] = dtype[1][:-1]
         dtype = dtype[0]
-        return NumpyForm(dtype, parameters=parameters, inner_shape=inner_shape)
-    else:
         return NumpyForm(
-            _dtype_to_primitive[dtype], parameters=parameters, inner_shape=inner_shape
+            primitive=dtype, parameters=parameters, inner_shape=inner_shape
         )
+    return NumpyForm(
+        primitive=ak._v2.types.numpytype._dtype_to_primitive[dtype],
+        parameters=parameters,
+        inner_shape=inner_shape,
+    )
 
 
 class NumpyForm(Form):
@@ -69,11 +42,13 @@ class NumpyForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if primitive not in _primitive_to_dtype:
+        if primitive not in ak._v2.types.numpytype._primitive_to_dtype:
             raise TypeError(
                 "{0} 'primitive' must be one of {1}, not {2}".format(
                     type(self).__name__,
-                    ", ".join(repr(x) for x in _primitive_to_dtype),
+                    ", ".join(
+                        repr(x) for x in ak._v2.types.numpytype._primitive_to_dtype
+                    ),
                     repr(primitive),
                 )
             )
@@ -83,6 +58,8 @@ class NumpyForm(Form):
                     type(self).__name__, repr(inner_shape)
                 )
             )
+        if inner_shape is not None and not isinstance(inner_shape, list):
+            inner_shape = list(inner_shape)
         if has_identities is not None and not isinstance(has_identities, bool):
             raise TypeError(
                 "{0} 'has_identities' must be of type bool or None, not {1}".format(
@@ -117,12 +94,14 @@ class NumpyForm(Form):
 
     def __repr__(self):
         args = [repr(self._primitive)]
-        if len(self._inner_shape) > 0:
+        if self._inner_shape is not None and len(self._inner_shape) > 0:
             args.append("inner_shape=" + repr(self._inner_shape))
         args += self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose=True):
+    def _tolist_part(self, verbose=True, toplevel=False):
+        if toplevel:
+            return self._primitive
         out = {}
         out["class"] = "NumpyArray"
         out["primitive"] = self._primitive

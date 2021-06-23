@@ -73,18 +73,19 @@ class RecordForm(Form):
         return self._contents
 
     def __repr__(self):
-        args = [
-            repr(self._recordlookup),
-            repr(self._content),
-        ] + self._repr_args()
+        args = [repr(self._contents), repr(self._recordlookup)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(
-        self,
-        verbose=True,
-    ):
+    def _tolist_part(self, verbose=True, toplevel=False):
         out = {}
         out["class"] = "RecordArray"
-        out["recordlookop"] = self._recordlookup
-        out["content"] = [content.tolist(verbose=verbose) for content in self._contents]
+        contents_tolist = [self._contents[0].tolist(verbose=verbose)]
+        contents_tolist += [
+            content.tolist(verbose=verbose, toplevel=not verbose)
+            for content in self._contents[1:]
+        ]
+        if self._recordlookup is not None:
+            out["contents"] = dict(zip(self._recordlookup, contents_tolist))
+        else:
+            out["contents"] = contents_tolist
         return out

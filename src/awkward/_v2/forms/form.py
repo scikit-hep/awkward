@@ -31,7 +31,9 @@ class Form(object):
     def __str__(self):
         return json.dumps(self.tolist(verbose=False), indent="    ")
 
-    def tolist(self, toplevel=False, verbose=True):
+    def tolist(self, verbose=True, toplevel=False):
+        if toplevel:
+            return self._tolist_part(verbose=verbose, toplevel=toplevel)
         out = self._tolist_part(verbose=verbose)
         if verbose or self._has_identities:
             out["has_identities"] = self._has_identities
@@ -54,5 +56,4 @@ class Form(object):
 
         if self._form_key is not None:
             out.append("form_key=" + repr(self._form_key))
-
         return out

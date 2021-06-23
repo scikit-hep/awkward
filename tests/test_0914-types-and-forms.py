@@ -41,7 +41,10 @@ def test_UnknownType():
     )
 
 
-# @pytest.skipif(ak._util.win, reason="NumPy does not have float16, float128, and complex256 -- on Windows")
+@pytest.mark.skipif(
+    ak._util.win,
+    reason="NumPy does not have float16, float128, and complex256 -- on Windows",
+)
 def test_NumpyType():
     assert str(ak._v2.types.numpytype.NumpyType("bool")) == "bool"
     assert str(ak._v2.types.numpytype.NumpyType("int8")) == "int8"
@@ -1523,8 +1526,10 @@ def test_EmptyForm():
     }
 
 
-# @pytest.skipif(ak._util.win, reason="NumPy does not have float16, float128, and complex256 -- on Windows")
-@pytest.mark.skip(reason="unimplemented RecordForm")
+@pytest.mark.skipif(
+    ak._util.win,
+    reason="NumPy does not have float16, float128, and complex256 -- on Windows",
+)
 def test_NumpyForm():
     assert (
         str(ak._v2.forms.numpyform.NumpyForm("bool"))
@@ -1809,13 +1814,19 @@ def test_NumpyForm():
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak._v2.forms.numpyform.from_dtype(
-        np.dtype("bool"), inner_shape=(1, 2, 3)
-    ).tolist(verbose=False) == {
+    assert ak._v2.forms.numpyform.from_dtype(np.dtype(("bool", (1, 2, 3)))).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [1, 2, 3],
     }
+    with pytest.raises(TypeError):
+        ak._v2.forms.from_iter(np.dtype("O")).tolist(verbose=False)
+    with pytest.raises(TypeError):
+        ak._v2.forms.from_iter(
+            np.dtype([("one", np.int64), ("two", np.float64)])
+        ).tolist(verbose=False)
     assert ak._v2.forms.from_iter("bool").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
@@ -2631,12 +2642,14 @@ def test_ListOffsetForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented RecordForm")
 def test_RecordForm():
     assert (
         str(
             ak._v2.forms.recordform.RecordForm(
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
                 None,
             )
         )
@@ -2653,7 +2666,10 @@ def test_RecordForm():
     assert (
         str(
             ak._v2.forms.recordform.RecordForm(
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
                 ["x", "y"],
             )
         )
@@ -2670,7 +2686,10 @@ def test_RecordForm():
     assert (
         str(
             ak._v2.forms.recordform.RecordForm(
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
                 None,
                 has_identities=True,
                 parameters={"x": 123},
@@ -2695,7 +2714,10 @@ def test_RecordForm():
     assert (
         str(
             ak._v2.forms.recordform.RecordForm(
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
                 ["x", "y"],
                 has_identities=True,
                 parameters={"x": 123},
@@ -2721,7 +2743,10 @@ def test_RecordForm():
     assert (
         repr(
             ak._v2.forms.recordform.RecordForm(
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
                 None,
             )
         )
@@ -2730,7 +2755,10 @@ def test_RecordForm():
     assert (
         repr(
             ak._v2.forms.recordform.RecordForm(
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
                 ["x", "y"],
             )
         )
@@ -2740,7 +2768,7 @@ def test_RecordForm():
         repr(
             ak._v2.forms.recordform.RecordForm(
                 contents=[
-                    ak._v2.forms.EmptyForm(),
+                    ak._v2.forms.emptyform.EmptyForm(),
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
                 recordlookup=None,
@@ -2755,7 +2783,7 @@ def test_RecordForm():
         repr(
             ak._v2.forms.recordform.RecordForm(
                 contents=[
-                    ak._v2.forms.EmptyForm(),
+                    ak._v2.forms.emptyform.EmptyForm(),
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
                 recordlookup=["x", "y"],
@@ -2768,7 +2796,7 @@ def test_RecordForm():
     )
 
     assert ak._v2.forms.recordform.RecordForm(
-        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
         None,
     ).tolist(verbose=False) == {
         "class": "RecordArray",
@@ -2778,7 +2806,7 @@ def test_RecordForm():
         ],
     }
     assert ak._v2.forms.recordform.RecordForm(
-        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
         ["x", "y"],
     ).tolist(verbose=False) == {
         "class": "RecordArray",
@@ -2788,7 +2816,7 @@ def test_RecordForm():
         },
     }
     assert ak._v2.forms.recordform.RecordForm(
-        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
         None,
     ).tolist() == {
         "class": "RecordArray",
@@ -2813,7 +2841,7 @@ def test_RecordForm():
         "form_key": None,
     }
     assert ak._v2.forms.recordform.RecordForm(
-        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
         ["x", "y"],
     ).tolist() == {
         "class": "RecordArray",
@@ -2838,7 +2866,10 @@ def test_RecordForm():
         "form_key": None,
     }
     assert ak._v2.forms.recordform.RecordForm(
-        content=[ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        contents=[
+            ak._v2.forms.emptyform.EmptyForm(),
+            ak._v2.forms.numpyform.NumpyForm("bool"),
+        ],
         recordlookup=None,
         has_identities=True,
         parameters={"x": 123},
@@ -2854,7 +2885,10 @@ def test_RecordForm():
         "form_key": "hello",
     }
     assert ak._v2.forms.recordform.RecordForm(
-        content=[ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        contents=[
+            ak._v2.forms.emptyform.EmptyForm(),
+            ak._v2.forms.numpyform.NumpyForm("bool"),
+        ],
         recordlookup=["x", "y"],
         has_identities=True,
         parameters={"x": 123},
@@ -3864,7 +3898,6 @@ def test_UnmaskedForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented UnionForm")
 def test_UnionForm():
     assert (
         str(
@@ -3894,7 +3927,10 @@ def test_UnionForm():
             ak._v2.forms.unionform.UnionForm(
                 "i8",
                 "u32",
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
             )
         )
         == """{
@@ -3914,7 +3950,10 @@ def test_UnionForm():
             ak._v2.forms.unionform.UnionForm(
                 "i8",
                 "i64",
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
             )
         )
         == """{
@@ -3934,7 +3973,10 @@ def test_UnionForm():
             ak._v2.forms.unionform.UnionForm(
                 "i8",
                 "i32",
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
                 has_identities=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -3963,7 +4005,10 @@ def test_UnionForm():
             ak._v2.forms.unionform.UnionForm(
                 "i8",
                 "i32",
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
             )
         )
         == "UnionForm('i8', 'i32', [EmptyForm(), NumpyForm('bool')])"
@@ -3974,7 +4019,7 @@ def test_UnionForm():
                 tags="i8",
                 index="i32",
                 contents=[
-                    ak._v2.forms.EmptyForm(),
+                    ak._v2.forms.emptyform.EmptyForm(),
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
                 has_identities=True,
@@ -3988,7 +4033,7 @@ def test_UnionForm():
     assert ak._v2.forms.unionform.UnionForm(
         "i8",
         "i32",
-        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
     ).tolist(verbose=False) == {
         "class": "UnionArray",
         "tags": "i8",
@@ -4001,7 +4046,7 @@ def test_UnionForm():
     assert ak._v2.forms.unionform.UnionForm(
         "i8",
         "i32",
-        [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
     ).tolist() == {
         "class": "UnionArray",
         "tags": "i8",
@@ -4029,7 +4074,10 @@ def test_UnionForm():
     assert ak._v2.forms.unionform.UnionForm(
         tags="i8",
         index="i32",
-        content=[ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        contents=[
+            ak._v2.forms.emptyform.EmptyForm(),
+            ak._v2.forms.numpyform.NumpyForm("bool"),
+        ],
         has_identities=True,
         parameters={"x": 123},
         form_key="hello",

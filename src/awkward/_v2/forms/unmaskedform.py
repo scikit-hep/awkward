@@ -50,7 +50,7 @@ class UnmaskedForm(Form):
         args = [repr(self._content)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose=True):
+    def _tolist_part(self, verbose=True, toplevel=False):
         out = {}
         out["class"] = "UnmaskedArray"
         out["content"] = self._content.tolist(verbose=verbose)

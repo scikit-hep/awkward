@@ -20,15 +20,10 @@ import awkward._v2.forms.virtualform  # noqa: F401
 
 
 def from_iter(input):
-
-    has_identities = input.get("has_identities", False)
-    parameters = input.get("parameters", {})
-    form_key = input.get("form_key", None)
-    if "EmptyArray" == input["class"]:
-        return awkward._v2.forms.emptyform.EmptyForm(
-            has_identities, parameters, form_key
-        )
-    elif "NumpyArray" == input["class"]:
+    has_identities = input["has_identities"] if "has_identities" in input else False
+    parameters = input["parameters"] if "parameters" in input else {}
+    form_key = input["form_key"] if "form_key" in input else None
+    if isinstance(input, str) or "NumpyArray" == input["class"]:
         if isinstance(input, str):
             return awkward._v2.forms.numpyform.NumpyForm(primitive=input)
         else:
@@ -42,6 +37,10 @@ def from_iter(input):
             return awkward._v2.forms.numpyform.NumpyForm(
                 primitive, inner_shape, has_identities, parameters, form_key
             )
+    elif "EmptyArray" == input["class"]:
+        return awkward._v2.forms.emptyform.EmptyForm(
+            has_identities, parameters, form_key
+        )
     elif "RegularArray" == input["class"]:
         return awkward._v2.forms.regularform.RegularForm(
             content=from_iter(input["content"]),
@@ -63,6 +62,22 @@ def from_iter(input):
         return awkward._v2.forms.listoffsetform.ListOffsetForm(
             offsets=input["offsets"],
             content=from_iter(input["content"]),
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    elif "RecordArray" == input["class"]:
+        recordlookup = input["recordlookup"] if "recordlookup" in input else None
+        if isinstance(input["contents"], dict):
+            recordlookup = list(input["contents"].keys())
+            contents = [
+                from_iter(content) for content in list(input["contents"].values())
+            ]
+        else:
+            contents = [from_iter(content) for content in input["contents"]]
+        return awkward._v2.forms.recordform.RecordForm(
+            contents=contents,
+            recordlookup=recordlookup,
             has_identities=has_identities,
             parameters=parameters,
             form_key=form_key,
@@ -113,6 +128,15 @@ def from_iter(input):
     elif "UnmaskedArray" == input["class"]:
         return awkward._v2.forms.unmaskedform.UnmaskedForm(
             content=from_iter(input["content"]),
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    elif "UnionArray" == input["class"]:
+        return awkward._v2.forms.unionform.UnionForm(
+            tags=input["tags"],
+            index=input["index"],
+            contents=[from_iter(content) for content in input["contents"]],
             has_identities=has_identities,
             parameters=parameters,
             form_key=form_key,

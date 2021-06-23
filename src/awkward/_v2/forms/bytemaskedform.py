@@ -78,7 +78,7 @@ class ByteMaskedForm(Form):
         ] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose=True):
+    def _tolist_part(self, verbose=True, toplevel=False):
         out = {}
         out["class"] = "ByteMaskedArray"
         out["mask"] = self._mask

@@ -92,10 +92,15 @@ class UnionForm(Form):
         ] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose=True):
+    def _tolist_part(self, verbose=True, toplevel=False):
         out = {}
         out["class"] = "UnionArray"
         out["tags"] = self._tags
         out["index"] = self._index
-        out["content"] = [content.tolist(verbose=verbose) for content in self._contents]
+        contents_tolist = [self._contents[0].tolist(verbose=verbose)]
+        contents_tolist += [
+            content.tolist(verbose=verbose, toplevel=not verbose)
+            for content in self._contents[1:]
+        ]
+        out["contents"] = contents_tolist
         return out
