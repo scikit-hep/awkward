@@ -162,10 +162,7 @@ def from_numpy(
             contents.append(recurse(array[name], mask))
         layout = ak.layout.RecordArray(contents, array.dtype.names)
 
-    if highlevel:
-        return ak._util.wrap(layout, behavior)
-    else:
-        return layout
+    return ak._util.maybe_wrap(layout, behavior, highlevel)
 
 
 def to_numpy(array, allow_missing=True):
@@ -419,10 +416,7 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
 
     layout = recurse(array)
 
-    if highlevel:
-        return ak._util.wrap(layout, behavior)
-    else:
-        return layout
+    return ak._util.maybe_wrap(layout, behavior, highlevel)
 
 
 def to_cupy(array):
@@ -590,10 +584,7 @@ def from_jax(array, regulararray=False, highlevel=True, behavior=None):
 
     layout = recurse(array)
 
-    if highlevel:
-        return ak._util.wrap(layout, behavior)
-    else:
-        return layout
+    return ak._util.maybe_wrap(layout, behavior, highlevel)
 
 
 def to_jax(array):
@@ -827,10 +818,7 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
     arr = ak.to_layout(array)
     out = arr.copy_to(kernels)
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def from_iter(
@@ -897,10 +885,7 @@ def from_iter(
     for x in iterable:
         out.fromiter(x)
     layout = out.snapshot()
-    if highlevel:
-        return ak._util.wrap(layout, behavior)
-    else:
-        return layout
+    return ak._util.maybe_wrap(layout, behavior, highlevel)
 
 
 def to_list(array):
@@ -1121,10 +1106,7 @@ def from_json(
     if complex_imag_string is not None:
         layout = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
 
-    if highlevel:
-        return ak._util.wrap(layout, behavior)
-    else:
-        return layout
+    return ak._util.maybe_wrap(layout, behavior, highlevel)
 
 
 def to_json(
@@ -1305,15 +1287,9 @@ def from_awkward0(
         else:
             return array._layout.snapshot()
     elif isinstance(array, (ak.layout.Content, ak.layout.Record)):
-        if highlevel:
-            return ak._util.wrap(array, behavior)
-        else:
-            return array
+        return ak._util.maybe_wrap(array, behavior, highlevel)
     elif isinstance(array, ak.layout.ArrayBuilder):
-        if highlevel:
-            return ak._util.wrap(array.snapshot(), behavior)
-        else:
-            return array.snapshot()
+        return ak._util.maybe_wrap(array.snapshot(), behavior, highlevel)
 
     def recurse(array, level):
         if isinstance(array, dict):
@@ -1637,10 +1613,7 @@ def from_awkward0(
             )
 
     out = recurse(array, 0)
-    if highlevel:
-        return ak._util.wrap(out, behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 from_awkward0.int8max = np.iinfo(np.int8).max
@@ -1959,10 +1932,7 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True, behavior=None
             return None
 
     out = ak._util.recursively_apply(to_layout(array), getfunction, pass_depth=False)
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def _import_pyarrow(name):
@@ -2941,10 +2911,7 @@ def _from_arrow(
                 + ak._util.exception_suffix(__file__)
             )
 
-    if highlevel:
-        return ak._util.wrap(handle_arrow(array), behavior)
-    else:
-        return handle_arrow(array)
+    return ak._util.maybe_wrap(handle_arrow(array), behavior, highlevel)
 
 
 def to_parquet(
@@ -5119,10 +5086,7 @@ def from_buffers(
             + ak._util.exception_suffix(__file__)
         )
 
-    if highlevel:
-        return ak._util.wrap(out, behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 def to_pandas(

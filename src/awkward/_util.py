@@ -449,6 +449,10 @@ def maybe_wrap(content, behavior, highlevel):
         return content
 
 
+def maybe_wrap_like(content, array, behavior, highlevel):
+    return maybe_wrap(content, behaviorof(array, behavior=behavior), highlevel)
+
+
 def extra(args, kwargs, defaults):
     out = []
     for i in range(len(defaults)):

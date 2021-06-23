@@ -183,10 +183,7 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
         pass_depth=False,
     )
     assert isinstance(out, tuple) and len(out) == 1
-    if highlevel:
-        return ak._util.wrap(out[0], behavior)
-    else:
-        return out[0]
+    return ak._util.maybe_wrap(out[0], behavior, highlevel)
 
 
 def num(array, axis=1, highlevel=True, behavior=None):
@@ -254,12 +251,7 @@ def num(array, axis=1, highlevel=True, behavior=None):
         array, allow_record=False, allow_other=False
     )
     out = layout.num(axis=axis)
-    if highlevel:
-        return ak._util.wrap(
-            out, behavior=ak._util.behaviorof(array, behavior=behavior)
-        )
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def run_lengths(array, highlevel=True, behavior=None):
@@ -474,10 +466,7 @@ def run_lengths(array, highlevel=True, behavior=None):
             pass_user=False,
         )
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def zip(
@@ -660,10 +649,7 @@ def zip(
         out = out[0]
         assert isinstance(out, ak.layout.Record)
 
-    if highlevel:
-        return ak._util.wrap(out, behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 def unzip(array):
@@ -751,10 +737,7 @@ def to_regular(array, axis=1, highlevel=True, behavior=None):
             numpy_to_regular=True,
         )
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def from_regular(array, axis=1, highlevel=True, behavior=None):
@@ -810,10 +793,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
             numpy_to_regular=True,
         )
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def with_name(array, name, highlevel=True, behavior=None):
@@ -865,10 +845,7 @@ def with_name(array, name, highlevel=True, behavior=None):
 
     out2 = ak._util.recursively_apply(out, getfunction2, pass_depth=False)
 
-    if highlevel:
-        return ak._util.wrap(out2, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out2
+    return ak._util.maybe_wrap_like(out2, array, behavior, highlevel)
 
 
 def with_field(base, what, where=None, highlevel=True, behavior=None):
@@ -993,10 +970,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        if highlevel:
-            return ak._util.wrap(out[0], behavior=behavior)
-        else:
-            return out[0]
+        return ak._util.maybe_wrap(out[0], behavior, highlevel)
 
 
 def with_parameter(array, parameter, value, highlevel=True, behavior=None):
@@ -1030,12 +1004,7 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
     else:
         out = layout.withparameter(parameter, value)
 
-    if highlevel:
-        return ak._util.wrap(
-            out, behavior=ak._util.behaviorof(array, behavior=behavior)
-        )
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def without_parameters(array, highlevel=True, behavior=None):
@@ -1061,12 +1030,7 @@ def without_parameters(array, highlevel=True, behavior=None):
         layout, lambda layout: None, pass_depth=False, keep_parameters=False
     )
 
-    if highlevel:
-        return ak._util.wrap(
-            out, behavior=ak._util.behaviorof(array, behavior=behavior)
-        )
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 _ZEROS = object()
@@ -1277,10 +1241,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
     if dtype is not None:
         out = strings_astype(out, dtype)
         out = values_astype(out, dtype)
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 @ak._connect._numpy.implements("broadcast_arrays")
@@ -1665,12 +1626,9 @@ def concatenate(
             pass_depth=True,
         )[0]
 
-    if highlevel:
-        return ak._util.wrap(
-            out, behavior=ak._util.behaviorof(*arrays, behavior=behavior)
-        )
-    else:
-        return out
+    return ak._util.maybe_wrap(
+        out, ak._util.behaviorof(*arrays, behavior=behavior), highlevel
+    )
 
 
 @ak._connect._numpy.implements("where")
@@ -1772,10 +1730,7 @@ def where(condition, *args, **kwargs):
             [akcondition, left, right], getfunction, behavior, pass_depth=False
         )
 
-        if highlevel:
-            return ak._util.wrap(out[0], behavior=behavior)
-        else:
-            return out[0]
+        return ak._util.maybe_wrap(out[0], behavior, highlevel)
 
     else:
         raise TypeError(
@@ -1936,20 +1891,12 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
         else:
             out = apply(layout)
 
-        if highlevel:
-            return ak._util.wrap(
-                out, behavior=ak._util.behaviorof(array, behavior=behavior)
-            )
-        else:
-            return out
+        return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
     else:
         out = layout.flatten(axis)
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
@@ -2155,10 +2102,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
             "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
         )
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def _packed(array, axis=None, highlevel=True, behavior=None):
@@ -2355,9 +2299,7 @@ def _packed(array, axis=None, highlevel=True, behavior=None):
 
     out = apply(layout, 1, axis)
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def packed(array, highlevel=True, behavior=None):
@@ -2483,10 +2425,7 @@ def local_index(array, axis=-1, highlevel=True, behavior=None):
         array, allow_record=True, allow_other=False
     )
     out = layout.localindex(axis)
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 @ak._connect._numpy.implements("sort")
@@ -2519,10 +2458,7 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=N
         array, allow_record=False, allow_other=False
     )
     out = layout.sort(axis, ascending, stable)
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 @ak._connect._numpy.implements("argsort")
@@ -2566,10 +2502,7 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavio
         array, allow_record=False, allow_other=False
     )
     out = layout.argsort(axis, ascending, stable)
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
@@ -2695,10 +2628,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
         out = layout.rpad_and_clip(target, axis)
     else:
         out = layout.rpad(target, axis)
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def fill_none(array, value, highlevel=True, behavior=None):
@@ -2773,10 +2703,7 @@ def fill_none(array, value, highlevel=True, behavior=None):
 
         out = arraylayout.fillna(valuelayout)
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def is_none(array, axis=0, highlevel=True, behavior=None):
@@ -2827,10 +2754,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
         layout, getfunction, pass_depth=True, pass_user=True, user=axis
     )
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def singletons(array, highlevel=True, behavior=None):
@@ -2873,10 +2797,7 @@ def singletons(array, highlevel=True, behavior=None):
     layout = ak.operations.convert.to_layout(array)
     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def firsts(array, axis=1, highlevel=True, behavior=None):
@@ -2935,10 +2856,7 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
             toslice
         ]
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def cartesian(
@@ -3400,10 +3318,7 @@ def cartesian(
             flatten_axis = toflatten.pop()
             result = flatten(result, axis=flatten_axis, highlevel=False)
 
-    if highlevel:
-        return ak._util.wrap(result, behavior)
-    else:
-        return result
+    return ak._util.maybe_wrap(result, behavior, highlevel)
 
 
 def argcartesian(
@@ -3509,10 +3424,7 @@ def argcartesian(
             layouts, axis=axis, nested=nested, parameters=parameters, highlevel=False
         )
 
-        if highlevel:
-            return ak._util.wrap(result, behavior)
-        else:
-            return result
+        return ak._util.maybe_wrap(result, behavior, highlevel)
 
 
 def combinations(
@@ -3677,12 +3589,7 @@ def combinations(
     out = layout.combinations(
         n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
     )
-    if highlevel:
-        return ak._util.wrap(
-            out, behavior=ak._util.behaviorof(array, behavior=behavior)
-        )
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def argcombinations(
@@ -3747,12 +3654,7 @@ def argcombinations(
         out = layout.combinations(
             n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
         )
-        if highlevel:
-            return ak._util.wrap(
-                out, behavior=ak._util.behaviorof(array, behavior=behavior)
-            )
-        else:
-            return out
+        return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def partitions(array):
@@ -3811,12 +3713,9 @@ def partitioned(arrays, highlevel=True, behavior=None):
         stops.append(total_length)
 
     out = ak.partition.IrregularlyPartitionedArray(partitions, stops)
-    if highlevel:
-        return ak._util.wrap(
-            out, behavior=ak._util.behaviorof(*arrays, behavior=behavior)
-        )
-    else:
-        return out
+    return ak._util.maybe_wrap(
+        out, ak._util.behaviorof(*arrays, behavior=behavior), highlevel
+    )
 
 
 def repartition(array, lengths, highlevel=True, behavior=None):
@@ -3889,12 +3788,7 @@ def repartition(array, lengths, highlevel=True, behavior=None):
         else:
             out = ak.partition.IrregularlyPartitionedArray.toPartitioned(layout, stops)
 
-    if highlevel:
-        return ak._util.wrap(
-            out, behavior=ak._util.behaviorof(array, behavior=behavior)
-        )
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def virtual(
@@ -4089,10 +3983,7 @@ def virtual(
 
     out = ak.layout.VirtualArray(gen, cache, cache_key=cache_key, parameters=parameters)
 
-    if highlevel:
-        return ak._util.wrap(out, behavior=behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 def materialized(array, highlevel=True, behavior=None):
@@ -4120,10 +4011,7 @@ def materialized(array, highlevel=True, behavior=None):
     out = ak._util.recursively_apply(
         layout, getfunction, pass_depth=False, pass_user=False
     )
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def with_cache(array, cache, highlevel=True, behavior=None):
@@ -4205,10 +4093,7 @@ def with_cache(array, cache, highlevel=True, behavior=None):
     out = ak._util.recursively_apply(
         ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 @ak._connect._numpy.implements("size")
@@ -4388,10 +4273,7 @@ def nan_to_num(
     out = ak._util.recursively_apply(
         layout, getfunction, pass_depth=False, pass_user=False
     )
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 @ak._connect._numpy.implements("isclose")
@@ -4443,10 +4325,7 @@ def isclose(
     assert isinstance(out, tuple) and len(out) == 1
     result = out[0]
 
-    if highlevel:
-        return ak._util.wrap(result, behavior)
-    else:
-        return result
+    return ak._util.maybe_wrap(result, behavior, highlevel)
 
 
 _dtype_to_string = {
@@ -4533,10 +4412,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
     )
     out = layout.numbers_to_type(to_str)
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def strings_astype(array, to, highlevel=True, behavior=None):
@@ -4604,10 +4480,7 @@ def strings_astype(array, to, highlevel=True, behavior=None):
         pass_depth=False,
         pass_user=False,
     )
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 __all__ = [
