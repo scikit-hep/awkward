@@ -1,0 +1,132 @@
+name: Wheels
+
+on:
+  pull_request: [main] # Temporary
+  workflow_dispatch:
+  release:
+    types:
+    - published
+
+
+env:
+  CIBW_TEST_EXTRAS: test
+  CIBW_TEST_COMMAND: pytest {project}/tests
+  CIBW_BUILD_VERBOSITY: 1
+  CIBW_SKIP: "pp27* pp36* pp*win* cp27-win*"
+  CIBW_TEST_SKIP: "*universal2:arm64 pp*macos*"
+  CIBW_ENVIRONMENT: PIP_ONLY_BINARY=cmake,numpy
+
+
+jobs:
+  make_sdist:
+    name: "Make SDist"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Build SDist
+      run: pipx run build --sdist
+
+    - uses: actions/upload-artifact@v2
+      with:
+        path: dist/*.tar.gz
+
+
+  build_wheels:
+    name: "Wheel: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        arch: [auto64, auto32]
+        build: ["*"]
+        include:
+        - os: ubuntu-latest
+          type: ManyLinux1
+          arch: auto64
+          build: "cp{27,35,36}-*"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+
+        - os: ubuntu-latest
+          type: ManyLinux2010
+          arch: auto64
+          build: "cp{36,37,38,39}-*"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
+
+        - os: macos-latest
+          type: 2.7-3.6
+          arch: auto
+          build: "cp{27,35,36}-*"
+
+        - os: macos-latest
+          type: 3.7-3.9 & pypy
+          arch: auto
+          build: "cp3{7,8,9}-* pp*"
+
+        - os: macos-latest
+          arch: universal2
+          build: "*"
+
+        - os: windows-latest
+          arch: auto32
+          build: "*"
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - uses: pypa/cibuildwheel@v1.12.0
+      env:
+        CIBW_BUILD: ${{ matrix.build }}
+        CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
+        CIBW_ARCHS: ${{ matrix.arch }}
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@v2
+      with:
+        path: wheelhouse/*.whl
+
+
+  build_alt_wheels:
+    name: "Wheel: ${{ matrix.python }} on ${{ matrix.arch }}"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [36, 37, 38, 39]
+        arch: [aarch64]
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - uses: docker/setup-qemu-action@v1.2.0
+
+    - uses: pypa/cibuildwheel@v1.12.0
+      env:
+        CIBW_BUILD: cp${{ matrix.python }}-*
+        CIBW_ARCHS: ${{ matrix.arch }}
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@v2
+      with:
+        path: wheelhouse/*.whl
+
+
+  upload_all:
+    needs: [build_wheels, build_alt_wheels, make_sdist]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: artifact
+        path: dist
+
+    - uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        password: ${{ secrets.pypi_password }}
