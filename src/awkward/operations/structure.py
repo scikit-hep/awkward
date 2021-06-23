@@ -183,10 +183,7 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
         pass_depth=False,
     )
     assert isinstance(out, tuple) and len(out) == 1
-    if highlevel:
-        return ak._util.wrap(out[0], behavior)
-    else:
-        return out[0]
+    return ak._util.maybe_wrap(out[0], behavior, highlevel)
 
 
 def num(array, axis=1, highlevel=True, behavior=None):
@@ -660,10 +657,7 @@ def zip(
         out = out[0]
         assert isinstance(out, ak.layout.Record)
 
-    if highlevel:
-        return ak._util.wrap(out, behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 def unzip(array):
@@ -3400,10 +3394,7 @@ def cartesian(
             flatten_axis = toflatten.pop()
             result = flatten(result, axis=flatten_axis, highlevel=False)
 
-    if highlevel:
-        return ak._util.wrap(result, behavior)
-    else:
-        return result
+    return ak._util.maybe_wrap(result, behavior, highlevel)
 
 
 def argcartesian(
@@ -4089,10 +4080,7 @@ def virtual(
 
     out = ak.layout.VirtualArray(gen, cache, cache_key=cache_key, parameters=parameters)
 
-    if highlevel:
-        return ak._util.wrap(out, behavior=behavior)
-    else:
-        return out
+    return ak._util.maybe_wrap(out, behavior, highlevel)
 
 
 def materialized(array, highlevel=True, behavior=None):
@@ -4443,10 +4431,7 @@ def isclose(
     assert isinstance(out, tuple) and len(out) == 1
     result = out[0]
 
-    if highlevel:
-        return ak._util.wrap(result, behavior)
-    else:
-        return result
+    return ak._util.maybe_wrap(result, behavior, highlevel)
 
 
 _dtype_to_string = {
