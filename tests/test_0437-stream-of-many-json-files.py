@@ -373,7 +373,9 @@ def test_fromfile():
     # read json file containg 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with floats
     array = ak.from_json(
-        os.path.join(DIR, "samples/test.json"), infinity_string="inf", minus_infinity_string="-inf"
+        os.path.join(DIR, "samples/test.json"),
+        infinity_string="inf",
+        minus_infinity_string="-inf",
     )
 
     assert ak.to_list(array) == [
@@ -570,7 +572,9 @@ def test_fromfile():
     # user-defined strings
     # replace can only work for one string definition
     array = ak.from_json(
-        os.path.join(DIR, "samples/test-nan-inf.json"), infinity_string="Infinity", nan_string="None"
+        os.path.join(DIR, "samples/test-nan-inf.json"),
+        infinity_string="Infinity",
+        nan_string="None",
     )
 
     assert ak.to_list(array) == [
