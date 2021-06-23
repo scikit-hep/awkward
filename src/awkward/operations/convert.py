@@ -3504,43 +3504,6 @@ class _ArrowDataset(_Dataset):
         )
 
     @staticmethod
-    def _regularize_filesystem(filesystem):
-        from pyarrow.fs import FileSystem, LocalFileSystem, PyFileSystem, FSSpecHandler
-
-        if filesystem is None:
-            return LocalFileSystem()
-        elif isinstance(filesystem, FileSystem):
-            return filesystem
-        else:
-            # Assume we have an fsspec filesystem
-            return PyFileSystem(FSSpecHandler(filesystem))
-
-    @classmethod
-    def _regularize_options(cls, source, options):
-        if options is None:
-            options = {}
-
-        # Require "hive" partitioning (as we only support this kind)
-        if "partitioning" in options:
-            raise ValueError(
-                "Partitioning is currently an implementation detail in Awkward"
-                + ak._util.exception_suffix(__file__)
-            )
-
-        arrow_options = {}
-        # Deduce base dir if not provided
-        if isinstance(source, Iterable) and not isinstance(source, str):
-            arrow_options["partition_base_dir"] = os.path.commonpath(source)
-
-        # Update our defaults with user options
-        arrow_options.update(options)
-        arrow_options["filesystem"] = cls._regularize_filesystem(
-            arrow_options.get("filesystem")
-        )
-        arrow_options["partitioning"] = pyarrow.dataset.partitioning(flavor="hive")
-        return arrow_options
-
-    @staticmethod
     def _get_paths_and_counts(fragments, row_groups):
         paths_and_counts = []
         last_filename = None
@@ -3562,30 +3525,6 @@ class _ArrowDataset(_Dataset):
                 paths_and_counts.append([filename, 0])
             paths_and_counts[-1][-1] += row_group.num_rows
         return paths_and_counts
-
-    @staticmethod
-    def _create_dataset(path, file_system, options):
-        import pyarrow.fs
-
-        if isinstance(path, str):
-            file_type = file_system.get_file_info(path).type
-
-            # If the user passes the `_metadata` file, then we should use `parquet_dataset`
-            if file_type == pyarrow.fs.FileType.File and path.endswith("_metadata"):
-                return pyarrow.dataset.parquet_dataset(path, **options)
-
-            # If the user passes a directory with `_metadata` file,
-            # then we should use `parquet_dataset`
-            else:
-                metadata_path = posixpath.join(path, "_metadata")
-                metadata_file_type = file_system.get_file_info(metadata_path).type
-                if (
-                    file_type == pyarrow.fs.FileType.Directory
-                    and metadata_file_type == pyarrow.fs.FileType.File
-                ):
-                    return pyarrow.dataset.parquet_dataset(metadata_path, **options)
-        # In all other cases
-        return pyarrow.dataset.dataset(path, **options)
 
     @property
     def row_group_metadata(self):
