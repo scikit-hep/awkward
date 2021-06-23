@@ -6,10 +6,7 @@ import json
 
 import awkward as ak
 
-import json
-
 np = ak.nplike.NumpyMetadata.instance()
-
 
 class Form(object):
     @property

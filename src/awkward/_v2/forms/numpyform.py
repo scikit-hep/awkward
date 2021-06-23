@@ -7,7 +7,7 @@ try:
 except ImportError:
     from collections import Iterable
 
-import json, copy
+import copy
 
 from awkward._v2.forms.form import Form
 
@@ -54,7 +54,6 @@ def from_dtype(dtype, parameters={}, inner_shape=[]):
         dtype = dtype[0]
         return NumpyForm(dtype, parameters=params, inner_shape=inner_shape)
     else:
-        print(parameters)
         return NumpyForm(
             _dtype_to_primitive[dtype], parameters=parameters, inner_shape=inner_shape
         )
@@ -120,6 +119,14 @@ class NumpyForm(Form):
         self._has_identities = has_identities
         self._parameters = parameters
         self._form_key = form_key
+
+    @property
+    def primitive(self):
+        return self._primitive
+
+    @property
+    def inner_shape(self):
+        return self._inner_shape
 
     def __repr__(self):
         args = [repr(self._primitive)]

@@ -4,27 +4,32 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
-
-class ListForm(Form):
+class ByteMaskedForm(Form):
     def __init__(
-        self, starts, stops, content, has_identities=False, parameters={}, form_key=None
+        self,
+        mask,
+        content,
+        valid_when,
+        has_identities=False,
+        parameters={},
+        form_key=None,
     ):
-        if not isinstance(starts, str):
+        if not isinstance(mask, str):
             raise TypeError(
-                "{0} 'starts' must be of type str, not {1}".format(
-                    type(self).__name__, repr(starts)
-                )
-            )
-        if not isinstance(stops, str):
-            raise TypeError(
-                "{0} 'starts' must be of type str, not {1}".format(
-                    type(self).__name__, repr(starts)
+                "{0} 'mask' must be of type str, not {1}".format(
+                    type(self).__name__, repr(mask)
                 )
             )
         if not isinstance(content, Form):
             raise TypeError(
                 "{0} all 'contents' must be Form subclasses, not {1}".format(
                     type(self).__name__, repr(content)
+                )
+            )
+        if not isinstance(valid_when, bool):
+            raise TypeError(
+                "{0} 'valid_when' must be bool, not {1}".format(
+                    type(self).__name__, repr(valid_when)
                 )
             )
         if has_identities is not None and not isinstance(has_identities, bool):
@@ -45,37 +50,33 @@ class ListForm(Form):
                     type(self).__name__, repr(form_key)
                 )
             )
-        self._starts = starts
-        self._stops = stops
+        self._mask = mask
         self._content = content
+        self._valid_when = valid_when
         self._has_identities = has_identities
         self._parameters = parameters
         self._form_key = form_key
 
     @property
-    def starts(self):
-        return self._starts
+    def mask(self):
+        return self._mask
 
-    @property
-    def stops(self):
-        return self._stops
-    
     @property
     def content(self):
         return self._content
 
+    @property
+    def valid_when(self):
+        return self._valid_when
+
     def __repr__(self):
-        args = [
-            repr(self._starts),
-            repr(self._stops),
-            repr(self._content),
-        ] + self._repr_args()
+        args = [repr(self._mask), repr(self._content), repr(self._valid_when)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose=True):
         out = {}
-        out["class"] = "ListArray"
-        out["starts"] = self._starts
-        out["stops"] = self._stops
+        out["class"] = "ByteMaskedArray"
+        out["mask"] = self._mask
+        out["valid_when"] = self._valid_when
         out["content"] = self._content.tolist(verbose=verbose)
         return out

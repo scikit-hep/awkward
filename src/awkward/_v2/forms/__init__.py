@@ -6,11 +6,15 @@ import awkward._v2.forms.emptyform  # noqa: F401
 import awkward._v2.forms.numpyform  # noqa: F401
 import awkward._v2.forms.regularform  # noqa: F401
 import awkward._v2.forms.listform  # noqa: F401
-
-# import awkward._v2.forms.recordform  # noqa: F401
-# import awkward._v2.forms.optionform  # noqa: F401
-# import awkward._v2.forms.unionform  # noqa: F401
-# import awkward._v2.forms.arrayform  # noqa: F401
+import awkward._v2.forms.listoffsetform  # noqa: F401
+import awkward._v2.forms.recordform  # noqa: F401
+import awkward._v2.forms.indexedform  # noqa: F401
+import awkward._v2.forms.indexedoptionform  # noqa: F401
+import awkward._v2.forms.bytemaskedform  # noqa: F401
+import awkward._v2.forms.bitmaskedform  # noqa: F401
+import awkward._v2.forms.unmaskedform  # noqa: F401
+import awkward._v2.forms.unionform  # noqa: F401
+import awkward._v2.forms.virtualform  # noqa: F401
 
 
 def from_iter(input):
@@ -38,6 +42,72 @@ def from_iter(input):
             parameters=parameters,
             form_key=form_key,
         )
+    if "ListOffsetArray" == input["class"]:
+        return awkward._v2.forms.listoffsetform.ListOffsetForm(
+            offsets=input["offsets"],
+            content=from_iter(input["content"]),
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    if "IndexedArray" == input["class"]:
+        return awkward._v2.forms.indexedform.IndexedForm(
+            index=input["index"],
+            content=from_iter(input["content"]),
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    if "IndexedOptionArray" == input["class"]:
+        return awkward._v2.forms.indexedoptionform.IndexedOptionForm(
+            index=input["index"],
+            content=from_iter(input["content"]),
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    if "IndexedOptionArray" == input["class"]:
+        return awkward._v2.forms.indexedoptionform.IndexedOptionForm(
+            index=input["index"],
+            content=from_iter(input["content"]),
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    if "ByteMaskedArray" == input["class"]:
+        return awkward._v2.forms.bytemaskedform.ByteMaskedForm(
+            mask=input["mask"],
+            content=from_iter(input["content"]),
+            valid_when=input["valid_when"],
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    if "BitMaskedArray" == input["class"]:
+        return awkward._v2.forms.bitmaskedform.BitMaskedForm(
+            mask=input["mask"],
+            content=from_iter(input["content"]),
+            valid_when=input["valid_when"],
+            lsb_order =  input["lsb_order"],
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    if "UnmaskedArray" == input["class"]:
+        return awkward._v2.forms.unmaskedform.UnmaskedForm(
+            content=from_iter(input["content"]),
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
+    if "VirtualArray" == input["class"]:
+        return awkward._v2.forms.virtualform.VirtualForm(
+            form=input["form"],
+            has_length=input["has_length"],
+            has_identities=has_identities,
+            parameters=parameters,
+            form_key=form_key,
+        )
 
 
 def numpy_form(input):
@@ -46,4 +116,6 @@ def numpy_form(input):
     parameters = input["parameters"] if "parameters" in input else {}
     form_key = input["form_key"] if "form_key" in input else None
 
-    return awkward._v2.forms.emptyform.NumpyForm(has_identities, parameters, form_key)
+    return awkward._v2.forms.emptyform.NumpyForm(
+        primitive, has_identities, parameters, form_key
+    )

@@ -2,29 +2,36 @@
 
 from __future__ import absolute_import
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 from awkward._v2.forms.form import Form
 
-
-class ListForm(Form):
+class RecordForm(Form):
     def __init__(
-        self, starts, stops, content, has_identities=False, parameters={}, form_key=None
-    ):
-        if not isinstance(starts, str):
+        self, contents, recordlookup, has_identities=False, parameters={}, form_key=None
+    ):  
+        if not isinstance(contents, Iterable):
             raise TypeError(
-                "{0} 'starts' must be of type str, not {1}".format(
-                    type(self).__name__, repr(starts)
+                "{0} 'contents' must be iterable, not {1}".format(
+                    type(self).__name__, repr(contents)
                 )
             )
-        if not isinstance(stops, str):
-            raise TypeError(
-                "{0} 'starts' must be of type str, not {1}".format(
-                    type(self).__name__, repr(starts)
+        if not isinstance(contents, list):
+            contents = list(contents)
+        for content in contents:
+            if not isinstance(content, Form):
+                raise TypeError(
+                    "{0} all 'contents' must be Form subclasses, not {1}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
-            )
-        if not isinstance(content, Form):
+        if recordlookup is not None and not isinstance(recordlookup, Iterable):
             raise TypeError(
-                "{0} all 'contents' must be Form subclasses, not {1}".format(
-                    type(self).__name__, repr(content)
+                "{0} 'recordlookup' must be iterable, not {1}".format(
+                    type(self).__name__, repr(contents)
                 )
             )
         if has_identities is not None and not isinstance(has_identities, bool):
@@ -45,37 +52,30 @@ class ListForm(Form):
                     type(self).__name__, repr(form_key)
                 )
             )
-        self._starts = starts
-        self._stops = stops
-        self._content = content
+        self._recordlookup = recordlookup
+        self._contents = contents
         self._has_identities = has_identities
         self._parameters = parameters
         self._form_key = form_key
 
     @property
-    def starts(self):
-        return self._starts
+    def recordlookup(self):
+        return self._recordlookup
 
     @property
-    def stops(self):
-        return self._stops
-    
-    @property
-    def content(self):
-        return self._content
+    def contents(self):
+        return self._contents
 
     def __repr__(self):
         args = [
-            repr(self._starts),
-            repr(self._stops),
+            repr(self._recordlookup),
             repr(self._content),
         ] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose=True):
+    def _tolist_part(self, verbose=True, ):
         out = {}
-        out["class"] = "ListArray"
-        out["starts"] = self._starts
-        out["stops"] = self._stops
-        out["content"] = self._content.tolist(verbose=verbose)
+        out["class"] = "RecordArray"
+        out["recordlookop"] = self._recordlookup
+        out["content"] = [content.tolist(verbose=verbose) for content in self._contents]
         return out

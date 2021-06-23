@@ -2058,7 +2058,6 @@ def test_NumpyForm():
     }
 
 
-# @pytest.mark.skip(reason="unimplemented RegularForm")
 def test_RegularForm():
     assert (
         str(
@@ -2430,7 +2429,6 @@ def test_ListForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented ListOffsetForm")
 def test_ListOffsetForm():
     assert (
         str(
@@ -2620,7 +2618,7 @@ def test_ListOffsetForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).tolist(verbose=False) == {
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {"class": "EmptyArray"},
@@ -2972,7 +2970,6 @@ def test_RecordForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented IndexedForm")
 def test_IndexedForm():
     assert (
         str(
@@ -3162,7 +3159,7 @@ def test_IndexedForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).tolist(verbose=False) == {
         "class": "IndexedArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
@@ -3172,7 +3169,6 @@ def test_IndexedForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented IndexedOptionForm")
 def test_IndexedOptionForm():
     assert (
         str(
@@ -3329,7 +3325,7 @@ def test_IndexedOptionForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).tolist(verbose=False) == {
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
@@ -3339,7 +3335,6 @@ def test_IndexedOptionForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented ByteMaskedForm")
 def test_ByteMaskedForm():
     assert (
         str(
@@ -3510,7 +3505,7 @@ def test_ByteMaskedForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).tolist(verbose=False) == {
         "class": "ByteMaskedArray",
         "mask": "i8",
         "valid_when": True,
@@ -3521,7 +3516,6 @@ def test_ByteMaskedForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented BitMaskedForm")
 def test_BitMaskedForm():
     assert (
         str(
@@ -3741,7 +3735,7 @@ def test_BitMaskedForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).tolist(verbose=False) == {
         "class": "BitMaskedArray",
         "mask": "u8",
         "valid_when": True,
@@ -3753,7 +3747,6 @@ def test_BitMaskedForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented UnmaskedForm")
 def test_UnmaskedForm():
     assert (
         str(ak._v2.forms.unmaskedform.UnmaskedForm(ak._v2.forms.emptyform.EmptyForm()))
@@ -3859,7 +3852,7 @@ def test_UnmaskedForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).tolist(verbose=False) == {
         "class": "UnmaskedArray",
         "content": {"class": "EmptyArray"},
         "has_identities": True,
@@ -3875,7 +3868,7 @@ def test_UnionForm():
             ak._v2.forms.unionform.UnionForm(
                 "i8",
                 "i32",
-                [ak._v2.forms.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
             )
         )
         == """{
@@ -4175,7 +4168,6 @@ def test_UnionForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented VirtualForm")
 def test_VirtualForm():
     assert (
         str(ak._v2.forms.virtualform.VirtualForm(None, False))

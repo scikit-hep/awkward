@@ -4,27 +4,25 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
-
-class ListForm(Form):
+class VirtualForm(Form):
     def __init__(
-        self, starts, stops, content, has_identities=False, parameters={}, form_key=None
+        self,
+        form,
+        has_length,
+        has_identities=False,
+        parameters={},
+        form_key=None,
     ):
-        if not isinstance(starts, str):
+        if form is not None and not isinstance(form, Form):
             raise TypeError(
-                "{0} 'starts' must be of type str, not {1}".format(
-                    type(self).__name__, repr(starts)
+                "{0} all 'form' must be Form subclasses, not {1}".format(
+                    type(self).__name__, repr(form)
                 )
             )
-        if not isinstance(stops, str):
+        if not isinstance(has_length, bool):
             raise TypeError(
-                "{0} 'starts' must be of type str, not {1}".format(
-                    type(self).__name__, repr(starts)
-                )
-            )
-        if not isinstance(content, Form):
-            raise TypeError(
-                "{0} all 'contents' must be Form subclasses, not {1}".format(
-                    type(self).__name__, repr(content)
+                "{0} 'has_length' must be bool, not {1}".format(
+                    type(self).__name__, repr(has_length)
                 )
             )
         if has_identities is not None and not isinstance(has_identities, bool):
@@ -45,37 +43,27 @@ class ListForm(Form):
                     type(self).__name__, repr(form_key)
                 )
             )
-        self._starts = starts
-        self._stops = stops
-        self._content = content
+        self._form = form
+        self._has_length = has_length
         self._has_identities = has_identities
         self._parameters = parameters
         self._form_key = form_key
 
     @property
-    def starts(self):
-        return self._starts
+    def form(self):
+        return self._form
 
     @property
-    def stops(self):
-        return self._stops
-    
-    @property
-    def content(self):
-        return self._content
+    def has_length(self):
+        return self._has_length
 
     def __repr__(self):
-        args = [
-            repr(self._starts),
-            repr(self._stops),
-            repr(self._content),
-        ] + self._repr_args()
+        args = [repr(self._form), repr(self._has_length)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose=True):
         out = {}
-        out["class"] = "ListArray"
-        out["starts"] = self._starts
-        out["stops"] = self._stops
-        out["content"] = self._content.tolist(verbose=verbose)
+        out["class"] = "VirtualArray"
+        out["form"] = self._form.tolist(verbose=verbose) if self._form is not None else None
+        out["has_length"] = self._has_length
         return out

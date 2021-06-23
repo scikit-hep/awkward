@@ -2,8 +2,6 @@
 
 from __future__ import absolute_import
 
-import json
-
 from awkward._v2.forms.form import Form
 
 import awkward as ak
@@ -51,11 +49,11 @@ class RegularForm(Form):
 
     @property
     def content(self):
-        return content
+        return self._content
 
     @property
     def size(self):
-        return size
+        return self._size
 
     def __repr__(self):
         args = [repr(self._content), repr(self._size)] + self._repr_args()
