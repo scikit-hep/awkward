@@ -818,10 +818,7 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
     arr = ak.to_layout(array)
     out = arr.copy_to(kernels)
 
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def from_iter(
@@ -1290,15 +1287,9 @@ def from_awkward0(
         else:
             return array._layout.snapshot()
     elif isinstance(array, (ak.layout.Content, ak.layout.Record)):
-        if highlevel:
-            return ak._util.wrap(array, behavior)
-        else:
-            return array
+        return ak._util.maybe_wrap(array, behavior, highlevel)
     elif isinstance(array, ak.layout.ArrayBuilder):
-        if highlevel:
-            return ak._util.wrap(array.snapshot(), behavior)
-        else:
-            return array.snapshot()
+        return ak._util.maybe_wrap(array.snapshot(), behavior, highlevel)
 
     def recurse(array, level):
         if isinstance(array, dict):
@@ -1941,10 +1932,7 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True, behavior=None
             return None
 
     out = ak._util.recursively_apply(to_layout(array), getfunction, pass_depth=False)
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def _import_pyarrow(name):
