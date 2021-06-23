@@ -750,7 +750,6 @@ def test_RecordType():
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
                 None,
-                # FIXME assumed it's True as opposed to "True"
                 {"__categorical__": True},
             )
         )
@@ -1453,7 +1452,6 @@ def test_ArrayType():
     )
 
 
-@pytest.mark.skip(reason="unimplemented EmptyForm")
 def test_EmptyForm():
     assert (
         str(ak._v2.forms.emptyform.EmptyForm())
@@ -1524,7 +1522,6 @@ def test_EmptyForm():
     }
 
 
-@pytest.mark.skip(reason="unimplemented NumpyForm")
 def test_NumpyForm():
     assert (
         str(ak._v2.forms.numpyform.NumpyForm("bool"))
@@ -1809,13 +1806,13 @@ def test_NumpyForm():
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype(("bool", (1, 2, 3)))) == {
+    assert ak._v2.forms.numpyform.from_dtype(
+        np.dtype("bool"), inner_shape=(1, 2, 3)
+    ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [1, 2, 3],
     }
-
     assert ak._v2.forms.numpyform.from_iter("bool").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
@@ -2060,29 +2057,8 @@ def test_NumpyForm():
         "form_key": "hello",
     }
 
-    assert ak._v2.forms.regularform.RegularForm(
-        ak._v2.forms.numpyform.NumpyForm("bool"), 10
-    ).tolist(verbose=False) == {"class": "RegularArray", "content": "bool", "size": 10}
-    assert ak._v2.forms.regularform.RegularForm(
-        ak._v2.forms.numpyform.NumpyForm("bool"), 10
-    ).tolist(verbose=False) == {
-        "class": "RegularArray",
-        "content": {
-            "class": "NumpyArray",
-            "primitive": "bool",
-            "inner_shape": [],
-            "has_identities": False,
-            "parameters": {},
-            "form_key": None,
-        },
-        "size": 10,
-        "has_identities": False,
-        "parameters": {},
-        "form_key": None,
-    }
 
-
-@pytest.mark.skip(reason="unimplemented RegularForm")
+# @pytest.mark.skip(reason="unimplemented RegularForm")
 def test_RegularForm():
     assert (
         str(
@@ -2137,7 +2113,7 @@ def test_RegularForm():
                 form_key="hello",
             )
         )
-        == "RegularForm(EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "RegularForm(EmptyForm(), 10, has_identities=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.regularform.RegularForm(
@@ -2200,7 +2176,7 @@ def test_RegularForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).tolist(verbose=False) == {
         "class": "RegularArray",
         "size": 10,
         "content": {"class": "EmptyArray"},
@@ -2208,9 +2184,35 @@ def test_RegularForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
+    assert ak._v2.forms.regularform.RegularForm(
+        ak._v2.forms.numpyform.NumpyForm("bool"), 10
+    ).tolist() == {
+        "class": "RegularArray",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "bool",
+            "inner_shape": [],
+            "has_identities": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "size": 10,
+        "has_identities": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak._v2.forms.regularform.RegularForm(
+        ak._v2.forms.numpyform.NumpyForm("bool"), 10
+    ).tolist(verbose=False) == {
+        "class": "RegularArray",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "bool",
+        },
+        "size": 10,
+    }
 
 
-@pytest.mark.skip(reason="unimplemented ListForm")
 def test_ListForm():
     assert (
         str(
@@ -2417,7 +2419,7 @@ def test_ListForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).tolist(verbose=False) == {
         "class": "ListArray",
         "starts": "i32",
         "stops": "i32",
