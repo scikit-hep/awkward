@@ -1891,7 +1891,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
         else:
             out = apply(layout)
 
-        return ak._util.maybe_wrap(out, array, behavior, highlevel)
+        return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
     else:
         out = layout.flatten(axis)
