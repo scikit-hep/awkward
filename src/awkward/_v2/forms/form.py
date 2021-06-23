@@ -8,6 +8,7 @@ import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
+
 class Form(object):
     @property
     def has_identities(self):

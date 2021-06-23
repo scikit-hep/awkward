@@ -59,7 +59,7 @@ class ListForm(Form):
     @property
     def stops(self):
         return self._stops
-    
+
     @property
     def content(self):
         return self._content

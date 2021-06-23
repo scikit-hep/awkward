@@ -9,6 +9,7 @@ except ImportError:
 
 from awkward._v2.forms.form import Form
 
+
 class UnionForm(Form):
     def __init__(
         self,
@@ -84,7 +85,11 @@ class UnionForm(Form):
         return self._contents
 
     def __repr__(self):
-        args = [repr(self._tags),  repr(self._index), repr(self._contents)] + self._repr_args()
+        args = [
+            repr(self._tags),
+            repr(self._index),
+            repr(self._contents),
+        ] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose=True):

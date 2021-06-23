@@ -9,10 +9,11 @@ except ImportError:
 
 from awkward._v2.forms.form import Form
 
+
 class RecordForm(Form):
     def __init__(
         self, contents, recordlookup, has_identities=False, parameters={}, form_key=None
-    ):  
+    ):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{0} 'contents' must be iterable, not {1}".format(
@@ -73,7 +74,10 @@ class RecordForm(Form):
         ] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose=True, ):
+    def _tolist_part(
+        self,
+        verbose=True,
+    ):
         out = {}
         out["class"] = "RecordArray"
         out["recordlookop"] = self._recordlookup

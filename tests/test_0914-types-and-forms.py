@@ -3868,7 +3868,10 @@ def test_UnionForm():
             ak._v2.forms.unionform.UnionForm(
                 "i8",
                 "i32",
-                [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+                [
+                    ak._v2.forms.emptyform.EmptyForm(),
+                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                ],
             )
         )
         == """{

@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
+
 class BitMaskedForm(Form):
     def __init__(
         self,
@@ -41,8 +42,8 @@ class BitMaskedForm(Form):
             )
         if has_identities is not None and not isinstance(has_identities, bool):
             raise TypeError(
-            "{0} 'has_identities' must be of type bool or None, not {1}".format(
-                type(self).__name__, repr(has_identities)
+                "{0} 'has_identities' must be of type bool or None, not {1}".format(
+                    type(self).__name__, repr(has_identities)
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
@@ -82,7 +83,12 @@ class BitMaskedForm(Form):
         return self._lsb_order
 
     def __repr__(self):
-        args = [repr(self._mask), repr(self._content), repr(self._valid_when), repr(self._lsb_order)] + self._repr_args()
+        args = [
+            repr(self._mask),
+            repr(self._content),
+            repr(self._valid_when),
+            repr(self._lsb_order),
+        ] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose=True):

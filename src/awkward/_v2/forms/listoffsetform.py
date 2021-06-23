@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from awkward._v2.forms.form import Form
 
+
 class ListOffsetForm(Form):
     def __init__(
         self, offsets, content, has_identities=False, parameters={}, form_key=None
