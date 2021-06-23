@@ -204,7 +204,7 @@ With ArrayBuilder
 
 [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can add missing values to an array using the `null` method or appending `None`.
 
-(This is what [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) uses internally to accumulate lists.)
+(This is what [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) uses internally to accumulate data.)
 
 ```{code-cell} ipython3
 builder = ak.ArrayBuilder()
@@ -222,7 +222,7 @@ array
 In Numba
 --------
 
-Functions that Numba Just-In-Time (JIT) compiles can use [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) or construct flat data and "counts" arrays for [ak.unflatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unflatten.html).
+Functions that Numba Just-In-Time (JIT) compiles can use [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) or construct a boolean array for [ak.mask](https://awkward-array.readthedocs.io/en/latest/_auto/ak.mask.html).
 
 ([ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context.)
 
@@ -243,5 +243,26 @@ def example(builder):
 builder = example(ak.ArrayBuilder())
 
 array = builder.snapshot()
+array
+```
+
+```{code-cell} ipython3
+@nb.jit
+def faster_example():
+    data = np.empty(5, np.int64)
+    mask = np.empty(5, np.bool_)
+    data[0] = 1
+    mask[0] = True
+    data[1] = 2
+    mask[1] = True
+    mask[2] = False
+    mask[3] = False
+    data[4] = 5
+    mask[4] = True
+    return data, mask
+
+data, mask = faster_example()
+
+array = ak.Array(data).mask[mask]
 array
 ```

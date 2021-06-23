@@ -32,15 +32,11 @@ sections:
       - file: how-to-create-records
         title: "Arrays of records"
       - file: how-to-create-missing
-        title: "Arrays of missing data [todo]"
+        title: "Arrays of missing data"
       - file: how-to-create-strings
-        title: "Arrays of strings [todo]"
-      - file: how-to-create-categorical
-        title: "Arrays of categories [todo]"
+        title: "Arrays of strings"
       - file: how-to-create-lazy
         title: "Lazy arrays [todo]"
-      - file: how-to-create-partitioned
-        title: "Partitioned arrays [todo]"
       - file: how-to-create-unflatten-group
         title: "Unflattening and grouping [todo]"
       - file: how-to-create-arraybuilder
