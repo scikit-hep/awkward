@@ -470,7 +470,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
     slice.append(std::make_shared<ak::SliceEllipsis>());
   }
 
-  else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
+  // NumPy on Manylinux1 doesn't pass the is comparison, but it is None
+  else if (obj.is_none() || obj.is(py::module::import("numpy").attr("newaxis"))) {
     slice.append(std::make_shared<ak::SliceNewAxis>());
   }
 
