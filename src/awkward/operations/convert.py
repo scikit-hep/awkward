@@ -1000,6 +1000,10 @@ def to_list(array):
         )
 
 
+_maybe_json_str = re.compile(r"^\s*(\[|\{|\"|[0-9]|true|false|null)")
+_maybe_json_bytes = re.compile(br"^\s*(\[|\{|\"|[0-9]|true|false|null)")
+
+
 def from_json(
     source,
     nan_string=None,
@@ -1014,7 +1018,7 @@ def from_json(
 ):
     """
     Args:
-        source (str): JSON-formatted string to convert into an array.
+        source (str): JSON-formatted string or filename to convert into an array.
         nan_string (None or str): If not None, strings with this value will be
             interpreted as floating-point NaN values.
         infinity_string (None or str): If not None, strings with this value will
@@ -1057,6 +1061,8 @@ def from_json(
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
+    is_path, source = ak._util.regularize_path(source)
+
     if os.path.isfile(source):
         layout = ak._ext.fromjsonfile(
             source,
@@ -1067,7 +1073,10 @@ def from_json(
             resize=resize,
             buffersize=buffersize,
         )
-    else:
+    elif not is_path and (
+        (isinstance(source, bytes) and _maybe_json_bytes.match(source))
+        or _maybe_json_str.match(source)
+    ):
         layout = ak._ext.fromjson(
             source,
             nan_string=nan_string,
@@ -1077,6 +1086,12 @@ def from_json(
             resize=resize,
             buffersize=buffersize,
         )
+    else:
+        if ak._util.py27:
+            exc = IOError
+        else:
+            exc = FileNotFoundError
+        raise exc("file not found or not a regular file: {0}".format(source))
 
     def getfunction(recordnode):
         if isinstance(recordnode, ak.layout.RecordArray):
