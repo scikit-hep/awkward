@@ -3798,6 +3798,13 @@ def from_parquet(
     else:
         # Update options and get FS
         filesystem = options.setdefault("filesystem", LocalFileSystem())
+        partitioning = options.setdefault("partitioning", "hive")
+        if partitioning != "hive":
+            raise ValueError(
+                "Cannot set partitioning to value other than hive: "
+                + repr(partitioning)
+                + ak._util.exception_suffix(__file__)
+            )
 
         if isinstance(source, str):
             source_as_posix = _path_to_posix(source)
@@ -3805,23 +3812,35 @@ def from_parquet(
             if source_info.type == FileType.Directory:
                 metadata_path = posixpath.join(source_as_posix, "_metadata")
                 metadata_info = filesystem.get_file_info(metadata_path)
+
+                # Directory with _metadata
                 if metadata_info.type == FileType.File:
                     metadata_dataset = pyarrow.dataset.dataset(metadata_path, **options)
                     paths = _dataset_paths_from_metadata(metadata_dataset)
                     arrow_dataset = pyarrow.dataset.dataset(
-                        paths, schema=metadata_dataset.schema, **options
+                        paths,
+                        partition_base_dir=source_as_posix,
+                        schema=metadata_dataset.schema,
+                        **options
                     )
-                elif metadata_info.type == FileType.Directory:
+                # Directory of files (recurse)
+                else:
                     infos = filesystem.get_file_info(
                         FileSelector(source_as_posix, recursive=True)
                     )
                     paths = sorted([i.path for i in infos if i.extension == ".parquet"])
-                    arrow_dataset = pyarrow.dataset.dataset(paths, **options)
-                else:
-                    raise ValueError
+                    arrow_dataset = pyarrow.dataset.dataset(
+                        paths, partition_base_dir=source_as_posix, **options
+                    )
+            # Single path
             else:
                 arrow_dataset = pyarrow.dataset.dataset(source_as_posix, **options)
+        # Iterable of paths
         elif isinstance(source, Iterable):
+            source = [_regularize_path(x) for x in source]
+            if isinstance(source[0], str):
+                source = [_path_to_posix(p) for p in source]
+                options.setdefault("partition_base_dir", posixpath.commonpath(source))
             arrow_dataset = pyarrow.dataset.dataset(source, **options)
         else:
             raise TypeError(
