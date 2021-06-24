@@ -42,7 +42,9 @@ class Content(object):
         elif isinstance(where, Content):
             raise NotImplementedError("needs _getitem_next")
 
-        elif isinstance(where, Iterable) and all(isinstance(x, (int, bool)) for x in where):
+        elif isinstance(where, Iterable) and all(
+            isinstance(x, (int, bool)) for x in where
+        ):
             raise NotImplementedError("needs _getitem_array")
 
         elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
