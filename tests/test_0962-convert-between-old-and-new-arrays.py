@@ -14,6 +14,7 @@ def test_EmptyArray():
     v2a = ak._v2.contents.emptyarray.EmptyArray()
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_NumpyArray():
@@ -23,6 +24,7 @@ def test_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
     v1b = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5))
     v2b = ak._v2.contents.numpyarray.NumpyArray(
@@ -30,6 +32,7 @@ def test_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
+    assert ak.to_list(v1b) == ak.to_list(v2b)
 
 
 def test_RegularArray_NumpyArray():
@@ -45,6 +48,7 @@ def test_RegularArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
     v1b = ak.layout.RegularArray(ak.layout.EmptyArray(), 0, zeros_length=10)
     v2b = ak._v2.contents.regulararray.RegularArray(
@@ -52,6 +56,7 @@ def test_RegularArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
+    assert ak.to_list(v1b) == ak.to_list(v2b)
 
 
 def test_ListArray_NumpyArray():
@@ -69,6 +74,7 @@ def test_ListArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_ListOffsetArray_NumpyArray():
@@ -82,6 +88,7 @@ def test_ListOffsetArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_RecordArray_NumpyArray():
@@ -103,6 +110,7 @@ def test_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
     v1b = ak.layout.RecordArray(
         [
@@ -122,16 +130,19 @@ def test_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
+    assert ak.to_list(v1b) == ak.to_list(v2b)
 
     v1c = ak.layout.RecordArray([], [], 10)
     v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
     assert v1v2_equal(v1c, v2c)
     assert v1v2_equal(v2_to_v1(v2c), v1_to_v2(v1c))
+    assert ak.to_list(v1c) == ak.to_list(v2c)
 
     v1d = ak.layout.RecordArray([], None, 10)
     v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
     assert v1v2_equal(v1d, v2d)
     assert v1v2_equal(v2_to_v1(v2d), v1_to_v2(v1d))
+    assert ak.to_list(v1d) == ak.to_list(v2d)
 
 
 def test_IndexedArray_NumpyArray():
@@ -145,6 +156,7 @@ def test_IndexedArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_IndexedOptionArray_NumpyArray():
@@ -158,6 +170,7 @@ def test_IndexedOptionArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_ByteMaskedArray_NumpyArray():
@@ -173,6 +186,7 @@ def test_ByteMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
     v1b = ak.layout.ByteMaskedArray(
         ak.layout.Index8(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
@@ -186,6 +200,7 @@ def test_ByteMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
+    assert ak.to_list(v1b) == ak.to_list(v2b)
 
 
 def test_BitMaskedArray_NumpyArray():
@@ -255,6 +270,7 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
     v1b = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -322,6 +338,7 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
+    assert ak.to_list(v1b) == ak.to_list(v2b)
 
     v1c = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -395,6 +412,7 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1c, v2c)
     assert v1v2_equal(v2_to_v1(v2c), v1_to_v2(v1c))
+    assert ak.to_list(v1c) == ak.to_list(v2c)
 
     v1d = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -468,6 +486,7 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1d, v2d)
     assert v1v2_equal(v2_to_v1(v2d), v1_to_v2(v1d))
+    assert ak.to_list(v1d) == ak.to_list(v2d)
 
 
 def test_UnmaskedArray_NumpyArray():
@@ -479,6 +498,7 @@ def test_UnmaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_UnionArray_NumpyArray():
@@ -500,6 +520,7 @@ def test_UnionArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_RegularArray_RecordArray_NumpyArray():
@@ -523,6 +544,7 @@ def test_RegularArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
     v1b = ak.layout.RegularArray(
         ak.layout.RecordArray([ak.layout.EmptyArray()], ["nest"]),
@@ -538,6 +560,7 @@ def test_RegularArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
+    assert ak.to_list(v1b) == ak.to_list(v2b)
 
 
 def test_ListArray_RecordArray_NumpyArray():
@@ -563,6 +586,7 @@ def test_ListArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
@@ -586,6 +610,7 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_IndexedArray_RecordArray_NumpyArray():
@@ -609,6 +634,7 @@ def test_IndexedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
@@ -632,6 +658,7 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
@@ -657,6 +684,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
     v1b = ak.layout.ByteMaskedArray(
         ak.layout.Index8(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
@@ -680,6 +708,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
+    assert ak.to_list(v1b) == ak.to_list(v2b)
 
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
@@ -787,6 +816,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
     v1b = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -894,6 +924,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
+    assert ak.to_list(v1b) == ak.to_list(v2b)
 
     v1c = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -1007,6 +1038,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1c, v2c)
     assert v1v2_equal(v2_to_v1(v2c), v1_to_v2(v1c))
+    assert ak.to_list(v1c) == ak.to_list(v2c)
 
     v1d = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -1120,6 +1152,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1d, v2d)
     assert v1v2_equal(v2_to_v1(v2d), v1_to_v2(v1d))
+    assert ak.to_list(v1d) == ak.to_list(v2d)
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
@@ -1141,6 +1174,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)
 
 
 def test_UnionArray_RecordArray_NumpyArray():
@@ -1176,3 +1210,4 @@ def test_UnionArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
+    assert ak.to_list(v1a) == ak.to_list(v2a)

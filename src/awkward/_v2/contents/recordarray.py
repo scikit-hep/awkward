@@ -54,7 +54,7 @@ class RecordArray(Content):
         if isinstance(keys, Iterable):
             if not isinstance(keys, list):
                 keys = list(keys)
-            if not all(isinstance(x, str) for x in keys):
+            if not all(ak._util.isstr(x) for x in keys):
                 raise TypeError(
                     "{0} 'keys' must all be strings, not {1}".format(
                         type(self).__name__, repr(keys)
