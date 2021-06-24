@@ -7,6 +7,7 @@ try:
 except ImportError:
     from collections import Iterable
 
+import awkward as ak
 from awkward._v2.types.type import Type
 
 
@@ -33,7 +34,7 @@ class UnionType(Type):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
+        if typestr is not None and not ak._util.isstr(typestr):
             raise TypeError(
                 "{0} 'typestr' must be of type string or None, not {1}".format(
                     type(self).__name__, repr(typestr)

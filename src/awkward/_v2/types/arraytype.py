@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 import awkward._v2.types.type
 
 
@@ -13,7 +14,7 @@ class ArrayType(object):
                     type(self).__name__, repr(content)
                 )
             )
-        if not isinstance(length, int) or length < 0:
+        if not ak._util.isint(length) or length < 0:
             raise ValueError(
                 "{0} 'length' must be of a positive integer, not {1}".format(
                     type(self).__name__, repr(length)

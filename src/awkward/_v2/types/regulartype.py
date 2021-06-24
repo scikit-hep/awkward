@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 from awkward._v2.types.type import Type
 
 
@@ -13,7 +14,7 @@ class RegularType(Type):
                     type(self).__name__, repr(content)
                 )
             )
-        if not isinstance(size, int) or size < 0:
+        if not ak._util.isint(size) or size < 0:
             raise ValueError(
                 "{0} 'size' must be of a positive integer, not {1}".format(
                     type(self).__name__, repr(size)
@@ -25,7 +26,7 @@ class RegularType(Type):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
+        if typestr is not None and not ak._util.isstr(typestr):
             raise TypeError(
                 "{0} 'typestr' must be of type string or None, not {1}".format(
                     type(self).__name__, repr(typestr)

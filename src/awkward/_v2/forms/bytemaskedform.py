@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 from awkward._v2.forms.form import Form
 
 
@@ -15,7 +16,7 @@ class ByteMaskedForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not isinstance(mask, str):
+        if not ak._util.isstr(mask):
             raise TypeError(
                 "{0} 'mask' must be of type str, not {1}".format(
                     type(self).__name__, repr(mask)
@@ -33,30 +34,11 @@ class ByteMaskedForm(Form):
                     type(self).__name__, repr(valid_when)
                 )
             )
-        if has_identities is not None and not isinstance(has_identities, bool):
-            raise TypeError(
-                "{0} 'has_identities' must be of type bool or None, not {1}".format(
-                    type(self).__name__, repr(has_identities)
-                )
-            )
-        if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{0} 'parameters' must be of type dict or None, not {1}".format(
-                    type(self).__name__, repr(parameters)
-                )
-            )
-        if form_key is not None and not isinstance(form_key, str):
-            raise TypeError(
-                "{0} 'form_key' must be of type string or None, not {1}".format(
-                    type(self).__name__, repr(form_key)
-                )
-            )
+
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
-        self._has_identities = has_identities
-        self._parameters = parameters
-        self._form_key = form_key
+        self._init(has_identities, parameters, form_key)
 
     @property
     def mask(self):
@@ -78,10 +60,13 @@ class ByteMaskedForm(Form):
         ] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose=True, toplevel=False):
-        out = {}
-        out["class"] = "ByteMaskedArray"
-        out["mask"] = self._mask
-        out["valid_when"] = self._valid_when
-        out["content"] = self._content.tolist(verbose=verbose)
-        return out
+    def _tolist_part(self, verbose, toplevel):
+        return self._tolist_extra(
+            {
+                "class": "ByteMaskedArray",
+                "mask": self._mask,
+                "valid_when": self._valid_when,
+                "content": self._content._tolist_part(verbose, toplevel=False),
+            },
+            verbose,
+        )

@@ -1517,13 +1517,13 @@ def test_EmptyForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter({"class": "EmptyArray"}).tolist() == {
+    assert ak._v2.forms.from_iter({"class": "EmptyArray"}).tolist() == {
         "class": "EmptyArray",
         "has_identities": False,
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "EmptyArray",
             "has_identities": True,
@@ -1566,7 +1566,7 @@ def test_NumpyForm():
                 form_key="hello",
             )
         )
-        == "NumpyForm('bool', inner_shape=[1, 2, 3], has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "NumpyForm('bool', inner_shape=(1, 2, 3), has_identities=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.numpyform.NumpyForm("bool").tolist(verbose=False) == {
@@ -1837,80 +1837,80 @@ def test_NumpyForm():
         "inner_shape": [1, 2, 3],
     }
     with pytest.raises(TypeError):
-        ak._v2.forms.form.from_iter(np.dtype("O")).tolist(verbose=False)
+        ak._v2.forms.from_dtype(np.dtype("O")).tolist(verbose=False)
     with pytest.raises(TypeError):
-        ak._v2.forms.form.from_iter(
+        ak._v2.forms.from_dtype(
             np.dtype([("one", np.int64), ("two", np.float64)])
         ).tolist(verbose=False)
-    assert ak._v2.forms.form.from_iter("bool").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("bool").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak._v2.forms.form.from_iter("int8").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("int8").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak._v2.forms.form.from_iter("uint8").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("uint8").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak._v2.forms.form.from_iter("int16").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("int16").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak._v2.forms.form.from_iter("uint16").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("uint16").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak._v2.forms.form.from_iter("int32").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("int32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak._v2.forms.form.from_iter("uint32").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("uint32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak._v2.forms.form.from_iter("int64").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("int64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak._v2.forms.form.from_iter("uint64").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("uint64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
-    assert ak._v2.forms.form.from_iter("float16").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("float16").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float16",
     }
-    assert ak._v2.forms.form.from_iter("float32").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("float32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak._v2.forms.form.from_iter("float64").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("float64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
-    assert ak._v2.forms.form.from_iter("float128").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("float128").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float128",
     }
-    assert ak._v2.forms.form.from_iter("complex64").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("complex64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak._v2.forms.form.from_iter("complex128").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("complex128").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
-    assert ak._v2.forms.form.from_iter("complex256").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("complex256").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex256",
     }
-    assert ak._v2.forms.form.from_iter("datetime64").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("datetime64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "datetime64",
@@ -1921,7 +1921,7 @@ def test_NumpyForm():
         "primitive": "datetime64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "datetime64",
@@ -1932,11 +1932,11 @@ def test_NumpyForm():
         "primitive": "datetime64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak._v2.forms.form.from_iter("timedelta64").tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter("timedelta64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "timedelta64",
@@ -1947,7 +1947,7 @@ def test_NumpyForm():
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "timedelta64",
@@ -1959,116 +1959,116 @@ def test_NumpyForm():
         "parameters": {"__unit__": "s", "x": 123},
     }
 
-    assert ak._v2.forms.form.from_iter(
-        {"class": "NumpyArray", "primitive": "bool"}
-    ).tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "bool"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak._v2.forms.form.from_iter(
-        {"class": "NumpyArray", "primitive": "int8"}
-    ).tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "int8"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak._v2.forms.form.from_iter(
-        {"class": "NumpyArray", "primitive": "uint8"}
-    ).tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "uint8"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak._v2.forms.form.from_iter(
-        {"class": "NumpyArray", "primitive": "int16"}
-    ).tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "int16"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "uint16"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak._v2.forms.form.from_iter(
-        {"class": "NumpyArray", "primitive": "int32"}
-    ).tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "int32"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "uint32"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak._v2.forms.form.from_iter(
-        {"class": "NumpyArray", "primitive": "int64"}
-    ).tolist(verbose=False) == {
+    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "int64"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "uint64"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "float16"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float16",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "float32"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "float64"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "float128"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float128",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "complex64"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "complex128"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "complex256"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex256",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "datetime64"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "timedelta64"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
 
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "bool",
@@ -2183,7 +2183,7 @@ def test_RegularForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "RegularArray", "size": 10, "content": {"class": "EmptyArray"}}
     ).tolist() == {
         "class": "RegularArray",
@@ -2198,7 +2198,7 @@ def test_RegularForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "RegularArray",
             "size": 10,
@@ -2236,10 +2236,7 @@ def test_RegularForm():
         ak._v2.forms.numpyform.NumpyForm("bool"), 10
     ).tolist(verbose=False) == {
         "class": "RegularArray",
-        "content": {
-            "class": "NumpyArray",
-            "primitive": "bool",
-        },
+        "content": "bool",
         "size": 10,
     }
 
@@ -2380,7 +2377,7 @@ def test_ListForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ListArray",
             "starts": "i32",
@@ -2401,7 +2398,7 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ListArray",
             "starts": "u32",
@@ -2422,7 +2419,7 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ListArray",
             "starts": "i64",
@@ -2443,7 +2440,7 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ListArray",
             "starts": "i32",
@@ -2590,7 +2587,7 @@ def test_ListOffsetForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ListOffsetArray",
             "offsets": "i32",
@@ -2609,7 +2606,7 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ListOffsetArray",
             "offsets": "u32",
@@ -2628,7 +2625,7 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ListOffsetArray",
             "offsets": "i64",
@@ -2647,7 +2644,7 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ListOffsetArray",
             "offsets": "i32",
@@ -2930,7 +2927,7 @@ def test_RecordForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "RecordArray",
             "contents": [
@@ -2960,7 +2957,7 @@ def test_RecordForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "RecordArray",
             "contents": {
@@ -2990,7 +2987,7 @@ def test_RecordForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "RecordArray",
             "contents": [
@@ -3011,7 +3008,7 @@ def test_RecordForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "RecordArray",
             "contents": {
@@ -3160,7 +3157,7 @@ def test_IndexedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "IndexedArray",
             "index": "i32",
@@ -3179,7 +3176,7 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "IndexedArray",
             "index": "u32",
@@ -3198,7 +3195,7 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "IndexedArray",
             "index": "i64",
@@ -3217,7 +3214,7 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "IndexedArray",
             "index": "i32",
@@ -3348,7 +3345,7 @@ def test_IndexedOptionForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "IndexedOptionArray",
             "index": "i32",
@@ -3367,7 +3364,7 @@ def test_IndexedOptionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "IndexedOptionArray",
             "index": "i64",
@@ -3386,7 +3383,7 @@ def test_IndexedOptionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "IndexedOptionArray",
             "index": "i32",
@@ -3526,7 +3523,7 @@ def test_ByteMaskedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ByteMaskedArray",
             "mask": "i8",
@@ -3547,7 +3544,7 @@ def test_ByteMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ByteMaskedArray",
             "mask": "i64",
@@ -3568,7 +3565,7 @@ def test_ByteMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "ByteMaskedArray",
             "mask": "i8",
@@ -3754,7 +3751,7 @@ def test_BitMaskedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "BitMaskedArray",
             "mask": "u8",
@@ -3777,7 +3774,7 @@ def test_BitMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "BitMaskedArray",
             "mask": "i64",
@@ -3800,7 +3797,7 @@ def test_BitMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "BitMaskedArray",
             "mask": "u8",
@@ -3909,7 +3906,7 @@ def test_UnmaskedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {"class": "UnmaskedArray", "content": {"class": "EmptyArray"}}
     ).tolist() == {
         "class": "UnmaskedArray",
@@ -3923,7 +3920,7 @@ def test_UnmaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "UnmaskedArray",
             "content": {"class": "EmptyArray"},
@@ -4138,7 +4135,7 @@ def test_UnionForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4172,7 +4169,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4206,7 +4203,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4240,7 +4237,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4401,7 +4398,7 @@ def test_VirtualForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "VirtualArray",
             "form": None,
@@ -4415,7 +4412,7 @@ def test_VirtualForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.form.from_iter(
+    assert ak._v2.forms.from_iter(
         {
             "class": "VirtualArray",
             "form": None,

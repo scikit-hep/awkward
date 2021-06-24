@@ -25,8 +25,6 @@ class RecordForm(Form):
                     type(self).__name__, repr(contents)
                 )
             )
-        if not isinstance(contents, list):
-            contents = list(contents)
         for content in contents:
             if not isinstance(content, Form):
                 raise TypeError(
@@ -40,29 +38,10 @@ class RecordForm(Form):
                     type(self).__name__, repr(contents)
                 )
             )
-        if has_identities is not None and not isinstance(has_identities, bool):
-            raise TypeError(
-                "{0} 'has_identities' must be of type bool or None, not {1}".format(
-                    type(self).__name__, repr(has_identities)
-                )
-            )
-        if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{0} 'parameters' must be of type dict or None, not {1}".format(
-                    type(self).__name__, repr(parameters)
-                )
-            )
-        if form_key is not None and not isinstance(form_key, str):
-            raise TypeError(
-                "{0} 'form_key' must be of type string or None, not {1}".format(
-                    type(self).__name__, repr(form_key)
-                )
-            )
+
         self._recordlookup = recordlookup
-        self._contents = contents
-        self._has_identities = has_identities
-        self._parameters = parameters
-        self._form_key = form_key
+        self._contents = list(contents)
+        self._init(has_identities, parameters, form_key)
 
     @property
     def recordlookup(self):
@@ -76,16 +55,13 @@ class RecordForm(Form):
         args = [repr(self._contents), repr(self._recordlookup)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose=True, toplevel=False):
-        out = {}
-        out["class"] = "RecordArray"
-        contents_tolist = [self._contents[0].tolist(verbose=verbose)]
-        contents_tolist += [
-            content.tolist(verbose=verbose, toplevel=not verbose)
-            for content in self._contents[1:]
+    def _tolist_part(self, verbose, toplevel):
+        out = {"class": "RecordArray"}
+        contents_tolist = [
+            content._tolist_part(verbose, toplevel=False) for content in self._contents
         ]
-        if self._recordlookup is not None:
-            out["contents"] = dict(zip(self._recordlookup, contents_tolist))
-        else:
+        if self._recordlookup is None:
             out["contents"] = contents_tolist
-        return out
+        else:
+            out["contents"] = dict(zip(self._recordlookup, contents_tolist))
+        return self._tolist_extra(out, verbose)
