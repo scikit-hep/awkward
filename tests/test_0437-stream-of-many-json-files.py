@@ -6,6 +6,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+# Change to pathlib when Python 2 is dropped
+import os.path
+
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def test_unfinished_fragment_exception():
     # read unfinished json fragments
@@ -205,7 +211,7 @@ def test_two_arrays():
     array = ak.from_json(str)
     assert ak.to_list(array) == ["one", "two"]
 
-    array = ak.from_json("tests/samples/test-two-arrays.json")
+    array = ak.from_json(os.path.join(DIR, "samples/test-two-arrays.json"))
     assert ak.to_list(array) == [
         {"one": 1, "two": 2.2},
         {"one": 10, "two": 22.0},
@@ -354,7 +360,7 @@ def test_array_tojson():
 
 def test_fromfile():
     # read multiple json fragments from a json file
-    array = ak.from_json("tests/samples/test-record-array.json")
+    array = ak.from_json(os.path.join(DIR, "samples/test-record-array.json"))
     assert ak.to_list(array) == [
         {"x": 1.1, "y": []},
         {"x": 2.2, "y": [1]},
@@ -367,7 +373,9 @@ def test_fromfile():
     # read json file containg 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with floats
     array = ak.from_json(
-        "tests/samples/test.json", infinity_string="inf", minus_infinity_string="-inf"
+        os.path.join(DIR, "samples/test.json"),
+        infinity_string="inf",
+        minus_infinity_string="-inf",
     )
 
     assert ak.to_list(array) == [
@@ -427,7 +435,7 @@ def test_fromfile():
     ]
 
     # read json file containg 'nan' and 'inf' user-defined strings
-    array = ak.from_json("tests/samples/test.json")
+    array = ak.from_json(os.path.join(DIR, "samples/test.json"))
 
     assert ak.to_list(array) == [
         1.1,
@@ -488,7 +496,7 @@ def test_fromfile():
     # read json file containg 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with a predefined 'None' string
     array = ak.from_json(
-        "tests/samples/test.json",
+        os.path.join(DIR, "samples/test.json"),
         infinity_string="inf",
         minus_infinity_string="-inf",
         nan_string="NaN",
@@ -560,11 +568,13 @@ def test_fromfile():
         ]
     )
 
-    # read json file containg multiple definitions of 'nan' and 'inf'
+    # read json file containing multiple definitions of 'nan' and 'inf'
     # user-defined strings
     # replace can only work for one string definition
     array = ak.from_json(
-        "tests/samples/test-nan-inf.json", infinity_string="Infinity", nan_string="None"
+        os.path.join(DIR, "samples/test-nan-inf.json"),
+        infinity_string="Infinity",
+        nan_string="None",
     )
 
     assert ak.to_list(array) == [
