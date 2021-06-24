@@ -2,11 +2,11 @@
 
 from __future__ import absolute_import
 
-import awkward._v2.types.unknowntype  # noqa: F401
-import awkward._v2.types.numpytype  # noqa: F401
-import awkward._v2.types.regulartype  # noqa: F401
-import awkward._v2.types.listtype  # noqa: F401
-import awkward._v2.types.recordtype  # noqa: F401
-import awkward._v2.types.optiontype  # noqa: F401
-import awkward._v2.types.uniontype  # noqa: F401
-import awkward._v2.types.arraytype  # noqa: F401
+import awkward._v2.types.unknowntype.UnknownType  # noqa: F401
+import awkward._v2.types.numpytype.NumpyType  # noqa: F401
+import awkward._v2.types.regulartype.RegularType  # noqa: F401
+import awkward._v2.types.listtype.ListType  # noqa: F401
+import awkward._v2.types.recordtype.RecordType  # noqa: F401
+import awkward._v2.types.optiontype.OptionType  # noqa: F401
+import awkward._v2.types.uniontype.UnionType  # noqa: F401
+import awkward._v2.types.arraytype.ArrayType  # noqa: F401
