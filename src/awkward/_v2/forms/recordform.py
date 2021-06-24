@@ -39,7 +39,7 @@ class RecordForm(Form):
                 )
             )
 
-        self._recordlookup = recordlookup
+        self._keys = keys
         self._contents = list(contents)
         self._init(has_identities, parameters, form_key)
 
@@ -57,14 +57,13 @@ class RecordForm(Form):
 
     def _tolist_part(self, verbose, toplevel):
         out = {"class": "RecordArray"}
+
         contents_tolist = [
             content._tolist_part(verbose, toplevel=False) for content in self._contents
         ]
-
         if self._keys is not None:
             out["contents"] = dict(zip(self._keys, contents_tolist))
         else:
             out["contents"] = contents_tolist
-        else:
-            out["contents"] = dict(zip(self._recordlookup, contents_tolist))
+
         return self._tolist_extra(out, verbose)
