@@ -6,3 +6,5 @@ import awkward._v2.index  # noqa: F401
 import awkward._v2.identifier  # noqa: F401
 import awkward._v2.contents  # noqa: F401
 import awkward._v2.record  # noqa: F401
+import awkward._v2.types  # noqa: F401
+import awkward._v2.forms  # noqa: F401
