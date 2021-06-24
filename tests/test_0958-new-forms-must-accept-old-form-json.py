@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -11,12 +13,21 @@ import awkward as ak  # noqa: F401
 
 def test_EmptyArray():
     a = ak.layout.EmptyArray()
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_NumpyArray():
     a = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
     b = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5))
+    v1 = json.loads(b.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
 
 
 def test_RegularArray_NumpyArray():
@@ -24,8 +35,14 @@ def test_RegularArray_NumpyArray():
         ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         3,
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
     b = ak.layout.RegularArray(ak.layout.EmptyArray(), 0, zeros_length=10)
+    v1 = json.loads(b.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
 
 
 def test_ListArray_NumpyArray():
