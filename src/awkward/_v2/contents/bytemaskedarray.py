@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class ByteMaskedArray(Content):
-    def __init__(self, mask, content, valid_when):
+    def __init__(self, mask, content, valid_when, identifier=None, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(
                 "{0} 'mask' must be an Index with dtype=int8, not {1}".format(
@@ -39,6 +39,7 @@ class ByteMaskedArray(Content):
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
+        self._init(identifier, parameters)
 
     @property
     def mask(self):

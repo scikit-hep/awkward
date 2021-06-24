@@ -6,8 +6,8 @@ from awkward._v2.contents.content import Content
 
 
 class EmptyArray(Content):
-    def __init__(self):
-        pass
+    def __init__(self, identifier=None, parameters=None):
+        self._init(identifier, parameters)
 
     def __repr__(self):
         return self._repr("", "", "")

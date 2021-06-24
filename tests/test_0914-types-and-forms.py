@@ -973,7 +973,7 @@ def test_RecordType():
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
-                recordlookup=None,
+                keys=None,
             )
         )
         == "RecordType([UnknownType(), NumpyType('bool')], None)"
@@ -985,7 +985,7 @@ def test_RecordType():
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
-                recordlookup=["x", "y"],
+                keys=["x", "y"],
             )
         )
         == "RecordType([UnknownType(), NumpyType('bool')], ['x', 'y'])"
@@ -997,7 +997,7 @@ def test_RecordType():
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
-                recordlookup=None,
+                keys=None,
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
                 typestr="override",
             )
@@ -1011,7 +1011,7 @@ def test_RecordType():
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
-                recordlookup=None,
+                keys=None,
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
             )
         )
@@ -1024,7 +1024,7 @@ def test_RecordType():
                     ak._v2.types.unknowntype.UnknownType(),
                     ak._v2.types.numpytype.NumpyType("bool"),
                 ],
-                recordlookup=["x", "y"],
+                keys=["x", "y"],
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
                 typestr="override",
             )
@@ -2798,7 +2798,7 @@ def test_RecordForm():
                     ak._v2.forms.emptyform.EmptyForm(),
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
-                recordlookup=None,
+                keys=None,
                 has_identities=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -2813,7 +2813,7 @@ def test_RecordForm():
                     ak._v2.forms.emptyform.EmptyForm(),
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
-                recordlookup=["x", "y"],
+                keys=["x", "y"],
                 has_identities=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -2897,7 +2897,7 @@ def test_RecordForm():
             ak._v2.forms.emptyform.EmptyForm(),
             ak._v2.forms.numpyform.NumpyForm("bool"),
         ],
-        recordlookup=None,
+        keys=None,
         has_identities=True,
         parameters={"x": 123},
         form_key="hello",
@@ -2916,7 +2916,7 @@ def test_RecordForm():
             ak._v2.forms.emptyform.EmptyForm(),
             ak._v2.forms.numpyform.NumpyForm("bool"),
         ],
-        recordlookup=["x", "y"],
+        keys=["x", "y"],
         has_identities=True,
         parameters={"x": 123},
         form_key="hello",

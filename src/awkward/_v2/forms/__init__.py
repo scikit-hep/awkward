@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+from awkward._v2.forms.form import Form  # noqa: F401
 from awkward._v2.forms.emptyform import EmptyForm  # noqa: F401
 from awkward._v2.forms.numpyform import NumpyForm  # noqa: F401
 from awkward._v2.forms.regularform import RegularForm  # noqa: F401

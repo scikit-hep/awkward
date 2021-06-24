@@ -14,7 +14,16 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class BitMaskedArray(Content):
-    def __init__(self, mask, content, valid_when, length, lsb_order):
+    def __init__(
+        self,
+        mask,
+        content,
+        valid_when,
+        length,
+        lsb_order,
+        identifier=None,
+        parameters=None,
+    ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
                 "{0} 'mask' must be an Index with dtype=uint8, not {1}".format(
@@ -63,6 +72,7 @@ class BitMaskedArray(Content):
         self._valid_when = valid_when
         self._length = length
         self._lsb_order = lsb_order
+        self._init(identifier, parameters)
 
     @property
     def mask(self):

@@ -8,7 +8,7 @@ from awkward._v2.contents.content import Content
 
 
 class RegularArray(Content):
-    def __init__(self, content, size, zeros_length=0):
+    def __init__(self, content, size, zeros_length=0, identifier=None, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
                 "{0} 'content' must be a Content subtype, not {1}".format(
@@ -34,6 +34,7 @@ class RegularArray(Content):
             self._length = len(content) // size  # floor division
         else:
             self._length = zeros_length
+        self._init(identifier, parameters)
 
     @property
     def size(self):

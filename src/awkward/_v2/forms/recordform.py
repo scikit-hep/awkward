@@ -14,7 +14,7 @@ class RecordForm(Form):
     def __init__(
         self,
         contents,
-        recordlookup,
+        keys,
         has_identities=False,
         parameters=None,
         form_key=None,
@@ -34,9 +34,9 @@ class RecordForm(Form):
                         type(self).__name__, repr(content)
                     )
                 )
-        if recordlookup is not None and not isinstance(recordlookup, Iterable):
+        if keys is not None and not isinstance(keys, Iterable):
             raise TypeError(
-                "{0} 'recordlookup' must be iterable, not {1}".format(
+                "{0} 'keys' must be iterable, not {1}".format(
                     type(self).__name__, repr(contents)
                 )
             )
@@ -58,22 +58,22 @@ class RecordForm(Form):
                     type(self).__name__, repr(form_key)
                 )
             )
-        self._recordlookup = recordlookup
+        self._keys = keys
         self._contents = contents
         self._has_identities = has_identities
         self._parameters = parameters
         self._form_key = form_key
 
     @property
-    def recordlookup(self):
-        return self._recordlookup
+    def keys(self):
+        return self._keys
 
     @property
     def contents(self):
         return self._contents
 
     def __repr__(self):
-        args = [repr(self._contents), repr(self._recordlookup)] + self._repr_args()
+        args = [repr(self._contents), repr(self._keys)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose=True, toplevel=False):
@@ -84,8 +84,8 @@ class RecordForm(Form):
             content.tolist(verbose=verbose, toplevel=not verbose)
             for content in self._contents[1:]
         ]
-        if self._recordlookup is not None:
-            out["contents"] = dict(zip(self._recordlookup, contents_tolist))
+        if self._keys is not None:
+            out["contents"] = dict(zip(self._keys, contents_tolist))
         else:
             out["contents"] = contents_tolist
         return out

@@ -60,17 +60,18 @@ def from_iter(input):
             form_key=form_key,
         )
     elif "RecordArray" == input["class"]:
-        recordlookup = input["recordlookup"] if "recordlookup" in input else None
         if isinstance(input["contents"], dict):
-            recordlookup = list(input["contents"].keys())
-            contents = [
-                from_iter(content) for content in list(input["contents"].values())
-            ]
+            contents = []
+            keys = []
+            for key, content in input["contents"].items():
+                contents.append(from_iter(content))
+                keys.append(key)
         else:
             contents = [from_iter(content) for content in input["contents"]]
+            keys = None
         return ak._v2.forms.recordform.RecordForm(
             contents=contents,
-            recordlookup=recordlookup,
+            keys=keys,
             has_identities=has_identities,
             parameters=parameters,
             form_key=form_key,

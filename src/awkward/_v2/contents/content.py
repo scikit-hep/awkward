@@ -14,6 +14,36 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Content(object):
+    def _init(self, identifier, parameters):
+        if parameters is None:
+            parameters = {}
+
+        if identifier is not None and not isinstance(
+            identifier, ak._v2.identifier.Identifier
+        ):
+            raise TypeError(
+                "{0} 'identifier' must be an Identifier or None, not {1}".format(
+                    type(self).__name__, repr(identifier)
+                )
+            )
+        if not isinstance(parameters, dict):
+            raise TypeError(
+                "{0} 'parameters' must be a dict or None, not {1}".format(
+                    type(self).__name__, repr(identifier)
+                )
+            )
+
+        self._identifier = identifier
+        self._parameters = parameters
+
+    @property
+    def identifier(self):
+        return self._identifier
+
+    @property
+    def parameters(self):
+        return self._parameters
+
     def __getitem__(self, where):
         if isinstance(where, numbers.Integral):
             return self._getitem_at(where)

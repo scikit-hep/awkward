@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class ListOffsetArray(Content):
-    def __init__(self, offsets, content):
+    def __init__(self, offsets, content, identifier=None, parameters=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
             np.dtype(np.int32),
             np.dtype(np.uint32),
@@ -35,6 +35,7 @@ class ListOffsetArray(Content):
 
         self._offsets = offsets
         self._content = content
+        self._init(identifier, parameters)
 
     @property
     def offsets(self):

@@ -9,17 +9,26 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class NumpyArray(Content):
-    def __init__(self, data):
+    def __init__(self, data, identifier=None, parameters=None):
         self._nplike = ak.nplike.of(data)
         self._data = self._nplike.asarray(data)
+        self._init(identifier, parameters)
 
     @property
     def nplike(self):
         return self._nplike
 
     @property
+    def data(self):
+        return self._data
+
+    @property
     def shape(self):
         return self._data.shape
+
+    @property
+    def strides(self):
+        return self._data.strides
 
     @property
     def dtype(self):
