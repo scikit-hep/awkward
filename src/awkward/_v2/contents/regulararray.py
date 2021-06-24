@@ -2,8 +2,7 @@
 
 from __future__ import absolute_import
 
-import numbers
-
+import awkward as ak
 from awkward._v2.contents.content import Content
 
 
@@ -15,13 +14,13 @@ class RegularArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if not (isinstance(size, numbers.Integral) and size >= 0):
+        if not (ak._util.isint(size) and size >= 0):
             raise TypeError(
                 "{0} 'size' must be a non-negative integer, not {1}".format(
                     type(self).__name__, size
                 )
             )
-        if not (isinstance(zeros_length, numbers.Integral) and zeros_length >= 0):
+        if not (ak._util.isint(zeros_length) and zeros_length >= 0):
             raise TypeError(
                 "{0} 'zeros_length' must be a non-negative integer, not {1}".format(
                     type(self).__name__, zeros_length
@@ -29,7 +28,7 @@ class RegularArray(Content):
             )
 
         self._content = content
-        self._size = size
+        self._size = int(size)
         if size != 0:
             self._length = len(content) // size  # floor division
         else:

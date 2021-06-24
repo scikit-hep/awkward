@@ -2,8 +2,6 @@
 
 from __future__ import absolute_import
 
-import numbers
-
 from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
@@ -42,7 +40,7 @@ class BitMaskedArray(Content):
                     type(self).__name__, repr(valid_when)
                 )
             )
-        if not isinstance(length, numbers.Integral):
+        if not ak._util.isint(length):
             raise TypeError(
                 "{0} 'length' must be an integer, not {1}".format(
                     type(self).__name__, repr(length)

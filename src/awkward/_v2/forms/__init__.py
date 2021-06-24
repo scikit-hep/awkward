@@ -2,9 +2,9 @@
 
 from __future__ import absolute_import
 
-from awkward._v2.forms.form import Form  # noqa: F401
+from awkward._v2.forms.form import Form, from_iter, from_json  # noqa: F401
 from awkward._v2.forms.emptyform import EmptyForm  # noqa: F401
-from awkward._v2.forms.numpyform import NumpyForm  # noqa: F401
+from awkward._v2.forms.numpyform import NumpyForm, from_dtype  # noqa: F401
 from awkward._v2.forms.regularform import RegularForm  # noqa: F401
 from awkward._v2.forms.listform import ListForm  # noqa: F401
 from awkward._v2.forms.listoffsetform import ListOffsetForm  # noqa: F401

@@ -6,7 +6,6 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-import numbers
 
 import awkward as ak
 
@@ -45,7 +44,7 @@ class Content(object):
         return self._parameters
 
     def __getitem__(self, where):
-        if isinstance(where, numbers.Integral):
+        if ak._util.isint(where):
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
@@ -54,7 +53,7 @@ class Content(object):
         elif isinstance(where, slice):
             raise NotImplementedError("needs _getitem_next")
 
-        elif isinstance(where, str):
+        elif ak._util.isstr(where):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
@@ -72,7 +71,7 @@ class Content(object):
         elif isinstance(where, Content):
             raise NotImplementedError("needs _getitem_next")
 
-        elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
+        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):
