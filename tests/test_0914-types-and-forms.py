@@ -1456,6 +1456,9 @@ def test_ArrayType():
     )
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_EmptyForm():
     assert (
         str(ak._v2.forms.emptyform.EmptyForm())
@@ -1526,6 +1529,9 @@ def test_EmptyForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 @pytest.mark.skipif(
     ak._util.win,
     reason="NumPy does not have float16, float128, and complex256 -- on Windows",
@@ -2072,6 +2078,9 @@ def test_NumpyForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_RegularForm():
     assert (
         str(
@@ -2226,6 +2235,9 @@ def test_RegularForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_ListForm():
     assert (
         str(
@@ -2443,6 +2455,9 @@ def test_ListForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_ListOffsetForm():
     assert (
         str(
@@ -2642,6 +2657,9 @@ def test_ListOffsetForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_RecordForm():
     assert (
         str(
@@ -3007,6 +3025,9 @@ def test_RecordForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_IndexedForm():
     assert (
         str(
@@ -3206,6 +3227,9 @@ def test_IndexedForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_IndexedOptionForm():
     assert (
         str(
@@ -3372,6 +3396,9 @@ def test_IndexedOptionForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_ByteMaskedForm():
     assert (
         str(
@@ -3553,6 +3580,9 @@ def test_ByteMaskedForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_BitMaskedForm():
     assert (
         str(
@@ -3784,6 +3814,9 @@ def test_BitMaskedForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_UnmaskedForm():
     assert (
         str(ak._v2.forms.unmaskedform.UnmaskedForm(ak._v2.forms.emptyform.EmptyForm()))
@@ -3898,6 +3931,9 @@ def test_UnmaskedForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_UnionForm():
     assert (
         str(
@@ -4222,6 +4258,9 @@ def test_UnionForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_VirtualForm():
     assert (
         str(ak._v2.forms.virtualform.VirtualForm(None, False))
