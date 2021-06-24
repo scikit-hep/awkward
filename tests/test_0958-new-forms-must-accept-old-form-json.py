@@ -8,8 +8,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-# flake8: noqa
-
 
 def test_EmptyArray():
     a = ak.layout.EmptyArray()
@@ -51,6 +49,9 @@ def test_ListArray_NumpyArray():
         ak.layout.Index64(np.array([7, 100, 3, 200], dtype=np.int64)),
         ak.layout.NumpyArray(np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])),
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_ListOffsetArray_NumpyArray():
@@ -58,6 +59,9 @@ def test_ListOffsetArray_NumpyArray():
         ak.layout.Index64(np.array([1, 4, 4, 6], dtype=np.int64)),
         ak.layout.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_RecordArray_NumpyArray():
@@ -68,6 +72,9 @@ def test_RecordArray_NumpyArray():
         ],
         ["x", "y"],
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
     b = ak.layout.RecordArray(
         [
@@ -76,10 +83,19 @@ def test_RecordArray_NumpyArray():
         ],
         None,
     )
+    v1 = json.loads(b.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
 
     c = ak.layout.RecordArray([], [], 10)
+    v1 = json.loads(c.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == c.form
 
     d = ak.layout.RecordArray([], None, 10)
+    v1 = json.loads(d.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == d.form
 
 
 def test_IndexedArray_NumpyArray():
@@ -87,6 +103,9 @@ def test_IndexedArray_NumpyArray():
         ak.layout.Index64(np.array([2, 2, 0, 1, 4, 5, 4], dtype=np.int64)),
         ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_IndexedOptionArray_NumpyArray():
@@ -94,6 +113,9 @@ def test_IndexedOptionArray_NumpyArray():
         ak.layout.Index64(np.array([2, 2, -1, 1, -1, 5, 4], dtype=np.int64)),
         ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_ByteMaskedArray_NumpyArray():
@@ -102,12 +124,18 @@ def test_ByteMaskedArray_NumpyArray():
         ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
     b = ak.layout.ByteMaskedArray(
         ak.layout.Index8(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
         ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
+    v1 = json.loads(b.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
 
 
 def test_BitMaskedArray_NumpyArray():
@@ -143,6 +171,9 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
     b = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -176,6 +207,9 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
+    v1 = json.loads(b.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
 
     c = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -212,6 +246,9 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
+    v1 = json.loads(c.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == c.form
 
     d = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -248,10 +285,16 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
+    v1 = json.loads(d.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == d.form
 
 
 def test_UnmaskedArray_NumpyArray():
     a = ak.layout.UnmaskedArray(ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3])))
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_UnionArray_NumpyArray():
@@ -263,6 +306,9 @@ def test_UnionArray_NumpyArray():
             ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_RegularArray_RecordArray_NumpyArray():
@@ -273,12 +319,18 @@ def test_RegularArray_RecordArray_NumpyArray():
         ),
         3,
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
     b = ak.layout.RegularArray(
         ak.layout.RecordArray([ak.layout.EmptyArray()], ["nest"]),
         0,
         zeros_length=10,
     )
+    v1 = json.loads(b.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
 
 
 def test_ListArray_RecordArray_NumpyArray():
@@ -290,6 +342,9 @@ def test_ListArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
@@ -300,6 +355,9 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_IndexedArray_RecordArray_NumpyArray():
@@ -310,6 +368,9 @@ def test_IndexedArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
@@ -320,6 +381,9 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
@@ -331,6 +395,9 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=True,
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
     b = ak.layout.ByteMaskedArray(
         ak.layout.Index8(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
@@ -340,6 +407,9 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=False,
     )
+    v1 = json.loads(b.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
 
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
@@ -394,6 +464,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
     b = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -447,6 +520,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
+    v1 = json.loads(b.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
 
     c = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -503,6 +579,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
+    v1 = json.loads(c.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == c.form
 
     d = ak.layout.BitMaskedArray(
         ak.layout.IndexU8(
@@ -559,6 +638,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
+    v1 = json.loads(d.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == d.form
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
@@ -568,6 +650,9 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
             ["nest"],
         )
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
 
 
 def test_UnionArray_RecordArray_NumpyArray():
@@ -584,3 +669,6 @@ def test_UnionArray_RecordArray_NumpyArray():
             ),
         ],
     )
+    v1 = json.loads(a.form.tojson())
+    v2 = ak._v2.forms.from_iter(v1).tolist()
+    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
