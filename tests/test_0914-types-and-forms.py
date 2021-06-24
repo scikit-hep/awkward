@@ -531,6 +531,9 @@ def test_ListType():
     )
 
 
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_RecordType():
     assert (
         str(
