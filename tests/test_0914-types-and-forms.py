@@ -1032,7 +1032,9 @@ def test_RecordType():
         == "RecordType([UnknownType(), NumpyType('bool')], ['x', 'y'], parameters={'__record__': 'Name', 'x': 123, '__categorical__': True}, typestr='override')"
     )
 
-
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="Python 2.7, 3.5 have unstable dict order."
+)
 def test_OptionType():
     assert (
         str(ak._v2.types.optiontype.OptionType(ak._v2.types.unknowntype.UnknownType()))
