@@ -20,7 +20,7 @@ class Identifier(object):
         self._ref = ref
         self._fieldloc = fieldloc
         if not isinstance(fieldloc, dict) or not all(
-            isinstance(k, int) and isinstance(v, str) for k, v in fieldloc.items()
+            ak._util.isint(k) and ak._util.isstr(v) for k, v in fieldloc.items()
         ):
             raise TypeError("Identifier fieldloc must be a dict of int -> str")
         self._nplike = ak.nplike.of(data)

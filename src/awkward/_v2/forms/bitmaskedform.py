@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 from awkward._v2.forms.form import Form
 
 
@@ -16,7 +17,7 @@ class BitMaskedForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not isinstance(mask, str):
+        if not ak._util.isstr(mask):
             raise TypeError(
                 "{0} 'mask' must be of type str, not {1}".format(
                     type(self).__name__, repr(mask)

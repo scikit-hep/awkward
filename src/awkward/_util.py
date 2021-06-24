@@ -7,6 +7,7 @@ import sys
 import os
 import warnings
 import itertools
+import numbers
 
 try:
     from collections.abc import Mapping
@@ -29,6 +30,36 @@ if py27:
     unicode = eval("unicode")
 else:
     unicode = None
+
+
+def isint(x):
+    """
+    Returns True if and only if ``x`` is an integer (including NumPy, not
+    including bool).
+    """
+    return isinstance(x, (int, numbers.Integral, np.integer)) and not isinstance(
+        x, (bool, np.bool_)
+    )
+
+
+def isnum(x):
+    """
+    Returns True if and only if ``x`` is a number (including NumPy, not
+    including bool).
+    """
+    return isinstance(x, (int, float, numbers.Real, np.number)) and not isinstance(
+        x, (bool, np.bool_)
+    )
+
+
+def isstr(x):
+    """
+    Returns True if and only if ``x`` is a string (including Python 2 unicode).
+    """
+    if py27:
+        return isinstance(x, (bytes, unicode))
+    else:
+        return isinstance(x, str)
 
 
 def exception_suffix(filename):

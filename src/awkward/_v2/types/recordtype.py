@@ -9,6 +9,7 @@ except ImportError:
 
 import json
 
+import awkward as ak
 from awkward._v2.types.type import Type
 
 
@@ -41,7 +42,7 @@ class RecordType(Type):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
+        if typestr is not None and not ak._util.isstr(typestr):
             raise TypeError(
                 "{0} 'typestr' must be of type string or None, not {1}".format(
                     type(self).__name__, repr(typestr)

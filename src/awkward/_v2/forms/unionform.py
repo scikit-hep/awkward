@@ -7,6 +7,7 @@ try:
 except ImportError:
     from collections import Iterable
 
+import awkward as ak
 from awkward._v2.forms.form import Form
 
 
@@ -20,13 +21,13 @@ class UnionForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not isinstance(tags, str):
+        if not ak._util.isstr(tags):
             raise TypeError(
                 "{0} 'tags' must be of type str, not {1}".format(
                     type(self).__name__, repr(tags)
                 )
             )
-        if not isinstance(index, str):
+        if not ak._util.isstr(index):
             raise TypeError(
                 "{0} 'index' must be of type str, not {1}".format(
                     type(self).__name__, repr(index)

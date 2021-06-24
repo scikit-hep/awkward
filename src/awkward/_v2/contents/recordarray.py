@@ -6,8 +6,8 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-import numbers
 
+import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.record import Record
 
@@ -31,7 +31,7 @@ class RecordArray(Content):
             )
         elif length is None:
             length = min(len(x) for x in contents)
-        if not (isinstance(length, numbers.Integral) and length >= 0):
+        if not (ak._util.isint(length) and length >= 0):
             raise TypeError(
                 "{0} 'length' must be a non-negative integer or None, not {1}".format(
                     type(self).__name__, repr(length)
@@ -54,7 +54,7 @@ class RecordArray(Content):
         if isinstance(recordlookup, Iterable):
             if not isinstance(recordlookup, list):
                 recordlookup = list(recordlookup)
-            if not all(isinstance(x, str) for x in recordlookup):
+            if not all(ak._util.isstr(x) for x in recordlookup):
                 raise TypeError(
                     "{0} 'recordlookup' must all be strings, not {1}".format(
                         type(self).__name__, repr(recordlookup)
@@ -156,10 +156,16 @@ class RecordArray(Content):
         )
 
     def content(self, index_or_key):
-        if isinstance(index_or_key, numbers.Integral):
+        if ak._util.isint(index_or_key):
             index = index_or_key
-        else:
+        elif ak._util.isstr(index_or_key):
             index = self.key_to_index(index_or_key)
+        else:
+            raise TypeError(
+                "index_or_key must be an integer (index) or string (key), not {0}".format(
+                    repr(index_or_key)
+                )
+            )
         return self._contents[index][: self._length]
 
     def _getitem_at(self, where):

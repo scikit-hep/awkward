@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 from awkward._v2.forms.form import Form
 
 
@@ -9,7 +10,7 @@ class ListOffsetForm(Form):
     def __init__(
         self, offsets, content, has_identities=False, parameters=None, form_key=None
     ):
-        if not isinstance(offsets, str):
+        if not ak._util.isstr(offsets):
             raise TypeError(
                 "{0} 'offsets' must be of type str, not {1}".format(
                     type(self).__name__, repr(offsets)

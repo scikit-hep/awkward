@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def from_iter(input):
-    if isinstance(input, str):
+    if ak._util.isstr(input):
         return ak._v2.forms.numpyform.NumpyForm(primitive=input)
 
     has_identities = input.get("has_identities", False)
@@ -187,7 +187,7 @@ class Form(object):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if form_key is not None and not isinstance(form_key, str):
+        if form_key is not None and not ak._util.isstr(form_key):
             raise TypeError(
                 "{0} 'form_key' must be of type string or None, not {1}".format(
                     type(self).__name__, repr(form_key)

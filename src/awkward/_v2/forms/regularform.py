@@ -2,8 +2,7 @@
 
 from __future__ import absolute_import
 
-import numbers
-
+import awkward as ak
 from awkward._v2.forms.form import Form
 
 
@@ -17,7 +16,7 @@ class RegularForm(Form):
                     type(self).__name__, repr(content)
                 )
             )
-        if not isinstance(size, numbers.Integral):
+        if not ak._util.isint(size):
             raise TypeError(
                 "{0} 'size' must be of type int, not {1}".format(
                     type(self).__name__, repr(size)
