@@ -8,7 +8,7 @@ from awkward._v2.forms.form import Form
 
 class RegularForm(Form):
     def __init__(
-        self, content, size, has_identities=False, parameters=None, form_key=None
+        self, content, size, has_identifier=False, parameters=None, form_key=None
     ):
         if not isinstance(content, Form):
             raise TypeError(
@@ -25,7 +25,7 @@ class RegularForm(Form):
 
         self._content = content
         self._size = int(size)
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def content(self):

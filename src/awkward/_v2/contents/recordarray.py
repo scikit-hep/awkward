@@ -90,6 +90,16 @@ class RecordArray(Content):
     def is_tuple(self):
         return self._keys is None
 
+    @property
+    def form(self):
+        return ak._v2.forms.RecordForm(
+            [x.form for x in self._contents],
+            self._keys,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
     def __len__(self):
         return self._length
 

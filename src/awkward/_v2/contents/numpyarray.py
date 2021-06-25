@@ -12,6 +12,27 @@ class NumpyArray(Content):
     def __init__(self, data, identifier=None, parameters=None):
         self._nplike = ak.nplike.of(data)
         self._data = self._nplike.asarray(data)
+
+        if (
+            self._data.dtype not in ak._v2.types.numpytype._dtype_to_primitive
+            and not isinstance(self._data.dtype.type, (np.datetime64, np.timdelta64))
+        ):
+            raise TypeError(
+                "{0} 'data' dtype {1} is not supported; must be one of {2}".format(
+                    type(self).__name__,
+                    repr(self._data.dtype),
+                    ", ".join(
+                        repr(x) for x in ak._v2.types.numpytype._dtype_to_primitive
+                    ),
+                )
+            )
+        if len(self._data.shape) == 0:
+            raise TypeError(
+                "{0} 'data' must be an array, not {1}".format(
+                    type(self).__name__, repr(data)
+                )
+            )
+
         self._init(identifier, parameters)
 
     @property
@@ -33,6 +54,16 @@ class NumpyArray(Content):
     @property
     def dtype(self):
         return self._data.dtype
+
+    @property
+    def form(self):
+        return ak._v2.forms.NumpyForm(
+            ak._v2.types.numpytype._dtype_to_primitive[self._data.dtype],
+            self._data.shape[1:],
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     def __len__(self):
         return len(self._data)

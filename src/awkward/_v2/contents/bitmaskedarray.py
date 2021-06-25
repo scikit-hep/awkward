@@ -2,11 +2,10 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
-
-import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -87,6 +86,18 @@ class BitMaskedArray(Content):
     @property
     def lsb_order(self):
         return self._lsb_order
+
+    @property
+    def form(self):
+        return ak._v2.forms.BitMaskedForm(
+            self._mask.form,
+            self._content.form,
+            self._valid_when,
+            self._lsb_order,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     def __len__(self):
         return self._length

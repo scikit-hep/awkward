@@ -15,7 +15,7 @@ class RecordForm(Form):
         self,
         contents,
         keys,
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -41,7 +41,7 @@ class RecordForm(Form):
 
         self._keys = keys
         self._contents = list(contents)
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def keys(self):

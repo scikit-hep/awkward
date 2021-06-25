@@ -96,6 +96,7 @@ class Index(object):
         out.append(post)
         return "".join(out)
 
+    @property
     def form(self):
         return _dtype_to_form[self._data.dtype]
 

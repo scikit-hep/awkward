@@ -13,28 +13,25 @@ def from_iter(input):
     if ak._util.isstr(input):
         return ak._v2.forms.numpyform.NumpyForm(primitive=input)
 
-    has_identities = input.get("has_identities", False)
+    has_identifier = input.get("has_identifier", input.get("has_identities", False))
     parameters = input.get("parameters", {})
     form_key = input.get("form_key", None)
 
     if input["class"] == "NumpyArray":
         primitive = input["primitive"]
-        inner_shape = input["inner_shape"] if "inner_shape" in input else []
-        has_identities = input["has_identities"] if "has_identities" in input else False
-        parameters = input["parameters"] if "parameters" in input else {}
-        form_key = input["form_key"] if "form_key" in input else None
+        inner_shape = input.get("inner_shape", [])
         return ak._v2.forms.numpyform.NumpyForm(
-            primitive, inner_shape, has_identities, parameters, form_key
+            primitive, inner_shape, has_identifier, parameters, form_key
         )
 
     elif input["class"] == "EmptyArray":
-        return ak._v2.forms.emptyform.EmptyForm(has_identities, parameters, form_key)
+        return ak._v2.forms.emptyform.EmptyForm(has_identifier, parameters, form_key)
 
     elif input["class"] == "RegularArray":
         return ak._v2.forms.regularform.RegularForm(
             content=from_iter(input["content"]),
             size=input["size"],
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -44,7 +41,7 @@ def from_iter(input):
             starts=input["starts"],
             stops=input["stops"],
             content=from_iter(input["content"]),
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -58,7 +55,7 @@ def from_iter(input):
         return ak._v2.forms.listoffsetform.ListOffsetForm(
             offsets=input["offsets"],
             content=from_iter(input["content"]),
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -76,7 +73,7 @@ def from_iter(input):
         return ak._v2.forms.recordform.RecordForm(
             contents=contents,
             keys=keys,
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -90,7 +87,7 @@ def from_iter(input):
         return ak._v2.forms.indexedform.IndexedForm(
             index=input["index"],
             content=from_iter(input["content"]),
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -103,7 +100,7 @@ def from_iter(input):
         return ak._v2.forms.indexedoptionform.IndexedOptionForm(
             index=input["index"],
             content=from_iter(input["content"]),
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -113,7 +110,7 @@ def from_iter(input):
             mask=input["mask"],
             content=from_iter(input["content"]),
             valid_when=input["valid_when"],
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -124,7 +121,7 @@ def from_iter(input):
             content=from_iter(input["content"]),
             valid_when=input["valid_when"],
             lsb_order=input["lsb_order"],
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -132,7 +129,7 @@ def from_iter(input):
     elif input["class"] == "UnmaskedArray":
         return ak._v2.forms.unmaskedform.UnmaskedForm(
             content=from_iter(input["content"]),
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -147,7 +144,7 @@ def from_iter(input):
             tags=input["tags"],
             index=input["index"],
             contents=[from_iter(content) for content in input["contents"]],
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -156,7 +153,7 @@ def from_iter(input):
         return ak._v2.forms.virtualform.VirtualForm(
             form=input["form"],
             has_length=input["has_length"],
-            has_identities=has_identities,
+            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -172,14 +169,14 @@ def from_json(input):
 
 
 class Form(object):
-    def _init(self, has_identities, parameters, form_key):
+    def _init(self, has_identifier, parameters, form_key):
         if parameters is None:
             parameters = {}
 
-        if not isinstance(has_identities, bool):
+        if not isinstance(has_identifier, bool):
             raise TypeError(
-                "{0} 'has_identities' must be of type bool, not {1}".format(
-                    type(self).__name__, repr(has_identities)
+                "{0} 'has_identifier' must be of type bool, not {1}".format(
+                    type(self).__name__, repr(has_identifier)
                 )
             )
         if not isinstance(parameters, dict):
@@ -195,13 +192,13 @@ class Form(object):
                 )
             )
 
-        self._has_identities = has_identities
+        self._has_identifier = has_identifier
         self._parameters = parameters
         self._form_key = form_key
 
     @property
-    def has_identities(self):
-        return self._has_identities
+    def has_identifier(self):
+        return self._has_identifier
 
     @property
     def parameters(self):
@@ -224,8 +221,8 @@ class Form(object):
         return self._tolist_part(verbose, toplevel=True)
 
     def _tolist_extra(self, out, verbose):
-        if verbose or self._has_identities:
-            out["has_identities"] = self._has_identities
+        if verbose or self._has_identifier:
+            out["has_identifier"] = self._has_identifier
         if verbose or self._parameters is not None and len(self._parameters) > 0:
             out["parameters"] = {} if self._parameters is None else self._parameters
         if verbose or self._form_key is not None:
@@ -237,8 +234,8 @@ class Form(object):
 
     def _repr_args(self):
         out = []
-        if self._has_identities is not False:
-            out.append("has_identities=" + repr(self._has_identities))
+        if self._has_identifier is not False:
+            out.append("has_identifier=" + repr(self._has_identifier))
 
         if self._parameters is not None and len(self._parameters) > 0:
             out.append("parameters=" + repr(self._parameters))

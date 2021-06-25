@@ -45,6 +45,16 @@ class ListOffsetArray(Content):
     def content(self):
         return self._content
 
+    @property
+    def form(self):
+        return ak._v2.forms.ListOffsetForm(
+            self._offsets.form,
+            self._content.form,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
     def __len__(self):
         return len(self._offsets) - 1
 

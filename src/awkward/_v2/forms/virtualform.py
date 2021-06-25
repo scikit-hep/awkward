@@ -10,7 +10,7 @@ class VirtualForm(Form):
         self,
         form,
         has_length,
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -29,7 +29,7 @@ class VirtualForm(Form):
 
         self._form = form
         self._has_length = has_length
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def form(self):

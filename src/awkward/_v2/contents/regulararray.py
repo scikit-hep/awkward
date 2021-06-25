@@ -43,6 +43,16 @@ class RegularArray(Content):
     def content(self):
         return self._content
 
+    @property
+    def form(self):
+        return ak._v2.forms.RegularForm(
+            self._content.form,
+            self._size,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
     def __len__(self):
         return self._length
 

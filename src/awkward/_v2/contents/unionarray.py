@@ -76,6 +76,17 @@ class UnionArray(Content):
     def contents(self):
         return self._contents
 
+    @property
+    def form(self):
+        return ak._v2.forms.UnionForm(
+            self._tags.form,
+            self._index.form,
+            [x.form for x in self._contents],
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
     def __len__(self):
         return len(self._tags)
 

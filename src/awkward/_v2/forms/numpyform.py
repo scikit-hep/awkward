@@ -34,7 +34,12 @@ def from_dtype(dtype, parameters=None):
 
     primitive = ak._v2.types.numpytype._dtype_to_primitive.get(dtype)
     if primitive is None:
-        raise TypeError("dtype {0} is not supported")
+        raise TypeError(
+            "dtype {0} is not supported; must be one of {1}".format(
+                repr(dtype),
+                ", ".join(repr(x) for x in ak._v2.types.numpytype._dtype_to_primitive),
+            )
+        )
 
     return NumpyForm(
         primitive=primitive,
@@ -48,7 +53,7 @@ class NumpyForm(Form):
         self,
         primitive,
         inner_shape=(),
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -71,7 +76,7 @@ class NumpyForm(Form):
 
         self._primitive = primitive
         self._inner_shape = tuple(inner_shape)
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def primitive(self):
@@ -93,7 +98,7 @@ class NumpyForm(Form):
             not verbose
             and not toplevel
             and len(self._inner_shape) == 0
-            and not self._has_identities
+            and not self._has_identifier
             and len(self._parameters) == 0
             and self._form_key is None
         ):

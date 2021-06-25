@@ -53,6 +53,17 @@ class ByteMaskedArray(Content):
     def valid_when(self):
         return self._valid_when
 
+    @property
+    def form(self):
+        return ak._v2.forms.ByteMaskedForm(
+            self._mask.form,
+            self._content.form,
+            self._valid_when,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
     def __len__(self):
         return len(self._mask)
 

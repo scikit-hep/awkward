@@ -1478,12 +1478,12 @@ def test_EmptyForm():
     assert (
         str(
             ak._v2.forms.emptyform.EmptyForm(
-                has_identities=True, parameters={"x": 123}, form_key="hello"
+                has_identifier=True, parameters={"x": 123}, form_key="hello"
             )
         )
         == """{
     "class": "EmptyArray",
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -1494,10 +1494,10 @@ def test_EmptyForm():
     assert (
         repr(
             ak._v2.forms.emptyform.EmptyForm(
-                has_identities=True, parameters={"x": 123}, form_key="hello"
+                has_identifier=True, parameters={"x": 123}, form_key="hello"
             )
         )
-        == "EmptyForm(has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "EmptyForm(has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.emptyform.EmptyForm().tolist(verbose=False) == {
@@ -1505,34 +1505,34 @@ def test_EmptyForm():
     }
     assert ak._v2.forms.emptyform.EmptyForm().tolist() == {
         "class": "EmptyArray",
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.emptyform.EmptyForm(
-        has_identities=True, parameters={"x": 123}, form_key="hello"
+        has_identifier=True, parameters={"x": 123}, form_key="hello"
     ).tolist(verbose=False) == {
         "class": "EmptyArray",
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
     assert ak._v2.forms.from_iter({"class": "EmptyArray"}).tolist() == {
         "class": "EmptyArray",
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.from_iter(
         {
             "class": "EmptyArray",
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
     ).tolist() == {
         "class": "EmptyArray",
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -1561,12 +1561,12 @@ def test_NumpyForm():
             ak._v2.forms.numpyform.NumpyForm(
                 primitive="bool",
                 inner_shape=[1, 2, 3],
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "NumpyForm('bool', inner_shape=(1, 2, 3), has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "NumpyForm('bool', inner_shape=(1, 2, 3), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.numpyform.NumpyForm("bool").tolist(verbose=False) == {
@@ -1577,21 +1577,21 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [],
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.numpyform.NumpyForm(
         "bool",
         inner_shape=[1, 2, 3],
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [1, 2, 3],
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2073,7 +2073,7 @@ def test_NumpyForm():
             "class": "NumpyArray",
             "primitive": "bool",
             "inner_shape": [1, 2, 3],
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -2081,7 +2081,7 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [1, 2, 3],
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2108,7 +2108,7 @@ def test_RegularForm():
             ak._v2.forms.regularform.RegularForm(
                 ak._v2.forms.emptyform.EmptyForm(),
                 10,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -2119,7 +2119,7 @@ def test_RegularForm():
     "content": {
         "class": "EmptyArray"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -2139,12 +2139,12 @@ def test_RegularForm():
             ak._v2.forms.regularform.RegularForm(
                 content=ak._v2.forms.emptyform.EmptyForm(),
                 size=10,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "RegularForm(EmptyForm(), 10, has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "RegularForm(EmptyForm(), 10, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.regularform.RegularForm(
@@ -2161,25 +2161,25 @@ def test_RegularForm():
         "size": 10,
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.regularform.RegularForm(
         content=ak._v2.forms.emptyform.EmptyForm(),
         size=10,
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
         "class": "RegularArray",
         "size": 10,
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2190,11 +2190,11 @@ def test_RegularForm():
         "size": 10,
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2203,7 +2203,7 @@ def test_RegularForm():
             "class": "RegularArray",
             "size": 10,
             "content": {"class": "EmptyArray"},
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -2211,7 +2211,7 @@ def test_RegularForm():
         "class": "RegularArray",
         "size": 10,
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2223,12 +2223,12 @@ def test_RegularForm():
             "class": "NumpyArray",
             "primitive": "bool",
             "inner_shape": [],
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
         "size": 10,
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2296,7 +2296,7 @@ def test_ListForm():
                 "i32",
                 "i32",
                 ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -2308,7 +2308,7 @@ def test_ListForm():
     "content": {
         "class": "EmptyArray"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -2329,12 +2329,12 @@ def test_ListForm():
                 starts="i32",
                 stops="i32",
                 content=ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "ListForm('i32', 'i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "ListForm('i32', 'i32', EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.listform.ListForm(
@@ -2353,11 +2353,11 @@ def test_ListForm():
         "stops": "i32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2365,7 +2365,7 @@ def test_ListForm():
         starts="i32",
         stops="i32",
         content=ak._v2.forms.emptyform.EmptyForm(),
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
@@ -2373,7 +2373,7 @@ def test_ListForm():
         "starts": "i32",
         "stops": "i32",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2390,11 +2390,11 @@ def test_ListForm():
         "stops": "i32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2411,11 +2411,11 @@ def test_ListForm():
         "stops": "u32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2432,11 +2432,11 @@ def test_ListForm():
         "stops": "i64",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2446,7 +2446,7 @@ def test_ListForm():
             "starts": "i32",
             "stops": "i32",
             "content": {"class": "EmptyArray"},
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -2455,7 +2455,7 @@ def test_ListForm():
         "starts": "i32",
         "stops": "i32",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2512,7 +2512,7 @@ def test_ListOffsetForm():
             ak._v2.forms.listoffsetform.ListOffsetForm(
                 "i32",
                 ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -2523,7 +2523,7 @@ def test_ListOffsetForm():
     "content": {
         "class": "EmptyArray"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -2543,12 +2543,12 @@ def test_ListOffsetForm():
             ak._v2.forms.listoffsetform.ListOffsetForm(
                 offsets="i32",
                 content=ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "ListOffsetForm('i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "ListOffsetForm('i32', EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.listoffsetform.ListOffsetForm(
@@ -2565,25 +2565,25 @@ def test_ListOffsetForm():
         "offsets": "i32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.listoffsetform.ListOffsetForm(
         offsets="i32",
         content=ak._v2.forms.emptyform.EmptyForm(),
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2598,11 +2598,11 @@ def test_ListOffsetForm():
         "offsets": "i32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2617,11 +2617,11 @@ def test_ListOffsetForm():
         "offsets": "u32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2636,11 +2636,11 @@ def test_ListOffsetForm():
         "offsets": "i64",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2649,7 +2649,7 @@ def test_ListOffsetForm():
             "class": "ListOffsetArray",
             "offsets": "i32",
             "content": {"class": "EmptyArray"},
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -2657,7 +2657,7 @@ def test_ListOffsetForm():
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2715,7 +2715,7 @@ def test_RecordForm():
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
                 None,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -2728,7 +2728,7 @@ def test_RecordForm():
         },
         "bool"
     ],
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -2743,7 +2743,7 @@ def test_RecordForm():
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
                 ["x", "y"],
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -2756,7 +2756,7 @@ def test_RecordForm():
         },
         "y": "bool"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -2796,12 +2796,12 @@ def test_RecordForm():
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
                 keys=None,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "RecordForm([EmptyForm(), NumpyForm('bool')], None, has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "RecordForm([EmptyForm(), NumpyForm('bool')], None, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
     assert (
         repr(
@@ -2811,12 +2811,12 @@ def test_RecordForm():
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
                 keys=["x", "y"],
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "RecordForm([EmptyForm(), NumpyForm('bool')], ['x', 'y'], has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "RecordForm([EmptyForm(), NumpyForm('bool')], ['x', 'y'], has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.recordform.RecordForm(
@@ -2847,7 +2847,7 @@ def test_RecordForm():
         "contents": [
             {
                 "class": "EmptyArray",
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -2855,12 +2855,12 @@ def test_RecordForm():
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2872,7 +2872,7 @@ def test_RecordForm():
         "contents": {
             "x": {
                 "class": "EmptyArray",
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -2880,12 +2880,12 @@ def test_RecordForm():
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2895,7 +2895,7 @@ def test_RecordForm():
             ak._v2.forms.numpyform.NumpyForm("bool"),
         ],
         keys=None,
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
@@ -2904,7 +2904,7 @@ def test_RecordForm():
             {"class": "EmptyArray"},
             "bool",
         ],
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2914,7 +2914,7 @@ def test_RecordForm():
             ak._v2.forms.numpyform.NumpyForm("bool"),
         ],
         keys=["x", "y"],
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
@@ -2923,7 +2923,7 @@ def test_RecordForm():
             "x": {"class": "EmptyArray"},
             "y": "bool",
         },
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -2940,7 +2940,7 @@ def test_RecordForm():
         "contents": [
             {
                 "class": "EmptyArray",
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -2948,12 +2948,12 @@ def test_RecordForm():
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2970,7 +2970,7 @@ def test_RecordForm():
         "contents": {
             "x": {
                 "class": "EmptyArray",
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -2978,12 +2978,12 @@ def test_RecordForm():
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -2994,7 +2994,7 @@ def test_RecordForm():
                 {"class": "EmptyArray"},
                 "bool",
             ],
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -3004,7 +3004,7 @@ def test_RecordForm():
             {"class": "EmptyArray"},
             "bool",
         ],
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3015,7 +3015,7 @@ def test_RecordForm():
                 "x": {"class": "EmptyArray"},
                 "y": "bool",
             },
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -3025,7 +3025,7 @@ def test_RecordForm():
             "x": {"class": "EmptyArray"},
             "y": "bool",
         },
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3082,7 +3082,7 @@ def test_IndexedForm():
             ak._v2.forms.indexedform.IndexedForm(
                 "i32",
                 ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -3093,7 +3093,7 @@ def test_IndexedForm():
     "content": {
         "class": "EmptyArray"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -3113,12 +3113,12 @@ def test_IndexedForm():
             ak._v2.forms.indexedform.IndexedForm(
                 index="i32",
                 content=ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "IndexedForm('i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "IndexedForm('i32', EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.indexedform.IndexedForm(
@@ -3135,25 +3135,25 @@ def test_IndexedForm():
         "index": "i32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.indexedform.IndexedForm(
         index="i32",
         content=ak._v2.forms.emptyform.EmptyForm(),
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
         "class": "IndexedArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3168,11 +3168,11 @@ def test_IndexedForm():
         "index": "i32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3187,11 +3187,11 @@ def test_IndexedForm():
         "index": "u32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3206,11 +3206,11 @@ def test_IndexedForm():
         "index": "i64",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3219,7 +3219,7 @@ def test_IndexedForm():
             "class": "IndexedArray",
             "index": "i32",
             "content": {"class": "EmptyArray"},
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -3227,7 +3227,7 @@ def test_IndexedForm():
         "class": "IndexedArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3270,7 +3270,7 @@ def test_IndexedOptionForm():
             ak._v2.forms.indexedoptionform.IndexedOptionForm(
                 "i32",
                 ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -3281,7 +3281,7 @@ def test_IndexedOptionForm():
     "content": {
         "class": "EmptyArray"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -3301,12 +3301,12 @@ def test_IndexedOptionForm():
             ak._v2.forms.indexedoptionform.IndexedOptionForm(
                 index="i32",
                 content=ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "IndexedOptionForm('i32', EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "IndexedOptionForm('i32', EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.indexedoptionform.IndexedOptionForm(
@@ -3323,25 +3323,25 @@ def test_IndexedOptionForm():
         "index": "i32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.indexedoptionform.IndexedOptionForm(
         index="i32",
         content=ak._v2.forms.emptyform.EmptyForm(),
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3356,11 +3356,11 @@ def test_IndexedOptionForm():
         "index": "i32",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3375,11 +3375,11 @@ def test_IndexedOptionForm():
         "index": "i64",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3388,7 +3388,7 @@ def test_IndexedOptionForm():
             "class": "IndexedOptionArray",
             "index": "i32",
             "content": {"class": "EmptyArray"},
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -3396,7 +3396,7 @@ def test_IndexedOptionForm():
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3442,7 +3442,7 @@ def test_ByteMaskedForm():
                 "i8",
                 ak._v2.forms.emptyform.EmptyForm(),
                 True,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -3454,7 +3454,7 @@ def test_ByteMaskedForm():
     "content": {
         "class": "EmptyArray"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -3475,12 +3475,12 @@ def test_ByteMaskedForm():
                 mask="i8",
                 content=ak._v2.forms.emptyform.EmptyForm(),
                 valid_when=True,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "ByteMaskedForm('i8', EmptyForm(), True, has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "ByteMaskedForm('i8', EmptyForm(), True, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.bytemaskedform.ByteMaskedForm(
@@ -3499,11 +3499,11 @@ def test_ByteMaskedForm():
         "valid_when": True,
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3511,7 +3511,7 @@ def test_ByteMaskedForm():
         mask="i8",
         content=ak._v2.forms.emptyform.EmptyForm(),
         valid_when=True,
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
@@ -3519,7 +3519,7 @@ def test_ByteMaskedForm():
         "mask": "i8",
         "valid_when": True,
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3536,11 +3536,11 @@ def test_ByteMaskedForm():
         "valid_when": True,
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3557,11 +3557,11 @@ def test_ByteMaskedForm():
         "valid_when": True,
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3571,7 +3571,7 @@ def test_ByteMaskedForm():
             "mask": "i8",
             "valid_when": True,
             "content": {"class": "EmptyArray"},
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -3580,7 +3580,7 @@ def test_ByteMaskedForm():
         "mask": "i8",
         "valid_when": True,
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3661,7 +3661,7 @@ def test_BitMaskedForm():
                 ak._v2.forms.emptyform.EmptyForm(),
                 True,
                 False,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -3674,7 +3674,7 @@ def test_BitMaskedForm():
     "content": {
         "class": "EmptyArray"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -3699,12 +3699,12 @@ def test_BitMaskedForm():
                 content=ak._v2.forms.emptyform.EmptyForm(),
                 valid_when=True,
                 lsb_order=False,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "BitMaskedForm('u8', EmptyForm(), True, False, has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "BitMaskedForm('u8', EmptyForm(), True, False, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.bitmaskedform.BitMaskedForm(
@@ -3725,11 +3725,11 @@ def test_BitMaskedForm():
         "lsb_order": False,
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3738,7 +3738,7 @@ def test_BitMaskedForm():
         content=ak._v2.forms.emptyform.EmptyForm(),
         valid_when=True,
         lsb_order=False,
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
@@ -3747,7 +3747,7 @@ def test_BitMaskedForm():
         "valid_when": True,
         "lsb_order": False,
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3766,11 +3766,11 @@ def test_BitMaskedForm():
         "lsb_order": False,
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3789,11 +3789,11 @@ def test_BitMaskedForm():
         "lsb_order": False,
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3804,7 +3804,7 @@ def test_BitMaskedForm():
             "valid_when": True,
             "lsb_order": False,
             "content": {"class": "EmptyArray"},
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -3814,7 +3814,7 @@ def test_BitMaskedForm():
         "valid_when": True,
         "lsb_order": False,
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3837,7 +3837,7 @@ def test_UnmaskedForm():
         str(
             ak._v2.forms.unmaskedform.UnmaskedForm(
                 ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -3847,7 +3847,7 @@ def test_UnmaskedForm():
     "content": {
         "class": "EmptyArray"
     },
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -3866,12 +3866,12 @@ def test_UnmaskedForm():
         repr(
             ak._v2.forms.unmaskedform.UnmaskedForm(
                 content=ak._v2.forms.emptyform.EmptyForm(),
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "UnmaskedForm(EmptyForm(), has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "UnmaskedForm(EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.unmaskedform.UnmaskedForm(
@@ -3886,23 +3886,23 @@ def test_UnmaskedForm():
         "class": "UnmaskedArray",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.unmaskedform.UnmaskedForm(
         content=ak._v2.forms.emptyform.EmptyForm(),
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
         "class": "UnmaskedArray",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -3912,11 +3912,11 @@ def test_UnmaskedForm():
         "class": "UnmaskedArray",
         "content": {
             "class": "EmptyArray",
-            "has_identities": False,
+            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -3924,14 +3924,14 @@ def test_UnmaskedForm():
         {
             "class": "UnmaskedArray",
             "content": {"class": "EmptyArray"},
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
     ).tolist(verbose=False) == {
         "class": "UnmaskedArray",
         "content": {"class": "EmptyArray"},
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -4019,7 +4019,7 @@ def test_UnionForm():
                     ak._v2.forms.emptyform.EmptyForm(),
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -4034,7 +4034,7 @@ def test_UnionForm():
         },
         "bool"
     ],
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -4064,12 +4064,12 @@ def test_UnionForm():
                     ak._v2.forms.emptyform.EmptyForm(),
                     ak._v2.forms.numpyform.NumpyForm("bool"),
                 ],
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "UnionForm('i8', 'i32', [EmptyForm(), NumpyForm('bool')], has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "UnionForm('i8', 'i32', [EmptyForm(), NumpyForm('bool')], has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.unionform.UnionForm(
@@ -4096,7 +4096,7 @@ def test_UnionForm():
         "contents": [
             {
                 "class": "EmptyArray",
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -4104,12 +4104,12 @@ def test_UnionForm():
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -4120,7 +4120,7 @@ def test_UnionForm():
             ak._v2.forms.emptyform.EmptyForm(),
             ak._v2.forms.numpyform.NumpyForm("bool"),
         ],
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
@@ -4131,7 +4131,7 @@ def test_UnionForm():
             {"class": "EmptyArray"},
             "bool",
         ],
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -4152,7 +4152,7 @@ def test_UnionForm():
         "contents": [
             {
                 "class": "EmptyArray",
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -4160,12 +4160,12 @@ def test_UnionForm():
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -4186,7 +4186,7 @@ def test_UnionForm():
         "contents": [
             {
                 "class": "EmptyArray",
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -4194,12 +4194,12 @@ def test_UnionForm():
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -4220,7 +4220,7 @@ def test_UnionForm():
         "contents": [
             {
                 "class": "EmptyArray",
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -4228,12 +4228,12 @@ def test_UnionForm():
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
-                "has_identities": False,
+                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -4246,7 +4246,7 @@ def test_UnionForm():
                 {"class": "EmptyArray"},
                 "bool",
             ],
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -4258,7 +4258,7 @@ def test_UnionForm():
             {"class": "EmptyArray"},
             "bool",
         ],
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -4317,7 +4317,7 @@ def test_VirtualForm():
             ak._v2.forms.virtualform.VirtualForm(
                 form=None,
                 has_length=False,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
@@ -4326,7 +4326,7 @@ def test_VirtualForm():
     "class": "VirtualArray",
     "form": null,
     "has_length": false,
-    "has_identities": true,
+    "has_identifier": true,
     "parameters": {
         "x": 123
     },
@@ -4363,12 +4363,12 @@ def test_VirtualForm():
             ak._v2.forms.virtualform.VirtualForm(
                 form=None,
                 has_length=False,
-                has_identities=True,
+                has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
             )
         )
-        == "VirtualForm(None, False, has_identities=True, parameters={'x': 123}, form_key='hello')"
+        == "VirtualForm(None, False, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
     assert ak._v2.forms.virtualform.VirtualForm(None, False).tolist(verbose=False) == {
@@ -4380,21 +4380,21 @@ def test_VirtualForm():
         "class": "VirtualArray",
         "form": None,
         "has_length": False,
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
     assert ak._v2.forms.virtualform.VirtualForm(
         form=None,
         has_length=False,
-        has_identities=True,
+        has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
     ).tolist(verbose=False) == {
         "class": "VirtualArray",
         "form": None,
         "has_length": False,
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
@@ -4408,7 +4408,7 @@ def test_VirtualForm():
         "class": "VirtualArray",
         "form": None,
         "has_length": False,
-        "has_identities": False,
+        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -4417,7 +4417,7 @@ def test_VirtualForm():
             "class": "VirtualArray",
             "form": None,
             "has_length": False,
-            "has_identities": True,
+            "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
@@ -4425,7 +4425,7 @@ def test_VirtualForm():
         "class": "VirtualArray",
         "form": None,
         "has_length": False,
-        "has_identities": True,
+        "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
