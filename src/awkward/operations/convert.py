@@ -972,6 +972,11 @@ def to_list(array):
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         return [to_list(x) for x in array]
 
+    elif isinstance(array, ak._v2.contents.Content):
+        import awkward._v2.tmp_for_testing
+
+        return to_list(awkward._v2.tmp_for_testing.v2_to_v1(array))
+
     elif isinstance(array, dict):
         return dict((n, to_list(x)) for n, x in array.items())
 

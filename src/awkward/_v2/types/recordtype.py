@@ -9,11 +9,12 @@ except ImportError:
 
 import json
 
+import awkward as ak
 from awkward._v2.types.type import Type
 
 
 class RecordType(Type):
-    def __init__(self, contents, recordlookup, parameters=None, typestr=None):
+    def __init__(self, contents, keys, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{0} 'contents' must be iterable, not {1}".format(
@@ -29,9 +30,9 @@ class RecordType(Type):
                         type(self).__name__, repr(content)
                     )
                 )
-        if recordlookup is not None and not isinstance(recordlookup, Iterable):
+        if keys is not None and not isinstance(keys, Iterable):
             raise TypeError(
-                "{0} 'recordlookup' must be iterable, not {1}".format(
+                "{0} 'keys' must be iterable, not {1}".format(
                     type(self).__name__, repr(contents)
                 )
             )
@@ -41,14 +42,14 @@ class RecordType(Type):
                     type(self).__name__, repr(parameters)
                 )
             )
-        if typestr is not None and not isinstance(typestr, str):
+        if typestr is not None and not ak._util.isstr(typestr):
             raise TypeError(
                 "{0} 'typestr' must be of type string or None, not {1}".format(
                     type(self).__name__, repr(typestr)
                 )
             )
         self._contents = contents
-        self._recordlookup = recordlookup
+        self._keys = keys
         self._parameters = parameters
         self._typestr = typestr
 
@@ -57,12 +58,12 @@ class RecordType(Type):
         return self._contents
 
     @property
-    def recordlookup(self):
-        return self._recordlookup
+    def keys(self):
+        return self._keys
 
     @property
     def is_tuple(self):
-        return self._recordlookup is None
+        return self._keys is None
 
     _str_parameters_exclude = ("__categorical__", "__record__")
 
@@ -82,7 +83,7 @@ class RecordType(Type):
                     else:
                         out = name + "[" + ", ".join(children) + "]"
                 else:
-                    pairs = [k + ": " + v for k, v in zip(self._recordlookup, children)]
+                    pairs = [k + ": " + v for k, v in zip(self._keys, children)]
                     if name is None:
                         out = "{" + ", ".join(pairs) + "}"
                     else:
@@ -96,18 +97,16 @@ class RecordType(Type):
                         out = "{0}[{1}, {2}]".format(name, ", ".join(children), params)
                 else:
                     if name is None:
-                        keys = [json.dumps(x) for x in self._recordlookup]
+                        keys = [json.dumps(x) for x in self._keys]
                         out = "struct[[{0}], [{1}], {2}]".format(
                             ", ".join(keys), ", ".join(children), params
                         )
                     else:
-                        pairs = [
-                            k + ": " + v for k, v in zip(self._recordlookup, children)
-                        ]
+                        pairs = [k + ": " + v for k, v in zip(self._keys, children)]
                         out = "{0}[{1}, {2}]".format(name, ", ".join(pairs), params)
 
         return self._str_categorical_begin() + out + self._str_categorical_end()
 
     def __repr__(self):
-        args = [repr(self._contents), repr(self._recordlookup)] + self._repr_args()
+        args = [repr(self._contents), repr(self._keys)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))

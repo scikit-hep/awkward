@@ -2,19 +2,25 @@
 
 from __future__ import absolute_import
 
-import numbers
-
+import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
-
-import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
 
 class BitMaskedArray(Content):
-    def __init__(self, mask, content, valid_when, length, lsb_order):
+    def __init__(
+        self,
+        mask,
+        content,
+        valid_when,
+        length,
+        lsb_order,
+        identifier=None,
+        parameters=None,
+    ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
                 "{0} 'mask' must be an Index with dtype=uint8, not {1}".format(
@@ -33,7 +39,7 @@ class BitMaskedArray(Content):
                     type(self).__name__, repr(valid_when)
                 )
             )
-        if not isinstance(length, numbers.Integral):
+        if not ak._util.isint(length):
             raise TypeError(
                 "{0} 'length' must be an integer, not {1}".format(
                     type(self).__name__, repr(length)
@@ -63,6 +69,7 @@ class BitMaskedArray(Content):
         self._valid_when = valid_when
         self._length = length
         self._lsb_order = lsb_order
+        self._init(identifier, parameters)
 
     @property
     def mask(self):
@@ -79,6 +86,18 @@ class BitMaskedArray(Content):
     @property
     def lsb_order(self):
         return self._lsb_order
+
+    @property
+    def form(self):
+        return ak._v2.forms.BitMaskedForm(
+            self._mask.form,
+            self._content.form,
+            self._valid_when,
+            self._lsb_order,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     def __len__(self):
         return self._length

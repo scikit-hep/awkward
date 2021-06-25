@@ -6,14 +6,14 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-import numbers
 
+import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.record import Record
 
 
 class RecordArray(Content):
-    def __init__(self, contents, recordlookup, length=None):
+    def __init__(self, contents, keys, length=None, identifier=None, parameters=None):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{0} 'contents' must be iterable, not {1}".format(
@@ -31,7 +31,7 @@ class RecordArray(Content):
             )
         elif length is None:
             length = min(len(x) for x in contents)
-        if not (isinstance(length, numbers.Integral) and length >= 0):
+        if not (ak._util.isint(length) and length >= 0):
             raise TypeError(
                 "{0} 'length' must be a non-negative integer or None, not {1}".format(
                     type(self).__name__, repr(length)
@@ -51,43 +51,54 @@ class RecordArray(Content):
                     )
                 )
 
-        if isinstance(recordlookup, Iterable):
-            if not isinstance(recordlookup, list):
-                recordlookup = list(recordlookup)
-            if not all(isinstance(x, str) for x in recordlookup):
+        if isinstance(keys, Iterable):
+            if not isinstance(keys, list):
+                keys = list(keys)
+            if not all(ak._util.isstr(x) for x in keys):
                 raise TypeError(
-                    "{0} 'recordlookup' must all be strings, not {1}".format(
-                        type(self).__name__, repr(recordlookup)
+                    "{0} 'keys' must all be strings, not {1}".format(
+                        type(self).__name__, repr(keys)
                     )
                 )
-            if not len(contents) == len(recordlookup):
+            if not len(contents) == len(keys):
                 raise ValueError(
-                    "{0} len(contents) ({1}) must be equal to len(recordlookup) ({2})".format(
-                        type(self).__name__, len(contents), len(recordlookup)
+                    "{0} len(contents) ({1}) must be equal to len(keys) ({2})".format(
+                        type(self).__name__, len(contents), len(keys)
                     )
                 )
-        elif recordlookup is not None:
+        elif keys is not None:
             raise TypeError(
-                "{0} 'recordlookup' must be iterable or None, not {1}".format(
-                    type(self).__name__, repr(recordlookup)
+                "{0} 'keys' must be iterable or None, not {1}".format(
+                    type(self).__name__, repr(keys)
                 )
             )
 
         self._contents = contents
-        self._recordlookup = recordlookup
+        self._keys = keys
         self._length = length
+        self._init(identifier, parameters)
 
     @property
     def contents(self):
         return self._contents
 
     @property
-    def recordlookup(self):
-        return self._recordlookup
+    def keys(self):
+        return self._keys
 
     @property
     def is_tuple(self):
-        return self._recordlookup is None
+        return self._keys is None
+
+    @property
+    def form(self):
+        return ak._v2.forms.RecordForm(
+            [x.form for x in self._contents],
+            self._keys,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     def __len__(self):
         return self._length
@@ -101,7 +112,7 @@ class RecordArray(Content):
         out.append(" is_tuple=")
         out.append(repr(str(self.is_tuple)))
         out.append(">\n")
-        if self._recordlookup is None:
+        if self._keys is None:
             for i, x in enumerate(self._contents):
                 out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
                 out.append(x._repr(indent + "        ", "", "\n"))
@@ -110,7 +121,7 @@ class RecordArray(Content):
             for i, x in enumerate(self._contents):
                 out.append(
                     "{0}    <content index={1} key={2}>\n".format(
-                        indent, repr(str(i)), repr(self._recordlookup[i])
+                        indent, repr(str(i)), repr(self._keys[i])
                     )
                 )
                 out.append(x._repr(indent + "        ", "", "\n"))
@@ -122,10 +133,10 @@ class RecordArray(Content):
 
     def index_to_key(self, index):
         if 0 <= index < len(self._contents):
-            if self._recordlookup is None:
+            if self._keys is None:
                 return str(index)
             else:
-                return self._recordlookup[index]
+                return self._keys[index]
         else:
             raise IndexError(
                 "no index {0} in record with {1} fields".format(
@@ -134,7 +145,7 @@ class RecordArray(Content):
             )
 
     def key_to_index(self, key):
-        if self._recordlookup is None:
+        if self._keys is None:
             try:
                 i = int(key)
             except ValueError:
@@ -144,7 +155,7 @@ class RecordArray(Content):
                     return i
         else:
             try:
-                i = self._recordlookup.index(key)
+                i = self._keys.index(key)
             except ValueError:
                 pass
             else:
@@ -156,10 +167,16 @@ class RecordArray(Content):
         )
 
     def content(self, index_or_key):
-        if isinstance(index_or_key, numbers.Integral):
+        if ak._util.isint(index_or_key):
             index = index_or_key
-        else:
+        elif ak._util.isstr(index_or_key):
             index = self.key_to_index(index_or_key)
+        else:
+            raise TypeError(
+                "index_or_key must be an integer (index) or string (key), not {0}".format(
+                    repr(index_or_key)
+                )
+            )
         return self._contents[index][: self._length]
 
     def _getitem_at(self, where):
@@ -176,11 +193,11 @@ class RecordArray(Content):
             stop = min(max(stop, 0), self._length)
             if stop < start:
                 stop = start
-            return RecordArray([], self._recordlookup, stop - start)
+            return RecordArray([], self._keys, stop - start)
         else:
             return RecordArray(
                 [x[start:stop] for x in self._contents],
-                self._recordlookup,
+                self._keys,
                 stop - start,
             )
 
@@ -189,10 +206,10 @@ class RecordArray(Content):
 
     def _getitem_fields(self, where):
         indexes = [self.key_to_index(key) for key in where]
-        if self._recordlookup is None:
+        if self._keys is None:
             return RecordArray([self.content(i) for i in indexes], None)
         else:
             return RecordArray(
                 [self.content(i) for i in indexes],
-                [self._recordlookup[i] for i in indexes],
+                [self._keys[i] for i in indexes],
             )

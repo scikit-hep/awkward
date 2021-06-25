@@ -6,7 +6,6 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-import numbers
 
 import awkward as ak
 
@@ -14,8 +13,38 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Content(object):
+    def _init(self, identifier, parameters):
+        if parameters is None:
+            parameters = {}
+
+        if identifier is not None and not isinstance(
+            identifier, ak._v2.identifier.Identifier
+        ):
+            raise TypeError(
+                "{0} 'identifier' must be an Identifier or None, not {1}".format(
+                    type(self).__name__, repr(identifier)
+                )
+            )
+        if not isinstance(parameters, dict):
+            raise TypeError(
+                "{0} 'parameters' must be a dict or None, not {1}".format(
+                    type(self).__name__, repr(identifier)
+                )
+            )
+
+        self._identifier = identifier
+        self._parameters = parameters
+
+    @property
+    def identifier(self):
+        return self._identifier
+
+    @property
+    def parameters(self):
+        return self._parameters
+
     def __getitem__(self, where):
-        if isinstance(where, numbers.Integral):
+        if ak._util.isint(where):
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
@@ -24,7 +53,7 @@ class Content(object):
         elif isinstance(where, slice):
             raise NotImplementedError("needs _getitem_next")
 
-        elif isinstance(where, str):
+        elif ak._util.isstr(where):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
@@ -47,7 +76,7 @@ class Content(object):
         ):
             raise NotImplementedError("needs _getitem_array")
 
-        elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
+        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):

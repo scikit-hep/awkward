@@ -7,8 +7,6 @@ try:
 except ImportError:
     from collections import Iterable
 
-import numbers
-
 import awkward as ak
 from awkward._v2.contents.content import Content
 
@@ -22,7 +20,7 @@ class Record(object):
             raise TypeError(
                 "Record 'array' must be a RecordArray, not {0}".format(repr(array))
             )
-        if not isinstance(at, numbers.Integral):
+        if not ak._util.isint(at):
             raise TypeError(
                 "Record 'at' must be an integer, not {0}".format(repr(array))
             )
@@ -58,13 +56,13 @@ class Record(object):
         return "".join(out)
 
     def __getitem__(self, where):
-        if isinstance(where, numbers.Integral):
+        if ak._util.isint(where):
             raise IndexError("scalar Record cannot be sliced by an integer")
 
         elif isinstance(where, slice):
             raise IndexError("scalar Record cannot be sliced by a range slice (`:`)")
 
-        elif isinstance(where, str):
+        elif ak._util.isstr(where):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
@@ -82,7 +80,7 @@ class Record(object):
         elif isinstance(where, Content):
             raise IndexError("scalar Record cannot be sliced by an array")
 
-        elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
+        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):

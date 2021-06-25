@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class ListArray(Content):
-    def __init__(self, starts, stops, content):
+    def __init__(self, starts, stops, content, identifier=None, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),
             np.dtype(np.uint32),
@@ -41,6 +41,7 @@ class ListArray(Content):
         self._starts = starts
         self._stops = stops
         self._content = content
+        self._init(identifier, parameters)
 
     @property
     def starts(self):
@@ -53,6 +54,17 @@ class ListArray(Content):
     @property
     def content(self):
         return self._content
+
+    @property
+    def form(self):
+        return ak._v2.forms.ListForm(
+            self._starts.form,
+            self._stops.form,
+            self._content.form,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     def __len__(self):
         return len(self._starts)

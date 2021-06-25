@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class IndexedArray(Content):
-    def __init__(self, index, content):
+    def __init__(self, index, content, identifier=None, parameters=None):
         if not (
             isinstance(index, Index)
             and index.dtype
@@ -33,6 +33,7 @@ class IndexedArray(Content):
 
         self._index = index
         self._content = content
+        self._init(identifier, parameters)
 
     @property
     def index(self):
@@ -41,6 +42,16 @@ class IndexedArray(Content):
     @property
     def content(self):
         return self._content
+
+    @property
+    def form(self):
+        return ak._v2.forms.IndexedForm(
+            self._index.form,
+            self._content.form,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     def __len__(self):
         return len(self._index)
