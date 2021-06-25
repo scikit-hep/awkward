@@ -47,13 +47,13 @@ jobs:
         - os: ubuntu-latest
           type: ManyLinux1
           arch: auto64
-          build: "cp{27,35,36}-*"
+          build: "cp{27,35,36,37,38}-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
 
         - os: ubuntu-latest
           type: ManyLinux2010
           arch: auto64
-          build: "cp{36,37,38,39}-*"
+          build: "cp{36,37,38,39}-* pp37-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
 
         - os: macos-latest
