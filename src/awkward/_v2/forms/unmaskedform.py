@@ -9,7 +9,7 @@ class UnmaskedForm(Form):
     def __init__(
         self,
         content,
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -21,7 +21,7 @@ class UnmaskedForm(Form):
             )
 
         self._content = content
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def content(self):

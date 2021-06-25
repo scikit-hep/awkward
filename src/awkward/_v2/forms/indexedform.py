@@ -11,7 +11,7 @@ class IndexedForm(Form):
         self,
         index,
         content=None,
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -30,7 +30,7 @@ class IndexedForm(Form):
 
         self._index = index
         self._content = content
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def index(self):

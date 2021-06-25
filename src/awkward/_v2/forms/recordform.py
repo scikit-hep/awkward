@@ -14,8 +14,8 @@ class RecordForm(Form):
     def __init__(
         self,
         contents,
-        recordlookup,
-        has_identities=False,
+        keys,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -32,36 +32,38 @@ class RecordForm(Form):
                         type(self).__name__, repr(content)
                     )
                 )
-        if recordlookup is not None and not isinstance(recordlookup, Iterable):
+        if keys is not None and not isinstance(keys, Iterable):
             raise TypeError(
-                "{0} 'recordlookup' must be iterable, not {1}".format(
+                "{0} 'keys' must be iterable, not {1}".format(
                     type(self).__name__, repr(contents)
                 )
             )
 
-        self._recordlookup = recordlookup
+        self._keys = keys
         self._contents = list(contents)
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
-    def recordlookup(self):
-        return self._recordlookup
+    def keys(self):
+        return self._keys
 
     @property
     def contents(self):
         return self._contents
 
     def __repr__(self):
-        args = [repr(self._contents), repr(self._recordlookup)] + self._repr_args()
+        args = [repr(self._contents), repr(self._keys)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose, toplevel):
         out = {"class": "RecordArray"}
+
         contents_tolist = [
             content._tolist_part(verbose, toplevel=False) for content in self._contents
         ]
-        if self._recordlookup is None:
-            out["contents"] = contents_tolist
+        if self._keys is not None:
+            out["contents"] = dict(zip(self._keys, contents_tolist))
         else:
-            out["contents"] = dict(zip(self._recordlookup, contents_tolist))
+            out["contents"] = contents_tolist
+
         return self._tolist_extra(out, verbose)

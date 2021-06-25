@@ -256,7 +256,16 @@ namespace awkward {
         json["class"].IsString()) {
 
       bool h = false;
-      if (json.HasMember("has_identities")) {
+      if (json.HasMember("has_identifier")) {
+        if (json["has_identifier"].IsBool()) {
+          h = json["has_identifier"].GetBool();
+        }
+        else {
+          throw std::invalid_argument(
+            std::string("'has_identifier' must be boolean") + FILENAME(__LINE__));
+        }
+      }
+      else if (json.HasMember("has_identities")) {
         if (json["has_identities"].IsBool()) {
           h = json["has_identities"].GetBool();
         }

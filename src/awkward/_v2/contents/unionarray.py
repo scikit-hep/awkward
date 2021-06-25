@@ -15,7 +15,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class UnionArray(Content):
-    def __init__(self, tags, index, contents):
+    def __init__(self, tags, index, contents, identifier=None, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise TypeError(
                 "{0} 'tags' must be an Index with dtype=int8, not {1}".format(
@@ -59,6 +59,7 @@ class UnionArray(Content):
         self._tags = tags
         self._index = index
         self._contents = contents
+        self._init(identifier, parameters)
 
     @property
     def tags(self):
@@ -68,9 +69,23 @@ class UnionArray(Content):
     def index(self):
         return self._index
 
+    def content(self, index):
+        return self._contents[index]
+
     @property
     def contents(self):
         return self._contents
+
+    @property
+    def form(self):
+        return ak._v2.forms.UnionForm(
+            self._tags.form,
+            self._index.form,
+            [x.form for x in self._contents],
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     def __len__(self):
         return len(self._tags)

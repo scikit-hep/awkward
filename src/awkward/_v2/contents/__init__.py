@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import awkward._v2.index  # noqa: F401
 import awkward._v2.record  # noqa: F401
 
+from awkward._v2.contents.content import Content  # noqa: F401
 from awkward._v2.contents.emptyarray import EmptyArray  # noqa: F401
 from awkward._v2.contents.numpyarray import NumpyArray  # noqa: F401
 from awkward._v2.contents.regulararray import RegularArray  # noqa: F401

@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+from awkward._v2.types.type import Type  # noqa: F401
 from awkward._v2.types.unknowntype import UnknownType  # noqa: F401
 from awkward._v2.types.numpytype import NumpyType  # noqa: F401
 from awkward._v2.types.regulartype import RegularType  # noqa: F401

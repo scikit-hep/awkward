@@ -13,7 +13,7 @@ class BitMaskedForm(Form):
         content,
         valid_when,
         lsb_order,
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -46,7 +46,7 @@ class BitMaskedForm(Form):
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def mask(self):

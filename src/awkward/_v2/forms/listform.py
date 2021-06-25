@@ -12,7 +12,7 @@ class ListForm(Form):
         starts,
         stops,
         content,
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -38,7 +38,7 @@ class ListForm(Form):
         self._starts = starts
         self._stops = stops
         self._content = content
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def starts(self):

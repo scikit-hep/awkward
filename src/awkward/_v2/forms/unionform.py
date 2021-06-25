@@ -17,7 +17,7 @@ class UnionForm(Form):
         tags,
         index,
         contents,
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -50,7 +50,7 @@ class UnionForm(Form):
         self._tags = tags
         self._index = index
         self._contents = list(contents)
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def tags(self):

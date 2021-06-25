@@ -12,7 +12,7 @@ class ByteMaskedForm(Form):
         mask,
         content,
         valid_when,
-        has_identities=False,
+        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -38,7 +38,7 @@ class ByteMaskedForm(Form):
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
-        self._init(has_identities, parameters, form_key)
+        self._init(has_identifier, parameters, form_key)
 
     @property
     def mask(self):

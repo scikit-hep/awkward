@@ -2,11 +2,12 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 from awkward._v2.contents.content import Content
 
 
 class UnmaskedArray(Content):
-    def __init__(self, content):
+    def __init__(self, content, identifier=None, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
                 "{0} 'content' must be a Content subtype, not {1}".format(
@@ -15,10 +16,20 @@ class UnmaskedArray(Content):
             )
 
         self._content = content
+        self._init(identifier, parameters)
 
     @property
-    def contents(self):
-        return self._contents
+    def content(self):
+        return self._content
+
+    @property
+    def form(self):
+        return ak._v2.forms.UnmaskedForm(
+            self._content.form,
+            has_identifier=self._identifier is not None,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     def __len__(self):
         return len(self._content)
