@@ -212,10 +212,11 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 
 | Version number | Target date | Deprecated features to remove in this version |
 |:--------------:|:-----------:|:----------------------------------------------|
-| 1.4.0 | 2021-08-01 | |
-| 1.5.0 | 2021-10-01 | |
-| 1.6.0 | 2021-12-01 | |
-| 1.7.0 | 2022-02-01 | |
+| 1.4.0 | 2021-06-28 _(for PyHEP)_ | |
+| 1.5.0 | 2021-08-01 | |
+| 1.6.0 | 2021-10-01 | |
+| 1.7.0 | 2021-12-01 | |
+| 1.8.0 | 2022-02-01 | |
 
 ## Voting for fixes/features
 
