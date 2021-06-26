@@ -13,7 +13,7 @@ env:
   CIBW_TEST_COMMAND: pytest {project}/tests
   CIBW_BUILD_VERBOSITY: 1
   CIBW_SKIP: "pp27* pp36* pp*win* cp27-win*"
-  CIBW_TEST_SKIP: "*universal2:arm64 pp*macos*"
+  CIBW_TEST_SKIP: "*universal2:arm64 pp*"
   CIBW_ENVIRONMENT: PIP_ONLY_BINARY=cmake,numpy
 
 
