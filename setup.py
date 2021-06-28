@@ -1,12 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import print_function
 
+import multiprocessing
 import os
 import platform
+import re
+import shutil
 import subprocess
 import sys
-import multiprocessing
-import shutil
 
 import setuptools
 import setuptools.command.build_ext
@@ -133,11 +134,16 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
             build_args += ["-j", str(multiprocessing.cpu_count())]
 
-        if (
-            platform.system() == "Darwin"
-            and "MACOSX_DEPLOYMENT_TARGET" not in os.environ
-        ):
-            cmake_args += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9"]
+        if platform.system() == "Darwin":
+            if "MACOSX_DEPLOYMENT_TARGET" not in os.environ:
+                cmake_args += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9"]
+
+            # Cross-compile support for macOS
+            archs = re.findall(r"-arch (\S+)", os.environ.get("ARCHFLAGS", ""))
+            if archs:
+                cmake_args.append(
+                    "-DCMAKE_OSX_ARCHITECTURES:STRING={0}".format(";".join(archs))
+                )
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
