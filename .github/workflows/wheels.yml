@@ -1,7 +1,6 @@
 name: Wheels
 
 on:
-  pull_request: # Temporary
   workflow_dispatch:
   release:
     types:
