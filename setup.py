@@ -59,6 +59,10 @@ extras["all"] = sum(extras.values(), [])
 install_requires = read_requirements("requirements.txt")
 
 
+# generate include/awkward/kernels.h and src/awkward/_kernel_signatures.py
+subprocess.check_call([PYTHON, os.path.join("dev", "generate-kernel-signatures.py")])
+
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
         Extension.__init__(self, name, sources=[])
@@ -83,13 +87,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         # required for auto-detection of auxiliary "native" libs
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
-
-        subprocess.check_call(
-            [
-                PYTHON,
-                os.path.join(ext.sourcedir, "dev", "generate-kernel-signatures.py"),
-            ]
-        )
 
         cfg = "Debug" if self.debug else "Release"
 

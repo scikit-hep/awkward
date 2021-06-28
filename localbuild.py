@@ -73,6 +73,7 @@ if (
     or os.stat("localbuild.py").st_mtime >= localbuild_time
     or os.stat(generate_kernel_signatures).st_mtime >= localbuild_time
     or not os.path.exists(os.path.join("include", "awkward", "kernels.h"))
+    or not os.path.exists(os.path.join("src", "awkward", "_kernel_signatures.py"))
     or os.stat("setup.py").st_mtime >= localbuild_time
     or thisstate != laststate
 ):
