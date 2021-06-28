@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from __future__ import absolute_import
+
 import os
 import datetime
 
@@ -102,11 +104,11 @@ def type_to_pytype(typename, special):
     return ("POINTER(" * count) + ("c_" + typename) + (")" * count)
 
 
-def cpu_kernels_signatures_py(specification):
-    print("Generating src/awkward/_cpu_kernels_signatures.py...")
+def kernel_signatures_py(specification):
+    print("Generating src/awkward/_kernel_signatures.py...")
 
     with open(
-        os.path.join(CURRENT_DIR, "..", "src", "awkward", "_cpu_kernels_signatures.py"),
+        os.path.join(CURRENT_DIR, "..", "src", "awkward", "_kernel_signatures.py"),
         "w",
     ) as file:
         file.write(
@@ -194,11 +196,11 @@ def by_signature(lib):
 """
         )
 
-    print("Done with  src/awkward/_cpu_kernels_signatures.py...")
+    print("Done with  src/awkward/_kernel_signatures.py...")
 
 
 if __name__ == "__main__":
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         specification = yaml.safe_load(specfile)
         include_kernels_h(specification)
-        cpu_kernels_signatures_py(specification)
+        kernel_signatures_py(specification)

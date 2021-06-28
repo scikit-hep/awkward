@@ -1,4 +1,12 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# AUTO GENERATED ON 2021-06-28 AT 15:35:15
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
 
 from __future__ import absolute_import
 
@@ -30,7 +38,3 @@ class Error(ctypes.Structure):
         ("attempt", ctypes.c_int64),
         ("pass_through", ctypes.c_bool),
     ]
-
-
-del platform
-del pkg_resources

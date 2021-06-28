@@ -1,3 +1,10 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# AUTO GENERATED ON 2021-06-28 AT 15:35:05
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
 
-from __future__ import absolute_import
+# fmt: off
+
