@@ -11,6 +11,7 @@ import sys
 
 import setuptools
 import setuptools.command.build_ext
+import setuptools.command.build_py
 import setuptools.command.install
 from setuptools import setup, Extension
 
@@ -57,10 +58,6 @@ extras = {
 extras["all"] = sum(extras.values(), [])
 
 install_requires = read_requirements("requirements.txt")
-
-
-# generate include/awkward/kernels.h and src/awkward/_kernel_signatures.py
-subprocess.check_call([PYTHON, os.path.join("dev", "generate-kernel-signatures.py")])
 
 
 class CMakeExtension(Extension):
@@ -166,6 +163,16 @@ def tree(x):
     if os.path.isdir(x):
         for y in os.listdir(x):
             tree(os.path.join(x, y))
+
+
+class BuildPy(setuptools.command.build_py.build_py):
+    def run(self):
+        # generate include/awkward/kernels.h and src/awkward/_kernel_signatures.py
+        subprocess.check_call(
+            [PYTHON, os.path.join("dev", "generate-kernel-signatures.py")]
+        )
+
+        setuptools.command.build_py.build_py.run(self)
 
 
 class Install(setuptools.command.install.install):
@@ -285,5 +292,5 @@ setup(
     install_requires=install_requires,
     extras_require=extras,
     ext_modules=[CMakeExtension("awkward")],
-    cmdclass={"build_ext": CMakeBuild, "install": Install},
+    cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
 )
