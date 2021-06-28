@@ -5,13 +5,13 @@ from __future__ import absolute_import
 import json
 
 # don't import awkward._connect._uproot in awkward/__init__.py!
-import uproot4
+import uproot
 
 import awkward as ak
 
 
 def can_optimize(interpretation, form):
-    if isinstance(interpretation, uproot4.interpretation.objects.AsObjects):
+    if isinstance(interpretation, uproot.interpretation.objects.AsObjects):
         jsonform = json.loads(form.tojson(verbose=True))
         if (
             jsonform["class"] == "ListOffsetArray64"
@@ -33,7 +33,7 @@ def can_optimize(interpretation, form):
 
 
 def basket_array(form, data, byte_offsets, extra):
-    # FIXME: uproot4_issue_90 is just a placeholder, to show how it would be done
+    # FIXME: uproot_issue_90 is just a placeholder, to show how it would be done
 
     return ak._io.uproot_issue_90(
         form,
