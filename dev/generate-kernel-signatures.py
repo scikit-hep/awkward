@@ -159,7 +159,7 @@ from numpy import (
 class ERROR(Structure):
     _fields_ = [
         ("str", c_char_p),
-        ("fliename", c_char_p),
+        ("filename", c_char_p),
         ("id", c_int64),
         ("attempt", c_int64),
         ("pass_through", c_bool),

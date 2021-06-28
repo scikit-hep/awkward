@@ -31,6 +31,15 @@ if py27:
 else:
     unicode = None
 
+# matches include/awkward/common.h
+kMaxInt8 = 127  # 2**7  - 1
+kMaxUInt8 = 255  # 2**8  - 1
+kMaxInt32 = 2147483647  # 2**31 - 1
+kMaxUInt32 = 4294967295  # 2**32 - 1
+kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
+kSliceNone = kMaxInt64 + 1  # for Slice::none()
+kMaxLevels = 48
+
 
 def isint(x):
     """
