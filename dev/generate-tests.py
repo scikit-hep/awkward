@@ -246,7 +246,10 @@ kSliceNone = kMaxInt64 + 1
 
 # fmt: off
 
-""".format(datetime.datetime.now().isoformat().replace("T", " AT ")[:22]))
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
+        )
 
     with open(
         os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w"
@@ -299,7 +302,7 @@ def genspectests(specdict):
             "w",
         ) as f:
             f.write(
-            """# AUTO GENERATED ON {0}
+                """# AUTO GENERATED ON {0}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -309,7 +312,10 @@ def genspectests(specdict):
 
 # fmt: off
 
-""".format(datetime.datetime.now().isoformat().replace("T", " AT ")[:22]))
+""".format(
+                    datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                )
+            )
             f.write("import pytest\nimport kernels\n\n")
             num = 1
             if spec.tests == []:
@@ -418,14 +424,17 @@ def gencpukerneltests(specdict):
 
 # fmt: off
 
-""".format(datetime.datetime.now().isoformat().replace("T", " AT ")[:22]))
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
+        )
 
     for spec in specdict.values():
         with open(
             os.path.join(tests_cpu_kernels, "test_cpu" + spec.name + ".py"), "w"
         ) as f:
             f.write(
-            """# AUTO GENERATED ON {0}
+                """# AUTO GENERATED ON {0}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -435,9 +444,14 @@ def gencpukerneltests(specdict):
 
 # fmt: off
 
-""".format(datetime.datetime.now().isoformat().replace("T", " AT ")[:22]))
+""".format(
+                    datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                )
+            )
 
-            f.write("import ctypes\nimport pytest\n\nfrom awkward._cpu_kernels import lib\n\n")
+            f.write(
+                "import ctypes\nimport pytest\n\nfrom awkward._cpu_kernels import lib\n\n"
+            )
             num = 1
             if spec.tests == []:
                 f.write(
@@ -552,7 +566,10 @@ class Error(ctypes.Structure):
         ("attempt", ctypes.c_int64),
         ("pass_through", ctypes.c_bool),
     ]
-""".format(datetime.datetime.now().isoformat().replace("T", " AT ")[:22]))
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
+        )
 
     cudakernels = getcudakernelslist()
     funcnames = getfuncnames()
@@ -566,7 +583,7 @@ class Error(ctypes.Structure):
                 os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
             ) as f:
                 f.write(
-            """# AUTO GENERATED ON {0}
+                    """# AUTO GENERATED ON {0}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -576,7 +593,10 @@ class Error(ctypes.Structure):
 
 # fmt: off
 
-""".format(datetime.datetime.now().isoformat().replace("T", " AT ")[:22]))
+""".format(
+                        datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                    )
+                )
                 f.write(
                     "import ctypes\nimport cupy\nimport pytest\nfrom __init__ import lib, Error\n\n"
                 )
