@@ -64,12 +64,15 @@ def check_call(args, env=None):
     return subprocess.check_call(args, env=env)
 
 
+generate_kernel_signatures = os.path.join("dev", "generate-kernel-signatures.py")
+
+
 # Refresh the directory if any configuration has changed.
 if (
     os.stat("CMakeLists.txt").st_mtime >= localbuild_time
     or os.stat("localbuild.py").st_mtime >= localbuild_time
-    or os.stat(os.path.join("dev", "generate-kernel-signatures.py")).st_mtime
-    >= localbuild_time
+    or os.stat(generate_kernel_signatures).st_mtime >= localbuild_time
+    or not os.path.exists(os.path.join("include", "awkward", "kernels.h"))
     or os.stat("setup.py").st_mtime >= localbuild_time
     or thisstate != laststate
 ):
@@ -87,7 +90,7 @@ if (
             ]
         )
 
-    check_call([PYTHON, os.path.join("dev", "generate-kernel-signatures.py")])
+    check_call([PYTHON, generate_kernel_signatures])
 
     if os.path.exists("localbuild"):
         shutil.rmtree("localbuild")

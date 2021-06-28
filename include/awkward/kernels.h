@@ -1,5 +1,11 @@
-// AUTO GENERATED: DO NOT EDIT BY HAND!
-// To regenerate file, execute - python dev/generate-kernel-signatures.py
+// AUTO GENERATED ON 2021-06-28 AT 12:48:44
+// DO NOT EDIT BY HAND!
+//
+// To regenerate file, run
+//
+//     python dev/generate-kernel-signatures.py
+//
+// (It is usually run as part of pip install . or localbuild.py.)
 
 #ifndef AWKWARD_KERNELS_H_
 #define AWKWARD_KERNELS_H_
@@ -7,6 +13,7 @@
 #include "awkward/common.h"
 
 extern "C" {
+
   EXPORT_SYMBOL ERROR
   awkward_BitMaskedArray_to_ByteMaskedArray(
     int8_t* tobytemask,
@@ -5074,4 +5081,5 @@ extern "C" {
     int64_t length);
 
 }
-#endif
+
+#endif // AWKWARD_KERNELS_H_

@@ -1,13 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import os
+import datetime
 
 import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-def getctype(typename):
+def type_to_ctype(typename):
     flag = False
     if "Const[" in typename:
         flag = True
@@ -22,36 +23,57 @@ def getctype(typename):
     return typename
 
 
-if __name__ == "__main__":
+def include_kernels_h(specification):
     print("Generating include/awkward/kernels.h...")
 
     with open(
         os.path.join(CURRENT_DIR, "..", "include", "awkward", "kernels.h"), "w"
     ) as header:
-        header.write("// AUTO GENERATED: DO NOT EDIT BY HAND!\n")
         header.write(
-            "// To regenerate file, execute - python dev/generate-kernel-signatures.py\n\n"
+            """// AUTO GENERATED ON {0}
+// DO NOT EDIT BY HAND!
+//
+// To regenerate file, run
+//
+//     python dev/generate-kernel-signatures.py
+//
+// (It is usually run as part of pip install . or localbuild.py.)
+
+#ifndef AWKWARD_KERNELS_H_
+#define AWKWARD_KERNELS_H_
+
+#include "awkward/common.h"
+
+extern "C" {{
+
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
         )
+        for spec in specification["kernels"]:
+            for childfunc in spec["specializations"]:
+                header.write(" " * 2 + "EXPORT_SYMBOL ERROR\n")
+                header.write(" " * 2 + childfunc["name"] + "(\n")
+                for i, arg in enumerate(childfunc["args"]):
+                    header.write(
+                        " " * 4 + type_to_ctype(arg["type"]) + " " + arg["name"]
+                    )
+                    if i == (len(childfunc["args"]) - 1):
+                        header.write(");\n")
+                    else:
+                        header.write(",\n")
+            header.write("\n")
         header.write(
-            '#ifndef AWKWARD_KERNELS_H_\n#define AWKWARD_KERNELS_H_\n\n#include "awkward/common.h"\n\nextern "C" {\n'
+            """}
+
+#endif // AWKWARD_KERNELS_H_
+"""
         )
-        with open(
-            os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
-        ) as specfile:
-            indspec = yaml.safe_load(specfile)["kernels"]
-            for spec in indspec:
-                for childfunc in spec["specializations"]:
-                    header.write(" " * 2 + "EXPORT_SYMBOL ERROR\n")
-                    header.write(" " * 2 + childfunc["name"] + "(\n")
-                    for i, arg in enumerate(childfunc["args"]):
-                        header.write(
-                            " " * 4 + getctype(arg["type"]) + " " + arg["name"]
-                        )
-                        if i == (len(childfunc["args"]) - 1):
-                            header.write(");\n")
-                        else:
-                            header.write(",\n")
-                header.write("\n")
-        header.write("}\n#endif\n")
 
     print("Done with  include/awkward/kernels.h.")
+
+
+if __name__ == "__main__":
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
+        specification = yaml.safe_load(specfile)
+        include_kernels_h(specification)
