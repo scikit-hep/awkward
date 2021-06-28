@@ -5,6 +5,9 @@ docs/demos/test-program.cpp
 .ci/logs/
 .clangd/
 
+# Generated includes
+include/awkward/kernels.h
+
 # Generated CUDA kernels
 src/cuda-kernels/awkward_*.cu
 

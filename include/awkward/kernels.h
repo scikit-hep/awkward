@@ -1,5 +1,5 @@
 // AUTO GENERATED: DO NOT EDIT BY HAND!
-// To regenerate file, execute - python dev/generate-kernelheader.py
+// To regenerate file, execute - python dev/generate-kernel-signatures.py
 
 #ifndef AWKWARD_KERNELS_H_
 #define AWKWARD_KERNELS_H_

@@ -10,6 +10,7 @@ import json
 import glob
 import multiprocessing
 
+PYTHON = sys.executable
 
 arguments = argparse.ArgumentParser()
 arguments.add_argument("--clean", default=False, action="store_true")
@@ -35,6 +36,9 @@ if args.clean:
     for x in ("localbuild", "awkward", ".pytest_cache", "tests/__pycache__"):
         if os.path.exists(x):
             shutil.rmtree(x)
+    for x in ("include/awkward/kernels.h",):
+        if os.path.exists(x):
+            os.unlink(x)
     sys.exit()
 
 # Changes that would trigger a recompilation.
@@ -64,14 +68,26 @@ def check_call(args, env=None):
 if (
     os.stat("CMakeLists.txt").st_mtime >= localbuild_time
     or os.stat("localbuild.py").st_mtime >= localbuild_time
+    or os.stat(os.path.join("dev", "generate-kernel-signatures.py")).st_mtime
+    >= localbuild_time
     or os.stat("setup.py").st_mtime >= localbuild_time
     or thisstate != laststate
 ):
 
     if args.dependencies:
         check_call(
-            ["pip", "install", "-r", "requirements.txt", "-r", "requirements-test.txt"]
+            [
+                "pip",
+                "install",
+                "-r",
+                "requirements.txt",
+                "-r",
+                "requirements-test.txt",
+                "PyYAML",
+            ]
         )
+
+    check_call([PYTHON, os.path.join("dev", "generate-kernel-signatures.py")])
 
     if os.path.exists("localbuild"):
         shutil.rmtree("localbuild")

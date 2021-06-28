@@ -23,12 +23,14 @@ def getctype(typename):
 
 
 if __name__ == "__main__":
+    print("Generating include/awkward/kernels.h...")
+
     with open(
         os.path.join(CURRENT_DIR, "..", "include", "awkward", "kernels.h"), "w"
     ) as header:
         header.write("// AUTO GENERATED: DO NOT EDIT BY HAND!\n")
         header.write(
-            "// To regenerate file, execute - python dev/generate-kernelheader.py\n\n"
+            "// To regenerate file, execute - python dev/generate-kernel-signatures.py\n\n"
         )
         header.write(
             '#ifndef AWKWARD_KERNELS_H_\n#define AWKWARD_KERNELS_H_\n\n#include "awkward/common.h"\n\nextern "C" {\n'
@@ -51,3 +53,5 @@ if __name__ == "__main__":
                             header.write(",\n")
                 header.write("\n")
         header.write("}\n#endif\n")
+
+    print("Done with  include/awkward/kernels.h.")

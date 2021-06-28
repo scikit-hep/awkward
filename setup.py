@@ -27,6 +27,8 @@ try:
 except ImportError:
     CMAKE = "cmake"
 
+PYTHON = sys.executable
+
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -80,6 +82,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         # required for auto-detection of auxiliary "native" libs
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
+
+        subprocess.check_call(
+            [
+                PYTHON,
+                os.path.join(ext.sourcedir, "dev", "generate-kernel-signatures.py"),
+            ]
+        )
 
         cfg = "Debug" if self.debug else "Release"
 
