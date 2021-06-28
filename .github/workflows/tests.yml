@@ -19,7 +19,7 @@ jobs:
     name: "Make SDist"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2cp36-manylinux_x86_64
+    - uses: actions/checkout@v2
       with:
         submodules: true
 
