@@ -106,9 +106,11 @@ def cpu_kernels_signatures_py(specification):
     print("Generating src/awkward/_cpu_kernels_signatures.py...")
 
     with open(
-        os.path.join(CURRENT_DIR, "..", "src", "awkward", "_cpu_kernels_signatures.py"), "w"
+        os.path.join(CURRENT_DIR, "..", "src", "awkward", "_cpu_kernels_signatures.py"),
+        "w",
     ) as file:
-        file.write("""# AUTO GENERATED ON {0}
+        file.write(
+            """# AUTO GENERATED ON {0}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -164,22 +166,33 @@ class ERROR(Structure):
 
 def by_signature(lib):
     out = {{}}
-""".format(datetime.datetime.now().isoformat().replace("T", " AT ")[:22]))
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
+        )
 
         for spec in specification["kernels"]:
             for childfunc in spec["specializations"]:
                 special = [repr(spec["name"])]
-                arglist = [type_to_pytype(x["type"], special) for x in childfunc["args"]]
-                file.write("""
+                arglist = [
+                    type_to_pytype(x["type"], special) for x in childfunc["args"]
+                ]
+                file.write(
+                    """
     f = lib.{0}
     f.argtypes = [{1}]
     f.restype = ERROR
     out[{2}] = f
-""".format(childfunc["name"], ", ".join(arglist), ", ".join(special)))
+""".format(
+                        childfunc["name"], ", ".join(arglist), ", ".join(special)
+                    )
+                )
 
-        file.write("""
+        file.write(
+            """
     return out
-""")
+"""
+        )
 
     print("Done with  src/awkward/_cpu_kernels_signatures.py...")
 
