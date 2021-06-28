@@ -329,17 +329,6 @@ jobs:
         displayName: "Test"
 
       - script: |
-          python dev/generate-cuda.py
-        displayName: "Generate CUDA kernels"
-        condition: "and(succeeded(), and(ne(variables['python.version'], '3.8'), ne(variables['python.version'], '3.9')))"
-
-      - script: |
-          python -m pip install wheel
-          bash cuda-build.sh
-        displayName: "Build the cuda-kernels"
-        condition: "and(succeeded(), and(ne(variables['python.version'], '2.7'), ne(variables['python.version'], '3.9')))"
-
-      - script: |
           echo '===== include directory ============================='
           ls -R `python -m awkward.config --incdir`
           echo '===== library directory ============================='
