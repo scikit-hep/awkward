@@ -43,6 +43,31 @@ class Content(object):
     def parameters(self):
         return self._parameters
 
+    def handle_error(self, error):
+        if error.filename is None:
+            filename = ""
+        else:
+            filename = error.filename.decode(errors="surrogateescape")
+
+        message = error.str.decode(errors="surrogateescape")
+
+        if error.pass_through:
+            raise ValueError(message + filename)
+
+        else:
+            if error.id != ak._util.kSliceNone and self._identifier is not None:
+                # FIXME https://github.com/scikit-hep/awkward-1.0/blob/45d59ef4ae45eebb02995b8e1acaac0d46fb9573/src/libawkward/util.cpp#L443-L450
+                pass
+
+            if error.attempt != ak._util.kSliceNone:
+                message += " (attempting to get {0})".format(error.attempt)
+
+            # FIXME: attempt to pretty-print the array at this point; fall back to class name
+            pretty = " in " + type(self).__name__
+
+            message += pretty
+            raise ValueError(message + filename)
+
     def __getitem__(self, where):
         if ak._util.isint(where):
             return self._getitem_at(where)

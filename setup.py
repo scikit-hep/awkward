@@ -1,15 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import print_function
 
+import multiprocessing
 import os
 import platform
+import re
+import shutil
 import subprocess
 import sys
-import multiprocessing
-import shutil
 
 import setuptools
 import setuptools.command.build_ext
+import setuptools.command.build_py
 import setuptools.command.install
 from setuptools import setup, Extension
 
@@ -26,6 +28,8 @@ try:
     CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
 except ImportError:
     CMAKE = "cmake"
+
+PYTHON = sys.executable
 
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
@@ -133,11 +137,16 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
             build_args += ["-j", str(multiprocessing.cpu_count())]
 
-        if (
-            platform.system() == "Darwin"
-            and "MACOSX_DEPLOYMENT_TARGET" not in os.environ
-        ):
-            cmake_args += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9"]
+        if platform.system() == "Darwin":
+            if "MACOSX_DEPLOYMENT_TARGET" not in os.environ:
+                cmake_args += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9"]
+
+            # Cross-compile support for macOS
+            archs = re.findall(r"-arch (\S+)", os.environ.get("ARCHFLAGS", ""))
+            if archs:
+                cmake_args.append(
+                    "-DCMAKE_OSX_ARCHITECTURES:STRING={0}".format(";".join(archs))
+                )
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
@@ -154,6 +163,16 @@ def tree(x):
     if os.path.isdir(x):
         for y in os.listdir(x):
             tree(os.path.join(x, y))
+
+
+class BuildPy(setuptools.command.build_py.build_py):
+    def run(self):
+        # generate include/awkward/kernels.h and src/awkward/_kernel_signatures.py
+        subprocess.check_call(
+            [PYTHON, os.path.join("dev", "generate-kernel-signatures.py")]
+        )
+
+        setuptools.command.build_py.build_py.run(self)
 
 
 class Install(setuptools.command.install.install):
@@ -273,5 +292,5 @@ setup(
     install_requires=install_requires,
     extras_require=extras,
     ext_modules=[CMakeExtension("awkward")],
-    cmdclass={"build_ext": CMakeBuild, "install": Install},
+    cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
 )

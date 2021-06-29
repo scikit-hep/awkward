@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  pull_request:
+
+env:
+  CIBW_TEST_EXTRAS: test
+  CIBW_TEST_COMMAND: pytest {project}/tests
+  CIBW_BUILD_VERBOSITY: 1
+  CIBW_TEST_SKIP: "*universal2:arm64 pp*"
+  CIBW_ENVIRONMENT: PIP_ONLY_BINARY=cmake,numpy
+  CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+  CIBW_ARCHS_MACOS: universal2
+  CIBW_BUILD: cp39-win_amd64 cp36-manylinux_x86_64 cp38-macosx_universal2
+
+
+jobs:
+  make_sdist:
+    name: "Make SDist"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Build SDist
+      run: pipx run build --sdist
+
+    - name: Check metadata
+      run: pipx run twine check dist/*
+
+    - uses: actions/upload-artifact@v2
+      with:
+        path: dist/*.tar.gz
+
+
+  build_wheels:
+    name: "Wheel: ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - uses: pypa/cibuildwheel@v1.12.0
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@v2
+      with:
+        path: wheelhouse/*.whl
