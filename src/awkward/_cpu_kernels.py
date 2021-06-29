@@ -6,6 +6,8 @@ import ctypes
 import platform
 import pkg_resources
 
+import awkward._kernel_signatures
+
 if platform.system() == "Windows":
     name = "awkward-cpu-kernels.dll"
 elif platform.system() == "Darwin":
@@ -15,3 +17,4 @@ else:
 libpath = pkg_resources.resource_filename("awkward", name)
 
 lib = ctypes.cdll.LoadLibrary(libpath)
+kernel = awkward._kernel_signatures.by_signature(lib)

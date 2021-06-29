@@ -5,14 +5,17 @@ docs/demos/test-program.cpp
 .ci/logs/
 .clangd/
 
+# Generated includes
+include/awkward/kernels.h
+src/awkward/_kernel_signatures.py
+
 # Generated CUDA kernels
 src/cuda-kernels/awkward_*.cu
 
 # Kernel tests
-tests-cpu-kernels/test*
-tests-cuda-kernels/test*
-tests-spec/kernels.py
-tests-spec/test*
+tests-cpu-kernels
+tests-cuda-kernels
+tests-spec
 
 dependent-project/CMakeFiles
 dependent-project/CMakeCache.txt

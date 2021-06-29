@@ -1,28 +1,27 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
+from __future__ import absolute_import
+
 import argparse
 import glob
 import os
+import shutil
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def clean_tests():
-    if os.path.exists(os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")):
-        os.remove(os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"))
-    cpu_kernel_tests = glob.glob(
-        os.path.join(CURRENT_DIR, "..", "tests-cpu-kernels", "test") + "*"
-    )
-    for testfile in cpu_kernel_tests:
-        os.remove(testfile)
-    cuda_kernel_tests = glob.glob(
-        os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels", "test") + "*"
-    )
-    for testfile in cuda_kernel_tests:
-        os.remove(testfile)
-    kernel_spec_tests = glob.glob(
-        os.path.join(CURRENT_DIR, "..", "tests-spec", "test") + "*"
-    )
-    for testfile in kernel_spec_tests:
-        os.remove(testfile)
+    tests_spec = os.path.join(CURRENT_DIR, "..", "tests-spec")
+    if os.path.exists(tests_spec):
+        shutil.rmtree(tests_spec)
+
+    tests_cpu_kernels = os.path.join(CURRENT_DIR, "..", "tests-cpu-kernels")
+    if os.path.exists(tests_cpu_kernels):
+        shutil.rmtree(tests_cpu_kernels)
+
+    tests_cuda_kernels = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels")
+    if os.path.exists(tests_cuda_kernels):
+        shutil.rmtree(tests_cuda_kernels)
 
 
 def clean_cuda_kernels():

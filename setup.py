@@ -11,6 +11,7 @@ import sys
 
 import setuptools
 import setuptools.command.build_ext
+import setuptools.command.build_py
 import setuptools.command.install
 from setuptools import setup, Extension
 
@@ -27,6 +28,8 @@ try:
     CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
 except ImportError:
     CMAKE = "cmake"
+
+PYTHON = sys.executable
 
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
@@ -162,6 +165,16 @@ def tree(x):
             tree(os.path.join(x, y))
 
 
+class BuildPy(setuptools.command.build_py.build_py):
+    def run(self):
+        # generate include/awkward/kernels.h and src/awkward/_kernel_signatures.py
+        subprocess.check_call(
+            [PYTHON, os.path.join("dev", "generate-kernel-signatures.py")]
+        )
+
+        setuptools.command.build_py.build_py.run(self)
+
+
 class Install(setuptools.command.install.install):
     def run(self):
         outerdir = os.path.join(
@@ -279,5 +292,5 @@ setup(
     install_requires=install_requires,
     extras_require=extras,
     ext_modules=[CMakeExtension("awkward")],
-    cmdclass={"build_ext": CMakeBuild, "install": Install},
+    cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
 )

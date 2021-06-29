@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import ctypes
+
 import numpy
 
 import awkward as ak
@@ -341,7 +343,24 @@ class NumpyLike(Singleton):
         return self._module.datetime_as_string(*args, **kwargs)
 
 
+class NumpyKernel(object):
+    def __init__(self, kernel):
+        self._kernel = kernel
+
+    def __call__(self, *args):
+        assert len(args) == len(self._kernel.argtypes)
+        return self._kernel(
+            *(
+                ctypes.cast(x, t) if issubclass(t, ctypes._Pointer) else x
+                for x, t in zip(args, self._kernel.argtypes)
+            )
+        )
+
+
 class Numpy(NumpyLike):
+    def __getitem__(self, args):
+        return NumpyKernel(ak._cpu_kernels.kernel[args])
+
     def __init__(self):
         self._module = numpy
 
@@ -355,6 +374,9 @@ class Numpy(NumpyLike):
 
 
 class Cupy(NumpyLike):
+    def __getitem__(self, args):
+        raise NotImplementedError("no CUDA in v2 yet")
+
     def __init__(self):
         try:
             import cupy

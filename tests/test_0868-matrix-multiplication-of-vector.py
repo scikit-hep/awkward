@@ -10,6 +10,21 @@ import awkward as ak  # noqa: F401
 vector = pytest.importorskip("vector")
 
 
+def awkward_isnt_installed_globally():
+    import importlib_metadata
+
+    try:
+        importlib_metadata.version("awkward")
+    except importlib_metadata.PackageNotFoundError:
+        return True
+    else:
+        return False
+
+
+@pytest.mark.skipif(
+    awkward_isnt_installed_globally(),
+    reason="Awkward Array isn't installed globally for Vector",
+)
 def test():
     point = ak.Record(
         {"x": 1, "y": 2, "z": 3},
