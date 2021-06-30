@@ -14,9 +14,6 @@ tests-cuda-kernels/test*
 tests-spec/kernels.py
 tests-spec/test*
 
-##Kernel tests using hypothesis
-hypothesis-tests-spec/strategies.py
-hypothesis-tests-spec/test*
 
 dependent-project/CMakeFiles
 dependent-project/CMakeCache.txt
