@@ -1,5 +1,6 @@
 include requirements*.txt VERSION_INFO CMakeLists.txt LICENSE README*.md CONTRIBUTING.md runtime.txt
 include dev/generate-kernel-signatures.py
+include kernel-specification.yml
 recursive-include include *.h
 recursive-include src *.cpp *.py *.cu
 recursive-include tests *.cpp *.py samples/*
