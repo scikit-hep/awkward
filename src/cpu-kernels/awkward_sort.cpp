@@ -10,6 +10,18 @@
 #include <vector>
 
 template <typename T>
+bool sort_order_ascending(T l, T r)
+{
+  return !std::isnan(r) && (std::isnan(l) || l < r);
+}
+
+template <typename T>
+bool sort_order_descending(T l, T r)
+{
+  return !std::isnan(r) && (std::isnan(l) || l > r);
+}
+
+template <typename T>
 ERROR awkward_sort(
   T* toptr,
   const T* fromptr,
@@ -27,7 +39,7 @@ ERROR awkward_sort(
       auto start = std::next(index.begin(), offsets[i]);
       auto stop = std::next(index.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return !std::isnan(fromptr[i2]) && (std::isnan(fromptr[i1]) || fromptr[i1] < fromptr[i2]);
+        return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
       });
     }
   }
@@ -36,7 +48,7 @@ ERROR awkward_sort(
       auto start = std::next(index.begin(), offsets[i]);
       auto stop = std::next(index.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return !std::isnan(fromptr[i2]) && (std::isnan(fromptr[i1]) || fromptr[i1] > fromptr[i2]);
+        return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
       });
     }
   }
@@ -45,7 +57,7 @@ ERROR awkward_sort(
       auto start = std::next(index.begin(), offsets[i]);
       auto stop = std::next(index.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return !std::isnan(fromptr[i2]) && (std::isnan(fromptr[i1]) || fromptr[i1] < fromptr[i2]);
+        return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
       });
     }
   }
@@ -54,7 +66,7 @@ ERROR awkward_sort(
       auto start = std::next(index.begin(), offsets[i]);
       auto stop = std::next(index.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return !std::isnan(fromptr[i2]) && (std::isnan(fromptr[i1]) || fromptr[i1] > fromptr[i2]);
+        return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
       });
     }
   }
@@ -273,4 +285,16 @@ ERROR awkward_sort_float64(
     parentslength,
     ascending,
     stable);
+}
+
+template <>
+bool sort_order_ascending(bool l, bool r)
+{
+  return l < r;
+}
+
+template <>
+bool sort_order_descending(bool l, bool r)
+{
+  return l > r;
 }
