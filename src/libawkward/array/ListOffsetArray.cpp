@@ -1824,9 +1824,15 @@ namespace awkward {
 
       outcontent = outcontent.get()->carry(outcarry, false);
 
+      Index64 outoffsets(offsets_.length());
+      // FIXME: move to kernel
+      for (int64_t i = 0; i < offsets_.length(); i++) {
+        outoffsets.data()[i] = offsets_.data()[i] - offsets_.data()[0];
+      }
+
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            parameters_,
-                                                           offsets_,
+                                                           outoffsets,
                                                            outcontent);
       return out;
     }
@@ -1856,9 +1862,15 @@ namespace awkward {
         negaxis, util::make_starts(offsets_), nextparents,
         offsets_.length() - 1, ascending, stable);
 
+      Index64 outoffsets(offsets_.length());
+      // FIXME: move to kernel
+      for (int64_t i = 0; i < offsets_.length(); i++) {
+        outoffsets.data()[i] = offsets_.data()[i] - offsets_.data()[0];
+      }
+
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            parameters_,
-                                                           offsets_,
+                                                           outoffsets,
                                                            outcontent);
       return out;
     }
@@ -1991,26 +2003,22 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      bool make_shifts = true;
-
       Index64 nextshifts(nextlen);
-      if (make_shifts) {
-        Index64 nummissing(maxcount);
-        Index64 missing(offsets_.getitem_at(offsets_.length() - 1));
-        struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
-          kernel::lib::cpu,   // DERIVE
-          nummissing.data(),
-          missing.data(),
-          nextshifts.data(),
-          offsets_.data(),
-          offsets_.length() - 1,
-          starts.data(),
-          parents.data(),
-          maxcount,
-          nextlen,
-          nextcarry.data());
-        util::handle_error(err7, classname(), identities_.get());
-      }
+      Index64 nummissing(maxcount);
+      Index64 missing(offsets_.getitem_at(offsets_.length() - 1));
+      struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
+        kernel::lib::cpu,   // DERIVE
+        nummissing.data(),
+        missing.data(),
+        nextshifts.data(),
+        offsets_.data(),
+        offsets_.length() - 1,
+        starts.data(),
+        parents.data(),
+        maxcount,
+        nextlen,
+        nextcarry.data());
+      util::handle_error(err7, classname(), identities_.get());
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
 
@@ -2033,9 +2041,15 @@ namespace awkward {
 
       outcontent = outcontent.get()->carry(outcarry, false);
 
+      Index64 outoffsets(offsets_.length());
+      // FIXME: move to kernel
+      for (int64_t i = 0; i < offsets_.length(); i++) {
+        outoffsets.data()[i] = offsets_.data()[i] - offsets_.data()[0];
+      }
+
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            util::Parameters(),
-                                                           offsets_,
+                                                           outoffsets,
                                                            outcontent);
       return out;
     }
@@ -2069,9 +2083,15 @@ namespace awkward {
         ascending,
         stable);
 
+      Index64 outoffsets(offsets_.length());
+      // FIXME: move to kernel
+      for (int64_t i = 0; i < offsets_.length(); i++) {
+        outoffsets.data()[i] = offsets_.data()[i] - offsets_.data()[0];
+      }
+
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            util::Parameters(),
-                                                           offsets_,
+                                                           outoffsets,
                                                            outcontent);
       return out;
     }

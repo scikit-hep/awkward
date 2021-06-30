@@ -4514,8 +4514,16 @@ kernels:
     description: null
     definition: |
       def awkward_NumpyArray_rearrange_shifted(toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength):
+          k = 0
+          for i in range(offsetslength - 1):
+              for j in rage(fromoffsets[i + 1] - fromoffsets[i]):
+                  toptr[k] = toptr[k] + fromoffsets[i]
+                  k = k + 1
+
           for i in range(length):
-              toptr[i] = toptr[i] + fromshifts[toptr[i]]
+              parent = fromparents[i]
+              start = fromstarts[parent]
+              toptr[i] = toptr[i] + fromshifts[toptr[i]] - start
     automatic-tests: false
     manual-tests: []
 
