@@ -1,58 +1,188 @@
-from hypothesis import given, strategies as st
+from hypothesis import strategies as st, given, settings
+from hypothesis.strategies import composite
 import os
 import json
+from shutil import copy
+
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-def generate_strategies():
-    with open(
-        os.path.join(CURRENT_DIR, "..", "hypothesis-tests-spec", "strategies.py"), "w"
-    ) as test_file:
-        test_file.write("from hypothesis import given, strategies as st\n")
-        test_file.write("from hypothesis.strategies import composite\n\n")
-        with open(
-            os.path.join(CURRENT_DIR, "..", "constraints.json"), "r"
-        ) as contraints_file:
-            data = json.load(contraints_file)
-            res = "\treturn ("
-            for kernels in data["kernels"]:
-                test_file.write("@composite\n")
-                r = 0
-                test_file.write(
-                    "def "
-                    + "generate_"
-                    + kernels["name"]
-                    + "(draw,elements=st.integers()):\n"
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
+import copy
+import os
+from collections import OrderedDict
+from itertools import product
+
+import yaml
+from numpy import uint8  # noqa: F401 (used in evaluated strings)
+
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+#Class to create an object of the various arguments of a kernel function
+class Argument(object):
+    __slots__ = ("name", "typename", "direction", "role")
+
+    def __init__(self, name, typename, direction, role="default"):
+        self.name = name
+        self.typename = typename
+        self.direction = direction
+        self.role = role
+
+#Class to create an object of various specifications of a kernel function
+class Specification(object):
+    def __init__(self, spec, testdata, blacklisted):
+        self.name = spec["name"]
+        self.args = []
+        for arg in spec["args"]:
+            self.args.append(
+                Argument(
+                    arg["name"],
+                    arg["type"],
+                    arg["dir"],
+                    arg["role"] if "role" in arg.keys() else "default",
                 )
-                for args in kernels["arguments"]:
-                    test_file.write("\t" + args["var"] + "=" + "draw(st.")
-                    if len(args["constraints"]) == 0:
-                        test_file.write(args["strategy_name"] + "())\n")
-                    else:
-                        num = 0
-                        test_file.write(args["strategy_name"] + "(")
-                        if args["strategy_name"] == "lists":
-                            test_file.write("elements")
-                            num += 1
-                        for cons in args["constraints"]:
-                            if num == 0:
-                                test_file.write(
-                                    cons + "=" + str(args["constraints"][cons])
-                                )
-                                num += 1
-                            else:
-                                test_file.write(
-                                    "," + cons + "=" + str(args["constraints"][cons])
-                                )
-                                num += 1
-                        test_file.write("))\n")
-                    if r == 0:
-                        res = res + args["var"]
-                        r += 1
-                    else:
-                        res = res + "," + args["var"]
-                test_file.write(res + ")")
+            )
+        if blacklisted:
+            self.tests = []
+
+    def validateoverflow(self, testvals):
+        flag = True
+        for arg in self.args:
+            if "uint" in arg.typename and (
+                any(n < 0 for n in testvals["inargs"][arg.name])
+                or (
+                    "outargs" in testvals.keys()
+                    and arg.name in testvals["outargs"].keys()
+                    and any(n < 0 for n in testvals["outargs"][arg.name])
+                )
+            ):
+                flag = False
+        return flag
+
+    def dicttolist(self, outputdict, typename):
+        typeval = gettypeval(typename)
+        vallist = []
+        count = 0
+        for num in sorted(outputdict):
+            if num == count:
+                vallist.append(outputdict[num])
+            else:
+                while num != count:
+                    count += 1
+                    vallist.append(typeval)
+                vallist.append(outputdict[num])
+            count += 1
+        return vallist
+
+    def getdummyvalue(self, typename, length):
+        return [gettypeval(typename)] * length
+
+    def typevalidates(self, testdict, arglist):
+        for arg in arglist:
+            if isinstance(testdict[arg.name], list):
+                if testdict[arg.name] == []:
+                    return False
+                if not isinstance(
+                    testdict[arg.name][0], type(gettypeval(arg.typename))
+                ):
+                    return False
+            else:
+                if not isinstance(testdict[arg.name], type(gettypeval(arg.typename))):
+                    return False
+        return True
 
 
-generate_strategies()
+#Reads the kernel specification file into a dict
+# Creates an object of each specification and stores it in the dict
+def readspec():
+    genpykernels()
+    specdict = {}
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification.yml"), "r"
+    ) as specfile:
+        loadfile = yaml.safe_load(specfile)
+        indspec = loadfile["kernels"]
+        data = loadfile["tests"]
+        for spec in indspec:
+            if "def " in spec["definition"]:
+                for childfunc in spec["specializations"]:
+                    specdict[childfunc["name"]] = Specification(
+                        childfunc,
+                        data,
+                        not spec["automatic-tests"],
+                    )
+    return specdict
+
+
+def wrap_exec(string, globs, locs):
+    exec(string, globs, locs)
+
+
+def wrap_eval(string, globs, locs):
+    return eval(string, globs, locs)
+
+
+def gettypename(spectype):
+    typename = spectype.replace("List", "").replace("[", "").replace("]", "")
+    if typename.endswith("_t"):
+        typename = typename[:-2]
+    return typename
+
+
+def getfuncnames():
+    funcs = {}
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
+        indspec = yaml.safe_load(specfile)["kernels"]
+        for spec in indspec:
+            funcs[spec["name"]] = []
+            for childfunc in spec["specializations"]:
+                funcs[spec["name"]].append(childfunc["name"])
+    return funcs
+
+#Generates the kernel functions in kernels.py in tests-spec folder
+def genpykernels():
+    print("Generating Python kernels")
+    prefix = """
+from numpy import uint8
+kMaxInt64  = 9223372036854775806
+kSliceNone = kMaxInt64 + 1
+"""
+    with open(
+        os.path.join(CURRENT_DIR, "..", "hypothesis-tests-spec", "kernels.py"), "w"
+    ) as outfile:
+        outfile.write(prefix)
+        with open(
+            os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
+        ) as specfile:
+            indspec = yaml.safe_load(specfile)["kernels"]
+            for spec in indspec:
+                if "def " in spec["definition"]:
+                    outfile.write(spec["definition"] + "\n")
+                    for childfunc in spec["specializations"]:
+                        outfile.write(
+                            "{0} = {1}\n".format(childfunc["name"], spec["name"])
+                        )
+                    outfile.write("\n\n")
+
+
+def gettypeval(typename):
+    if "int" in typename:
+        typeval = 123
+    elif "bool" in typename:
+        typeval = True
+    elif "double" in typename or "float" in typename:
+        typeval = 123.0
+    else:
+        raise ValueError("Unknown type encountered")
+    return typeval
+
+# def temp():
+#     with open(os.path.join(CURRENT_DIR, "..", "hypothesis-tests-spec", "kernels.py"),'r') as read:
+#         with open(os.path.join(CURRENT_DIR,"kernels.py"),'w') as wr:
+#             wr.write(str(read))
+
+
+if __name__ == "__main__":
+    readspec()
