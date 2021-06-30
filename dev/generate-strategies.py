@@ -20,7 +20,7 @@ from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-#Class to create an object of the various arguments of a kernel function
+# Class to create an object of the various arguments of a kernel function
 class Argument(object):
     __slots__ = ("name", "typename", "direction", "role")
 
@@ -30,7 +30,8 @@ class Argument(object):
         self.direction = direction
         self.role = role
 
-#Class to create an object of various specifications of a kernel function
+
+# Class to create an object of various specifications of a kernel function
 class Specification(object):
     def __init__(self, spec, testdata, blacklisted):
         self.name = spec["name"]
@@ -94,7 +95,7 @@ class Specification(object):
         return True
 
 
-#Reads the kernel specification file into a dict
+# Reads the kernel specification file into a dict
 # Creates an object of each specification and stores it in the dict
 def readspec():
     genpykernels()
@@ -141,7 +142,8 @@ def getfuncnames():
                 funcs[spec["name"]].append(childfunc["name"])
     return funcs
 
-#Generates the kernel functions in kernels.py in tests-spec folder
+
+# Generates the kernel functions in kernels.py in tests-spec folder
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
@@ -177,6 +179,7 @@ def gettypeval(typename):
     else:
         raise ValueError("Unknown type encountered")
     return typeval
+
 
 # def temp():
 #     with open(os.path.join(CURRENT_DIR, "..", "hypothesis-tests-spec", "kernels.py"),'r') as read:
