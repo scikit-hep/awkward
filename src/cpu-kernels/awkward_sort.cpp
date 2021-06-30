@@ -5,6 +5,7 @@
 #include "awkward/kernels.h"
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <vector>
 

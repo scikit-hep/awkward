@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_argsort.cpp", line)
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <vector>
 
