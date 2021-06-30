@@ -1098,14 +1098,19 @@ namespace awkward {
 
     Index64 starts(1);
     starts.setitem_at_nowrap(0, 0);
+
+    Index64 shifts(0);
+
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
       kernel::lib::cpu,   // DERIVE
       parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
+
     ContentPtr out = argsort_next(negaxis,
                                   starts,
+                                  shifts,
                                   parents,
                                   1,
                                   ascending,

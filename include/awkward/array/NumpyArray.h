@@ -479,6 +479,7 @@ namespace awkward {
     const ContentPtr
       argsort_next(int64_t negaxis,
                    const Index64& starts,
+                   const Index64& shifts,
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,
@@ -804,6 +805,7 @@ namespace awkward {
     const std::shared_ptr<void> index_sort(const T* data,
                                            int64_t length,
                                            const Index64& starts,
+                                           const Index64& shifts,
                                            const Index64& parents,
                                            int64_t outlength,
                                            bool ascending,

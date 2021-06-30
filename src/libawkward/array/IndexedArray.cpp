@@ -2498,6 +2498,7 @@ namespace awkward {
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::argsort_next(int64_t negaxis,
                                             const Index64& starts,
+                                            const Index64& shifts,
                                             const Index64& parents,
                                             int64_t outlength,
                                             bool ascending,
@@ -2519,9 +2520,11 @@ namespace awkward {
     util::handle_error(err1, classname(), identities_.get());
 
     int64_t next_length = (numnull > 0) ? index_length - numnull : index_length;
+
     Index64 nextparents(next_length);
     Index64 nextcarry(next_length);
     Index64 outindex(index_length);
+
     struct Error err2 = kernel::IndexedArray_reduce_next_64<T>(
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
@@ -2532,15 +2535,42 @@ namespace awkward {
       index_length);
     util::handle_error(err2, classname(), identities_.get());
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    bool make_shifts = (isoption()  &&
+                        !branchdepth.first  && negaxis == branchdepth.second);
+
+    Index64 nextshifts(make_shifts ? index_.length() - numnull : 0);
+    if (make_shifts) {
+      if (shifts.length() == 0) {
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+      else {
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length(),
+          shifts.data());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+    }
+
     ContentPtr next = content_.get()->carry(nextcarry, false);
 
     bool inject_nones = false;
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (numnull > 0  &&  !branchdepth.first  &&  negaxis != branchdepth.second) {
       inject_nones = true;
     }
     ContentPtr out = next.get()->argsort_next(negaxis,
                                               starts,
+                                              nextshifts,
                                               nextparents,
                                               outlength,
                                               ascending,

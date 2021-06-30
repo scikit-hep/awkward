@@ -1868,12 +1868,14 @@ namespace awkward {
   const ContentPtr
   ListOffsetArrayOf<T>::argsort_next(int64_t negaxis,
                                      const Index64& starts,
+                                     const Index64& shifts,
                                      const Index64& parents,
                                      int64_t outlength,
                                      bool ascending,
                                      bool stable) const {
     return toListOffsetArray64(true).get()->argsort_next(negaxis,
                                                          starts,
+                                                         shifts,
                                                          parents,
                                                          outlength,
                                                          ascending,
@@ -1884,6 +1886,7 @@ namespace awkward {
   const ContentPtr
   ListOffsetArrayOf<int64_t>::argsort_next(int64_t negaxis,
                                            const Index64& starts,
+                                           const Index64& shifts,
                                            const Index64& parents,
                                            int64_t outlength,
                                            bool ascending,
@@ -1988,11 +1991,37 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
+      bool make_shifts = true;
+
+      Index64 nextshifts(nextlen);
+      if (make_shifts) {
+        Index64 nummissing(maxcount);
+        Index64 missing(offsets_.getitem_at(offsets_.length() - 1));
+        struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nummissing.data(),
+          missing.data(),
+          nextshifts.data(),
+          offsets_.data(),
+          offsets_.length() - 1,
+          starts.data(),
+          parents.data(),
+          maxcount,
+          nextlen,
+          nextcarry.data());
+        util::handle_error(err7, classname(), identities_.get());
+      }
+
       ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
 
       ContentPtr outcontent = nextcontent.get()->argsort_next(
-        negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
-        ascending, stable);
+        negaxis - 1,
+        nextstarts,
+        nextshifts,
+        nextparents,
+        maxnextparents + 1,
+        ascending,
+        stable);
 
       Index64 outcarry(nextlen);
       struct Error err5 = kernel::ListOffsetArray_local_preparenext_64(
@@ -2031,10 +2060,14 @@ namespace awkward {
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
-
       ContentPtr outcontent = trimmed.get()->argsort_next(
-        negaxis, util::make_starts(offsets_), nextparents,
-        offsets_.length() - 1, ascending, stable);
+        negaxis,
+        util::make_starts(offsets_),
+        shifts,
+        nextparents,
+        offsets_.length() - 1,
+        ascending,
+        stable);
 
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            util::Parameters(),

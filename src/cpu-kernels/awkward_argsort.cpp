@@ -68,7 +68,6 @@ ERROR awkward_argsort(
       });
     }
   }
-
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i] = result[i];
   }

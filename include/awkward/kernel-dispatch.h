@@ -1098,6 +1098,19 @@ namespace awkward {
       double scale);
 
     template <typename FROM, typename TO>
+    ERROR NumpyArray_rearrange_shifted(
+      kernel::lib ptr_lib,
+      TO* toptr,
+      const FROM* fromshifts,
+      int64_t length,
+      const FROM* fromoffsets,
+      int64_t offsetslength,
+      const FROM* fromparents,
+      int64_t parentslength,
+      const FROM* fromstarts,
+      int64_t startslength);
+
+    template <typename FROM, typename TO>
     ERROR ListArray_fill(
       kernel::lib ptr_lib,
       TO* tostarts,

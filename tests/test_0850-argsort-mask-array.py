@@ -19,5 +19,5 @@ def test():
     ]
     assert ak.argsort(array.mask[is_valid]).tolist() == [
         [0, 1, 2, None],
-        [1, 0, None, None, None],
+        [4, 3, None, None, None],
     ]

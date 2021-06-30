@@ -813,7 +813,7 @@ namespace awkward {
                   bool mask,
                   bool keepdims) const = 0;
 
-    /// @brief This array with one axis removed by applying a Reducer
+    /// @brief This array sorted
     ///
     /// The user's entry point for this operation is #sort.
     ///
@@ -824,7 +824,7 @@ namespace awkward {
     /// structure into this structure with the same meaning as in
     /// {@link ListArrayOf ListArray}.
     /// @param parents Groups to combine as an {@link IndexOf Index} of
-    /// upward pointers from this structure to the outer structure to reduce.
+    /// upward pointers from this structure to the outer structure to sort.
     /// @param outlength The length of the array, after the operation
     /// completes.
     /// @param ascending If `true`, the values will be sorted in an ascending
@@ -840,9 +840,32 @@ namespace awkward {
                 bool ascending,
                 bool stable) const = 0;
 
+    /// @brief This array sorted indices
+    ///
+    /// The user's entry point for this operation is #argsort.
+    ///
+    /// @param negaxis The negative axis: `-axis`. That is, `negaxis = 1`
+    /// means the deepest axis level.
+    /// @param starts Staring positions of each group to combine as an
+    /// {@link IndexOf Index}. These are downward pointers from an outer
+    /// structure into this structure with the same meaning as in
+    /// {@link ListArrayOf ListArray}.
+    /// @param shifts Per-element adjustments that allows
+    /// for variable-length lists with axis != -1 and for missing values
+    /// (None).
+    /// @param parents Groups to combine as an {@link IndexOf Index} of
+    /// upward pointers from this structure to the outer structure to sort.
+    /// @param outlength The length of the array, after the operation
+    /// completes.
+    /// @param ascending If `true`, the values will be sorted in an ascending
+    /// order.
+    /// @param stable If `true`, the values will be sorted by a
+    /// stable sort algorithm to maintain the relative order of records with
+    /// equal keys (i.e. values).
     virtual const ContentPtr
       argsort_next(int64_t negaxis,
                    const Index64& starts,
+                   const Index64& shifts,
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,

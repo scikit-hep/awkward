@@ -11167,6 +11167,42 @@ namespace awkward {
       }
     }
 
+    template <>
+    ERROR NumpyArray_rearrange_shifted<int64_t, int64_t>(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      const int64_t* fromshifts,
+      int64_t length,
+      const int64_t* fromoffsets,
+      int64_t offsetslength,
+      const int64_t* fromparents,
+      int64_t parentslength,
+      const int64_t* fromstarts,
+      int64_t startslength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_rearrange_shifted_toint64_fromint64(
+          reinterpret_cast<int64_t*>(toptr),
+          reinterpret_cast<const int64_t*>(fromshifts),
+          length,
+          reinterpret_cast<const int64_t*>(fromoffsets),
+          offsetslength,
+          reinterpret_cast<const int64_t*>(fromparents),
+          parentslength,
+          reinterpret_cast<const int64_t*>(fromstarts),
+          startslength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_rearrange_shifted<int64_t, int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_rearrange_shifted<int64_t, int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR ListArray_fill(
       kernel::lib ptr_lib,

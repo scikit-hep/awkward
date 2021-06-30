@@ -1561,12 +1561,14 @@ namespace awkward {
   const ContentPtr
   ListArrayOf<T>::argsort_next(int64_t negaxis,
                                const Index64& starts,
+                               const Index64& shifts,
                                const Index64& parents,
                                int64_t outlength,
                                bool ascending,
                                bool stable) const {
     return toListOffsetArray64(true).get()->argsort_next(negaxis,
                                                          starts,
+                                                         shifts,
                                                          parents,
                                                          outlength,
                                                          ascending,
