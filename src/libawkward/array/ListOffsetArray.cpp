@@ -1824,12 +1824,7 @@ namespace awkward {
 
       outcontent = outcontent.get()->carry(outcarry, false);
 
-      Index64 outoffsets(offsets_.length());
-      // FIXME: move to kernel
-      for (int64_t i = 0; i < offsets_.length(); i++) {
-        outoffsets.data()[i] = offsets_.data()[i] - offsets_.data()[0];
-      }
-
+      Index64 outoffsets = compact_offsets64(true);
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            parameters_,
                                                            outoffsets,
@@ -1862,12 +1857,7 @@ namespace awkward {
         negaxis, util::make_starts(offsets_), nextparents,
         offsets_.length() - 1, ascending, stable);
 
-      Index64 outoffsets(offsets_.length());
-      // FIXME: move to kernel
-      for (int64_t i = 0; i < offsets_.length(); i++) {
-        outoffsets.data()[i] = offsets_.data()[i] - offsets_.data()[0];
-      }
-
+      Index64 outoffsets = compact_offsets64(true);
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            parameters_,
                                                            outoffsets,
@@ -2041,12 +2031,7 @@ namespace awkward {
 
       outcontent = outcontent.get()->carry(outcarry, false);
 
-      Index64 outoffsets(offsets_.length());
-      // FIXME: move to kernel
-      for (int64_t i = 0; i < offsets_.length(); i++) {
-        outoffsets.data()[i] = offsets_.data()[i] - offsets_.data()[0];
-      }
-
+      Index64 outoffsets = compact_offsets64(true);;
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            util::Parameters(),
                                                            outoffsets,
@@ -2083,12 +2068,7 @@ namespace awkward {
         ascending,
         stable);
 
-      Index64 outoffsets(offsets_.length());
-      // FIXME: move to kernel
-      for (int64_t i = 0; i < offsets_.length(); i++) {
-        outoffsets.data()[i] = offsets_.data()[i] - offsets_.data()[0];
-      }
-
+      Index64 outoffsets = compact_offsets64(true);
       ContentPtr out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                            util::Parameters(),
                                                            outoffsets,
