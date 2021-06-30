@@ -11,7 +11,12 @@ def test_nan():
     array = ak.Array([1, 2, np.nan, 3, 0, np.nan])
 
     assert ak.argsort(array).tolist() == [
-        2, 5, 4, 0, 1, 3,
+        2,
+        5,
+        4,
+        0,
+        1,
+        3,
     ]
     # Note, `nan` comparison with `nan` returns False
     assert str(ak.sort(array).tolist()) == "[nan, nan, 0.0, 1.0, 2.0, 3.0]"
