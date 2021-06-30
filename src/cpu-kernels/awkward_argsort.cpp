@@ -25,7 +25,7 @@ ERROR awkward_argsort(
       auto start = std::next(result.begin(), offsets[i]);
       auto stop = std::next(result.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] < fromptr[i2];
+        return !std::isnan(fromptr[i2]) && (std::isnan(fromptr[i1]) || fromptr[i1] < fromptr[i2]);
       });
       std::transform(start, stop, start, [&](int64_t j) -> int64_t {
         return j - offsets[i];
@@ -37,7 +37,7 @@ ERROR awkward_argsort(
       auto start = std::next(result.begin(), offsets[i]);
       auto stop = std::next(result.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] > fromptr[i2];
+        return !std::isnan(fromptr[i2]) && (std::isnan(fromptr[i1]) || fromptr[i1] > fromptr[i2]);
       });
       std::transform(start, stop, start, [&](int64_t j) -> int64_t {
         return j - offsets[i];
@@ -49,7 +49,7 @@ ERROR awkward_argsort(
       auto start = std::next(result.begin(), offsets[i]);
       auto stop = std::next(result.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] < fromptr[i2];
+        return !std::isnan(fromptr[i2]) && (std::isnan(fromptr[i1]) || fromptr[i1] < fromptr[i2]);
       });
       std::transform(start, stop, start, [&](int64_t j) -> int64_t {
         return j - offsets[i];
@@ -61,7 +61,7 @@ ERROR awkward_argsort(
       auto start = std::next(result.begin(), offsets[i]);
       auto stop = std::next(result.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] > fromptr[i2];
+        return !std::isnan(fromptr[i2]) && (std::isnan(fromptr[i1]) || fromptr[i1] > fromptr[i2]);
       });
       std::transform(start, stop, start, [&](int64_t j) -> int64_t {
         return j - offsets[i];
