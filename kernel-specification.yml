@@ -6293,11 +6293,11 @@ kernels:
           for i in range(length):
               if toindex[i] > last_index:
                   last_index = toindex[i]
-          for i in ragne(length):
+          for i in range(length):
               if toindex[i] == -1:
                   last_index = last_index + 1
                   toindex[i] = last_index
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_localindex
