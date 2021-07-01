@@ -8,6 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
+from awkward._v2.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -69,6 +70,8 @@ class Content(object):
             raise ValueError(message + filename)
 
     def __getitem__(self, where):
+        import awkward._v2.contents.numpyarray
+
         if ak._util.isint(where):
             return self._getitem_at(where)
 
@@ -93,10 +96,16 @@ class Content(object):
         elif isinstance(where, ak.highlevel.Array):
             raise NotImplementedError("needs _getitem_next")
 
-        elif isinstance(where, np.ndarray) and all(
-            isinstance(x, (np.int64, np.bool_)) for x in where
-        ):
-            return self._getitem_array(where)
+        elif isinstance(where, awkward._v2.contents.numpyarray.NumpyArray):
+            if issubclass(where.data.dtype.type, (np.integer, np.bool_)):
+                return self._getitem_array(where.data)
+            else:
+                raise TypeError(
+                    "one-dimensional array slice must be an array of integers or "
+                    "booleans, not\n\n    {0}".format(
+                        repr(where.data).replace("\n", "\n    ")
+                    )
+                )
 
         elif isinstance(where, Content):
             raise NotImplementedError("needs _getitem_next")
@@ -105,7 +114,7 @@ class Content(object):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):
-            raise NotImplementedError("needs _getitem_next")
+            return self.__getitem__(v1_to_v2(ak.operations.convert.to_layout(where)))
 
         else:
             raise TypeError(
