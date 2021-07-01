@@ -6280,6 +6280,26 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_Index_nones_as_index
+    specializations:
+      - name: awkward_Index_nones_as_index_64
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_Index_nones_as_index(toindex, length):
+          last_index = 0
+          for i in range(length):
+              if toindex[i] > last_index:
+                  last_index = toindex[i]
+          for i in ragne(length):
+              if toindex[i] == -1:
+                  last_index = last_index + 1
+                  toindex[i] = last_index
+    automatic-tests: true
+    manual-tests: []
+
   - name: awkward_localindex
     specializations:
       - name: awkward_localindex_64

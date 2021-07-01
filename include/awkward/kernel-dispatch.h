@@ -1289,6 +1289,11 @@ namespace awkward {
       int64_t target,
       int64_t length);
 
+    ERROR Index_nones_as_index_64(
+      kernel::lib ptr_lib,
+      int64_t* toindex,
+      int64_t length);
+
     ERROR RegularArray_rpad_and_clip_axis1_64(
       kernel::lib ptr_lib,
       int64_t* toindex,

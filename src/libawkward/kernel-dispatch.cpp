@@ -12535,6 +12535,27 @@ namespace awkward {
       }
     }
 
+    ERROR Index_nones_as_index_64(
+      kernel::lib ptr_lib,
+      int64_t *toindex,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_Index_nones_as_index_64(
+          toindex,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_nones_as_index_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for Index_nones_as_index_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
     ERROR RegularArray_rpad_and_clip_axis1_64(
       kernel::lib ptr_lib,
       int64_t *toindex,
