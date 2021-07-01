@@ -571,9 +571,14 @@ def completely_flatten(array):
 
     elif isinstance(array, ak.layout.NumpyArray):
         if array.format.upper().startswith("M"):
-            return (ak.nplike.of(array).asarray(array.view_int64).view(array.format),)
+            return (
+                ak.nplike.of(array)
+                .asarray(array.view_int64)
+                .view(array.format)
+                .reshape(-1),
+            )
         else:
-            return (ak.nplike.of(array).asarray(array),)
+            return (ak.nplike.of(array).asarray(array).reshape(-1),)
 
     else:
         raise RuntimeError(
