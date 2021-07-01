@@ -179,6 +179,7 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
         [layoutarray, layoutmask],
         getfunction,
         behavior,
+        numpy_to_regular=True,
         right_broadcast=False,
         pass_depth=False,
     )
