@@ -40,4 +40,6 @@ class EmptyArray(Content):
         raise IndexError("fields " + repr(where) + " not found")
 
     def _getitem_array(self, where):
-        raise IndexError("cannot extract {0} elemnts from {1}".format(repr(len(where)), repr(where)))
+        raise IndexError(
+            "cannot extract {0} elemnts from {1}".format(repr(len(where)), repr(where))
+        )

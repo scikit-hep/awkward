@@ -17,24 +17,28 @@ def test_EmptyArray():
     # no = one.layout
     v2a = ak._v2.contents.emptyarray.EmptyArray()
     with pytest.raises(IndexError):
-        v2a[np.array([0,1])]
+        v2a[np.array([0, 1])]
     with pytest.raises(ValueError):
         v1a.carry(ak.layout.Index64(np.array([2, 1, 0], np.int64)), False)
 
 
 def test_NumpyArray():
     v1a = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
-    v2a = ak._v2.contents.numpyarray.NumpyArray(
-        np.array([0.0, 1.1, 2.2, 3.3])
+    v2a = ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
+    assert ak.to_list(v2a[np.array([0, 1, 2])]) == ak.to_list(
+        v1a.carry(ak.layout.Index64(np.array([0, 1, 2], np.int64)), False)
     )
-    assert ak.to_list(v2a[np.array([0,1,2])]) == ak.to_list(v1a.carry(ak.layout.Index64(np.array([0, 1, 2], np.int64)), False))
 
     v1b = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5))
     v2b = ak._v2.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     )
-    v2b[np.array([1,1,1])] == np.tile(np.arange(2*3*5/2, 2*3*5, dtype=np.int64).reshape(1,3,5), (3,1)).reshape(3,3,5)
-    assert ak.to_list(v2a[np.array([1,1,1])]) == ak.to_list(v1a.carry(ak.layout.Index64(np.array([1, 1, 1], np.int64)), False))
+    v2b[np.array([1, 1, 1])] == np.tile(
+        np.arange(2 * 3 * 5 / 2, 2 * 3 * 5, dtype=np.int64).reshape(1, 3, 5), (3, 1)
+    ).reshape(3, 3, 5)
+    assert ak.to_list(v2a[np.array([1, 1, 1])]) == ak.to_list(
+        v1a.carry(ak.layout.Index64(np.array([1, 1, 1], np.int64)), False)
+    )
 
 
 def test_RegularArray_NumpyArray():
@@ -48,10 +52,12 @@ def test_RegularArray_NumpyArray():
         ),
         3,
     )
-    result = v2a[np.array([0,1])]
+    result = v2a[np.array([0, 1])]
     assert ak.to_list(result) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
-    assert ak.to_list(result) == ak.to_list(v1a.carry(ak.layout.Index64(np.array([0, 1], np.int64)), False))
-    #WIP 
+    assert ak.to_list(result) == ak.to_list(
+        v1a.carry(ak.layout.Index64(np.array([0, 1], np.int64)), False)
+    )
+    # WIP
     # assert v1v2_equal(v1a.carry(ak.layout.Index64(np.array([0, 1], np.int64)), False), result)
 
     v1b = ak.layout.RegularArray(ak.layout.EmptyArray(), 0, zeros_length=10)
@@ -59,9 +65,12 @@ def test_RegularArray_NumpyArray():
         ak._v2.contents.emptyarray.EmptyArray(), 0, zeros_length=10
     )
     with pytest.raises(IndexError):
-        ak.to_list(v2b[np.array([0, 0, 0])]) 
-    #WIP
-    assert [[], [], []] == ak.to_list(v1b.carry(ak.layout.Index64(np.array([0, 0, 0], np.int64)), False))
+        ak.to_list(v2b[np.array([0, 0, 0])])
+    # WIP
+    assert [[], [], []] == ak.to_list(
+        v1b.carry(ak.layout.Index64(np.array([0, 0, 0], np.int64)), False)
+    )
+
 
 @pytest.mark.skip(reason="unimplemented ListArray")
 def test_ListArray_NumpyArray():
@@ -77,9 +86,10 @@ def test_ListArray_NumpyArray():
             np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
         ),
     )
-    resultv2 = v2a[np.array([0,1,2])]
+    resultv2 = v2a[np.array([0, 1, 2])]
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 2], np.int64)), False)
     # assert ak.to_list(resultv1) == "ak.to_list(resultv2)"
+
 
 @pytest.mark.skip(reason="unimplemented ListOffsetArray")
 def test_ListOffsetArray_NumpyArray():
@@ -91,9 +101,10 @@ def test_ListOffsetArray_NumpyArray():
         ak._v2.index.Index(np.array([1, 4, 4, 6], dtype=np.int64)),
         ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
     )
-    resultv2 = v2a[np.array([0,1,2])]
+    resultv2 = v2a[np.array([0, 1, 2])]
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 2], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
+
 
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_RecordArray_NumpyArray():
@@ -153,6 +164,7 @@ def test_RecordArray_NumpyArray():
     assert v1v2_equal(v2_to_v1(v2d), v1_to_v2(v1d))
     assert ak.to_list(v1d) == ak.to_list(v2d)
 
+
 @pytest.mark.skip(reason="unimplemented IndexedArray")
 def test_IndexedArray_NumpyArray():
     v1a = ak.layout.IndexedArray64(
@@ -166,6 +178,7 @@ def test_IndexedArray_NumpyArray():
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
     assert ak.to_list(v1a) == ak.to_list(v2a)
+
 
 @pytest.mark.skip(reason="unimplemented IndexedOptionArray")
 def test_IndexedOptionArray_NumpyArray():
@@ -193,7 +206,7 @@ def test_ByteMaskedArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
-    resultv2 = v2a[np.array([0,1,2])]
+    resultv2 = v2a[np.array([0, 1, 2])]
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 2], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
 
@@ -207,10 +220,9 @@ def test_ByteMaskedArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
-    resultv2 = v2b[np.array([0,1,2])]
+    resultv2 = v2b[np.array([0, 1, 2])]
     resultv1 = v1b.carry(ak.layout.Index64(np.array([0, 1, 2], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
-   
 
 
 def test_BitMaskedArray_NumpyArray():
@@ -498,6 +510,7 @@ def test_BitMaskedArray_NumpyArray():
     resultv1 = v1d.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
 
+
 @pytest.mark.skip(reason="unimplemented UnmaskedArray")
 def test_UnmaskedArray_NumpyArray():
     v1a = ak.layout.UnmaskedArray(ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3])))
@@ -507,6 +520,7 @@ def test_UnmaskedArray_NumpyArray():
     resultv2 = v2a[np.array([0, 1, 4])]
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
+
 
 @pytest.mark.skip(reason="unimplemented UnionArray")
 def test_UnionArray_NumpyArray():
@@ -529,6 +543,7 @@ def test_UnionArray_NumpyArray():
     resultv2 = v2a[np.array([0, 1, 4])]
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
+
 
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_RegularArray_RecordArray_NumpyArray():
@@ -570,6 +585,7 @@ def test_RegularArray_RecordArray_NumpyArray():
     resultv1 = v1b.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
 
+
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_ListArray_RecordArray_NumpyArray():
     v1a = ak.layout.ListArray64(
@@ -596,6 +612,7 @@ def test_ListArray_RecordArray_NumpyArray():
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
 
+
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_ListOffsetArray_RecordArray_NumpyArray():
     v1a = ak.layout.ListOffsetArray64(
@@ -619,6 +636,7 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
     resultv2 = v2a[np.array([0, 1, 4])]
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
+
 
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_IndexedArray_RecordArray_NumpyArray():
@@ -644,6 +662,7 @@ def test_IndexedArray_RecordArray_NumpyArray():
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
 
+
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_IndexedOptionArray_RecordArray_NumpyArray():
     v1a = ak.layout.IndexedOptionArray64(
@@ -667,6 +686,7 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
     resultv2 = v2a[np.array([0, 1, 4])]
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
+
 
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_ByteMaskedArray_RecordArray_NumpyArray():
@@ -717,6 +737,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     resultv2 = v2b[np.array([0, 1, 4])]
     resultv1 = v1b.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
+
 
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_BitMaskedArray_RecordArray_NumpyArray():
@@ -1162,6 +1183,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     resultv1 = v1d.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
 
+
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_UnmaskedArray_RecordArray_NumpyArray():
     v1a = ak.layout.UnmaskedArray(
@@ -1179,6 +1201,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
     resultv2 = v2a[np.array([0, 1, 4])]
     resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), False)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
+
 
 @pytest.mark.skip(reason="unimplemented RecordArray")
 def test_UnionArray_RecordArray_NumpyArray():

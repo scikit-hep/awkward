@@ -56,6 +56,7 @@ def test_NumpyArray():
     with pytest.raises(IndexError):
         b[["bad", "good", "ok"]]
 
+
 def test_RegularArray_NumpyArray():
     # 6.6 is inaccessible
     a = ak._v2.contents.regulararray.RegularArray(

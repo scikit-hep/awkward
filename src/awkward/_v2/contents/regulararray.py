@@ -7,6 +7,7 @@ from awkward._v2.contents.content import Content
 
 import numpy as np
 
+
 class RegularArray(Content):
     def __init__(self, content, size, zeros_length=0, identifier=None, parameters=None):
         if not isinstance(content, Content):
@@ -97,6 +98,8 @@ class RegularArray(Content):
             where = self._nplike.asarray(where, dtype=where.dtype, order="C")
         new_where = []
         for i in where:
-            new_where.append(np.arange(i*self._size, i*self._size + self._size))
-        new_where =np.asarray(new_where).flatten()
-        return RegularArray(self._content._getitem_array(new_where), self._size, len(where))
+            new_where.append(np.arange(i * self._size, i * self._size + self._size))
+        new_where = np.asarray(new_where).flatten()
+        return RegularArray(
+            self._content._getitem_array(new_where), self._size, len(where)
+        )
