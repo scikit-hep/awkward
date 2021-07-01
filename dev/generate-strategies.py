@@ -88,7 +88,7 @@ class Specification(object):
         return True
 
 
-#Reads the kernel specification file into a dict
+# Reads the kernel specification file into a dict
 # Creates an object of each specification and stores it in the dict
 def readspec():
     genpykernels()
