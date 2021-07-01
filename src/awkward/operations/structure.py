@@ -2035,11 +2035,12 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
     else:
 
-        def transform(self, layout, depth, posaxis):
+        def transform(layout, depth, posaxis):
             # Pack the current layout. This ensures that the `counts` array,
             # which is computed with these layouts applied, aligns with the
             # internal layout to be unflattened (#910)
             layout = _pack_layout(layout)
+
             posaxis = layout.axis_wrap_if_negative(posaxis)
             if posaxis == depth and isinstance(layout, ak._util.listtypes):
                 # We are one *above* the level where we want to apply this.
@@ -2070,25 +2071,17 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                 )
 
             else:
-                return self.generic_transform(layout, depth, posaxis)
+                return ak._util.transform_child_layouts(
+                    transform, layout, depth, posaxis
+                )
 
         if isinstance(layout, ak.partition.PartitionedArray):
             outparts = []
             for part in layout.partitions:
-                outparts.append(
-                    ak._util.recursively_transform(
-                        part,
-                        transform,
-                        user=axis,
-                    )
-                )
+                outparts.append(transform(part, depth=1, posaxis=axis))
             out = ak.partition.IrregularlyPartitionedArray(outparts)
         else:
-            out = ak._util.recursively_transform(
-                layout,
-                transform,
-                user=axis,
-            )
+            out = transform(layout, depth=1, posaxis=axis)
 
     if current_offsets is not None and not (
         len(current_offsets[0]) == 1 and current_offsets[0][0] == 0
@@ -2318,15 +2311,17 @@ def packed(array, highlevel=True, behavior=None):
 
     See also #ak.to_buffers.
     """
-
-    def _pack_all(self, layout, depth, user):
-        packed = _pack_layout(layout)
-        return self.generic_transform(packed, depth, user)
-
     layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
-    out = ak._util.recursively_transform(layout, _pack_all)
+
+    def transform(layout, depth=1, user=None):
+        return ak._util.transform_child_layouts(
+            transform, _pack_layout(layout), depth, user
+        )
+
+    out = transform(layout)
+
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
