@@ -3,22 +3,15 @@ from hypothesis.strategies import composite
 import os
 import json
 from shutil import copy
-
-
-CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
 import copy
 import os
 from collections import OrderedDict
 from itertools import product
-
 import yaml
 from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
 
 #Class to create an object of the various arguments of a kernel function
 class Argument(object):
@@ -29,6 +22,7 @@ class Argument(object):
         self.typename = typename
         self.direction = direction
         self.role = role
+
 
 #Class to create an object of various specifications of a kernel function
 class Specification(object):
@@ -141,6 +135,7 @@ def getfuncnames():
                 funcs[spec["name"]].append(childfunc["name"])
     return funcs
 
+
 #Generates the kernel functions in kernels.py in tests-spec folder
 def genpykernels():
     print("Generating Python kernels")
@@ -178,11 +173,42 @@ def gettypeval(typename):
         raise ValueError("Unknown type encountered")
     return typeval
 
-# def temp():
-#     with open(os.path.join(CURRENT_DIR, "..", "hypothesis-tests-spec", "kernels.py"),'r') as read:
-#         with open(os.path.join(CURRENT_DIR,"kernels.py"),'w') as wr:
-#             wr.write(str(read))
+data=[]
 
+@composite
+def strat(draw):
+    lencontent=draw(st.integers(min_value=1,max_value=15))
+    index=draw(st.lists(st.integers().filter(lambda x:x > -1 and x<lencontent),min_size=1,max_size=10,unique=True))
+    length=len(index)
+    isoption=False
+    return (index,length,lencontent,isoption)
+
+
+@given(strat())
+@settings(max_examples=50)
+def find(ex):
+    with open(os.path.join(CURRENT_DIR,"..","hypothesis-tests-spec","kernels.py"),) as js:
+        exec(js.read(),globals(),locals())
+        x=eval('awkward_IndexedArray_validity(*ex)')
+        data.append({"inputs":ex,"output":x})
+
+def main():
+    print("Generating tests")
+    with open(os.path.join(CURRENT_DIR,"..","hypothesis-tests-spec","test_awkward_IndexedArray_validity.py"),'w') as wr:
+        wr.write('import kernels')
+        i=0
+        for d in data:
+            i=i+1
+            wr.write('\n\n\ndef test_pyawkward_IndexedArray32_validity_'+str(i)+'():\n\t')
+            wr.write('index='+str(d["inputs"][0]))
+            wr.write('\n\tlength='+str(d["inputs"][1]))
+            wr.write('\n\tlencontent='+str(d["inputs"][2]))
+            wr.write('\n\tisoption='+str(d["inputs"][3]))
+            wr.write('\n\tresult=kernels.awkward_IndexedArray_validity('+str(d["inputs"][0])+','+str(d["inputs"][1])+','+str(d["inputs"][2])+','+str(d["inputs"][3])+')')
+            wr.write('\n\tassert result==None')
+            
 
 if __name__ == "__main__":
     readspec()
+    find()
+    main()
