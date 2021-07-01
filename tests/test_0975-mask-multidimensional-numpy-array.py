@@ -19,4 +19,4 @@ def test():
         )
     )
 
-    ak.mask(array, mask)
+    assert ak.mask(array, mask).to_list() == [[1, 2, 3], [4, 5, None], [7, None, 9]]
