@@ -1303,6 +1303,42 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_IndexedArray_index_of_nulls
+    specializations:
+      - name: awkward_IndexedArray32_index_of_nulls
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+      - name: awkward_IndexedArray64_index_of_nulls
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+      - name: awkward_IndexedArrayU32_index_of_nulls
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+    description: null
+    definition: |
+      def awkward_IndexedArray_index_of_nulls(toindex, fromindex, lenindex, parents, starts):
+          j = 0
+          for i in range(lenindex):
+              if fromindex[i] < 0:
+                  parent = parents[i]
+                  start = starts[parent]
+                  toindex[j] = i - start
+                  j = j + 1
+    automatic-tests: true
+    manual-tests: []
+
   - name: awkward_IndexedArray_overlay_mask
     specializations:
       - name: awkward_IndexedArray32_overlay_mask8_to64
@@ -4498,6 +4534,35 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
+  - name: awkward_NumpyArray_rearrange_shifted
+    specializations:
+      - name: awkward_NumpyArray_rearrange_shifted_toint64_fromint64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromshifts, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: fromparents, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: parentslength, type: "int64_t", dir: in, role: default}
+          - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: startslength, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_NumpyArray_rearrange_shifted(toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, parentslength):
+          k = 0
+          for i in range(offsetslength - 1):
+              for j in rage(fromoffsets[i + 1] - fromoffsets[i]):
+                  toptr[k] = toptr[k] + fromoffsets[i]
+                  k = k + 1
+
+          for i in range(length):
+              parent = fromparents[i]
+              start = fromstarts[parent]
+              toptr[i] = toptr[i] + fromshifts[toptr[i]] - start
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_getitem_boolean_nonzero
     specializations:
       - name: awkward_NumpyArray_getitem_boolean_nonzero_64
@@ -6213,6 +6278,26 @@ kernels:
               offset = offset + target
               tostops[i] = offset
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_Index_nones_as_index
+    specializations:
+      - name: awkward_Index_nones_as_index_64
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_Index_nones_as_index(toindex, length):
+          last_index = 0
+          for i in range(length):
+              if toindex[i] > last_index:
+                  last_index = toindex[i]
+          for i in range(length):
+              if toindex[i] == -1:
+                  last_index = last_index + 1
+                  toindex[i] = last_index
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_localindex

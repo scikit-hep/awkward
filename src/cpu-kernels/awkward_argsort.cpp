@@ -3,10 +3,23 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_argsort.cpp", line)
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <vector>
 
 #include "awkward/kernels.h"
+
+template <typename T>
+bool argsort_order_ascending(T l, T r)
+{
+  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l < r);
+}
+
+template <typename T>
+bool argsort_order_descending(T l, T r)
+{
+  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l > r);
+}
 
 template <typename T>
 ERROR awkward_argsort(
@@ -25,7 +38,7 @@ ERROR awkward_argsort(
       auto start = std::next(result.begin(), offsets[i]);
       auto stop = std::next(result.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] < fromptr[i2];
+        return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
       });
       std::transform(start, stop, start, [&](int64_t j) -> int64_t {
         return j - offsets[i];
@@ -37,7 +50,7 @@ ERROR awkward_argsort(
       auto start = std::next(result.begin(), offsets[i]);
       auto stop = std::next(result.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] > fromptr[i2];
+        return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
       });
       std::transform(start, stop, start, [&](int64_t j) -> int64_t {
         return j - offsets[i];
@@ -49,7 +62,7 @@ ERROR awkward_argsort(
       auto start = std::next(result.begin(), offsets[i]);
       auto stop = std::next(result.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] < fromptr[i2];
+        return argsort_order_ascending<T>(fromptr[i1], fromptr[i2]);
       });
       std::transform(start, stop, start, [&](int64_t j) -> int64_t {
         return j - offsets[i];
@@ -61,14 +74,13 @@ ERROR awkward_argsort(
       auto start = std::next(result.begin(), offsets[i]);
       auto stop = std::next(result.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] > fromptr[i2];
+        return argsort_order_descending<T>(fromptr[i1], fromptr[i2]);
       });
       std::transform(start, stop, start, [&](int64_t j) -> int64_t {
         return j - offsets[i];
       });
     }
   }
-
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i] = result[i];
   }
@@ -272,4 +284,16 @@ ERROR awkward_argsort_float64(
     offsetslength,
     ascending,
     stable);
+}
+
+template <>
+bool argsort_order_ascending(bool l, bool r)
+{
+  return l < r;
+}
+
+template <>
+bool argsort_order_descending(bool l, bool r)
+{
+  return l > r;
 }

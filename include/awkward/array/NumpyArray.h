@@ -471,8 +471,7 @@ namespace awkward {
                 const Index64& parents,
                 int64_t outlength,
                 bool ascending,
-                bool stable,
-                bool keepdims) const override;
+                bool stable) const override;
 
     const ContentPtr
       as_unique_strings(const Index64& offsets) const;
@@ -480,11 +479,11 @@ namespace awkward {
     const ContentPtr
       argsort_next(int64_t negaxis,
                    const Index64& starts,
+                   const Index64& shifts,
                    const Index64& parents,
                    int64_t outlength,
                    bool ascending,
-                   bool stable,
-                   bool keepdims) const override;
+                   bool stable) const override;
 
     const ContentPtr
       localindex(int64_t axis, int64_t depth) const override;
@@ -806,6 +805,7 @@ namespace awkward {
     const std::shared_ptr<void> index_sort(const T* data,
                                            int64_t length,
                                            const Index64& starts,
+                                           const Index64& shifts,
                                            const Index64& parents,
                                            int64_t outlength,
                                            bool ascending,

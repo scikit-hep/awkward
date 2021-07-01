@@ -603,37 +603,34 @@ namespace awkward {
                         const Index64& parents,
                         int64_t outlength,
                         bool ascending,
-                        bool stable,
-                        bool keepdims) const {
+                        bool stable) const {
     ContentPtr asnumpy = toNumpyArray("d", 8, util::dtype::float64);
     return asnumpy.get()->sort_next(negaxis,
                                     starts,
                                     parents,
                                     outlength,
                                     ascending,
-                                    stable,
-                                    keepdims);
+                                    stable);
   }
 
   const ContentPtr
   EmptyArray::argsort_next(int64_t negaxis,
                            const Index64& starts,
+                           const Index64& shifts,
                            const Index64& parents,
                            int64_t outlength,
                            bool ascending,
-                           bool stable,
-                           bool keepdims) const {
+                           bool stable) const {
     ContentPtr asnumpy = toNumpyArray(util::dtype_to_format(util::dtype::int64),
-                                      8,
+                                      util::dtype_to_itemsize(util::dtype::int64),
                                       util::dtype::int64);
-    ContentPtr out = asnumpy.get()->argsort_next(negaxis,
-                                                 starts,
-                                                 parents,
-                                                 outlength,
-                                                 ascending,
-                                                 stable,
-                                                 keepdims);
-    return out;
+    return asnumpy.get()->argsort_next(negaxis,
+                                       starts,
+                                       shifts,
+                                       parents,
+                                       outlength,
+                                       ascending,
+                                       stable);
   }
 
   const ContentPtr

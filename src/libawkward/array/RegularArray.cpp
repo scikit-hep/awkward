@@ -1278,8 +1278,7 @@ namespace awkward {
                           const Index64& parents,
                           int64_t outlength,
                           bool ascending,
-                          bool stable,
-                          bool keepdims) const {
+                          bool stable) const {
     if (length() == 0) {
       return shallow_copy();
     }
@@ -1289,8 +1288,7 @@ namespace awkward {
                                        parents,
                                        outlength,
                                        ascending,
-                                       stable,
-                                       keepdims);
+                                       stable);
     if (RegularArray* raw1 =
             dynamic_cast<RegularArray*>(out.get())) {
       if (ListOffsetArray64* raw2 =
@@ -1309,22 +1307,22 @@ namespace awkward {
   const ContentPtr
   RegularArray::argsort_next(int64_t negaxis,
                              const Index64& starts,
+                             const Index64& shifts,
                              const Index64& parents,
                              int64_t outlength,
                              bool ascending,
-                             bool stable,
-                             bool keepdims) const {
+                             bool stable) const {
     if (length() == 0) {
       return std::make_shared<NumpyArray>(Index64(0));
     }
     std::shared_ptr<Content> out = toListOffsetArray64(true).get()->argsort_next(
                                        negaxis,
                                        starts,
+                                       shifts,
                                        parents,
                                        outlength,
                                        ascending,
-                                       stable,
-                                       keepdims);
+                                       stable);
     if (RegularArray* raw1 =
             dynamic_cast<RegularArray*>(out.get())) {
       if (ListOffsetArray64* raw2 =

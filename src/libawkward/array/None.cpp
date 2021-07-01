@@ -354,8 +354,7 @@ namespace awkward {
                   const Index64& parents,
                   int64_t outlength,
                   bool ascending,
-                  bool stable,
-                  bool keepdims) const {
+                  bool stable) const {
     throw std::runtime_error(
       std::string("undefined operation: None::sort_next")
       + FILENAME(__LINE__));
@@ -364,11 +363,11 @@ namespace awkward {
   const ContentPtr
   None::argsort_next(int64_t negaxis,
                      const Index64& starts,
+                     const Index64& shifts,
                      const Index64& parents,
                      int64_t outlength,
                      bool ascending,
-                     bool stable,
-                     bool keepdims) const {
+                     bool stable) const {
     throw std::runtime_error(
       std::string("undefined operation: None::argsort_next")
       + FILENAME(__LINE__));
