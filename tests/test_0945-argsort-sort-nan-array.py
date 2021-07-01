@@ -27,3 +27,39 @@ def test_bool():
 
     assert ak.argsort(array).tolist() == [1, 2, 0, 3, 4, 5]
     assert ak.sort(array).tolist() == [False, False, True, True, True, True]
+
+
+def test_argsort():
+    array = ak.Array([1, 2, None, 3, 0, None])
+    assert ak.argsort(array).tolist() == [4, 0, 1, 3, 2, 5]
+    assert array[ak.argsort(array)].tolist() == [
+        0,
+        1,
+        2,
+        3,
+        None,
+        None,
+    ]
+
+
+def test_argsort_2d():
+    array = ak.Array([[1, 2, None, 3, 0, None], [1, 2, None, 3, 0, None]])
+    assert ak.argsort(array).tolist() == [[4, 0, 1, 3, 2, 5], [4, 0, 1, 3, 2, 5]]
+    assert array[ak.argsort(array)].tolist() == [
+        [
+            0,
+            1,
+            2,
+            3,
+            None,
+            None,
+        ],
+        [
+            0,
+            1,
+            2,
+            3,
+            None,
+            None,
+        ],
+    ]

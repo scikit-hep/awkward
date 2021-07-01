@@ -12,13 +12,13 @@
 template <typename T>
 bool sort_order_ascending(T l, T r)
 {
-  return !std::isnan(r) && (std::isnan(l) || l < r);
+  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l < r);
 }
 
 template <typename T>
 bool sort_order_descending(T l, T r)
 {
-  return !std::isnan(r) && (std::isnan(l) || l > r);
+  return !std::isnan(static_cast<double>(r)) && (std::isnan(static_cast<double>(l)) || l > r);
 }
 
 template <typename T>

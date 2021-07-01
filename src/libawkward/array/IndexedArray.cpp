@@ -2525,7 +2525,7 @@ namespace awkward {
     Index64 nextcarry(next_length);
     Index64 outindex(index_length);
 
-    struct Error err2 = kernel::IndexedArray_reduce_next_64<T>(
+    struct Error err3 = kernel::IndexedArray_reduce_next_64<T>(
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
       nextparents.data(),
@@ -2533,7 +2533,7 @@ namespace awkward {
       index_.data(),
       parents.data(),
       index_length);
-    util::handle_error(err2, classname(), identities_.get());
+    util::handle_error(err3, classname(), identities_.get());
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     bool make_shifts = (isoption()  &&
@@ -2542,23 +2542,23 @@ namespace awkward {
     Index64 nextshifts(make_shifts ? index_.length() - numnull : 0);
     if (make_shifts) {
       if (shifts.length() == 0) {
-        struct Error err3 =
+        struct Error err4 =
             kernel::IndexedArray_reduce_next_nonlocal_nextshifts_64<T>(
           kernel::lib::cpu,   // DERIVE
           nextshifts.data(),
           index_.data(),
           index_.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
       }
       else {
-        struct Error err3 =
+        struct Error err5 =
             kernel::IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<T>(
           kernel::lib::cpu,   // DERIVE
           nextshifts.data(),
           index_.data(),
           index_.length(),
           shifts.data());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err5, classname(), identities_.get());
       }
     }
 
@@ -2576,8 +2576,29 @@ namespace awkward {
                                               ascending,
                                               stable);
 
+    bool nulls_merged = false;
+    if (isoption()) {
+
+      Index64 nulls_index(numnull);
+      struct Error err2 = kernel::IndexedArray_index_of_nulls<T>(
+        kernel::lib::cpu,   // DERIVE
+        nulls_index.data(),
+        index_.data(),
+        index_length,
+        parents.data(),
+        starts.data());
+      util::handle_error(err2, classname(), identities_.get());
+
+      ContentPtr ind = std::make_shared<NumpyArray>(nulls_index);
+
+      if (out.get()->mergeable(ind, true)) {
+        out = out.get()->merge(ind);
+        nulls_merged = true;
+      }
+    }
+
     Index64 nextoutindex(parents_length);
-    struct Error err3 = kernel::IndexedArray_local_preparenext_64(
+    struct Error err6 = kernel::IndexedArray_local_preparenext_64(
       kernel::lib::cpu,   // DERIVE
       nextoutindex.data(),
       starts.data(),
@@ -2585,7 +2606,20 @@ namespace awkward {
       parents_length,
       nextparents.data(),
       next_length);
-    util::handle_error(err3, classname(), identities_.get());
+    util::handle_error(err6, classname(), identities_.get());
+
+    if (isoption()  &&  nulls_merged) {
+      // FIXME: move to kernels
+      int64_t last_index = 0;
+      for( int64_t i = 0; i < nextoutindex.length(); i++) {
+        nextoutindex.data()[i] > last_index ? last_index = nextoutindex.data()[i] : last_index;
+      }
+
+      // FIXME: move to kernels
+      for(int64_t i = 0; i < nextoutindex.length(); i++) {
+        nextoutindex.data()[i] == -1 ? nextoutindex.data()[i] = ++last_index : nextoutindex.data()[i];
+      }
+    }
 
     IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
                                           util::Parameters(),

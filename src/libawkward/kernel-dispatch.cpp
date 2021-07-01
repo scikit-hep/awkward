@@ -2517,6 +2517,90 @@ namespace awkward {
     }
 
     template<>
+    ERROR IndexedArray_index_of_nulls<int32_t>(
+      kernel::lib ptr_lib,
+      int64_t *toindex,
+      const int32_t *fromindex,
+      int64_t lenindex,
+      const int64_t* parents,
+      const int64_t* starts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_index_of_nulls(
+          toindex,
+          fromindex,
+          lenindex,
+          parents,
+          starts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_index_of_nulls<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_index_of_nulls<int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR IndexedArray_index_of_nulls<uint32_t>(
+      kernel::lib ptr_lib,
+      int64_t *toindex,
+      const uint32_t *fromindex,
+      int64_t lenindex,
+      const int64_t* parents,
+      const int64_t* starts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_index_of_nulls(
+          toindex,
+          fromindex,
+          lenindex,
+          parents,
+          starts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_index_of_nulls<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_index_of_nulls<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR IndexedArray_index_of_nulls<int64_t>(
+      kernel::lib ptr_lib,
+      int64_t *toindex,
+      const int64_t *fromindex,
+      int64_t lenindex,
+      const int64_t* parents,
+      const int64_t* starts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_index_of_nulls(
+          toindex,
+          fromindex,
+          lenindex,
+          parents,
+          starts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_index_of_nulls<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_index_of_nulls<int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
     ERROR IndexedArray_getitem_nextcarry_outindex_64<int32_t>(
       kernel::lib ptr_lib,
       int64_t *tocarry,

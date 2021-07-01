@@ -152,64 +152,56 @@ def test_IndexedOptionArray():
 
     assert ak.to_list(ak.argsort(array, axis=0, ascending=True, stable=True)) == [
         [4, 4, 4, 0, 0],
-        [2, None, 0],
-        [3, None, 2],
-        [None, None, None],
-        [None, None, None],
+        [2, 0, 0],
+        [3, 1, 2],
+        [0, 2, 1],
+        [1, 3, 3],
     ]
 
     assert ak.to_list(ak.argsort(array, axis=0, ascending=True, stable=False)) == [
         [4, 4, 4, 0, 0],
-        [2, None, 0],
-        [3, None, 2],
-        [None, None, None],
-        [None, None, None],
+        [2, 0, 0],
+        [3, 1, 2],
+        [0, 2, 1],
+        [1, 3, 3],
     ]
 
     assert ak.to_list(ak.argsort(array, axis=0, ascending=False, stable=True)) == [
         [3, 4, 2, 0, 0],
-        [2, None, 0],
-        [4, None, 4],
-        [None, None, None],
-        [None, None, None],
+        [2, 0, 0],
+        [4, 1, 4],
+        [0, 2, 1],
+        [1, 3, 3],
     ]
     assert ak.to_list(ak.argsort(array, axis=0, ascending=False, stable=False)) == [
         [3, 4, 2, 0, 0],
-        [2, None, 0],
-        [4, None, 4],
-        [None, None, None],
-        [None, None, None],
+        [2, 0, 0],
+        [4, 1, 4],
+        [0, 2, 1],
+        [1, 3, 3],
     ]
 
     assert ak.to_list(ak.argsort(array, axis=1, ascending=True, stable=True)) == [
-        [3, 2, 4, None, None],
-        [None, None, None],
-        [0, 2, None],
-        [0, None, None],
+        [3, 2, 4, 0, 1],
+        [0, 1, 2],
+        [0, 2, 1],
+        [0, 1, 2],
         [2, 1, 0],
     ]
 
     assert ak.to_list(ak.argsort(array, axis=1, ascending=True, stable=False)) == [
-        [3, 2, 4, None, None],
-        [None, None, None],
-        [0, 2, None],
-        [0, None, None],
+        [3, 2, 4, 0, 1],
+        [0, 1, 2],
+        [0, 2, 1],
+        [0, 1, 2],
         [2, 1, 0],
     ]
 
-    assert ak.to_list(ak.sort(array, axis=1, ascending=False, stable=False)) == [
-        [3.3, 2.2, 1.1, None, None],
-        [None, None, None],
-        [5.5, 4.4, None],
-        [5.5, None, None],
-        [-4.4, -5.5, -6.6],
-    ]
-
     assert ak.to_list(ak.argsort(array, axis=1, ascending=False, stable=True)) == [
-        [4, 2, 3, None, None],
-        [None, None, None],
-        [2, 0, None],
-        [0, None, None],
+        [4, 2, 3, 0, 1],
+        [0, 1, 2],
+        [2, 0, 1],
+        [0, 1, 2],
         [0, 1, 2],
     ]
 
@@ -218,8 +210,8 @@ def test_IndexedOptionArray():
         3,
         2,
         4,
-        None,
-        None,
+        0,
+        1,
     ]
 
     array3 = ak.Array(
@@ -299,11 +291,11 @@ def test_IndexedOptionArray():
 
     array5 = ak.argsort(array4, axis=0, ascending=True, stable=False)
     assert ak.to_list(array5) == [
-        [4, 4, 4, None, None],
-        [0, 0, 0, None, None],
-        [2, 2, None, None, None],
-        [3, None, None, None, None],
-        [None, None, None, None, None],
+        [4, 4, 4, 0, 0],
+        [0, 0, 0, 1, 1],
+        [2, 2, 1, 2, 2],
+        [3, 1, 2, 3, 3],
+        [1, 3, 3, 4, 4],
     ]
 
     # FIXME: implement dropna to strip off the None's

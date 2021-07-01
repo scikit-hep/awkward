@@ -5404,6 +5404,12 @@ namespace awkward {
       return ptr;
     }
 
+    // int64_t num_nullls = 0;
+    // for(int64_t i = 0; i < shifts.length(); i++) {
+    //   shifts.data()[i] > num_nullls ? num_nullls = shifts.data()[i] : num_nullls;
+    // }
+    // std::cout << "Num nulls " << num_nullls << "\n";
+
     int64_t offsets_length = 0;
     struct Error err1 = kernel::sorting_ranges_length(
       kernel::lib::cpu,   // DERIVE

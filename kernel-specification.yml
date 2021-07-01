@@ -1303,6 +1303,40 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_IndexedArray_index_of_nulls
+    specializations:
+      - name: awkward_IndexedArray32_index_of_nulls
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+      - name: awkward_IndexedArray64_index_of_nulls
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+      - name: awkward_IndexedArrayU32_index_of_nulls
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+    description: null
+    definition: |
+      def awkward_IndexedArray_index_of_nulls(toindex, fromindex, lenindex):
+          j = 0
+          for i in range(lenindex):
+              if fromindex[i] < 0:
+                  toindex[j] = i
+                  j = j + 1
+    automatic-tests: true
+    manual-tests: []
+
   - name: awkward_IndexedArray_overlay_mask
     specializations:
       - name: awkward_IndexedArray32_overlay_mask8_to64

@@ -537,6 +537,15 @@ namespace awkward {
       int64_t lenindex);
 
     template <typename T>
+    ERROR IndexedArray_index_of_nulls(
+      kernel::lib ptr_lib,
+      int64_t* toindex,
+      const T* fromindex,
+      int64_t lenindex,
+      const int64_t* parents,
+      const int64_t* starts);
+
+    template <typename T>
     ERROR IndexedArray_getitem_nextcarry_outindex_64(
       kernel::lib ptr_lib,
       int64_t* tocarry,
