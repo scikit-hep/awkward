@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import awkward as ak
 from awkward._v2.contents.content import Content
 
+import numpy as np
 
 class RegularArray(Content):
     def __init__(self, content, size, zeros_length=0, identifier=None, parameters=None):
@@ -90,3 +91,12 @@ class RegularArray(Content):
 
     def _getitem_fields(self, where):
         return RegularArray(self._content[where], self._size, self._length)
+
+    def _getitem_array(self, where):
+        if where.strides != (where.itemsize,):
+            where = self._nplike.asarray(where, dtype=where.dtype, order="C")
+        new_where = []
+        for i in where:
+            new_where.append(np.arange(i*self._size, i*self._size + self._size))
+        new_where =np.asarray(new_where).flatten()
+        return RegularArray(self._content._getitem_array(new_where), self._size, len(where))

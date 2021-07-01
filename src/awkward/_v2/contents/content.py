@@ -93,15 +93,13 @@ class Content(object):
         elif isinstance(where, ak.highlevel.Array):
             raise NotImplementedError("needs _getitem_next")
 
+        elif isinstance(where, np.ndarray) and all(isinstance(x, (np.int64, np.bool_)) for x in where):
+            return self._getitem_array(where)
+
         elif isinstance(where, Content):
             raise NotImplementedError("needs _getitem_next")
 
-        elif isinstance(where, Iterable) and all(
-            isinstance(x, (int, bool)) for x in where
-        ):
-            raise NotImplementedError("needs _getitem_array")
-
-        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
+        elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):

@@ -120,6 +120,19 @@ class BitMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def get_bytemask(self):
+        # In general, slices must convert BitMaskedArray to ByteMaskedArray.
+        if self._lsb_order:
+            bytemask = (
+                self._mask.nplike.unpackbits(self._mask)
+                .reshape(-1, 8)[:, ::-1]
+                .reshape(-1)
+                .view(np.int8)
+            )
+        else:
+            bytemask = self._mask.nplike.unpackbits(self._mask).view(np.int8)
+        return bytemask
+
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
@@ -135,16 +148,7 @@ class BitMaskedArray(Content):
             return None
 
     def _getitem_range(self, where):
-        # In general, slices must convert BitMaskedArray to ByteMaskedArray.
-        if self._lsb_order:
-            bytemask = (
-                self._mask.nplike.unpackbits(self._mask)
-                .reshape(-1, 8)[:, ::-1]
-                .reshape(-1)
-                .view(np.int8)
-            )
-        else:
-            bytemask = self._mask.nplike.unpackbits(self._mask).view(np.int8)
+        bytemask = self.get_bytemask()
         start, stop, step = where.indices(len(self))
         return ByteMaskedArray(
             Index(bytemask[start:stop]),
@@ -169,3 +173,7 @@ class BitMaskedArray(Content):
             length=self._length,
             lsb_order=self._lsb_order,
         )
+    
+    def _getitem_array(self, where):
+        bytemask = self.get_bytemask()
+        return ByteMaskedArray(Index(bytemask[where]), self._content._getitem_array(where), valid_when=self._valid_when)

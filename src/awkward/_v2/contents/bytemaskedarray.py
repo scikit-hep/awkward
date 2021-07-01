@@ -110,3 +110,8 @@ class ByteMaskedArray(Content):
         return ByteMaskedArray(
             self._mask, self._content[where], valid_when=self._valid_when
         )
+
+    def _getitem_array(self, where):
+        # if where.strides != (where.itemsize,):
+        #     where = self._nplike.asarray(where, dtype=where.dtype, order="C")
+        return ByteMaskedArray(Index(self._mask[where]), self._content._getitem_array(where), valid_when=self._valid_when)
