@@ -1485,7 +1485,7 @@ class LayoutTransformer(object):
 
 class FunctionalTransformer(LayoutTransformer):
     def __init__(self, transformer, numpy_to_regular, keep_parameters):
-        super().__init__(keep_parameters=keep_parameters)
+        super(FunctionalTransformer, self).__init__(keep_parameters=keep_parameters)
         self._numpy_to_regular = numpy_to_regular
         self._transformer = transformer
 
