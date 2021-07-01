@@ -1469,6 +1469,246 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
         )
 
 
+class LayoutTransformer(object):
+    def __init__(self, keep_parameters=False):
+        self._keep_parameters = keep_parameters
+
+    @property
+    def keep_parameters(self):
+        return self._keep_parameters
+
+    def generic_transform(self, layout, depth, user):
+        # the rest of this is one switch statement
+        if isinstance(layout, ak.partition.PartitionedArray):
+            return ak.partition.IrregularlyPartitionedArray(
+                [self.transform(x, depth, user) for x in layout.partitions]
+            )
+
+        elif isinstance(layout, ak.layout.NumpyArray):
+            if self._keep_parameters:
+                return layout
+            else:
+                return ak.layout.NumpyArray(
+                    ak.nplike.of(layout).asarray(layout), layout.identities, None
+                )
+
+        elif isinstance(layout, ak.layout.EmptyArray):
+            if self._keep_parameters:
+                return layout
+            else:
+                return ak.layout.EmptyArray(layout.identities, None)
+
+        elif isinstance(layout, ak.layout.RegularArray):
+            return ak.layout.RegularArray(
+                self.transform(layout.content, depth + 1, user),
+                layout.size,
+                len(layout),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListArray32):
+            return ak.layout.ListArray32(
+                layout.starts,
+                layout.stops,
+                self.transform(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListArrayU32):
+            return ak.layout.ListArrayU32(
+                layout.starts,
+                layout.stops,
+                self.transform(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListArray64):
+            return ak.layout.ListArray64(
+                layout.starts,
+                layout.stops,
+                self.transform(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListOffsetArray32):
+            return ak.layout.ListOffsetArray32(
+                layout.offsets,
+                self.transform(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListOffsetArrayU32):
+            return ak.layout.ListOffsetArrayU32(
+                layout.offsets,
+                self.transform(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListOffsetArray64):
+            return ak.layout.ListOffsetArray64(
+                layout.offsets,
+                self.transform(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedArray32):
+            return ak.layout.IndexedArray32(
+                layout.index,
+                self.transform(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedArrayU32):
+            return ak.layout.IndexedArrayU32(
+                layout.index,
+                self.transform(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedArray64):
+            return ak.layout.IndexedArray64(
+                layout.index,
+                self.transform(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedOptionArray32):
+            return ak.layout.IndexedOptionArray32(
+                layout.index,
+                self.transform(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedOptionArray64):
+            return ak.layout.IndexedOptionArray64(
+                layout.index,
+                self.transform(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ByteMaskedArray):
+            return ak.layout.ByteMaskedArray(
+                layout.mask,
+                self.transform(layout.content, depth, user),
+                layout.valid_when,
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.BitMaskedArray):
+            return ak.layout.BitMaskedArray(
+                layout.mask,
+                self.transform(layout.content, depth, user),
+                layout.valid_when,
+                len(layout),
+                layout.lsb_order,
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.UnmaskedArray):
+            return ak.layout.UnmaskedArray(
+                self.transform(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.RecordArray):
+            return ak.layout.RecordArray(
+                [self.transform(x, depth, user) for x in layout.contents],
+                layout.recordlookup,
+                len(layout),
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.Record):
+            return ak.layout.Record(
+                self.transform(layout.array, depth, user),
+                layout.at,
+            )
+
+        elif isinstance(layout, ak.layout.UnionArray8_32):
+            return ak.layout.UnionArray8_32(
+                layout.tags,
+                layout.index,
+                [self.transform(x, depth, user) for x in layout.contents],
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.UnionArray8_U32):
+            return ak.layout.UnionArray8_U32(
+                layout.tags,
+                layout.index,
+                [self.transform(x, depth, user) for x in layout.contents],
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.UnionArray8_64):
+            return ak.layout.UnionArray8_64(
+                layout.tags,
+                layout.index,
+                [self.transform(x, depth, user) for x in layout.contents],
+                layout.identities,
+                layout.parameters if self._keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.VirtualArray):
+            return self.transform(layout.array, depth, user)
+
+        else:
+            raise AssertionError(
+                "unrecognized Content type: {0}".format(type(layout))
+                + exception_suffix(__file__)
+            )
+
+    def transform(self, layout, depth, user):
+        raise NotImplementedError
+
+
+class FunctionalTransformer(LayoutTransformer):
+    def __init__(self, transformer, numpy_to_regular, keep_parameters):
+        super().__init__(keep_parameters=keep_parameters)
+        self._numpy_to_regular = numpy_to_regular
+        self._transformer = transformer
+
+    @property
+    def numpy_to_regular(self):
+        return self._numpy_to_regular
+
+    def transform(self, layout, depth, user):
+        if self._numpy_to_regular and isinstance(layout, ak.layout.NumpyArray):
+            layout = layout.toRegularArray()
+        return self._transformer(self, layout, depth, user)
+
+
+def recursively_transform(
+    layout,
+    transform,
+    user=None,
+    keep_parameters=True,
+    numpy_to_regular=False,
+):
+    transformer = FunctionalTransformer(
+        transform, numpy_to_regular=numpy_to_regular, keep_parameters=keep_parameters
+    )
+    return transformer.transform(layout, 1, user)
+
+
 def find_caches(layout):
     # Both of the implementations below find referentially unique mutablemappings,
     # but the PartitionedArray case is optimized for many unique values (with a set)
