@@ -1,0 +1,44 @@
+{
+    "Inputs":[
+        {
+            "name":"awkward_IndexedArray_validity",
+            "cases":[
+                {
+                    "inputs": [[0,1,2,3,4,5,6,7,8,9],0,10,true],
+                    "output": null,
+                    "except":false
+                },
+                {
+                    "inputs": [[-1, 0, 0, 1, 1, 1, 0, 0, 5, 0, 1, 5, 1, 1],10,5,false],
+                    "output": "ValueError",
+                    "except":true
+                },
+                {
+                    "inputs": [[1, 0, 0, 1, 7, 11, 0, 0, 8, 9, 1, 0, 1, 1],10,6,false],
+                    "output": "ValueError",
+                    "except":true
+                },
+                {
+                    "inputs": [[-1, 0, 0, 1, 6, -2, 0, 0, 5, 0, 1, 0, 1, 1],10,7,true],
+                    "output": null,
+                    "except":false
+                },
+                {
+                    "inputs": [[1, 0, 0, 1, 4, 1, 8, 0, 5, 9, 1, 0, 1, 1],10,6,false],
+                    "output": "ValueError",
+                    "except":true
+                },
+                {
+                    "inputs": [[1,-10, 0, 1, -7, 1, 0, 0, 5, 0, 1, 0, 1, 1],10,6,true],
+                    "output": null,
+                    "except":false
+                },
+                {
+                    "inputs": [[1,-10, 0, 1, -7, 1, 0, 0, 5, 0, 1, 0, 1, 1],10,6,true],
+                    "output": null,
+                    "except":false
+                }
+            ]
+        }
+    ]
+}

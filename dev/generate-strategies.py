@@ -173,42 +173,32 @@ def gettypeval(typename):
         raise ValueError("Unknown type encountered")
     return typeval
 
-data=[]
-
-@composite
-def strat(draw):
-    lencontent=draw(st.integers(min_value=1,max_value=15))
-    index=draw(st.lists(st.integers().filter(lambda x:x > -1 and x<lencontent),min_size=1,max_size=10,unique=True))
-    length=len(index)
-    isoption=False
-    return (index,length,lencontent,isoption)
-
-
-@given(strat())
-@settings(max_examples=50)
-def find(ex):
-    with open(os.path.join(CURRENT_DIR,"..","hypothesis-tests-spec","kernels.py"),) as js:
-        exec(js.read(),globals(),locals())
-        x=eval('awkward_IndexedArray_validity(*ex)')
-        data.append({"inputs":ex,"output":x})
 
 def main():
     print("Generating tests")
     with open(os.path.join(CURRENT_DIR,"..","hypothesis-tests-spec","test_awkward_IndexedArray_validity.py"),'w') as wr:
         wr.write('import kernels')
-        i=0
-        for d in data:
-            i=i+1
-            wr.write('\n\n\ndef test_pyawkward_IndexedArray32_validity_'+str(i)+'():\n\t')
-            wr.write('index='+str(d["inputs"][0]))
-            wr.write('\n\tlength='+str(d["inputs"][1]))
-            wr.write('\n\tlencontent='+str(d["inputs"][2]))
-            wr.write('\n\tisoption='+str(d["inputs"][3]))
-            wr.write('\n\tresult=kernels.awkward_IndexedArray_validity('+str(d["inputs"][0])+','+str(d["inputs"][1])+','+str(d["inputs"][2])+','+str(d["inputs"][3])+')')
-            wr.write('\n\tassert result==None')
+        with open(os.path.join(CURRENT_DIR,"..","inputs.json"),'r') as js:
+            data=json.load(js)
+            i=0
+            indexArray=data["Inputs"][0]["cases"]
+            for d in indexArray:
+                i=i+1
+                wr.write('\n\n\ndef test_pyawkward_IndexedArray32_validity_'+str(i)+'():\n\t')
+                wr.write('index='+str(d["inputs"][0]))
+                wr.write('\n\tlength='+str(d["inputs"][1]))
+                wr.write('\n\tlencontent='+str(d["inputs"][2]))
+                wr.write('\n\tisoption='+str(d["inputs"][3]))
+                if(d["except"]==True):
+                    wr.write('\n\ttry:\n\t\t')
+                    wr.write('result=kernels.awkward_IndexedArray_validity('+str(d["inputs"][0])+','+str(d["inputs"][1])+','+str(d["inputs"][2])+','+str(d["inputs"][3])+')')
+                    wr.write('\n\texcept '+str(d["output"])+":")
+                    wr.write('\n\t\tassert True')
+                else:
+                    wr.write('\n\tresult=kernels.awkward_IndexedArray_validity('+str(d["inputs"][0])+','+str(d["inputs"][1])+','+str(d["inputs"][2])+','+str(d["inputs"][3])+')')
+                    wr.write('\n\tassert result==None')
             
 
 if __name__ == "__main__":
     readspec()
-    find()
     main()
