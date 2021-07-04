@@ -6,8 +6,6 @@ import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
 
-import numpy
-
 np = ak.nplike.NumpyMetadata.instance()
 
 
@@ -105,11 +103,7 @@ class ListArray(Content):
     def _getitem_fields(self, where):
         return ListArray(self._starts, self._stops, self._content[where])
 
-    def _getitem_array(self, where):
-        if where.strides != (where.itemsize,):
-            where = self._nplike.asarray(where, dtype=where.dtype, order="C")
-        # new_where = []
-        # for i in where:
-        #     new_where.append(numpy.arange(i*self._size, i*self._size + self._size))
-        # new_where =numpy.asarray(new_where).flatten()
-        return ListArray(self.starts, self.stops, self._content._getitem_array(where))
+    def _getitem_array(self, where, allow_lazy):
+        starts = Index(self._starts[where])
+        stops = Index(self._stops[: len(self._starts)][where])
+        return ListArray(starts, stops, self._content)

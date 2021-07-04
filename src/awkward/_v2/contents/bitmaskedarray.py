@@ -174,10 +174,10 @@ class BitMaskedArray(Content):
             lsb_order=self._lsb_order,
         )
 
-    def _getitem_array(self, where):
+    def _getitem_array(self, where, allow_lazy):
         bytemask = self.get_bytemask()
         return ByteMaskedArray(
             Index(bytemask[where]),
-            self._content._getitem_array(where),
+            self._content._getitem_array(where, allow_lazy=False),
             valid_when=self._valid_when,
         )

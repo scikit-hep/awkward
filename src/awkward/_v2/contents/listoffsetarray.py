@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
 
+
 np = ak.nplike.NumpyMetadata.instance()
 
 
@@ -91,3 +92,13 @@ class ListOffsetArray(Content):
 
     def _getitem_fields(self, where):
         return ListOffsetArray(self._offsets, self._content[where])
+
+    def _getitem_array(self, where, allow_lazy):
+        if where[-1] >= len(self):
+            raise IndexError("array index out of bounds")
+        stops = where[-1] + 2
+        return ak._v2.contents.listarray.ListArray(
+            Index(self.offsets[where]),
+            Index(self._offsets[where[-1] : stops]),
+            self._content,
+        )

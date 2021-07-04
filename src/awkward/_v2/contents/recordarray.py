@@ -9,6 +9,7 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.contents.content import Content
+from awkward._v2.index import Index
 from awkward._v2.record import Record
 
 
@@ -213,3 +214,28 @@ class RecordArray(Content):
                 [self.content(i) for i in indexes],
                 [self._keys[i] for i in indexes],
             )
+
+    def _getitem_array(self, where, allow_lazy):
+        if allow_lazy:
+            return ak._v2.contents.indexedarray.IndexedArray(
+                Index(where % self._length), self
+            )
+        else:
+            contents = (
+                [
+                    self.content(i)._getitem_array(where, allow_lazy=False)
+                    for i in range(len(self._contents))
+                ]
+                if len(self._contents) > 0
+                else []
+            )
+
+            keys = (
+                [self._keys[i] for i in range(len(self._keys))]
+                if self._keys is not None
+                else None
+            )
+
+            length = len(where) if len(self._contents) == 0 else None
+
+            return RecordArray(contents, keys, length)

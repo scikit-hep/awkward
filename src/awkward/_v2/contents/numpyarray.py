@@ -119,7 +119,5 @@ class NumpyArray(Content):
     def _getitem_fields(self, where):
         raise IndexError("fields " + repr(where) + " not found")
 
-    def _getitem_array(self, where):
-        if where.strides != (where.itemsize,):
-            where = self._nplike.asarray(where, dtype=where.dtype, order="C")
+    def _getitem_array(self, where, allow_lazy):
         return NumpyArray(self._data[where])

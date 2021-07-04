@@ -85,3 +85,6 @@ class IndexedArray(Content):
 
     def _getitem_fields(self, where):
         return IndexedArray(self._index, self._content[where])
+
+    def _getitem_array(self, where, allow_lazy):
+        return IndexedArray(Index(self._index.data[where]), self._content)

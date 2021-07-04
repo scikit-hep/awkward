@@ -58,3 +58,6 @@ class UnmaskedArray(Content):
 
     def _getitem_fields(self, where):
         return UnmaskedArray(self._content[where])
+
+    def _getitem_array(self, where, allow_lazy):
+        return UnmaskedArray(self.content._getitem_array(where, allow_lazy=False))

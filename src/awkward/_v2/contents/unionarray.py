@@ -128,3 +128,8 @@ class UnionArray(Content):
 
     def _getitem_fields(self, where):
         return UnionArray(self._tags, self._index, [x[where] for x in self._contents])
+
+    def _getitem_array(self, where, allow_lazy):
+        tags = Index(self._tags[where])
+        index = Index(self._index[where])
+        return UnionArray(tags, index, self._contents)

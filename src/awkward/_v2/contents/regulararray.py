@@ -2,10 +2,10 @@
 
 from __future__ import absolute_import
 
+import numpy as np
+
 import awkward as ak
 from awkward._v2.contents.content import Content
-
-import numpy as np
 
 
 class RegularArray(Content):
@@ -93,13 +93,19 @@ class RegularArray(Content):
     def _getitem_fields(self, where):
         return RegularArray(self._content[where], self._size, self._length)
 
-    def _getitem_array(self, where):
-        if where.strides != (where.itemsize,):
-            where = self._nplike.asarray(where, dtype=where.dtype, order="C")
-        new_where = []
-        for i in where:
-            new_where.append(np.arange(i * self._size, i * self._size + self._size))
-        new_where = np.asarray(new_where).flatten()
-        return RegularArray(
-            self._content._getitem_array(new_where), self._size, len(where)
-        )
+    def _getitem_array(self, where, allow_lazy):
+        new_where = np.arange(len(where) * self._size)
+        for i in range(len(where)):
+            for j in range(self._size):
+                new_where[i * self._size + j] = where[i] * self._size + j
+        zeros_length = len(where)
+        if len(new_where) == 0:
+            return [[]] * len(where)
+        else:
+            return RegularArray(
+                self._content._getitem_array(new_where, allow_lazy=False),
+                self._size,
+                zeros_length,
+            )
+            # FIXME : for use of negative indexes, but the v1 to v2 comparison will fail as this is trimmed // trimming self.content will also fail both the v1 to v2 comparison and to_list implementation
+            # return RegularArray(self._content[: -(len(self._content) % self._size)]._getitem_array(new_where, allow_lazy = False), self._size, zeros_length)

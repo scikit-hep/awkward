@@ -98,7 +98,7 @@ class Content(object):
 
         elif isinstance(where, awkward._v2.contents.numpyarray.NumpyArray):
             if issubclass(where.data.dtype.type, (np.integer, np.bool_)):
-                return self._getitem_array(where.data)
+                return self._getitem_array(where.data, allow_lazy=True)
             else:
                 raise TypeError(
                     "one-dimensional array slice must be an array of integers or "

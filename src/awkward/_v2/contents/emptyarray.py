@@ -39,7 +39,7 @@ class EmptyArray(Content):
     def _getitem_fields(self, where):
         raise IndexError("fields " + repr(where) + " not found")
 
-    def _getitem_array(self, where):
+    def _getitem_array(self, where, allow_lazy):
         raise IndexError(
             "cannot extract {0} elemnts from {1}".format(repr(len(where)), repr(where))
         )
