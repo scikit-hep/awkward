@@ -1728,7 +1728,11 @@ def where(condition, *args, **kwargs):
 
         behavior = ak._util.behaviorof(akcondition, left, right)
         out = ak._util.broadcast_and_apply(
-            [akcondition, left, right], getfunction, behavior, pass_depth=False
+            [akcondition, left, right],
+            getfunction,
+            behavior,
+            pass_depth=False,
+            numpy_to_regular=True,
         )
 
         return ak._util.maybe_wrap(out[0], behavior, highlevel)
