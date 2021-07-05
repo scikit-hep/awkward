@@ -7,6 +7,8 @@ try:
 except ImportError:
     from collections import Iterable
 
+import numpy as np
+
 import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
@@ -218,7 +220,7 @@ class RecordArray(Content):
     def _getitem_array(self, where, allow_lazy):
         if allow_lazy:
             return ak._v2.contents.indexedarray.IndexedArray(
-                Index(where % self._length), self
+                Index(np.asarray(where % self._length, dtype=np.int64)), self
             )
         else:
             contents = (

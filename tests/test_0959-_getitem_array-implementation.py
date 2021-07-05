@@ -113,6 +113,10 @@ def test_ListOffsetArray_NumpyArray():
     assert v1v2_equal(resultv1, resultv2)
 
 
+@pytest.mark.skipif(
+    ak._util.win,
+    reason="unstable dict order. -- on Windows",
+)
 def test_RecordArray_NumpyArray():
     v2a = ak._v2.contents.recordarray.RecordArray(
         [
@@ -1337,11 +1341,7 @@ def test_RecordArray_NumpyArray_AllowLazy():
         ],
         ["x", "y"],
     )
-    # resultv1 = v1a.carry(ak.layout.Index64(np.array([1, 2], np.int64)), True)
-
     resultv1 = v1a[np.array([1, 2])]
-    print(resultv1)
-    print(resultv2)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
     assert v1v2_equal(resultv1, resultv2)
 
