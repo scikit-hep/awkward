@@ -30,6 +30,17 @@ def test_two_levels():
     assert ak.to_list(ak.ravel(layout)) == [0, 1, 2, 3, 4, 3, 6, 5, 2, 2]
 
 
+def test_record():
+    x = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 3, 5], dtype=np.int64)), content
+    )
+    y = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([5, 7, 10], dtype=np.int64)), content
+    )
+    layout = ak.layout.RecordArray((x, y), ("x", "y"))
+    assert ak.to_list(ak.ravel(layout)) == [0, 1, 2, 3, 4, 3, 6, 5, 2, 2]
+
+
 def test_option():
     inner = ak.layout.ListOffsetArray64(
         ak.layout.Index64(np.array([0, 3, 6, 6, 8, 10], dtype=np.int64)), content
