@@ -131,7 +131,7 @@ namespace awkward {
       }
       out = contents_[0].get()->purelist_parameter(key);
       for (size_t i = 1;  i < contents_.size();  i++) {
-        if (!contents_[i].get()->parameter_equals(key, out)) {
+        if (!util::json_equals(out, contents_[i].get()->purelist_parameter(key))) {
           return "null";
         }
       }
