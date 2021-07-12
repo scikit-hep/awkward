@@ -3,8 +3,8 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: '0.10'
-    jupytext_version: 1.5.2
+    format_version: 0.13
+    jupytext_version: 1.10.3
 kernelspec:
   display_name: Python 3
   language: python
@@ -23,55 +23,55 @@ The biggest difference between an [ak.ArrayBuilder](https://awkward-array.readth
 Appending
 ---------
 
-```{code-cell} ipython3
+```{code-cell}
 import awkward as ak
 ```
 
 When a builder is first created, it has zero length and unknown type.
 
-```{code-cell} ipython3
+```{code-cell}
 builder = ak.ArrayBuilder()
 builder
 ```
 
 Calling its `append` method adds data and also determines its type.
 
-```{code-cell} ipython3
+```{code-cell}
 builder.append(1)
 builder
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 builder.append(2.2)
 builder
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 builder.append(3+1j)
 builder
 ```
 
 Note that this can include missing data by promoting to an [option-type](https://awkward-array.readthedocs.io/en/latest/ak.types.OptionType.html),
 
-```{code-cell} ipython3
+```{code-cell}
 builder.append(None)
 builder
 ```
 
 and mix types by promoting to a [union-type](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html):
 
-```{code-cell} ipython3
+```{code-cell}
 builder.append("five")
 builder
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 builder.type
 ```
 
 We've been using "`append`" because it is generic (it recognizes the types of its arguments and builds that), but there are also methods for building structure explicitly.
 
-```{code-cell} ipython3
+```{code-cell}
 builder = ak.ArrayBuilder()
 builder.boolean(False)
 builder.integer(1)
@@ -82,7 +82,7 @@ builder.string("five")
 builder
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 builder.type
 ```
 
@@ -91,7 +91,7 @@ Snapshot
 
 To turn an [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) into an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html), call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffacted).
 
-```{code-cell} ipython3
+```{code-cell}
 array = builder.snapshot()
 array
 ```
@@ -111,7 +111,7 @@ The most useful of these create nested data structures:
 
 which switch into a mode that starts filling inside of a list, record, or tuple. For records and tuples, you additionally have to specify the `field` or `index` of the record or tuple (respectively).
 
-```{code-cell} ipython3
+```{code-cell}
 builder = ak.ArrayBuilder()
 
 builder.begin_list()
@@ -133,20 +133,20 @@ builder
 
 Appending after the `begin_list` puts data inside the list, rather than outside:
 
-```{code-cell} ipython3
+```{code-cell}
 builder.append(9.9)
 builder
 ```
 
 This `9.9` is outside of the lists, and hence the type is now "lists of numbers *or* numbers."
 
-```{code-cell} ipython3
+```{code-cell}
 builder.type
 ```
 
 Since `begin_list` and `end_list` are imperative, the nesting structure of an array can be determined by program flow:
 
-```{code-cell} ipython3
+```{code-cell}
 def arbitrary_nesting(builder, depth):
     if depth == 0:
         builder.append(1)
@@ -164,7 +164,7 @@ builder
 
 Often, you'll know the exact depth of nesting you want. The Python `with` statement can be used to restrict the generality (nd free you from having to remember to `end` what you `begin`).
 
-```{code-cell} ipython3
+```{code-cell}
 builder = ak.ArrayBuilder()
 
 with builder.list():
@@ -187,7 +187,7 @@ When using `begin_record`/`end_record` (or the equivalent `record` in the `with`
 
    * `field("fieldname")`: switches to fill a field with a given name (and returns the builder, for convenience).
 
-```{code-cell} ipython3
+```{code-cell}
 builder = ak.ArrayBuilder()
 
 with builder.record():
@@ -200,7 +200,7 @@ builder
 
 The record type can also be given a name.
 
-```{code-cell} ipython3
+```{code-cell}
 builder = ak.ArrayBuilder()
 
 with builder.record("Point"):
@@ -213,12 +213,12 @@ builder
 
 This gives the resulting records a type named "`Point`", which might have specialized behaviors.
 
-```{code-cell} ipython3
+```{code-cell}
 array = builder.snapshot()
 array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 array.type
 ```
 
@@ -227,7 +227,7 @@ Nested tuples
 
 The same is true for tuples, but the next field to fill is selected by "`index`" (integer), rather than "`field`" (string), and the tuple size has to be given up-front.
 
-```{code-cell} ipython3
+```{code-cell}
 builder = ak.ArrayBuilder()
 
 with builder.tuple(3):
@@ -248,7 +248,7 @@ If the set of fields changes while collecting records, the builder algorithm cou
 
 By default, [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) follows policy (1), but it can be made to follow policy (2) if the names of the records are different.
 
-```{code-cell} ipython3
+```{code-cell}
 policy1 = ak.ArrayBuilder()
 
 with policy1.record():
@@ -263,7 +263,7 @@ print(policy1)
 policy1.type
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 policy2 = ak.ArrayBuilder()
 
 with policy2.record("First"):
@@ -283,31 +283,31 @@ Comments on union-type
 
 Although it's easy to make [union-type](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html) data with [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html), the applications of union-type data are more limited. For instance, we can select a field that belongs to _all_ types of the union, but not any fields that don't share that field.
 
-```{code-cell} ipython3
+```{code-cell}
 array2 = policy2.snapshot()
 array2
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 array2.y
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 # array2.x    would raise AttributeError
 ```
 
 The above would be no problem for records collected using policy 1 (see previous section).
 
-```{code-cell} ipython3
+```{code-cell}
 array1 = policy1.snapshot()
 array1
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 array1.y
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 array1.x
 ```
 
@@ -328,7 +328,7 @@ There are a few limitations, though:
 
 Therefore, a common pattern is:
 
-```{code-cell} ipython3
+```{code-cell}
 import numba as nb
 
 @nb.jit
@@ -355,7 +355,7 @@ Appending parts of an existing array
 
 If the argument of the `append` function is part of another Awkward Array, that array will be *linked into* the new array, rather than reconstructing the original by iterating over it. That can be a performance advantage (appending records with 1000 fields takes as much time as appending records with 1 field), but it can prevent large data structures from being garbage-collected, because a reference to them exists in the new array.
 
-```{code-cell} ipython3
+```{code-cell}
 original = ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}])
 
 builder = ak.ArrayBuilder()
@@ -372,7 +372,7 @@ new_array = builder.snapshot()
 new_array
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 new_array.layout
 ```
 

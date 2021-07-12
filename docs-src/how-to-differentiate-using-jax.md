@@ -3,8 +3,8 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: '0.10'
-    jupytext_version: 1.5.2
+    format_version: 0.13
+    jupytext_version: 1.10.3
 kernelspec:
   display_name: Python 3
   language: python
@@ -16,7 +16,7 @@ Differentiation using JAX
 
 Currently, all the functions which contain slicing or numpy ufuncs are supported by Awkward Arrays and can be differentiated by JAX. We do not support any specialized funtions like `ak.sum()` or `ak.prod()`. These are planned to be implemented in the near future. Since, the GPU support for Awkward Arrays is only partially complete, we have to configure JAX to use CPU only. We can do this by:
 
-```{code-cell} ipython3
+```{code-cell}
 import jax
 jax.config.update("jax_platform_name", "cpu")
 ```
@@ -25,7 +25,7 @@ How to differentiate Awkward Arrays?
 
 Before using JAX on functions which deal with Awkward Arrays we need to call the `ak.jax.register()`. This makes `JAX` aware of Awkward Arrays. Here's an example:
 
-```{code-cell} ipython3
+```{code-cell}
 import awkward as ak
 import numpy as np
 
@@ -53,7 +53,7 @@ print(value_vjp, vjp_func(value_vjp))
 
 Here's how we can use numpy ufuncs on Awkward Arrays and have them differentiated by JAX:
 
-```{code-cell} ipython3
+```{code-cell}
 import awkward as ak
 import numpy as np
 
@@ -85,7 +85,7 @@ What JAX functions are currently supported?
 
 Till now, we have tested and support three JAX functions, `jax.vjp`, `jax.jvp` and `jax.jit`. While, `jax.jvp` and `jax.jit` work for all elementwise differntiation cases, `jax.vjp` has a limitation with Awkward Arrays where you can't differentiate functions which output a scalar. Instead a workaround is to use slices to output get the scalar in the form of an Awkward Array. Here's an example:
 
-```{code-cell} ipython3
+```{code-cell}
 import awkward as ak
 import numpy as np
 

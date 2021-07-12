@@ -9,7 +9,6 @@ trigger:
       - VERSION_INFO
       - .ci/azure-doctest-awkward.yml
       - .ci/azure-deploy-awkward.yml
-      - .ci/linux-build.sh
       - .readthedocs.yml
       - docs-src/*
       - docs-img/*
@@ -328,17 +327,6 @@ jobs:
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
-
-      - script: |
-          python dev/generate-cuda.py
-        displayName: "Generate CUDA kernels"
-        condition: "and(succeeded(), and(ne(variables['python.version'], '3.8'), ne(variables['python.version'], '3.9')))"
-
-      - script: |
-          python -m pip install wheel
-          bash cuda-build.sh
-        displayName: "Build the cuda-kernels"
-        condition: "and(succeeded(), and(ne(variables['python.version'], '2.7'), ne(variables['python.version'], '3.9')))"
 
       - script: |
           echo '===== include directory ============================='

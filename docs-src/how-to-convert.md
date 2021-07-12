@@ -3,8 +3,8 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: '0.10'
-    jupytext_version: 1.5.2
+    format_version: 0.13
+    jupytext_version: 1.10.3
 kernelspec:
   display_name: Python 3
   language: python
@@ -20,4 +20,4 @@ Converting arrays
    * **[ROOT via Uproot](how-to-convert-uproot)**
    * **[Arrow and Parquet](how-to-convert-arrow)**
    * **[Pandas](how-to-convert-pandas)**
-   * **[Generic array-sets](how-to-convert-buffers)**
+   * **[Generic buffers](how-to-convert-buffers)**

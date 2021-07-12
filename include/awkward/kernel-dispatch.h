@@ -537,6 +537,15 @@ namespace awkward {
       int64_t lenindex);
 
     template <typename T>
+    ERROR IndexedArray_index_of_nulls(
+      kernel::lib ptr_lib,
+      int64_t* toindex,
+      const T* fromindex,
+      int64_t lenindex,
+      const int64_t* parents,
+      const int64_t* starts);
+
+    template <typename T>
     ERROR IndexedArray_getitem_nextcarry_outindex_64(
       kernel::lib ptr_lib,
       int64_t* tocarry,
@@ -1098,6 +1107,19 @@ namespace awkward {
       double scale);
 
     template <typename FROM, typename TO>
+    ERROR NumpyArray_rearrange_shifted(
+      kernel::lib ptr_lib,
+      TO* toptr,
+      const FROM* fromshifts,
+      int64_t length,
+      const FROM* fromoffsets,
+      int64_t offsetslength,
+      const FROM* fromparents,
+      int64_t parentslength,
+      const FROM* fromstarts,
+      int64_t startslength);
+
+    template <typename FROM, typename TO>
     ERROR ListArray_fill(
       kernel::lib ptr_lib,
       TO* tostarts,
@@ -1265,6 +1287,11 @@ namespace awkward {
       int64_t* tostarts,
       int64_t* tostops,
       int64_t target,
+      int64_t length);
+
+    ERROR Index_nones_as_index_64(
+      kernel::lib ptr_lib,
+      int64_t* toindex,
       int64_t length);
 
     ERROR RegularArray_rpad_and_clip_axis1_64(

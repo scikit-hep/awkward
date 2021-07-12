@@ -3410,8 +3410,7 @@ namespace awkward {
                         const Index64& parents,
                         int64_t outlength,
                         bool ascending,
-                        bool stable,
-                        bool keepdims) const {
+                        bool stable) const {
     if (length() == 0 ) {
       return shallow_copy();
     }
@@ -3426,8 +3425,7 @@ namespace awkward {
                                                parents,
                                                outlength,
                                                ascending,
-                                               stable,
-                                               keepdims);
+                                               stable);
     }
     else {
       std::shared_ptr<Content> out;
@@ -3569,15 +3567,6 @@ namespace awkward {
                                          dtype_,
                                          ptr_lib_);
 
-      if (keepdims) {
-        out = std::make_shared<RegularArray>(
-          Identities::none(),
-          util::Parameters(),
-          out,
-          parents.length() / starts.length(),
-          length());
-      }
-
       return out;
     }
   }
@@ -3585,11 +3574,11 @@ namespace awkward {
   const ContentPtr
   NumpyArray::argsort_next(int64_t negaxis,
                            const Index64& starts,
+                           const Index64& shifts,
                            const Index64& parents,
                            int64_t outlength,
                            bool ascending,
-                           bool stable,
-                           bool keepdims) const {
+                           bool stable) const {
     if (shape_.empty()) {
       throw std::runtime_error(
         std::string("attempting to argsort a scalar") + FILENAME(__LINE__));
@@ -3597,11 +3586,11 @@ namespace awkward {
     else if (shape_.size() != 1  ||  !iscontiguous()) {
       return toRegularArray().get()->argsort_next(negaxis,
                                                   starts,
+                                                  shifts,
                                                   parents,
                                                   outlength,
                                                   ascending,
-                                                  stable,
-                                                  keepdims);
+                                                  stable);
     }
     else {
       std::shared_ptr<Content> out;
@@ -3612,6 +3601,7 @@ namespace awkward {
         ptr = index_sort<bool>(reinterpret_cast<bool*>(data()),
                                length(),
                                starts,
+                               shifts,
                                parents,
                                outlength,
                                ascending,
@@ -3621,6 +3611,7 @@ namespace awkward {
         ptr = index_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                  length(),
                                  starts,
+                                 shifts,
                                  parents,
                                  outlength,
                                  ascending,
@@ -3630,6 +3621,7 @@ namespace awkward {
         ptr = index_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
                                   length(),
                                   starts,
+                                  shifts,
                                   parents,
                                   outlength,
                                   ascending,
@@ -3639,6 +3631,7 @@ namespace awkward {
         ptr = index_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
                                   length(),
                                   starts,
+                                  shifts,
                                   parents,
                                   outlength,
                                   ascending,
@@ -3648,6 +3641,7 @@ namespace awkward {
         ptr = index_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
                                   length(),
                                   starts,
+                                  shifts,
                                   parents,
                                   outlength,
                                   ascending,
@@ -3657,6 +3651,7 @@ namespace awkward {
         ptr = index_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                   length(),
                                   starts,
+                                  shifts,
                                   parents,
                                   outlength,
                                   ascending,
@@ -3666,6 +3661,7 @@ namespace awkward {
         ptr = index_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
                                    length(),
                                    starts,
+                                   shifts,
                                    parents,
                                    outlength,
                                    ascending,
@@ -3675,6 +3671,7 @@ namespace awkward {
         ptr = index_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
                                    length(),
                                    starts,
+                                   shifts,
                                    parents,
                                    outlength,
                                    ascending,
@@ -3684,6 +3681,7 @@ namespace awkward {
         ptr = index_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
                                    length(),
                                    starts,
+                                   shifts,
                                    parents,
                                    outlength,
                                    ascending,
@@ -3697,6 +3695,7 @@ namespace awkward {
         ptr = index_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
                                 starts,
+                                shifts,
                                 parents,
                                 outlength,
                                 ascending,
@@ -3706,6 +3705,7 @@ namespace awkward {
         ptr = index_sort<double>(reinterpret_cast<double*>(data()),
                                  length(),
                                  starts,
+                                 shifts,
                                  parents,
                                  outlength,
                                  ascending,
@@ -3752,14 +3752,6 @@ namespace awkward {
                                          dtype,
                                          ptr_lib_);
 
-      if (keepdims) {
-        out = std::make_shared<RegularArray>(
-          Identities::none(),
-          util::Parameters(),
-          out,
-          parents.length() / starts.length(),
-          length());
-      }
       return out;
     }
   }
@@ -5400,6 +5392,7 @@ namespace awkward {
   NumpyArray::index_sort(const T* data,
                          int64_t length,
                          const Index64& starts,
+                         const Index64& shifts,
                          const Index64& parents,
                          int64_t outlength,
                          bool ascending,
@@ -5410,6 +5403,12 @@ namespace awkward {
     if (length == 0) {
       return ptr;
     }
+
+    // int64_t num_nullls = 0;
+    // for(int64_t i = 0; i < shifts.length(); i++) {
+    //   shifts.data()[i] > num_nullls ? num_nullls = shifts.data()[i] : num_nullls;
+    // }
+    // std::cout << "Num nulls " << num_nullls << "\n";
 
     int64_t offsets_length = 0;
     struct Error err1 = kernel::sorting_ranges_length(
@@ -5428,38 +5427,32 @@ namespace awkward {
       parents.length());
     util::handle_error(err2, classname(), nullptr);
 
-    if (stable) {
-      struct Error err3 = kernel::NumpyArray_argsort<T>(
-        kernel::lib::cpu,   // DERIVE
-        ptr.get(),
-        data,
-        length,
-        offsets.data(),
-        offsets_length,
-        ascending,
-        stable);
-      util::handle_error(err3, classname(), nullptr);
-    }
-    else {
-      std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
-      std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
+    struct Error err3 = kernel::NumpyArray_argsort<T>(
+      kernel::lib::cpu,   // DERIVE
+      ptr.get(),
+      data,
+      length,
+      offsets.data(),
+      offsets_length,
+      ascending,
+      stable);
+    util::handle_error(err3, classname(), nullptr);
 
-      struct Error err3 = kernel::NumpyArray_quick_argsort<T>(
-        kernel::lib::cpu,   // DERIVE
-        ptr.get(),
-        data,
-        length,
-        tmp_beg_ptr.get(),
-        tmp_end_ptr.get(),
-        offsets.data(),
-        offsets_length,
-        ascending,
-        stable,
-        kMaxLevels);
-      util::handle_error(err3, classname(), nullptr);
+    if (shifts.length() > 0) {
+        struct Error err4 = kernel::NumpyArray_rearrange_shifted(
+          kernel::lib::cpu,   // DERIVE
+          ptr.get(),
+          shifts.data(),
+          shifts.length(),
+          offsets.data(),
+          offsets_length,
+          parents.data(),
+          parents.length(),
+          starts.data(),
+          starts.length());
+         util::handle_error(err4, classname(), nullptr);
     }
+
     return ptr;
   }
 

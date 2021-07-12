@@ -25,7 +25,7 @@ def test_fromfile(tmp_path):
     a = ak.from_json(os.path.join(str(tmp_path), "tmp1.json"))
     assert ak.to_list(a) == [[1.1, 2.2, 3.0], [], [4.0, 5.5]]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IOError):
         ak.from_json("nonexistent.json")
 
     with open(os.path.join(str(tmp_path), "tmp2.json"), "w") as f:

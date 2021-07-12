@@ -13,7 +13,7 @@ from awkward._ext import Identities64
 
 from awkward._ext import Iterator
 from awkward._ext import ArrayBuilder
-from awkward._ext import TypedArrayBuilder
+from awkward._ext import LayoutBuilder
 from awkward._ext import _PersistentSharedPtr
 
 from awkward._ext import Content
@@ -67,7 +67,7 @@ __all__ = [
     "Identities64",
     "Iterator",
     "ArrayBuilder",
-    "TypedArrayBuilder",
+    "LayoutBuilder",
     "_PersistentSharedPtr",
     "Content",
     "EmptyArray",

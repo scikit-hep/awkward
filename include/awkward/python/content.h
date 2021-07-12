@@ -7,7 +7,7 @@
 #include <pybind11/stl.h>
 
 #include "awkward/builder/ArrayBuilder.h"
-#include "awkward/typedbuilder/TypedArrayBuilder.h"
+#include "awkward/layoutbuilder/LayoutBuilder.h"
 #include "awkward/Iterator.h"
 #include "awkward/Content.h"
 #include "awkward/array/EmptyArray.h"
@@ -63,9 +63,9 @@ ak::Slice
 py::class_<ak::ArrayBuilder>
   make_ArrayBuilder(const py::handle& m, const std::string& name);
 
-/// @brief Makes a TypedArrayBuilder class in Python that mirrors the one in C++.
-py::class_<ak::TypedArrayBuilder>
-  make_TypedArrayBuilder(const py::handle& m, const std::string& name);
+/// @brief Makes a LayoutBuilder class in Python that mirrors the one in C++.
+py::class_<ak::LayoutBuilder>
+  make_LayoutBuilder(const py::handle& m, const std::string& name);
 
 /// @brief Makes an Iterator class in Python that mirrors the one in C++.
 py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>>

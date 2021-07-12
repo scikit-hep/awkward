@@ -256,7 +256,16 @@ namespace awkward {
         json["class"].IsString()) {
 
       bool h = false;
-      if (json.HasMember("has_identities")) {
+      if (json.HasMember("has_identifier")) {
+        if (json["has_identifier"].IsBool()) {
+          h = json["has_identifier"].GetBool();
+        }
+        else {
+          throw std::invalid_argument(
+            std::string("'has_identifier' must be boolean") + FILENAME(__LINE__));
+        }
+      }
+      else if (json.HasMember("has_identities")) {
         if (json["has_identities"].IsBool()) {
           h = json["has_identities"].GetBool();
         }
@@ -361,6 +370,7 @@ namespace awkward {
         return std::make_shared<RecordForm>(h, p, f, recordlookup, contents);
       }
 
+      isgen = is64 = isU32 = is32 = false;
       if ((isgen = (cls == std::string("ListOffsetArray")))  ||
           (is64  = (cls == std::string("ListOffsetArray64")))  ||
           (isU32 = (cls == std::string("ListOffsetArrayU32")))  ||
@@ -391,6 +401,7 @@ namespace awkward {
         return std::make_shared<ListOffsetForm>(h, p, f, offsets, content);
       }
 
+      isgen = is64 = isU32 = is32 = false;
       if ((isgen = (cls == std::string("ListArray")))  ||
           (is64  = (cls == std::string("ListArray64")))  ||
           (isU32 = (cls == std::string("ListArrayU32")))  ||
@@ -454,6 +465,7 @@ namespace awkward {
         return std::make_shared<RegularForm>(h, p, f, content, size);
       }
 
+      isgen = is64 = is32 = false;
       if ((isgen = (cls == std::string("IndexedOptionArray")))  ||
           (is64  = (cls == std::string("IndexedOptionArray64")))  ||
           (is32  = (cls == std::string("IndexedOptionArray32")))) {
@@ -482,6 +494,7 @@ namespace awkward {
         return std::make_shared<IndexedOptionForm>(h, p, f, index, content);
       }
 
+      isgen = is64 = isU32 = is32 = false;
       if ((isgen = (cls == std::string("IndexedArray")))  ||
           (is64  = (cls == std::string("IndexedArray64")))  ||
           (isU32 = (cls == std::string("IndexedArrayU32")))  ||
@@ -595,6 +608,7 @@ namespace awkward {
         return std::make_shared<UnmaskedForm>(h, p, f, content);
       }
 
+      isgen = is64 = isU32 = is32 = false;
       if ((isgen = (cls == std::string("UnionArray")))  ||
           (is64  = (cls == std::string("UnionArray8_64")))  ||
           (isU32 = (cls == std::string("UnionArray8_U32")))  ||
@@ -1084,25 +1098,29 @@ namespace awkward {
 
     Index64 starts(1);
     starts.setitem_at_nowrap(0, 0);
+
+    Index64 shifts(0);
+
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
       kernel::lib::cpu,   // DERIVE
       parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
+
     ContentPtr out = argsort_next(negaxis,
                                   starts,
+                                  shifts,
                                   parents,
                                   1,
                                   ascending,
-                                  stable,
-                                  true);
+                                  stable);
 
      if (out.get()->length() == 0) {
        return out.get()->getitem_nothing();
      }
      else {
-       return out.get()->getitem_at_nowrap(0);
+       return out;
      }
   }
 
@@ -1161,14 +1179,13 @@ namespace awkward {
                                parents,
                                1,
                                ascending,
-                               stable,
-                               true);
+                               stable);
 
     if (out.get()->length() == 0) {
       return out.get()->getitem_nothing();
     }
     else {
-      return out.get()->getitem_at_nowrap(0);
+      return out;
     }
   }
 

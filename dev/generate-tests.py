@@ -1,7 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from __future__ import absolute_import
+
 import copy
 import os
+import datetime
+import shutil
 from collections import OrderedDict
 from itertools import product
 
@@ -225,6 +229,28 @@ from numpy import uint8
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
 """
+
+    tests_spec = os.path.join(CURRENT_DIR, "..", "tests-spec")
+    if os.path.exists(tests_spec):
+        shutil.rmtree(tests_spec)
+    os.mkdir(tests_spec)
+    with open(os.path.join(tests_spec, "__init__.py"), "w") as f:
+        f.write(
+            """# AUTO GENERATED ON {0}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
+        )
+
     with open(
         os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w"
     ) as outfile:
@@ -275,6 +301,21 @@ def genspectests(specdict):
             ),
             "w",
         ) as f:
+            f.write(
+                """# AUTO GENERATED ON {0}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+""".format(
+                    datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                )
+            )
             f.write("import pytest\nimport kernels\n\n")
             num = 1
             if spec.tests == []:
@@ -367,14 +408,50 @@ def getctypelist(arglist):
 def gencpukerneltests(specdict):
     print("Generating files for testing CPU kernels")
 
+    tests_cpu_kernels = os.path.join(CURRENT_DIR, "..", "tests-cpu-kernels")
+    if os.path.exists(tests_cpu_kernels):
+        shutil.rmtree(tests_cpu_kernels)
+    os.mkdir(tests_cpu_kernels)
+    with open(os.path.join(tests_cpu_kernels, "__init__.py"), "w") as f:
+        f.write(
+            """# AUTO GENERATED ON {0}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
+        )
+
     for spec in specdict.values():
         with open(
-            os.path.join(
-                CURRENT_DIR, "..", "tests-cpu-kernels", "test_cpu" + spec.name + ".py"
-            ),
-            "w",
+            os.path.join(tests_cpu_kernels, "test_cpu" + spec.name + ".py"), "w"
         ) as f:
-            f.write("import ctypes\nimport pytest\nfrom __init__ import lib, Error\n\n")
+            f.write(
+                """# AUTO GENERATED ON {0}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+""".format(
+                    datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                )
+            )
+
+            f.write(
+                "import ctypes\nimport pytest\n\nfrom awkward._cpu_kernels import lib\n\n"
+            )
             num = 1
             if spec.tests == []:
                 f.write(
@@ -413,10 +490,6 @@ def gencpukerneltests(specdict):
                                 )
                             )
                 f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
-                f.write(" " * 4 + "funcC.restype = Error\n")
-                f.write(
-                    " " * 4 + "funcC.argtypes = {0}\n".format(getctypelist(spec.args))
-                )
                 args = ""
                 count = 0
                 for arg in spec.args:
@@ -440,29 +513,90 @@ def gencpukerneltests(specdict):
                             f.write(" " * 4 + "assert {0} == pytest_{0}\n".format(arg))
                     f.write(" " * 4 + "assert not ret_pass.str\n")
                 else:
-                    f.write(" " * 4 + "assert funcC({0}).str.contents\n".format(args))
+                    f.write(" " * 4 + "assert funcC({0}).str\n".format(args))
                 f.write("\n")
 
 
 def gencudakerneltests(specdict):
     print("Generating files for testing CUDA kernels")
 
+    tests_cuda_kernels = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels")
+    if os.path.exists(tests_cuda_kernels):
+        shutil.rmtree(tests_cuda_kernels)
+    os.mkdir(tests_cuda_kernels)
+    with open(os.path.join(tests_cuda_kernels, "__init__.py"), "w") as f:
+        f.write(
+            """# AUTO GENERATED ON {0}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+from __future__ import absolute_import
+
+import ctypes
+import platform
+
+import pkg_resources
+
+# awkward-cuda-kernels is only supported on Linux, but let's leave the placeholder.
+if platform.system() == "Windows":
+    shared_library_name = "awkward-cuda-kernels.dll"
+elif platform.system() == "Darwin":
+    shared_library_name = "libawkward-cuda-kernels.dylib"
+else:
+    shared_library_name = "libawkward-cuda-kernels.so"
+
+CUDA_KERNEL_SO = pkg_resources.resource_filename(
+    "awkward_cuda_kernels", shared_library_name
+)
+
+lib = ctypes.CDLL(CUDA_KERNEL_SO)
+
+
+class Error(ctypes.Structure):
+    _fields_ = [
+        ("str", ctypes.POINTER(ctypes.c_char)),
+        ("filename", ctypes.POINTER(ctypes.c_char)),
+        ("identity", ctypes.c_int64),
+        ("attempt", ctypes.c_int64),
+        ("pass_through", ctypes.c_bool),
+    ]
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
+        )
+
     cudakernels = getcudakernelslist()
     funcnames = getfuncnames()
     cudafuncnames = {funcname: funcnames[funcname] for funcname in cudakernels}
+
     for spec in specdict.values():
         if (spec.name in cudakernels) or any(
             spec.name in x for x in cudafuncnames.values()
         ):
             with open(
-                os.path.join(
-                    CURRENT_DIR,
-                    "..",
-                    "tests-cuda-kernels",
-                    "test_cuda" + spec.name + ".py",
-                ),
-                "w",
+                os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
             ) as f:
+                f.write(
+                    """# AUTO GENERATED ON {0}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+""".format(
+                        datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                    )
+                )
                 f.write(
                     "import ctypes\nimport cupy\nimport pytest\nfrom __init__ import lib, Error\n\n"
                 )
