@@ -1,38 +1,30 @@
-name: Feature request
-description: Some functionality needs to be added…
-title: Feature Request
-labels:
-  - feature
+name: "Feature request"
+description: "Some functionality needs to be added…"
+labels: ["feature"]
 assignees: []
 
 body:
   - type: markdown
     attributes:
       value: |
-        What you're looking for might already be possible as a combination of existing functions, so these requests might get converted into requests for documentation (with a corresponding change in title).
+        What you're looking for might already be possible as a combination of existing functions, but ask anyway. If what you want can be performed by a combination of existing features, we'll convert this issue into a [Discussion Q&A](https://github.com/scikit-hep/awkward-1.0/discussions/categories/q-a).
 
-        Here are some links to documentation, to help you in your search.
+        The following links to documentation might help:
 
-           * [The tutorials site](https://awkward-array.org/)
-           * [The C++ API](https://awkward-array.readthedocs.io/en/latest/_static/index.html)
-           * [The Python API](https://awkward-array.readthedocs.io/en/latest/index.html)
-           * [StackOverflow: [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array)
-           * [Gitter: Scikit-HEP/awkward-array room](https://gitter.im/Scikit-HEP/awkward-array)
+           * The [tutorials site](https://awkward-array.org/).
+           * The [Python docstrings](https://awkward-array.readthedocs.io/en/latest/index.html).
+           * The [C++ doxygen API](https://awkward-array.readthedocs.io/en/latest/_static/index.html).
+           * [StackOverflow: [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array).
+           * [Gitter: Scikit-HEP/awkward-array room](https://gitter.im/Scikit-HEP/awkward-array).
+
   - type: textarea
     id: feature
     attributes:
-      label: Description of New Feature
-      description: Please describe the feature that you would like to see implemented.
-      placeholder: Tell us what you need!
+      label: "Description of new feature"
+      placeholder: "Tell us what you need."
+      description: |
+        Please be specific, with code examples and expected output (in [backticks](https://www.markdownguide.org/extended-syntax/#fenced-code-blocks)) where it would help.
+
+        If you need to include a file, try **clicking on the rectangle below to highlight it** and then dragging the file in.
     validations:
       required: true
-
-  - type: textarea
-    attributes:
-      label: Additional Information
-      description: |
-        Links? References? Anything that will give us more context about the issue you are encountering!
-
-        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
-    validations:
-      required: false

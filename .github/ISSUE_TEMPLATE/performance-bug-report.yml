@@ -1,8 +1,6 @@
-name: Performance bug report
-description: It works, but it could/should be faster…
-title: 'Performance Bug'
-labels:
-  - performance
+name: "Performance bug report"
+description: "It works, but it could/should be faster…"
+labels: ["performance"]
 assignees: []
 
 body:
@@ -11,47 +9,31 @@ body:
       value: |
         The goal of these issues is to fix performance "mistakes," instances where a fix would make the majority of applications several times faster or more, not fine-tuning an application or trading performance in one case for another (unless the former is a very rare or unusual case).
 
-        To prove that something is a performance mistake, it needs to have a reproducible metric and a demonstration that shows how fast it could be, such as equivalent C or Numba code. If the comparison is truly equivalent (i.e. a general-purpose function is not compared with a highly specialized one), we'll try to optimize the metric within a factor of 2 or so of the baseline.
+        To prove that something is a performance mistake, it needs to have a reproducible metric and a demonstration that shows how fast it could be in bare metal, such as equivalent C or Numba code. If the comparison is truly equivalent (i.e. a general-purpose function is not compared with a highly specialized one), we'll try to optimize the metric within a factor of 2 or so of the baseline.
 
         Alternatively, if you've found a mistake in the code that would always be faster if fixed, we can fix it without tests. Some bugs are obvious.
+
   - type: input
     id: version
     attributes:
-      label: Awkward Version
+      label: "Version of Awkward Array"
       description: |
-        What version of Awkward Array are you using?
-
-        You can discover this by running
         ```python
         >>> import awkward as ak
         >>> ak.__version__
         ```
-      placeholder: MAJOR.MINOR.PATCH
-    validations:
-      required: true
-  - type: textarea
-    id: reproducer
-    attributes:
-      label: Code to Reproduce
-      description: Please copy and paste some code that reproduces the bug. This will be automatically formatted into code, so no need for backticks.
-      render: python
-      value: |
-        import awkward as ak
-  - type: textarea
-    id: observed
-    attributes:
-      label: Description of Performance
-      description: Please describe what happens when you run the reproducer.
-      placeholder: Tell us what happens!
+
+        (Your issue might have already been fixed; see [latest version](https://pypi.org/project/awkward/).)
+      placeholder: "XX.YY.ZZ"
     validations:
       required: true
 
   - type: textarea
+    id: description
     attributes:
-      label: Additional Information
+      label: "Description and code to reproduce"
       description: |
-        Links? References? Anything that will give us more context about the issue you are encountering!
-
-        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+        If your code example requires data, be sure to include it in a way that is publicly accessible, such as **clicking on the rectangle below to highlight it** and then dragging the file in. (You can [pickle](https://docs.python.org/3/library/pickle.html) Awkward Arrays, but verify that the issue applies to pickled arrays as well as the original arrays.)
+      placeholder: "Tell us what should be faster."
     validations:
-      required: false
+      required: true
