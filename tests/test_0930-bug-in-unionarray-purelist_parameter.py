@@ -9,7 +9,7 @@ import awkward as ak  # noqa: F401
 
 def test():
     @ak.mixin_class(ak.behavior)
-    class Blah:
+    class Blah(object):
         @property
         def blah(self):
             return self["x"]
