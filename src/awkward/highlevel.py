@@ -519,6 +519,9 @@ class Array(
         """
         return ak.operations.describe.fields(self)
 
+    def _ipython_key_completions_(self):
+        return ak.operations.describe.fields(self)
+
     @property
     def type(self):
         """
@@ -1723,6 +1726,9 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
 
         See also #ak.fields.
         """
+        return ak.operations.describe.fields(self)
+
+    def _ipython_key_completions_(self):
         return ak.operations.describe.fields(self)
 
     @property
