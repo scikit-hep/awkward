@@ -9,7 +9,7 @@ import awkward as ak  # noqa: F401
 
 def test():
     array = ak.Array([{"x": 1}, {"x": 2}, None, {"x": 3}])
-    assert ak.fill_none(array, array[0]).tolist() == [
+    assert ak.fill_none(array, array[0], axis=0).tolist() == [
         {"x": 1},
         {"x": 2},
         {"x": 1},

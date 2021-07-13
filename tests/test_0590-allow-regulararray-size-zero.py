@@ -55,7 +55,7 @@ def test_mergeable():
 
 
 def test_fillna():
-    assert ak.fill_none(empty, 5).tolist() == []
+    assert ak.fill_none(empty, 5, axis=0).tolist() == []
 
 
 def test_pad_none():
