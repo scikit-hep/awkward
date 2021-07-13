@@ -2650,10 +2650,7 @@ def _fill_none_deprecated(array, value, highlevel=True, behavior=None):
         return out
 
 
-AXIS_UNSET = object()
-
-
-def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
+def fill_none(array, value, axis=ak._util.MISSING, highlevel=True, behavior=None):
     """
     Args:
         array: Data in which to replace None with a given value.
@@ -2696,7 +2693,7 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
     """
 
     # Add a condition for the "old" behaviour
-    if axis is AXIS_UNSET:
+    if axis is ak._util.MISSING:
         ak._util.deprecate(
             "ak.fill_none needs an explicit axis because the default will change to `axis=-1` in version 1.4.0",
             "1.4.0",
@@ -2711,47 +2708,56 @@ def fill_none(array, value, axis=AXIS_UNSET, highlevel=True, behavior=None):
     )
     nplike = ak.nplike.of(arraylayout)
 
-    def getfunction(layout, depth, posaxis, apply):
-        # If the user specifies an axis
-        if posaxis is not None:
-            posaxis = layout.axis_wrap_if_negative(posaxis)
-            # Then only apply to that axis
-            if posaxis != depth - 1:
-                return posaxis
-
-        if isinstance(layout, ak._util.optiontypes):
-            if (
-                isinstance(value, Iterable)
-                and not (
-                    isinstance(value, (str, bytes))
-                    or (ak._util.py27 and isinstance(value, ak._util.unicode))
-                )
-                or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
-            ):
-                valuelayout = ak.operations.convert.to_layout(
-                    value, allow_record=True, allow_other=False
-                )
-                if isinstance(valuelayout, ak.layout.Record):
-                    valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
-                elif len(valuelayout) == 0:
-                    offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
-                    valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
-                else:
-                    valuelayout = ak.layout.RegularArray(
-                        valuelayout, len(valuelayout), 1
-                    )
-            else:
-                valuelayout = ak.operations.convert.to_layout(
-                    [value], allow_record=False, allow_other=False
-                )
-            return lambda: apply(layout.fillna(valuelayout), depth, posaxis)
-
+    # Convert value type to appropriate layout
+    if (
+        isinstance(value, Iterable)
+        and not (
+            isinstance(value, (str, bytes))
+            or (ak._util.py27 and isinstance(value, ak._util.unicode))
+        )
+        or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
+    ):
+        valuelayout = ak.operations.convert.to_layout(
+            value, allow_record=True, allow_other=False
+        )
+        if isinstance(valuelayout, ak.layout.Record):
+            valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
+        elif len(valuelayout) == 0:
+            offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
+            valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
         else:
-            return posaxis
+            valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+    else:
+        valuelayout = ak.operations.convert.to_layout(
+            [value], allow_record=False, allow_other=False
+        )
 
-    out = ak._util.recursively_apply(
-        arraylayout, getfunction, pass_user=True, pass_apply=True, user=axis
-    )
+    def maybe_fillna(layout):
+        if isinstance(layout, ak._util.optiontypes):
+            return layout.fillna(valuelayout)
+        else:
+            return layout
+
+    if axis is None:
+
+        def transform(layout, depth, posaxis):
+            return ak._util.transform_child_layouts(
+                transform, maybe_fillna(layout), depth, posaxis
+            )
+
+    else:
+
+        def transform(layout, depth, posaxis):
+            posaxis = layout.axis_wrap_if_negative(posaxis)
+            if posaxis + 1 < depth:
+                return layout
+
+            if posaxis + 1 == depth:
+                layout = maybe_fillna(layout)
+
+            return ak._util.transform_child_layouts(transform, layout, depth, posaxis)
+
+    out = transform(arraylayout, 1, axis)
 
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
