@@ -1199,10 +1199,10 @@ namespace awkward {
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 outindex,
-                                                 raw->content()));
+          IndexedOptionArray64(Identities::none(),
+                               util::Parameters(),
+                               outindex,
+                               raw->content()).simplify_optiontype());
       }
       else {
         throw std::runtime_error(
