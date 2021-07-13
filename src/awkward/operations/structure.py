@@ -2719,7 +2719,14 @@ def fill_none(array, value, axis=ak._util.MISSING, highlevel=True, behavior=None
             )
 
     # Convert value type to appropriate layout
-    if (
+    if isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
+        isinstance(value, np.ndarray)
+        and issubclass(value.dtype.type, (np.bool_, np.number))
+    ):
+        valuelayout = ak.operations.convert.to_layout(
+            nplike.asarray(value), allow_record=False, allow_other=False
+        )
+    elif (
         isinstance(value, Iterable)
         and not (
             isinstance(value, (str, bytes))
