@@ -105,6 +105,11 @@ To raise these warnings as errors, run `warnings.filterwarnings("error", module=
     warnings.warn(warning, category)
 
 
+# Sentinel object for catching pass-through values
+class MISSING(object):
+    pass
+
+
 virtualtypes = (ak.layout.VirtualArray,)
 
 unknowntypes = (ak.layout.EmptyArray,)
