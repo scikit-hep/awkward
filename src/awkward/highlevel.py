@@ -1134,7 +1134,8 @@ class Array(
         """
         return sorted(
             set(
-                dir(super(Array, self))
+                [x for x in dir(type(self)) if not x.startswith("_")]
+                + dir(super(Array, self))
                 + [
                     x
                     for x in self.layout.keys()
@@ -1853,7 +1854,8 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         """
         return sorted(
             set(
-                dir(super(Record, self))
+                [x for x in dir(type(self)) if not x.startswith("_")]
+                + dir(super(Record, self))
                 + [
                     x
                     for x in self.layout.keys()
