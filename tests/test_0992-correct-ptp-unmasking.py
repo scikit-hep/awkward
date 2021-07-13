@@ -8,24 +8,29 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    array = ak.Array([
-        [   0,    1, None      ],
-        [None,    3            ],
-        [                      ],
-        None,
-        [   4,    5, None,    6],
-    ])
+    array = ak.Array(
+        [
+            [0, 1, None],
+            [None, 3],
+            [],
+            None,
+            [4, 5, None, 6],
+        ]
+    )
 
     assert ak.sum(array, axis=-1).tolist() == [
-        1,         # 0 + 1
-        3,         # 3
-        0,         # list is empty
-        None,      # list is missing
-        15,        # 4 + 5 + 6
+        1,  # 0 + 1
+        3,  # 3
+        0,  # list is empty
+        None,  # list is missing
+        15,  # 4 + 5 + 6
     ]
 
     assert ak.sum(array, axis=-2).tolist() == [
-            4,    9,    0,    6,
+        4,
+        9,
+        0,
+        6,
         # 0+4
         #     1+3+5
         #         no data
@@ -33,15 +38,18 @@ def test():
     ]
 
     assert ak.min(array, axis=-1).tolist() == [
-        0,         # min([0, 1])
-        3,         # min([3])
-        None,      # list is empty
-        None,      # list is missing
-        4,         # min([4, 5, 6])
+        0,  # min([0, 1])
+        3,  # min([3])
+        None,  # list is empty
+        None,  # list is missing
+        4,  # min([4, 5, 6])
     ]
 
     assert ak.min(array, axis=-2).tolist() == [
-            0,    1, None,    6,
+        0,
+        1,
+        None,
+        6,
         # 0,4
         #     1,3,5
         #          no data
