@@ -214,9 +214,12 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 | Version number | Target date | Deprecated features to remove in this version |
 |:--------------:|:-----------:|:----------------------------------------------|
 | 1.5.0 | 2021-08-01 | |
-| 1.6.0 | 2021-10-01 | |
-| 1.7.0 | 2021-12-01 | |
-| 1.8.0 | 2022-02-01 | |
+| 1.6.0 | 2021-09-01 | |
+| 1.7.0 | 2021-10-01 | [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) default `axis` will be `-1`. Until then, all uses without an explicit `axis` raise warnings. |
+| 1.8.0 | 2021-11-01 | |
+| 1.9.0 | 2021-12-01 | |
+| 1.10.0 | 2022-01-01 | |
+| 1.11.0 | 2022-02-01 | |
 
 ## Voting for fixes/features
 

@@ -1546,7 +1546,7 @@ def concatenate(
                     if isinstance(x, ak._util.optiontypes) and isinstance(
                         x.content, ak._util.listtypes
                     ):
-                        nextinputs.append(fill_none(x, [], highlevel=False))
+                        nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
@@ -2606,6 +2606,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
+# TODO: remove in 1.7.0!
 def _fill_none_deprecated(array, value, highlevel=True, behavior=None):
     arraylayout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
@@ -2614,7 +2615,7 @@ def _fill_none_deprecated(array, value, highlevel=True, behavior=None):
 
     if isinstance(arraylayout, ak.partition.PartitionedArray):
         out = ak.partition.apply(
-            lambda x: fill_none(x, value, highlevel=False), arraylayout
+            lambda x: _fill_none_deprecated(x, value, highlevel=False), arraylayout
         )
 
     else:
@@ -2695,9 +2696,10 @@ def fill_none(array, value, axis=ak._util.MISSING, highlevel=True, behavior=None
     # Add a condition for the "old" behaviour
     if axis is ak._util.MISSING:
         ak._util.deprecate(
-            "ak.fill_none needs an explicit axis because the default will change to `axis=-1` in version 1.4.0",
-            "1.4.0",
-            date="August 1, 2021",
+            "ak.fill_none needs an explicit `axis` because the default will change to `axis=-1`",
+            "1.7.0",
+            date="2021-10-01",
+            will_be="changed",
         )
         return _fill_none_deprecated(
             array, value, highlevel=highlevel, behavior=behavior

@@ -90,17 +90,24 @@ def exception_suffix(filename):
 warnings.filterwarnings("default", module="awkward.*")
 
 
-def deprecate(message, version, date=None, category=DeprecationWarning):
+def deprecate(
+    message, version, date=None, will_be="an error", category=DeprecationWarning
+):
     if date is None:
         date = ""
     else:
         date = " (target date: " + date + ")"
-    warning = """In version {0}{1}, this will be an error.
+    warning = """In version {0}{1}, this will be {2}.
 
-To raise these warnings as errors, run `warnings.filterwarnings("error", module="awkward.*")`.
+To raise these warnings as errors (and get stack traces to find out where they're called), run
 
-{2}""".format(
-        version, date, message
+    import warnings
+    warnings.filterwarnings("error", module="awkward.*")
+
+after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
+
+Issue: {3}.""".format(
+        version, date, will_be, message
     )
     warnings.warn(warning, category)
 
@@ -1793,7 +1800,9 @@ def union_to_record(unionarray, anonymous):
             contents.append(union_to_record(layout, anonymous))
         elif isinstance(layout, optiontypes):
             contents.append(
-                ak.operations.structure.fill_none(layout, np.nan, highlevel=False)
+                ak.operations.structure.fill_none(
+                    layout, np.nan, axis=0, highlevel=False
+                )
             )
         else:
             contents.append(layout)

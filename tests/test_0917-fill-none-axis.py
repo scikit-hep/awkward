@@ -28,8 +28,10 @@ def test_fill_none_axis_none():
 def test_fill_none_axis_deprecated():
     ak.deprecations_as_errors = False
 
-    filled = ak.fill_none(array, 10)
-    assert ak.to_list(filled) == [[None, 2], 10, [4, None]]
+    with pytest.deprecated_call():
+        filled = ak.fill_none(array, 10)
+        assert ak.to_list(filled) == [[None, 2], 10, [4, None]]
 
-    filled_twice = ak.fill_none(filled, 20)
-    assert ak.to_list(filled_twice) == [[20, 2], 10, [4, 20]]
+        with pytest.deprecated_call():
+            filled_twice = ak.fill_none(filled, 20)
+            assert ak.to_list(filled_twice) == [[20, 2], 10, [4, 20]]

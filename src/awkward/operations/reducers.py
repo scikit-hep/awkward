@@ -667,7 +667,7 @@ def ptp(arr, axis=None, keepdims=False, mask_identity=True):
         arr, axis=axis, keepdims=keepdims
     )
     if not mask_identity:
-        return ak.fill_none(ptp, 0)
+        return ak.fill_none(ptp, 0, axis=-1)
     return ptp
 
 
