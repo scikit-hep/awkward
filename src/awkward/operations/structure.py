@@ -2693,22 +2693,30 @@ def fill_none(array, value, axis=ak._util.MISSING, highlevel=True, behavior=None
     The values could be floating-point numbers or strings.
     """
 
-    # Add a condition for the "old" behaviour
-    if axis is ak._util.MISSING:
-        ak._util.deprecate(
-            "ak.fill_none needs an explicit `axis` because the default will change to `axis=-1`",
-            "1.7.0",
-            date="2021-10-01",
-            will_be="changed",
-        )
-        return _fill_none_deprecated(
-            array, value, highlevel=highlevel, behavior=behavior
-        )
-
     arraylayout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
     nplike = ak.nplike.of(arraylayout)
+
+    # Add a condition for the "old" behaviour
+    if axis is ak._util.MISSING:
+        if isinstance(arraylayout, ak.layout.Record):
+            mindepth, maxdepth = arraylayout.array.minmax_depth
+        else:
+            mindepth, maxdepth = arraylayout.minmax_depth
+
+        if mindepth == maxdepth == 1:
+            axis = 0
+        else:
+            ak._util.deprecate(
+                "ak.fill_none needs an explicit `axis` because the default will change to `axis=-1`",
+                "1.7.0",
+                date="2021-10-01",
+                will_be="changed",
+            )
+            return _fill_none_deprecated(
+                array, value, highlevel=highlevel, behavior=behavior
+            )
 
     # Convert value type to appropriate layout
     if (
