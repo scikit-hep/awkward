@@ -1,0 +1,29 @@
+name: "Documentation"
+description: "Something needs to be explained…"
+labels: ["docs"]
+assignees: []
+
+body:
+  - type: dropdown
+    id: where
+    attributes:
+      label: "Which documentation?"
+      description: |
+        On the [tutorials site](https://awkward-array.org/), in the [Python docstrings](https://awkward-array.readthedocs.io/), or in the [C++ doxygen API](https://awkward-array.readthedocs.io/en/latest/_static/index.html)?
+      options:
+        - Tutorials site
+        - Python docstrings
+        - C++ doxygen API
+        - Other (please explain)?
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: "What needs to be documented?"
+      description: |
+        If you need to include a screenshot, try **clicking on the rectangle below to highlight it** and then dragging the file in or pasting from the clipboard.
+      placeholder: "Tell us what you need to know."
+    validations:
+      required: true

@@ -1,0 +1,39 @@
+name: "Performance bug report"
+description: "It works, but it could/should be faster…"
+labels: ["performance"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The goal of these issues is to fix performance "mistakes," instances where a fix would make the majority of applications several times faster or more, not fine-tuning an application or trading performance in one case for another (unless the former is a very rare or unusual case).
+
+        To prove that something is a performance mistake, it needs to have a reproducible metric and a demonstration that shows how fast it could be in bare metal, such as equivalent C or Numba code. If the comparison is truly equivalent (i.e. a general-purpose function is not compared with a highly specialized one), we'll try to optimize the metric within a factor of 2 or so of the baseline.
+
+        Alternatively, if you've found a mistake in the code that would always be faster if fixed, we can fix it without tests. Some bugs are obvious.
+
+  - type: input
+    id: version
+    attributes:
+      label: "Version of Awkward Array"
+      description: |
+        ```python
+        >>> import awkward as ak
+        >>> ak.__version__
+        ```
+
+        (Your issue might have already been fixed; see [latest version](https://pypi.org/project/awkward/).)
+      placeholder: "XX.YY.ZZ"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description and code to reproduce"
+      description: |
+        If your code example requires data, be sure to include it in a way that is publicly accessible, such as **clicking on the rectangle below to highlight it** and then dragging the file in. (You can [pickle](https://docs.python.org/3/library/pickle.html) Awkward Arrays, but verify that the issue applies to pickled arrays as well as the original arrays.)
+      placeholder: "Tell us what should be faster."
+    validations:
+      required: true

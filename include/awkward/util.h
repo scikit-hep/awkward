@@ -164,6 +164,11 @@ namespace awkward {
 
     using Parameters = std::map<std::string, std::string>;
 
+    /// @brief Returns `true` if `myvalue` is equal to `value` when interpreted
+    /// as JSON.
+    bool
+    json_equals(const std::string &myvalue, const std::string &value);
+
     /// @brief Returns `true` if the value associated with a `key` in
     /// `parameters` is equal to the specified `value`.
     ///

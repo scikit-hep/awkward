@@ -581,6 +581,15 @@ namespace awkward {
     }
 
     bool
+    json_equals(const std::string &myvalue, const std::string &value) {
+      rj::Document mine;
+      rj::Document yours;
+      mine.Parse<rj::kParseNanAndInfFlag>(myvalue.c_str());
+      yours.Parse<rj::kParseNanAndInfFlag>(value.c_str());
+      return mine == yours;
+    }
+
+    bool
     parameter_equals(const Parameters &parameters,
                      const std::string &key,
                      const std::string &value) {
