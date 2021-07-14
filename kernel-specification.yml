@@ -3178,19 +3178,32 @@ kernels:
       def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
           outstarts, outstops, distincts, lendistincts, gaps, outlength
       ):
+          maxcount = lendistincts // outlength
+
           j = 0
           k = 0
           maxdistinct = -1
+          lasti = -1
           for i in range(lendistincts):
               if maxdistinct < distincts[i]:
                   maxdistinct = distincts[i]
-                  for gappy in range(gaps[j]):
+
+                  extra = (i - lasti) // maxcount
+                  lasti = i
+
+                  numgappy = gaps[j]
+                  if numgappy < extra:
+                      numgappy = extra
+
+                  for gappy in range(numgappy):
                       outstarts[k] = i
                       outstops[k] = i
                       k = k + 1
                   j = j + 1
+
               if distincts[i] != -1:
                   outstops[k - 1] = i + 1
+
           while k < outlength:
               outstarts[k] = lendistincts + 1
               outstops[k] = lendistincts + 1

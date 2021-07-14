@@ -11,26 +11,41 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
   int64_t lendistincts,
   const int64_t* gaps,
   int64_t outlength) {
+  int64_t maxcount = lendistincts / outlength;
+
   int64_t j = 0;
   int64_t k = 0;
   int64_t maxdistinct = -1;
+  int64_t lasti = -1;
   for (int64_t i = 0;  i < lendistincts;  i++) {
     if (maxdistinct < distincts[i]) {
       maxdistinct = distincts[i];
-      for (int64_t gappy = 0;  gappy < gaps[j];  gappy++) {
+
+      int64_t extra = (i - lasti)/maxcount;
+      lasti = i;
+
+      int64_t numgappy = gaps[j];
+      if (numgappy < extra) {
+        numgappy = extra;
+      }
+
+      for (int64_t gappy = 0;  gappy < numgappy;  gappy++) {
         outstarts[k] = i;
         outstops[k] = i;
         k++;
       }
       j++;
     }
+
     if (distincts[i] != -1) {
       outstops[k - 1] = i + 1;
     }
   }
+
   for (;  k < outlength;  k++) {
     outstarts[k] = lendistincts + 1;
     outstops[k] = lendistincts + 1;
   }
+
   return success();
 }
