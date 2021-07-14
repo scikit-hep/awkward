@@ -30,5 +30,5 @@ def test_argmax():
 
 
 def test_argmin():
-    i = ak.argmax(array, axis=-1)
-    assert ak.to_list(i.layout.content) == [0, 1, 2]
+    i = ak.argmin(array, axis=-1)
+    assert ak.to_list(i.layout.content) == [0, 0, 0]
