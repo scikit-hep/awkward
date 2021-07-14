@@ -390,11 +390,24 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::toListOffsetArray64(bool start_at_zero) const {
-    if (std::is_same<T, int64_t>::value  &&
-        (!start_at_zero  ||
-         offsets_.getitem_at_nowrap(0) == 0)) {
-      return shallow_copy();
+    if (std::is_same<T, int64_t>::value) {
+      if (!start_at_zero) {
+        return shallow_copy();
+      }
+
+      int64_t offsets0 = offsets_.getitem_at_nowrap(0);
+      if (offsets0 == 0) {
+        return shallow_copy();
+      }
+
+      Index64 offsets = compact_offsets64(start_at_zero);
+      ContentPtr content = content_.get()->getitem_range_nowrap(offsets0, content_.get()->length());
+      return std::make_shared<ListOffsetArrayOf<int64_t>>(identities_,
+                                                          parameters_,
+                                                          offsets,
+                                                          content);
     }
+
     else {
       Index64 offsets = compact_offsets64(start_at_zero);
       return broadcast_tooffsets64(offsets);
@@ -1353,6 +1366,13 @@ namespace awkward {
     int64_t outlength,
     bool mask,
     bool keepdims) const {
+    if (offsets_.getitem_at_nowrap(0) != 0) {
+      ContentPtr next = toListOffsetArray64(true);
+      return next.get()->reduce_next(
+          reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims
+      );
+    }
+
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
