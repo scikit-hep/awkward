@@ -9,12 +9,16 @@ ERROR awkward_NumpyArray_reduce_adjust_starts_64(
   int64_t outlength,
   const int64_t* parents,
   const int64_t* starts) {
-  for (int64_t k = 0;  k < outlength;  k++) {
-    int64_t i = toptr[k];
-    if (i >= 0) {
-      int64_t parent = parents[i];
-      int64_t start = starts[parent];
-      toptr[k] += -start;
+
+  if (outlength > 0) {
+    int64_t origin = starts[parents[toptr[0]]];
+    for (int64_t k = 0;  k < outlength;  k++) {
+      int64_t i = toptr[k];
+      if (i >= 0) {
+        int64_t parent = parents[i];
+        int64_t start = starts[parent];
+        toptr[k] += -(start - origin);
+      }
     }
   }
   return success();
