@@ -20,10 +20,36 @@ def convert_to_array(layout, args, kwargs):
 implemented = {}
 
 
+def _to_rectilinear(arg):
+    if isinstance(
+        arg,
+        (
+            ak.Array,
+            ak.Record,
+            ak.ArrayBuilder,
+            ak.layout.Content,
+            ak.layout.Record,
+            ak.layout.ArrayBuilder,
+            ak.layout.LayoutBuilder,
+        ),
+    ):
+        nplike = ak.nplike.of(arg)
+        return nplike.to_rectilinear(arg)
+    else:
+        return arg
+
+
 def array_function(func, types, args, kwargs):
     function = implemented.get(func)
     if function is None:
-        return NotImplemented
+        args = tuple(_to_rectilinear(x) for x in args)
+        kwargs = dict((k, _to_rectilinear(v)) for k, v in kwargs.items())
+        out = func(*args, **kwargs)
+        nplike = ak.nplike.of(out)
+        if isinstance(out, nplike.ndarray) and len(out.shape) != 0:
+            return ak.Array(out)
+        else:
+            return out
     else:
         return function(*args, **kwargs)
 
