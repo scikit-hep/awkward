@@ -2278,7 +2278,7 @@ def packed(array, highlevel=True, behavior=None):
     Returns an array with the same data as the input, but with packed inner structures:
 
     - #ak.layout.NumpyArray becomes C-contiguous (if it isn't already)
-    - #ak.layout.RegularArray trims unrechable content
+    - #ak.layout.RegularArray trims unreachable content
     - #ak.layout.ListArray becomes #ak.layout.ListOffsetArray, making all list data contiguous
     - #ak.layout.ListOffsetArray starts at `offsets[0] == 0`, trimming unreachable content
     - #ak.layout.RecordArray trims unreachable contents
@@ -3896,7 +3896,7 @@ def virtual(
         cache_key (None or str): If None, a unique string is generated for this
             virtual array for use with the `cache` (unique per Python process);
             otherwise, the explicitly provided key is used (which ought to
-            ensure global uniquness for the scope in which these arrays are
+            ensure global uniqueness for the scope in which these arrays are
             used).
         parameters (None or dict): Parameters for the new
             #ak.layout.VirtualArray node that is created by this operation.
