@@ -235,7 +235,7 @@ We adhere to an 80-character line width, which is a [standard in the industry](h
 
 Unit tests do not need to adhere to the 80-character limit.
 
-we use several linters and reformatters; all are supported through a single interface with the [pre-commit](https://pre-commit.com) tool. Automatic reformatting will be applied to PRs automatically using [pre-commit.ci](https://pre-commit.ci), though running pre-commit locally is still recommended.
+We use several linters and reformatters; all are supported through a single interface with the [pre-commit](https://pre-commit.com) tool. Automatic reformatting will be applied to PRs automatically using [pre-commit.ci](https://pre-commit.ci), though running pre-commit locally is still recommended.
 
 ### Fully qualified names
 
