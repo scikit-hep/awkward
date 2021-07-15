@@ -235,7 +235,9 @@ We adhere to an 80-character line width, which is a [standard in the industry](h
 
 Unit tests do not need to adhere to the 80-character limit.
 
-we use several linters and reformatters; all are supported through a single interface with the [pre-commit](https://pre-commit.com) tool. Automatic reformatting will be applied to PRs automatically using [pre-commit.ci](https://pre-commit.ci), though running pre-commit locally is still recommended.
+We don't, however, use automated formatters like clang-format or black. Automated formatting can rearrange code into something that is, paradoxically, harder to read, undermining the human element in programming.
+
+We don't currently use linters like clang-tidy or flake8, but I'm open to it.
 
 ### Fully qualified names
 
@@ -273,7 +275,7 @@ We only supprt Python 2.7 as much as is practical. For example, we ignore compil
 
 Python 2.7 and 3.5 have unstable dict order, which excludes them both from some tests.
 
-Allowing Python 2.7 after it has been [fully and finally discontinued](https://mail.python.org/archives/list/python-dev@python.org/message/OFCIETIXLX34X7FVK5B5WPZH22HXV342/) may sound anachronistic, but some of our users depend on legacy codebases forcing them in Python 2, so we support that for now.
+Allowing Python 2.7 after it has been [fully and finally discontinued](https://mail.python.org/archives/list/python-dev@python.org/message/OFCIETIXLX34X7FVK5B5WPZH22HXV342/) may sound anachronistic, but some of our users depend on legacy codebases forcing them in Python 2, and Python 2 limits our adoption of new language features, keeping the code "simple, rather than smart."
 
 ### Third party dependencies
 
