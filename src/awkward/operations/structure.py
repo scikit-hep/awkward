@@ -2174,7 +2174,10 @@ def _pack_layout(layout):
         new_index[~is_none] = nplike.arange(len(new_index) - nplike.sum(is_none))
 
         return ak.layout.IndexedOptionArray64(
-            ak.layout.Index64(new_index), layout.project()
+            ak.layout.Index64(new_index),
+            layout.project(),
+            layout.identities,
+            layout.parameters,
         )
 
     # Project indexed arrays
@@ -2212,7 +2215,9 @@ def _pack_layout(layout):
 
     # UnmaskedArray just wraps another array
     elif isinstance(layout, ak.layout.UnmaskedArray):
-        return ak.layout.UnmaskedArray(layout.content)
+        return ak.layout.UnmaskedArray(
+            layout.content, layout.identities, layout.parameters
+        )
 
     # UnionArrays can be simplified
     # and their contents too
@@ -2262,13 +2267,20 @@ def _pack_layout(layout):
 
         content = layout.content
 
-        # Truncate content if it is larger than a perfect
-        # multiple of the RegularArray size
-        n, r = divmod(len(content), layout.size)
-        if r != 0:
-            content = content[: n * layout.size]
+        # Truncate content to perfect multiple of the RegularArray size
+        if layout.size > 0:
+            r = len(content) % layout.size
+            content = content[: len(content) - r]
+        else:
+            content = content[:0]
 
-        return ak.layout.RegularArray(content, layout.size)
+        return ak.layout.RegularArray(
+            content,
+            layout.size,
+            len(layout),
+            layout.identities,
+            layout.parameters,
+        )
 
     # BitMaskedArrays can change length
     elif isinstance(layout, ak.layout.BitMaskedArray):
