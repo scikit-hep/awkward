@@ -12,7 +12,7 @@ except ImportError:
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
 
 
 @ak._connect._numpy.implements("copy")
