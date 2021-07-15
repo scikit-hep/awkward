@@ -8,7 +8,7 @@ import awkward as ak  # noqa: F401
 
 
 @pytest.mark.skipif(
-    not (ak._util.py27 or ak._util.py35),
+    ak._util.py27 or ak._util.py35,
     reason="SOMETIMES doesn't work under Python 2.7 and 3.5",
 )
 def test():
