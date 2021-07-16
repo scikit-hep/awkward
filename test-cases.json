@@ -544,6 +544,330 @@
             "except":true,
             "unsigned":false
         }
-    ]
+    ],
+    "awkward_BitMaskedArray_to_ByteMaskedArray":[
+        {
+            "tobytemask":[123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123,123],
+            "frombitmask":[1, 1, 1, 1, 1],
+            "bitmasklength":3,
+            "validwhen":true,
+            "lsb_order":false,
+            "output":{
+                "tobytemask":[true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tobytemask":[123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123,123],
+            "frombitmask":[1, 1, 1, 1, 1],
+            "bitmasklength":3,
+            "validwhen":false,
+            "lsb_order":true,
+            "output":{
+                "tobytemask":[true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tobytemask":[123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123,123],
+            "frombitmask":[1, 1, 1, 1, 1],
+            "bitmasklength":3,
+            "validwhen":true,
+            "lsb_order":true,
+            "output":{
+                "tobytemask":[false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tobytemask":[123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123,123],
+            "frombitmask":[1, 1, 1, 1, 1],
+            "bitmasklength":3,
+            "validwhen":false,
+            "lsb_order":false,
+            "output":{
+                "tobytemask":[false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tobytemask":[123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123,123],
+            "frombitmask":[1, 1, 1, 1, 1],
+            "bitmasklength":3,
+            "validwhen":true,
+            "lsb_order":false,
+            "output":{
+                "tobytemask":[true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tobytemask":[123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123,123],
+            "frombitmask":[0, 0, 0, 0, 0],
+            "bitmasklength":3,
+            "validwhen":true,
+            "lsb_order":false,
+            "output":{
+                "tobytemask":[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]
+            },
+            "except":false,
+            "unsigned":false
+        }
+    ],
+    "awkward_BitMaskedArray_to_IndexedOptionArray":[
+        {
 
-    }
+        }
+    ],
+    "awkward_ByteMaskedArray_getitem_carry":[
+        {
+            "tomask":[123,123,123,123,123,123],
+            "frommask":[0, 0, 0, 0, 0],
+            "lenmask":5,
+            "fromcarry":[1, 5, 0, 1, 5, 1, 5, 0, 1, 0, 1, 0, 1, 1],
+            "lencarry":6,
+            "output":"ValueError",
+            "except":true,
+            "unsigned":false
+        },
+        {
+            "tomask":[123,123,123,123,123,123],
+            "frommask":[0, 0, 0, 0, 0],
+            "lenmask":5,
+            "fromcarry":[1, 3, 0, 1, 7, 1, 5, 8, 1, 0, 1, 0, 1, 1],
+            "lencarry":6,
+            "output":"ValueError",
+            "except":true,
+            "unsigned":false
+        },
+        {
+            "tomask":[123,123,123,123,123,123],
+            "frommask":[2, 0, 4, 0, 0],
+            "lenmask":5,
+            "fromcarry":[0, 3, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1],
+            "lencarry":6,
+            "output":{
+                "tomask":[2, 0, 2, 0, 2, 0]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tomask":[123,123,123,123,123,123],
+            "frommask":[2, 0, 4, 0, 0],
+            "lenmask":5,
+            "fromcarry":[0, 3, 4, 1, 0, 1, 4, 0, 1, 4, 1, 0, 1, 1],
+            "lencarry":6,
+            "output":{
+                "tomask":[2, 0, 0, 0, 2, 0]
+            },
+            "except":false,
+            "unsigned":false
+        }
+    ],
+    "awkward_ByteMaskedArray_getitem_nextcarry":[
+        {
+            "tocarry":[123, 123, 123],
+            "mask":[1, 0, 0, 1, 1],
+            "length":3,
+            "validwhen":true,
+            "output":{
+                "tocarry":[0, 123, 123]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tocarry":[123, 123, 123],
+            "mask":[1, 1, 2, 1, 1],
+            "length":3,
+            "validwhen":true,
+            "output":{
+                "tocarry":[0, 1, 2]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tocarry":[123, 123, 123],
+            "mask":[1, 1, 2, 1, 1],
+            "length":3,
+            "validwhen":false,
+            "output":{
+                "tocarry":[123, 123, 123]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tocarry":[123, 123, 123],
+            "mask":[0, 0, 2, 1, 1],
+            "length":3,
+            "validwhen":false,
+            "output":{
+                "tocarry":[0, 1, 123]
+            },
+            "except":false,
+            "unsigned":false
+        }
+    ],
+    "awkward_ByteMaskedArray_getitem_nextcarry_outindex":[
+        {
+            "tocarry":[123, 123, 123],
+            "outindex":[123, 123, 123],
+            "mask":[1, 1, 1, 1, 1],
+            "length":3,
+            "validwhen":true,
+            "output":{
+                "tocarry":[0, 1, 2],
+                "outindex":[0.0, 1.0, 2.0]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tocarry":[123, 123, 123],
+            "outindex":[123, 123, 123],
+            "mask":[0, 0, 0, 1, 1],
+            "length":3,
+            "validwhen":true,
+            "output":{
+                "outindex":[-1, -1, -1]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tocarry":[123, 123, 123],
+            "outindex":[123, 123, 123],
+            "mask":[0, 0, 0, 1, 1],
+            "length":3,
+            "validwhen":false,
+            "output":{
+                "tocarry":[0, 1, 2],
+                "outindex":[0.0, 1.0, 2.0]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tocarry":[123, 123, 123],
+            "outindex":[123, 123, 123],
+            "mask":[2, 1, 5, 1, 1],
+            "length":3,
+            "validwhen":false,
+            "output":{
+                "outindex":[-1, -1, -1]
+            },
+            "except":false,
+            "unsigned":false
+        }
+    ],
+    "awkward_ByteMaskedArray_mask":[
+        {
+            "tomask":[123, 123, 123],
+            "frommask":[0, 0, 0],
+            "length":3,
+            "validwhen":true,
+            "output":{
+                "tomask":[true, true, true]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tomask":[123, 123, 123],
+            "frommask":[2, 1, 3],
+            "length":3,
+            "validwhen":true,
+            "output":{
+                "tomask":[false, false, false]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tomask":[123, 123, 123],
+            "frommask":[0, 3, 0],
+            "length":3,
+            "validwhen":false,
+            "output":{
+                "tomask":[false, true, false]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "tomask":[123, 123, 123],
+            "frommask":[2, 3, 0],
+            "length":3,
+            "validwhen":false,
+            "output":{
+                "tomask":[true, true, false]
+            },
+            "except":false,
+            "unsigned":false
+        }
+    ],
+    "awkward_ByteMaskedArray_numnull":[
+        {
+            "numnull":[123],
+            "mask":[0, 0, 0],
+            "length":3,
+            "validwhen":true,
+            "output":{
+                "numnull":[3]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "numnull":[123],
+            "mask":[2, 1, 3],
+            "length":3,
+            "validwhen":true,
+            "output":{
+                "numnull":[0]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "numnull":[123],
+            "mask":[2, 1, 3],
+            "length":3,
+            "validwhen":false,
+            "output":{
+                "numnull":[3]
+            },
+            "except":false,
+            "unsigned":false
+        },
+        {
+            "numnull":[123],
+            "mask":[0, 0, 0],
+            "length":3,
+            "validwhen":false,
+            "output":{
+                "numnull":[0]
+            },
+            "except":false,
+            "unsigned":false
+        }
+    ],
+    "awkward_ByteMaskedArray_overlay_mask":[
+        {
+
+        }
+    ],
+    "awkward_ByteMaskedArray_toIndexedOptionArray":[
+        {
+
+        }
+    ]
+}
