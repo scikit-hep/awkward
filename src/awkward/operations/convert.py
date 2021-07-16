@@ -4710,7 +4710,9 @@ def _form_to_layout(
         else:
             dtype, inner_shape = dtype_inner_shape.subdtype
 
-        if length is not None:
+        # If the buffer is required to have a length, check that it's not too short.
+        # If the array has no itemsize, then the buffer can never be "too short"!
+        if (length is not None) and (dtype_inner_shape.itemsize > 0):
             actual = len(raw_array) // dtype_inner_shape.itemsize
             if length > actual:
                 raise ValueError(
@@ -4719,7 +4721,21 @@ def _form_to_layout(
                     + ak._util.exception_suffix(__file__)
                 )
 
-        array = raw_array.view(dtype).reshape((-1,) + inner_shape)
+        # NumPy can only infer the length of the array from the buffer
+        # if the inner shape has a nonzero item-size.
+        if dtype_inner_shape.itemsize:
+            leading_shape = (-1,)
+        elif length is not None:
+            leading_shape = (length,)
+        # Given that `length=None` only occurs when reading legacy data
+        # This already failed, so we can fail if `length` is not given
+        else:
+            raise ValueError(
+                "buffer is empty, and no length was given. It is not possible to "
+                "determine the correct size of the array from the buffer alone."
+            )
+
+        array = raw_array.view(dtype).reshape(leading_shape + inner_shape)
 
         return ak.layout.NumpyArray(array, identities, parameters)
 

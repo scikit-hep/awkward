@@ -358,6 +358,9 @@ class NumPyKernel(object):
 
 
 class NumPy(NumPyLike):
+    def to_rectilinear(self, array, *args, **kwargs):
+        return ak.operations.convert.to_numpy(array, *args, **kwargs)
+
     def __getitem__(self, args):
         return NumPyKernel(ak._cpu_kernels.kernel[args])
 
@@ -372,8 +375,15 @@ class NumPy(NumPyLike):
     def char(self):
         return self._module.char
 
+    @property
+    def ndarray(self):
+        return self._module.ndarray
+
 
 class CuPy(NumPyLike):
+    def to_rectilinear(self, array, *args, **kwargs):
+        return ak.operations.convert.to_cupy(array, *args, **kwargs)
+
     def __getitem__(self, args):
         raise NotImplementedError("no CUDA in v2 yet")
 
