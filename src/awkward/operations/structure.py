@@ -477,6 +477,7 @@ def zip(
     with_name=None,
     highlevel=True,
     behavior=None,
+    right_broadcast=False,
 ):
     """
     Args:
@@ -496,6 +497,8 @@ def zip(
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        right_broadcast (bool): If True, follow rules for implicit
+            right-broadcasting, as described in #ak.broadcast_arrays.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -639,9 +642,8 @@ def zip(
         layouts,
         getfunction,
         behavior,
-        right_broadcast=False,
+        right_broadcast=right_broadcast,
         pass_depth=True,
-        regular_to_jagged=True,
     )
     assert isinstance(out, tuple) and len(out) == 1
     out = out[0]
