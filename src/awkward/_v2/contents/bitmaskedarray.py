@@ -166,7 +166,7 @@ class BitMaskedArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
         else:

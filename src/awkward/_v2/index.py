@@ -123,20 +123,6 @@ class Index(object):
     def to64(self):
         return Index(self._data.astype(np.int64))
 
-    def isarange(self):
-        result = self._nplike.empty(1, dtype=np.bool_)
-        err = self._nplike[
-            "awkward_Index_iscontiguous",  # badly named
-            np.bool_,
-            self._data.dtype.type,
-        ](
-            result,
-            self._data,
-            len(self._data),
-        )
-        assert err.str is None
-        return result[0]
-
     def __copy__(self):
         return Index(self._data.copy())
 

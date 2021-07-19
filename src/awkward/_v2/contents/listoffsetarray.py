@@ -85,7 +85,7 @@ class ListOffsetArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         return self._content[self._offsets[where] : self._offsets[where + 1]]
 
     def _getitem_range(self, where):
@@ -102,10 +102,6 @@ class ListOffsetArray(Content):
         return ListOffsetArray(self._offsets, self._content[where])
 
     def _getitem_array(self, where, allow_lazy):
-        rangeslice = self._getitem_asarange(where)
-        if rangeslice is not None:
-            return rangeslice
-
         return ak._v2.contents.listarray.ListArray(
             self.starts[where],
             self.stops[where],

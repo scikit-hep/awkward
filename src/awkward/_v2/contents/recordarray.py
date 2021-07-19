@@ -186,7 +186,7 @@ class RecordArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         return Record(self, where)
 
     def _getitem_range(self, where):
@@ -217,32 +217,25 @@ class RecordArray(Content):
                 [self._keys[i] for i in indexes],
             )
 
-    def _getitem_array(self, where, allow_lazy):
+    def _getitem_array(self, where, allow_lazy, defensively_copy=True):
         if allow_lazy and len(where.shape) == 1:
             nplike = ak.nplike.of(where)
 
-            copied = False
-            if not issubclass(where.dtype.type, np.integer):
-                (where,) = nplike.nonzero(where)
-                copied = True
+            if defensively_copy:
+                where = where.copy()
 
             negative = where < 0
             if nplike.any(negative):
-                if not copied:
+                if not defensively_copy:
                     where = where.copy()
-                    copied = True
                 where[negative] += self._length
 
             if nplike.any(where >= self._length):
-                raise IndexError("array index out of bounds")
+                raise ak._v2.contents.content.NestedIndexError(self, where)
 
             return ak._v2.contents.indexedarray.IndexedArray(Index(where), self)
 
         else:
-            rangeslice = self._getitem_asarange(where)
-            if rangeslice is not None:
-                return rangeslice
-
             contents = [
                 self.content(i)._getitem_array(where, allow_lazy)
                 for i in range(self.numcontents)

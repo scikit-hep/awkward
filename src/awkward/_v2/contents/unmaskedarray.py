@@ -60,8 +60,4 @@ class UnmaskedArray(Content):
         return UnmaskedArray(self._content[where])
 
     def _getitem_array(self, where, allow_lazy):
-        rangeslice = self._getitem_asarange(where)
-        if rangeslice is not None:
-            return rangeslice
-
         return UnmaskedArray(self.content._getitem_array(where, allow_lazy))

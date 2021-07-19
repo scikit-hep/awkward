@@ -77,7 +77,7 @@ class RegularArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         return self._content[(where) * self._size : (where + 1) * self._size]
 
     def _getitem_range(self, where):
@@ -97,14 +97,6 @@ class RegularArray(Content):
         nplike = ak.nplike.of(where)
 
         copied = False
-        if not issubclass(where.dtype.type, np.integer):
-            (where,) = nplike.nonzero(where)
-            copied = True
-
-        rangeslice = self._getitem_asarange(where)
-        if rangeslice is not None:
-            return rangeslice
-
         if not issubclass(where.dtype.type, np.int64):
             where = where.astype(np.int64)
             copied = True
@@ -117,7 +109,7 @@ class RegularArray(Content):
             where[negative] += self._length
 
         if nplike.any(where >= self._length):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
         self.handle_error(

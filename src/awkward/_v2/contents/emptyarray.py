@@ -30,7 +30,7 @@ class EmptyArray(Content):
         return 0
 
     def _getitem_at(self, where):
-        raise IndexError("array of type Empty has no index " + repr(where))
+        raise ak._v2.contents.content.NestedIndexError(self, where)
 
     def _getitem_range(self, where):
         return self
@@ -45,8 +45,4 @@ class EmptyArray(Content):
         if len(where) == 0:
             return self
         else:
-            raise IndexError(
-                "cannot extract {0} elemnts from {1}".format(
-                    repr(len(where)), repr(where)
-                )
-            )
+            raise ak._v2.contents.content.NestedIndexError(self, where)

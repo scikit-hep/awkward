@@ -73,7 +73,7 @@ class IndexedOptionArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         if self._index[where] < 0:
             return None
         else:
@@ -91,8 +91,4 @@ class IndexedOptionArray(Content):
         return IndexedOptionArray(self._index, self._content[where])
 
     def _getitem_array(self, where, allow_lazy):
-        rangeslice = self._getitem_asarange(where)
-        if rangeslice is not None:
-            return rangeslice
-
         return IndexedOptionArray(self._index[where], self._content)

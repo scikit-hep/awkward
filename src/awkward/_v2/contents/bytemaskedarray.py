@@ -87,7 +87,7 @@ class ByteMaskedArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         if self._mask[where] == self._valid_when:
             return self._content[where]
         else:
@@ -112,10 +112,6 @@ class ByteMaskedArray(Content):
         )
 
     def _getitem_array(self, where, allow_lazy):
-        rangeslice = self._getitem_asarange(where)
-        if rangeslice is not None:
-            return rangeslice
-
         return ByteMaskedArray(
             self._mask[where],
             self._content._getitem_array(where, allow_lazy),
