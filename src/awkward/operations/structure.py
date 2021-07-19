@@ -1337,9 +1337,9 @@ def broadcast_arrays(*arrays, **kwargs):
     Awkward Array's broadcasting manages to have it both ways by applying the
     following rules:
 
-       * If a dimension is regular (i.e. #ak.types.RegularType), like NumPy,
+       * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
          implicit broadcasting aligns to the right, like NumPy.
-       * If a dimension is variable (i.e. #ak.types.ListType), which can
+       * If any dimension is variable (i.e. #ak.types.ListType), which can
          never be true of NumPy, implicit broadcasting aligns to the left.
        * Explicit broadcasting with a length-1 regular dimension always
          broadcasts, like NumPy.
