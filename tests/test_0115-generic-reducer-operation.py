@@ -535,7 +535,11 @@ def test_gaps():
     depth2 = ak.layout.ListOffsetArray64(
         offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
     )
-    assert ak.to_list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]]
+    assert ak.to_list(depth2) == [
+        [[2, 3, 5], [], [7, 11], [13]],
+        [],
+        [[17, 19], [23]],
+    ]
 
     assert ak.to_list(depth2.prod(-1)) == [
         [2 * 3 * 5, 1, 7 * 11, 13],
@@ -544,6 +548,8 @@ def test_gaps():
     ]
 
     assert ak.to_list(depth2.prod(-2)) == [[2 * 7 * 13, 3 * 11, 5], [], [17 * 23, 19]]
+
+    assert ak.to_list(depth2.prod(-3)) == [[2 * 17, 3 * 19, 5], [23], [7, 11], [13]]
 
 
 def test_complicated():

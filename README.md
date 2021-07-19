@@ -209,14 +209,17 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 | [1.1.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.1.0) | 2021-02-09 | Removed [ak.to_arrayset](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrayset.html)/[ak.from_arrayset](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrayset.html) in favor of [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html)/[ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) ([#592](https://github.com/scikit-hep/awkward-1.0/pull/592)). |
 | [1.2.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.2.0) | 2021-04-01 | _(none)_ |
 | [1.3.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.3.0) | 2021-06-01 | _(none)_ |
+| [1.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.4.0) | 2021-07-02 | _(none)_ |
 
 | Version number | Target date | Deprecated features to remove in this version |
 |:--------------:|:-----------:|:----------------------------------------------|
-| 1.4.0 | 2021-06-28 _(for PyHEP)_ | |
 | 1.5.0 | 2021-08-01 | |
-| 1.6.0 | 2021-10-01 | |
-| 1.7.0 | 2021-12-01 | |
-| 1.8.0 | 2022-02-01 | |
+| 1.6.0 | 2021-09-01 | |
+| 1.7.0 | 2021-10-01 | [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) default `axis` will be `-1`. Until then, all uses without an explicit `axis` raise warnings. |
+| 1.8.0 | 2021-11-01 | |
+| 1.9.0 | 2021-12-01 | |
+| 1.10.0 | 2022-01-01 | |
+| 1.11.0 | 2022-02-01 | |
 
 ## Voting for fixes/features
 

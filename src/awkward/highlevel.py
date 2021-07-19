@@ -519,6 +519,9 @@ class Array(
         """
         return ak.operations.describe.fields(self)
 
+    def _ipython_key_completions_(self):
+        return ak.operations.describe.fields(self)
+
     @property
     def type(self):
         """
@@ -1134,7 +1137,8 @@ class Array(
         """
         return sorted(
             set(
-                dir(super(Array, self))
+                [x for x in dir(type(self)) if not x.startswith("_")]
+                + dir(super(Array, self))
                 + [
                     x
                     for x in self.layout.keys()
@@ -1724,6 +1728,9 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         """
         return ak.operations.describe.fields(self)
 
+    def _ipython_key_completions_(self):
+        return ak.operations.describe.fields(self)
+
     @property
     def type(self):
         """
@@ -1853,7 +1860,8 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         """
         return sorted(
             set(
-                dir(super(Record, self))
+                [x for x in dir(type(self)) if not x.startswith("_")]
+                + dir(super(Record, self))
                 + [
                     x
                     for x in self.layout.keys()

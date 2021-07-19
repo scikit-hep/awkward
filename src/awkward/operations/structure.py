@@ -179,6 +179,7 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
         [layoutarray, layoutmask],
         getfunction,
         behavior,
+        numpy_to_regular=True,
         right_broadcast=False,
         pass_depth=False,
     )
@@ -476,6 +477,7 @@ def zip(
     with_name=None,
     highlevel=True,
     behavior=None,
+    right_broadcast=False,
 ):
     """
     Args:
@@ -495,6 +497,8 @@ def zip(
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        right_broadcast (bool): If True, follow rules for implicit
+            right-broadcasting, as described in #ak.broadcast_arrays.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -638,9 +642,8 @@ def zip(
         layouts,
         getfunction,
         behavior,
-        right_broadcast=False,
+        right_broadcast=right_broadcast,
         pass_depth=True,
-        regular_to_jagged=True,
     )
     assert isinstance(out, tuple) and len(out) == 1
     out = out[0]
@@ -1334,9 +1337,9 @@ def broadcast_arrays(*arrays, **kwargs):
     Awkward Array's broadcasting manages to have it both ways by applying the
     following rules:
 
-       * If a dimension is regular (i.e. #ak.types.RegularType), like NumPy,
+       * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
          implicit broadcasting aligns to the right, like NumPy.
-       * If a dimension is variable (i.e. #ak.types.ListType), which can
+       * If any dimension is variable (i.e. #ak.types.ListType), which can
          never be true of NumPy, implicit broadcasting aligns to the left.
        * Explicit broadcasting with a length-1 regular dimension always
          broadcasts, like NumPy.
@@ -1545,7 +1548,7 @@ def concatenate(
                     if isinstance(x, ak._util.optiontypes) and isinstance(
                         x.content, ak._util.listtypes
                     ):
-                        nextinputs.append(fill_none(x, [], highlevel=False))
+                        nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
@@ -1727,7 +1730,11 @@ def where(condition, *args, **kwargs):
 
         behavior = ak._util.behaviorof(akcondition, left, right)
         out = ak._util.broadcast_and_apply(
-            [akcondition, left, right], getfunction, behavior, pass_depth=False
+            [akcondition, left, right],
+            getfunction,
+            behavior,
+            pass_depth=False,
+            numpy_to_regular=True,
         )
 
         return ak._util.maybe_wrap(out[0], behavior, highlevel)
@@ -1958,10 +1965,6 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
     layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
-    # Pack the layout above the axis that will be unflattened. This ensures that
-    # the `counts` array, which is computed through these layouts, aligns with
-    # the layout to be unflattened (#910)
-    layout = _packed(layout, axis=axis - 1, highlevel=False)
 
     if isinstance(counts, (numbers.Integral, np.integer)):
         current_offsets = None
@@ -2039,7 +2042,12 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
     else:
 
-        def getfunction(layout, depth, posaxis):
+        def transform(layout, depth, posaxis):
+            # Pack the current layout. This ensures that the `counts` array,
+            # which is computed with these layouts applied, aligns with the
+            # internal layout to be unflattened (#910)
+            layout = _pack_layout(layout)
+
             posaxis = layout.axis_wrap_if_negative(posaxis)
             if posaxis == depth and isinstance(layout, ak._util.listtypes):
                 # We are one *above* the level where we want to apply this.
@@ -2065,34 +2073,22 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                         "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
                     )
 
-                return lambda: ak.layout.ListOffsetArray64(
+                return ak.layout.ListOffsetArray64(
                     ak.layout.Index64(positions), content
                 )
 
             else:
-                return posaxis
+                return ak._util.transform_child_layouts(
+                    transform, layout, depth, posaxis
+                )
 
         if isinstance(layout, ak.partition.PartitionedArray):
             outparts = []
             for part in layout.partitions:
-                outparts.append(
-                    ak._util.recursively_apply(
-                        part,
-                        getfunction,
-                        pass_depth=True,
-                        pass_user=True,
-                        user=axis,
-                    )
-                )
+                outparts.append(transform(part, depth=1, posaxis=axis))
             out = ak.partition.IrregularlyPartitionedArray(outparts)
         else:
-            out = ak._util.recursively_apply(
-                layout,
-                getfunction,
-                pass_depth=True,
-                pass_user=True,
-                user=axis,
-            )
+            out = transform(layout, depth=1, posaxis=axis)
 
     if current_offsets is not None and not (
         len(current_offsets[0]) == 1 and current_offsets[0][0] == 0
@@ -2105,201 +2101,235 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
-def _packed(array, axis=None, highlevel=True, behavior=None):
+@ak._connect._numpy.implements("ravel")
+def ravel(array, highlevel=True, behavior=None):
+    """
+    Args:
+        array: Data containing nested lists to flatten
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Returns an array with all level of nesting removed by erasing the
+    boundaries between consecutive lists.
+
+    This is the equivalent of NumPy's `np.ravel` for Awkward Arrays.
+
+    Consider the following doubly nested `array`.
+
+        ak.Array([[
+                   [1.1, 2.2, 3.3],
+                   [],
+                   [4.4, 5.5],
+                   [6.6]],
+                  [],
+                  [
+                   [7.7],
+                   [8.8, 9.9]
+                  ]])
+
+    Ravelling the array produces a flat array
+
+        >>> print(ak.ravel(array))
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+
+    Missing values are eliminated by flattening: there is no distinction
+    between an empty list and a value of None at the level of flattening.
+    """
     layout = ak.operations.convert.to_layout(
-        array, allow_record=True, allow_other=False
+        array, allow_record=False, allow_other=False
     )
     nplike = ak.nplike.of(layout)
 
-    def truncate(layout, n):
-        return layout[:n]
+    out = ak._util.completely_flatten(layout)
+    assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
-    def apply(layout, depth, posaxis):
-        if posaxis is not None:
-            # If a particular axis was given
-            posaxis = layout.axis_wrap_if_negative(posaxis)
-            # Do not proceed past that axis
-            if posaxis < depth - 1:
-                return layout
-
-        if isinstance(layout, ak.layout.NumpyArray):
-            return layout.contiguous()
-
-        # EmptyArray is a no-op
-        elif isinstance(layout, ak.layout.EmptyArray):
-            return layout
-
-        # Project indexed arrays
-        elif isinstance(layout, ak._util.indexedoptiontypes):
-            if isinstance(layout.content, ak._util.optiontypes):
-                return apply(layout.simplify(), depth, posaxis)
-
-            index = nplike.asarray(layout.index)
-            new_index = nplike.zeros_like(index)
-
-            is_none = index < 0
-            new_index[is_none] = -1
-            new_index[~is_none] = nplike.arange(len(new_index) - nplike.sum(is_none))
-
-            return ak.layout.IndexedOptionArray64(
-                ak.layout.Index64(new_index), apply(layout.project(), depth, posaxis)
-            )
-
-        # Project indexed arrays
-        elif isinstance(layout, ak._util.indexedtypes):
-            return apply(layout.project(), depth, posaxis)
-
-        # ListArray performs both ordering and resizing
-        elif isinstance(
-            layout,
-            (
-                ak.layout.ListArray32,
-                ak.layout.ListArrayU32,
-                ak.layout.ListArray64,
-            ),
-        ):
-            return apply(layout.toListOffsetArray64(True), depth, posaxis)
-
-        # ListOffsetArray performs resizing
-        elif isinstance(
-            layout,
-            (
-                ak.layout.ListOffsetArray32,
-                ak.layout.ListOffsetArray64,
-                ak.layout.ListOffsetArrayU32,
-            ),
-        ):
-            new_layout = layout.toListOffsetArray64(True)
-            new_length = new_layout.offsets[-1]
-            return ak.layout.ListOffsetArray64(
-                new_layout.offsets,
-                apply(truncate(new_layout.content, new_length), depth + 1, posaxis),
-                new_layout.identities,
-                new_layout.parameters,
-            )
-
-        # UnmaskedArray just wraps another array
-        elif isinstance(layout, ak.layout.UnmaskedArray):
-            return ak.layout.UnmaskedArray(apply(layout.content, depth, posaxis))
-
-        # UnionArrays can be simplified
-        # and their contents too
-        elif isinstance(layout, ak._util.uniontypes):
-            layout = layout.simplify()
-
-            # If we managed to lose the drop type entirely
-            if not isinstance(layout, ak._util.uniontypes):
-                return apply(layout, depth, posaxis)
-
-            # Pack simplified layout
-            tags = nplike.asarray(layout.tags)
-            index = nplike.asarray(layout.index)
-
-            new_contents = [None] * len(layout.contents)
-            new_index = nplike.zeros_like(index)
-
-            # Compact indices
-            for i in range(len(layout.contents)):
-                is_i = tags == i
-
-                new_contents[i] = apply(layout.project(i), depth, posaxis)
-                new_index[is_i] = nplike.arange(nplike.sum(is_i))
-
-            return ak.layout.UnionArray8_64(
-                ak.layout.Index8(tags),
-                ak.layout.Index64(new_index),
-                new_contents,
-                layout.identities,
-                layout.parameters,
-            )
-
-        # RecordArray contents can be truncated
-        elif isinstance(layout, ak.layout.RecordArray):
-            return ak.layout.RecordArray(
-                [
-                    apply(truncate(c, len(layout)), depth, posaxis)
-                    for c in layout.contents
-                ],
-                layout.recordlookup,
-                len(layout),
-                layout.identities,
-                layout.parameters,
-            )
-
-        # RegularArrays can change length
-        elif isinstance(layout, ak.layout.RegularArray):
-            if not len(layout):
-                return layout
-
-            content = layout.content
-
-            # Truncate content if it is larger than a perfect
-            # multiple of the RegularArray size
-            n, r = divmod(len(content), layout.size)
-            if r != 0:
-                content = truncate(content, n * layout.size)
-
-            return ak.layout.RegularArray(
-                apply(content, depth + 1, posaxis), layout.size
-            )
-
-        # BitMaskedArrays can change length
-        elif isinstance(layout, ak.layout.BitMaskedArray):
-            layout = layout.simplify()
-
-            if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
-                return apply(layout.toIndexedOptionArray64(), depth, posaxis)
-
-            return ak.layout.BitMaskedArray(
-                layout.mask,
-                apply(truncate(layout.content, len(layout)), depth, posaxis),
-                layout.valid_when,
-                len(layout),
-                layout.lsb_order,
-                layout.identities,
-                layout.parameters,
-            )
-
-        # ByteMaskedArrays can change length
-        elif isinstance(layout, ak.layout.ByteMaskedArray):
-            layout = layout.simplify()
-
-            if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
-                return apply(layout.toIndexedOptionArray64(), depth, posaxis)
-
-            return ak.layout.ByteMaskedArray(
-                layout.mask,
-                apply(truncate(layout.content, len(layout)), depth, posaxis),
-                layout.valid_when,
-                layout.identities,
-                layout.parameters,
-            )
-
-        elif isinstance(layout, ak.layout.VirtualArray):
-            return apply(layout.array, depth, posaxis)
-
-        elif isinstance(layout, ak.partition.PartitionedArray):
-            return ak.partition.IrregularlyPartitionedArray(
-                [apply(x, depth, posaxis) for x in layout.partitions]
-            )
-
-        elif isinstance(layout, ak.layout.Record):
-            return ak.layout.Record(
-                apply(layout.array, depth, posaxis),
-                layout.at,
-            )
-
-        # Finally, fall through to failure
-        else:
-            raise AssertionError(
-                "unrecognized layout: "
-                + repr(layout)
-                + ak._util.exception_suffix(__file__)
-            )
-
-    out = apply(layout, 1, axis)
+    if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
+        out = ak.layout.NumpyArray(nplike.ma.concatenate(out))
+    else:
+        out = ak.layout.NumpyArray(nplike.concatenate(out))
 
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+
+
+def _pack_layout(layout):
+    nplike = ak.nplike.of(layout)
+
+    if isinstance(layout, ak.layout.NumpyArray):
+        return layout.contiguous()
+
+    # EmptyArray is a no-op
+    elif isinstance(layout, ak.layout.EmptyArray):
+        return layout
+
+    # Project indexed arrays
+    elif isinstance(layout, ak._util.indexedoptiontypes):
+        if isinstance(layout.content, ak._util.optiontypes):
+            return layout.simplify()
+
+        index = nplike.asarray(layout.index)
+        new_index = nplike.zeros_like(index)
+
+        is_none = index < 0
+        new_index[is_none] = -1
+        new_index[~is_none] = nplike.arange(len(new_index) - nplike.sum(is_none))
+
+        return ak.layout.IndexedOptionArray64(
+            ak.layout.Index64(new_index),
+            layout.project(),
+            layout.identities,
+            layout.parameters,
+        )
+
+    # Project indexed arrays
+    elif isinstance(layout, ak._util.indexedtypes):
+        return layout.project()
+
+    # ListArray performs both ordering and resizing
+    elif isinstance(
+        layout,
+        (
+            ak.layout.ListArray32,
+            ak.layout.ListArrayU32,
+            ak.layout.ListArray64,
+        ),
+    ):
+        return layout.toListOffsetArray64(True)
+
+    # ListOffsetArray performs resizing
+    elif isinstance(
+        layout,
+        (
+            ak.layout.ListOffsetArray32,
+            ak.layout.ListOffsetArray64,
+            ak.layout.ListOffsetArrayU32,
+        ),
+    ):
+        new_layout = layout.toListOffsetArray64(True)
+        new_length = new_layout.offsets[-1]
+        return ak.layout.ListOffsetArray64(
+            new_layout.offsets,
+            new_layout.content[:new_length],
+            new_layout.identities,
+            new_layout.parameters,
+        )
+
+    # UnmaskedArray just wraps another array
+    elif isinstance(layout, ak.layout.UnmaskedArray):
+        return ak.layout.UnmaskedArray(
+            layout.content, layout.identities, layout.parameters
+        )
+
+    # UnionArrays can be simplified
+    # and their contents too
+    elif isinstance(layout, ak._util.uniontypes):
+        layout = layout.simplify()
+
+        # If we managed to lose the drop type entirely
+        if not isinstance(layout, ak._util.uniontypes):
+            return layout
+
+        # Pack simplified layout
+        tags = nplike.asarray(layout.tags)
+        index = nplike.asarray(layout.index)
+
+        new_contents = [None] * len(layout.contents)
+        new_index = nplike.zeros_like(index)
+
+        # Compact indices
+        for i in range(len(layout.contents)):
+            is_i = tags == i
+
+            new_contents[i] = layout.project(i)
+            new_index[is_i] = nplike.arange(nplike.sum(is_i))
+
+        return ak.layout.UnionArray8_64(
+            ak.layout.Index8(tags),
+            ak.layout.Index64(new_index),
+            new_contents,
+            layout.identities,
+            layout.parameters,
+        )
+
+    # RecordArray contents can be truncated
+    elif isinstance(layout, ak.layout.RecordArray):
+        return ak.layout.RecordArray(
+            [c[: len(layout)] for c in layout.contents],
+            layout.recordlookup,
+            len(layout),
+            layout.identities,
+            layout.parameters,
+        )
+
+    # RegularArrays can change length
+    elif isinstance(layout, ak.layout.RegularArray):
+        if not len(layout):
+            return layout
+
+        content = layout.content
+
+        # Truncate content to perfect multiple of the RegularArray size
+        if layout.size > 0:
+            r = len(content) % layout.size
+            content = content[: len(content) - r]
+        else:
+            content = content[:0]
+
+        return ak.layout.RegularArray(
+            content,
+            layout.size,
+            len(layout),
+            layout.identities,
+            layout.parameters,
+        )
+
+    # BitMaskedArrays can change length
+    elif isinstance(layout, ak.layout.BitMaskedArray):
+        layout = layout.simplify()
+
+        if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
+            return layout.toIndexedOptionArray64()
+
+        return ak.layout.BitMaskedArray(
+            layout.mask,
+            layout.content[: len(layout)],
+            layout.valid_when,
+            len(layout),
+            layout.lsb_order,
+            layout.identities,
+            layout.parameters,
+        )
+
+    # ByteMaskedArrays can change length
+    elif isinstance(layout, ak.layout.ByteMaskedArray):
+        layout = layout.simplify()
+
+        if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
+            return layout.toIndexedOptionArray64()
+
+        return ak.layout.ByteMaskedArray(
+            layout.mask,
+            layout.content[: len(layout)],
+            layout.valid_when,
+            layout.identities,
+            layout.parameters,
+        )
+
+    elif isinstance(layout, ak.layout.VirtualArray):
+        return layout.array
+
+    elif isinstance(layout, ak.partition.PartitionedArray):
+        return layout
+
+    elif isinstance(layout, ak.layout.Record):
+        return layout
+
+    # Finally, fall through to failure
+    else:
+        raise AssertionError(
+            "unrecognized layout: " + repr(layout) + ak._util.exception_suffix(__file__)
+        )
 
 
 def packed(array, highlevel=True, behavior=None):
@@ -2352,7 +2382,18 @@ def packed(array, highlevel=True, behavior=None):
 
     See also #ak.to_buffers.
     """
-    return _packed(array, highlevel=highlevel, behavior=behavior)
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=True, allow_other=False
+    )
+
+    def transform(layout, depth=1, user=None):
+        return ak._util.transform_child_layouts(
+            transform, _pack_layout(layout), depth, user
+        )
+
+    out = transform(layout)
+
+    return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 def local_index(array, axis=-1, highlevel=True, behavior=None):
@@ -2631,11 +2672,62 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
-def fill_none(array, value, highlevel=True, behavior=None):
+# TODO: remove in 1.7.0!
+def _fill_none_deprecated(array, value, highlevel=True, behavior=None):
+    arraylayout = ak.operations.convert.to_layout(
+        array, allow_record=True, allow_other=False
+    )
+    nplike = ak.nplike.of(arraylayout)
+
+    if isinstance(arraylayout, ak.partition.PartitionedArray):
+        out = ak.partition.apply(
+            lambda x: _fill_none_deprecated(x, value, highlevel=False), arraylayout
+        )
+
+    else:
+        if (
+            isinstance(value, Iterable)
+            and not (
+                isinstance(value, (str, bytes))
+                or (ak._util.py27 and isinstance(value, ak._util.unicode))
+            )
+            or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
+        ):
+            valuelayout = ak.operations.convert.to_layout(
+                value, allow_record=True, allow_other=False
+            )
+            if isinstance(valuelayout, ak.layout.Record):
+                valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
+            elif len(valuelayout) == 0:
+                offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
+                valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
+            else:
+                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+
+        else:
+            valuelayout = ak.operations.convert.to_layout(
+                [value], allow_record=False, allow_other=False
+            )
+
+        out = arraylayout.fillna(valuelayout)
+
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
+    else:
+        return out
+
+
+def fill_none(array, value, axis=ak._util.MISSING, highlevel=True, behavior=None):
     """
     Args:
         array: Data in which to replace None with a given value.
         value: Data with which to replace None.
+        axis (None or int): If None, replace all None values in the array
+            with the given value; if an int, The dimension at which this
+            operation is applied. The outermost dimension is `0`, followed
+            by `1`, etc., and negative values count backward from the
+            innermost: `-1` is the innermost  dimension, `-2` is the next
+            level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -2666,42 +2758,89 @@ def fill_none(array, value, highlevel=True, behavior=None):
 
     The values could be floating-point numbers or strings.
     """
+
     arraylayout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
     nplike = ak.nplike.of(arraylayout)
 
-    if isinstance(arraylayout, ak.partition.PartitionedArray):
-        out = ak.partition.apply(
-            lambda x: fill_none(x, value, highlevel=False), arraylayout
+    # Add a condition for the "old" behaviour
+    if axis is ak._util.MISSING:
+        if isinstance(arraylayout, ak.layout.Record):
+            mindepth, maxdepth = arraylayout.array.minmax_depth
+        else:
+            mindepth, maxdepth = arraylayout.minmax_depth
+
+        if mindepth == maxdepth == 1:
+            axis = 0
+        else:
+            ak._util.deprecate(
+                "ak.fill_none needs an explicit `axis` because the default will change to `axis=-1`",
+                "1.7.0",
+                date="2021-10-01",
+                will_be="changed",
+            )
+            return _fill_none_deprecated(
+                array, value, highlevel=highlevel, behavior=behavior
+            )
+
+    # Convert value type to appropriate layout
+    if isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
+        isinstance(value, np.ndarray)
+        and issubclass(value.dtype.type, (np.bool_, np.number))
+    ):
+        valuelayout = ak.operations.convert.to_layout(
+            nplike.asarray(value), allow_record=False, allow_other=False
+        )
+    elif (
+        isinstance(value, Iterable)
+        and not (
+            isinstance(value, (str, bytes))
+            or (ak._util.py27 and isinstance(value, ak._util.unicode))
+        )
+        or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
+    ):
+        valuelayout = ak.operations.convert.to_layout(
+            value, allow_record=True, allow_other=False
+        )
+        if isinstance(valuelayout, ak.layout.Record):
+            valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
+        elif len(valuelayout) == 0:
+            offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
+            valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
+        else:
+            valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+    else:
+        valuelayout = ak.operations.convert.to_layout(
+            [value], allow_record=False, allow_other=False
         )
 
-    else:
-        if (
-            isinstance(value, Iterable)
-            and not (
-                isinstance(value, (str, bytes))
-                or (ak._util.py27 and isinstance(value, ak._util.unicode))
-            )
-            or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
-        ):
-            valuelayout = ak.operations.convert.to_layout(
-                value, allow_record=True, allow_other=False
-            )
-            if isinstance(valuelayout, ak.layout.Record):
-                valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
-            elif len(valuelayout) == 0:
-                offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
-                valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
-            else:
-                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
-
+    def maybe_fillna(layout):
+        if isinstance(layout, ak._util.optiontypes):
+            return layout.fillna(valuelayout)
         else:
-            valuelayout = ak.operations.convert.to_layout(
-                [value], allow_record=False, allow_other=False
+            return layout
+
+    if axis is None:
+
+        def transform(layout, depth, posaxis):
+            return ak._util.transform_child_layouts(
+                transform, maybe_fillna(layout), depth, posaxis
             )
 
-        out = arraylayout.fillna(valuelayout)
+    else:
+
+        def transform(layout, depth, posaxis):
+            posaxis = layout.axis_wrap_if_negative(posaxis)
+            if posaxis + 1 < depth:
+                return layout
+
+            if posaxis + 1 == depth:
+                layout = maybe_fillna(layout)
+
+            return ak._util.transform_child_layouts(transform, layout, depth, posaxis)
+
+    out = transform(arraylayout, 1, axis)
 
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 

@@ -658,17 +658,34 @@ def ptp(arr, axis=None, keepdims=False, mask_identity=True):
         <Array [3, None, 1] type='3 * ?float64'>
 
     because there are three lists, the first has a range of `3`, the second is
-    empty, and the third has a range of `1`.
+    `None` because the list is empty, and the third has a range of `1`. Similarly,
+
+        >>> ak.ptp(array, axis=-1, mask_identity=False)
+        <Array [3, 0, 1] type='3 * float64'>
+
+    The second value is `0` because the list is empty.
 
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    ptp = ak.max(arr, axis=axis, keepdims=keepdims) - ak.min(
-        arr, axis=axis, keepdims=keepdims
-    )
-    if not mask_identity:
-        return ak.fill_none(ptp, 0)
-    return ptp
+    if axis is None:
+        out = ak.max(arr) - ak.min(arr)
+        if not mask_identity and out is None:
+            out = 0
+
+    else:
+        maxi = ak.max(arr, axis=axis, mask_identity=True, keepdims=True)
+        mini = ak.min(arr, axis=axis, mask_identity=True, keepdims=True)
+        out = maxi - mini
+
+        if not mask_identity:
+            out = ak.fill_none(out, 0, axis=-1)
+
+        if not keepdims:
+            posaxis = out.layout.axis_wrap_if_negative(axis)
+            out = out[(slice(None, None),) * posaxis + (0,)]
+
+    return out
 
 
 @ak._connect._numpy.implements("argmin")

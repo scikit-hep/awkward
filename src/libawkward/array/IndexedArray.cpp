@@ -2270,10 +2270,10 @@ namespace awkward {
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 outindex,
-                                                 raw->content()));
+          IndexedOptionArray64(Identities::none(),
+                               util::Parameters(),
+                               outindex,
+                               raw->content()).simplify_optiontype());
       }
       else {
         throw std::runtime_error(
@@ -2369,8 +2369,7 @@ namespace awkward {
                                          const Index64& parents,
                                          int64_t outlength,
                                          bool ascending,
-                                         bool stable,
-                                         bool keepdims) const {
+                                         bool stable) const {
     if (length() == 0 ) {
       return shallow_copy();
     }
@@ -2406,7 +2405,6 @@ namespace awkward {
     bool inject_nones = false;
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (numnull > 0  &&  !branchdepth.first  &&  negaxis != branchdepth.second) {
-      keepdims = false;
       inject_nones = true;
     }
     ContentPtr out = next.get()->sort_next(negaxis,
@@ -2414,8 +2412,7 @@ namespace awkward {
                                            nextparents,
                                            outlength,
                                            ascending,
-                                           stable,
-                                           keepdims);
+                                           stable);
 
     Index64 nextoutindex(parents_length);
     struct Error err3 = kernel::IndexedArray_local_preparenext_64(
@@ -2471,6 +2468,9 @@ namespace awkward {
                                               parameters_,
                                               outindex,
                                               raw->content());
+        if (inject_nones) {
+          return tmp.simplify_optiontype();
+        }
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
@@ -2498,11 +2498,11 @@ namespace awkward {
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::argsort_next(int64_t negaxis,
                                             const Index64& starts,
+                                            const Index64& shifts,
                                             const Index64& parents,
                                             int64_t outlength,
                                             bool ascending,
-                                            bool stable,
-                                            bool keepdims) const {
+                                            bool stable) const {
     if (length() == 0 ) {
       return std::make_shared<NumpyArray>(Index64(0));
     }
@@ -2520,9 +2520,11 @@ namespace awkward {
     util::handle_error(err1, classname(), identities_.get());
 
     int64_t next_length = (numnull > 0) ? index_length - numnull : index_length;
+
     Index64 nextparents(next_length);
     Index64 nextcarry(next_length);
     Index64 outindex(index_length);
+
     struct Error err2 = kernel::IndexedArray_reduce_next_64<T>(
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
@@ -2533,24 +2535,70 @@ namespace awkward {
       index_length);
     util::handle_error(err2, classname(), identities_.get());
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    bool make_shifts = (isoption()  &&
+                        !branchdepth.first  && negaxis == branchdepth.second);
+
+    Index64 nextshifts(make_shifts ? index_.length() - numnull : 0);
+    if (make_shifts) {
+      if (shifts.length() == 0) {
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+      else {
+        struct Error err4 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length(),
+          shifts.data());
+        util::handle_error(err4, classname(), identities_.get());
+      }
+    }
+
     ContentPtr next = content_.get()->carry(nextcarry, false);
 
     bool inject_nones = false;
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (numnull > 0  &&  !branchdepth.first  &&  negaxis != branchdepth.second) {
-      keepdims = false;
       inject_nones = true;
     }
     ContentPtr out = next.get()->argsort_next(negaxis,
                                               starts,
+                                              nextshifts,
                                               nextparents,
                                               outlength,
                                               ascending,
-                                              stable,
-                                              keepdims);
+                                              stable);
+
+    bool nulls_merged = false;
+    if (isoption()) {
+
+      Index64 nulls_index(numnull);
+      struct Error err5 = kernel::IndexedArray_index_of_nulls<T>(
+        kernel::lib::cpu,   // DERIVE
+        nulls_index.data(),
+        index_.data(),
+        index_length,
+        parents.data(),
+        starts.data());
+      util::handle_error(err5, classname(), identities_.get());
+
+      ContentPtr ind = std::make_shared<NumpyArray>(nulls_index);
+
+      if (out.get()->mergeable(ind, true)) {
+        out = out.get()->merge(ind);
+        nulls_merged = true;
+      }
+    }
 
     Index64 nextoutindex(parents_length);
-    struct Error err3 = kernel::IndexedArray_local_preparenext_64(
+    struct Error err6 = kernel::IndexedArray_local_preparenext_64(
       kernel::lib::cpu,   // DERIVE
       nextoutindex.data(),
       starts.data(),
@@ -2558,7 +2606,15 @@ namespace awkward {
       parents_length,
       nextparents.data(),
       next_length);
-    util::handle_error(err3, classname(), identities_.get());
+    util::handle_error(err6, classname(), identities_.get());
+
+    if (isoption()  &&  nulls_merged) {
+      struct Error err7 = kernel::Index_nones_as_index_64(
+        kernel::lib::cpu,   // DERIVE
+        nextoutindex.data(),
+        nextoutindex.length());
+      util::handle_error(err7, classname(), identities_.get());
+    }
 
     IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
                                           util::Parameters(),
@@ -2591,18 +2647,21 @@ namespace awkward {
                         "ListOffsetArray64 whose offsets start at zero")
             + FILENAME(__LINE__));
         }
-        struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+        struct Error err8 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           starts_length,
           outindex.length());
-        util::handle_error(err4, classname(), identities_.get());
+        util::handle_error(err8, classname(), identities_.get());
 
         IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
                                               util::Parameters(),
                                               outindex,
                                               raw->content());
+        if (inject_nones) {
+          return tmp.simplify_optiontype();
+        }
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
