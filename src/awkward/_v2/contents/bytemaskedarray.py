@@ -96,8 +96,8 @@ class ByteMaskedArray(Content):
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
         return ByteMaskedArray(
-            Index(self._mask[start:stop]),
-            self._content[start:stop],
+            self._mask[start:stop],
+            self._content._getitem_range(slice(start, stop)),
             valid_when=self._valid_when,
         )
 
@@ -112,8 +112,12 @@ class ByteMaskedArray(Content):
         )
 
     def _getitem_array(self, where, allow_lazy):
+        rangeslice = self._getitem_asarange(where)
+        if rangeslice is not None:
+            return rangeslice
+
         return ByteMaskedArray(
-            Index(self._mask[where]),
-            self._content._getitem_array(where, allow_lazy=False),
+            self._mask[where],
+            self._content._getitem_array(where, allow_lazy),
             valid_when=self._valid_when,
         )

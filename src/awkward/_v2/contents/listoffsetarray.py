@@ -39,6 +39,14 @@ class ListOffsetArray(Content):
         self._init(identifier, parameters)
 
     @property
+    def starts(self):
+        return self._offsets[:-1]
+
+    @property
+    def stops(self):
+        return self._offsets[1:]
+
+    @property
     def offsets(self):
         return self._offsets
 
@@ -94,11 +102,12 @@ class ListOffsetArray(Content):
         return ListOffsetArray(self._offsets, self._content[where])
 
     def _getitem_array(self, where, allow_lazy):
-        if where[-1] >= len(self):
-            raise IndexError("array index out of bounds")
-        stops = where[-1] + 2
+        rangeslice = self._getitem_asarange(where)
+        if rangeslice is not None:
+            return rangeslice
+
         return ak._v2.contents.listarray.ListArray(
-            Index(self.offsets[where]),
-            Index(self._offsets[where[-1] : stops]),
+            self.starts[where],
+            self.stops[where],
             self._content,
         )

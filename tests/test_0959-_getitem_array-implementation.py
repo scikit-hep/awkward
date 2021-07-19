@@ -588,7 +588,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         ),
         3,
     )
-    resultv2 = v2a[np.array([0])]
+    resultv2 = v2a._getitem_array(np.array([0]), False)
     assert ak.to_list(resultv2) == [[{"nest": 0.0}, {"nest": 1.1}, {"nest": 2.2}]]
 
     v1a = ak.layout.RegularArray(
@@ -609,7 +609,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         0,
         zeros_length=10,
     )
-    resultv2 = v2b[np.array([0])]
+    resultv2 = v2b._getitem_array(np.array([0]), False)
     assert ak.to_list(resultv2) == [[]]
 
     v1b = ak.layout.RegularArray(
@@ -618,6 +618,52 @@ def test_RegularArray_RecordArray_NumpyArray():
         zeros_length=10,
     )
     resultv1 = v1b.carry(ak.layout.Index64(np.array([0], np.int64)), False)
+    assert ak.to_list(resultv1) == [[]]
+    assert ak.to_list(resultv1) == ak.to_list(resultv2)
+
+
+def test_RegularArray_RecordArray_NumpyArray_lazy():
+    v2a = ak._v2.contents.regulararray.RegularArray(
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        3,
+    )
+    resultv2 = v2a[np.array([0])]
+    assert ak.to_list(resultv2) == [[{"nest": 0.0}, {"nest": 1.1}, {"nest": 2.2}]]
+
+    v1a = ak.layout.RegularArray(
+        ak.layout.RecordArray(
+            [ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]))],
+            ["nest"],
+        ),
+        3,
+    )
+    resultv1 = v1a.carry(ak.layout.Index64(np.array([0], np.int64)), True)
+    assert ak.to_list(resultv1) == ak.to_list(resultv2)
+    assert v1v2_equal(resultv1, resultv2)
+
+    v2b = ak._v2.contents.regulararray.RegularArray(
+        ak._v2.contents.recordarray.RecordArray(
+            [ak._v2.contents.emptyarray.EmptyArray()], ["nest"]
+        ),
+        0,
+        zeros_length=10,
+    )
+    resultv2 = v2b[np.array([0])]
+    assert ak.to_list(resultv2) == [[]]
+
+    v1b = ak.layout.RegularArray(
+        ak.layout.RecordArray([ak.layout.EmptyArray()], ["nest"]),
+        0,
+        zeros_length=10,
+    )
+    resultv1 = v1b.carry(ak.layout.Index64(np.array([0], np.int64)), True)
     assert ak.to_list(resultv1) == [[]]
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
 
@@ -746,7 +792,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=True,
     )
-    resultv2 = v2a[np.array([0, 1, 4])]
+    resultv2 = v2a._getitem_array(np.array([0, 1, 4]), False)
     assert ak.to_list(resultv2) == [{"nest": 1.1}, None, {"nest": 5.5}]
 
     v1a = ak.layout.ByteMaskedArray(
@@ -774,7 +820,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=False,
     )
-    resultv2 = v2b[np.array([3, 1, 4])]
+    resultv2 = v2b._getitem_array(np.array([3, 1, 4]), False)
     assert ak.to_list(resultv2) == [None, None, {"nest": 5.5}]
 
     v1b = ak.layout.ByteMaskedArray(
@@ -787,6 +833,64 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     )
 
     resultv1 = v1b.carry(ak.layout.Index64(np.array([3, 1, 4], np.int64)), False)
+    assert ak.to_list(resultv1) == ak.to_list(resultv2)
+    assert v1v2_equal(resultv1, resultv2)
+
+
+def test_ByteMaskedArray_RecordArray_NumpyArray_lazy():
+    v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+    )
+    resultv2 = v2a[np.array([0, 1, 4])]
+    assert ak.to_list(resultv2) == [{"nest": 1.1}, None, {"nest": 5.5}]
+
+    v1a = ak.layout.ByteMaskedArray(
+        ak.layout.Index8(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
+        ak.layout.RecordArray(
+            [ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6]))],
+            ["nest"],
+        ),
+        valid_when=True,
+    )
+
+    resultv1 = v1a.carry(ak.layout.Index64(np.array([0, 1, 4], np.int64)), True)
+    assert ak.to_list(resultv1) == ak.to_list(resultv2)
+    assert v1v2_equal(resultv1, resultv2)
+
+    v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=False,
+    )
+    resultv2 = v2b[np.array([3, 1, 4])]
+    assert ak.to_list(resultv2) == [None, None, {"nest": 5.5}]
+
+    v1b = ak.layout.ByteMaskedArray(
+        ak.layout.Index8(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
+        ak.layout.RecordArray(
+            [ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6]))],
+            ["nest"],
+        ),
+        valid_when=False,
+    )
+
+    resultv1 = v1b.carry(ak.layout.Index64(np.array([3, 1, 4], np.int64)), True)
     assert ak.to_list(resultv1) == ak.to_list(resultv2)
     assert v1v2_equal(resultv1, resultv2)
 
@@ -843,7 +947,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    resultv2 = v2a[np.array([0, 1, 4])]
+    resultv2 = v2a._getitem_array(np.array([0, 1, 4]), False)
     assert ak.to_list(resultv2) == [{"nest": 0.0}, {"nest": 1.0}, None]
 
     v1a = ak.layout.BitMaskedArray(
@@ -953,7 +1057,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    resultv2 = v2b[np.array([1, 1, 4])]
+    resultv2 = v2b._getitem_array(np.array([1, 1, 4]), False)
     assert ak.to_list(resultv2) == [{"nest": 1.0}, {"nest": 1.0}, None]
 
     v1b = ak.layout.BitMaskedArray(
@@ -1067,7 +1171,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    resultv2 = v2c[np.array([0, 1, 4])]
+    resultv2 = v2c._getitem_array(np.array([0, 1, 4]), False)
     assert ak.to_list(resultv2) == [{"nest": 0.0}, {"nest": 1.0}, None]
 
     v1c = ak.layout.BitMaskedArray(
@@ -1184,7 +1288,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    resultv2 = v2d[np.array([0, 0, 0])]
+    resultv2 = v2d._getitem_array(np.array([0, 0, 0]), False)
     assert ak.to_list(resultv2) == [{"nest": 0.0}, {"nest": 0.0}, {"nest": 0.0}]
 
     v1d = ak.layout.BitMaskedArray(
@@ -1254,7 +1358,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
             ["nest"],
         )
     )
-    resultv2 = v2a[np.array([0, 1, 1, 1, 1])]
+    resultv2 = v2a._getitem_array(np.array([0, 1, 1, 1, 1]), False)
     assert ak.to_list(resultv2) == [
         {"nest": 0.0},
         {"nest": 1.1},
@@ -1319,7 +1423,7 @@ def test_UnionArray_RecordArray_NumpyArray():
     assert v1v2_equal(resultv1, resultv2)
 
 
-def test_RecordArray_NumpyArray_AllowLazy():
+def test_RecordArray_NumpyArray_lazy():
     v2a = ak._v2.contents.recordarray.RecordArray(
         [
             ak._v2.contents.numpyarray.NumpyArray(

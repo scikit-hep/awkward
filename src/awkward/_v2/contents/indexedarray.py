@@ -87,4 +87,8 @@ class IndexedArray(Content):
         return IndexedArray(self._index, self._content[where])
 
     def _getitem_array(self, where, allow_lazy):
-        return IndexedArray(Index(self._index.data[where]), self._content)
+        rangeslice = self._getitem_asarange(where)
+        if rangeslice is not None:
+            return rangeslice
+
+        return IndexedArray(self._index[where], self._content)

@@ -91,4 +91,8 @@ class IndexedOptionArray(Content):
         return IndexedOptionArray(self._index, self._content[where])
 
     def _getitem_array(self, where, allow_lazy):
-        return IndexedOptionArray(Index(self._index[where]), self._content)
+        rangeslice = self._getitem_asarange(where)
+        if rangeslice is not None:
+            return rangeslice
+
+        return IndexedOptionArray(self._index[where], self._content)

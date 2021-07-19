@@ -104,6 +104,12 @@ class ListArray(Content):
         return ListArray(self._starts, self._stops, self._content[where])
 
     def _getitem_array(self, where, allow_lazy):
-        starts = Index(self._starts[where])
-        stops = Index(self._stops[: len(self._starts)][where])
-        return ListArray(starts, stops, self._content)
+        rangeslice = self._getitem_asarange(where)
+        if rangeslice is not None:
+            return rangeslice
+
+        return ListArray(
+            self._starts[where],
+            self._stops[: len(self._starts)][where],
+            self._content,
+        )

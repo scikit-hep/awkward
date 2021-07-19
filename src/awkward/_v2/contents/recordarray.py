@@ -82,6 +82,10 @@ class RecordArray(Content):
         self._init(identifier, parameters)
 
     @property
+    def numcontents(self):
+        return len(self._contents)
+
+    @property
     def contents(self):
         return self._contents
 
@@ -135,16 +139,14 @@ class RecordArray(Content):
         return "".join(out)
 
     def index_to_key(self, index):
-        if 0 <= index < len(self._contents):
+        if 0 <= index < self.numcontents:
             if self._keys is None:
                 return str(index)
             else:
                 return self._keys[index]
         else:
             raise IndexError(
-                "no index {0} in record with {1} fields".format(
-                    index, len(self._contents)
-                )
+                "no index {0} in record with {1} fields".format(index, self.numcontents)
             )
 
     def key_to_index(self, key):
@@ -154,7 +156,7 @@ class RecordArray(Content):
             except ValueError:
                 pass
             else:
-                if 0 <= i < len(self._contents):
+                if 0 <= i < self.numcontents:
                     return i
         else:
             try:
@@ -164,9 +166,7 @@ class RecordArray(Content):
             else:
                 return i
         raise IndexError(
-            "no field {0} in record with {1} fields".format(
-                repr(key), len(self._contents)
-            )
+            "no field {0} in record with {1} fields".format(repr(key), self.numcontents)
         )
 
     def content(self, index_or_key):
@@ -191,7 +191,7 @@ class RecordArray(Content):
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
-        if len(self._contents) == 0:
+        if self.numcontents == 0:
             start = min(max(start, 0), self._length)
             stop = min(max(stop, 0), self._length)
             if stop < start:
@@ -218,26 +218,37 @@ class RecordArray(Content):
             )
 
     def _getitem_array(self, where, allow_lazy):
-        if allow_lazy:
-            return ak._v2.contents.indexedarray.IndexedArray(
-                Index(np.asarray(where % self._length, dtype=np.int64)), self
-            )
+        if allow_lazy and len(where.shape) == 1:
+            nplike = ak.nplike.of(where)
+
+            copied = False
+            if not issubclass(where.dtype.type, np.integer):
+                (where,) = nplike.nonzero(where)
+                copied = True
+
+            negative = where < 0
+            if nplike.any(negative):
+                if not copied:
+                    where = where.copy()
+                    copied = True
+                where[negative] += self._length
+
+            if nplike.any(where >= self._length):
+                raise IndexError("array index out of bounds")
+
+            return ak._v2.contents.indexedarray.IndexedArray(Index(where), self)
+
         else:
-            contents = (
-                [
-                    self.content(i)._getitem_array(where, allow_lazy=False)
-                    for i in range(len(self._contents))
-                ]
-                if len(self._contents) > 0
-                else []
-            )
+            rangeslice = self._getitem_asarange(where)
+            if rangeslice is not None:
+                return rangeslice
 
-            keys = (
-                [self._keys[i] for i in range(len(self._keys))]
-                if self._keys is not None
-                else None
-            )
-
-            length = len(where) if len(self._contents) == 0 else None
-
-            return RecordArray(contents, keys, length)
+            contents = [
+                self.content(i)._getitem_array(where, allow_lazy)
+                for i in range(self.numcontents)
+            ]
+            if issubclass(where.dtype.type, np.integer):
+                length = len(where)
+            else:
+                length = len(self)
+            return RecordArray(contents, self._keys, length)

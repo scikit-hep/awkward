@@ -120,18 +120,47 @@ class BitMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def get_bytemask(self):
-        # In general, slices must convert BitMaskedArray to ByteMaskedArray.
-        if self._lsb_order:
-            bytemask = (
-                self._mask.nplike.unpackbits(self._mask)
-                .reshape(-1, 8)[:, ::-1]
-                .reshape(-1)
-                .view(np.int8)
+    def bytemask(self):
+        nplike = self._mask.nplike
+        bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
+        self.handle_error(
+            nplike[
+                "awkward_BitMaskedArray_to_ByteMaskedArray",
+                bytemask.dtype.type,
+                self._mask.dtype.type,
+            ](
+                bytemask.data,
+                self._mask.data,
+                len(self._mask),
+                self._valid_when,
+                self._lsb_order,
             )
-        else:
-            bytemask = self._mask.nplike.unpackbits(self._mask).view(np.int8)
-        return bytemask
+        )
+        return bytemask.data[: self._length]
+
+    def toByteMaskedArray(self):
+        nplike = self._mask.nplike
+        bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
+        self.handle_error(
+            nplike[
+                "awkward_BitMaskedArray_to_ByteMaskedArray",
+                bytemask.dtype.type,
+                self._mask.dtype.type,
+            ](
+                bytemask.data,
+                self._mask.data,
+                len(self._mask),
+                False,  # this differs from the kernel call in 'bytemask'
+                self._lsb_order,
+            )
+        )
+        return ByteMaskedArray(
+            bytemask[: self._length],
+            self._content,
+            self._valid_when,
+            self._identifier,
+            self._parameters,
+        )
 
     def _getitem_at(self, where):
         if where < 0:
@@ -148,13 +177,7 @@ class BitMaskedArray(Content):
             return None
 
     def _getitem_range(self, where):
-        bytemask = self.get_bytemask()
-        start, stop, step = where.indices(len(self))
-        return ByteMaskedArray(
-            Index(bytemask[start:stop]),
-            self._content[start:stop],
-            valid_when=self._valid_when,
-        )
+        return self.toByteMaskedArray()._getitem_range(where)
 
     def _getitem_field(self, where):
         return BitMaskedArray(
@@ -175,9 +198,4 @@ class BitMaskedArray(Content):
         )
 
     def _getitem_array(self, where, allow_lazy):
-        bytemask = self.get_bytemask()
-        return ByteMaskedArray(
-            Index(bytemask[where]),
-            self._content._getitem_array(where, allow_lazy=False),
-            valid_when=self._valid_when,
-        )
+        return self.toByteMaskedArray()._getitem_array(where, allow_lazy)

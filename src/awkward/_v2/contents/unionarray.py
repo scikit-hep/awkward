@@ -130,6 +130,10 @@ class UnionArray(Content):
         return UnionArray(self._tags, self._index, [x[where] for x in self._contents])
 
     def _getitem_array(self, where, allow_lazy):
-        tags = Index(self._tags[where])
-        index = Index(self._index[where])
+        rangeslice = self._getitem_asarange(where)
+        if rangeslice is not None:
+            return rangeslice
+
+        tags = self._tags[where]
+        index = self._index[: len(self._tags)][where]
         return UnionArray(tags, index, self._contents)

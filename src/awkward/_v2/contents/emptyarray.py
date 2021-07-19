@@ -5,6 +5,8 @@ from __future__ import absolute_import
 import awkward as ak
 from awkward._v2.contents.content import Content
 
+np = ak.nplike.NumpyMetadata.instance()
+
 
 class EmptyArray(Content):
     def __init__(self, identifier=None, parameters=None):
@@ -31,7 +33,7 @@ class EmptyArray(Content):
         raise IndexError("array of type Empty has no index " + repr(where))
 
     def _getitem_range(self, where):
-        return EmptyArray()
+        return self
 
     def _getitem_field(self, where):
         raise IndexError("field " + repr(where) + " not found")
@@ -40,6 +42,11 @@ class EmptyArray(Content):
         raise IndexError("fields " + repr(where) + " not found")
 
     def _getitem_array(self, where, allow_lazy):
-        raise IndexError(
-            "cannot extract {0} elemnts from {1}".format(repr(len(where)), repr(where))
-        )
+        if len(where) == 0:
+            return self
+        else:
+            raise IndexError(
+                "cannot extract {0} elemnts from {1}".format(
+                    repr(len(where)), repr(where)
+                )
+            )

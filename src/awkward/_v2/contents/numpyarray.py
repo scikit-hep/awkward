@@ -120,4 +120,8 @@ class NumpyArray(Content):
         raise IndexError("fields " + repr(where) + " not found")
 
     def _getitem_array(self, where, allow_lazy):
+        rangeslice = self._getitem_asarange(where)
+        if rangeslice is not None:
+            return rangeslice
+
         return NumpyArray(self._data[where])

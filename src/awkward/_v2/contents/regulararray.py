@@ -94,18 +94,47 @@ class RegularArray(Content):
         return RegularArray(self._content[where], self._size, self._length)
 
     def _getitem_array(self, where, allow_lazy):
-        new_where = np.arange(len(where) * self._size)
-        for i in range(len(where)):
-            for j in range(self._size):
-                new_where[i * self._size + j] = where[i] * self._size + j
-        zeros_length = len(where)
-        if len(new_where) == 0:
-            return [[]] * len(where)
-        else:
-            return RegularArray(
-                self._content._getitem_array(new_where, allow_lazy=False),
+        nplike = ak.nplike.of(where)
+
+        copied = False
+        if not issubclass(where.dtype.type, np.integer):
+            (where,) = nplike.nonzero(where)
+            copied = True
+
+        rangeslice = self._getitem_asarange(where)
+        if rangeslice is not None:
+            return rangeslice
+
+        if not issubclass(where.dtype.type, np.int64):
+            where = where.astype(np.int64)
+            copied = True
+
+        negative = where < 0
+        if nplike.any(negative):
+            if not copied:
+                where = where.copy()
+                copied = True
+            where[negative] += self._length
+
+        if nplike.any(where >= self._length):
+            raise IndexError("array index out of bounds")
+
+        nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
+        self.handle_error(
+            nplike[
+                "awkward_RegularArray_getitem_carry",
+                nextcarry.dtype.type,
+                where.dtype.type,
+            ](
+                nextcarry.data,
+                where,
+                len(where),
                 self._size,
-                zeros_length,
             )
-            # FIXME : for use of negative indexes, but the v1 to v2 comparison will fail as this is trimmed // trimming self.content will also fail both the v1 to v2 comparison and to_list implementation
-            # return RegularArray(self._content[: -(len(self._content) % self._size)]._getitem_array(new_where, allow_lazy = False), self._size, zeros_length)
+        )
+
+        return RegularArray(
+            self._content._getitem_array(nextcarry.data, allow_lazy),
+            self._size,
+            len(where),
+        )
