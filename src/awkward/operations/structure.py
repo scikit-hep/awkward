@@ -2355,7 +2355,7 @@ def packed(array, highlevel=True, behavior=None):
     - #ak.layout.BitMaskedArray becomes an #ak.layout.IndexedOptionArray if it contains records, stays a #ak.layout.BitMaskedArray otherwise
     - #ak.layout.UnionArray gets projected contents
     - #ak.layout.VirtualArray gets materialized
-    - #ak.layout.Record becomes a record over a single-item RecordArray
+    - #ak.layout.Record becomes a record over a single-item #ak.layout.RecordArray
 
     Example:
 
