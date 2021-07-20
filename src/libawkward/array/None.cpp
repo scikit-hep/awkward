@@ -290,14 +290,14 @@ namespace awkward {
   const SliceItemPtr
   None::asslice() const {
     throw std::runtime_error(
-      std::string("undefined opteration: None::asslice")
+      std::string("undefined operation: None::asslice")
       + FILENAME(__LINE__));
   }
 
   const ContentPtr
   None::fillna(const ContentPtr& value) const {
     throw std::runtime_error(
-      std::string("undefined opteration: None::fillna")
+      std::string("undefined operation: None::fillna")
       + FILENAME(__LINE__));
   }
 
