@@ -181,7 +181,8 @@ def test_record():
     a = ak.layout.NumpyArray(np.arange(10))
     b = ak.layout.NumpyArray(np.arange(10) * 2 + 4)
     layout = ak.layout.RecordArray([a, b], None, 5)
-    first = layout[0]
-    packed = ak.packed(first, highlevel=False)
-    assert ak.to_list(packed) == ak.to_list(first)
-    assert len(packed.array) == len(layout)
+    record = layout[4]
+    packed = ak.packed(record, highlevel=False)
+    assert ak.to_list(packed) == ak.to_list(record)
+    assert len(packed.array) == 1
+    assert ak.to_list(packed.array) == [(4, 12)]
