@@ -112,7 +112,7 @@ class UnionArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         return self._contents[self._tags[where]][self._index[where]]
 
     def _getitem_range(self, where):
@@ -128,3 +128,8 @@ class UnionArray(Content):
 
     def _getitem_fields(self, where):
         return UnionArray(self._tags, self._index, [x[where] for x in self._contents])
+
+    def _getitem_array(self, where, allow_lazy):
+        tags = self._tags[where]
+        index = self._index[: len(self._tags)][where]
+        return UnionArray(tags, index, self._contents)

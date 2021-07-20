@@ -344,16 +344,31 @@ class NumpyLike(Singleton):
 
 
 class NumpyKernel(object):
-    def __init__(self, kernel):
+    def __init__(self, kernel, name_and_types):
         self._kernel = kernel
+        self._name_and_types = name_and_types
+
+    def __repr__(self):
+        return "<{0} {1}{2}>".format(
+            type(self).__name__,
+            self._name_and_types[0],
+            "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
+        )
+
+    @staticmethod
+    def _cast(x, t):
+        if issubclass(t, ctypes._Pointer):
+            if isinstance(x, numpy.ndarray):
+                return ctypes.cast(x.ctypes.data, t)
+            else:
+                return ctypes.cast(x, t)
+        else:
+            return x
 
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
         return self._kernel(
-            *(
-                ctypes.cast(x, t) if issubclass(t, ctypes._Pointer) else x
-                for x, t in zip(args, self._kernel.argtypes)
-            )
+            *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
         )
 
 
@@ -362,7 +377,7 @@ class Numpy(NumpyLike):
         return ak.operations.convert.to_numpy(array, *args, **kwargs)
 
     def __getitem__(self, args):
-        return NumpyKernel(ak._cpu_kernels.kernel[args])
+        return NumpyKernel(ak._cpu_kernels.kernel[args], args)
 
     def __init__(self):
         self._module = numpy

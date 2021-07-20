@@ -118,3 +118,6 @@ class NumpyArray(Content):
 
     def _getitem_fields(self, where):
         raise IndexError("fields " + repr(where) + " not found")
+
+    def _getitem_array(self, where, allow_lazy):
+        return NumpyArray(self._data[where])

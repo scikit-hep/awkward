@@ -88,7 +88,7 @@ class ListArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         return self._content[self._starts[where] : self._stops[where]]
 
     def _getitem_range(self, where):
@@ -102,3 +102,10 @@ class ListArray(Content):
 
     def _getitem_fields(self, where):
         return ListArray(self._starts, self._stops, self._content[where])
+
+    def _getitem_array(self, where, allow_lazy):
+        return ListArray(
+            self._starts[where],
+            self._stops[: len(self._starts)][where],
+            self._content,
+        )

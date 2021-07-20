@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import numpy as np
+
 import awkward as ak
 from awkward._v2.contents.content import Content
 
@@ -75,7 +77,7 @@ class RegularArray(Content):
         if where < 0:
             where += len(self)
         if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+            raise ak._v2.contents.content.NestedIndexError(self, where)
         return self._content[(where) * self._size : (where + 1) * self._size]
 
     def _getitem_range(self, where):
@@ -90,3 +92,41 @@ class RegularArray(Content):
 
     def _getitem_fields(self, where):
         return RegularArray(self._content[where], self._size, self._length)
+
+    def _getitem_array(self, where, allow_lazy):
+        nplike = ak.nplike.of(where)
+
+        copied = False
+        if not issubclass(where.dtype.type, np.int64):
+            where = where.astype(np.int64)
+            copied = True
+
+        negative = where < 0
+        if nplike.any(negative):
+            if not copied:
+                where = where.copy()
+                copied = True
+            where[negative] += self._length
+
+        if nplike.any(where >= self._length):
+            raise ak._v2.contents.content.NestedIndexError(self, where)
+
+        nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
+        self.handle_error(
+            nplike[
+                "awkward_RegularArray_getitem_carry",
+                nextcarry.dtype.type,
+                where.dtype.type,
+            ](
+                nextcarry.data,
+                where,
+                len(where),
+                self._size,
+            )
+        )
+
+        return RegularArray(
+            self._content._getitem_array(nextcarry.data, allow_lazy),
+            self._size,
+            len(where),
+        )
