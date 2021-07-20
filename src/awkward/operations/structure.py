@@ -2323,7 +2323,7 @@ def _pack_layout(layout):
         return layout
 
     elif isinstance(layout, ak.layout.Record):
-        return layout
+        return ak.layout.Record(layout.array[layout.at : layout.at + 1], 0)
 
     # Finally, fall through to failure
     else:
