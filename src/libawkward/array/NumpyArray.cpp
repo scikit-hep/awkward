@@ -3874,10 +3874,11 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      throw std::runtime_error(
-        std::string("undefined operation: NumpyArray::getitem_next_jagged("
-                    "array) for ndim == ") + std::to_string(ndim())
-        + FILENAME(__LINE__));
+      ContentPtr next = toRegularArray();
+      return next.get()->getitem_next_jagged(slicestarts,
+                                             slicestops,
+                                             slicecontent,
+                                             tail);
     }
   }
 
@@ -3892,10 +3893,11 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      throw std::runtime_error(
-        std::string("undefined operation: NumpyArray::getitem_next_jagged("
-                    "missing) for ndim == ") + std::to_string(ndim())
-        + FILENAME(__LINE__));
+      ContentPtr next = toRegularArray();
+      return next.get()->getitem_next_jagged(slicestarts,
+                                             slicestops,
+                                             slicecontent,
+                                             tail);
     }
   }
 
@@ -3910,10 +3912,11 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      throw std::runtime_error(
-        std::string("undefined operation: NumpyArray::getitem_next_jagged("
-                    "jagged) for ndim == ") + std::to_string(ndim())
-        + FILENAME(__LINE__));
+      ContentPtr next = toRegularArray();
+      return next.get()->getitem_next_jagged(slicestarts,
+                                             slicestops,
+                                             slicecontent,
+                                             tail);
     }
   }
 
