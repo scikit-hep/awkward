@@ -2008,48 +2008,6 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
-                                      const Index64& slicestops,
-                                      const SliceVarNewAxis& slicecontent,
-                                      const Slice& tail) const {
-    throw std::runtime_error(
-      "FIXME ListArrayOf<T>::SliceVarNewAxis. "
-      "2021-02-10 Was this left over from development? If so, it's not getting tested. "
-      "If anyone out there encounters this error, please report it so that "
-      "we can properly validate this code path and include it in the tests. "
-      "https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=bug+%28unverified%29&template=bug-report.md&title="
-    );
-
-    SliceJagged64 jagged = varaxis_to_jagged(slicecontent);
-    return getitem_next_jagged(slicestarts, slicestops, jagged, tail);
-  }
-
-  template <typename T>
-  const ContentPtr
-  ListArrayOf<T>::getitem_next(const SliceVarNewAxis& varnewaxis,
-                               const Slice& tail,
-                               const Index64& advanced) const {
-    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
-    return getitem_next(jagged, tail, advanced);
-  }
-
-  template <typename T>
-  const SliceJagged64
-  ListArrayOf<T>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
-    Index64 offsets = compact_offsets64(true);
-    Index64 nextcarry(offsets.getitem_at_nowrap(offsets.length() - 1));
-    struct Error err = kernel::SliceVarNewAxis_to_SliceJagged64(
-      kernel::lib::cpu,   // DERIVE
-      nextcarry.data(),
-      offsets.data(),
-      offsets.length() - 1);
-    util::handle_error(err, classname(), identities_.get());
-    SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
-    return SliceJagged64(offsets, nextcontent);
-  }
-
-  template <typename T>
-  const ContentPtr
   ListArrayOf<T>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> starts = starts_.copy_to(ptr_lib);
     IndexOf<T> stops = stops_.copy_to(ptr_lib);
