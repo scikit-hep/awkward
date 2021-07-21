@@ -93,8 +93,8 @@ class ListArray(Content):
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
-        starts = Index(self._starts[start:stop])
-        stops = Index(self._stops[start:stop])
+        starts = self._starts[start:stop]
+        stops = self._stops[start:stop]
         return ListArray(starts, stops, self._content)
 
     def _getitem_field(self, where):
@@ -103,9 +103,13 @@ class ListArray(Content):
     def _getitem_fields(self, where):
         return ListArray(self._starts, self._stops, self._content[where])
 
-    def _getitem_array(self, where, allow_lazy):
-        return ListArray(
-            self._starts[where],
-            self._stops[: len(self._starts)][where],
-            self._content,
-        )
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        try:
+            nextstarts = self._starts[carry.data]
+            nextstops = self._stops[: len(self._starts)][carry.data]
+        except IndexError as err:
+            raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
+
+        return ListArray(nextstarts, nextstops, self._content)

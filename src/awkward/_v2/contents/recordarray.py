@@ -11,7 +11,6 @@ import numpy as np
 
 import awkward as ak
 from awkward._v2.contents.content import Content
-from awkward._v2.index import Index
 from awkward._v2.record import Record
 
 
@@ -217,31 +216,32 @@ class RecordArray(Content):
                 [self._keys[i] for i in indexes],
             )
 
-    def _getitem_array(self, where, allow_lazy, defensively_copy=True):
-        if allow_lazy and len(where.shape) == 1:
-            nplike = ak.nplike.of(where)
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
 
-            if defensively_copy:
+        if allow_lazy:
+            nplike, where = carry.nplike, carry.data
+
+            if allow_lazy != "copied":
                 where = where.copy()
 
             negative = where < 0
             if nplike.any(negative):
-                if not defensively_copy:
-                    where = where.copy()
                 where[negative] += self._length
 
             if nplike.any(where >= self._length):
                 raise ak._v2.contents.content.NestedIndexError(self, where)
 
-            return ak._v2.contents.indexedarray.IndexedArray(Index(where), self)
+            nextindex = ak._v2.index.Index64(where)
+            return ak._v2.contents.indexedarray.IndexedArray(nextindex, self)
 
         else:
             contents = [
-                self.content(i)._getitem_array(where, allow_lazy)
+                self.content(i)._carry(carry, allow_lazy)
                 for i in range(self.numcontents)
             ]
-            if issubclass(where.dtype.type, np.integer):
-                length = len(where)
+            if issubclass(carry.dtype.type, np.integer):
+                length = len(carry)
             else:
                 length = len(self)
             return RecordArray(contents, self._keys, length)

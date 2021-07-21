@@ -118,8 +118,8 @@ class UnionArray(Content):
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
         return UnionArray(
-            Index(self._tags[start:stop]),
-            Index(self._index[start:stop]),
+            self._tags[start:stop],
+            self._index[start:stop],
             self._contents,
         )
 
@@ -129,7 +129,13 @@ class UnionArray(Content):
     def _getitem_fields(self, where):
         return UnionArray(self._tags, self._index, [x[where] for x in self._contents])
 
-    def _getitem_array(self, where, allow_lazy):
-        tags = self._tags[where]
-        index = self._index[: len(self._tags)][where]
-        return UnionArray(tags, index, self._contents)
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        try:
+            nexttags = self._tags[carry.data]
+            nextindex = self._index[: len(self._tags)][carry.data]
+        except IndexError as err:
+            raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
+
+        return UnionArray(nexttags, nextindex, self._contents)

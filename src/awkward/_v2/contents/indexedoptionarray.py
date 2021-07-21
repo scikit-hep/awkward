@@ -80,9 +80,7 @@ class IndexedOptionArray(Content):
             return self._content[self._index[where]]
 
     def _getitem_range(self, where):
-        return IndexedOptionArray(
-            Index(self._index[where.start : where.stop]), self._content
-        )
+        return IndexedOptionArray(self._index[where.start : where.stop], self._content)
 
     def _getitem_field(self, where):
         return IndexedOptionArray(self._index, self._content[where])
@@ -90,5 +88,12 @@ class IndexedOptionArray(Content):
     def _getitem_fields(self, where):
         return IndexedOptionArray(self._index, self._content[where])
 
-    def _getitem_array(self, where, allow_lazy):
-        return IndexedOptionArray(self._index[where], self._content)
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        try:
+            nextindex = self._index[carry.data]
+        except IndexError as err:
+            raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
+
+        return IndexedOptionArray(nextindex, self._content)

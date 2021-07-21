@@ -119,5 +119,12 @@ class NumpyArray(Content):
     def _getitem_fields(self, where):
         raise IndexError("fields " + repr(where) + " not found")
 
-    def _getitem_array(self, where, allow_lazy):
-        return NumpyArray(self._data[where])
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        try:
+            nextdata = self._data[carry.data]
+        except IndexError as err:
+            raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
+
+        return NumpyArray(nextdata)
