@@ -14,10 +14,6 @@ def test():
             ak.layout.NumpyArray(np.arange(4 * 6).reshape(6, 4)),
         )
     )
-    ix = ak.Array([
-        [[0], [1], [2], [3]],
-        [],
-        [[3], [2]]
-    ])
+    ix = ak.Array([[[0], [1], [2], [3]], [], [[3], [2]]])
     assert array[ix].tolist() == [[[0], [5], [10], [15]], [], [[19], [22]]]
     assert str(array[ix].type) == "3 * var * var * int64"
