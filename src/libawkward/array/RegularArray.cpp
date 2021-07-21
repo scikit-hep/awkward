@@ -967,15 +967,15 @@ namespace awkward {
 
   const SliceItemPtr
   RegularArray::asslice() const {
-    if (size_ == 1) {
-      return std::make_shared<SliceVarNewAxis>(content_.get()->asslice());
-    }
-    else {
+    // if (size_ == 1) {
+    //   return std::make_shared<SliceVarNewAxis>(content_.get()->asslice());
+    // }
+    // else {
       throw std::invalid_argument(
         std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
                     "slice rules) or they can have all var-sized dimensions (for jagged "
                     "indexing), but not both in the same slice item") + FILENAME(__LINE__));
-    }
+    // }
   }
 
   const ContentPtr
