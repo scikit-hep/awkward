@@ -41,8 +41,10 @@ class EmptyArray(Content):
     def _getitem_fields(self, where):
         raise IndexError("fields " + repr(where) + " not found")
 
-    def _getitem_array(self, where, allow_lazy):
-        if len(where) == 0:
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        if len(carry) == 0:
             return self
         else:
-            raise ak._v2.contents.content.NestedIndexError(self, where)
+            raise ak._v2.contents.content.NestedIndexError(self, carry.data)

@@ -93,10 +93,12 @@ class RegularArray(Content):
     def _getitem_fields(self, where):
         return RegularArray(self._content[where], self._size, self._length)
 
-    def _getitem_array(self, where, allow_lazy):
-        nplike = ak.nplike.of(where)
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
 
-        copied = False
+        nplike, where = carry.nplike, carry.data
+
+        copied = allow_lazy == "copied"
         if not issubclass(where.dtype.type, np.int64):
             where = where.astype(np.int64)
             copied = True
@@ -126,7 +128,7 @@ class RegularArray(Content):
         )
 
         return RegularArray(
-            self._content._getitem_array(nextcarry.data, allow_lazy),
+            self._content._carry(nextcarry, allow_lazy),
             self._size,
             len(where),
         )

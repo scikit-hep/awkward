@@ -99,11 +99,17 @@ class Content(object):
                 raise NotImplementedError("needs _getitem_next")
 
             elif isinstance(where, awkward._v2.contents.numpyarray.NumpyArray):
-                nplike = where.nplike
-                if issubclass(where.data.dtype.type, np.integer):
-                    carry = where.data
-                elif issubclass(where.data.dtype.type, (np.bool_, np.bool)):
-                    (carry,) = nplike.nonzero(where.data)
+                if issubclass(where.data.dtype.type, np.int64):
+                    carry = ak._v2.index.Index64(where.data.reshape(-1))
+                    allow_lazy = True
+                elif issubclass(where.data.dtype.type, np.integer):
+                    carry = ak._v2.index.Index64(
+                        where.data.astype(np.int64).reshape(-1)
+                    )
+                    allow_lazy = "copied"  # True, but also can be modified in-place
+                elif issubclass(where.data.dtype.type, (np.bool_, bool)):
+                    carry = ak._v2.index.Index64(np.nonzero(where.data.reshape(-1))[0])
+                    allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     raise TypeError(
                         "one-dimensional array slice must be an array of integers or "
@@ -111,11 +117,10 @@ class Content(object):
                             repr(where.data).replace("\n", "\n    ")
                         )
                     )
-                asrange = self._getitem_asrange(carry, nplike)
-                if asrange is not None:
-                    return asrange
-                else:
-                    return self._getitem_array(carry, allow_lazy=True)
+                carried = self._carry_asrange(carry)
+                if carried is None:
+                    carried = self._carry(carry, allow_lazy=allow_lazy)
+                return _getitem_ensure_shape(carried, where.data.shape)
 
             elif isinstance(where, Content):
                 raise NotImplementedError("needs _getitem_next")
@@ -138,6 +143,11 @@ class Content(object):
                 )
 
         except NestedIndexError as err:
+            if isinstance(where, Content):
+                wherey = str(ak.Array(v2_to_v1(where)))
+            else:
+                wherey = repr(where)
+
             raise IndexError(
                 """cannot slice
 
@@ -147,43 +157,58 @@ with
 
     {1}
 
-because an index is out of bounds (in {2} of length {3} using sub-slice {4})""".format(
+because an index is out of bounds (in {2} with length {3}, using sub-slice {4}{5})""".format(
                     repr(ak.Array(v2_to_v1(self))),
-                    repr(where),
+                    wherey,
                     type(err.array).__name__,
                     len(err.array),
                     repr(err.slicer),
+                    "" if err.details is None else ", details: " + repr(err.details),
                 )
             )
 
-    def _getitem_asrange(self, where, nplike):
-        result = nplike.empty(1, dtype=np.bool_)
+    def _carry_asrange(self, carry):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        result = carry.nplike.empty(1, dtype=np.bool_)
         self.handle_error(
-            nplike[
+            carry.nplike[
                 "awkward_Index_iscontiguous",  # badly named
                 np.bool_,
-                where.dtype.type,
+                carry.dtype.type,
             ](
                 result,
-                where,
-                len(where),
+                carry.data,
+                len(carry),
             )
         )
         if result[0]:
-            if len(where) == len(self):
+            if len(carry) == len(self):
                 return self
-            elif len(where) < len(self):
-                return self._getitem_range(slice(0, len(where)))
+            elif len(carry) < len(self):
+                return self._getitem_range(slice(0, len(carry)))
             else:
                 raise IndexError
         else:
             return None
 
 
+def _getitem_ensure_shape(array, shape):
+    assert isinstance(array, Content)
+    if len(shape) == 1:
+        assert len(array) == shape[0]
+        return array
+    else:
+        return _getitem_ensure_shape(
+            ak._v2.contents.RegularArray(array, shape[-1], shape[-2]), shape[:-1]
+        )
+
+
 class NestedIndexError(IndexError):
-    def __init__(self, array, slicer):
+    def __init__(self, array, slicer, details=None):
         self._array = array
         self._slicer = slicer
+        self._details = details
 
     @property
     def array(self):
@@ -192,6 +217,10 @@ class NestedIndexError(IndexError):
     @property
     def slicer(self):
         return self._slicer
+
+    @property
+    def details(self):
+        return self._details
 
     def __str__(self):
         return """cannot slice
@@ -202,7 +231,8 @@ with
 
     {1}
 
-because an index is out of bounds""".format(
+because an index is out of bounds{2}""".format(
             repr(self._array),
             repr(self._slicer),
+            "" if self._details is None else " (details: " + repr(self._details) + ")",
         )

@@ -197,5 +197,7 @@ class BitMaskedArray(Content):
             lsb_order=self._lsb_order,
         )
 
-    def _getitem_array(self, where, allow_lazy):
-        return self.toByteMaskedArray()._getitem_array(where, allow_lazy)
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        return self.toByteMaskedArray()._carry(carry, allow_lazy)

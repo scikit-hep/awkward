@@ -92,8 +92,8 @@ class ListOffsetArray(Content):
         start, stop, step = where.indices(len(self))
         offsets = self._offsets[start : stop + 1]
         if len(offsets) == 0:
-            offsets = [0]
-        return ListOffsetArray(Index(offsets), self._content)
+            offsets = Index(self._offsets.nplike.array([0], dtype=self._offsets.dtype))
+        return ListOffsetArray(offsets, self._content)
 
     def _getitem_field(self, where):
         return ListOffsetArray(self._offsets, self._content[where])
@@ -101,9 +101,13 @@ class ListOffsetArray(Content):
     def _getitem_fields(self, where):
         return ListOffsetArray(self._offsets, self._content[where])
 
-    def _getitem_array(self, where, allow_lazy):
-        return ak._v2.contents.listarray.ListArray(
-            self.starts[where],
-            self.stops[where],
-            self._content,
-        )
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        try:
+            nextstarts = self.starts[carry.data]
+            nextstops = self.stops[carry.data]
+        except IndexError as err:
+            raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
+
+        return ak._v2.contents.listarray.ListArray(nextstarts, nextstops, self._content)

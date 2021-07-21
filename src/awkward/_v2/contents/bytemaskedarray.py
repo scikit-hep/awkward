@@ -111,9 +111,16 @@ class ByteMaskedArray(Content):
             self._mask, self._content[where], valid_when=self._valid_when
         )
 
-    def _getitem_array(self, where, allow_lazy):
+    def _carry(self, carry, allow_lazy):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        try:
+            nextmask = self._mask[carry.data]
+        except IndexError as err:
+            raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
+
         return ByteMaskedArray(
-            self._mask[where],
-            self._content._getitem_array(where, allow_lazy),
+            nextmask,
+            self._content._carry(carry, allow_lazy),
             valid_when=self._valid_when,
         )
