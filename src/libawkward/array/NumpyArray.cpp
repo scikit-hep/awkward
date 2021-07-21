@@ -1318,8 +1318,7 @@ namespace awkward {
       return false;
     }
     else if (dynamic_cast<SliceMissing64*>(head.get())  ||
-             dynamic_cast<SliceJagged64*>(head.get())  ||
-             dynamic_cast<SliceVarNewAxis*>(head.get())) {
+             dynamic_cast<SliceJagged64*>(head.get())) {
       return true;
     }
     else {
@@ -3918,24 +3917,6 @@ namespace awkward {
     }
   }
 
-  const ContentPtr
-  NumpyArray::getitem_next_jagged(const Index64& slicestarts,
-                                  const Index64& slicestops,
-                                  const SliceVarNewAxis& slicecontent,
-                                  const Slice& tail) const {
-    if (ndim() == 1) {
-      throw std::invalid_argument(
-        std::string("too many jagged slice dimensions for array")
-        + FILENAME(__LINE__));
-    }
-    else {
-      throw std::runtime_error(
-        std::string("undefined operation: NumpyArray::getitem_next_jagged("
-                    "varnewaxis) for ndim == ") + std::to_string(ndim())
-        + FILENAME(__LINE__));
-    }
-  }
-
   bool
   NumpyArray::iscontiguous() const {
     ssize_t x = itemsize_;
@@ -4387,13 +4368,6 @@ namespace awkward {
              dynamic_cast<SliceJagged64*>(head.get())) {
       throw std::runtime_error(
         std::string("FIXME: NumpyArray::getitem_next(jagged)") + FILENAME(__LINE__));
-    }
-    else if (SliceVarNewAxis* varnewaxis =
-             dynamic_cast<SliceVarNewAxis*>(head.get())) {
-      throw std::runtime_error(
-        std::string("undefined operation: NumpyArray::getitem_next(varnewaxis) "
-                    "(defer to Content::getitem_next(varnewaxis))")
-        + FILENAME(__LINE__));
     }
     else {
       throw std::runtime_error(
@@ -5013,38 +4987,6 @@ namespace awkward {
         numpy.tojson_string(builder, true);
       }
       builder.endlist();
-    }
-  }
-
-  const ContentPtr
-  NumpyArray::getitem_next(const SliceVarNewAxis& varnewaxis,
-                           const Slice& tail,
-                           const Index64& advanced) const {
-    if (ndim() == 1) {
-      throw std::invalid_argument(
-        std::string("too many slice dimensions for array")
-        + FILENAME(__LINE__));
-    }
-    else {
-      throw std::runtime_error(
-        std::string("undefined operation: NumpyArray::getitem_next("
-                    "varnewaxis) for ndim == ") + std::to_string(ndim())
-        + FILENAME(__LINE__));
-    }
-  }
-
-  const SliceJagged64
-  NumpyArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
-    if (ndim() == 1) {
-      throw std::invalid_argument(
-        std::string("too many slice dimensions for array")
-        + FILENAME(__LINE__));
-    }
-    else {
-      throw std::runtime_error(
-        std::string("undefined operation: NumpyArray::varaxis_to_jagged("
-                    "varnewaxis) for ndim == ") + std::to_string(ndim())
-        + FILENAME(__LINE__));
     }
   }
 

@@ -1448,10 +1448,6 @@ namespace awkward {
              dynamic_cast<SliceJagged64*>(head.get())) {
       return getitem_next(*jagged, tail, advanced);
     }
-    else if (SliceVarNewAxis* varnewaxis =
-             dynamic_cast<SliceVarNewAxis*>(head.get())) {
-      return getitem_next(*varnewaxis, tail, advanced);
-    }
     else {
       throw std::runtime_error(
         std::string("unrecognized slice type") + FILENAME(__LINE__));
@@ -1474,10 +1470,6 @@ namespace awkward {
     else if (SliceJagged64* jagged =
              dynamic_cast<SliceJagged64*>(slicecontent.get())) {
       return getitem_next_jagged(slicestarts, slicestops, *jagged, tail);
-    }
-    else if (SliceVarNewAxis* varnewaxis =
-             dynamic_cast<SliceVarNewAxis*>(slicecontent.get())) {
-      return getitem_next_jagged(slicestarts, slicestops, *varnewaxis, tail);
     }
     else {
       throw std::runtime_error(
