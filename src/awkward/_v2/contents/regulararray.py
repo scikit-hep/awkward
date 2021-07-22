@@ -79,7 +79,7 @@ class RegularArray(Content):
         if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
-        return self._content._getitem_range(start, stop)
+        return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
@@ -87,7 +87,7 @@ class RegularArray(Content):
         zeros_length = stop - start
         substart, substop = start * self._size, stop * self._size
         return RegularArray(
-            self._content._getitem_range(substart, substop),
+            self._content._getitem_range(slice(substart, substop)),
             self._size,
             zeros_length,
             self._range_identifier(start, stop),
