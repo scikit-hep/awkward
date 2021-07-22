@@ -184,23 +184,33 @@ class RecordArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
+        if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
         return Record(self, where)
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
+        assert step == 1
         if self.numcontents == 0:
             start = min(max(start, 0), self._length)
             stop = min(max(stop, 0), self._length)
             if stop < start:
                 stop = start
-            return RecordArray([], self._keys, stop - start)
-        else:
             return RecordArray(
-                [x[start:stop] for x in self._contents],
+                [],
                 self._keys,
                 stop - start,
+                self._range_identifier(start, stop),
+                self._parameters,
+            )
+        else:
+            nextslice = slice(start, stop)
+            return RecordArray(
+                [x._getitem_range(nextslice) for x in self._contents],
+                self._keys,
+                stop - start,
+                self._range_identifier(start, stop),
+                self._parameters,
             )
 
     def _getitem_field(self, where):
@@ -209,11 +219,18 @@ class RecordArray(Content):
     def _getitem_fields(self, where):
         indexes = [self.key_to_index(key) for key in where]
         if self._keys is None:
-            return RecordArray([self.content(i) for i in indexes], None)
+            return RecordArray(
+                [self.content(i) for i in indexes],
+                None,
+                self._fields_identifier(where),
+                None,
+            )
         else:
             return RecordArray(
                 [self.content(i) for i in indexes],
                 [self._keys[i] for i in indexes],
+                self._fields_identifier(where),
+                None,
             )
 
     def _carry(self, carry, allow_lazy):
@@ -233,7 +250,12 @@ class RecordArray(Content):
                 raise ak._v2.contents.content.NestedIndexError(self, where)
 
             nextindex = ak._v2.index.Index64(where)
-            return ak._v2.contents.indexedarray.IndexedArray(nextindex, self)
+            return ak._v2.contents.indexedarray.IndexedArray(
+                nextindex,
+                self,
+                self._carry_identifier(carry),
+                None,
+            )
 
         else:
             contents = [
@@ -244,7 +266,13 @@ class RecordArray(Content):
                 length = len(carry)
             else:
                 length = len(self)
-            return RecordArray(contents, self._keys, length)
+            return RecordArray(
+                contents,
+                self._keys,
+                length,
+                self._carry_identifier(carry),
+                self._parameters,
+            )
 
     def _getitem_next(self, head, tail, advanced):
         if isinstance(head, int):

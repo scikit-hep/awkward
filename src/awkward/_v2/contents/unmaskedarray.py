@@ -50,19 +50,37 @@ class UnmaskedArray(Content):
         return "".join(out)
 
     def _getitem_at(self, where):
-        return self._content[where]
+        return self._content._getitem_at(where)
 
     def _getitem_range(self, where):
-        return UnmaskedArray(self._content[where])
+        start, stop, step = where.indices(len(self))
+        assert step == 1
+        return UnmaskedArray(
+            self._content._getitem_range(slice(start, stop)),
+            self._range_identifier(start, stop),
+            self._parameters,
+        )
 
     def _getitem_field(self, where):
-        return UnmaskedArray(self._content[where])
+        return UnmaskedArray(
+            self._content[where],
+            self._field_identifier(where),
+            None,
+        )
 
     def _getitem_fields(self, where):
-        return UnmaskedArray(self._content[where])
+        return UnmaskedArray(
+            self._content[where],
+            self._fields_identifier(where),
+            None,
+        )
 
     def _carry(self, carry, allow_lazy):
-        return UnmaskedArray(self.content._carry(carry, allow_lazy))
+        return UnmaskedArray(
+            self.content._carry(carry, allow_lazy),
+            self._carry_identifier(carry),
+            self._parameters,
+        )
 
     def _getitem_next(self, head, tail, advanced):
         if isinstance(head, int):

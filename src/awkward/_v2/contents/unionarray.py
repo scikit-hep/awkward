@@ -111,23 +111,39 @@ class UnionArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
+        if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
-        return self._contents[self._tags[where]][self._index[where]]
+        tag, index = self._tags[where], self._index[where]
+        return self._contents[tag]._getitem_at(index)
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
+        assert step == 1
         return UnionArray(
             self._tags[start:stop],
             self._index[start:stop],
             self._contents,
+            self._range_identifier(start, stop),
+            self._parameters,
         )
 
     def _getitem_field(self, where):
-        return UnionArray(self._tags, self._index, [x[where] for x in self._contents])
+        return UnionArray(
+            self._tags,
+            self._index,
+            [x[where] for x in self._contents],
+            self._field_identifier(where),
+            None,
+        )
 
     def _getitem_fields(self, where):
-        return UnionArray(self._tags, self._index, [x[where] for x in self._contents])
+        return UnionArray(
+            self._tags,
+            self._index,
+            [x[where] for x in self._contents],
+            self._fields_identifer(where),
+            None,
+        )
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
@@ -138,7 +154,13 @@ class UnionArray(Content):
         except IndexError as err:
             raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
 
-        return UnionArray(nexttags, nextindex, self._contents)
+        return UnionArray(
+            nexttags,
+            nextindex,
+            self._contents,
+            self._carry_identifier(carry),
+            self._parameters,
+        )
 
     def _getitem_next(self, head, tail, advanced):
         if isinstance(head, int):

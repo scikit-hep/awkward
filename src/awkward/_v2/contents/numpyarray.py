@@ -104,14 +104,24 @@ class NumpyArray(Content):
         return "".join(out)
 
     def _getitem_at(self, where):
-        out = self._data[where]
+        try:
+            out = self._data[where]
+        except IndexError as err:
+            raise ak._v2.contents.content.NestedIndexError(self, where, str(err))
+
         if hasattr(out, "shape") and len(out.shape) != 0:
-            return NumpyArray(out)
+            return NumpyArray(out, None, None)
         else:
             return out
 
     def _getitem_range(self, where):
-        return NumpyArray(self._data[where])
+        start, stop, step = where.indices(len(self))
+        assert step == 1
+        return NumpyArray(
+            self._data[where],
+            self._range_identifier(start, stop),
+            self._parameters,
+        )
 
     def _getitem_field(self, where):
         raise IndexError("field " + repr(where) + " not found")
@@ -127,7 +137,7 @@ class NumpyArray(Content):
         except IndexError as err:
             raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
 
-        return NumpyArray(nextdata)
+        return NumpyArray(nextdata, self._carry_identifier(carry), self._parameters)
 
     def _getitem_next(self, head, tail, advanced):
         if isinstance(head, int):

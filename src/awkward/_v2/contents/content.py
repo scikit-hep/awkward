@@ -266,6 +266,30 @@ because an index is out of bounds (in {2} with length {3}, using sub-slice {4}{5
         else:
             return None
 
+    def _range_identifier(self, start, stop):
+        if self._identifier is None:
+            return None
+        else:
+            raise NotImplementedError
+
+    def _field_identifier(self, field):
+        if self._identifier is None:
+            return None
+        else:
+            raise NotImplementedError
+
+    def _fields_identifier(self, fields):
+        if self._identifier is None:
+            return None
+        else:
+            raise NotImplementedError
+
+    def _carry_identifier(self, carry):
+        if self._identifier is None:
+            return None
+        else:
+            raise NotImplementedError
+
 
 def _getitem_ensure_shape(array, shape):
     assert isinstance(array, Content)

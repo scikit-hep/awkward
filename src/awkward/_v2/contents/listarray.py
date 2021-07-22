@@ -87,21 +87,39 @@ class ListArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
+        if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
-        return self._content[self._starts[where] : self._stops[where]]
+        start, stop = self._starts[where], self._stops[where]
+        return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
-        starts = self._starts[start:stop]
-        stops = self._stops[start:stop]
-        return ListArray(starts, stops, self._content)
+        assert step == 1
+        return ListArray(
+            self._starts[start:stop],
+            self._stops[start:stop],
+            self._content,
+            self._range_identifier(start, stop),
+            self._parameters,
+        )
 
     def _getitem_field(self, where):
-        return ListArray(self._starts, self._stops, self._content[where])
+        return ListArray(
+            self._starts,
+            self._stops,
+            self._content._getitem_field(where),
+            self._field_identifier(where),
+            None,
+        )
 
     def _getitem_fields(self, where):
-        return ListArray(self._starts, self._stops, self._content[where])
+        return ListArray(
+            self._starts,
+            self._stops,
+            self._content[where],
+            self._fields_identifier(where),
+            None,
+        )
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
@@ -112,7 +130,13 @@ class ListArray(Content):
         except IndexError as err:
             raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
 
-        return ListArray(nextstarts, nextstops, self._content)
+        return ListArray(
+            nextstarts,
+            nextstops,
+            self._content,
+            self._carry_identifier(carry),
+            self._parameters,
+        )
 
     def _getitem_next(self, head, tail, advanced):
         if isinstance(head, int):

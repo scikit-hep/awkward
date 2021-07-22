@@ -84,22 +84,38 @@ class ListOffsetArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
+        if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
-        return self._content[self._offsets[where] : self._offsets[where + 1]]
+        start, stop = self._offsets[where], self._offsets[where + 1]
+        return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
         offsets = self._offsets[start : stop + 1]
         if len(offsets) == 0:
             offsets = Index(self._offsets.nplike.array([0], dtype=self._offsets.dtype))
-        return ListOffsetArray(offsets, self._content)
+        return ListOffsetArray(
+            offsets,
+            self._content,
+            self._range_identifier(start, stop),
+            self._parameters,
+        )
 
     def _getitem_field(self, where):
-        return ListOffsetArray(self._offsets, self._content[where])
+        return ListOffsetArray(
+            self._offsets,
+            self._content._getitem_field(where),
+            self._field_identifier(where),
+            None,
+        )
 
     def _getitem_fields(self, where):
-        return ListOffsetArray(self._offsets, self._content[where])
+        return ListOffsetArray(
+            self._offsets,
+            self._content._getitem_fields(where),
+            self._fields_identifier(where),
+            None,
+        )
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
@@ -110,7 +126,13 @@ class ListOffsetArray(Content):
         except IndexError as err:
             raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
 
-        return ak._v2.contents.listarray.ListArray(nextstarts, nextstops, self._content)
+        return ak._v2.contents.listarray.ListArray(
+            nextstarts,
+            nextstops,
+            self._content,
+            self._carry_identifier(carry),
+            self._parameters,
+        )
 
     def _getitem_next(self, head, tail, advanced):
         if isinstance(head, int):

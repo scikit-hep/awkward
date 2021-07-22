@@ -86,29 +86,40 @@ class ByteMaskedArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
+        if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
         if self._mask[where] == self._valid_when:
-            return self._content[where]
+            return self._content._getitem_at(where)
         else:
             return None
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
+        assert step == 1
         return ByteMaskedArray(
             self._mask[start:stop],
             self._content._getitem_range(slice(start, stop)),
-            valid_when=self._valid_when,
+            self._valid_when,
+            self._range_identifier(start, stop),
+            self._parameters,
         )
 
     def _getitem_field(self, where):
         return ByteMaskedArray(
-            self._mask, self._content[where], valid_when=self._valid_when
+            self._mask,
+            self._content._getitem_field(where),
+            self._valid_when,
+            self._field_identifier(where),
+            None,
         )
 
     def _getitem_fields(self, where):
         return ByteMaskedArray(
-            self._mask, self._content[where], valid_when=self._valid_when
+            self._mask,
+            self._content._getitem_fields(where),
+            self._valid_when,
+            self._fields_identifier(where),
+            None,
         )
 
     def _carry(self, carry, allow_lazy):
@@ -122,7 +133,9 @@ class ByteMaskedArray(Content):
         return ByteMaskedArray(
             nextmask,
             self._content._carry(carry, allow_lazy),
-            valid_when=self._valid_when,
+            self._valid_when,
+            self._carry_identifier(carry),
+            self._parameters,
         )
 
     def _getitem_next(self, head, tail, advanced):

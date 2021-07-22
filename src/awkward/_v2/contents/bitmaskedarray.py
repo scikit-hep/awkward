@@ -165,14 +165,14 @@ class BitMaskedArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
+        if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
         else:
             bit = bool(self._mask[where // 8] & (128 >> (where % 8)))
         if bit == self._valid_when:
-            return self._content[where]
+            return self._content._getitem_at(where)
         else:
             return None
 
@@ -182,19 +182,23 @@ class BitMaskedArray(Content):
     def _getitem_field(self, where):
         return BitMaskedArray(
             self._mask,
-            self._content[where],
-            valid_when=self._valid_when,
-            length=self._length,
-            lsb_order=self._lsb_order,
+            self._content._getitem_field(where),
+            self._valid_when,
+            self._length,
+            self._lsb_order,
+            self._field_identifier(where),
+            None,
         )
 
     def _getitem_fields(self, where):
         return BitMaskedArray(
             self._mask,
-            self._content[where],
-            valid_when=self._valid_when,
-            length=self._length,
-            lsb_order=self._lsb_order,
+            self._content._getitem_fields(where),
+            self._valid_when,
+            self._length,
+            self._lsb_order,
+            self._fields_identifier(where),
+            None,
         )
 
     def _carry(self, carry, allow_lazy):

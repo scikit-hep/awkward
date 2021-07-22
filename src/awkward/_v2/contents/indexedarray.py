@@ -73,18 +73,35 @@ class IndexedArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
+        if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
-        return self._content[self._index[where]]
+        return self._content._getitem_at(self._index[where])
 
     def _getitem_range(self, where):
-        return IndexedArray(self._index[where.start : where.stop], self._content)
+        start, stop, step = where.indices(len(self))
+        assert step == 1
+        return IndexedArray(
+            self._index[start:stop],
+            self._content,
+            self._range_identifier(start, stop),
+            self._parameters,
+        )
 
     def _getitem_field(self, where):
-        return IndexedArray(self._index, self._content[where])
+        return IndexedArray(
+            self._index,
+            self._content._getitem_field(where),
+            self._field_identifier(where),
+            None,
+        )
 
     def _getitem_fields(self, where):
-        return IndexedArray(self._index, self._content[where])
+        return IndexedArray(
+            self._index,
+            self._content._getitem_fields(where),
+            self._fields_identifier(where),
+            None,
+        )
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
@@ -94,7 +111,12 @@ class IndexedArray(Content):
         except IndexError as err:
             raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
 
-        return IndexedArray(nextindex, self._content)
+        return IndexedArray(
+            nextindex,
+            self._content,
+            self._carry_identifier(carry),
+            self._parameters,
+        )
 
     def _getitem_next(self, head, tail, advanced):
         if isinstance(head, int):

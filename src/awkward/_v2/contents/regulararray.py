@@ -76,22 +76,41 @@ class RegularArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
+        if not (0 <= where < len(self)):
             raise ak._v2.contents.content.NestedIndexError(self, where)
-        return self._content[(where) * self._size : (where + 1) * self._size]
+        start, stop = (where) * self._size, (where + 1) * self._size
+        return self._content._getitem_range(start, stop)
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
+        assert step == 1
         zeros_length = stop - start
-        start *= self._size
-        stop *= self._size
-        return RegularArray(self._content[start:stop], self._size, zeros_length)
+        substart, substop = start * self._size, stop * self._size
+        return RegularArray(
+            self._content._getitem_range(substart, substop),
+            self._size,
+            zeros_length,
+            self._range_identifier(start, stop),
+            self._parameters,
+        )
 
     def _getitem_field(self, where):
-        return RegularArray(self._content[where], self._size, self._length)
+        return RegularArray(
+            self._content._getitem_field(where),
+            self._size,
+            self._length,
+            self._field_identifier(where),
+            None,
+        )
 
     def _getitem_fields(self, where):
-        return RegularArray(self._content[where], self._size, self._length)
+        return RegularArray(
+            self._content._getitem_fields(where),
+            self._size,
+            self._length,
+            self._fields_identifier(where),
+            None,
+        )
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
@@ -131,6 +150,8 @@ class RegularArray(Content):
             self._content._carry(nextcarry, allow_lazy),
             self._size,
             len(where),
+            self._carry_identifier(carry),
+            self._parameters,
         )
 
     def _getitem_next(self, head, tail, advanced):
