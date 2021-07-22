@@ -11,7 +11,7 @@ def test():
     array = ak.Array(
         ak.layout.ListOffsetArray64(
             ak.layout.Index64(np.r_[0, 4, 4, 6]),
-            ak.layout.NumpyArray(np.arange(4 * 6).reshape(6, 4)),
+            ak.layout.NumpyArray(np.arange(4 * 6, dtype=np.int64).reshape(6, 4)),
         )
     )
     ix = ak.Array([[[0], [1], [2], [3]], [], [[3], [2]]])
