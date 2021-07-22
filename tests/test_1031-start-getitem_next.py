@@ -2756,7 +2756,7 @@ def test_UnionArray_NumpyArray():
 
 def test_RegularArray_RecordArray_NumpyArray():
     # 6.6 is inaccessible
-    a = ak._v2.contents.regulararray.RegularArray(
+    a = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
         ak._v2.contents.recordarray.RecordArray(
             [
                 ak._v2.contents.numpyarray.NumpyArray(
@@ -2840,7 +2840,7 @@ def test_RegularArray_RecordArray_NumpyArray():
     #         "bad",
     #     ]
 
-    b = ak._v2.contents.regulararray.RegularArray(
+    b = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
         ak._v2.contents.recordarray.RecordArray(
             [ak._v2.contents.emptyarray.EmptyArray()], ["nest"]
         ),
@@ -2900,7 +2900,7 @@ def test_RegularArray_RecordArray_NumpyArray():
 def test_ListArray_RecordArray_NumpyArray():
     # 200 is inaccessible in stops
     # 6.6, 7.7, and 8.8 are inaccessible in content
-    a = ak._v2.contents.listarray.ListArray(
+    a = ak._v2.contents.listarray.ListArray(  # noqa: F841
         ak._v2.index.Index(np.array([4, 100, 1])),
         ak._v2.index.Index(np.array([7, 100, 3, 200])),
         ak._v2.contents.recordarray.RecordArray(
@@ -3040,7 +3040,7 @@ def test_ListArray_RecordArray_NumpyArray():
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
     # 6.6 and 7.7 are inaccessible
-    a = ak._v2.contents.listoffsetarray.ListOffsetArray(
+    a = ak._v2.contents.listoffsetarray.ListOffsetArray(  # noqa: F841
         ak._v2.index.Index(np.array([1, 4, 4, 6])),
         ak._v2.contents.recordarray.RecordArray(
             [
@@ -3179,7 +3179,7 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
 
 def test_IndexedArray_RecordArray_NumpyArray():
     # 4.4 is inaccessible; 3.3 and 5.5 appear twice
-    a = ak._v2.contents.indexedarray.IndexedArray(
+    a = ak._v2.contents.indexedarray.IndexedArray(  # noqa: F841
         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
         ak._v2.contents.recordarray.RecordArray(
             [
@@ -3348,7 +3348,7 @@ def test_IndexedArray_RecordArray_NumpyArray():
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
     # 1.1 and 4.4 are inaccessible; 3.3 appears twice
-    a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+    a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
         ak._v2.contents.recordarray.RecordArray(
             [
@@ -3529,7 +3529,7 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
     # 2.2, 4.4, and 6.6 are inaccessible
-    a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+    a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
         ak._v2.contents.recordarray.RecordArray(
             [
@@ -3685,7 +3685,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     #     ]
 
     # 2.2, 4.4, and 6.6 are inaccessible
-    b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+    b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
         ak._v2.contents.recordarray.RecordArray(
             [
@@ -4127,7 +4127,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     #     ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+    b = ak._v2.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
         ak._v2.index.Index(
             np.packbits(
                 np.array(
@@ -4419,7 +4419,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     #     ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+    c = ak._v2.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
         ak._v2.index.Index(
             np.packbits(
                 np.array(
@@ -4714,7 +4714,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     #     ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+    d = ak._v2.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
         ak._v2.index.Index(
             np.packbits(
                 np.array(
@@ -5010,7 +5010,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
-    a = ak._v2.contents.unmaskedarray.UnmaskedArray(
+    a = ak._v2.contents.unmaskedarray.UnmaskedArray(  # noqa: F841
         ak._v2.contents.recordarray.RecordArray(
             [
                 ak._v2.contents.numpyarray.NumpyArray(
@@ -5085,7 +5085,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
 def test_UnionArray_RecordArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
-    a = ak._v2.contents.unionarray.UnionArray(
+    a = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
