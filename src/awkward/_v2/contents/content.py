@@ -93,7 +93,10 @@ class Content(object):
                 raise NotImplementedError("needs _getitem_next")
 
             elif isinstance(where, tuple):
-                raise NotImplementedError("needs _getitem_next")
+                if len(where) == 0:
+                    return self
+                next = ak._v2.contents.RegularArray(self, len(self), 1)
+                return next._getitem_next(where[0], where[1:], None)
 
             elif isinstance(where, ak.highlevel.Array):
                 raise NotImplementedError("needs _getitem_next")
