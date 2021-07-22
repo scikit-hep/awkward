@@ -11,7 +11,7 @@ behavior = {}
 
 
 @ak.mixin_class(behavior, "1030_point")
-class AVeryVeryVeryLargeClassName:
+class AVeryVeryVeryLargeClassName(object):
     @property
     def mag2(self):
         return self.x ** 2 + self.y ** 2
