@@ -114,7 +114,7 @@ class RegularArray(Content):
             raise ak._v2.contents.content.NestedIndexError(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
-        self.handle_error(
+        self._handle_error(
             nplike[
                 "awkward_RegularArray_getitem_carry",
                 nextcarry.dtype.type,

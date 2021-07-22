@@ -123,7 +123,7 @@ class BitMaskedArray(Content):
     def bytemask(self):
         nplike = self._mask.nplike
         bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
-        self.handle_error(
+        self._handle_error(
             nplike[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,
@@ -141,7 +141,7 @@ class BitMaskedArray(Content):
     def toByteMaskedArray(self):
         nplike = self._mask.nplike
         bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
-        self.handle_error(
+        self._handle_error(
             nplike[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,

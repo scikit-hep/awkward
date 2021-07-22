@@ -44,7 +44,7 @@ class Content(object):
     def parameters(self):
         return self._parameters
 
-    def handle_error(self, error):
+    def _handle_error(self, error):
         if error.str is not None:
             if error.filename is None:
                 filename = ""
@@ -245,7 +245,7 @@ because an index is out of bounds (in {2} with length {3}, using sub-slice {4}{5
         assert isinstance(carry, ak._v2.index.Index)
 
         result = carry.nplike.empty(1, dtype=np.bool_)
-        self.handle_error(
+        self._handle_error(
             carry.nplike[
                 "awkward_Index_iscontiguous",  # badly named
                 np.bool_,
