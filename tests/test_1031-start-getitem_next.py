@@ -6,6 +6,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+from awkward._v2.tmp_for_testing import v1_to_v2
+
 
 def test_EmptyArray():
     a = ak._v2.contents.emptyarray.EmptyArray()
@@ -38,39 +40,63 @@ def test_EmptyArray():
     #     ]
 
 
+def test_NumpyArray_toRegularArray():
+    a = v1_to_v2(ak.from_numpy(np.arange(2 * 3 * 5).reshape(2, 3, 5)).layout)
+    b = a.toRegularArray()
+    assert isinstance(b, ak._v2.contents.RegularArray)
+    assert len(b) == len(a) == 2
+    assert b.size == 3
+    assert isinstance(b.content, ak._v2.contents.RegularArray)
+    assert len(b.content) == 6
+    assert b.content.size == 5
+    assert isinstance(b.content.content, ak._v2.contents.NumpyArray)
+    assert len(b.content.content) == 30
+
+    a = v1_to_v2(ak.from_numpy(np.arange(2 * 0 * 5).reshape(2, 0, 5)).layout)
+    b = a.toRegularArray()
+    assert isinstance(b, ak._v2.contents.RegularArray)
+    assert len(b) == len(a) == 2
+    assert b.size == 0
+    assert isinstance(b.content, ak._v2.contents.RegularArray)
+    assert len(b.content) == 0
+    assert b.content.size == 5
+    assert isinstance(b.content.content, ak._v2.contents.NumpyArray)
+    assert len(b.content.content) == 0
+
+
 def test_NumpyArray():
     a = ak._v2.contents.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
     )
     assert len(a) == 4
-    # assert (
-    #     a[
-    #         2,
-    #     ]
-    #     == 2.2
-    # )
-    # assert (
-    #     a[
-    #         -2,
-    #     ]
-    #     == 2.2
-    # )
-    # assert (
-    #     type(
-    #         a[
-    #             2,
-    #         ]
-    #     )
-    #     is np.float64
-    # )
-    # with pytest.raises(IndexError):
-    #     a[
-    #         4,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[
-    #         -5,
-    #     ]
+    assert (
+        a[
+            2,
+        ]
+        == 2.2
+    )
+    assert (
+        a[
+            -2,
+        ]
+        == 2.2
+    )
+    assert (
+        type(
+            a[
+                2,
+            ]
+        )
+        is np.float64
+    )
+    with pytest.raises(IndexError):
+        a[
+            4,
+        ]
+    with pytest.raises(IndexError):
+        a[
+            -5,
+        ]
     # assert isinstance(
     #     a[
     #         2:,
@@ -104,30 +130,30 @@ def test_NumpyArray():
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     )
     assert len(b) == 2
-    # assert isinstance(
-    #     b[
-    #         1,
-    #     ],
-    #     ak._v2.contents.numpyarray.NumpyArray,
-    # )
-    # assert (
-    #     len(
-    #         b[
-    #             1,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # with pytest.raises(IndexError):
-    #     b[
-    #         2,
-    #     ]
-    # assert (
-    #     b[1,][2,][  # noqa: E231
-    #         0,
-    #     ]
-    #     == 25
-    # )
+    assert isinstance(
+        b[
+            1,
+        ],
+        ak._v2.contents.numpyarray.NumpyArray,
+    )
+    assert (
+        len(
+            b[
+                1,
+            ]
+        )
+        == 3
+    )
+    with pytest.raises(IndexError):
+        b[
+            2,
+        ]
+    assert (
+        b[1,][2,][  # noqa: E231
+            0,
+        ]
+        == 25
+    )
     # assert (
     #     len(
     #         b[1,][2,][  # noqa: E231

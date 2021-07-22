@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import numpy as np
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError
 
 
 class RegularArray(Content):
@@ -46,6 +46,10 @@ class RegularArray(Content):
         return self._content
 
     @property
+    def nplike(self):
+        return self._content.nplike
+
+    @property
     def form(self):
         return ak._v2.forms.RegularForm(
             self._content.form,
@@ -77,7 +81,7 @@ class RegularArray(Content):
         if where < 0:
             where += len(self)
         if not (0 <= where < len(self)):
-            raise ak._v2.contents.content.NestedIndexError(self, where)
+            raise NestedIndexError(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))
 
@@ -112,7 +116,7 @@ class RegularArray(Content):
             None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
         nplike, where = carry.nplike, carry.data
@@ -130,7 +134,7 @@ class RegularArray(Content):
             where[negative] += self._length
 
         if nplike.any(where >= self._length):
-            raise ak._v2.contents.content.NestedIndexError(self, where)
+            raise NestedIndexError(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
         self._handle_error(
@@ -143,20 +147,38 @@ class RegularArray(Content):
                 where,
                 len(where),
                 self._size,
-            )
+            ),
+            carry,
         )
 
         return RegularArray(
-            self._content._carry(nextcarry, allow_lazy),
+            self._content._carry(nextcarry, allow_lazy, exception),
             self._size,
             len(where),
-            self._carry_identifier(carry),
+            self._carry_identifier(carry, exception),
             self._parameters,
         )
 
     def _getitem_next(self, head, tail, advanced):
-        if isinstance(head, int):
+        nplike = self.nplike
+
+        if head is None:
             raise NotImplementedError
+
+        elif isinstance(head, int):
+            nexthead, nexttail = self._headtail(tail)
+            nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
+            self._handle_error(
+                nplike["awkward_RegularArray_getitem_next_at", nextcarry.dtype.type](
+                    nextcarry.data,
+                    head,
+                    self._length,
+                    self._size,
+                ),
+                head,
+            )
+            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
             raise NotImplementedError

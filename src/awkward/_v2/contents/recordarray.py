@@ -10,7 +10,7 @@ except ImportError:
 import numpy as np
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.record import Record
 
 
@@ -95,6 +95,13 @@ class RecordArray(Content):
     @property
     def is_tuple(self):
         return self._keys is None
+
+    @property
+    def nplike(self):
+        if len(self._contents) == 0:
+            return ak.nplike.Numpy.instance()
+        else:
+            return self._contents[0].nplike
 
     @property
     def form(self):
@@ -185,7 +192,7 @@ class RecordArray(Content):
         if where < 0:
             where += len(self)
         if not (0 <= where < len(self)):
-            raise ak._v2.contents.content.NestedIndexError(self, where)
+            raise NestedIndexError(self, where)
         return Record(self, where)
 
     def _getitem_range(self, where):
@@ -233,7 +240,7 @@ class RecordArray(Content):
                 None,
             )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
         if allow_lazy:
@@ -247,19 +254,22 @@ class RecordArray(Content):
                 where[negative] += self._length
 
             if nplike.any(where >= self._length):
-                raise ak._v2.contents.content.NestedIndexError(self, where)
+                if issubclass(exception, NestedIndexError):
+                    raise exception(self, where)
+                else:
+                    raise exception("index out of range")
 
             nextindex = ak._v2.index.Index64(where)
             return ak._v2.contents.indexedarray.IndexedArray(
                 nextindex,
                 self,
-                self._carry_identifier(carry),
+                self._carry_identifier(carry, exception),
                 None,
             )
 
         else:
             contents = [
-                self.content(i)._carry(carry, allow_lazy)
+                self.content(i)._carry(carry, allow_lazy, exception)
                 for i in range(self.numcontents)
             ]
             if issubclass(carry.dtype.type, np.integer):
@@ -270,12 +280,17 @@ class RecordArray(Content):
                 contents,
                 self._keys,
                 length,
-                self._carry_identifier(carry),
+                self._carry_identifier(carry, exception),
                 self._parameters,
             )
 
     def _getitem_next(self, head, tail, advanced):
-        if isinstance(head, int):
+        nplike = self.nplike  # noqa: F841
+
+        if head is None:
+            raise NotImplementedError
+
+        elif isinstance(head, int):
             raise NotImplementedError
 
         elif isinstance(head, slice):

@@ -3,14 +3,14 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError
 
 np = ak.nplike.NumpyMetadata.instance()
 
 
 class NumpyArray(Content):
-    def __init__(self, data, identifier=None, parameters=None):
-        self._nplike = ak.nplike.of(data)
+    def __init__(self, data, identifier=None, parameters=None, nplike=None):
+        self._nplike = ak.nplike.of(data) if nplike is None else nplike
         self._data = self._nplike.asarray(data)
 
         if (
@@ -36,10 +36,6 @@ class NumpyArray(Content):
         self._init(identifier, parameters)
 
     @property
-    def nplike(self):
-        return self._nplike
-
-    @property
     def data(self):
         return self._data
 
@@ -54,6 +50,10 @@ class NumpyArray(Content):
     @property
     def dtype(self):
         return self._data.dtype
+
+    @property
+    def nplike(self):
+        return self._nplike
 
     @property
     def form(self):
@@ -103,14 +103,31 @@ class NumpyArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toRegularArray(self):
+        if len(self._data.shape) == 1:
+            return self
+        else:
+            return ak._v2.contents.RegularArray(
+                NumpyArray(
+                    self._data.reshape((-1,) + self._data.shape[2:]),
+                    None,
+                    None,
+                    nplike=self._nplike,
+                ).toRegularArray(),
+                self._data.shape[1],
+                self._data.shape[0],
+                self._identifier,
+                self._parameters,
+            )
+
     def _getitem_at(self, where):
         try:
             out = self._data[where]
         except IndexError as err:
-            raise ak._v2.contents.content.NestedIndexError(self, where, str(err))
+            raise NestedIndexError(self, where, str(err))
 
         if hasattr(out, "shape") and len(out.shape) != 0:
-            return NumpyArray(out, None, None)
+            return NumpyArray(out, None, None, nplike=self._nplike)
         else:
             return out
 
@@ -121,6 +138,7 @@ class NumpyArray(Content):
             self._data[where],
             self._range_identifier(start, stop),
             self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_field(self, where):
@@ -129,18 +147,31 @@ class NumpyArray(Content):
     def _getitem_fields(self, where):
         raise IndexError("fields " + repr(where) + " not found")
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
         try:
             nextdata = self._data[carry.data]
         except IndexError as err:
-            raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
+            if issubclass(exception, NestedIndexError):
+                raise exception(self, carry.data, str(err))
+            else:
+                raise exception(str(err))
 
-        return NumpyArray(nextdata, self._carry_identifier(carry), self._parameters)
+        return NumpyArray(
+            nextdata,
+            self._carry_identifier(carry, exception),
+            self._parameters,
+            nplike=self._nplike,
+        )
 
     def _getitem_next(self, head, tail, advanced):
-        if isinstance(head, int):
+        nplike = self.nplike  # noqa: F841
+
+        if head is None:
+            return self
+
+        elif isinstance(head, int):
             raise NotImplementedError
 
         elif isinstance(head, slice):

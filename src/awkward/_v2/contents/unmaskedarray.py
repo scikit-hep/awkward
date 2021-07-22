@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError  # noqa: F401
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -23,6 +23,10 @@ class UnmaskedArray(Content):
     @property
     def content(self):
         return self._content
+
+    @property
+    def nplike(self):
+        return self._content.nplike
 
     @property
     def form(self):
@@ -75,15 +79,20 @@ class UnmaskedArray(Content):
             None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry, allow_lazy, exception):
         return UnmaskedArray(
-            self.content._carry(carry, allow_lazy),
-            self._carry_identifier(carry),
+            self.content._carry(carry, allow_lazy, exception),
+            self._carry_identifier(carry, exception),
             self._parameters,
         )
 
     def _getitem_next(self, head, tail, advanced):
-        if isinstance(head, int):
+        nplike = self.nplike  # noqa: F841
+
+        if head is None:
+            raise NotImplementedError
+
+        elif isinstance(head, int):
             raise NotImplementedError
 
         elif isinstance(head, slice):

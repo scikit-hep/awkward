@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -26,11 +26,15 @@ class EmptyArray(Content):
             form_key=None,
         )
 
+    @property
+    def nplike(self):
+        return ak.nplike.Numpy.instance()
+
     def __len__(self):
         return 0
 
     def _getitem_at(self, where):
-        raise ak._v2.contents.content.NestedIndexError(self, where)
+        raise NestedIndexError(self, where)
 
     def _getitem_range(self, where):
         return self
@@ -41,16 +45,24 @@ class EmptyArray(Content):
     def _getitem_fields(self, where):
         raise IndexError("fields " + repr(where) + " not found")
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
         if len(carry) == 0:
             return self
         else:
-            raise ak._v2.contents.content.NestedIndexError(self, carry.data)
+            if issubclass(exception, NestedIndexError):
+                raise exception(self, carry.data)
+            else:
+                raise exception("index out of range")
 
     def _getitem_next(self, head, tail, advanced):
-        if isinstance(head, int):
+        nplike = self.nplike  # noqa: F841
+
+        if head is None:
+            raise NotImplementedError
+
+        elif isinstance(head, int):
             raise NotImplementedError
 
         elif isinstance(head, slice):

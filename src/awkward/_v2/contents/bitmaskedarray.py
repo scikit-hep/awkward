@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.index import Index
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
 
@@ -88,6 +88,10 @@ class BitMaskedArray(Content):
         return self._lsb_order
 
     @property
+    def nplike(self):
+        return self._mask.nplike
+
+    @property
     def form(self):
         return ak._v2.forms.BitMaskedForm(
             self._mask.form,
@@ -166,7 +170,7 @@ class BitMaskedArray(Content):
         if where < 0:
             where += len(self)
         if not (0 <= where < len(self)):
-            raise ak._v2.contents.content.NestedIndexError(self, where)
+            raise NestedIndexError(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
         else:
@@ -201,13 +205,18 @@ class BitMaskedArray(Content):
             None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
-        return self.toByteMaskedArray()._carry(carry, allow_lazy)
+        return self.toByteMaskedArray()._carry(carry, allow_lazy, exception)
 
     def _getitem_next(self, head, tail, advanced):
-        if isinstance(head, int):
+        nplike = self.nplike  # noqa: F841
+
+        if head is None:
+            raise NotImplementedError
+
+        elif isinstance(head, int):
             raise NotImplementedError
 
         elif isinstance(head, slice):

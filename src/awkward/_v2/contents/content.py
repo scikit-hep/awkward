@@ -44,12 +44,14 @@ class Content(object):
     def parameters(self):
         return self._parameters
 
-    def _handle_error(self, error):
+    def _handle_error(self, error, slicer=None):
         if error.str is not None:
             if error.filename is None:
                 filename = ""
             else:
-                filename = error.filename.decode(errors="surrogateescape")
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
 
             message = error.str.decode(errors="surrogateescape")
 
@@ -62,13 +64,22 @@ class Content(object):
                     pass
 
                 if error.attempt != ak._util.kSliceNone:
-                    message += " (attempting to get {0})".format(error.attempt)
+                    message += " while attempting to get index {0}".format(
+                        error.attempt
+                    )
 
-                # FIXME: attempt to pretty-print the array at this point; fall back to class name
-                pretty = " in " + type(self).__name__
+                message += filename
 
-                message += pretty
-                raise ValueError(message + filename)
+                if slicer is None:
+                    raise ValueError(message)
+                else:
+                    raise NestedIndexError(self, slicer, message)
+
+    def _headtail(self, oldtail):
+        if len(oldtail) == 0:
+            return None, ()
+        else:
+            return oldtail[0], oldtail[1:]
 
     def __getitem__(self, where):
         try:
@@ -111,7 +122,7 @@ class Content(object):
                 carry, allow_lazy = self._prepare_array(where)
                 carried = self._carry_asrange(carry)
                 if carried is None:
-                    carried = self._carry(carry, allow_lazy=allow_lazy)
+                    carried = self._carry(carry, allow_lazy, NestedIndexError)
                 return _getitem_ensure_shape(carried, where.data.shape)
 
             elif isinstance(where, Content):
@@ -149,13 +160,13 @@ with
 
     {1}
 
-because an index is out of bounds (in {2} with length {3}, using sub-slice {4}{5})""".format(
+because an index is out of bounds (in {2} with length {3}, using sub-slice {4}){5}""".format(
                     repr(ak.Array(v2_to_v1(self))),
                     wherey,
                     type(err.array).__name__,
                     len(err.array),
                     repr(err.slicer),
-                    "" if err.details is None else ", details: " + repr(err.details),
+                    "" if err.details is None else "\n\nDetails: " + err.details,
                 )
             )
 
@@ -284,7 +295,7 @@ because an index is out of bounds (in {2} with length {3}, using sub-slice {4}{5
         else:
             raise NotImplementedError
 
-    def _carry_identifier(self, carry):
+    def _carry_identifier(self, carry, exception):
         if self._identifier is None:
             return None
         else:
@@ -321,16 +332,8 @@ class NestedIndexError(IndexError):
         return self._details
 
     def __str__(self):
-        return """cannot slice
-
-    {0}
-
-with
-
-    {1}
-
-because an index is out of bounds{2}""".format(
-            repr(self._array),
+        return "cannot slice {0} with {1}{2}".format(
+            type(self._array).__name__,
             repr(self._slicer),
-            "" if self._details is None else " (details: " + repr(self._details) + ")",
+            "" if self._details is None else ": " + self._details,
         )

@@ -8,7 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.index import Index
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -77,6 +77,10 @@ class UnionArray(Content):
         return self._contents
 
     @property
+    def nplike(self):
+        return self._tags.nplike
+
+    @property
     def form(self):
         return ak._v2.forms.UnionForm(
             self._tags.form,
@@ -112,7 +116,7 @@ class UnionArray(Content):
         if where < 0:
             where += len(self)
         if not (0 <= where < len(self)):
-            raise ak._v2.contents.content.NestedIndexError(self, where)
+            raise NestedIndexError(self, where)
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
 
@@ -145,25 +149,33 @@ class UnionArray(Content):
             None,
         )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
         try:
             nexttags = self._tags[carry.data]
             nextindex = self._index[: len(self._tags)][carry.data]
         except IndexError as err:
-            raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
+            if issubclass(exception, NestedIndexError):
+                raise exception(self, carry.data, str(err))
+            else:
+                raise exception(str(err))
 
         return UnionArray(
             nexttags,
             nextindex,
             self._contents,
-            self._carry_identifier(carry),
+            self._carry_identifier(carry, exception),
             self._parameters,
         )
 
     def _getitem_next(self, head, tail, advanced):
-        if isinstance(head, int):
+        nplike = self.nplike  # noqa: F841
+
+        if head is None:
+            raise NotImplementedError
+
+        elif isinstance(head, int):
             raise NotImplementedError
 
         elif isinstance(head, slice):
