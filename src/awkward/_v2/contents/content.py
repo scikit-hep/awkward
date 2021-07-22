@@ -93,6 +93,10 @@ class Content(object):
             elif isinstance(where, tuple):
                 if len(where) == 0:
                     return self
+
+                if len(where) == 1:
+                    return self.__getitem__(where[0])
+
                 nextwhere = tuple(self._prepare_tuple_item(x) for x in where)
                 next = ak._v2.contents.RegularArray(self, len(self), 1)
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
