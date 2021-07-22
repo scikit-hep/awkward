@@ -71,8 +71,6 @@ class Content(object):
                 raise ValueError(message + filename)
 
     def __getitem__(self, where):
-        import awkward._v2.contents.numpyarray
-
         try:
             if ak._util.isint(where):
                 return self._getitem_at(where)
@@ -81,54 +79,45 @@ class Content(object):
                 return self._getitem_range(where)
 
             elif isinstance(where, slice):
-                raise NotImplementedError("needs _getitem_next")
+                return self.__getitem__((where,))
 
             elif ak._util.isstr(where):
                 return self._getitem_field(where)
 
             elif where is np.newaxis:
-                raise NotImplementedError("needs _getitem_next")
+                return self.__getitem__((where,))
 
             elif where is Ellipsis:
-                raise NotImplementedError("needs _getitem_next")
+                return self.__getitem__((where,))
 
             elif isinstance(where, tuple):
                 if len(where) == 0:
                     return self
+                nextwhere = tuple(self._prepare_tuple_item(x) for x in where)
                 next = ak._v2.contents.RegularArray(self, len(self), 1)
-                return next._getitem_next(where[0], where[1:], None)
+                out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
+                if len(out) == 0:
+                    raise NotImplementedError
+                else:
+                    return out._getitem_at(0)
 
             elif isinstance(where, ak.highlevel.Array):
-                raise NotImplementedError("needs _getitem_next")
+                return self.__getitem__(where.layout)
 
-            elif isinstance(where, awkward._v2.contents.numpyarray.NumpyArray):
-                if issubclass(where.data.dtype.type, np.int64):
-                    carry = ak._v2.index.Index64(where.data.reshape(-1))
-                    allow_lazy = True
-                elif issubclass(where.data.dtype.type, np.integer):
-                    carry = ak._v2.index.Index64(
-                        where.data.astype(np.int64).reshape(-1)
-                    )
-                    allow_lazy = "copied"  # True, but also can be modified in-place
-                elif issubclass(where.data.dtype.type, (np.bool_, bool)):
-                    carry = ak._v2.index.Index64(np.nonzero(where.data.reshape(-1))[0])
-                    allow_lazy = "copied"  # True, but also can be modified in-place
-                else:
-                    raise TypeError(
-                        "one-dimensional array slice must be an array of integers or "
-                        "booleans, not\n\n    {0}".format(
-                            repr(where.data).replace("\n", "\n    ")
-                        )
-                    )
+            elif isinstance(where, ak.layout.Content):
+                return self.__getitem__(v1_to_v2(where))
+
+            elif isinstance(where, ak._v2.contents.numpyarray.NumpyArray):
+                carry, allow_lazy = self._prepare_array(where)
                 carried = self._carry_asrange(carry)
                 if carried is None:
                     carried = self._carry(carry, allow_lazy=allow_lazy)
                 return _getitem_ensure_shape(carried, where.data.shape)
 
             elif isinstance(where, Content):
-                raise NotImplementedError("needs _getitem_next")
+                return self.__getitem__((where,))
 
-            elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
+            elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
                 return self._getitem_fields(where)
 
             elif isinstance(where, Iterable):
@@ -142,7 +131,7 @@ class Content(object):
                     "integer/boolean arrays (possibly with variable-length nested "
                     "lists or missing values), field name (str) or names (non-tuple "
                     "iterable of str) are valid indices for slicing, not\n\n    "
-                    + repr(where)
+                    + repr(where).replace("\n", "\n    ")
                 )
 
         except NestedIndexError as err:
@@ -169,6 +158,88 @@ because an index is out of bounds (in {2} with length {3}, using sub-slice {4}{5
                     "" if err.details is None else ", details: " + repr(err.details),
                 )
             )
+
+    def _prepare_tuple_item(self, item):
+        if ak._util.isint(item):
+            return int(item)
+
+        elif isinstance(item, slice):
+            return item
+
+        elif ak._util.isstr(item):
+            return item
+
+        elif item is np.newaxis:
+            return item
+
+        elif item is Ellipsis:
+            return item
+
+        elif isinstance(item, ak.highlevel.Array):
+            return self._prepare_tuple_item(item.layout)
+
+        elif isinstance(item, ak.layout.Content):
+            return self._prepare_tuple_item(v1_to_v2(item))
+
+        elif isinstance(item, ak._v2.contents.NumpyArray):
+            return self._prepare_array(item)[0]
+
+        elif isinstance(
+            item,
+            (
+                ak._v2.contents.ListOffsetArray,
+                ak._v2.contents.ListArray,
+                ak._v2.contents.RegularArray,
+            ),
+        ):
+            return item.toListOffsetArray64(False)
+
+        elif isinstance(
+            item,
+            (
+                ak._v2.contents.IndexedOptionArray,
+                ak._v2.contents.ByteMaskedArray,
+                ak._v2.contents.BitMaskedArray,
+                ak._v2.contents.UnmaskedArray,
+            ),
+        ):
+            return item.toIndexedOptionArray64()
+
+        elif isinstance(item, Iterable) and all(ak._util.isstr(x) for x in item):
+            return list(item)
+
+        elif isinstance(item, Iterable):
+            return self._prepare_tuple_item(
+                v1_to_v2(ak.operations.convert.to_layout(item))
+            )
+
+        else:
+            raise TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(item).replace("\n", "\n    ")
+            )
+
+    def _prepare_array(self, where):
+        if issubclass(where.data.dtype.type, np.int64):
+            carry = ak._v2.index.Index64(where.data.reshape(-1))
+            allow_lazy = True
+        elif issubclass(where.data.dtype.type, np.integer):
+            carry = ak._v2.index.Index64(where.data.astype(np.int64).reshape(-1))
+            allow_lazy = "copied"  # True, but also can be modified in-place
+        elif issubclass(where.data.dtype.type, (np.bool_, bool)):
+            carry = ak._v2.index.Index64(np.nonzero(where.data.reshape(-1))[0])
+            allow_lazy = "copied"  # True, but also can be modified in-place
+        else:
+            raise TypeError(
+                "one-dimensional array slice must be an array of integers or "
+                "booleans, not\n\n    {0}".format(
+                    repr(where.data).replace("\n", "\n    ")
+                )
+            )
+        return carry, allow_lazy
 
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak._v2.index.Index)
