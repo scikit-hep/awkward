@@ -245,3 +245,34 @@ class RecordArray(Content):
             else:
                 length = len(self)
             return RecordArray(contents, self._keys, length)
+
+    def _getitem_next(self, head, tail, advanced):
+        if isinstance(head, int):
+            raise NotImplementedError
+
+        elif isinstance(head, slice):
+            raise NotImplementedError
+
+        elif ak._util.isstr(head):
+            raise NotImplementedError
+
+        elif isinstance(head, list):
+            raise NotImplementedError
+
+        elif head is np.newaxis:
+            raise NotImplementedError
+
+        elif head is Ellipsis:
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.index.Index64):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+            raise NotImplementedError
+
+        else:
+            raise AssertionError(repr(head))

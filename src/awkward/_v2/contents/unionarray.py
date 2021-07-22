@@ -139,3 +139,34 @@ class UnionArray(Content):
             raise ak._v2.contents.content.NestedIndexError(self, carry.data, str(err))
 
         return UnionArray(nexttags, nextindex, self._contents)
+
+    def _getitem_next(self, head, tail, advanced):
+        if isinstance(head, int):
+            raise NotImplementedError
+
+        elif isinstance(head, slice):
+            raise NotImplementedError
+
+        elif ak._util.isstr(head):
+            raise NotImplementedError
+
+        elif isinstance(head, list):
+            raise NotImplementedError
+
+        elif head is np.newaxis:
+            raise NotImplementedError
+
+        elif head is Ellipsis:
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.index.Index64):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+            raise NotImplementedError
+
+        else:
+            raise AssertionError(repr(head))

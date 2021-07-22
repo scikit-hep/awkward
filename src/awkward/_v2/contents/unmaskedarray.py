@@ -5,6 +5,8 @@ from __future__ import absolute_import
 import awkward as ak
 from awkward._v2.contents.content import Content
 
+np = ak.nplike.NumpyMetadata.instance()
+
 
 class UnmaskedArray(Content):
     def __init__(self, content, identifier=None, parameters=None):
@@ -61,3 +63,34 @@ class UnmaskedArray(Content):
 
     def _carry(self, carry, allow_lazy):
         return UnmaskedArray(self.content._carry(carry, allow_lazy))
+
+    def _getitem_next(self, head, tail, advanced):
+        if isinstance(head, int):
+            raise NotImplementedError
+
+        elif isinstance(head, slice):
+            raise NotImplementedError
+
+        elif ak._util.isstr(head):
+            raise NotImplementedError
+
+        elif isinstance(head, list):
+            raise NotImplementedError
+
+        elif head is np.newaxis:
+            raise NotImplementedError
+
+        elif head is Ellipsis:
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.index.Index64):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+            raise NotImplementedError
+
+        else:
+            raise AssertionError(repr(head))

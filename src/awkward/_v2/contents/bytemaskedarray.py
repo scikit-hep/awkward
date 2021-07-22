@@ -124,3 +124,34 @@ class ByteMaskedArray(Content):
             self._content._carry(carry, allow_lazy),
             valid_when=self._valid_when,
         )
+
+    def _getitem_next(self, head, tail, advanced):
+        if isinstance(head, int):
+            raise NotImplementedError
+
+        elif isinstance(head, slice):
+            raise NotImplementedError
+
+        elif ak._util.isstr(head):
+            raise NotImplementedError
+
+        elif isinstance(head, list):
+            raise NotImplementedError
+
+        elif head is np.newaxis:
+            raise NotImplementedError
+
+        elif head is Ellipsis:
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.index.Index64):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+            raise NotImplementedError
+
+        else:
+            raise AssertionError(repr(head))
