@@ -6,6 +6,7 @@ import numpy as np
 
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.regularform import RegularForm
 
 
 class RegularArray(Content):
@@ -49,9 +50,11 @@ class RegularArray(Content):
     def nplike(self):
         return self._content.nplike
 
+    Form = RegularForm
+
     @property
     def form(self):
-        return ak._v2.forms.RegularForm(
+        return self.Form(
             self._content.form,
             self._size,
             has_identifier=self._identifier is not None,

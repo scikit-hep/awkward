@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError  # noqa: F401
+from awkward._v2.forms.unmaskedform import UnmaskedForm
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -28,9 +29,11 @@ class UnmaskedArray(Content):
     def nplike(self):
         return self._content.nplike
 
+    Form = UnmaskedForm
+
     @property
     def form(self):
-        return ak._v2.forms.UnmaskedForm(
+        return self.Form(
             self._content.form,
             has_identifier=self._identifier is not None,
             parameters=self._parameters,

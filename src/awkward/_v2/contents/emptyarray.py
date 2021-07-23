@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.emptyform import EmptyForm
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -18,9 +19,11 @@ class EmptyArray(Content):
     def _repr(self, indent, pre, post):
         return indent + pre + "<EmptyArray len='0'/>" + post
 
+    Form = EmptyForm
+
     @property
     def form(self):
-        return ak._v2.forms.EmptyForm(
+        return self.Form(
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
             form_key=None,

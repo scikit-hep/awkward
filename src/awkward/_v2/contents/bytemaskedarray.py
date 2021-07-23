@@ -3,8 +3,9 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.index import Index
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -57,9 +58,11 @@ class ByteMaskedArray(Content):
     def nplike(self):
         return self._mask.nplike
 
+    Form = ByteMaskedForm
+
     @property
     def form(self):
-        return ak._v2.forms.ByteMaskedForm(
+        return self.Form(
             self._mask.form,
             self._content.form,
             self._valid_when,

@@ -44,6 +44,12 @@ class Content(object):
     def parameters(self):
         return self._parameters
 
+    def parameter(self, key):
+        if self._parameters is None:
+            return None
+        else:
+            return self._parameters.get(key)
+
     def _handle_error(self, error, slicer=None):
         if error.str is not None:
             if error.filename is None:
@@ -348,6 +354,22 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return None
         else:
             raise NotImplementedError
+
+    @property
+    def purelist_isregular(self):
+        return self.Form.purelist_isregular.__get__(self)
+
+    @property
+    def purelist_depth(self):
+        return self.Form.purelist_depth.__get__(self)
+
+    @property
+    def minmax_depth(self):
+        return self.Form.minmax_depth.__get__(self)
+
+    @property
+    def branch_depth(self):
+        return self.Form.branch_depth.__get__(self)
 
 
 def _getitem_ensure_shape(array, shape):

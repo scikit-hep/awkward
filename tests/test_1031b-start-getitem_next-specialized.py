@@ -57,3 +57,6 @@ def test_RegularArray():
 
     assert ak.to_list(new[1, np.newaxis, -2]) == [[20, 21, 22, 23, 24]]
     assert ak.to_list(new[1, np.newaxis, np.newaxis, -2]) == [[[20, 21, 22, 23, 24]]]
+
+    assert old.minmax_depth == (3, 3)
+    assert new.minmax_depth == (3, 3)

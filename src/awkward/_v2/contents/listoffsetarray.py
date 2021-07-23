@@ -3,8 +3,9 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.index import Index
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.listoffsetform import ListOffsetForm
 
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -58,9 +59,11 @@ class ListOffsetArray(Content):
     def nplike(self):
         return self._offsets.nplike
 
+    Form = ListOffsetForm
+
     @property
     def form(self):
-        return ak._v2.forms.ListOffsetForm(
+        return self.Form(
             self._offsets.form,
             self._content.form,
             has_identifier=self._identifier is not None,

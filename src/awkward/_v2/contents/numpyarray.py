@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.numpyform import NumpyForm
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -44,6 +45,10 @@ class NumpyArray(Content):
         return self._data.shape
 
     @property
+    def inner_shape(self):
+        return self._data.shape[1:]
+
+    @property
     def strides(self):
         return self._data.strides
 
@@ -55,9 +60,11 @@ class NumpyArray(Content):
     def nplike(self):
         return self._nplike
 
+    Form = NumpyForm
+
     @property
     def form(self):
-        return ak._v2.forms.NumpyForm(
+        return self.Form(
             ak._v2.types.numpytype._dtype_to_primitive[self._data.dtype],
             self._data.shape[1:],
             has_identifier=self._identifier is not None,

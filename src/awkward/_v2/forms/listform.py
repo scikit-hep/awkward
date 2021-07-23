@@ -70,3 +70,30 @@ class ListForm(Form):
             },
             verbose,
         )
+
+    @property
+    def purelist_isregular(self):
+        return False
+
+    @property
+    def purelist_depth(self):
+        if self.parameter("__array__") in ("string", "bytestring"):
+            return 1
+        else:
+            return self._content.purelist_depth + 1
+
+    @property
+    def minmax_depth(self):
+        if self.parameter("__array__") in ("string", "bytestring"):
+            return (1, 1)
+        else:
+            mindepth, maxdepth = self._content.minmax_depth
+            return (mindepth + 1, maxdepth + 1)
+
+    @property
+    def branch_depth(self):
+        if self.parameter("__array__") in ("string", "bytestring"):
+            return (False, 1)
+        else:
+            branch, depth = self._content.branch_depth
+            return (branch, depth + 1)

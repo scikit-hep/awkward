@@ -85,3 +85,49 @@ class UnionForm(Form):
             },
             verbose,
         )
+
+    @property
+    def purelist_isregular(self):
+        for content in self._contents:
+            if not content.purelist_isregular:
+                return False
+        else:
+            return True
+
+    @property
+    def purelist_depth(self):
+        out = None
+        for content in self._contents:
+            if out is None:
+                out = self._content.purelist_depth
+            elif out != content.purelist_depth:
+                return -1
+        else:
+            return out
+
+    @property
+    def minmax_depth(self):
+        if len(self._contents) == 0:
+            return (0, 0)
+        mins, maxs = [], []
+        for content in self._contents:
+            mindepth, maxdepth = content.minmax_depth
+            mins.append(mindepth)
+            maxs.append(maxdepth)
+        return (min(mins), max(maxs))
+
+    @property
+    def branch_depth(self):
+        if len(self._contents) == 0:
+            return (False, 1)
+        anybranch = False
+        mindepth = None
+        for content in self._contents:
+            branch, depth = content.branch_depth
+            if mindepth is None:
+                mindepth = depth
+            if branch or mindepth != depth:
+                anybranch = True
+            if mindepth > depth:
+                mindepth = depth
+        return (anybranch, mindepth)

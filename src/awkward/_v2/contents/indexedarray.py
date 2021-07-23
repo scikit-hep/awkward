@@ -3,8 +3,9 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.index import Index
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.indexedform import IndexedForm
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -47,9 +48,11 @@ class IndexedArray(Content):
     def nplike(self):
         return self._index.nplike
 
+    Form = IndexedForm
+
     @property
     def form(self):
-        return ak._v2.forms.IndexedForm(
+        return self.Form(
             self._index.form,
             self._content.form,
             has_identifier=self._identifier is not None,

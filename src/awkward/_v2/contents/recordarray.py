@@ -10,8 +10,9 @@ except ImportError:
 import numpy as np
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.record import Record
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.recordform import RecordForm
 
 
 class RecordArray(Content):
@@ -103,9 +104,11 @@ class RecordArray(Content):
         else:
             return self._contents[0].nplike
 
+    Form = RecordForm
+
     @property
     def form(self):
-        return ak._v2.forms.RecordForm(
+        return self.Form(
             [x.form for x in self._contents],
             self._keys,
             has_identifier=self._identifier is not None,

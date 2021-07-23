@@ -8,8 +8,9 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.index import Index
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.unionform import UnionForm
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -80,9 +81,11 @@ class UnionArray(Content):
     def nplike(self):
         return self._tags.nplike
 
+    Form = UnionForm
+
     @property
     def form(self):
-        return ak._v2.forms.UnionForm(
+        return self.Form(
             self._tags.form,
             self._index.form,
             [x.form for x in self._contents],
