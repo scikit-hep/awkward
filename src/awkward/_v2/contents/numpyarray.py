@@ -147,10 +147,10 @@ class NumpyArray(Content):
             nplike=self._nplike,
         )
 
-    def _getitem_field(self, where):
+    def _getitem_field(self, where, only_fields=()):
         raise NestedIndexError(self, where, "not an array of records")
 
-    def _getitem_fields(self, where):
+    def _getitem_fields(self, where, only_fields=()):
         raise NestedIndexError(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy, exception):
@@ -201,10 +201,10 @@ class NumpyArray(Content):
             return NumpyArray(out, None, self._parameters, nplike=self._nplike)
 
         elif ak._util.isstr(head):
-            raise NestedIndexError(self, head, "not an array of records")
+            return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            raise NestedIndexError(self, head, "not an array of records")
+            return self._getitem_next_fields(head, tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
             where = (slice(None, None), head.data) + tail

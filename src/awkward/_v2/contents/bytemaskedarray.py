@@ -108,19 +108,19 @@ class ByteMaskedArray(Content):
             self._parameters,
         )
 
-    def _getitem_field(self, where):
+    def _getitem_field(self, where, only_fields=()):
         return ByteMaskedArray(
             self._mask,
-            self._content._getitem_field(where),
+            self._content._getitem_field(where, only_fields),
             self._valid_when,
             self._field_identifier(where),
             None,
         )
 
-    def _getitem_fields(self, where):
+    def _getitem_fields(self, where, only_fields=()):
         return ByteMaskedArray(
             self._mask,
-            self._content._getitem_fields(where),
+            self._content._getitem_fields(where, only_fields),
             self._valid_when,
             self._fields_identifier(where),
             None,
@@ -158,10 +158,10 @@ class ByteMaskedArray(Content):
             raise NotImplementedError
 
         elif ak._util.isstr(head):
-            raise NotImplementedError
+            return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            raise NotImplementedError
+            return self._getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
             raise NotImplementedError

@@ -48,3 +48,9 @@ def test_RegularArray():
 
     assert ak.to_list(old[1, 1:]) == [[20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
     assert ak.to_list(new[1, 1:]) == [[20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
+
+    with pytest.raises(IndexError):
+        new[1, "hello"]
+
+    with pytest.raises(IndexError):
+        new[1, ["hello", "there"]]

@@ -220,25 +220,43 @@ class RecordArray(Content):
                 self._parameters,
             )
 
-    def _getitem_field(self, where):
-        return self.content(where)
+    def _getitem_field(self, where, only_fields=()):
+        if len(only_fields) == 0:
+            return self.content(where)
 
-    def _getitem_fields(self, where):
+        else:
+            nexthead, nexttail = self._headtail(only_fields)
+            if ak.util.isstr(nexthead):
+                return self.content(where)._getitem_field(nexthead, nexttail)
+            else:
+                return self.content(where)._getitem_fields(nexthead, nexttail)
+
+    def _getitem_fields(self, where, only_fields=()):
         indexes = [self.key_to_index(key) for key in where]
         if self._keys is None:
-            return RecordArray(
-                [self.content(i) for i in indexes],
-                None,
-                self._fields_identifier(where),
-                None,
-            )
+            keys = None
         else:
-            return RecordArray(
-                [self.content(i) for i in indexes],
-                [self._keys[i] for i in indexes],
-                self._fields_identifier(where),
-                None,
-            )
+            keys = [self._keys[i] for i in indexes]
+
+        if len(only_fields) == 0:
+            contents = [self.content(i) for i in indexes]
+        else:
+            nexthead, nexttail = self._headtail(only_fields)
+            if ak._util.isstr(nexthead):
+                contents = [
+                    self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
+                ]
+            else:
+                contents = [
+                    self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
+                ]
+
+        return RecordArray(
+            contents,
+            keys,
+            self._fields_identifier(where),
+            None,
+        )
 
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
@@ -297,10 +315,10 @@ class RecordArray(Content):
             raise NotImplementedError
 
         elif ak._util.isstr(head):
-            raise NotImplementedError
+            return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            raise NotImplementedError
+            return self._getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
             raise NotImplementedError

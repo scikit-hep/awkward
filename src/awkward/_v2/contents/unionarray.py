@@ -131,20 +131,20 @@ class UnionArray(Content):
             self._parameters,
         )
 
-    def _getitem_field(self, where):
+    def _getitem_field(self, where, only_fields=()):
         return UnionArray(
             self._tags,
             self._index,
-            [x[where] for x in self._contents],
+            [x._getitem_field(where, only_fields) for x in self._contents],
             self._field_identifier(where),
             None,
         )
 
-    def _getitem_fields(self, where):
+    def _getitem_fields(self, where, only_fields=()):
         return UnionArray(
             self._tags,
             self._index,
-            [x[where] for x in self._contents],
+            [x._getitem_fields(where, only_fields) for x in self._contents],
             self._fields_identifer(where),
             None,
         )
@@ -182,10 +182,10 @@ class UnionArray(Content):
             raise NotImplementedError
 
         elif ak._util.isstr(head):
-            raise NotImplementedError
+            return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            raise NotImplementedError
+            return self._getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
             raise NotImplementedError

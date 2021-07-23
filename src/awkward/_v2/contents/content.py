@@ -81,6 +81,22 @@ class Content(object):
         else:
             return oldtail[0], oldtail[1:]
 
+    def _getitem_next_field(self, head, tail, advanced):
+        nexthead, nexttail = self._headtail(tail)
+        return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
+
+    def _getitem_next_fields(self, head, tail, advanced):
+        only_fields, not_fields = [], []
+        for x in tail:
+            if ak._util.isstr(x) or isinstance(x, list):
+                only_fields.append(x)
+            else:
+                not_fields.append(x)
+        nexthead, nexttail = self._headtail(tuple(not_fields))
+        return self._getitem_fields(head, tuple(only_fields))._getitem_next(
+            nexthead, nexttail, advanced
+        )
+
     def __getitem__(self, where):
         try:
             if ak._util.isint(where):

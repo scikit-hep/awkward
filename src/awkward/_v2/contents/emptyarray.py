@@ -39,11 +39,11 @@ class EmptyArray(Content):
     def _getitem_range(self, where):
         return self
 
-    def _getitem_field(self, where):
-        raise IndexError("field " + repr(where) + " not found")
+    def _getitem_field(self, where, only_fields=()):
+        raise NestedIndexError(self, where, "not an array of records")
 
-    def _getitem_fields(self, where):
-        raise IndexError("fields " + repr(where) + " not found")
+    def _getitem_fields(self, where, only_fields=()):
+        raise NestedIndexError(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
@@ -69,14 +69,10 @@ class EmptyArray(Content):
             raise NotImplementedError
 
         elif ak._util.isstr(head):
-            raise IndexError(
-                "cannot slice "
-                + type(self).__name__
-                + "by a field name because it has no fields"
-            )
+            return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            raise NotImplementedError
+            return self._getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
             raise NotImplementedError

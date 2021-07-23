@@ -183,10 +183,10 @@ class BitMaskedArray(Content):
     def _getitem_range(self, where):
         return self.toByteMaskedArray()._getitem_range(where)
 
-    def _getitem_field(self, where):
+    def _getitem_field(self, where, only_fields=()):
         return BitMaskedArray(
             self._mask,
-            self._content._getitem_field(where),
+            self._content._getitem_field(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
@@ -194,10 +194,10 @@ class BitMaskedArray(Content):
             None,
         )
 
-    def _getitem_fields(self, where):
+    def _getitem_fields(self, where, only_fields=()):
         return BitMaskedArray(
             self._mask,
-            self._content._getitem_fields(where),
+            self._content._getitem_fields(where, only_fields),
             self._valid_when,
             self._length,
             self._lsb_order,
@@ -223,10 +223,10 @@ class BitMaskedArray(Content):
             raise NotImplementedError
 
         elif ak._util.isstr(head):
-            raise NotImplementedError
+            return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
-            raise NotImplementedError
+            return self._getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
             raise NotImplementedError
