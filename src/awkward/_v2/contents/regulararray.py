@@ -143,7 +143,7 @@ class RegularArray(Content):
                 nextcarry.dtype.type,
                 where.dtype.type,
             ](
-                nextcarry.data,
+                nextcarry.to(nplike),
                 where,
                 len(where),
                 self._size,
@@ -170,7 +170,7 @@ class RegularArray(Content):
             nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
             self._handle_error(
                 nplike["awkward_RegularArray_getitem_next_at", nextcarry.dtype.type](
-                    nextcarry.data,
+                    nextcarry.to(nplike),
                     head,
                     self._length,
                     self._size,
@@ -181,7 +181,68 @@ class RegularArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            raise NotImplementedError
+            nexthead, nexttail = self._headtail(tail)
+            start, stop, step = head.indices(len(self))
+
+            nextsize = 0
+            if step > 0 and stop - start > 0:
+                diff = stop - start
+                nextsize = diff // step
+                if diff % step != 0:
+                    nextsize += 1
+            elif step < 0 and stop - start < 0:
+                diff = start - stop
+                nextsize = diff // step
+                if diff % step != 0:
+                    nextsize += 1
+
+            nextcarry = ak._v2.index.Index64.empty(self._length * nextsize, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_RegularArray_getitem_next_range",
+                    nextcarry.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    start,
+                    step,
+                    self._length,
+                    self._size,
+                    nextsize,
+                ),
+                head,
+            )
+            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+
+            if advanced is None or len(advanced) == 0:
+                return RegularArray(
+                    nextcontent._getitem_next(nexthead, nexttail, advanced),
+                    nextsize,
+                    self._length,
+                    self._identifier,
+                    self._parameters,
+                )
+            else:
+                nextadvanced = ak._v2.index.Index64.empty(self._length * nextsize, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_RegularArray_getitem_next_range_spreadadvanced",
+                        nextadvanced.dtype.type,
+                        advanced.dtype.type,
+                    ](
+                        nextadvanced.to(nplike),
+                        advanced.to(nplike),
+                        self._length,
+                        nextsize,
+                    ),
+                    head,
+                )
+                return RegularArray(
+                    nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
+                    nextsize,
+                    self._length,
+                    self._identities,
+                    self._parameters,
+                )
 
         elif ak._util.isstr(head):
             raise NotImplementedError

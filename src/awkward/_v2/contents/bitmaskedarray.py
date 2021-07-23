@@ -133,8 +133,8 @@ class BitMaskedArray(Content):
                 bytemask.dtype.type,
                 self._mask.dtype.type,
             ](
-                bytemask.data,
-                self._mask.data,
+                bytemask.to(nplike),
+                self._mask.to(nplike),
                 len(self._mask),
                 self._valid_when,
                 self._lsb_order,
@@ -151,8 +151,8 @@ class BitMaskedArray(Content):
                 bytemask.dtype.type,
                 self._mask.dtype.type,
             ](
-                bytemask.data,
-                self._mask.data,
+                bytemask.to(nplike),
+                self._mask.to(nplike),
                 len(self._mask),
                 False,  # this differs from the kernel call in 'bytemask'
                 self._lsb_order,

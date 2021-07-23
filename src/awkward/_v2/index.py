@@ -75,6 +75,9 @@ class Index(object):
     def __len__(self):
         return len(self._data)
 
+    def to(self, nplike):
+        return nplike.asarray(self._data)
+
     def __repr__(self):
         return self._repr("", "", "")
 

@@ -123,7 +123,7 @@ class Content(object):
                 carried = self._carry_asrange(carry)
                 if carried is None:
                     carried = self._carry(carry, allow_lazy, NestedIndexError)
-                return _getitem_ensure_shape(carried, where.data.shape)
+                return _getitem_ensure_shape(carried, where.shape)
 
             elif isinstance(where, Content):
                 return self.__getitem__((where,))
@@ -256,13 +256,13 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
 
     def _prepare_array(self, where):
-        if issubclass(where.data.dtype.type, np.int64):
+        if issubclass(where.dtype.type, np.int64):
             carry = ak._v2.index.Index64(where.data.reshape(-1))
             allow_lazy = True
-        elif issubclass(where.data.dtype.type, np.integer):
+        elif issubclass(where.dtype.type, np.integer):
             carry = ak._v2.index.Index64(where.data.astype(np.int64).reshape(-1))
             allow_lazy = "copied"  # True, but also can be modified in-place
-        elif issubclass(where.data.dtype.type, (np.bool_, bool)):
+        elif issubclass(where.dtype.type, (np.bool_, bool)):
             carry = ak._v2.index.Index64(np.nonzero(where.data.reshape(-1))[0])
             allow_lazy = "copied"  # True, but also can be modified in-place
         else:
@@ -285,7 +285,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 carry.dtype.type,
             ](
                 result,
-                carry.data,
+                carry.to(carry.nplike),
                 len(carry),
             )
         )
