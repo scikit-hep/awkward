@@ -134,18 +134,24 @@ class NumpyArray(Content):
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
         assert step == 1
+
+        try:
+            out = self._data[where]
+        except IndexError as err:
+            raise NestedIndexError(self, where, str(err))
+
         return NumpyArray(
-            self._data[where],
+            out,
             self._range_identifier(start, stop),
             self._parameters,
             nplike=self._nplike,
         )
 
     def _getitem_field(self, where):
-        raise IndexError("field " + repr(where) + " not found")
+        raise NestedIndexError(self, where, "not an array of records")
 
     def _getitem_fields(self, where):
-        raise IndexError("fields " + repr(where) + " not found")
+        raise NestedIndexError(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
@@ -168,29 +174,47 @@ class NumpyArray(Content):
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
-        if head is None:
+        if head == ():
             return self
 
         elif isinstance(head, int):
-            raise NotImplementedError
+            where = (slice(None, None), head) + tail
 
-        elif isinstance(head, slice):
-            raise NotImplementedError
+            try:
+                out = self._data[where]
+            except IndexError as err:
+                raise NestedIndexError(self, (head,) + tail, str(err))
+
+            if hasattr(out, "shape") and len(out.shape) != 0:
+                return NumpyArray(out, None, None, nplike=self._nplike)
+            else:
+                return out
+
+        elif isinstance(head, slice) or head is np.newaxis or head is Ellipsis:
+            where = (slice(None, None), head) + tail
+
+            try:
+                out = self._data[where]
+            except IndexError as err:
+                raise NestedIndexError(self, (head,) + tail, str(err))
+
+            return NumpyArray(out, None, self._parameters, nplike=self._nplike)
 
         elif ak._util.isstr(head):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "not an array of records")
 
         elif isinstance(head, list):
-            raise NotImplementedError
-
-        elif head is np.newaxis:
-            raise NotImplementedError
-
-        elif head is Ellipsis:
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "not an array of records")
 
         elif isinstance(head, ak._v2.index.Index64):
-            raise NotImplementedError
+            where = (slice(None, None), head.data) + tail
+
+            try:
+                out = self._data[where]
+            except IndexError as err:
+                raise NestedIndexError(self, (head,) + tail, str(err))
+
+            return NumpyArray(out, None, self._parameters, nplike=self._nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError

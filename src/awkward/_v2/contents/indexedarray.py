@@ -128,7 +128,7 @@ class IndexedArray(Content):
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
-        if head is None:
+        if head == ():
             raise NotImplementedError
 
         elif isinstance(head, int):

@@ -77,7 +77,7 @@ class Content(object):
 
     def _headtail(self, oldtail):
         if len(oldtail) == 0:
-            return None, ()
+            return (), ()
         else:
             return oldtail[0], oldtail[1:]
 
@@ -146,10 +146,28 @@ class Content(object):
                 )
 
         except NestedIndexError as err:
-            if isinstance(where, Content):
-                wherey = str(ak.Array(v2_to_v1(where)))
-            else:
-                wherey = repr(where)
+
+            def format_slice(x):
+                if isinstance(x, slice):
+                    if x.step is None:
+                        return "{0}:{1}".format(
+                            "" if x.start is None else x.start,
+                            "" if x.stop is None else x.stop,
+                        )
+                    else:
+                        return "{0}:{1}:{2}".format(
+                            "" if x.start is None else x.start,
+                            "" if x.stop is None else x.stop,
+                            x.step,
+                        )
+                elif isinstance(x, tuple):
+                    return "(" + ", ".join(format_slice(y) for y in x) + ")"
+                elif isinstance(x, ak._v2.index.Index64):
+                    return str(x.data)
+                elif isinstance(x, Content):
+                    return str(ak.Array(v2_to_v1(x)))
+                else:
+                    return repr(x)
 
             raise IndexError(
                 """cannot slice
@@ -160,13 +178,17 @@ with
 
     {1}
 
-because an index is out of bounds (in {2} with length {3}, using sub-slice {4}){5}""".format(
+at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     repr(ak.Array(v2_to_v1(self))),
-                    wherey,
+                    format_slice(where),
                     type(err.array).__name__,
                     len(err.array),
-                    repr(err.slicer),
-                    "" if err.details is None else "\n\nDetails: " + err.details,
+                    format_slice(err.slicer),
+                    ""
+                    if err.details is None
+                    else "\n\n{0} error: {1}.".format(
+                        type(err.array).__name__, err.details
+                    ),
                 )
             )
 
