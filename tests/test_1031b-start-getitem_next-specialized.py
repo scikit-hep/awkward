@@ -40,16 +40,16 @@ def test_NumpyArray():
         a[1, -2, [3, 1, 1, 2], 2]
 
 
-# def test_RegularArray():
-#     old = ak.layout.RegularArray(
-#         ak.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout, 3
-#     )
-#     new = v1_to_v2(old)
+def test_RegularArray():
+    old = ak.layout.RegularArray(
+        ak.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout, 3
+    )
+    new = v1_to_v2(old)
 
-#     print("OLD")
-#     print(old[1, 1:])
+    print("OLD")
+    print(ak.to_list(old[1, 1:]))
 
-#     print("NEW")
-#     print(new[1, 1:])
+    print("NEW")
+    print(ak.to_list(new[1, 1:]))
 
-#     raise Exception
+    raise Exception
