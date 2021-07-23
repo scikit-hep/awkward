@@ -113,6 +113,27 @@ class Content(object):
             None,
         )
 
+    def _getitem_next_ellipsis(self, tail, advanced):
+        mindepth, maxdepth = self.minmax_depth
+
+        dimlength = sum(
+            1 if isinstance(x, (int, slice, ak._v2.index.Index64)) else 0 for x in tail
+        )
+
+        if len(tail) == 0 or mindepth - 1 == maxdepth - 1 == dimlength:
+            nexthead, nexttail = self._headtail(tail)
+            return self._getitem_next(nexthead, nexttail, advanced)
+
+        elif mindepth - 1 == dimlength or maxdepth - 1 == dimlength:
+            raise NestedIndexError(
+                self,
+                Ellipsis,
+                "ellipsis (`...`) can't be used on data with different numbers of dimensions",
+            )
+
+        else:
+            return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
+
     def __getitem__(self, where):
         try:
             if ak._util.isint(where):

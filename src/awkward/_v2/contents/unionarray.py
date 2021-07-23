@@ -194,7 +194,7 @@ class UnionArray(Content):
             return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
-            raise NotImplementedError
+            return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
             raise NotImplementedError

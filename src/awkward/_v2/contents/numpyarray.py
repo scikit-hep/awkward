@@ -185,7 +185,7 @@ class NumpyArray(Content):
             return self
 
         elif isinstance(head, int):
-            where = (slice(None, None), head) + tail
+            where = (slice(None), head) + tail
 
             try:
                 out = self._data[where]
@@ -198,7 +198,7 @@ class NumpyArray(Content):
                 return out
 
         elif isinstance(head, slice) or head is np.newaxis or head is Ellipsis:
-            where = (slice(None, None), head) + tail
+            where = (slice(None), head) + tail
 
             try:
                 out = self._data[where]
@@ -214,7 +214,7 @@ class NumpyArray(Content):
             return self._getitem_next_fields(head, tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            where = (slice(None, None), head.data) + tail
+            where = (slice(None), head.data) + tail
 
             try:
                 out = self._data[where]

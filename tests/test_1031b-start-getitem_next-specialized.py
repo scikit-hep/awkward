@@ -60,3 +60,6 @@ def test_RegularArray():
 
     assert old.minmax_depth == (3, 3)
     assert new.minmax_depth == (3, 3)
+
+    assert ak.to_list(old[1, ..., -2]) == [18, 23, 28]
+    assert ak.to_list(new[1, ..., -2]) == [18, 23, 28]
