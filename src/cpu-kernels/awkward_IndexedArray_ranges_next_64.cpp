@@ -13,6 +13,8 @@ ERROR awkward_IndexedArray_ranges_next_64(
   int64_t* tostarts,
   int64_t* tostops,
   int64_t* tolength) {
+  std::cout << "awkward_IndexedArray_ranges_next_64" << std::endl;
+
   int64_t k = 0;
   int64_t stride = 0;
   for (int64_t i = 0; i < length; i++) {

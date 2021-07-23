@@ -9,6 +9,8 @@ ERROR awkward_ListOffsetArray_reduce_global_startstop_64(
   int64_t* globalstop,
   const int64_t* offsets,
   int64_t length) {
+  std::cout << "awkward_ListOffsetArray_reduce_global_startstop_64" << std::endl;
+
   *globalstart = offsets[0];
   *globalstop = offsets[length];
   return success();

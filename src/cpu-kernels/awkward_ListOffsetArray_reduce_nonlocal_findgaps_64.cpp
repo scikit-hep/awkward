@@ -8,6 +8,8 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
   int64_t* gaps,
   const int64_t* parents,
   int64_t lenparents) {
+  std::cout << "awkward_ListOffsetArray_reduce_nonlocal_findgaps_64" << std::endl;
+
   int64_t k = 0;
   int64_t last = -1;
   for (int64_t i = 0;  i < lenparents;  i++) {

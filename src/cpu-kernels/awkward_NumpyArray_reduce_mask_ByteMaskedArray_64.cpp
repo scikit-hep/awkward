@@ -9,6 +9,8 @@ ERROR awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
+  std::cout << "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64" << std::endl;
+
   for (int64_t i = 0;  i < outlength;  i++) {
     toptr[i] = 1;
   }

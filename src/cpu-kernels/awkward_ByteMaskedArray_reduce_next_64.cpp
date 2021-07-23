@@ -12,6 +12,8 @@ ERROR awkward_ByteMaskedArray_reduce_next_64(
   const int64_t* parents,
   int64_t length,
   bool validwhen) {
+  std::cout << "awkward_ByteMaskedArray_reduce_next_64" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
     if ((mask[i] != 0) == validwhen) {

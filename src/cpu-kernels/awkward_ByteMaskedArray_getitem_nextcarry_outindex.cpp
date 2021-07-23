@@ -11,6 +11,8 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex(
   const int8_t* mask,
   int64_t length,
   bool validwhen) {
+  std::cout << "awkward_ByteMaskedArray_getitem_nextcarry_outindex" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
     if ((mask[i] != 0) == validwhen) {

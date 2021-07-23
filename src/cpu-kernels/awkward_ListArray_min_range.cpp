@@ -10,6 +10,8 @@ ERROR awkward_ListArray_min_range(
   const C* fromstarts,
   const C* fromstops,
   int64_t lenstarts) {
+  std::cout << "awkward_ListArray_min_range" << std::endl;
+
   int64_t shorter = fromstops[0] - fromstarts[0];
   for (int64_t i = 1;  i < lenstarts;  i++) {
     int64_t rangeval = fromstops[i] - fromstarts[i];

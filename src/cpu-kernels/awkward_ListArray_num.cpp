@@ -10,6 +10,8 @@ ERROR awkward_ListArray_num(
   const C* fromstarts,
   const C* fromstops,
   int64_t length) {
+  std::cout << "awkward_ListArray_num" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     C start = fromstarts[i];
     C stop = fromstops[i];

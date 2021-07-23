@@ -9,6 +9,8 @@ ERROR awkward_RegularArray_compact_offsets(
   T* tooffsets,
   int64_t length,
   int64_t size) {
+  std::cout << "awkward_RegularArray_compact_offsets" << std::endl;
+
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {
     tooffsets[i + 1] = (i + 1)*size;

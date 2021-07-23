@@ -14,6 +14,8 @@ ERROR awkward_ListArray_getitem_next_array(
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
+  std::cout << "awkward_ListArray_getitem_next_array" << std::endl;
+
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[i] < fromstarts[i]) {
       return failure("stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));

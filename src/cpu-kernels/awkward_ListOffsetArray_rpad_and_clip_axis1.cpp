@@ -10,6 +10,8 @@ ERROR awkward_ListOffsetArray_rpad_and_clip_axis1(
   const C* fromoffsets,
   int64_t length,
   int64_t target) {
+  std::cout << "awkward_ListOffsetArray_rpad_and_clip_axis1" << std::endl;
+
   for (int64_t i = 0; i < length; i++) {
     int64_t rangeval = (T)(fromoffsets[i + 1] - fromoffsets[i]);
     int64_t shorter = (target < rangeval) ? target : rangeval;

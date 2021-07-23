@@ -10,6 +10,8 @@ ERROR awkward_IndexedArray_overlay_mask(
   const M* mask,
   const C* fromindex,
   int64_t length) {
+  std::cout << "awkward_IndexedArray_overlay_mask" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     M m = mask[i];
     toindex[i] = (m ? -1 : fromindex[i]);

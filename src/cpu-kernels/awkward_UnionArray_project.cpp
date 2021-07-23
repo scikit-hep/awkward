@@ -12,6 +12,8 @@ ERROR awkward_UnionArray_project(
   const I* fromindex,
   int64_t length,
   int64_t which) {
+  std::cout << "awkward_UnionArray_project" << std::endl;
+
   *lenout = 0;
   for (int64_t i = 0;  i < length;  i++) {
     if (fromtags[i] == which) {

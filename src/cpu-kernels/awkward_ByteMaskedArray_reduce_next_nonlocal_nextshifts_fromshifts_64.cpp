@@ -10,6 +10,8 @@ ERROR awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
   int64_t length,
   bool valid_when,
   const int64_t* shifts) {
+  std::cout << "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64" << std::endl;
+
   int64_t nullsum = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {

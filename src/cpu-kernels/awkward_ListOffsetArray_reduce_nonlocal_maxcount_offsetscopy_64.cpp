@@ -9,6 +9,8 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
   int64_t* offsetscopy,
   const int64_t* offsets,
   int64_t length) {
+  std::cout << "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64" << std::endl;
+
   *maxcount = 0;
   offsetscopy[0] = offsets[0];
   for (int64_t i = 0;  i < length;  i++) {

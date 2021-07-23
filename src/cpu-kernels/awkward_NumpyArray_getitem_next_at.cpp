@@ -11,6 +11,8 @@ ERROR awkward_NumpyArray_getitem_next_at(
   int64_t lencarry,
   int64_t skip,
   int64_t at) {
+  std::cout << "awkward_NumpyArray_getitem_next_at" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     nextcarryptr[i] = skip*carryptr[i] + at;
   }

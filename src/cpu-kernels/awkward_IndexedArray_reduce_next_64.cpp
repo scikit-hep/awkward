@@ -12,6 +12,8 @@ ERROR awkward_IndexedArray_reduce_next_64(
   const T* index,
   const int64_t* parents,
   int64_t length) {
+  std::cout << "awkward_IndexedArray_reduce_next_64" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
     if (index[i] >= 0) {

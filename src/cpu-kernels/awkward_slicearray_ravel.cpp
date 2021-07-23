@@ -11,6 +11,8 @@ ERROR awkward_slicearray_ravel(
   int64_t ndim,
   const int64_t* shape,
   const int64_t* strides) {
+  std::cout << "awkward_slicearray_ravel" << std::endl;
+
   if (ndim == 1) {
     for (T i = 0;  i < shape[0];  i++) {
       toptr[i] = fromptr[i*strides[0]];

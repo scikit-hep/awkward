@@ -10,6 +10,8 @@ ERROR awkward_RegularArray_getitem_carry(
   const T* fromcarry,
   int64_t lencarry,
   int64_t size) {
+  std::cout << "awkward_RegularArray_getitem_carry" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     for (int64_t j = 0;  j < size;  j++) {
       tocarry[i*size + j] = fromcarry[i]*size + j;

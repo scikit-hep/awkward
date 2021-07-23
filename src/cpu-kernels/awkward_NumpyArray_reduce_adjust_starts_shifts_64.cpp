@@ -10,6 +10,8 @@ ERROR awkward_NumpyArray_reduce_adjust_starts_shifts_64(
   const int64_t* parents,
   const int64_t* starts,
   const int64_t* shifts) {
+  std::cout << "awkward_NumpyArray_reduce_adjust_starts_shifts_64" << std::endl;
+
   for (int64_t k = 0;  k < outlength;  k++) {
     int64_t i = toptr[k];
     if (i >= 0) {

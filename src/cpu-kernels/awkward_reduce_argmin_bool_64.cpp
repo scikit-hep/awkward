@@ -10,6 +10,8 @@ ERROR awkward_reduce_argmin_bool_64(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
+  std::cout << "awkward_reduce_argmin_bool_64" << std::endl;
+
   for (int64_t k = 0;  k < outlength;  k++) {
     toptr[k] = -1;
   }

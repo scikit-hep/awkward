@@ -9,6 +9,8 @@ ERROR awkward_ListOffsetArray_toRegularArray(
   int64_t* size,
   const C* fromoffsets,
   int64_t offsetslength) {
+  std::cout << "awkward_ListOffsetArray_toRegularArray" << std::endl;
+
   *size = -1;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t count = (int64_t)fromoffsets[i + 1] - (int64_t)fromoffsets[i];

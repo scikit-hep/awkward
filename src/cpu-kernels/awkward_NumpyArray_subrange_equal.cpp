@@ -11,6 +11,8 @@ ERROR awkward_NumpyArray_subrange_equal(
     const int64_t* fromstops,
     int64_t length,
     bool* toequal) {
+  std::cout << "awkward_NumpyArray_subrange_equal" << std::endl;
+
 
   bool differ = true;
   int64_t leftlen;

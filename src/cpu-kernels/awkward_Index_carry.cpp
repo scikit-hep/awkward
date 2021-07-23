@@ -11,6 +11,8 @@ ERROR awkward_index_carry(
   const T* carry,
   int64_t lenfromindex,
   int64_t length) {
+  std::cout << "awkward_index_carry" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     T j = carry[i];
     if (j > lenfromindex) {

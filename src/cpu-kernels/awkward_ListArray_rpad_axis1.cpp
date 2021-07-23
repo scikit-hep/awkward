@@ -13,6 +13,8 @@ ERROR awkward_ListArray_rpad_axis1(
   C* tostops,
   int64_t target,
   int64_t length) {
+  std::cout << "awkward_ListArray_rpad_axis1" << std::endl;
+
   int64_t offset = 0;
   for (int64_t i = 0; i < length; i++) {
     tostarts[i] = offset;

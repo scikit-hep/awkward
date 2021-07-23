@@ -12,6 +12,8 @@ ERROR awkward_RegularArray_getitem_next_array(
   int64_t length,
   int64_t lenarray,
   int64_t size) {
+  std::cout << "awkward_RegularArray_getitem_next_array" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < lenarray;  j++) {
       tocarry[i*lenarray + j] = i*size + fromarray[j];

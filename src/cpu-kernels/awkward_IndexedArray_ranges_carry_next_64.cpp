@@ -11,6 +11,8 @@ ERROR awkward_IndexedArray_ranges_carry_next_64(
   const int64_t* fromstops,
   int64_t length,
   int64_t* tocarry) {
+  std::cout << "awkward_IndexedArray_ranges_carry_next_64" << std::endl;
+
   int64_t k = 0;
   int64_t stride = 0;
   for (int64_t i = 0; i < length; i++) {

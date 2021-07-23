@@ -10,6 +10,8 @@ awkward_NumpyArray_fill_tocomplex(TO* toptr,
                                   int64_t tooffset,
                                   const FROM* fromptr,
                                   int64_t length) {
+  std::cout << "awkward_NumpyArray_fill_tocomplex" << std::endl;
+
   for (int64_t i = 0; i < length; i++) {
     toptr[tooffset + 2 * i] = (TO)fromptr[i];
     toptr[tooffset + 2 * i + 1] = (TO)0;

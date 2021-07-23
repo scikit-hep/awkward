@@ -12,6 +12,8 @@ ERROR awkward_ListArray_getitem_jagged_numvalid(
   int64_t length,
   const T* missing,
   int64_t missinglength) {
+  std::cout << "awkward_ListArray_getitem_jagged_numvalid" << std::endl;
+
   *numvalid = 0;
   for (int64_t i = 0;  i < length;  i++) {
     T slicestart = slicestarts[i];

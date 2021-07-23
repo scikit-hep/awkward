@@ -11,6 +11,8 @@ awkward_NumpyArray_fill_scaled(TO* toptr,
                                const FROM* fromptr,
                                int64_t length,
                                double scale) {
+  std::cout << "awkward_NumpyArray_fill_scaled" << std::endl;
+
   for (int64_t i = 0; i < length; i++) {
     toptr[tooffset + i] = (TO)(fromptr[i] * scale);
   }

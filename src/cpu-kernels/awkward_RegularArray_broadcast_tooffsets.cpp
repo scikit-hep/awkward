@@ -9,6 +9,8 @@ ERROR awkward_RegularArray_broadcast_tooffsets(
   const T* fromoffsets,
   int64_t offsetslength,
   int64_t size) {
+  std::cout << "awkward_RegularArray_broadcast_tooffsets" << std::endl;
+
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t count = (int64_t)(fromoffsets[i + 1] - fromoffsets[i]);
     if (count < 0) {

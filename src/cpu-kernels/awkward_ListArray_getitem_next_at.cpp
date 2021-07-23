@@ -11,6 +11,8 @@ ERROR awkward_ListArray_getitem_next_at(
   const C* fromstops,
   int64_t lenstarts,
   int64_t at) {
+  std::cout << "awkward_ListArray_getitem_next_at" << std::endl;
+
   for (int64_t i = 0;  i < lenstarts;  i++) {
     int64_t length = fromstops[i] - fromstarts[i];
     int64_t regular_at = at;

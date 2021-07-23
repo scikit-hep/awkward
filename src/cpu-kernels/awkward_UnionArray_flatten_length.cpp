@@ -11,6 +11,8 @@ ERROR awkward_UnionArray_flatten_length(
   const FROMINDEX* fromindex,
   int64_t length,
   T** offsetsraws) {
+  std::cout << "awkward_UnionArray_flatten_length" << std::endl;
+
   *total_length = 0;
   for (int64_t i = 0;  i < length;  i++) {
     FROMTAGS tag = fromtags[i];

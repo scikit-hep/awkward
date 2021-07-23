@@ -10,6 +10,8 @@ awkward_NumpyArray_fill(TO* toptr,
                         int64_t tooffset,
                         const FROM* fromptr,
                         int64_t length) {
+  std::cout << "awkward_NumpyArray_fill" << std::endl;
+
   for (int64_t i = 0; i < length; i++) {
     toptr[tooffset + i] = (TO)fromptr[i];
   }

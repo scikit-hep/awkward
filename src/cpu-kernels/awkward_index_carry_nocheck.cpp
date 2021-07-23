@@ -10,6 +10,8 @@ ERROR awkward_index_carry_nocheck(
   const C* fromindex,
   const T* carry,
   int64_t length) {
+  std::cout << "awkward_index_carry_nocheck" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     toindex[i] = fromindex[(size_t)(carry[i])];
   }

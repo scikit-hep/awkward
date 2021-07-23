@@ -11,6 +11,8 @@ ERROR awkward_ListArray_rpad_and_clip_length_axis1(
   const C* fromstops,
   int64_t target,
   int64_t lenstarts) {
+  std::cout << "awkward_ListArray_rpad_and_clip_length_axis1" << std::endl;
+
   int64_t length = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
     int64_t rangeval = fromstops[i] - fromstarts[i];

@@ -11,6 +11,8 @@ ERROR awkward_NumpyArray_getitem_next_null(
   int64_t len,
   int64_t stride,
   const T* pos) {
+  std::cout << "awkward_NumpyArray_getitem_next_null" << std::endl;
+
   for (int64_t i = 0;  i < len;  i++) {
     std::memcpy(&toptr[i*stride], &fromptr[pos[i]*stride], (size_t)stride);
   }

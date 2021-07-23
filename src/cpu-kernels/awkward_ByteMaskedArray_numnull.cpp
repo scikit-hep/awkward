@@ -9,6 +9,8 @@ ERROR awkward_ByteMaskedArray_numnull(
   const int8_t* mask,
   int64_t length,
   bool validwhen) {
+  std::cout << "awkward_ByteMaskedArray_numnull" << std::endl;
+
   *numnull = 0;
   for (int64_t i = 0;  i < length;  i++) {
     if ((mask[i] != 0) != validwhen) {

@@ -10,6 +10,8 @@ ERROR awkward_ListArray_compact_offsets(
   const C* fromstarts,
   const C* fromstops,
   int64_t length) {
+  std::cout << "awkward_ListArray_compact_offsets" << std::endl;
+
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {
     C start = fromstarts[i];

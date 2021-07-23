@@ -10,6 +10,8 @@ ERROR awkward_ListOffsetArray_rpad_axis1(
   const C* fromoffsets,
   int64_t fromlength,
   int64_t target) {
+  std::cout << "awkward_ListOffsetArray_rpad_axis1" << std::endl;
+
   int64_t count = 0;
   for (int64_t i = 0; i < fromlength; i++) {
     int64_t rangeval =

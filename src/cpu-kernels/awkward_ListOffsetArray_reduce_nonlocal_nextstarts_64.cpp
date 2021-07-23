@@ -8,6 +8,8 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
   int64_t* nextstarts,
   const int64_t* nextparents,
   int64_t nextlen) {
+  std::cout << "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64" << std::endl;
+
   int64_t lastnextparent = -1;
   for (int64_t i = 0;  i < nextlen;  i++) {
     if (nextparents[i] != lastnextparent) {

@@ -10,6 +10,8 @@ ERROR awkward_ListArray_getitem_jagged_carrylen(
   const T* slicestarts,
   const T* slicestops,
   int64_t sliceouterlen) {
+  std::cout << "awkward_ListArray_getitem_jagged_carrylen" << std::endl;
+
   *carrylen = 0;
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
     *carrylen = *carrylen + (int64_t)(slicestops[i] - slicestarts[i]);

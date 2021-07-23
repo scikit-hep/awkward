@@ -10,6 +10,8 @@ ERROR awkward_Identities_extend(
   const ID* fromptr,
   int64_t fromlength,
   int64_t tolength) {
+  std::cout << "awkward_Identities_extend" << std::endl;
+
   int64_t i = 0;
   for (;  i < fromlength;  i++) {
     toptr[i] = fromptr[i];

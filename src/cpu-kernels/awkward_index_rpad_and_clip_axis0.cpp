@@ -9,6 +9,8 @@ ERROR awkward_index_rpad_and_clip_axis0(
   T* toindex,
   int64_t target,
   int64_t length) {
+  std::cout << "awkward_index_rpad_and_clip_axis0" << std::endl;
+
   int64_t shorter = (target < length ? target : length);
   for (int64_t i = 0; i < shorter; i++) {
     toindex[i] = i;

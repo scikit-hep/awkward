@@ -9,6 +9,8 @@ ERROR awkward_slicemissing_check_same(
   const int8_t* bytemask,
   const int64_t* missingindex,
   int64_t length) {
+  std::cout << "awkward_slicemissing_check_same" << std::endl;
+
   *same = true;
   for (int64_t i = 0;  i < length;  i++) {
     bool left = (bytemask[i] != 0);

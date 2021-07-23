@@ -8,6 +8,8 @@ ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
   int64_t* nextparents,
   const int64_t* offsets,
   int64_t length) {
+  std::cout << "awkward_ListOffsetArray_reduce_local_nextparents_64" << std::endl;
+
   int64_t initialoffset = offsets[0];
   for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = offsets[i] - initialoffset;

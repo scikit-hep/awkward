@@ -9,6 +9,8 @@ ERROR awkward_Index_iscontiguous(
   bool* result,
   const T* fromindex,
   int64_t length) {
+  std::cout << "awkward_Index_iscontiguous" << std::endl;
+
   *result = true;
   T expecting = 0;
   for (int64_t i = 0;  i < length;  i++) {

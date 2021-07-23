@@ -12,6 +12,8 @@ ERROR awkward_Identities_from_RegularArray(
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
+  std::cout << "awkward_Identities_from_RegularArray" << std::endl;
+
   for (int64_t i = 0;  i < fromlength;  i++) {
     for (int64_t j = 0;  j < size;  j++) {
       for (int64_t k = 0;  k < fromwidth;  k++) {

@@ -17,6 +17,8 @@ ERROR awkward_UnionArray_simplify_one(
   int64_t fromwhich,
   int64_t length,
   int64_t base) {
+  std::cout << "awkward_UnionArray_simplify_one" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     if (fromtags[i] == fromwhich) {
       totags[i] = (TOTAGS)towhich;

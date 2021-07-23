@@ -9,6 +9,8 @@ ERROR awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64(
   int64_t* nextshifts,
   const T* index,
   int64_t length) {
+  std::cout << "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64" << std::endl;
+
   int64_t nullsum = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {

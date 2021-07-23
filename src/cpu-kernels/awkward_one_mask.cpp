@@ -8,6 +8,8 @@ template <typename M>
 ERROR awkward_one_mask(
   M* tomask,
   int64_t length) {
+  std::cout << "awkward_one_mask" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     tomask[i] = 1;
   }

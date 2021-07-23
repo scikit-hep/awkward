@@ -13,6 +13,8 @@ ERROR awkward_ListArray_getitem_carry(
   const T* fromcarry,
   int64_t lenstarts,
   int64_t lencarry) {
+  std::cout << "awkward_ListArray_getitem_carry" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenstarts) {
       return failure("index out of range", i, fromcarry[i], FILENAME(__LINE__));

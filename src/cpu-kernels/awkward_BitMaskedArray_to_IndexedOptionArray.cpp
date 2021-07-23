@@ -11,6 +11,8 @@ ERROR awkward_BitMaskedArray_to_IndexedOptionArray(
   int64_t bitmasklength,
   bool validwhen,
   bool lsb_order) {
+  std::cout << "awkward_BitMaskedArray_to_IndexedOptionArray" << std::endl;
+
   if (lsb_order) {
     for (int64_t i = 0;  i < bitmasklength;  i++) {
       uint8_t byte = frombitmask[i];

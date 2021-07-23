@@ -9,6 +9,8 @@ ERROR awkward_NumpyArray_contiguous_init(
   T* toptr,
   int64_t skip,
   int64_t stride) {
+  std::cout << "awkward_NumpyArray_contiguous_init" << std::endl;
+
   for (int64_t i = 0;  i < skip;  i++) {
     toptr[i] = i*stride;
   }

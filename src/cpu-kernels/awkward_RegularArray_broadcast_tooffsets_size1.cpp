@@ -9,6 +9,8 @@ ERROR awkward_RegularArray_broadcast_tooffsets_size1(
   T* tocarry,
   const T* fromoffsets,
   int64_t offsetslength) {
+  std::cout << "awkward_RegularArray_broadcast_tooffsets_size1" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t count = (int64_t)(fromoffsets[i + 1] - fromoffsets[i]);

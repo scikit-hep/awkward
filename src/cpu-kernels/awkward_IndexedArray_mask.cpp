@@ -9,6 +9,8 @@ ERROR awkward_IndexedArray_mask(
   M* tomask,
   const C* fromindex,
   int64_t length) {
+  std::cout << "awkward_IndexedArray_mask" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     tomask[i] = (fromindex[i] < 0);
   }

@@ -17,6 +17,8 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
   const char* stringdata,
   const int64_t* stringstarts,
   const int64_t* stringstops) {
+  std::cout << "awkward_ListOffsetArray_argsort_strings_impl" << std::endl;
+
 
   auto sorter =
         [&stringdata, &stringstarts, &stringstops](int left, int right) -> bool {

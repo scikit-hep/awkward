@@ -15,6 +15,8 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
   int64_t maxcount,
   int64_t nextlen,
   const int64_t* nextcarry) {
+  std::cout << "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     int64_t start = offsets[i];
     int64_t stop = offsets[i + 1];

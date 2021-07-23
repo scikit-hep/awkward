@@ -12,6 +12,8 @@ ERROR awkward_MaskedArray_getitem_next_jagged_project(
   int64_t* starts_out,
   int64_t* stops_out,
   int64_t length) {
+  std::cout << "awkward_MaskedArray_getitem_next_jagged_project" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0; i < length; ++i) {
     if (index[i] >= 0) {

@@ -8,6 +8,8 @@ template <typename T>
 ERROR awkward_carry_arange(
   T* toptr,
   int64_t length) {
+  std::cout << "awkward_carry_arange" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i] = i;
   }

@@ -10,6 +10,8 @@ ERROR awkward_NumpyArray_getitem_boolean_nonzero(
   const int8_t* fromptr,
   int64_t length,
   int64_t stride) {
+  std::cout << "awkward_NumpyArray_getitem_boolean_nonzero" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i += stride) {
     if (fromptr[i] != 0) {

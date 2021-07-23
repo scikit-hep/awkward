@@ -11,6 +11,8 @@ ERROR awkward_NumpyArray_contiguous_next(
   int64_t length,
   int64_t skip,
   int64_t stride) {
+  std::cout << "awkward_NumpyArray_contiguous_next" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < skip;  j++) {
       topos[i*skip + j] = frompos[i] + j*stride;

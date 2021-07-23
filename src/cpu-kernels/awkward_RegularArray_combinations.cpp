@@ -13,6 +13,8 @@ ERROR awkward_RegularArray_combinations_64(
   bool replacement,
   int64_t size,
   int64_t length) {
+  std::cout << "awkward_RegularArray_combinations_64" << std::endl;
+
   for (int64_t j = 0;  j < n;  j++) {
     toindex[j] = 0;
   }

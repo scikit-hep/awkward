@@ -11,6 +11,8 @@ ERROR awkward_IndexedArray_getitem_carry(
   const T* fromcarry,
   int64_t lenindex,
   int64_t lencarry) {
+  std::cout << "awkward_IndexedArray_getitem_carry" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenindex) {
       return failure("index out of range", i, fromcarry[i], FILENAME(__LINE__));

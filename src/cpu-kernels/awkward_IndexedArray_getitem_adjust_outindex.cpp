@@ -13,6 +13,8 @@ ERROR awkward_IndexedArray_getitem_adjust_outindex(
   int64_t fromindexlength,
   const T* nonzero,
   int64_t nonzerolength) {
+  std::cout << "awkward_IndexedArray_getitem_adjust_outindex" << std::endl;
+
   int64_t j = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < fromindexlength;  i++) {

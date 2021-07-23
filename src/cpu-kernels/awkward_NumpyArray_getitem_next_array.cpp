@@ -13,6 +13,8 @@ ERROR awkward_NumpyArray_getitem_next_array(
   int64_t lencarry,
   int64_t lenflathead,
   int64_t skip) {
+  std::cout << "awkward_NumpyArray_getitem_next_array" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     for (int64_t j = 0;  j < lenflathead;  j++) {
       nextcarryptr[i*lenflathead + j] = skip*carryptr[i] + flatheadptr[j];

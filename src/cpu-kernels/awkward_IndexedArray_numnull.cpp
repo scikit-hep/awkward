@@ -9,6 +9,8 @@ ERROR awkward_IndexedArray_numnull(
   int64_t* numnull,
   const C* fromindex,
   int64_t lenindex) {
+  std::cout << "awkward_IndexedArray_numnull" << std::endl;
+
   *numnull = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
     if (fromindex[i] < 0) {

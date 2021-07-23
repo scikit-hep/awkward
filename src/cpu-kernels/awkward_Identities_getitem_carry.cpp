@@ -12,6 +12,8 @@ ERROR awkward_Identities_getitem_carry(
   int64_t lencarry,
   int64_t width,
   int64_t length) {
+  std::cout << "awkward_Identities_getitem_carry" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (carryptr[i] >= length) {
       return failure("index out of range", kSliceNone, carryptr[i], FILENAME(__LINE__));

@@ -9,6 +9,8 @@ ERROR awkward_sorting_ranges(
   int64_t tolength,
   const int64_t* parents,
   int64_t parentslength) {
+  std::cout << "awkward_sorting_ranges" << std::endl;
+
   int64_t j = 0;
   int64_t k = 0;
   toindex[0] = k;

@@ -9,6 +9,8 @@ ERROR awkward_regularize_arrayslice(
   T* flatheadptr,
   int64_t lenflathead,
   int64_t length) {
+  std::cout << "awkward_regularize_arrayslice" << std::endl;
+
   for (int64_t i = 0;  i < lenflathead;  i++) {
     T original = flatheadptr[i];
     if (flatheadptr[i] < 0) {

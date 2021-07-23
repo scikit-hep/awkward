@@ -15,6 +15,8 @@ ERROR awkward_Identities_from_UnionArray(
   int64_t fromlength,
   int64_t fromwidth,
   int64_t which) {
+  std::cout << "awkward_Identities_from_UnionArray" << std::endl;
+
   for (int64_t k = 0;  k < tolength*fromwidth;  k++) {
     toptr[k] = -1;
   }

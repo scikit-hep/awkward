@@ -11,6 +11,8 @@ ERROR awkward_UnionArray_filltags(
   const FROM* fromtags,
   int64_t length,
   int64_t base) {
+  std::cout << "awkward_UnionArray_filltags" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     totags[totagsoffset + i] = (TO)(fromtags[i] + base);
   }

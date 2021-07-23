@@ -11,6 +11,8 @@ ERROR awkward_ByteMaskedArray_getitem_carry(
   int64_t lenmask,
   const T* fromcarry,
   int64_t lencarry) {
+  std::cout << "awkward_ByteMaskedArray_getitem_carry" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenmask) {
       return failure("index out of range", i, fromcarry[i], FILENAME(__LINE__));

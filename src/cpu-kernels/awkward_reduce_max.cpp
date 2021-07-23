@@ -12,6 +12,8 @@ ERROR awkward_reduce_max(
   int64_t lenparents,
   int64_t outlength,
   OUT identity) {
+  std::cout << "awkward_reduce_max" << std::endl;
+
   for (int64_t i = 0;  i < outlength;  i++) {
     toptr[i] = identity;
   }

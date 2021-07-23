@@ -10,6 +10,8 @@ ERROR awkward_RegularArray_getitem_next_range_spreadadvanced(
   const T* fromadvanced,
   int64_t length,
   int64_t nextsize) {
+  std::cout << "awkward_RegularArray_getitem_next_range_spreadadvanced" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < nextsize;  j++) {
       toadvanced[i*nextsize + j] = fromadvanced[i];

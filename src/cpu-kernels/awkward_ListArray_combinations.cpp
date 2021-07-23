@@ -15,6 +15,8 @@ ERROR awkward_ListArray_combinations(
   const C* starts,
   const C* stops,
   int64_t length) {
+  std::cout << "awkward_ListArray_combinations" << std::endl;
+
   for (int64_t j = 0;  j < n;  j++) {
     toindex[j] = 0;
   }

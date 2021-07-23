@@ -8,6 +8,8 @@ template <typename T>
 ERROR awkward_Index_nones_as_index(
   T* toindex,
   int64_t length) {
+  std::cout << "awkward_Index_nones_as_index" << std::endl;
+
   int64_t last_index = 0;
   for (int64_t i = 0; i < length; i++) {
     toindex[i] > last_index ? last_index = toindex[i] : last_index;

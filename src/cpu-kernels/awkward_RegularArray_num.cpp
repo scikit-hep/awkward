@@ -9,6 +9,8 @@ ERROR awkward_RegularArray_num(
   T* tonum,
   int64_t size,
   int64_t length) {
+  std::cout << "awkward_RegularArray_num" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     tonum[i] = size;
   }

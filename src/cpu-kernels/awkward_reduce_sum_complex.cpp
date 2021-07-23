@@ -11,6 +11,8 @@ ERROR awkward_reduce_sum_complex(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
+  std::cout << "awkward_reduce_sum_complex" << std::endl;
+
   for (int64_t i = 0;  i < outlength;  i++) {
     toptr[i * 2] = (OUT)0;
     toptr[i * 2 + 1] = (OUT)0;

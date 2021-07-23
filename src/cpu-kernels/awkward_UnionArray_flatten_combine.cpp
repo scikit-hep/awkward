@@ -17,6 +17,8 @@ ERROR awkward_UnionArray_flatten_combine(
   const FROMINDEX* fromindex,
   int64_t length,
   T** offsetsraws) {
+  std::cout << "awkward_UnionArray_flatten_combine" << std::endl;
+
   tooffsets[0] = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {

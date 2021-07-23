@@ -11,6 +11,8 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
   const C* fromindex,
   int64_t lenindex,
   int64_t lencontent) {
+  std::cout << "awkward_IndexedArray_getitem_nextcarry_outindex" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[i];

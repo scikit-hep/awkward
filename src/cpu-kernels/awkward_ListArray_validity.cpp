@@ -10,6 +10,8 @@ ERROR awkward_ListArray_validity(
   const C* stops,
   int64_t length,
   int64_t lencontent) {
+  std::cout << "awkward_ListArray_validity" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     C start = starts[i];
     C stop = stops[i];

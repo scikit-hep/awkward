@@ -16,6 +16,8 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
   int64_t length,
   const int64_t* parents,
   int64_t maxcount) {
+  std::cout << "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64" << std::endl;
+
   *maxnextparents = 0;
   for (int64_t i = 0;  i < distinctslen;  i++) {
     distincts[i] = -1;

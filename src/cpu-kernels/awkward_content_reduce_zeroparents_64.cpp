@@ -7,6 +7,8 @@
 ERROR awkward_content_reduce_zeroparents_64(
   int64_t* toparents,
   int64_t length) {
+  std::cout << "awkward_content_reduce_zeroparents_64" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     toparents[i] = 0;
   }

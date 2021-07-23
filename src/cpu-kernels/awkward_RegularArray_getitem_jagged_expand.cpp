@@ -11,6 +11,8 @@ ERROR awkward_RegularArray_getitem_jagged_expand(
   const T* singleoffsets,
   int64_t regularsize,
   int64_t regularlength) {
+  std::cout << "awkward_RegularArray_getitem_jagged_expand" << std::endl;
+
   for (int64_t i = 0;  i < regularlength;  i++) {
     for (int64_t j = 0;  j < regularsize;  j++) {
       multistarts[i*regularsize + j] = singleoffsets[j];

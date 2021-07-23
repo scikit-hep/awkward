@@ -12,6 +12,8 @@ ERROR awkward_UnionArray_nestedfill_tags_index(
   T tag,
   const C* fromcounts,
   int64_t length) {
+  std::cout << "awkward_UnionArray_nestedfill_tags_index" << std::endl;
+
   I k = 0;
   for (int64_t i = 0;  i < length;  i++) {
     C start = tmpstarts[i];

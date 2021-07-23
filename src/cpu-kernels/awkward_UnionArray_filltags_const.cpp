@@ -10,6 +10,8 @@ ERROR awkward_UnionArray_filltags_const(
   int64_t totagsoffset,
   int64_t length,
   int64_t base) {
+  std::cout << "awkward_UnionArray_filltags_const" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     totags[totagsoffset + i] = (TO)base;
   }

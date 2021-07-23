@@ -93,6 +93,8 @@ ERROR awkward_quick_sort(
     bool ascending,
     int64_t length,
     int64_t maxlevels) {
+  std::cout << "awkward_quick_sort" << std::endl;
+
 
   if (ascending) {
     for (int64_t i = 0; i < length; i++) {

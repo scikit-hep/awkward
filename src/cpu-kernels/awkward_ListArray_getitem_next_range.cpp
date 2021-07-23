@@ -15,6 +15,8 @@ ERROR awkward_ListArray_getitem_next_range(
   int64_t start,
   int64_t stop,
   int64_t step) {
+  std::cout << "awkward_ListArray_getitem_next_range" << std::endl;
+
   int64_t k = 0;
   tooffsets[0] = 0;
   if (step > 0) {

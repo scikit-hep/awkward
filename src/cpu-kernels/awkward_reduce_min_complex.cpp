@@ -12,6 +12,8 @@ ERROR awkward_reduce_min_complex(
   int64_t lenparents,
   int64_t outlength,
   OUT identity) {
+  std::cout << "awkward_reduce_min_complex" << std::endl;
+
   for (int64_t i = 0;  i < outlength;  i++) {
    toptr[i * 2] = identity;
    toptr[i * 2 + 1] = 0;

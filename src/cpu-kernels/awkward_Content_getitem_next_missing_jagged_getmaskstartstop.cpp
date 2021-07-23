@@ -11,6 +11,8 @@ ERROR awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
   int64_t* starts_out,
   int64_t* stops_out,
   int64_t length) {
+  std::cout << "awkward_Content_getitem_next_missing_jagged_getmaskstartstop" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0; i < length; ++i) {
     starts_out[i] = offsets_in[k];

@@ -15,6 +15,8 @@ ERROR awkward_NumpyArray_getitem_next_range_advanced(
   int64_t skip,
   int64_t start,
   int64_t step) {
+  std::cout << "awkward_NumpyArray_getitem_next_range_advanced" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     for (int64_t j = 0;  j < lenhead;  j++) {
       nextcarryptr[i*lenhead + j] = skip*carryptr[i] + start + j*step;

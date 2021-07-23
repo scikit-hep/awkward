@@ -10,6 +10,8 @@ ERROR awkward_IndexedArray_fill_count(
   int64_t toindexoffset,
   int64_t length,
   int64_t base) {
+  std::cout << "awkward_IndexedArray_fill_count" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     toindex[toindexoffset + i] = i + base;
   }

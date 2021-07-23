@@ -11,6 +11,8 @@ ERROR awkward_IndexedArray_simplify(
   int64_t outerlength,
   const IN* innerindex,
   int64_t innerlength) {
+  std::cout << "awkward_IndexedArray_simplify" << std::endl;
+
   for (int64_t i = 0;  i < outerlength;  i++) {
     OUT j = outerindex[i];
     if (j < 0) {

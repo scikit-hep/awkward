@@ -9,6 +9,8 @@ ERROR awkward_Identities32_to_Identities64(
   const int32_t* fromptr,
   int64_t length,
   int64_t width) {
+  std::cout << "awkward_Identities32_to_Identities64" << std::endl;
+
   for (int64_t i = 0;  i < length*width;  i++) {
     toptr[i]= (int64_t)fromptr[i];
   }

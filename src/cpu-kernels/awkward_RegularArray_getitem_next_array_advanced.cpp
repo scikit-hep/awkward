@@ -13,6 +13,8 @@ ERROR awkward_RegularArray_getitem_next_array_advanced(
   int64_t length,
   int64_t lenarray,
   int64_t size) {
+  std::cout << "awkward_RegularArray_getitem_next_array_advanced" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     tocarry[i] = i*size + fromarray[fromadvanced[i]];
     toadvanced[i] = i;

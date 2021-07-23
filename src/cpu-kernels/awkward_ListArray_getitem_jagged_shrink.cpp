@@ -13,6 +13,8 @@ ERROR awkward_ListArray_getitem_jagged_shrink(
   const T* slicestops,
   int64_t length,
   const T* missing) {
+  std::cout << "awkward_ListArray_getitem_jagged_shrink" << std::endl;
+
   int64_t k = 0;
   if (length == 0) {
     tosmalloffsets[0] = 0;

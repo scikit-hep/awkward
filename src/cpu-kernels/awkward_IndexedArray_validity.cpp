@@ -10,6 +10,8 @@ ERROR awkward_IndexedArray_validity(
   int64_t length,
   int64_t lencontent,
   bool isoption) {
+  std::cout << "awkward_IndexedArray_validity" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     C idx = index[i];
     if (!isoption) {

@@ -9,6 +9,8 @@ ERROR awkward_ListArray_getitem_next_range_counts(
   int64_t* total,
   const C* fromoffsets,
   int64_t lenstarts) {
+  std::cout << "awkward_ListArray_getitem_next_range_counts" << std::endl;
+
   *total = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
     *total = *total + fromoffsets[i + 1] - fromoffsets[i];

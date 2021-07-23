@@ -11,6 +11,8 @@ ERROR awkward_ByteMaskedArray_overlay_mask(
   const M* mymask,
   int64_t length,
   bool validwhen) {
+  std::cout << "awkward_ByteMaskedArray_overlay_mask" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     bool theirs = theirmask[i];
     bool mine = ((mymask[i] != 0) != validwhen);

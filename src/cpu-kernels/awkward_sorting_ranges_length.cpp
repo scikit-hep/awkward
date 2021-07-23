@@ -8,6 +8,8 @@ ERROR awkward_sorting_ranges_length(
   int64_t* tolength,
   const int64_t* parents,
   int64_t parentslength) {
+  std::cout << "awkward_sorting_ranges_length" << std::endl;
+
   int64_t length = 2;
   for (int64_t i = 1;  i < parentslength;  i++) {
     if (parents[i - 1] != parents[i]) {

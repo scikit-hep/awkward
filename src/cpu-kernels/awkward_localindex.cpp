@@ -8,6 +8,8 @@ template <typename T>
 ERROR awkward_localindex(
   T* toindex,
   int64_t length) {
+  std::cout << "awkward_localindex" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     toindex[i] = i;
   }

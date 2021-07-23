@@ -14,6 +14,8 @@ ERROR awkward_ListArray_fill(
   const FROM* fromstops,
   int64_t length,
   int64_t base) {
+  std::cout << "awkward_ListArray_fill" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     tostarts[tostartsoffset + i] = (TO)(fromstarts[i] + base);
     tostops[tostopsoffset + i] = (TO)(fromstops[i] + base);

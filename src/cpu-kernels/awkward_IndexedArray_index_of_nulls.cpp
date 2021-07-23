@@ -11,6 +11,8 @@ ERROR awkward_IndexedArray_index_of_nulls(
   int64_t lenindex,
   const int64_t* parents,
   const int64_t* starts) {
+  std::cout << "awkward_IndexedArray_index_of_nulls" << std::endl;
+
   int64_t j = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
     if (fromindex[i] < 0) {

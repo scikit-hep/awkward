@@ -9,6 +9,8 @@ ERROR awkward_ListArray_localindex(
   T* toindex,
   const C* offsets,
   int64_t length) {
+  std::cout << "awkward_ListArray_localindex" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     int64_t start = (int64_t)offsets[i];
     int64_t stop = (int64_t)offsets[i + 1];

@@ -10,6 +10,8 @@ ERROR awkward_ListArray_getitem_next_range_spreadadvanced(
   const T* fromadvanced,
   const C* fromoffsets,
   int64_t lenstarts) {
+  std::cout << "awkward_ListArray_getitem_next_range_spreadadvanced" << std::endl;
+
   for (int64_t i = 0;  i < lenstarts;  i++) {
     C count = fromoffsets[i + 1] - fromoffsets[i];
     for (int64_t j = 0;  j < count;  j++) {

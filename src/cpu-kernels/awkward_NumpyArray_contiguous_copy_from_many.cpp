@@ -12,6 +12,8 @@ ERROR awkward_NumpyArray_contiguous_copy_from_many(
   int64_t len,
   int64_t stride,
   const T* pos) {
+  std::cout << "awkward_NumpyArray_contiguous_copy_from_many" << std::endl;
+
   int64_t k = 0;
   int64_t j = 0;
   for (int64_t i = 0;  i < len;  i++) {

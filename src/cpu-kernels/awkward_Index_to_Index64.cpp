@@ -10,6 +10,8 @@ ERROR awkward_Index_to_Index64(
   const T* fromptr,
   int64_t length
 ) {
+  std::cout << "awkward_Index_to_Index64" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i]= (int64_t)fromptr[i];
   }

@@ -16,6 +16,8 @@ ERROR awkward_ListOffsetArray_getitem_adjust_offsets_index(
   int64_t nonzerolength,
   const int8_t* originalmask,
   int64_t masklength) {
+  std::cout << "awkward_ListOffsetArray_getitem_adjust_offsets_index" << std::endl;
+
   int64_t k = 0;
   tooffsets[0] = fromoffsets[0];
   for (int64_t i = 0;  i < length;  i++) {

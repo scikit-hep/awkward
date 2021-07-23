@@ -11,6 +11,8 @@ ERROR awkward_UnionArray_validity(
   int64_t length,
   int64_t numcontents,
   const int64_t* lencontents) {
+  std::cout << "awkward_UnionArray_validity" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     T tag = tags[i];
     I idx = index[i];

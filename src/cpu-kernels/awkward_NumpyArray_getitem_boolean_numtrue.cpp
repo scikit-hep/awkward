@@ -9,6 +9,8 @@ ERROR awkward_NumpyArray_getitem_boolean_numtrue(
   const int8_t* fromptr,
   int64_t length,
   int64_t stride) {
+  std::cout << "awkward_NumpyArray_getitem_boolean_numtrue" << std::endl;
+
   *numtrue = 0;
   for (int64_t i = 0;  i < length;  i += stride) {
     *numtrue = *numtrue + (fromptr[i] != 0);

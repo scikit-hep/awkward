@@ -12,6 +12,8 @@ ERROR awkward_ListArray_getitem_jagged_descend(
   int64_t sliceouterlen,
   const C* fromstarts,
   const C* fromstops) {
+  std::cout << "awkward_ListArray_getitem_jagged_descend" << std::endl;
+
   if (sliceouterlen == 0) {
     tooffsets[0] = 0;
   }

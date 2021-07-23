@@ -10,6 +10,8 @@ ERROR awkward_ByteMaskedArray_mask(
   const M* frommask,
   int64_t length,
   bool validwhen) {
+  std::cout << "awkward_ByteMaskedArray_mask" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     tomask[i] = ((frommask[i] != 0) != validwhen);
   }

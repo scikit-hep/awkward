@@ -16,6 +16,8 @@ ERROR awkward_ListArray_getitem_jagged_apply(
   const C* fromstarts,
   const C* fromstops,
   int64_t contentlen) {
+  std::cout << "awkward_ListArray_getitem_jagged_apply" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
     T slicestart = slicestarts[i];

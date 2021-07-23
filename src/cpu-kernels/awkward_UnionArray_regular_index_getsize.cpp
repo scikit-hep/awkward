@@ -9,6 +9,8 @@ ERROR awkward_UnionArray_regular_index_getsize(
   int64_t* size,
   const C* fromtags,
   int64_t length) {
+  std::cout << "awkward_UnionArray_regular_index_getsize" << std::endl;
+
   *size = 0;
   for (int64_t i = 0;  i < length;  i++) {
     int64_t tag = (int64_t)fromtags[i];

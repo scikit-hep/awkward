@@ -9,6 +9,8 @@ ERROR awkward_ListOffsetArray_compact_offsets(
   T* tooffsets,
   const C* fromoffsets,
   int64_t length) {
+  std::cout << "awkward_ListOffsetArray_compact_offsets" << std::endl;
+
   int64_t diff = (int64_t)fromoffsets[0];
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {

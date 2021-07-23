@@ -11,6 +11,8 @@ ERROR awkward_IndexedArray_fill(
   const FROM* fromindex,
   int64_t length,
   int64_t base) {
+  std::cout << "awkward_IndexedArray_fill" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     FROM fromval = fromindex[i];
     toindex[toindexoffset + i] = fromval < 0 ? -1 : (TO)(fromval + base);

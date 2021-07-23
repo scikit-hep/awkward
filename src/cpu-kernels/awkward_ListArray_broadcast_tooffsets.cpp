@@ -12,6 +12,8 @@ ERROR awkward_ListArray_broadcast_tooffsets(
   const C* fromstarts,
   const C* fromstops,
   int64_t lencontent) {
+  std::cout << "awkward_ListArray_broadcast_tooffsets" << std::endl;
+
   int64_t k = 0;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t start = (int64_t)fromstarts[i];

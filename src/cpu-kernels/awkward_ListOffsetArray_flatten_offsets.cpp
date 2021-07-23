@@ -11,6 +11,8 @@ ERROR awkward_ListOffsetArray_flatten_offsets(
   int64_t outeroffsetslen,
   const T* inneroffsets,
   int64_t inneroffsetslen) {
+  std::cout << "awkward_ListOffsetArray_flatten_offsets" << std::endl;
+
   for (int64_t i = 0;  i < outeroffsetslen;  i++) {
     tooffsets[i] =
       inneroffsets[outeroffsets[i]];

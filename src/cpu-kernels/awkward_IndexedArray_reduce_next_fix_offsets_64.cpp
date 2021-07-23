@@ -9,6 +9,8 @@ ERROR awkward_IndexedArray_reduce_next_fix_offsets_64(
   const int64_t* starts,
   int64_t startslength,
   int64_t outindexlength) {
+  std::cout << "awkward_IndexedArray_reduce_next_fix_offsets_64" << std::endl;
+
   for (int64_t i = 0;  i < startslength;  i++) {
     outoffsets[i] = starts[i];
   }

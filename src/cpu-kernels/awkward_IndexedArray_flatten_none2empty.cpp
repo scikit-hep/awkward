@@ -11,6 +11,8 @@ ERROR awkward_IndexedArray_flatten_none2empty(
   int64_t outindexlength,
   const T* offsets,
   int64_t offsetslength) {
+  std::cout << "awkward_IndexedArray_flatten_none2empty" << std::endl;
+
   outoffsets[0] = offsets[0];
   int64_t k = 1;
   for (int64_t i = 0;  i < outindexlength;  i++) {

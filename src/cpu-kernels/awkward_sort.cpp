@@ -31,6 +31,8 @@ ERROR awkward_sort(
   int64_t parentslength,
   bool ascending,
   bool stable) {
+  std::cout << "awkward_sort" << std::endl;
+
   std::vector<int64_t> index(length);
   std::iota(index.begin(), index.end(), 0);
 

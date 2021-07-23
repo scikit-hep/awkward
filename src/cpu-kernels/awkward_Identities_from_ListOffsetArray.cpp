@@ -12,6 +12,8 @@ ERROR awkward_Identities_from_ListOffsetArray(
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
+  std::cout << "awkward_Identities_from_ListOffsetArray" << std::endl;
+
   int64_t globalstart = fromoffsets[0];
   int64_t globalstop = fromoffsets[fromlength];
   for (int64_t k = 0;  k < globalstart*(fromwidth + 1);  k++) {

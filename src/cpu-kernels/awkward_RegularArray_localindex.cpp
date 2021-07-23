@@ -9,6 +9,8 @@ ERROR awkward_RegularArray_localindex(
   T* toindex,
   int64_t size,
   int64_t length) {
+  std::cout << "awkward_RegularArray_localindex" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < size;  j++) {
       toindex[i*size + j] = j;

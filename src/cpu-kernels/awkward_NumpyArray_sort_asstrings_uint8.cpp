@@ -19,6 +19,8 @@ ERROR awkward_NumpyArray_sort_asstrings_uint8(
     int64_t* outoffsets,
     bool ascending,
     bool stable) {
+  std::cout << "awkward_NumpyArray_sort_asstrings_uint8" << std::endl;
+
 
   // convert array of characters to
   // an std container of strings

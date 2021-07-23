@@ -14,6 +14,8 @@ ERROR awkward_ListArray_getitem_next_range_carrylength(
   int64_t start,
   int64_t stop,
   int64_t step) {
+  std::cout << "awkward_ListArray_getitem_next_range_carrylength" << std::endl;
+
   *carrylength = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
     int64_t length = fromstops[i] - fromstarts[i];

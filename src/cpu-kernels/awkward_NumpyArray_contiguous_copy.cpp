@@ -11,6 +11,8 @@ ERROR awkward_NumpyArray_contiguous_copy(
   int64_t len,
   int64_t stride,
   const T* pos) {
+  std::cout << "awkward_NumpyArray_contiguous_copy" << std::endl;
+
   for (int64_t i = 0;  i < len;  i++) {
     memcpy(&toptr[i*stride], &fromptr[pos[i]], (size_t)stride);
   }

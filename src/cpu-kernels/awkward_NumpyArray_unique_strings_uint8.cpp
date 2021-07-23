@@ -10,6 +10,8 @@ ERROR awkward_NumpyArray_unique_strings_uint8(
     int64_t offsetslength,
     int64_t* outoffsets,
     int64_t* tolength) {
+  std::cout << "awkward_NumpyArray_unique_strings_uint8" << std::endl;
+
 
   int64_t slen = 0;
   int64_t index = 0;

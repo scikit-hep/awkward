@@ -9,6 +9,8 @@ ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(
   T* toindex,
   const int8_t* frommask,
   int64_t length) {
+  std::cout << "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1" << std::endl;
+
   int64_t count = 0;
   for (int64_t i = 0; i < length; i++) {
     if (frommask[i]) {

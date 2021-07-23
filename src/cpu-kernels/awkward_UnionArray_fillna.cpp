@@ -9,6 +9,8 @@ ERROR awkward_UnionArray_fillna(
   T* toindex,
   const C* fromindex,
   int64_t length) {
+  std::cout << "awkward_UnionArray_fillna" << std::endl;
+
   for (int64_t i = 0; i < length; i++)
   {
     toindex[i] = fromindex[i] >= 0 ? fromindex[i] : 0;

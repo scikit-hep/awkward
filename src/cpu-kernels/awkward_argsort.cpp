@@ -30,6 +30,8 @@ ERROR awkward_argsort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
+  std::cout << "awkward_argsort" << std::endl;
+
   std::vector<int64_t> result(length);
   std::iota(result.begin(), result.end(), 0);
 

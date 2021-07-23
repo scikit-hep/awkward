@@ -11,6 +11,8 @@ ERROR awkward_missing_repeat(
   int64_t indexlength,
   int64_t repetitions,
   int64_t regularsize) {
+  std::cout << "awkward_missing_repeat" << std::endl;
+
   for (int64_t i = 0;  i < repetitions;  i++) {
     for (int64_t j = 0;  j < indexlength;  j++) {
       T base = index[j];

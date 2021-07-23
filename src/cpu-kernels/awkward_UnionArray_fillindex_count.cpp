@@ -9,6 +9,8 @@ ERROR awkward_UnionArray_fillindex_count(
   TO* toindex,
   int64_t toindexoffset,
   int64_t length) {
+  std::cout << "awkward_UnionArray_fillindex_count" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     toindex[toindexoffset + i] = (TO)i;
   }

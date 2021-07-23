@@ -8,6 +8,8 @@ ERROR awkward_NumpyArray_copy(
   uint8_t* toptr,
   const uint8_t* fromptr,
   int64_t len) {
+  std::cout << "awkward_NumpyArray_copy" << std::endl;
+
   memcpy(toptr, fromptr, (size_t)len);
   return success();
 }

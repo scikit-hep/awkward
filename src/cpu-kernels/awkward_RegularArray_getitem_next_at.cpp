@@ -10,6 +10,8 @@ ERROR awkward_RegularArray_getitem_next_at(
   int64_t at,
   int64_t length,
   int64_t size) {
+  std::cout << "awkward_RegularArray_getitem_next_at" << std::endl;
+
   int64_t regular_at = at;
   if (regular_at < 0) {
     regular_at += size;

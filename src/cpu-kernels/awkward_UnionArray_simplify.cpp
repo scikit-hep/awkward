@@ -22,6 +22,8 @@ ERROR awkward_UnionArray_simplify(
   int64_t outerwhich,
   int64_t length,
   int64_t base) {
+  std::cout << "awkward_UnionArray_simplify" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     if (outertags[i] == outerwhich) {
       OUTERINDEX j = outerindex[i];

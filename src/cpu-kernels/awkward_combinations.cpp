@@ -10,6 +10,8 @@ ERROR awkward_combinations(
   int64_t n,
   bool replacement,
   int64_t singlelen) {
+  std::cout << "awkward_combinations" << std::endl;
+
   return failure("FIXME: awkward_combinations", 0, kSliceNone, FILENAME(__LINE__));
 }
 ERROR awkward_combinations_64(

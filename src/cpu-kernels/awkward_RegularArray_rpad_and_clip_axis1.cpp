@@ -10,6 +10,8 @@ ERROR awkward_RegularArray_rpad_and_clip_axis1(
   int64_t target,
   int64_t size,
   int64_t length) {
+  std::cout << "awkward_RegularArray_rpad_and_clip_axis1" << std::endl;
+
   int64_t shorter = (target < size ? target : size);
   for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < shorter;  j++) {

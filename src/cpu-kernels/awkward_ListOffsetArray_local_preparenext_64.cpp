@@ -12,6 +12,8 @@ ERROR awkward_ListOffsetArray_local_preparenext_64(
   int64_t* tocarry,
   const int64_t* fromindex,
   int64_t length) {
+  std::cout << "awkward_ListOffsetArray_local_preparenext_64" << std::endl;
+
   std::vector<int64_t> result(length);
   std::iota(result.begin(), result.end(), 0);
   std::sort(result.begin(), result.end(),

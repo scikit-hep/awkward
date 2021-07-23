@@ -11,6 +11,8 @@ ERROR awkward_reduce_prod(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
+  std::cout << "awkward_reduce_prod" << std::endl;
+
   for (int64_t i = 0;  i < outlength;  i++) {
     toptr[i] = (OUT)1;
   }

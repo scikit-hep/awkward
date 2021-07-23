@@ -8,6 +8,8 @@ template <typename T>
 ERROR awkward_new_Identities(
   T* toptr,
   int64_t length) {
+  std::cout << "awkward_new_Identities" << std::endl;
+
   for (T i = 0;  i < length;  i++) {
     toptr[i] = i;
   }

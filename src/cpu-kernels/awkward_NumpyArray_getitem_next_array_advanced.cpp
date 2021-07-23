@@ -12,6 +12,8 @@ ERROR awkward_NumpyArray_getitem_next_array_advanced(
   const T* flatheadptr,
   int64_t lencarry,
   int64_t skip) {
+  std::cout << "awkward_NumpyArray_getitem_next_array_advanced" << std::endl;
+
   for (int64_t i = 0;  i < lencarry;  i++) {
     nextcarryptr[i] = skip*carryptr[i] + flatheadptr[advancedptr[i]];
   }

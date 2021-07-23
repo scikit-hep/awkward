@@ -9,6 +9,8 @@ ERROR awkward_unique(
   T* toptr,
   int64_t length,
   int64_t* tolength) {
+  std::cout << "awkward_unique" << std::endl;
+
 
   int64_t j = 0;
   for (int64_t i = 1;  i < length;  i++) {

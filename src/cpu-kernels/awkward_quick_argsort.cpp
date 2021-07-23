@@ -101,6 +101,8 @@ ERROR awkward_quick_argsort(
   bool ascending,
   bool stable,
   int64_t maxlevels) {
+  std::cout << "awkward_quick_argsort" << std::endl;
+
   for (int64_t i = 0; i < offsetslength - 1; i++) {
     for (int64_t j = 0; j < offsets[i + 1] - offsets[i]; j++) {
       toptr[offsets[i] + j] = j;

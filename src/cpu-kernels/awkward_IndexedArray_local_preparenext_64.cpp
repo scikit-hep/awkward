@@ -11,6 +11,8 @@ ERROR awkward_IndexedArray_local_preparenext_64(
     const int64_t parentslength,
     const int64_t* nextparents,
     const int64_t nextlen) {
+  std::cout << "awkward_IndexedArray_local_preparenext_64" << std::endl;
+
   int64_t j = 0;
   for (int64_t i = 0;  i < parentslength;  i++) {
     int64_t parent = parents[i];

@@ -12,6 +12,8 @@ ERROR awkward_RegularArray_getitem_next_range(
   int64_t length,
   int64_t size,
   int64_t nextsize) {
+  std::cout << "awkward_RegularArray_getitem_next_range" << std::endl;
+
   for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < nextsize;  j++) {
       tocarry[i*nextsize + j] = i*size + regular_start + j*step;

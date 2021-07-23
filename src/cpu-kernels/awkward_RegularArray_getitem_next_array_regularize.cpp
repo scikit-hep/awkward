@@ -10,6 +10,8 @@ ERROR awkward_RegularArray_getitem_next_array_regularize(
   const T* fromarray,
   int64_t lenarray,
   int64_t size) {
+  std::cout << "awkward_RegularArray_getitem_next_array_regularize" << std::endl;
+
   for (int64_t j = 0;  j < lenarray;  j++) {
     toarray[j] = fromarray[j];
     if (toarray[j] < 0) {

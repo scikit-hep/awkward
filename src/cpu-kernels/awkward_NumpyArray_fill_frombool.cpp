@@ -10,6 +10,8 @@ awkward_NumpyArray_fill_frombool(TO* toptr,
                                  int64_t tooffset,
                                  const bool* fromptr,
                                  int64_t length) {
+  std::cout << "awkward_NumpyArray_fill_frombool" << std::endl;
+
   for (int64_t i = 0; i < length; i++) {
     toptr[tooffset + i] = (TO)(fromptr[i] ? 1 : 0);
   }

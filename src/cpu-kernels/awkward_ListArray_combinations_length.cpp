@@ -13,6 +13,8 @@ ERROR awkward_ListArray_combinations_length(
   const C* starts,
   const C* stops,
   int64_t length) {
+  std::cout << "awkward_ListArray_combinations_length" << std::endl;
+
   *totallen = 0;
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {
