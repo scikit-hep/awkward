@@ -54,3 +54,6 @@ def test_RegularArray():
 
     with pytest.raises(IndexError):
         new[1, ["hello", "there"]]
+
+    assert ak.to_list(new[1, np.newaxis, -2]) == [[20, 21, 22, 23, 24]]
+    assert ak.to_list(new[1, np.newaxis, np.newaxis, -2]) == [[[20, 21, 22, 23, 24]]]

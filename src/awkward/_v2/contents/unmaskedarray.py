@@ -105,7 +105,7 @@ class UnmaskedArray(Content):
             return self._getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
-            raise NotImplementedError
+            return self._getitem_next_newaxis(tail, advanced)
 
         elif head is Ellipsis:
             raise NotImplementedError

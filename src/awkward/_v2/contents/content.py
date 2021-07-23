@@ -97,6 +97,16 @@ class Content(object):
             nexthead, nexttail, advanced
         )
 
+    def _getitem_next_newaxis(self, tail, advanced):
+        nexthead, nexttail = self._headtail(tail)
+        return ak._v2.contents.RegularArray(
+            self._getitem_next(nexthead, nexttail, advanced),
+            1,  # size
+            0,  # zeros_length is irrelevant when the size is 1 (!= 0)
+            None,
+            None,
+        )
+
     def __getitem__(self, where):
         try:
             if ak._util.isint(where):
