@@ -46,10 +46,5 @@ def test_RegularArray():
     )
     new = v1_to_v2(old)
 
-    print("OLD")
-    print(ak.to_list(old[1, 1:]))
-
-    print("NEW")
-    print(ak.to_list(new[1, 1:]))
-
-    raise Exception
+    assert ak.to_list(old[1, 1:]) == [[20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
+    assert ak.to_list(new[1, 1:]) == [[20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]

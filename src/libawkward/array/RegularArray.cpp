@@ -1367,8 +1367,6 @@ namespace awkward {
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
 
-    std::cout << "len " << len << " range " << range.tostring() << " tail " << tail.tostring() << " advanced " << advanced.tostring() << std::endl;
-
     if (range.step() == 0) {
       throw std::runtime_error(
         std::string("RegularArray::getitem_next(SliceRange): range.step() == 0")
@@ -1383,8 +1381,6 @@ namespace awkward {
                                   range.start() != Slice::none(),
                                   range.stop() != Slice::none(),
                                   size_);
-
-    std::cout << "regular_start " << regular_start << " regular_stop " << regular_stop << " regular_step " << regular_step << std::endl;
 
     int64_t nextsize = 0;
     if (range.step() > 0  &&  regular_stop - regular_start > 0) {
@@ -1402,8 +1398,6 @@ namespace awkward {
       }
     }
 
-    std::cout << "nextsize " << nextsize << std::endl;
-
     Index64 nextcarry(len*nextsize);
 
     struct Error err = kernel::RegularArray_getitem_next_range_64(
@@ -1416,13 +1410,9 @@ namespace awkward {
       nextsize);
     util::handle_error(err, classname(), identities_.get());
 
-    std::cout << "nextcarry " << nextcarry.tostring() << std::endl;
-
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
     if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
-      std::cout << "not advanced" << std::endl;
-
       return std::make_shared<RegularArray>(
         identities_,
         parameters_,
@@ -1431,8 +1421,6 @@ namespace awkward {
         length());
     }
     else {
-      std::cout << "advanced" << std::endl;
-
       Index64 nextadvanced(len*nextsize);
 
       struct Error err = kernel::RegularArray_getitem_next_range_spreadadvanced_64(
@@ -1442,8 +1430,6 @@ namespace awkward {
         len,
         nextsize);
       util::handle_error(err, classname(), identities_.get());
-
-      std::cout << "nextadvanced " << nextadvanced.tostring() << std::endl;
 
       return std::make_shared<RegularArray>(
         identities_,

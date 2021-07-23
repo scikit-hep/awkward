@@ -181,12 +181,8 @@ class RegularArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            print(f"{self._length = } {head = } {tail = }")
-
             nexthead, nexttail = self._headtail(tail)
             start, stop, step = head.indices(self._size)
-
-            print(f"{start = } {stop = } {step = }")
 
             nextsize = 0
             if step > 0 and stop - start > 0:
@@ -199,8 +195,6 @@ class RegularArray(Content):
                 nextsize = diff // step
                 if diff % step != 0:
                     nextsize += 1
-
-            print(f"{nextsize = }")
 
             nextcarry = ak._v2.index.Index64.empty(self._length * nextsize, nplike)
             self._handle_error(
@@ -217,14 +211,9 @@ class RegularArray(Content):
                 ),
                 head,
             )
-
-            print(f"{nextcarry = }")
-
             nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
 
             if advanced is None or len(advanced) == 0:
-                print("not advanced")
-
                 return RegularArray(
                     nextcontent._getitem_next(nexthead, nexttail, advanced),
                     nextsize,
@@ -233,9 +222,9 @@ class RegularArray(Content):
                     self._parameters,
                 )
             else:
-                print("advanced")
-
-                nextadvanced = ak._v2.index.Index64.empty(self._length * nextsize, nplike)
+                nextadvanced = ak._v2.index.Index64.empty(
+                    self._length * nextsize, nplike
+                )
                 self._handle_error(
                     nplike[
                         "awkward_RegularArray_getitem_next_range_spreadadvanced",
@@ -249,9 +238,6 @@ class RegularArray(Content):
                     ),
                     head,
                 )
-
-                print(f"{nextadvanced = }")
-
                 return RegularArray(
                     nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
                     nextsize,
