@@ -188,7 +188,7 @@ class NumpyArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
+        nplike = self._nplike
 
         if head == ():
             return self
@@ -202,7 +202,7 @@ class NumpyArray(Content):
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
             if hasattr(out, "shape") and len(out.shape) != 0:
-                return NumpyArray(out, None, None, nplike=self._nplike)
+                return NumpyArray(out, None, None, nplike=nplike)
             else:
                 return out
 
@@ -214,7 +214,7 @@ class NumpyArray(Content):
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
-            return NumpyArray(out, None, self._parameters, nplike=self._nplike)
+            return NumpyArray(out, None, self._parameters, nplike=nplike)
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -233,7 +233,7 @@ class NumpyArray(Content):
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
-            return NumpyArray(out, None, self._parameters, nplike=self._nplike)
+            return NumpyArray(out, None, self._parameters, nplike=nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError

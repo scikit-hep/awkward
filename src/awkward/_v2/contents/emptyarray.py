@@ -40,7 +40,7 @@ class EmptyArray(Content):
         return self
 
     def _getitem_at(self, where):
-        raise NestedIndexError(self, where)
+        raise NestedIndexError(self, where, "array is empty")
 
     def _getitem_range(self, where):
         return self
@@ -58,21 +58,21 @@ class EmptyArray(Content):
             return self
         else:
             if issubclass(exception, NestedIndexError):
-                raise exception(self, carry.data)
+                raise exception(self, carry.data, "array is empty")
             else:
-                raise exception("index out of range")
+                raise exception("array is empty")
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
         if head == ():
-            raise NotImplementedError
+            return self
 
         elif isinstance(head, int):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         elif isinstance(head, slice):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -87,7 +87,7 @@ class EmptyArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError

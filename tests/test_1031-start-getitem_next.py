@@ -12,32 +12,32 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 def test_EmptyArray():
     a = ak._v2.contents.emptyarray.EmptyArray()
     assert len(a) == 0
-    # with pytest.raises(IndexError):
-    #     a[
-    #         0,
-    #     ]
-    # assert isinstance(
-    #     a[
-    #         10:20,
-    #     ],
-    #     ak._v2.contents.emptyarray.EmptyArray,
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             10:20,
-    #         ]
-    #     )
-    #     == 0
-    # )
-    # with pytest.raises(IndexError):
-    #     a[
-    #         "bad",
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[
-    #         ["bad", "good", "ok"],
-    #     ]
+    with pytest.raises(IndexError):
+        a[
+            0,
+        ]
+    assert isinstance(
+        a[
+            10:20,
+        ],
+        ak._v2.contents.emptyarray.EmptyArray,
+    )
+    assert (
+        len(
+            a[
+                10:20,
+            ]
+        )
+        == 0
+    )
+    with pytest.raises(IndexError):
+        a[
+            "bad",
+        ]
+    with pytest.raises(IndexError):
+        a[
+            ["bad", "good", "ok"],
+        ]
 
 
 def test_NumpyArray_toRegularArray():
