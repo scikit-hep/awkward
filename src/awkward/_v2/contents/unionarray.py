@@ -179,7 +179,7 @@ class UnionArray(Content):
         nplike = self.nplike  # noqa: F841
 
         if head == ():
-            raise NotImplementedError
+            return self
 
         elif isinstance(head, int):
             raise NotImplementedError

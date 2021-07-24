@@ -580,104 +580,104 @@ def test_RecordArray_NumpyArray():
         ["x", "y"],
     )
     assert len(a) == 5
-    # with pytest.raises(IndexError):
-    #     a[
-    #         5,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[
-    #         -6,
-    #     ]
-    # assert isinstance(
-    #     a[
-    #         2,
-    #     ],
-    #     ak._v2.record.Record,
-    # )
-    # assert (
-    #     a[
-    #         2,
-    #     ]["y"]
-    #     == 2.2
-    # )
-    # assert (
-    #     a[
-    #         -3,
-    #     ]["y"]
-    #     == 2.2
-    # )
-    # assert isinstance(
-    #     a[
-    #         2:,
-    #     ],
-    #     ak._v2.contents.recordarray.RecordArray,
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             2:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             -3:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             2:100,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             -3:100,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert isinstance(
-    #     a[
-    #         "y",
-    #     ],
-    #     ak._v2.contents.numpyarray.NumpyArray,
-    # )
-    # assert (
-    #     a["y",][  # noqa: E231
-    #         2,
-    #     ]
-    #     == 2.2
-    # )
-    # assert (
-    #     a["y",][  # noqa: E231
-    #         -3,
-    #     ]
-    #     == 2.2
-    # )
-    # with pytest.raises(IndexError):
-    #     a[
-    #         "z",
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[
-    #         ["x", "z"],
-    #     ]
-    # assert (
-    #     len(
-    #         a[
-    #             ["x", "y"],
-    #         ]
-    #     )
-    #     == 5
-    # )
+    with pytest.raises(IndexError):
+        a[
+            5,
+        ]
+    with pytest.raises(IndexError):
+        a[
+            -6,
+        ]
+    assert isinstance(
+        a[
+            2,
+        ],
+        ak._v2.record.Record,
+    )
+    assert (
+        a[
+            2,
+        ]["y"]
+        == 2.2
+    )
+    assert (
+        a[
+            -3,
+        ]["y"]
+        == 2.2
+    )
+    assert isinstance(
+        a[
+            2:,
+        ],
+        ak._v2.contents.indexedarray.IndexedArray,
+    )
+    assert (
+        len(
+            a[
+                2:,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            a[
+                -3:,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            a[
+                2:100,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            a[
+                -3:100,
+            ]
+        )
+        == 3
+    )
+    assert isinstance(
+        a[
+            "y",
+        ],
+        ak._v2.contents.numpyarray.NumpyArray,
+    )
+    assert (
+        a["y",][  # noqa: E231
+            2,
+        ]
+        == 2.2
+    )
+    assert (
+        a["y",][  # noqa: E231
+            -3,
+        ]
+        == 2.2
+    )
+    with pytest.raises(IndexError):
+        a[
+            "z",
+        ]
+    with pytest.raises(IndexError):
+        a[
+            ["x", "z"],
+        ]
+    assert (
+        len(
+            a[
+                ["x", "y"],
+            ]
+        )
+        == 5
+    )
 
     # 5.5 is inaccessible
     b = ak._v2.contents.recordarray.RecordArray(
@@ -690,165 +690,165 @@ def test_RecordArray_NumpyArray():
         None,
     )
     assert len(b) == 5
-    # with pytest.raises(IndexError):
-    #     b[
-    #         5,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     b[
-    #         -6,
-    #     ]
-    # assert isinstance(b[2], ak._v2.record.Record)
-    # assert (
-    #     b[2,][  # noqa: E231
-    #         "1",
-    #     ]
-    #     == 2.2
-    # )
-    # assert (
-    #     b[-3,][  # noqa: E231
-    #         "1",
-    #     ]
-    #     == 2.2
-    # )
-    # assert isinstance(
-    #     b[
-    #         2:,
-    #     ],
-    #     ak._v2.contents.recordarray.RecordArray,
-    # )
-    # assert (
-    #     len(
-    #         b[
-    #             2:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         b[
-    #             -3:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         b[
-    #             2:100,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         b[
-    #             -3:100,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert isinstance(
-    #     b[
-    #         "1",
-    #     ],
-    #     ak._v2.contents.numpyarray.NumpyArray,
-    # )
-    # assert (
-    #     b["1",][  # noqa: E231
-    #         2,
-    #     ]
-    #     == 2.2
-    # )
-    # assert (
-    #     b["1",][  # noqa: E231
-    #         -3,
-    #     ]
-    #     == 2.2
-    # )
-    # with pytest.raises(IndexError):
-    #     a[
-    #         "2",
-    #     ]
-    # assert (
-    #     len(
-    #         b[
-    #             ["0", "1"],
-    #         ]
-    #     )
-    #     == 5
-    # )
+    with pytest.raises(IndexError):
+        b[
+            5,
+        ]
+    with pytest.raises(IndexError):
+        b[
+            -6,
+        ]
+    assert isinstance(b[2], ak._v2.record.Record)
+    assert (
+        b[2,][  # noqa: E231
+            "1",
+        ]
+        == 2.2
+    )
+    assert (
+        b[-3,][  # noqa: E231
+            "1",
+        ]
+        == 2.2
+    )
+    assert isinstance(
+        b[
+            2:,
+        ],
+        ak._v2.contents.indexedarray.IndexedArray,
+    )
+    assert (
+        len(
+            b[
+                2:,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            b[
+                -3:,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            b[
+                2:100,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            b[
+                -3:100,
+            ]
+        )
+        == 3
+    )
+    assert isinstance(
+        b[
+            "1",
+        ],
+        ak._v2.contents.numpyarray.NumpyArray,
+    )
+    assert (
+        b["1",][  # noqa: E231
+            2,
+        ]
+        == 2.2
+    )
+    assert (
+        b["1",][  # noqa: E231
+            -3,
+        ]
+        == 2.2
+    )
+    with pytest.raises(IndexError):
+        a[
+            "2",
+        ]
+    assert (
+        len(
+            b[
+                ["0", "1"],
+            ]
+        )
+        == 5
+    )
 
     c = ak._v2.contents.recordarray.RecordArray([], [], 10)
     assert len(c) == 10
-    # assert isinstance(
-    #     c[
-    #         5,
-    #     ],
-    #     ak._v2.record.Record,
-    # )
-    # assert isinstance(
-    #     c[
-    #         7:,
-    #     ],
-    #     ak._v2.contents.recordarray.RecordArray,
-    # )
-    # assert (
-    #     len(
-    #         c[
-    #             7:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         c[
-    #             -3:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # with pytest.raises(IndexError):
-    #     c[
-    #         "x",
-    #     ]
+    assert isinstance(
+        c[
+            5,
+        ],
+        ak._v2.record.Record,
+    )
+    assert isinstance(
+        c[
+            7:,
+        ],
+        ak._v2.contents.indexedarray.IndexedArray,
+    )
+    assert (
+        len(
+            c[
+                7:,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            c[
+                -3:,
+            ]
+        )
+        == 3
+    )
+    with pytest.raises(IndexError):
+        c[
+            "x",
+        ]
 
     d = ak._v2.contents.recordarray.RecordArray([], None, 10)
     assert len(d) == 10
-    # assert isinstance(
-    #     d[
-    #         5,
-    #     ],
-    #     ak._v2.record.Record,
-    # )
-    # assert isinstance(
-    #     d[
-    #         7:,
-    #     ],
-    #     ak._v2.contents.recordarray.RecordArray,
-    # )
-    # assert (
-    #     len(
-    #         d[
-    #             7:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         d[
-    #             -3:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # with pytest.raises(IndexError):
-    #     d[
-    #         "0",
-    #     ]
+    assert isinstance(
+        d[
+            5,
+        ],
+        ak._v2.record.Record,
+    )
+    assert isinstance(
+        d[
+            7:,
+        ],
+        ak._v2.contents.indexedarray.IndexedArray,
+    )
+    assert (
+        len(
+            d[
+                7:,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            d[
+                -3:,
+            ]
+        )
+        == 3
+    )
+    with pytest.raises(IndexError):
+        d[
+            "0",
+        ]
 
 
 def test_IndexedArray_NumpyArray():
@@ -2793,78 +2793,78 @@ def test_RegularArray_RecordArray_NumpyArray():
         ),
         3,
     )
-    # assert (
-    #     len(
-    #         a[
-    #             "nest",
-    #         ]
-    #     )
-    #     == 2
-    # )
-    # assert isinstance(
-    #     a["nest",][  # noqa: E231
-    #         1,
-    #     ],
-    #     ak._v2.contents.numpyarray.NumpyArray,
-    # )
-    # assert (
-    #     len(
-    #         a["nest",][  # noqa: E231
-    #             1,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     a["nest",][1,][  # noqa: E231
-    #         2,
-    #     ]
-    #     == 5.5
-    # )
-    # assert (
-    #     a["nest",][-1,][  # noqa: E231
-    #         2,
-    #     ]
-    #     == 5.5
-    # )
-    # assert isinstance(
-    #     a["nest",][  # noqa: E231
-    #         1:2,
-    #     ],
-    #     ak._v2.contents.regulararray.RegularArray,
-    # )
-    # assert (
-    #     len(
-    #         a["nest",][  # noqa: E231
-    #             1:,
-    #         ]
-    #     )
-    #     == 1
-    # )
-    # assert (
-    #     len(
-    #         a["nest",][  # noqa: E231
-    #             1:100,
-    #         ]
-    #     )
-    #     == 1
-    # )
-    # with pytest.raises(IndexError):
-    #     a["nest",][  # noqa: E231
-    #         2,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a["nest",][  # noqa: E231
-    #         -3,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a["nest",][1,][  # noqa: E231
-    #         3,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a["nest",][  # noqa: E231
-    #         "bad",
-    #     ]
+    assert (
+        len(
+            a[
+                "nest",
+            ]
+        )
+        == 2
+    )
+    assert isinstance(
+        a["nest",][  # noqa: E231
+            1,
+        ],
+        ak._v2.contents.numpyarray.NumpyArray,
+    )
+    assert (
+        len(
+            a["nest",][  # noqa: E231
+                1,
+            ]
+        )
+        == 3
+    )
+    assert (
+        a["nest",][1,][  # noqa: E231
+            2,
+        ]
+        == 5.5
+    )
+    assert (
+        a["nest",][-1,][  # noqa: E231
+            2,
+        ]
+        == 5.5
+    )
+    assert isinstance(
+        a["nest",][  # noqa: E231
+            1:2,
+        ],
+        ak._v2.contents.regulararray.RegularArray,
+    )
+    assert (
+        len(
+            a["nest",][  # noqa: E231
+                1:,
+            ]
+        )
+        == 1
+    )
+    assert (
+        len(
+            a["nest",][  # noqa: E231
+                1:100,
+            ]
+        )
+        == 1
+    )
+    with pytest.raises(IndexError):
+        a["nest",][  # noqa: E231
+            2,
+        ]
+    with pytest.raises(IndexError):
+        a["nest",][  # noqa: E231
+            -3,
+        ]
+    with pytest.raises(IndexError):
+        a["nest",][1,][  # noqa: E231
+            3,
+        ]
+    with pytest.raises(IndexError):
+        a["nest",][  # noqa: E231
+            "bad",
+        ]
 
     b = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
         ak._v2.contents.recordarray.RecordArray(
@@ -2873,54 +2873,54 @@ def test_RegularArray_RecordArray_NumpyArray():
         0,
         zeros_length=10,
     )
-    # assert (
-    #     len(
-    #         b[
-    #             "nest",
-    #         ]
-    #     )
-    #     == 10
-    # )
-    # assert isinstance(
-    #     b["nest",][  # noqa: E231
-    #         5,
-    #     ],
-    #     ak._v2.contents.emptyarray.EmptyArray,
-    # )
-    # assert (
-    #     len(
-    #         b["nest",][  # noqa: E231
-    #             5,
-    #         ]
-    #     )
-    #     == 0
-    # )
-    # assert isinstance(
-    #     b["nest",][  # noqa: E231
-    #         7:,
-    #     ],
-    #     ak._v2.contents.regulararray.RegularArray,
-    # )
-    # assert (
-    #     len(
-    #         b["nest",][  # noqa: E231
-    #             7:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         b["nest",][  # noqa: E231
-    #             7:100,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # with pytest.raises(IndexError):
-    #     b["nest",][  # noqa: E231
-    #         "bad",
-    #     ]
+    assert (
+        len(
+            b[
+                "nest",
+            ]
+        )
+        == 10
+    )
+    assert isinstance(
+        b["nest",][  # noqa: E231
+            5,
+        ],
+        ak._v2.contents.emptyarray.EmptyArray,
+    )
+    assert (
+        len(
+            b["nest",][  # noqa: E231
+                5,
+            ]
+        )
+        == 0
+    )
+    assert isinstance(
+        b["nest",][  # noqa: E231
+            7:,
+        ],
+        ak._v2.contents.regulararray.RegularArray,
+    )
+    assert (
+        len(
+            b["nest",][  # noqa: E231
+                7:,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            b["nest",][  # noqa: E231
+                7:100,
+            ]
+        )
+        == 3
+    )
+    with pytest.raises(IndexError):
+        b["nest",][  # noqa: E231
+            "bad",
+        ]
 
 
 def test_ListArray_RecordArray_NumpyArray():

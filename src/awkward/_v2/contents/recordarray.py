@@ -312,13 +312,7 @@ class RecordArray(Content):
         nplike = self.nplike  # noqa: F841
 
         if head == ():
-            raise NotImplementedError
-
-        elif isinstance(head, int):
-            raise NotImplementedError
-
-        elif isinstance(head, slice):
-            raise NotImplementedError
+            return self
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -326,20 +320,30 @@ class RecordArray(Content):
         elif isinstance(head, list):
             return self._getitem_next_fields(head, tail, advanced)
 
-        elif head is np.newaxis:
-            return self._getitem_next_newaxis(tail, advanced)
-
-        elif head is Ellipsis:
-            return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.index.Index64):
-            raise NotImplementedError
-
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
-
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             raise NotImplementedError
 
         else:
-            raise AssertionError(repr(head))
+            nexthead, nexttail = self._headtail(tail)
+
+            contents = []
+            for i in range(len(self._contents)):
+                contents.append(self.content(i).getitem_next(head, (), advanced))
+
+            parameters = None
+            if (
+                isinstance(
+                    head,
+                    (
+                        slice,
+                        ak._v2.contents.ListOffsetArray,
+                        ak._v2.contents.IndexedOptionArray,
+                    ),
+                )
+                or head is Ellipsis
+                or advanced is None
+            ):
+                parameters = self._parameters
+
+            next = RecordArray(contents, self._keys, None, parameters)
+            return next._getitem_next(nexthead, nexttail, advanced)
