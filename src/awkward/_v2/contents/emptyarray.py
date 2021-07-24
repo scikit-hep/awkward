@@ -36,6 +36,9 @@ class EmptyArray(Content):
     def __len__(self):
         return 0
 
+    def _getitem_nothing(self):
+        return self
+
     def _getitem_at(self, where):
         raise NestedIndexError(self, where)
 

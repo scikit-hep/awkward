@@ -134,6 +134,59 @@ class Content(object):
         else:
             return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
 
+    def _getitem_broadcast(self, items, nplike):
+        lookup = []
+        broadcastable = []
+        for item in items:
+            if (
+                isinstance(
+                    item,
+                    (
+                        slice,
+                        list,
+                        ak._v2.contents.ListOffsetArray,
+                        ak._v2.contents.IndexedOptionArray,
+                    ),
+                )
+                or ak._util.isstr(item)
+                or item is np.newaxis
+                or item is Ellipsis
+            ):
+                lookup.append(None)
+            elif isinstance(item, int):
+                lookup.append(len(broadcastable))
+                broadcastable.append(item)
+            else:
+                lookup.append(len(broadcastable))
+                broadcastable.append(nplike.asarray(item))
+
+        broadcasted = nplike.broadcast_arrays(*broadcastable)
+
+        out = []
+        for i, item in zip(lookup, items):
+            if i is None:
+                out.append(item)
+            else:
+                x = broadcasted[i]
+                if len(x.shape) == 0:
+                    out.append(int(x))
+                else:
+                    if issubclass(x.dtype.type, np.int64):
+                        out.append(ak._v2.index.Index64(x.reshape(-1)))
+                    elif issubclass(x.dtype.type, np.integer):
+                        out.append(ak._v2.index.Index64(x.astype(np.int64).reshape(-1)))
+                    elif issubclass(x.dtype.type, (np.bool_, bool)):
+                        out.append(ak._v2.index.Index64(np.nonzero(x.reshape(-1))[0]))
+                    else:
+                        raise TypeError(
+                            "array slice must be an array of integers or booleans, not\n\n    {0}".format(
+                                repr(x).replace("\n", "\n    ")
+                            )
+                        )
+                    out[-1].metadata["shape"] = x.shape
+
+        return tuple(out)
+
     def __getitem__(self, where):
         try:
             if ak._util.isint(where):
@@ -157,11 +210,16 @@ class Content(object):
             elif isinstance(where, tuple):
                 if len(where) == 0:
                     return self
-                nextwhere = tuple(self._prepare_tuple_item(x) for x in where)
-                next = ak._v2.contents.RegularArray(self, len(self), 1)
+                nextwhere = self._getitem_broadcast(
+                    [self._prepare_tuple_item(x) for x in where],
+                    self.nplike,
+                )
+
+                next = ak._v2.contents.RegularArray(self, len(self), 1, None, None)
+
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
                 if len(out) == 0:
-                    raise NotImplementedError
+                    raise out._getitem_nothing()
                 else:
                     return out._getitem_at(0)
 
@@ -172,11 +230,30 @@ class Content(object):
                 return self.__getitem__(v1_to_v2(where))
 
             elif isinstance(where, ak._v2.contents.numpyarray.NumpyArray):
-                carry, allow_lazy = self._prepare_array(where)
-                carried = self._carry_asrange(carry)
-                if carried is None:
-                    carried = self._carry(carry, allow_lazy, NestedIndexError)
-                return _getitem_ensure_shape(carried, where.shape)
+                if issubclass(where.dtype.type, np.int64):
+                    carry = ak._v2.index.Index64(where.data.reshape(-1))
+                    allow_lazy = True
+                elif issubclass(where.dtype.type, np.integer):
+                    carry = ak._v2.index.Index64(
+                        where.data.astype(np.int64).reshape(-1)
+                    )
+                    allow_lazy = "copied"  # True, but also can be modified in-place
+                elif issubclass(where.dtype.type, (np.bool_, bool)):
+                    carry = ak._v2.index.Index64(np.nonzero(where.data.reshape(-1))[0])
+                    allow_lazy = "copied"  # True, but also can be modified in-place
+                else:
+                    raise TypeError(
+                        "array slice must be an array of integers or booleans, not\n\n    {0}".format(
+                            repr(where.data).replace("\n", "\n    ")
+                        )
+                    )
+                out = self._getitem_next_array_wrap(
+                    self._carry(carry, allow_lazy, NestedIndexError), where.shape
+                )
+                if len(out) == 0:
+                    return out._getitem_nothing()
+                else:
+                    return out._getitem_at(0)
 
             elif isinstance(where, Content):
                 return self.__getitem__((where,))
@@ -268,7 +345,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return self._prepare_tuple_item(v1_to_v2(item))
 
         elif isinstance(item, ak._v2.contents.NumpyArray):
-            return self._prepare_array(item)[0]
+            return item.data
 
         elif isinstance(
             item,
@@ -308,24 +385,14 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 + repr(item).replace("\n", "\n    ")
             )
 
-    def _prepare_array(self, where):
-        if issubclass(where.dtype.type, np.int64):
-            carry = ak._v2.index.Index64(where.data.reshape(-1))
-            allow_lazy = True
-        elif issubclass(where.dtype.type, np.integer):
-            carry = ak._v2.index.Index64(where.data.astype(np.int64).reshape(-1))
-            allow_lazy = "copied"  # True, but also can be modified in-place
-        elif issubclass(where.dtype.type, (np.bool_, bool)):
-            carry = ak._v2.index.Index64(np.nonzero(where.data.reshape(-1))[0])
-            allow_lazy = "copied"  # True, but also can be modified in-place
-        else:
-            raise TypeError(
-                "one-dimensional array slice must be an array of integers or "
-                "booleans, not\n\n    {0}".format(
-                    repr(where.data).replace("\n", "\n    ")
-                )
-            )
-        return carry, allow_lazy
+    def _getitem_next_array_wrap(self, outcontent, shape):
+        length = shape[-2] if len(shape) >= 2 else 0
+        out = ak._v2.contents.RegularArray(outcontent, shape[-1], length, None, None)
+
+        for i in range(len(shape) - 2, -1, -1):
+            length = shape[i - 1] if i > 0 else 0
+            out = ak._v2.contents.RegularArray(out, shape[i], length, None, None)
+        return out
 
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak._v2.index.Index)
@@ -391,17 +458,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     @property
     def branch_depth(self):
         return self.Form.branch_depth.__get__(self)
-
-
-def _getitem_ensure_shape(array, shape):
-    assert isinstance(array, Content)
-    if len(shape) == 1:
-        assert len(array) == shape[0]
-        return array
-    else:
-        return _getitem_ensure_shape(
-            ak._v2.contents.RegularArray(array, shape[-1], shape[-2]), shape[:-1]
-        )
 
 
 class NestedIndexError(IndexError):

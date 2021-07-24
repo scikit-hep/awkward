@@ -200,6 +200,10 @@ class NumpyLike(Singleton):
 
     ############################ manipulation
 
+    def broadcast_arrays(self, *args, **kwargs):
+        # array1[, array2[, ...]]
+        return self._module.broadcast_arrays(*args, **kwargs)
+
     def add(self, *args, **kwargs):
         # array1, array2[, out=]
         return self._module.add(*args, **kwargs)

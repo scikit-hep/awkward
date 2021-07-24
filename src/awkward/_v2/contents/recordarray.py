@@ -191,6 +191,9 @@ class RecordArray(Content):
             )
         return self._contents[index][: self._length]
 
+    def _getitem_nothing(self):
+        return self._getitem_range(slice(0, 0))
+
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)

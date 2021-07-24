@@ -97,34 +97,34 @@ def test_NumpyArray():
         a[
             -5,
         ]
-    # assert isinstance(
-    #     a[
-    #         2:,
-    #     ],
-    #     ak._v2.contents.numpyarray.NumpyArray,
-    # )
-    # assert (
-    #     a[2:,][  # noqa: E231
-    #         0,
-    #     ]
-    #     == 2.2
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             2:,
-    #         ]
-    #     )
-    #     == 2
-    # )
-    # with pytest.raises(IndexError):
-    #     a[
-    #         "bad",
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[
-    #         ["bad", "good", "ok"],
-    #     ]
+    assert isinstance(
+        a[
+            2:,
+        ],
+        ak._v2.contents.numpyarray.NumpyArray,
+    )
+    assert (
+        a[2:,][  # noqa: E231
+            0,
+        ]
+        == 2.2
+    )
+    assert (
+        len(
+            a[
+                2:,
+            ]
+        )
+        == 2
+    )
+    with pytest.raises(IndexError):
+        a[
+            "bad",
+        ]
+    with pytest.raises(IndexError):
+        a[
+            ["bad", "good", "ok"],
+        ]
 
     b = ak._v2.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
@@ -154,28 +154,28 @@ def test_NumpyArray():
         ]
         == 25
     )
-    # assert (
-    #     len(
-    #         b[1,][2,][  # noqa: E231
-    #             1:,
-    #         ]
-    #     )
-    #     == 4
-    # )
-    # assert (
-    #     b[1,][2,][1:,][  # noqa: E231
-    #         2,
-    #     ]
-    #     == 28
-    # )
-    # with pytest.raises(IndexError):
-    #     b[
-    #         "bad",
-    #     ]
-    # with pytest.raises(IndexError):
-    #     b[
-    #         ["bad", "good", "ok"],
-    #     ]
+    assert (
+        len(
+            b[1,][2,][  # noqa: E231
+                1:,
+            ]
+        )
+        == 4
+    )
+    assert (
+        b[1,][2,][1:,][  # noqa: E231
+            2,
+        ]
+        == 28
+    )
+    with pytest.raises(IndexError):
+        b[
+            "bad",
+        ]
+    with pytest.raises(IndexError):
+        b[
+            ["bad", "good", "ok"],
+        ]
 
 
 def test_RegularArray_NumpyArray():
@@ -187,123 +187,123 @@ def test_RegularArray_NumpyArray():
         3,
     )
     assert len(a) == 2
-    # assert isinstance(
-    #     a[
-    #         1,
-    #     ],
-    #     ak._v2.contents.numpyarray.NumpyArray,
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             1,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     a[1,][  # noqa: E231
-    #         2,
-    #     ]
-    #     == 5.5
-    # )
-    # assert (
-    #     a[-1,][  # noqa: E231
-    #         2,
-    #     ]
-    #     == 5.5
-    # )
-    # assert isinstance(
-    #     a[
-    #         1:2,
-    #     ],
-    #     ak._v2.contents.regulararray.RegularArray,
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             1:,
-    #         ]
-    #     )
-    #     == 1
-    # )
-    # assert (
-    #     len(
-    #         a[
-    #             1:100,
-    #         ]
-    #     )
-    #     == 1
-    # )
-    # with pytest.raises(IndexError):
-    #     a[
-    #         2,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[
-    #         -3,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[1,][  # noqa: E231
-    #         3,
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[
-    #         "bad",
-    #     ]
-    # with pytest.raises(IndexError):
-    #     a[
-    #         ["bad", "good", "ok"],
-    #     ]
+    assert isinstance(
+        a[
+            1,
+        ],
+        ak._v2.contents.numpyarray.NumpyArray,
+    )
+    assert (
+        len(
+            a[
+                1,
+            ]
+        )
+        == 3
+    )
+    assert (
+        a[1,][  # noqa: E231
+            2,
+        ]
+        == 5.5
+    )
+    assert (
+        a[-1,][  # noqa: E231
+            2,
+        ]
+        == 5.5
+    )
+    assert isinstance(
+        a[
+            1:2,
+        ],
+        ak._v2.contents.regulararray.RegularArray,
+    )
+    assert (
+        len(
+            a[
+                1:,
+            ]
+        )
+        == 1
+    )
+    assert (
+        len(
+            a[
+                1:100,
+            ]
+        )
+        == 1
+    )
+    with pytest.raises(IndexError):
+        a[
+            2,
+        ]
+    with pytest.raises(IndexError):
+        a[
+            -3,
+        ]
+    with pytest.raises(IndexError):
+        a[1,][  # noqa: E231
+            3,
+        ]
+    with pytest.raises(IndexError):
+        a[
+            "bad",
+        ]
+    with pytest.raises(IndexError):
+        a[
+            ["bad", "good", "ok"],
+        ]
 
     b = ak._v2.contents.regulararray.RegularArray(
         ak._v2.contents.emptyarray.EmptyArray(), 0, zeros_length=10
     )
     assert len(b) == 10
-    # assert isinstance(
-    #     b[
-    #         5,
-    #     ],
-    #     ak._v2.contents.emptyarray.EmptyArray,
-    # )
-    # assert (
-    #     len(
-    #         b[
-    #             5,
-    #         ]
-    #     )
-    #     == 0
-    # )
-    # assert isinstance(
-    #     b[
-    #         7:,
-    #     ],
-    #     ak._v2.contents.regulararray.RegularArray,
-    # )
-    # assert (
-    #     len(
-    #         b[
-    #             7:,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # assert (
-    #     len(
-    #         b[
-    #             7:100,
-    #         ]
-    #     )
-    #     == 3
-    # )
-    # with pytest.raises(IndexError):
-    #     b[
-    #         "bad",
-    #     ]
-    # with pytest.raises(IndexError):
-    #     b[
-    #         ["bad", "good", "ok"],
-    #     ]
+    assert isinstance(
+        b[
+            5,
+        ],
+        ak._v2.contents.emptyarray.EmptyArray,
+    )
+    assert (
+        len(
+            b[
+                5,
+            ]
+        )
+        == 0
+    )
+    assert isinstance(
+        b[
+            7:,
+        ],
+        ak._v2.contents.regulararray.RegularArray,
+    )
+    assert (
+        len(
+            b[
+                7:,
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            b[
+                7:100,
+            ]
+        )
+        == 3
+    )
+    with pytest.raises(IndexError):
+        b[
+            "bad",
+        ]
+    with pytest.raises(IndexError):
+        b[
+            ["bad", "good", "ok"],
+        ]
 
 
 def test_ListArray_NumpyArray():

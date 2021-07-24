@@ -56,6 +56,9 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def _getitem_nothing(self):
+        return self._content._getitem_range(slice(0, 0))
+
     def _getitem_at(self, where):
         return self._content._getitem_at(where)
 

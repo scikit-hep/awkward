@@ -35,7 +35,14 @@ def test_NumpyArray():
     assert a[1, -2, ..., 2] == 22
     with pytest.raises(IndexError):
         a[1, -2, ..., 2, 2]
+
+    b = ak.layout.RegularArray(
+        ak.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout, 3
+    )
+
+    assert ak.to_list(b[1, -2, [3, 1, 1, 2]]) == [23, 21, 21, 22]
     assert ak.to_list(a[1, -2, [3, 1, 1, 2]]) == [23, 21, 21, 22]
+
     with pytest.raises(IndexError):
         a[1, -2, [3, 1, 1, 2], 2]
 
@@ -63,3 +70,28 @@ def test_RegularArray():
 
     assert ak.to_list(old[1, ..., -2]) == [18, 23, 28]
     assert ak.to_list(new[1, ..., -2]) == [18, 23, 28]
+
+    expectation = [
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+    ]
+    assert (
+        ak.to_list(
+            old[
+                [1, 0],
+            ]
+        )
+        == expectation
+    )
+    assert (
+        ak.to_list(
+            new[
+                [1, 0],
+            ]
+        )
+        == expectation
+    )
+    assert ak.to_list(new[[1, 0]]) == expectation
+
+    assert ak.to_list(old[1, [2, 0]]) == [[25, 26, 27, 28, 29], [15, 16, 17, 18, 19]]
+    assert ak.to_list(new[1, [2, 0]]) == [[25, 26, 27, 28, 29], [15, 16, 17, 18, 19]]

@@ -127,6 +127,15 @@ class NumpyArray(Content):
                 self._parameters,
             )
 
+    def _getitem_nothing(self):
+        tmp = self._data[0:0]
+        return NumpyArray(
+            tmp.reshape((0,) + tmp.shape[2:]),
+            self._range_identifier(0, 0),
+            None,
+            nplike=self._nplike,
+        )
+
     def _getitem_at(self, where):
         try:
             out = self._data[where]
@@ -214,7 +223,10 @@ class NumpyArray(Content):
             return self._getitem_next_fields(head, tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            where = (slice(None), head.data) + tail
+            if advanced is None:
+                where = (slice(None), head.data) + tail
+            else:
+                where = (nplike.asarray(advanced.data), head.data) + tail
 
             try:
                 out = self._data[where]
