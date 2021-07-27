@@ -29,7 +29,7 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
     block = """"""
     new_file = """"""
     for file in files:
-        # print(os.path.join(root,file))
+        new_file = """"""
         x = open(os.path.join(root, file), "r")
         lines = x.readlines()
         for line in lines:
@@ -43,6 +43,7 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 record = False
                 new_file += line
                 new_file += stdout + "\n"
+                print(stdout)
                 num += 1
                 continue
             elif record == True:
