@@ -566,7 +566,6 @@ def test_IndexedOptionArray():
     new = v1_to_v2(old)
 
     assert ak.to_list(old[:, 3:]) == [[4.4, 5.5, 6.6], [4.4, 5.5, 6.6]]
-    print(old[:, 3:])
     assert ak.to_list(new[:, 3:]) == [[4.4, 5.5, 6.6], [4.4, 5.5, 6.6]]
 
     # FIXME this will fail because the nr of strides is different: (8, 8) vs (48, 8)
@@ -723,7 +722,6 @@ def test_ListOffsetArray_NumpyArray():
     new = v1_to_v2(old)
 
     assert ak.to_list(old[0, 1:]) == []
-    print(old[:, 1:])
     assert ak.to_list(new[0, 1:]) == []
 
     assert v1v2_equal(old[0, 1:], new[0, 1:])

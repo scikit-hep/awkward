@@ -159,10 +159,33 @@ class ByteMaskedArray(Content):
 
         elif isinstance(head, int) or isinstance(head, slice):
             nexthead, nexttail = self._headtail(tail)
-            nextcarry = ak._v2.index.Index64.empty(len(self), nplike)
+            numnull = 0
+            for i in range(len(self._mask)):
+                if (self._mask[i] != 0) != self._valid_when:
+                    numnull += numnull
+
+            nextcarry = ak._v2.index.Index64.empty(len(self) - numnull, nplike)
+            outindex = ak._v2.index.Index64.empty(len(self), nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+                    nextcarry.dtype.type,
+                    outindex.dtype.type,
+                    self._mask.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    outindex.to(nplike),
+                    self._mask.to(nplike),
+                    len(self._mask),
+                    self._valid_when,
+                ),
+                head,
+            )
+            nextContent = self._content._carry(nextcarry, True, NestedIndexError)
+            out = nextContent._getitem_next(head, tail, advanced)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                nextcarry,
-                self._content._getitem_next(head, tail, advanced),
+                outindex,
+                out,
                 self._identifier,
                 self._parameters,
             )
