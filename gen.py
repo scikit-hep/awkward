@@ -6,7 +6,8 @@ num = 0
 
 
 def get_line(args):
-    str = "".join(args.splitlines()).replace(" ", "")
+    new = remove_comments(args)
+    str = "".join(new.splitlines()).replace(" ", "")
     start = str.find("(")
     stop = len(str) - 1
     temp = str[start:stop]
@@ -15,13 +16,26 @@ def get_line(args):
     function_name = str[str.find(":") + 2 : start]
     if function_name[len(function_name) - 1] == ">":
         function_name = function_name[0 : function_name.find("<")]
-    line = 'cout<<"awkward_' + function_name + '"<<'
+    line = 'std::cout<<"awkward_' + function_name + '"<<'
     for value in values:
         line += '"' + value + '="<<' + value + "<<"
     line = line[0 : len(line) - 2]
-    line = "".join(ch for ch in line if not ch.isupper())
-    line = "".join(ch for ch in line if ch != "/")
+    line = line + ";"
     return line
+
+
+def remove_comments(args):
+    s = """"""
+    for ln in args.splitlines():
+        z = ""
+        f = 0
+        for ch in ln:
+            if ch == "/":
+                f = 1
+            elif f == 0:
+                z += ch
+        s += z
+    return s
 
 
 for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward")):
@@ -43,7 +57,6 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 record = False
                 new_file += line
                 new_file += stdout + "\n"
-                print(stdout)
                 num += 1
                 continue
             elif record == True:
