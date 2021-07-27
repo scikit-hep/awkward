@@ -139,16 +139,22 @@ class IndexedOptionArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int):
-            raise NotImplementedError
-
-        elif isinstance(head, slice):
-            raise NotImplementedError
+        elif (
+            isinstance(head, int)
+            or isinstance(head, slice)
+            or isinstance(head, ak._v2.index.Index64)
+        ):
+            return IndexedOptionArray(
+                self._index,
+                self._content._getitem_next(head, tail, advanced),
+                self._identifier,
+                self._parameters,
+            )
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 
-        elif isinstance(head, list):
+        elif isinstance(head, list) and ak._util.isstr(head[0]):
             return self._getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:
@@ -156,9 +162,6 @@ class IndexedOptionArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.index.Index64):
-            raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError

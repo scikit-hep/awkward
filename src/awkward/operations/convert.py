@@ -949,6 +949,9 @@ def to_list(array):
     elif isinstance(array, ak.layout.Record):
         return {n: to_list(x) for n, x in array.fielditems()}
 
+    elif isinstance(array, ak._v2.record.Record):
+        return {to_list(x) for x in array}
+
     elif isinstance(array, ak.layout.ArrayBuilder):
         return [to_list(x) for x in array.snapshot()]
 

@@ -98,11 +98,12 @@ class UnmaskedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int):
-            raise NotImplementedError
-
-        elif isinstance(head, slice):
-            raise NotImplementedError
+        elif (
+            isinstance(head, int)
+            or isinstance(head, slice)
+            or isinstance(head, ak._v2.index.Index64)
+        ):
+            return UnmaskedArray(self.content._getitem_next(head, tail, advanced))
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -115,9 +116,6 @@ class UnmaskedArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.index.Index64):
-            raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError

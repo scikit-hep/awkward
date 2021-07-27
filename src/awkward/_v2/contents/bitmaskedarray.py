@@ -222,11 +222,8 @@ class BitMaskedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int):
-            raise NotImplementedError
-
-        elif isinstance(head, slice):
-            raise NotImplementedError
+        elif isinstance(head, int) or isinstance(head, slice):
+            return self.toByteMaskedArray()._getitem_next(head, tail, advanced)
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)

@@ -158,10 +158,92 @@ class ListArray(Content):
             return self
 
         elif isinstance(head, int):
-            raise NotImplementedError
+            nexthead, nexttail = self._headtail(tail)
+            nextcarry = ak._v2.index.Index64.empty(self._starts.length, nplike)
+            self._handle_error(
+                nplike["ListArray_getitem_next_at", nextcarry.dtype.type](
+                    nextcarry.to(nplike),
+                    self._starts.data,
+                    self._stops.data,
+                    self._starts.length,
+                    head,
+                ),
+                head,
+            )
+            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            raise NotImplementedError
+            nexthead, nexttail = self._headtail(tail)
+            lenstarts = len(self._starts)
+            start, stop, step = head.indices(lenstarts)
+
+            nextsize = 0
+            if step > 0 and stop - start > 0:
+                diff = stop - start
+                nextsize = diff // step
+                if diff % step != 0:
+                    nextsize += 1
+            elif step < 0 and stop - start < 0:
+                diff = start - stop
+                nextsize = diff // step
+                if diff % step != 0:
+                    nextsize += 1
+
+            nextcarry = ak._v2.index.Index64.empty(nextsize * len(self), nplike)
+            nextoffsets = ak._v2.index.Index32.empty(lenstarts + 1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_getitem_next_range",
+                    nextoffsets.dtype.type,
+                    nextcarry.dtype.type,
+                    nextoffsets.dtype.type,
+                    nextoffsets.dtype.type,
+                ](
+                    nextoffsets.to(nplike),
+                    nextcarry.to(nplike),
+                    self.starts.data,
+                    self.stops.data,
+                    lenstarts,
+                    start,
+                    stop,
+                    step,
+                ),
+                head,
+            )
+
+            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+
+            if advanced is None or len(advanced) == 0:
+                return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                    nextoffsets,
+                    nextcontent._getitem_next(nexthead, nexttail, advanced),
+                    self._identifier,
+                    self._parameters,
+                )
+            else:
+                nextadvanced = ak._v2.index.Index64.empty(
+                    self._length * nextsize, nplike
+                )
+                self._handle_error(
+                    nplike[
+                        "awkward_ListOffsetArray_getitem_next_range_spreadadvanced",
+                        nextadvanced.dtype.type,
+                        advanced.dtype.type,
+                    ](
+                        nextadvanced.to(nplike),
+                        advanced.to(nplike),
+                        self._length,
+                        nextsize,
+                    ),
+                    head,
+                )
+                return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                    nextoffsets,
+                    nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
+                    self._identifier,
+                    self._parameters,
+                )
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)

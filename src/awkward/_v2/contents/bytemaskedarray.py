@@ -157,11 +157,15 @@ class ByteMaskedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int):
-            raise NotImplementedError
-
-        elif isinstance(head, slice):
-            raise NotImplementedError
+        elif isinstance(head, int) or isinstance(head, slice):
+            nexthead, nexttail = self._headtail(tail)
+            nextcarry = ak._v2.index.Index64.empty(len(self), nplike)
+            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                nextcarry,
+                self._content._getitem_next(head, tail, advanced),
+                self._identifier,
+                self._parameters,
+            )
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)

@@ -328,7 +328,7 @@ class RecordArray(Content):
 
             contents = []
             for i in range(len(self._contents)):
-                contents.append(self.content(i).getitem_next(head, (), advanced))
+                contents.append(self.content(i)._getitem_next(head, (), advanced))
 
             parameters = None
             if (
@@ -343,7 +343,7 @@ class RecordArray(Content):
                 or head is Ellipsis
                 or advanced is None
             ):
+                identifier = self._identifier
                 parameters = self._parameters
-
-            next = RecordArray(contents, self._keys, None, parameters)
+            next = RecordArray(contents, self._keys, None, identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)

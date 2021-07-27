@@ -16,7 +16,7 @@ class NumpyArray(Content):
 
         if (
             self._data.dtype not in ak._v2.types.numpytype._dtype_to_primitive
-            and not isinstance(self._data.dtype.type, (np.datetime64, np.timdelta64))
+            and not isinstance(self._data.dtype.type, (np.datetime64, np.timedelta64))
         ):
             raise TypeError(
                 "{0} 'data' dtype {1} is not supported; must be one of {2}".format(

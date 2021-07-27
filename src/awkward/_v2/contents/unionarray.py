@@ -181,11 +181,14 @@ class UnionArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int):
-            raise NotImplementedError
-
-        elif isinstance(head, slice):
-            raise NotImplementedError
+        elif isinstance(head, int) or isinstance(head, slice):
+            return UnionArray(
+                self._tags,
+                self._index,
+                [x._getitem_next(head, tail, advanced) for x in self._contents],
+                self._identifier,
+                None,
+            )
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)

@@ -137,11 +137,13 @@ class IndexedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int):
-            raise NotImplementedError
-
-        elif isinstance(head, slice):
-            raise NotImplementedError
+        elif isinstance(head, int) or isinstance(head, slice):
+            return IndexedArray(
+                self._index,
+                self._content._getitem_next(head, tail, advanced),
+                self._identifier,
+                self._parameters,
+            )
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
