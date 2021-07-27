@@ -2,6 +2,7 @@ import re
 import os
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+num = 0
 
 
 def get_line(args):
@@ -28,21 +29,25 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
     block = """"""
     new_file = """"""
     for file in files:
+        # print(os.path.join(root,file))
         x = open(os.path.join(root, file), "r")
         lines = x.readlines()
         for line in lines:
             if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
                 block += line
                 record = True
-            elif re.search(r"\w+[)];", line) and record == True:
+            elif re.search(r"[)];", line) and record == True:
                 block += line
                 stdout = get_line(block)
                 block = """"""
                 record = False
                 new_file += line
                 new_file += stdout
+                num += 1
             elif record == True:
                 block += line
             new_file += line
-    with open(os.path.join(root, new_file), "w") as f:
-        f.write(new_file)
+        with open(os.path.join(root, file), "w") as f:
+            f.write(new_file)
+
+print("Added cout in " + str(num) + " places")
