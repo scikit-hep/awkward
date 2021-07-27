@@ -42,8 +42,9 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 block = """"""
                 record = False
                 new_file += line
-                new_file += stdout
+                new_file += stdout + "\n"
                 num += 1
+                continue
             elif record == True:
                 block += line
             new_file += line
