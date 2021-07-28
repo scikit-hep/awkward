@@ -981,9 +981,9 @@ def to_list(array):
         import awkward._v2.tmp_for_testing
 
         return to_list(
-            awkward._v2.tmp_for_testing.v2_to_v1(
-                array.array[array.at : array.at + 1]
-            )[0]
+            awkward._v2.tmp_for_testing.v2_to_v1(array.array[array.at : array.at + 1])[
+                0
+            ]
         )
 
     elif isinstance(array, dict):
