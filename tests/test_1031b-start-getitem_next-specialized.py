@@ -309,7 +309,6 @@ def test_IndexedArray():
         ),
     )
     new = v1_to_v2(old)
-
     assert v1v2_equal(old[1, 1:], new[1, 1:])
 
     assert ak.to_list(old[1, 1:]) == [[5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]
@@ -592,8 +591,7 @@ def test_IndexedOptionArray():
     assert ak.to_list(old[:, 3:]) == [[4.4, 5.5, 6.6], [4.4, 5.5, 6.6]]
     assert ak.to_list(new[:, 3:]) == [[4.4, 5.5, 6.6], [4.4, 5.5, 6.6]]
 
-    # FIXME this will fail because the nr of strides is different: (8, 8) vs (48, 8)
-    # assert v1v2_equal(old[:, 5:], new[:, 5:])
+    assert v1v2_equal(old[:, 5:], new[:, 5:])
 
     with pytest.raises(IndexError):
         new[1, "hello"]
@@ -630,8 +628,7 @@ def test_IndexedOptionArray():
     assert ak.to_list(new[[1, 0]]) == expectation
 
     assert ak.to_list(old[1, [1, 0]]) == [2.2, 1.1]
-    # FIXME
-    # assert ak.to_list(new[1, [1, 0]]) ==  [1.1, 1.1]
+    assert ak.to_list(new[1, [1, 0]]) == [2.2, 1.1]
 
 
 # def test_ListArray():

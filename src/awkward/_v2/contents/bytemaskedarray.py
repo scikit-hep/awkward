@@ -192,18 +192,17 @@ class ByteMaskedArray(Content):
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = self._headtail(tail)
             numnull = ak._v2.index.Index64.empty(1, nplike)
-
             nextcarry, outindex = self.nextcarry_outindex(numnull)
-            # FIXME
-            nextContent = self._content._carry(nextcarry, True, NestedIndexError)
-            out = nextContent._getitem_next(head, tail, advanced)
-            next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+
+            next = self._content._carry(nextcarry, True, NestedIndexError)
+            out = next._getitem_next(head, tail, advanced)
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,
                 self._parameters,
             )
-            return next._simplify_optiontype()
+            return out2._simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)

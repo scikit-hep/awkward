@@ -133,6 +133,38 @@ class IndexedOptionArray(Content):
             self._parameters,
         )
 
+    def nextcarry_outindex(self, numnull):
+        nplike = self.nplike
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_numnull",
+                numnull.dtype.type,
+                self._index.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._index.to(nplike),
+                len(self._index),
+            )
+        )
+        nextcarry = ak._v2.index.Index64.empty(len(self._index) - numnull[0], nplike)
+        outindex = ak._v2.index.Index64.empty(len(self._index), nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_getitem_nextcarry_outindex",
+                nextcarry.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                outindex.to(nplike),
+                self._index.to(nplike),
+                len(self._index),
+                len(self._content),
+            )
+        )
+        return nextcarry, outindex
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -141,33 +173,14 @@ class IndexedOptionArray(Content):
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = self._headtail(tail)
-            numnull = 0
-            for i in range(len(self._index)):
-                if self._index[i] < 0:
-                    numnull += 1
-            nextcarry = ak._v2.index.Index64.empty(len(self._index) - numnull, nplike)
-            outindex = ak._v2.index.Index64.empty(len(self._index), nplike)
 
-            self._handle_error(
-                nplike[
-                    "awkward_IndexedArray_getitem_nextcarry_outindex",
-                    nextcarry.dtype.type,
-                    outindex.dtype.type,
-                    outindex.dtype.type,  # FIXME self._index outputs long long
-                ](
-                    nextcarry.to(nplike),
-                    outindex.to(nplike),
-                    self._index.to(nplike),
-                    len(self._index),
-                    len(self._content),
-                ),
-                head,
-            )
-            # FIXME
-            # nextContent = self._content._carry(nextcarry, True, NestedIndexError)
-            out = self._content._getitem_next(head, (), advanced)
-            next = IndexedOptionArray(outindex, out, self._identifier, self._parameters)
-            return next._getitem_next(nexthead, nexttail, advanced)
+            numnull = ak._v2.index.Index64.empty(1, nplike)
+            nextcarry, outindex = self.nextcarry_outindex(numnull)
+
+            nextContent = self._content._carry(nextcarry, True, NestedIndexError)
+            out = nextContent._getitem_next(head, tail, advanced)
+            out2 = IndexedOptionArray(outindex, out, self._identifier, self._parameters)
+            return out2._simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
