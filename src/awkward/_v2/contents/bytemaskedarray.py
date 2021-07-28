@@ -157,13 +157,10 @@ class ByteMaskedArray(Content):
         if head == ():
             return self
 
-        elif (
-            isinstance(head, int)
-            or isinstance(head, slice)
-            or isinstance(head, ak._v2.index.Index64)
-        ):
+        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = self._headtail(tail)
             numnull = 0
+
             for i in range(len(self._mask)):
                 if (self._mask[i] != 0) != self._valid_when:
                     numnull += numnull
@@ -185,14 +182,18 @@ class ByteMaskedArray(Content):
                 ),
                 head,
             )
-            nextContent = self._content._carry(nextcarry, True, NestedIndexError)
-            out = nextContent._getitem_next(head, tail, advanced)
-            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            # FIXME
+            # nextContent = self._content._carry(
+            #     nextcarry, True, NestedIndexError
+            # )
+            out = self._content._getitem_next(head, (), advanced)
+            next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,
                 self._parameters,
             )
+            return next._getitem_next(nexthead, nexttail, advanced)
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)

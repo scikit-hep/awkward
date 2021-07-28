@@ -213,9 +213,8 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-
-            return NumpyArray(out, None, self._parameters, nplike=nplike)
-
+            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
+            return out2
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 

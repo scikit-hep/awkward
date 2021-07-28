@@ -310,6 +310,7 @@ def test_IndexedArray():
         ),
     )
     new = v1_to_v2(old)
+
     assert v1v2_equal(old[1, 1:], new[1, 1:])
 
     assert ak.to_list(old[1, 1:]) == [[5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]
@@ -365,6 +366,11 @@ def test_IndexedArray():
     )
     assert ak.to_list(old[[1, 0]]) == expectation
     assert ak.to_list(new[[1, 0]]) == expectation
+
+    assert ak.to_list(old[1, [1, 0]]) == [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
+    # FIXME
+    # assert ak.to_list(new[1, [1, 0]]) ==  [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
+    # assert v1v2_equal(old[1, [1, 0]], new[1, [1, 0]])
 
 
 def test_BitMaskedArray():
@@ -453,6 +459,8 @@ def test_BitMaskedArray():
 
     new = v1_to_v2(old)
 
+    assert v1v2_equal(old[:, :], new[:, :])
+
     assert ak.to_list(old[:, 5:]) == [
         [5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
         [5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
@@ -502,25 +510,33 @@ def test_BitMaskedArray():
         )
         == expectation
     )
+    assert ak.to_list(old[[1, 0]]) == expectation
     assert ak.to_list(new[[1, 0]]) == expectation
 
-    # assert ak.to_list(old[1, [1, 0]]) ==  [1.0, 0.0]
-    # assert ak.to_list(new[1, [1, 0]]) ==  [1.0, 0.0]
+    assert ak.to_list(old[1, [1, 0]]) == [1.0, 0.0]
+    assert ak.to_list(new[1, [1, 0]]) == [1.0, 0.0]
+    assert v1v2_equal(old[1, [1, 0]], new[1, [1, 0]])
 
 
 def test_ByteMaskedArray():
     old = ak.layout.ByteMaskedArray(
-        ak.layout.Index8(np.array([1, 1], np.int8)),
+        ak.layout.Index8(np.array([1, 1, 1], np.int8)),
         ak.layout.NumpyArray(
-            np.array([[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]])
+            np.array(
+                [
+                    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+                    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+                    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+                ]
+            )
         ),
         valid_when=True,
     )
 
     new = v1_to_v2(old)
 
-    assert ak.to_list(old[:, 5:]) == [[6.6], [6.6]]
-    assert ak.to_list(new[:, 5:]) == [[6.6], [6.6]]
+    assert ak.to_list(old[:, 5:]) == [[6.6], [6.6], [6.6]]
+    assert ak.to_list(new[:, 5:]) == [[6.6], [6.6], [6.6]]
 
     # FIXME this will fail because the nr of strides is different: (8, 8) vs (48, 8)
     # assert v1v2_equal(old[:, 5:], new[:, 5:])

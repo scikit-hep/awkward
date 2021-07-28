@@ -98,11 +98,7 @@ class UnmaskedArray(Content):
         if head == ():
             return self
 
-        elif (
-            isinstance(head, int)
-            or isinstance(head, slice)
-            or isinstance(head, ak._v2.index.Index64)
-        ):
+        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             return UnmaskedArray(self.content._getitem_next(head, tail, advanced))
 
         elif ak._util.isstr(head):

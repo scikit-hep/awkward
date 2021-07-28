@@ -181,11 +181,7 @@ class UnionArray(Content):
         if head == ():
             return self
 
-        elif (
-            isinstance(head, int)
-            or isinstance(head, slice)
-            or isinstance(head, ak._v2.index.Index64)
-        ):
+        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             lentags = len(self._tags)
             size = [0]
             for i in range(lentags):

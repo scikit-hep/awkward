@@ -137,13 +137,37 @@ class IndexedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int) or isinstance(head, slice):
-            return IndexedArray(
-                self._index,
-                self._content._getitem_next(head, tail, advanced),
-                self._identifier,
-                self._parameters,
+        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+            nexthead, nexttail = self._headtail(tail)
+            numnull = 0
+            for i in range(len(self._index)):
+                if self._index[i] < 0:
+                    numnull += 1
+            nextcarry = ak._v2.index.Index64.empty(len(self._index) - numnull, nplike)
+            outindex = ak._v2.index.Index64.empty(len(self._index), nplike)
+
+            self._handle_error(
+                nplike[
+                    "awkward_IndexedArray_getitem_nextcarry_outindex",
+                    nextcarry.dtype.type,
+                    outindex.dtype.type,
+                    outindex.dtype.type,  # FIXME self._index outputs long long
+                ](
+                    nextcarry.to(nplike),
+                    outindex.to(nplike),
+                    self._index.to(nplike),
+                    len(self._index),
+                    len(self._content),
+                ),
+                head,
             )
+            # FIXME
+            # nextContent = self._content._carry(
+            #     nextcarry, True, NestedIndexError
+            # )
+            out = self._content._getitem_next(head, (), advanced)
+            next = IndexedArray(outindex, out, self._identifier, self._parameters)
+            return next._getitem_next(nexthead, nexttail, advanced)
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -156,9 +180,6 @@ class IndexedArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.index.Index64):
-            raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError
