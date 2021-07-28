@@ -175,6 +175,35 @@ class UnionArray(Content):
             self._parameters,
         )
 
+    def _project(self, index):
+        nplike = self.nplike
+        lentags = len(self._tags)
+        assert len(self._index) == lentags
+        lenout = ak._v2.index.Index64.empty(1, nplike)
+        tmpcarry = ak._v2.index.Index64.empty(lentags, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_UnionArray_project",
+                lenout.dtype.type,
+                tmpcarry.dtype.type,
+                self._tags.dtype.type,
+                self._index.dtype.type,
+            ](
+                lenout.to(nplike),
+                tmpcarry.to(nplike),
+                self._tags.to(nplike),
+                self._index.to(nplike),
+                lentags,
+                index,
+            )
+        )
+        nextcarry = ak._v2.index.Index64.zeros(lenout[0], nplike)
+        out = self._contents[index]._carry(nextcarry, False, NestedIndexError)
+        print("OUT ", out)
+        print("LENTAGS ", lentags)
+        print("LENOUT ", lenout)
+        return out
+
     def _regular_index(self, tags):
         nplike = self.nplike
         lentags = len(tags)
@@ -192,7 +221,6 @@ class UnionArray(Content):
         )
         current = ak._v2.index.Index64.empty(size[0], nplike)
         outindex = ak._v2.index.Index64.empty(lentags, nplike)
-
         self._handle_error(
             nplike[
                 "awkward_UnionArray_regular_index",
@@ -202,11 +230,12 @@ class UnionArray(Content):
             ](
                 outindex.to(nplike),
                 current.to(nplike),
+                size[0],
                 tags.to(nplike),
-                size.to(nplike),
                 lentags,
             )
         )
+        print("OUTINDEX ", outindex)
         return outindex
 
     def _getitem_next(self, head, tail, advanced):
@@ -216,13 +245,16 @@ class UnionArray(Content):
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-            # FIXME
-            # outindex = self._regular_index(self._tags)
+            outcontents = []
+            for i in range(len(self._contents)):
+                projection = self._project(i)
+                outcontents.append(projection._getitem_next(head, tail, advanced))
+            outindex = self._regular_index(self._tags)
 
             out = UnionArray(
                 self._tags,
-                self._index,
-                [x._getitem_next(head, tail, advanced) for x in self._contents],
+                outindex,
+                outcontents,
                 self._identifier,
                 self._parameters,
             )
