@@ -159,13 +159,15 @@ class ListArray(Content):
 
         elif isinstance(head, int):
             nexthead, nexttail = self._headtail(tail)
-            nextcarry = ak._v2.index.Index64.empty(self._starts.length, nplike)
+            lenstarts = len(self._starts)
+            nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
             self._handle_error(
-                nplike["ListArray_getitem_next_at", nextcarry.dtype.type](
+                #FIXME self._starts.dtype.type
+                nplike["awkward_ListArray_getitem_next_at", nextcarry.dtype.type, nextcarry.dtype.type, nextcarry.dtype.type](
                     nextcarry.to(nplike),
-                    self._starts.data,
-                    self._stops.data,
-                    self._starts.length,
+                    self._starts.to(nplike),
+                    self._stops.to(nplike),
+                    lenstarts,
                     head,
                 ),
                 head,

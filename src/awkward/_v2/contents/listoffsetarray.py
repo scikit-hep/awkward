@@ -154,8 +154,26 @@ class ListOffsetArray(Content):
             return self
 
         elif isinstance(head, int):
+            print("AM HERE")
             nexthead, nexttail = self._headtail(tail)
-            nextcarry = ak._v2.index.Index64.empty(self._starts.length, nplike)
+            nextcarry = ak._v2.index.Index64.empty(len(self._offsets), nplike)
+
+            # starts = ak._v2.index.Index64.init
+            # stops = util::make_stops(offsets_)
+            # IndexOf<T> make_starts(const IndexOf<T> &offsets) {
+            # return IndexOf<T>(offsets.ptr(),
+            #                     offsets.offset(),
+            #                     offsets.length() - 1,
+            #                     offsets.ptr_lib());
+            # }
+
+            # template<typename T>
+            # IndexOf<T> make_stops(const IndexOf<T> &offsets) {
+            # return IndexOf<T>(offsets.ptr(),
+            #                     offsets.offset() + 1,
+            #                     offsets.length() - 1,
+            #                     offsets.ptr_lib());
+            # }
             self._handle_error(
                 nplike["ListArray_getitem_next_at", nextcarry.dtype.type](
                     nextcarry.to(nplike),
@@ -254,7 +272,81 @@ class ListOffsetArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            raise NotImplementedError
+            nexthead, nexttail = self._headtail(tail)
+            lenstarts = len(self._offsets) - 1
+            
+            flathead = nplike.asarray(head.data.reshape(-1))
+            regular_flathead = ak._v2.index.Index64.empty(len(flathead), nplike)
+
+            if advanced is None or len(advanced) == 0:
+                nextcarry = ak._v2.index.Index64.empty(
+                    lenstarts * len(flathead), nplike
+                )
+                nextadvanced = ak._v2.index.Index64.empty(
+                    lenstarts * len(flathead), nplike
+                )
+                self._handle_error(
+                    nplike[
+                        "awkward_ListArray_getitem_next_array",
+                        nextcarry.dtype.type,
+                        nextadvanced.dtype.type,
+                        regular_flathead.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        nextadvanced.to(nplike),
+                        self._starts.to(nplike),
+                        self._stops.to(nplike),
+                        regular_flathead.to(nplike),
+                        lenstarts,
+                        len(regular_flathead),
+                        len(self._content),
+                    ),
+                    head,
+                )
+                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+
+                out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+                if advanced is None:
+                    return self._getitem_next_array_wrap(out, head.metadata["shape"])
+                else:
+                    return out
+
+            elif len(self) == 0:
+                nextcarry = ak._v2.index.Index64.empty(0, nplike)
+                nextadvanced = ak._v2.index.Index64.empty(0, nplike)
+                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+
+            else:
+                nextcarry = ak._v2.index.Index64.empty(len(self), nplike)
+                nextadvanced = ak._v2.index.Index64.empty(len(self), nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_ListArray_getitem_next_array_advanced",
+                        nextcarry.dtype.type,
+                        nextadvanced.dtype.type,
+                        # FIXME
+                        # self._starts.dtype.type,
+                        advanced.dtype.type,
+                        advanced.dtype.type,
+                        advanced.dtype.type,
+                        regular_flathead.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        nextadvanced.to(nplike),
+                        self._starts.to(nplike),
+                        self._stops.to(nplike),
+                        regular_flathead.to(nplike),
+                        advanced.to(nplike),
+                        lenstarts,
+                        len(regular_flathead),
+                        len(self._content),
+                    ),
+                    head,
+                )
+                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError
