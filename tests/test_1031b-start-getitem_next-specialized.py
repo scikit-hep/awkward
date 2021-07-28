@@ -224,38 +224,28 @@ def test_UnmaskedArray():
 
 def test_UniondArray():
     old = ak.layout.UnionArray8_64(
-        ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 2, 2, 2], np.int8)),
-        ak.layout.Index64(np.array([4, 3, 0, 1, 2, 2, 4, 0, 0, 0], np.int64)),
+        ak.layout.Index8(np.array([1, 1], np.int8)),
+        ak.layout.Index64(np.array([1, 0], np.int64)),
         [
-            ak.layout.NumpyArray(np.array([[1, 2, 3], [1, 2, 3], [1, 2, 3]], np.int64)),
-            ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
-            ak.layout.NumpyArray(np.array([31.1, 2.2, 3.3, 4.4, 5.5])),
+            ak.layout.RegularArray(
+                ak.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout, 3
+            ),
+            ak.layout.RegularArray(
+                ak.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout, 3
+            ),
         ],
     )
     new = v1_to_v2(old)
-    assert v1v2_equal(old[1:], new[1:])
-
-    assert ak.to_list(old[1:]) == [
-        4.4,
-        [1, 2, 3],
-        [1, 2, 3],
-        3.3,
-        [1, 2, 3],
-        5.5,
-        31.1,
-        31.1,
-        31.1,
+    assert v1v2_equal(old[0, :], new[0, :])
+    assert ak.to_list(old[0, :]) == [
+        [15, 16, 17, 18, 19],
+        [20, 21, 22, 23, 24],
+        [25, 26, 27, 28, 29],
     ]
-    assert ak.to_list(new[1:]) == [
-        4.4,
-        [1, 2, 3],
-        [1, 2, 3],
-        3.3,
-        [1, 2, 3],
-        5.5,
-        31.1,
-        31.1,
-        31.1,
+    assert ak.to_list(new[0, :]) == [
+        [15, 16, 17, 18, 19],
+        [20, 21, 22, 23, 24],
+        [25, 26, 27, 28, 29],
     ]
 
     with pytest.raises(IndexError):
@@ -264,16 +254,31 @@ def test_UniondArray():
     with pytest.raises(IndexError):
         new[1, ["hello", "there"]]
 
-    assert ak.to_list(new[0, np.newaxis]) == [5.5]
-    assert ak.to_list(old[0, np.newaxis]) == [5.5]
+    assert ak.to_list(new[0, np.newaxis]) == [
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
+    ]
+    assert ak.to_list(old[0, np.newaxis]) == [
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
+    ]
 
-    assert old.minmax_depth == (1, 2)
-    assert new.minmax_depth == (1, 2)
+    assert old.minmax_depth == (3, 3)
+    assert new.minmax_depth == (3, 3)
 
-    assert ak.to_list(old[1, ...]) == 4.4
-    assert ak.to_list(new[1, ...]) == 4.4
+    assert ak.to_list(old[1, ...]) == [
+        [0, 1, 2, 3, 4],
+        [5, 6, 7, 8, 9],
+        [10, 11, 12, 13, 14],
+    ]
+    assert ak.to_list(new[1, ...]) == [
+        [0, 1, 2, 3, 4],
+        [5, 6, 7, 8, 9],
+        [10, 11, 12, 13, 14],
+    ]
 
-    expectation = [4.4, 5.5]
+    expectation = [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+    ]
     assert (
         ak.to_list(
             old[
@@ -292,6 +297,9 @@ def test_UniondArray():
     )
     assert ak.to_list(old[[1, 0]]) == expectation
     assert ak.to_list(new[[1, 0]]) == expectation
+    assert ak.to_list(old[1, [1, 0]]) == [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
+    # FIXME == [[5, 6, 7, 8, 9], [5, 6, 7, 8, 9]]
+    # assert ak.to_list(new[1, [1, 0]]) == [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
 
 
 def test_IndexedArray():
@@ -552,7 +560,7 @@ def test_ByteMaskedArray():
     assert ak.to_list(new[[1, 0]]) == expectation
 
     assert ak.to_list(old[1, [1, 0]]) == [2.2, 1.1]
-    # assert ak.to_list(new[1, [1, 0]]) ==   [2.2, 1.1]
+    assert ak.to_list(new[1, [1, 0]]) == [2.2, 1.1]
 
 
 def test_IndexedOptionArray():

@@ -181,7 +181,34 @@ class UnionArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int) or isinstance(head, slice):
+        elif (
+            isinstance(head, int)
+            or isinstance(head, slice)
+            or isinstance(head, ak._v2.index.Index64)
+        ):
+            lentags = len(self._tags)
+            size = [0]
+            for i in range(lentags):
+                tag = int(self._tags[i])
+                if size[0] < tag:
+                    size[0] = tag
+            size = size[0] + 1
+            current = ak._v2.index.Index64.empty(size, nplike)
+            outindex = ak._v2.index.Index64.empty(lentags, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_UnionArray_regular_index",
+                    current.dtype.type,
+                    outindex.dtype.type,
+                    self._tags.dtype.type,
+                ](
+                    outindex.to(nplike),
+                    current.to(nplike),
+                    size,
+                    self._tags.to(nplike),
+                    lentags,
+                )
+            )
             return UnionArray(
                 self._tags,
                 self._index,
@@ -201,9 +228,6 @@ class UnionArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.index.Index64):
-            raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError
