@@ -949,9 +949,6 @@ def to_list(array):
     elif isinstance(array, ak.layout.Record):
         return {n: to_list(x) for n, x in array.fielditems()}
 
-    elif isinstance(array, ak._v2.record.Record):
-        return {to_list(x) for x in array}
-
     elif isinstance(array, ak.layout.ArrayBuilder):
         return [to_list(x) for x in array.snapshot()]
 
@@ -979,6 +976,15 @@ def to_list(array):
         import awkward._v2.tmp_for_testing
 
         return to_list(awkward._v2.tmp_for_testing.v2_to_v1(array))
+
+    elif isinstance(array, ak._v2.record.Record):
+        import awkward._v2.tmp_for_testing
+
+        return to_list(
+            awkward._v2.tmp_for_testing.v2_to_v1(
+                array.array[array.at : array.at + 1]
+            )[0]
+        )
 
     elif isinstance(array, dict):
         return dict((n, to_list(x)) for n, x in array.items())
