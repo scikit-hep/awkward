@@ -274,7 +274,7 @@ class ListOffsetArray(Content):
         elif isinstance(head, ak._v2.index.Index64):
             nexthead, nexttail = self._headtail(tail)
             lenstarts = len(self._offsets) - 1
-            
+
             flathead = nplike.asarray(head.data.reshape(-1))
             regular_flathead = ak._v2.index.Index64.empty(len(flathead), nplike)
 
@@ -346,7 +346,6 @@ class ListOffsetArray(Content):
                 )
                 nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
-
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise NotImplementedError

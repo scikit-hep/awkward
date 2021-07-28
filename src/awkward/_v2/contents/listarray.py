@@ -162,8 +162,13 @@ class ListArray(Content):
             lenstarts = len(self._starts)
             nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
             self._handle_error(
-                #FIXME self._starts.dtype.type
-                nplike["awkward_ListArray_getitem_next_at", nextcarry.dtype.type, nextcarry.dtype.type, nextcarry.dtype.type](
+                # FIXME self._starts.dtype.type
+                nplike[
+                    "awkward_ListArray_getitem_next_at",
+                    nextcarry.dtype.type,
+                    nextcarry.dtype.type,
+                    nextcarry.dtype.type,
+                ](
                     nextcarry.to(nplike),
                     self._starts.to(nplike),
                     self._stops.to(nplike),
