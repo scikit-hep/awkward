@@ -124,9 +124,6 @@ def test_RecordArray():
         {"x": [3, 4], "y": [3.3, 4.4, 5.5]},
     ]
 
-    # FIXME AssertionError: <class 'awkward._ext.RecordArray'> vs <class 'awkward._v2.contents.indexedarray.IndexedArray'>
-    # assert v1v2_equal(old[:, 3:], new[:, 3:])
-
     with pytest.raises(IndexError):
         new[1, "hello"]
 
@@ -169,8 +166,7 @@ def test_RecordArray():
     assert ak.to_list(new[[1, 0]]) == expectation
 
     assert ak.to_list(old[1, [1, 0]]) == [{"x": 1, "y": 1.1}, {"x": 0, "y": 0.0}]
-    # FIXME
-    # assert ak.to_list(new[1, [1, 0]]) ==   [{'x': 1, 'y': 1.1}, {'x': 0, 'y': 0.0}]
+    assert ak.to_list(new[1, [1, 0]]) ==   [{'x': 1, 'y': 1.1}, {'x': 0, 'y': 0.0}]
 
 
 def test_UnmaskedArray():
@@ -366,9 +362,8 @@ def test_IndexedArray():
     assert ak.to_list(new[[1, 0]]) == expectation
 
     assert ak.to_list(old[1, [1, 0]]) == [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
-    # FIXME
-    # assert ak.to_list(new[1, [1, 0]]) ==  [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
-    # assert v1v2_equal(old[1, [1, 0]], new[1, [1, 0]])
+    assert ak.to_list(new[1, [1, 0]]) ==  [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
+    assert v1v2_equal(old[1, [1, 0]], new[1, [1, 0]])
 
 
 def test_BitMaskedArray():
@@ -653,11 +648,8 @@ def test_ListArray():
         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
     ]
-
-    # FIXME
-    # assert ak.to_list(new[0, :2]) == [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]]
-
-    # assert v1v2_equal(old[0, :2], new[0, :2])
+    #FIXME
+    assert ak.to_list(new[0, :2]) == [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]]
 
     with pytest.raises(IndexError):
         new[1, "hello"]
@@ -789,10 +781,10 @@ def test_ListOffsetArray_NumpyArray():
     )
     assert ak.to_list(old[[1, 0]]) == expectation
     assert ak.to_list(new[[1, 0]]) == expectation
-    # FIXME
+    
     assert ak.to_list(old[0, [0, 0]]) == [
         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
     ]
-
+    # FIXME
     # assert ak.to_list(new[0, [0, 0]]) ==  [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]]

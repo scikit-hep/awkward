@@ -343,7 +343,6 @@ class RecordArray(Content):
                 or head is Ellipsis
                 or advanced is None
             ):
-                identifier = self._identifier
                 parameters = self._parameters
-            next = RecordArray(contents, self._keys, None, identifier, parameters)
+            next = RecordArray(contents, self._keys, None, self._identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)
