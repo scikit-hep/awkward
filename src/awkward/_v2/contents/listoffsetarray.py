@@ -149,37 +149,18 @@ class ListOffsetArray(Content):
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
         elif isinstance(head, int):
-            print("AM HERE")
             nexthead, nexttail = self._headtail(tail)
             nextcarry = ak._v2.index.Index64.empty(len(self._offsets), nplike)
-
-            # starts = ak._v2.index.Index64.init
-            # stops = util::make_stops(offsets_)
-            # IndexOf<T> make_starts(const IndexOf<T> &offsets) {
-            # return IndexOf<T>(offsets.ptr(),
-            #                     offsets.offset(),
-            #                     offsets.length() - 1,
-            #                     offsets.ptr_lib());
-            # }
-
-            # template<typename T>
-            # IndexOf<T> make_stops(const IndexOf<T> &offsets) {
-            # return IndexOf<T>(offsets.ptr(),
-            #                     offsets.offset() + 1,
-            #                     offsets.length() - 1,
-            #                     offsets.ptr_lib());
-            # }
             self._handle_error(
                 nplike["ListArray_getitem_next_at", nextcarry.dtype.type](
                     nextcarry.to(nplike),
-                    self._starts.data,
-                    self._stops.data,
-                    self._starts.length,
+                    nextcarry.to(self.starts),
+                    nextcarry.to(self.stops),
+                    len(self.starts),
                     head,
                 ),
                 head,
@@ -189,7 +170,7 @@ class ListOffsetArray(Content):
 
         elif isinstance(head, slice):
             nexthead, nexttail = self._headtail(tail)
-            lenstarts = len(self._starts)
+            lenstarts = len(self.starts)
             start, stop, step = head.indices(lenstarts)
 
             nextsize = 0
@@ -211,13 +192,13 @@ class ListOffsetArray(Content):
                     "awkward_ListArray_getitem_next_range",
                     nextoffsets.dtype.type,
                     nextcarry.dtype.type,
-                    nextoffsets.dtype.type,
-                    nextoffsets.dtype.type,
+                    self.starts.dtype.type,
+                    self.stops.dtype.type,
                 ](
                     nextoffsets.to(nplike),
                     nextcarry.to(nplike),
-                    self.starts.data,
-                    self.stops.data,
+                    self.starts.to(nplike),
+                    self.stops.to(nplike),
                     lenstarts,
                     start,
                     stop,

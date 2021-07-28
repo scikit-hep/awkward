@@ -144,8 +144,7 @@ def test_RecordArray():
     assert new.minmax_depth == (2, 2)
 
     assert ak.to_list(old[0, ..., 0]) == {"x": 0, "y": 0.0}
-    # FIXME
-    assert ak.to_list(new[0, ..., 0]) == set()
+    assert ak.to_list(new[0, ..., 0]) == {"x": 0, "y": 0.0}
 
     expectation = [
         {"x": [0, 1, 2, 3, 4], "y": [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]},

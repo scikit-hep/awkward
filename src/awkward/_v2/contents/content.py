@@ -50,6 +50,12 @@ class Content(object):
         else:
             return self._parameters.get(key)
 
+    def _simplify_optiontype(self):
+        return self
+
+    def _simplify_uniontype(self):
+        return self
+
     def _handle_error(self, error, slicer=None):
         if error.str is not None:
             if error.filename is None:

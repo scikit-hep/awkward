@@ -99,7 +99,11 @@ class UnmaskedArray(Content):
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-            return UnmaskedArray(self.content._getitem_next(head, tail, advanced))
+            return UnmaskedArray(
+                self.content._getitem_next(head, tail, advanced),
+                self._identifier,
+                self._parameters,
+            )._simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
