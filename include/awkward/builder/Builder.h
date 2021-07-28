@@ -8,8 +8,6 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/Content.h"
-#include "awkward/type/Type.h"
 
 namespace awkward {
   class Content;

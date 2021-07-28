@@ -116,10 +116,8 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
-    // FIXME: refactor
     const GrowableBuffer<int64_t>& buffer() const { return offsets_; }
 
-    // FIXME: refactor
     const GrowableBuffer<uint8_t>& content() const { return content_; }
 
   private:

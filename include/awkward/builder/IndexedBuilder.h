@@ -99,10 +99,8 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    // FIXME: refactor
     const GrowableBuffer<int64_t>& buffer() const { return index_; }
 
-    // FIXME: refactor
     bool hasnull() const { return hasnull_; }
 
     // FIXME: refactor

@@ -116,7 +116,6 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
-    // FIXME: refactor
     const GrowableBuffer<std::complex<double>>& buffer() const { return buffer_; }
 
   private:

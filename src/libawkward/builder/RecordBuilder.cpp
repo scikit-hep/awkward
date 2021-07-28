@@ -10,6 +10,7 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 #include "awkward/builder/RecordBuilder.h"
+#include "awkward/util.h"
 
 namespace awkward {
   const BuilderPtr

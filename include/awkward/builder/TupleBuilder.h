@@ -113,7 +113,6 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
-    // FIXME: refactor
     const std::vector<BuilderPtr>& contents() const { return contents_; }
 
   private:

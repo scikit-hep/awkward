@@ -281,7 +281,6 @@ namespace awkward {
     void
       endrecord();
 
-    // FIXME: refactor
     // @brief Root node of the Builder tree.
     const Builder& builder() const { return *builder_; }
 

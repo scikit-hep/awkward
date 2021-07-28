@@ -103,7 +103,6 @@ namespace awkward {
     const std::string&
       units() const;
 
-    // FIXME: refactor
     const GrowableBuffer<int64_t>& buffer() const { return content_; }
 
     const std::string& unit() const { return units_; }

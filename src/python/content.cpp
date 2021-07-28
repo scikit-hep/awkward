@@ -1015,7 +1015,7 @@ namespace {
 
       // FIXME: do not go through buffer
       //
-      // layout = py::module::import("awkward").attr("layout").attr("NumpyArray")(
+      // return py::module::import("awkward").attr("layout").attr("NumpyArray")(
       //   py::array_t<int64_t>(py::buffer_info(reinterpret_cast<void*>(raw.buffer().ptr().get()),
       //   sizeof(int64_t),
       //   ak::util::dtype_to_format(ak::util::dtype::int64),
@@ -1196,24 +1196,15 @@ namespace {
     else if (builder.classname() == "OptionBuilder") {
       const ak::OptionBuilder& raw = dynamic_cast<const ak::OptionBuilder&>(builder);
 
-      // FIXME: AttributeError: 'awkward._ext.IndexedOptionArray64' object has no attribute 'simplify_optiontype'
-      //
-      // return py::module::import("awkward").attr("layout").attr("IndexedOptionArray64")(
-      //   py::module::import("awkward").attr("layout").attr("Index64")(
-      //     py::array_t<int64_t>(
-      //       raw.buffer().length(),
-      //       reinterpret_cast<int64_t*>(raw.buffer().ptr().get())
-      //     )
-      //   ),
-      //   builder_snapshot(raw.builder())
-      // ).attr("simplify_optiontype");
-
-      ak::Index64 index(raw.buffer().ptr(), 0, raw.buffer().length(), ak::kernel::lib::cpu);
-      return box(std::make_shared<ak::IndexedOptionArray64>(
-        ak::Identities::none(),
-        ak::util::Parameters(),
-        index,
-        unbox_content(builder_snapshot(raw.builder())))->simplify_optiontype());
+      return py::module::import("awkward").attr("layout").attr("IndexedOptionArray64")(
+          py::module::import("awkward").attr("layout").attr("Index64")(
+            py::array_t<int64_t>(
+              raw.buffer().length(),
+              reinterpret_cast<int64_t*>(raw.buffer().ptr().get())
+            )
+          ),
+          builder_snapshot(raw.builder())
+        ).attr("simplify")();
     }
     else if (builder.classname() == "RecordBuilder") {
       const ak::RecordBuilder& raw = dynamic_cast<const ak::RecordBuilder&>(builder);
@@ -1232,6 +1223,7 @@ namespace {
         recordlookup.get()->push_back(raw.keys()[i]);
       }
       std::vector<ak::ArrayCachePtr> caches;  // nothing is virtual here
+
       return box(std::make_shared<ak::RecordArray>(
         ak::Identities::none(),
         parameters,

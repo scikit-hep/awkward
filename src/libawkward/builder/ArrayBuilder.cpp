@@ -43,7 +43,9 @@ namespace awkward {
 
   const TypePtr
   ArrayBuilder::type(const util::TypeStrs& typestrs) const {
-    return builder_.get()->snapshot().get()->type(typestrs);
+    throw std::invalid_argument(
+      std::string("called obsolete 'ArrayBuilder::type'")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr

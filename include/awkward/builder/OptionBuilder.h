@@ -36,7 +36,7 @@ namespace awkward {
       fromvalids(const ArrayBuilderOptions& options,
                  const BuilderPtr& content);
 
-    /// @brief Create a StringBuilder from a full set of parameters.
+    /// @brief Create a OptionBuilder from a full set of parameters.
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
@@ -117,10 +117,8 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
-    // FIXME: refactor
     const GrowableBuffer<int64_t>& buffer() const { return index_; }
 
-    // FIXME: refactor
     const Builder& builder() const { return *content_; }
 
   private:
