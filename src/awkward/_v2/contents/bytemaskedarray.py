@@ -151,6 +151,38 @@ class ByteMaskedArray(Content):
             self._parameters,
         )
 
+    def nextcarry_outindex(self, numnull):
+        nplike = self.nplike
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_numnull",
+                numnull.dtype.type,
+                self._mask.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+            )
+        )
+        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
+        outindex = ak._v2.index.Index64.empty(len(self), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+                nextcarry.dtype.type,
+                outindex.dtype.type,
+                self._mask.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                outindex.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+            )
+        )
+        return nextcarry, outindex
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -159,41 +191,19 @@ class ByteMaskedArray(Content):
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = self._headtail(tail)
-            numnull = 0
+            numnull = ak._v2.index.Index64.empty(1, nplike)
 
-            for i in range(len(self._mask)):
-                if (self._mask[i] != 0) != self._valid_when:
-                    numnull += numnull
-
-            nextcarry = ak._v2.index.Index64.empty(len(self) - numnull, nplike)
-            outindex = ak._v2.index.Index64.empty(len(self), nplike)
-            self._handle_error(
-                nplike[
-                    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
-                    nextcarry.dtype.type,
-                    outindex.dtype.type,
-                    self._mask.dtype.type,
-                ](
-                    nextcarry.to(nplike),
-                    outindex.to(nplike),
-                    self._mask.to(nplike),
-                    len(self._mask),
-                    self._valid_when,
-                ),
-                head,
-            )
+            nextcarry, outindex = self.nextcarry_outindex(numnull)
             # FIXME
-            # nextContent = self._content._carry(
-            #     nextcarry, True, NestedIndexError
-            # )
-            out = self._content._getitem_next(head, (), advanced)
+            nextContent = self._content._carry(nextcarry, True, NestedIndexError)
+            out = nextContent._getitem_next(head, tail, advanced)
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,
                 self._parameters,
             )
-            return next._getitem_next(nexthead, nexttail, advanced)
+            return next._simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
