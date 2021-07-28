@@ -197,11 +197,8 @@ class UnionArray(Content):
                 index,
             )
         )
-        nextcarry = ak._v2.index.Index64.zeros(lenout[0], nplike)
+        nextcarry = ak._v2.index.Index64(tmpcarry.data[: lenout[0]], nplike)
         out = self._contents[index]._carry(nextcarry, False, NestedIndexError)
-        print("OUT ", out)
-        print("LENTAGS ", lentags)
-        print("LENOUT ", lenout)
         return out
 
     def _regular_index(self, tags):
@@ -235,7 +232,6 @@ class UnionArray(Content):
                 lentags,
             )
         )
-        print("OUTINDEX ", outindex)
         return outindex
 
     def _getitem_next(self, head, tail, advanced):

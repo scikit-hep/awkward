@@ -34,11 +34,6 @@ def v1v2_equal(v1, v2):
         v2, ak._v2.contents.NumpyArray
     ):
         v1_data = np.asarray(v1)
-        print("here")
-        print(v1_data.dtype)
-        print(v2.dtype)
-        print(v1_data)
-        print(v2.data)
         return v1_data.dtype == v2.dtype and np.array_equal(v1_data, v2.data)
 
     elif isinstance(v1, ak.layout.RegularArray) and isinstance(

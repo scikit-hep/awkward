@@ -180,9 +180,11 @@ class ListArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            nexthead, nexttail = self._headtail(tail)
             lenstarts = len(self._starts)
-            start, stop, step = head.indices(lenstarts)
+
+            nexthead, nexttail = self._headtail(tail)
+
+            start, stop, step = head.indices(self._stops[0])
             step = 1 if step is None else step
 
             carrylength = ak._v2.index.Index64.empty(1, nplike)
@@ -280,10 +282,11 @@ class ListArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
+            lenstarts = len(self._starts)
+
             nexthead, nexttail = self._headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
-            lenstarts = len(self._starts)
-            regular_flathead = ak._v2.index.Index64.empty(len(flathead), nplike)
+            regular_flathead = ak._v2.index.Index64.zeros(len(flathead), nplike)
 
             if advanced is None or len(advanced) == 0:
                 nextcarry = ak._v2.index.Index64.empty(
@@ -319,8 +322,9 @@ class ListArray(Content):
                     return out
 
             else:
-                nextcarry = ak._v2.index.Index64.empty(len(self), nplike)
-                nextadvanced = ak._v2.index.Index64.empty(len(self), nplike)
+                nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
+                nextadvanced = ak._v2.index.Index64.empty(lenstarts, nplike)
+
                 self._handle_error(
                     nplike[
                         "awkward_ListArray_getitem_next_array_advanced",
@@ -340,10 +344,10 @@ class ListArray(Content):
                         lenstarts,
                         len(regular_flathead),
                         len(self._content),
-                    ),
-                    head,
+                    )
                 )
                 nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):

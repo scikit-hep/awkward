@@ -172,7 +172,7 @@ class ListOffsetArray(Content):
         elif isinstance(head, slice):
             nexthead, nexttail = self._headtail(tail)
             lenstarts = len(self._offsets) - 1
-            start, stop, step = head.indices(lenstarts)
+            start, stop, step = head.indices(self.stops[0])
             step = 1 if step is None else step
 
             carrylength = ak._v2.index.Index64.empty(1, nplike)
@@ -275,8 +275,7 @@ class ListOffsetArray(Content):
             nexthead, nexttail = self._headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
             lenstarts = len(self._starts)
-            regular_flathead = ak._v2.index.Index64.empty(len(flathead), nplike)
-
+            regular_flathead = ak._v2.index.Index64.zeros(len(flathead), nplike)
             if advanced is None or len(advanced) == 0:
                 nextcarry = ak._v2.index.Index64.empty(
                     lenstarts * len(flathead), nplike

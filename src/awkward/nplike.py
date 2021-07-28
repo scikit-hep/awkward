@@ -382,7 +382,7 @@ class Numpy(NumpyLike):
 
     def __getitem__(self, args):
         # for key in ak._cpu_kernels.kernel.keys():
-        #     if "awkward_UnionArray_project" in key[0]:
+        #     if "ListArray_getitem_next_array_advanced" in key[0]:
         #         print(key)
         return NumpyKernel(ak._cpu_kernels.kernel[args], args)
 
