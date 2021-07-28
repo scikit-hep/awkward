@@ -281,10 +281,10 @@ class ListArray(Content):
                         nextadvanced.to(nplike),
                         self._starts.to(nplike),
                         self._stops.to(nplike),
-                        flathead.to(nplike),
+                        regular_flathead.to(nplike),
                         lenstarts,
-                        len(flathead),
-                        self._size,
+                        len(regular_flathead),
+                        len(self._content),
                     ),
                     head,
                 )
@@ -296,20 +296,24 @@ class ListArray(Content):
                 else:
                     return out
 
-            elif self._size == 0:
+            elif len(self) == 0:
                 nextcarry = ak._v2.index.Index64.empty(0, nplike)
                 nextadvanced = ak._v2.index.Index64.empty(0, nplike)
                 nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
             else:
-                nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
-                nextadvanced = ak._v2.index.Index64.empty(self._length, nplike)
+                nextcarry = ak._v2.index.Index64.empty(len(self), nplike)
+                nextadvanced = ak._v2.index.Index64.empty(len(self), nplike)
                 self._handle_error(
                     nplike[
                         "awkward_ListArray_getitem_next_array_advanced",
                         nextcarry.dtype.type,
                         nextadvanced.dtype.type,
+                        # FIXME
+                        # self._starts.dtype.type,
+                        advanced.dtype.type,
+                        advanced.dtype.type,
                         advanced.dtype.type,
                         regular_flathead.dtype.type,
                     ](
@@ -317,11 +321,11 @@ class ListArray(Content):
                         nextadvanced.to(nplike),
                         self._starts.to(nplike),
                         self._stops.to(nplike),
-                        advanced.to(nplike),
                         regular_flathead.to(nplike),
-                        self._length,
+                        advanced.to(nplike),
+                        lenstarts,
                         len(regular_flathead),
-                        self._size,
+                        len(self._content),
                     ),
                     head,
                 )

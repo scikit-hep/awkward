@@ -723,9 +723,15 @@ def test_ListArray():
     )
     assert ak.to_list(old[[1, 0]]) == expectation
     assert ak.to_list(new[[1, 0]]) == expectation
-    # FIXME
-    # assert ak.to_list(old[1, [1, 0]]) == [2.2, 1.1]
-    # assert ak.to_list(new[1, [1, 0]]) ==  [1.1, 1.1]
+
+    assert ak.to_list(old[0, [1, 0]]) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+    ]
+    assert ak.to_list(new[0, [1, 0]]) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+    ]
 
 
 def test_ListOffsetArray_NumpyArray():
