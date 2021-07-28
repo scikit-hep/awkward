@@ -175,6 +175,40 @@ class UnionArray(Content):
             self._parameters,
         )
 
+    def _regular_index(self, tags):
+        nplike = self.nplike
+        lentags = len(tags)
+        size = ak._v2.index.Index64.empty(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_UnionArray_regular_index_getsize",
+                size.dtype.type,
+                tags.dtype.type,
+            ](
+                size.to(nplike),
+                tags.to(nplike),
+                lentags,
+            )
+        )
+        current = ak._v2.index.Index64.empty(size[0], nplike)
+        outindex = ak._v2.index.Index64.empty(lentags, nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_UnionArray_regular_index",
+                outindex.dtype.type,
+                current.dtype.type,
+                tags.dtype.type,
+            ](
+                outindex.to(nplike),
+                current.to(nplike),
+                tags.to(nplike),
+                size.to(nplike),
+                lentags,
+            )
+        )
+        return outindex
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -182,36 +216,17 @@ class UnionArray(Content):
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-            lentags = len(self._tags)
-            size = [0]
-            for i in range(lentags):
-                tag = int(self._tags[i])
-                if size[0] < tag:
-                    size[0] = tag
-            size = size[0] + 1
-            current = ak._v2.index.Index64.empty(size, nplike)
-            outindex = ak._v2.index.Index64.empty(lentags, nplike)
-            self._handle_error(
-                nplike[
-                    "awkward_UnionArray_regular_index",
-                    current.dtype.type,
-                    outindex.dtype.type,
-                    self._tags.dtype.type,
-                ](
-                    outindex.to(nplike),
-                    current.to(nplike),
-                    size,
-                    self._tags.to(nplike),
-                    lentags,
-                )
-            )
-            return UnionArray(
+            # FIXME
+            # outindex = self._regular_index(self._tags)
+
+            out = UnionArray(
                 self._tags,
                 self._index,
                 [x._getitem_next(head, tail, advanced) for x in self._contents],
                 self._identifier,
-                None,
+                self._parameters,
             )
+            return out._simplify_uniontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)

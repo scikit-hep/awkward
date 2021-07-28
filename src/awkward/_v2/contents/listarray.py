@@ -158,24 +158,23 @@ class ListArray(Content):
             return self
 
         elif isinstance(head, int):
+            assert advanced is not None
             nexthead, nexttail = self._headtail(tail)
             lenstarts = len(self._starts)
             nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
             self._handle_error(
-                # FIXME self._starts.dtype.type
                 nplike[
                     "awkward_ListArray_getitem_next_at",
                     nextcarry.dtype.type,
-                    nextcarry.dtype.type,
-                    nextcarry.dtype.type,
+                    self._starts.dtype.type,
+                    self._stops.dtype.type,
                 ](
                     nextcarry.to(nplike),
                     self._starts.to(nplike),
                     self._stops.to(nplike),
                     lenstarts,
                     head,
-                ),
-                head,
+                )
             )
             nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
@@ -184,39 +183,45 @@ class ListArray(Content):
             nexthead, nexttail = self._headtail(tail)
             lenstarts = len(self._starts)
             start, stop, step = head.indices(lenstarts)
+            step = 1 if step is None else step
 
-            nextsize = 0
-            if step > 0 and stop - start > 0:
-                diff = stop - start
-                nextsize = diff // step
-                if diff % step != 0:
-                    nextsize += 1
-            elif step < 0 and stop - start < 0:
-                diff = start - stop
-                nextsize = diff // step
-                if diff % step != 0:
-                    nextsize += 1
+            carrylength = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_getitem_next_range_carrylength",
+                    carrylength.dtype.type,
+                    self._starts.dtype.type,
+                    self._stops.dtype.type,
+                ](
+                    carrylength.to(nplike),
+                    self._starts.to(nplike),
+                    self._stops.to(nplike),
+                    lenstarts,
+                    start,
+                    stop,
+                    step,
+                )
+            )
 
-            nextcarry = ak._v2.index.Index64.empty(nextsize * len(self), nplike)
-            nextoffsets = ak._v2.index.Index32.empty(lenstarts + 1, nplike)
+            nextoffsets = ak._v2.index.Index64.empty(lenstarts + 1, nplike)
+            nextcarry = ak._v2.index.Index64.empty(carrylength[0], nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListArray_getitem_next_range",
                     nextoffsets.dtype.type,
                     nextcarry.dtype.type,
-                    nextoffsets.dtype.type,
-                    nextoffsets.dtype.type,
+                    self._starts.dtype.type,
+                    self._stops.dtype.type,
                 ](
                     nextoffsets.to(nplike),
                     nextcarry.to(nplike),
-                    self.starts.data,
-                    self.stops.data,
+                    self._starts.to(nplike),
+                    self._stops.to(nplike),
                     lenstarts,
                     start,
                     stop,
                     step,
-                ),
-                head,
+                )
             )
 
             nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
@@ -229,21 +234,31 @@ class ListArray(Content):
                     self._parameters,
                 )
             else:
-                nextadvanced = ak._v2.index.Index64.empty(
-                    self._length * nextsize, nplike
-                )
+                total = ak._v2.index.Index64.empty(1, nplike)
                 self._handle_error(
                     nplike[
-                        "awkward_ListOffsetArray_getitem_next_range_spreadadvanced",
+                        "awkward_ListArray_getitem_next_range_counts",
+                        total.dtype.type,
+                        nextoffsets.dtype.type,
+                    ](
+                        total.to(nplike),
+                        nextoffsets.to(nplike),
+                        lenstarts,
+                    )
+                )
+                nextadvanced = ak._v2.index.Index64.empty(total[0], nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_ListArray_getitem_next_range_spreadadvanced",
                         nextadvanced.dtype.type,
                         advanced.dtype.type,
+                        nextoffsets.dtype.type,
                     ](
                         nextadvanced.to(nplike),
                         advanced.to(nplike),
-                        self._length,
-                        nextsize,
-                    ),
-                    head,
+                        nextoffsets.to(nplike),
+                        lenstarts,
+                    )
                 )
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
                     nextoffsets,
@@ -303,12 +318,6 @@ class ListArray(Content):
                 else:
                     return out
 
-            elif len(self) == 0:
-                nextcarry = ak._v2.index.Index64.empty(0, nplike)
-                nextadvanced = ak._v2.index.Index64.empty(0, nplike)
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
-                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
-
             else:
                 nextcarry = ak._v2.index.Index64.empty(len(self), nplike)
                 nextadvanced = ak._v2.index.Index64.empty(len(self), nplike)
@@ -317,12 +326,10 @@ class ListArray(Content):
                         "awkward_ListArray_getitem_next_array_advanced",
                         nextcarry.dtype.type,
                         nextadvanced.dtype.type,
-                        # FIXME
-                        # self._starts.dtype.type,
-                        advanced.dtype.type,
-                        advanced.dtype.type,
-                        advanced.dtype.type,
+                        self._starts.dtype.type,
+                        self._stops.dtype.type,
                         regular_flathead.dtype.type,
+                        advanced.dtype.type,
                     ](
                         nextcarry.to(nplike),
                         nextadvanced.to(nplike),

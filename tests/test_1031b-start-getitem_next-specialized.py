@@ -631,104 +631,104 @@ def test_IndexedOptionArray():
     assert ak.to_list(new[1, [1, 0]]) == [2.2, 1.1]
 
 
-# def test_ListArray():
-#     old = ak.layout.ListArray64(
-#         ak.layout.Index64(np.array([0, 100, 1], np.int64)),
-#         ak.layout.Index64(np.array([3, 100, 3, 200], np.int64)),
-#         ak.layout.NumpyArray(
-#             np.array(
-#                 [
-#                     [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#                     [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#                     [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#                     [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#                     [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#                 ]
-#             )
-#         ),
-#     )
-#     new = v1_to_v2(old)
+def test_ListArray():
+    old = ak.layout.ListArray64(
+        ak.layout.Index64(np.array([0, 100, 1], np.int64)),
+        ak.layout.Index64(np.array([3, 100, 3, 200], np.int64)),
+        ak.layout.NumpyArray(
+            np.array(
+                [
+                    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+                    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+                    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+                    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+                    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+                ]
+            )
+        ),
+    )
+    new = v1_to_v2(old)
 
-#     assert ak.to_list(old[0, :2]) == [
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#     ]
+    assert ak.to_list(old[0, :2]) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+    ]
 
-#     # FIXME
-#     # assert ak.to_list(new[0, :2]) == [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]]
+    # FIXME
+    # assert ak.to_list(new[0, :2]) == [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]]
 
-#     # assert v1v2_equal(old[0, :2], new[0, :2])
+    # assert v1v2_equal(old[0, :2], new[0, :2])
 
-#     with pytest.raises(IndexError):
-#         new[1, "hello"]
+    with pytest.raises(IndexError):
+        new[1, "hello"]
 
-#     with pytest.raises(IndexError):
-#         new[1, ["hello", "there"]]
+    with pytest.raises(IndexError):
+        new[1, ["hello", "there"]]
 
-#     assert ak.to_list(new[0, np.newaxis]) == [
-#         [
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         ]
-#     ]
-#     assert ak.to_list(old[0, np.newaxis]) == [
-#         [
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         ]
-#     ]
+    assert ak.to_list(new[0, np.newaxis]) == [
+        [
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        ]
+    ]
+    assert ak.to_list(old[0, np.newaxis]) == [
+        [
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        ]
+    ]
 
-#     assert old.minmax_depth == (3, 3)
-#     assert new.minmax_depth == (3, 3)
+    assert old.minmax_depth == (3, 3)
+    assert new.minmax_depth == (3, 3)
 
-#     assert ak.to_list(old[0, ...]) == [
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#     ]
-#     assert ak.to_list(new[0, ...]) == [
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#     ]
+    assert ak.to_list(old[0, ...]) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+    ]
+    assert ak.to_list(new[0, ...]) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+    ]
 
-#     expectation = [
-#         [],
-#         [
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         ],
-#     ]
-#     assert (
-#         ak.to_list(
-#             old[
-#                 [1, 0],
-#             ]
-#         )
-#         == expectation
-#     )
-#     assert (
-#         ak.to_list(
-#             new[
-#                 [1, 0],
-#             ]
-#         )
-#         == expectation
-#     )
-#     assert ak.to_list(old[[1, 0]]) == expectation
-#     assert ak.to_list(new[[1, 0]]) == expectation
+    expectation = [
+        [],
+        [
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+            [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        ],
+    ]
+    assert (
+        ak.to_list(
+            old[
+                [1, 0],
+            ]
+        )
+        == expectation
+    )
+    assert (
+        ak.to_list(
+            new[
+                [1, 0],
+            ]
+        )
+        == expectation
+    )
+    assert ak.to_list(old[[1, 0]]) == expectation
+    assert ak.to_list(new[[1, 0]]) == expectation
 
-#     assert ak.to_list(old[0, [1, 0]]) == [
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#     ]
-#     assert ak.to_list(new[0, [1, 0]]) == [
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
-#     ]
+    assert ak.to_list(old[0, [1, 0]]) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+    ]
+    assert ak.to_list(new[0, [1, 0]]) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+        [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
+    ]
 
 
 def test_ListOffsetArray_NumpyArray():
