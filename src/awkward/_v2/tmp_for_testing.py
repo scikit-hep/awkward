@@ -499,3 +499,34 @@ def v2_to_v1(v2):
 
     else:
         raise AssertionError(type(v2))
+
+
+def v1_to_v2_index(v1):
+    assert isinstance(
+        v1,
+        (
+            ak.layout.IndexU8,
+            ak.layout.IndexU32,
+            ak.layout.Index8,
+            ak.layout.Index32,
+            ak.layout.Index64,
+        ),
+    )
+
+    if isinstance(v1, ak.layout.IndexU8):
+        return ak._v2.index.IndexU8(v1.data)
+
+    elif isinstance(v1, ak.layout.IndexU32):
+        return ak._v2.index.IndexU32(v1.data)
+
+    elif isinstance(v1, ak.layout.Index8):
+        return ak._v2.index.Index8(v1.data)
+
+    elif isinstance(v1, ak.layout.Index32):
+        return ak._v2.index.Index32(np.asarray(v1))
+
+    elif isinstance(v1, ak.layout.Index64):
+        return ak._v2.index.Index64(np.asarray(v1))
+
+    else:
+        raise AssertionError(type(v1))
