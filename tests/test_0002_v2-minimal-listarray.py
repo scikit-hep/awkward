@@ -6,7 +6,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2, v1v2_equal, v1_to_v2_index
+from awkward._v2.tmp_for_testing import v1_to_v2, v1_to_v2_index
 
 
 def test():
