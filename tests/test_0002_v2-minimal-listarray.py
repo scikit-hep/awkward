@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2, v1v2_equal, v1_to_v2_index
 
+
 def test():
     data = np.array([0, 2, 2, 3], dtype="i8")
     offsets = ak.layout.Index64(data)
@@ -47,7 +48,7 @@ def test():
 
     content = ak.layout.NumpyArray(np.arange(12).reshape(3, 4))
     content2 = v1_to_v2(content)
-    
+
     assert np.asarray(content2).tolist() == [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
     assert np.asarray(content2[0]).tolist() == [0, 1, 2, 3]
     assert np.asarray(content2[1]).tolist() == [4, 5, 6, 7]
@@ -71,7 +72,9 @@ def test():
     assert np.asarray(content2[0]).tolist() == np.asarray(content[0]).tolist()
     assert np.asarray(content2[1]).tolist() == np.asarray(content[1]).tolist()
     assert np.asarray(content2[2]).tolist() == np.asarray(content[2]).tolist()
-    assert [content2[i][j] for i in range(3) for j in range(4)] == [content[i][j] for i in range(3) for j in range(4)]
+    assert [content2[i][j] for i in range(3) for j in range(4)] == [
+        content[i][j] for i in range(3) for j in range(4)
+    ]
 
     data = np.array([0, 2, 2, 3], dtype="i4")
     offsets = ak.layout.Index32(data)
@@ -135,5 +138,11 @@ def test_members():
     ]
 
     assert np.asarray(new2.offsets).tolist() == np.asarray(new.offsets).tolist()
-    assert np.asarray(new2.content.offsets).tolist() == np.asarray(new.content.offsets).tolist()
-    assert np.asarray(new2.content.content).tolist() == np.asarray(new.content.content).tolist()
+    assert (
+        np.asarray(new2.content.offsets).tolist()
+        == np.asarray(new.content.offsets).tolist()
+    )
+    assert (
+        np.asarray(new2.content.content).tolist()
+        == np.asarray(new.content.content).tolist()
+    )
