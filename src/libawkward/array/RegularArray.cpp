@@ -1381,6 +1381,7 @@ namespace awkward {
                                   range.start() != Slice::none(),
                                   range.stop() != Slice::none(),
                                   size_);
+
     int64_t nextsize = 0;
     if (range.step() > 0  &&  regular_stop - regular_start > 0) {
       int64_t diff = regular_stop - regular_start;

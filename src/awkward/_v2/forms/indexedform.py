@@ -53,3 +53,19 @@ class IndexedForm(Form):
             },
             verbose,
         )
+
+    @property
+    def purelist_isregular(self):
+        return self._content.purelist_isregular
+
+    @property
+    def purelist_depth(self):
+        return self._content.purelist_depth
+
+    @property
+    def minmax_depth(self):
+        return self._content.minmax_depth
+
+    @property
+    def branch_depth(self):
+        return self._content.branch_depth

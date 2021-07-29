@@ -977,6 +977,15 @@ def to_list(array):
 
         return to_list(awkward._v2.tmp_for_testing.v2_to_v1(array))
 
+    elif isinstance(array, ak._v2.record.Record):
+        import awkward._v2.tmp_for_testing
+
+        return to_list(
+            awkward._v2.tmp_for_testing.v2_to_v1(array.array[array.at : array.at + 1])[
+                0
+            ]
+        )
+
     elif isinstance(array, dict):
         return dict((n, to_list(x)) for n, x in array.items())
 

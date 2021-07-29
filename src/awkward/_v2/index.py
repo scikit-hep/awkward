@@ -18,8 +18,9 @@ _dtype_to_form = {
 class Index(object):
     _expected_dtype = None
 
-    def __init__(self, data):
+    def __init__(self, data, metadata=None):
         self._nplike = ak.nplike.of(data)
+        self._metadata = metadata
 
         self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
         if len(self._data.shape) != 1:
@@ -72,8 +73,17 @@ class Index(object):
     def dtype(self):
         return self._data.dtype
 
+    @property
+    def metadata(self):
+        if self._metadata is None:
+            self._metadata = {}
+        return self._metadata
+
     def __len__(self):
         return len(self._data)
+
+    def to(self, nplike):
+        return nplike.asarray(self._data)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -87,13 +97,20 @@ class Index(object):
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
             "\n"
         )
-        if len(arraystr_lines) > 1:
+        if len(arraystr_lines) > 1 or self._metadata is not None:
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
                 arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
             out.append(">\n" + indent + "    ")
+            if self._metadata is not None:
+                for k, v in self._metadata.items():
+                    out.append(
+                        "<metadata key={0}>{1}</metadata>\n".format(repr(k), repr(v))
+                        + indent
+                        + "    "
+                    )
             out.append(("\n" + indent + "    ").join(arraystr_lines))
             out.append("\n" + indent + "</Index>")
         else:

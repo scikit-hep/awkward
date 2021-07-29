@@ -67,3 +67,38 @@ class RecordForm(Form):
             out["contents"] = contents_tolist
 
         return self._tolist_extra(out, verbose)
+
+    @property
+    def purelist_isregular(self):
+        return True
+
+    @property
+    def purelist_depth(self):
+        return 1
+
+    @property
+    def minmax_depth(self):
+        if len(self._contents) == 0:
+            return (0, 0)
+        mins, maxs = [], []
+        for content in self._contents:
+            mindepth, maxdepth = content.minmax_depth
+            mins.append(mindepth)
+            maxs.append(maxdepth)
+        return (min(mins), max(maxs))
+
+    @property
+    def branch_depth(self):
+        if len(self._contents) == 0:
+            return (False, 1)
+        anybranch = False
+        mindepth = None
+        for content in self._contents:
+            branch, depth = content.branch_depth
+            if mindepth is None:
+                mindepth = depth
+            if branch or mindepth != depth:
+                anybranch = True
+            if mindepth > depth:
+                mindepth = depth
+        return (anybranch, mindepth)

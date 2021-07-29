@@ -204,15 +204,15 @@ class Form(object):
     def parameters(self):
         return self._parameters
 
-    @property
-    def form_key(self):
-        return self._form_key
-
     def parameter(self, key):
         if self._parameters is None:
             return None
         else:
             return self._parameters.get(key)
+
+    @property
+    def form_key(self):
+        return self._form_key
 
     def __str__(self):
         return json.dumps(self.tolist(verbose=False), indent="    ")

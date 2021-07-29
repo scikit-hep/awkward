@@ -398,6 +398,7 @@ namespace awkward {
       tags.data(),
       lentags);
     util::handle_error(err2, "UnionArray", nullptr);
+    std::cout<<"outindex "<<outindex.tostring()<<std::endl;
     return outindex;
   }
 
@@ -514,8 +515,13 @@ namespace awkward {
       lentags,
       index);
     util::handle_error(err, classname(), identities_.get());
+
     Index64 nextcarry(tmpcarry.ptr(), 0, lenout, tmpcarry.ptr_lib());
-    return contents_[(size_t)index].get()->carry(nextcarry, false);
+    auto out = contents_[(size_t)index].get()->carry(nextcarry, false);
+    std::cout << "out " << out->tostring() << std::endl;
+    std::cout << "lentags " << lentags << std::endl;
+    std::cout << "lenout " << lenout << std::endl;
+    return out;
   }
 
   template <typename T, typename I>

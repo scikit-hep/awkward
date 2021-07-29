@@ -5,7 +5,8 @@ from __future__ import absolute_import
 import numpy as np
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.regularform import RegularForm
 
 
 class RegularArray(Content):
@@ -46,8 +47,14 @@ class RegularArray(Content):
         return self._content
 
     @property
+    def nplike(self):
+        return self._content.nplike
+
+    Form = RegularForm
+
+    @property
     def form(self):
-        return ak._v2.forms.RegularForm(
+        return self.Form(
             self._content.form,
             self._size,
             has_identifier=self._identifier is not None,
@@ -73,27 +80,49 @@ class RegularArray(Content):
         out.append(post)
         return "".join(out)
 
+    def _getitem_nothing(self):
+        return self._content._getitem_range(slice(0, 0))
+
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
-            raise ak._v2.contents.content.NestedIndexError(self, where)
-        return self._content[(where) * self._size : (where + 1) * self._size]
+        if not (0 <= where < len(self)):
+            raise NestedIndexError(self, where)
+        start, stop = (where) * self._size, (where + 1) * self._size
+        return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
+        assert step == 1
         zeros_length = stop - start
-        start *= self._size
-        stop *= self._size
-        return RegularArray(self._content[start:stop], self._size, zeros_length)
+        substart, substop = start * self._size, stop * self._size
+        return RegularArray(
+            self._content._getitem_range(slice(substart, substop)),
+            self._size,
+            zeros_length,
+            self._range_identifier(start, stop),
+            self._parameters,
+        )
 
-    def _getitem_field(self, where):
-        return RegularArray(self._content[where], self._size, self._length)
+    def _getitem_field(self, where, only_fields=()):
+        return RegularArray(
+            self._content._getitem_field(where, only_fields),
+            self._size,
+            self._length,
+            self._field_identifier(where),
+            None,
+        )
 
-    def _getitem_fields(self, where):
-        return RegularArray(self._content[where], self._size, self._length)
+    def _getitem_fields(self, where, only_fields=()):
+        return RegularArray(
+            self._content._getitem_fields(where, only_fields),
+            self._size,
+            self._length,
+            self._fields_identifier(where),
+            None,
+        )
 
-    def _carry(self, carry, allow_lazy):
+    def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
         nplike, where = carry.nplike, carry.data
@@ -111,24 +140,215 @@ class RegularArray(Content):
             where[negative] += self._length
 
         if nplike.any(where >= self._length):
-            raise ak._v2.contents.content.NestedIndexError(self, where)
+            raise NestedIndexError(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
-        self.handle_error(
+        self._handle_error(
             nplike[
                 "awkward_RegularArray_getitem_carry",
                 nextcarry.dtype.type,
                 where.dtype.type,
             ](
-                nextcarry.data,
+                nextcarry.to(nplike),
                 where,
                 len(where),
                 self._size,
-            )
+            ),
+            carry,
         )
 
         return RegularArray(
-            self._content._carry(nextcarry, allow_lazy),
+            self._content._carry(nextcarry, allow_lazy, exception),
             self._size,
             len(where),
+            self._carry_identifier(carry, exception),
+            self._parameters,
         )
+
+    def _getitem_next(self, head, tail, advanced):
+        nplike = self.nplike
+
+        if head == ():
+            return self
+
+        elif isinstance(head, int):
+            nexthead, nexttail = self._headtail(tail)
+            nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
+            self._handle_error(
+                nplike["awkward_RegularArray_getitem_next_at", nextcarry.dtype.type](
+                    nextcarry.to(nplike),
+                    head,
+                    self._length,
+                    self._size,
+                ),
+                head,
+            )
+            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            return nextcontent._getitem_next(nexthead, nexttail, advanced)
+
+        elif isinstance(head, slice):
+            nexthead, nexttail = self._headtail(tail)
+            start, stop, step = head.indices(self._size)
+
+            nextsize = 0
+            if step > 0 and stop - start > 0:
+                diff = stop - start
+                nextsize = diff // step
+                if diff % step != 0:
+                    nextsize += 1
+            elif step < 0 and stop - start < 0:
+                diff = start - stop
+                nextsize = diff // step
+                if diff % step != 0:
+                    nextsize += 1
+
+            nextcarry = ak._v2.index.Index64.empty(self._length * nextsize, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_RegularArray_getitem_next_range",
+                    nextcarry.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    start,
+                    step,
+                    self._length,
+                    self._size,
+                    nextsize,
+                ),
+                head,
+            )
+            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+
+            if advanced is None or len(advanced) == 0:
+                return RegularArray(
+                    nextcontent._getitem_next(nexthead, nexttail, advanced),
+                    nextsize,
+                    self._length,
+                    self._identifier,
+                    self._parameters,
+                )
+            else:
+                nextadvanced = ak._v2.index.Index64.empty(
+                    self._length * nextsize, nplike
+                )
+                self._handle_error(
+                    nplike[
+                        "awkward_RegularArray_getitem_next_range_spreadadvanced",
+                        nextadvanced.dtype.type,
+                        advanced.dtype.type,
+                    ](
+                        nextadvanced.to(nplike),
+                        advanced.to(nplike),
+                        self._length,
+                        nextsize,
+                    ),
+                    head,
+                )
+                return RegularArray(
+                    nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
+                    nextsize,
+                    self._length,
+                    self._identifier,
+                    self._parameters,
+                )
+
+        elif ak._util.isstr(head):
+            return self._getitem_next_field(head, tail, advanced)
+
+        elif isinstance(head, list):
+            return self._getitem_next_fields(head, tail, advanced)
+
+        elif head is np.newaxis:
+            return self._getitem_next_newaxis(tail, advanced)
+
+        elif head is Ellipsis:
+            return self._getitem_next_ellipsis(tail, advanced)
+
+        elif isinstance(head, ak._v2.index.Index64):
+            nexthead, nexttail = self._headtail(tail)
+            flathead = nplike.asarray(head.data.reshape(-1))
+
+            regular_flathead = ak._v2.index.Index64.empty(len(flathead), nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_RegularArray_getitem_next_array_regularize",
+                    regular_flathead.dtype.type,
+                    flathead.dtype.type,
+                ](
+                    regular_flathead.to(nplike),
+                    flathead,
+                    len(flathead),
+                    self._size,
+                ),
+                head,
+            )
+
+            if advanced is None or len(advanced) == 0:
+                nextcarry = ak._v2.index.Index64.empty(
+                    self._length * len(flathead), nplike
+                )
+                nextadvanced = ak._v2.index.Index64.empty(
+                    self._length * len(flathead), nplike
+                )
+                self._handle_error(
+                    nplike[
+                        "awkward_RegularArray_getitem_next_array",
+                        nextcarry.dtype.type,
+                        nextadvanced.dtype.type,
+                        regular_flathead.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        nextadvanced.to(nplike),
+                        regular_flathead.to(nplike),
+                        self._length,
+                        len(regular_flathead),
+                        self._size,
+                    ),
+                    head,
+                )
+                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+
+                out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+                if advanced is None:
+                    return self._getitem_next_array_wrap(out, head.metadata["shape"])
+                else:
+                    return out
+
+            elif self._size == 0:
+                nextcarry = ak._v2.index.Index64.empty(0, nplike)
+                nextadvanced = ak._v2.index.Index64.empty(0, nplike)
+                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+
+            else:
+                nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
+                nextadvanced = ak._v2.index.Index64.empty(self._length, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_RegularArray_getitem_next_array_advanced",
+                        nextcarry.dtype.type,
+                        nextadvanced.dtype.type,
+                        advanced.dtype.type,
+                        regular_flathead.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        nextadvanced.to(nplike),
+                        advanced.to(nplike),
+                        regular_flathead.to(nplike),
+                        self._length,
+                        len(regular_flathead),
+                        self._size,
+                    ),
+                    head,
+                )
+                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+
+        elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+            raise NotImplementedError
+
+        else:
+            raise AssertionError(repr(head))

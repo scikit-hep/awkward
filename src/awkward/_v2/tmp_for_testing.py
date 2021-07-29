@@ -34,11 +34,7 @@ def v1v2_equal(v1, v2):
         v2, ak._v2.contents.NumpyArray
     ):
         v1_data = np.asarray(v1)
-        return (
-            np.array_equal(v1_data, v2.data)
-            and v1_data.dtype == v2.dtype
-            and v1_data.strides == v2.strides
-        )
+        return v1_data.dtype == v2.dtype and np.array_equal(v1_data, v2.data)
 
     elif isinstance(v1, ak.layout.RegularArray) and isinstance(
         v2, ak._v2.contents.RegularArray
@@ -188,6 +184,29 @@ def v1_to_v2_id(v1):
         raise NotImplementedError("Identities to Identifier")
 
 
+def fix(array):
+    if issubclass(array.dtype.type, np.signedinteger):
+        if array.dtype.itemsize == 8:
+            return array.view(np.int64)
+        elif array.dtype.itemsize == 4:
+            return array.view(np.int32)
+        elif array.dtype.itemsize == 2:
+            return array.view(np.int16)
+        elif array.dtype.itemsize == 1:
+            return array.view(np.int8)
+    elif issubclass(array.dtype.type, np.unsignedinteger):
+        if array.dtype.itemsize == 8:
+            return array.view(np.uint64)
+        elif array.dtype.itemsize == 4:
+            return array.view(np.uint32)
+        elif array.dtype.itemsize == 2:
+            return array.view(np.uint16)
+        elif array.dtype.itemsize == 1:
+            return array.view(np.uint8)
+    else:
+        return array
+
+
 def v1_to_v2(v1):
     assert isinstance(v1, ak.layout.Content)
 
@@ -198,7 +217,7 @@ def v1_to_v2(v1):
 
     elif isinstance(v1, ak.layout.NumpyArray):
         return ak._v2.contents.NumpyArray(
-            np.asarray(v1),
+            fix(np.asarray(v1)),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
         )
@@ -216,8 +235,8 @@ def v1_to_v2(v1):
         v1, (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64)
     ):
         return ak._v2.contents.ListArray(
-            ak._v2.index.Index(np.asarray(v1.starts)),
-            ak._v2.index.Index(np.asarray(v1.stops)),
+            ak._v2.index.Index(fix(np.asarray(v1.starts))),
+            ak._v2.index.Index(fix(np.asarray(v1.stops))),
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
@@ -232,7 +251,7 @@ def v1_to_v2(v1):
         ),
     ):
         return ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index(np.asarray(v1.offsets)),
+            ak._v2.index.Index(fix(np.asarray(v1.offsets))),
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
@@ -256,7 +275,7 @@ def v1_to_v2(v1):
         ),
     ):
         return ak._v2.contents.IndexedArray(
-            ak._v2.index.Index(np.asarray(v1.index)),
+            ak._v2.index.Index(fix(np.asarray(v1.index))),
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
@@ -266,7 +285,7 @@ def v1_to_v2(v1):
         v1, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64)
     ):
         return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index(np.asarray(v1.index)),
+            ak._v2.index.Index(fix(np.asarray(v1.index))),
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
@@ -274,7 +293,7 @@ def v1_to_v2(v1):
 
     elif isinstance(v1, ak.layout.ByteMaskedArray):
         return ak._v2.contents.ByteMaskedArray(
-            ak._v2.index.Index(np.asarray(v1.mask)),
+            ak._v2.index.Index(fix(np.asarray(v1.mask))),
             v1_to_v2(v1.content),
             v1.valid_when,
             identifier=v1_to_v2_id(v1.identities),
@@ -283,7 +302,7 @@ def v1_to_v2(v1):
 
     elif isinstance(v1, ak.layout.BitMaskedArray):
         return ak._v2.contents.BitMaskedArray(
-            ak._v2.index.Index(np.asarray(v1.mask)),
+            ak._v2.index.Index(fix(np.asarray(v1.mask))),
             v1_to_v2(v1.content),
             v1.valid_when,
             len(v1),
@@ -308,8 +327,8 @@ def v1_to_v2(v1):
         ),
     ):
         return ak._v2.contents.UnionArray(
-            ak._v2.index.Index(np.asarray(v1.tags)),
-            ak._v2.index.Index(np.asarray(v1.index)),
+            ak._v2.index.Index(fix(np.asarray(v1.tags))),
+            ak._v2.index.Index(fix(np.asarray(v1.index))),
             [v1_to_v2(x) for x in v1.contents],
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,

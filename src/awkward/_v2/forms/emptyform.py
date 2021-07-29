@@ -15,3 +15,19 @@ class EmptyForm(Form):
 
     def _tolist_part(self, verbose, toplevel):
         return self._tolist_extra({"class": "EmptyArray"}, verbose)
+
+    @property
+    def purelist_isregular(self):
+        return True
+
+    @property
+    def purelist_depth(self):
+        return 1
+
+    @property
+    def minmax_depth(self):
+        return (1, 1)
+
+    @property
+    def branch_depth(self):
+        return (False, 1)
