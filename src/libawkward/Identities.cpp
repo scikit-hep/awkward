@@ -17,7 +17,7 @@
 #include "awkward/Identities.h"
 
 namespace awkward {
-  void printMe();
+  
   std::atomic<Identities::Ref> numrefs{0};
 
   Identities::Ref
@@ -266,7 +266,7 @@ namespace awkward {
         carry.length(),
         width_,
         length_);
-      std::cout<<"the result: "<<reinterpret_cast<int32_t*>(rawout->printMe())<<std::endl;
+      std::cout<<"the result: "<<rawout->printMe()<<std::endl;
       util::handle_error(err, classname(), nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {

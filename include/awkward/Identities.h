@@ -402,7 +402,7 @@ namespace awkward {
 
     bool
       referentially_equal(const IdentitiesPtr& other) const override;
-
+  void printMe();
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
