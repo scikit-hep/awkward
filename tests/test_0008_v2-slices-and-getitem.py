@@ -77,7 +77,7 @@ def test_numpyarray_getitem_next():
     b = ak.layout.NumpyArray(a)
     c = np.array([7, 3, 3, 5])
     b2 = v1_to_v2(b)
-    
+
     assert ak.to_list(b2[c]) == ak.to_list(a[c])
     c = np.array([False, False, False, True, True, True, False, True, False, True])
     assert ak.to_list(b2[c]) == ak.to_list(a[c])
@@ -102,13 +102,13 @@ def test_numpyarray_getitem_next():
 
     c1 = np.array([[4, 1], [1, 3], [0, 4]])
     c2 = np.array([[2, 2], [0, 1], [1, 3]])
-    #FIXME elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            
+    # FIXME elif isinstance(head, ak._v2.contents.ListOffsetArray):
+
     # assert ak.to_list(b2[c1, c2]) == ak.to_list(a[c1, c2])
     c = np.array([False, False, True, True, False, True, True])
     assert ak.to_list(b2[c]) == ak.to_list(a[c])
     c = a % 2 == 0  # two dimensional
-    #FIXME elif isinstance(head, ak._v2.contents.ListOffsetArray):
+    # FIXME elif isinstance(head, ak._v2.contents.ListOffsetArray):
     # assert ak.to_list(b2[c]) == ak.to_list(a[c])
     c = np.array([], dtype=int)
     assert ak.to_list(b2[c]) == ak.to_list(a[c])

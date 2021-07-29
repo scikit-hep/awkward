@@ -216,7 +216,7 @@ class Content(object):
             elif isinstance(where, tuple):
                 if len(where) == 0:
                     return self
-                #FIXME
+                # FIXME
                 try:
                     prepare_tuple = [
                         self._prepare_tuple_item(x)
