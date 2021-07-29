@@ -198,8 +198,7 @@ class UnionArray(Content):
             )
         )
         nextcarry = ak._v2.index.Index64(tmpcarry.data[: lenout[0]], nplike)
-        out = self._contents[index]._carry(nextcarry, False, NestedIndexError)
-        return out
+        return self._contents[index]._carry(nextcarry, False, NestedIndexError)
 
     def _regular_index(self, tags):
         nplike = self.nplike

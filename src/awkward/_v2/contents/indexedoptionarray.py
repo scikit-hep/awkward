@@ -133,8 +133,9 @@ class IndexedOptionArray(Content):
             self._parameters,
         )
 
-    def nextcarry_outindex(self, numnull):
-        nplike = self.nplike
+    def nextcarry_outindex(self, nplike):
+        numnull = ak._v2.index.Index64.empty(1, nplike)
+
         self._handle_error(
             nplike[
                 "awkward_IndexedArray_numnull",
@@ -163,7 +164,8 @@ class IndexedOptionArray(Content):
                 len(self._content),
             )
         )
-        return nextcarry, outindex
+
+        return numnull[0], nextcarry, outindex
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
@@ -174,11 +176,10 @@ class IndexedOptionArray(Content):
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = self._headtail(tail)
 
-            numnull = ak._v2.index.Index64.empty(1, nplike)
-            nextcarry, outindex = self.nextcarry_outindex(numnull)
+            numnull, nextcarry, outindex = self.nextcarry_outindex(nplike)
 
-            nextContent = self._content._carry(nextcarry, True, NestedIndexError)
-            out = nextContent._getitem_next(head, tail, advanced)
+            next = self._content._carry(nextcarry, True, NestedIndexError)
+            out = next._getitem_next(head, tail, advanced)
             out2 = IndexedOptionArray(outindex, out, self._identifier, self._parameters)
             return out2._simplify_optiontype()
 
