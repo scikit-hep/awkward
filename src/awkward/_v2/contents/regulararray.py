@@ -198,7 +198,7 @@ class RegularArray(Content):
                     nextsize += 1
             elif step < 0 and stop - start < 0:
                 diff = start - stop
-                nextsize = diff // step
+                nextsize = diff // (step * -1)
                 if diff % step != 0:
                     nextsize += 1
 
@@ -352,3 +352,72 @@ class RegularArray(Content):
 
         else:
             raise AssertionError(repr(head))
+
+    def compact_offsets64(self, start_at_zero):
+        nplike = self.nplike
+        out = ak._v2.index.Index64.empty(self._length + 1, self.nplike)
+        self._handle_error(
+            nplike["awkward_RegularArray_compact_offsets", out.dtype.type](
+                out.to(nplike),
+                self._length,
+                self._size,
+            )
+        )
+        return out
+
+    def broadcast_tooffsets64(self, offsets):
+        nplike = self.nplike
+        if len(offsets) == 0 or offsets[0] != 0:
+            raise ValueError(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0"
+            )
+
+        if len(offsets) - 1 != self._length:
+            raise ValueError(
+                "cannot broadcast RegularArray of length ",
+                self._length,
+                " to length ",
+                len(offsets) - 1,
+            )
+
+        if self._identifier is not None:
+            identifier = self._identifier[slice(0, len(offsets) - 1)]
+        else:
+            identifier = self._identifier
+
+        if self._size == 1:
+            carrylen = offsets[-1]
+            nextcarry = ak._v2.index.Index64.empty(carrylen, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_RegularArray_broadcast_tooffsets_size1",
+                    nextcarry.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    offsets.to(nplike),
+                    len(offsets),
+                )
+            )
+            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                offsets, nextcontent, identifier, self._parameters
+            )
+
+        else:
+            self._handle_error(
+                nplike["awkward_RegularArray_broadcast_tooffsets", offsets.dtype.type](
+                    offsets.to(nplike),
+                    len(offsets),
+                    self._size,
+                )
+            )
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                offsets, self._content, self._identifier, self._parameters
+            )
+
+    def toListOffsetArray64(self, start_at_zero):
+        offsets = self.compact_offsets64(start_at_zero)
+        out = self.broadcast_tooffsets64(offsets)
+
+        return out

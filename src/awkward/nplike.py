@@ -382,7 +382,7 @@ class Numpy(NumpyLike):
 
     def __getitem__(self, args):
         # for key in ak._cpu_kernels.kernel.keys():
-        #     if "ListArray_getitem_next_array_advanced" in key[0]:
+        #     if "RegularArray_broadcast" in key[0]:
         #         print(key)
         return NumpyKernel(ak._cpu_kernels.kernel[args], args)
 
@@ -477,6 +477,9 @@ or
                 return out
         else:
             return self._module.ascontiguousarray(array, dtype=dtype)
+
+    def zeros(self, *args, **kwargs):
+        return self._module.zeros(*args, **kwargs)
 
     def frombuffer(self, *args, **kwargs):
         np_array = numpy.frombuffer(*args, **kwargs)

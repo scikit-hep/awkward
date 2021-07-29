@@ -216,8 +216,20 @@ class Content(object):
             elif isinstance(where, tuple):
                 if len(where) == 0:
                     return self
+                #FIXME
+                try:
+                    prepare_tuple = [
+                        self._prepare_tuple_item(x)
+                        for x in where
+                        if len(self._prepare_tuple_item(x)) > 0
+                    ]
+                    if len(prepare_tuple) == 0:
+                        return []
+                except:
+                    prepare_tuple = [self._prepare_tuple_item(x) for x in where]
+
                 nextwhere = self._getitem_broadcast(
-                    [self._prepare_tuple_item(x) for x in where],
+                    prepare_tuple,
                     self.nplike,
                 )
 
@@ -245,7 +257,9 @@ class Content(object):
                     )
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 elif issubclass(where.dtype.type, (np.bool_, bool)):
-                    carry = ak._v2.index.Index64(np.nonzero(where.data.reshape(-1))[0])
+                    nplike = ak.nplike.of(where)
+                    where = nplike.nonzero(where.data.reshape(-1))[0]
+                    carry = ak._v2.index.Index64(where)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     raise TypeError(
@@ -253,6 +267,7 @@ class Content(object):
                             repr(where.data).replace("\n", "\n    ")
                         )
                     )
+
                 out = self._getitem_next_array_wrap(
                     self._carry(carry, allow_lazy, NestedIndexError), where.shape
                 )
@@ -265,7 +280,10 @@ class Content(object):
                 return self.__getitem__((where,))
 
             elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
-                return self._getitem_fields(where)
+                if len(where) == 0:
+                    return []
+                else:
+                    return self._getitem_fields(where)
 
             elif isinstance(where, Iterable):
                 return self.__getitem__(
@@ -308,11 +326,11 @@ class Content(object):
             raise IndexError(
                 """cannot slice
 
-    {0}
+{0}
 
 with
 
-    {1}
+{1}
 
 at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     repr(ak.Array(v2_to_v1(self))),
