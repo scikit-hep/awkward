@@ -1013,16 +1013,6 @@ namespace {
         .append(std::to_string(ak::util::dtype_to_itemsize(dtype)))
         .append(ak::util::format_to_units(raw.unit()));
 
-      // FIXME: do not go through buffer
-      //
-      // return py::module::import("awkward").attr("layout").attr("NumpyArray")(
-      //   py::array_t<int64_t>(py::buffer_info(reinterpret_cast<void*>(raw.buffer().ptr().get()),
-      //   sizeof(int64_t),
-      //   ak::util::dtype_to_format(ak::util::dtype::int64),
-      //   1,
-      //   shape,
-      //   strides)));
-
       return box(std::make_shared<ak::NumpyArray>(
         ak::Identities::none(),
         ak::util::Parameters(),
