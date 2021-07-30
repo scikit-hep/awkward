@@ -1390,16 +1390,13 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       .def("__repr__", &ak::ArrayBuilder::tostring)
       .def("__len__", &ak::ArrayBuilder::length)
       .def("clear", &ak::ArrayBuilder::clear)
-      // FIXME: refactor
       .def("type", [](const ak::ArrayBuilder& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
         return unbox_content(::builder_snapshot(self.builder()))->type(typestrs);
       })
-      // FIXME: refactor
       .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
         return ::builder_snapshot(self.builder());
       })
       .def("__getitem__", &getitem<ak::ArrayBuilder>)
-      // FIXME: refactor
       .def("__iter__", [](const ak::ArrayBuilder& self) -> ak::Iterator {
         return ak::Iterator(unbox_content(::builder_snapshot(self.builder())));
       })

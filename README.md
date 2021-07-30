@@ -191,13 +191,9 @@ python -m pytest -vv -rs tests-cuda
 
 Python projects can simply `import awkward`.
 
-C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` and `libawkward.so` or their static library equivalents. These libraries are shipped, along with the include files, as part of pip's installation.
-
-   * See the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/main/dependent-project) directory for examples.
-
 # Roadmap
 
-Since [version 0.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/0.4.0), Awkward Array has been compiled with versions of pybind11 that have [ABI version 4](https://github.com/pybind/pybind11/blob/v2.6.2/include/pybind11/detail/internals.h#L152-L153). Any other Python extension built with pybind11 ABI version 4 can consume and produce Awkward Arrays in the way [described here](https://github.com/scikit-hep/awkward-1.0/tree/main/dependent-project).
+Since [version 0.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/0.4.0), Awkward Array has been compiled with versions of pybind11 that have [ABI version 4](https://github.com/pybind/pybind11/blob/v2.6.2/include/pybind11/detail/internals.h#L152-L153).
 
 The table below indicates when interface-breaking changes are planned; each is discussed in pull requests and issues. It doesn't include new additions that don't interfere with old behavior or corrections to bugs (i.e. behaviors that were _never_ intended and fixed immediately). Each deprecated feature is announced by a `FutureWarning` that indicates the target removal version/date.
 
