@@ -1337,6 +1337,11 @@ namespace {
       throw std::invalid_argument(std::string("unrecognized builder") + FILENAME(__LINE__));
     }
   }
+
+  const ak::BuilderPtr
+  builder_append(const ak::BuilderPtr builder) {
+    return builder;
+  }
 }
 
 template <>
@@ -1447,12 +1452,28 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
            [](ak::ArrayBuilder& self,
               const std::shared_ptr<ak::Content>& array,
               int64_t at) {
-        self.append(array, at);
+        int64_t length = array.get()->length();
+        int64_t regular_at = at;
+        if (regular_at < 0) {
+          regular_at += length;
+        }
+        if (!(0 <= regular_at  &&  regular_at < length)) {
+          throw std::invalid_argument(
+            std::string("'append' index (")
+            + std::to_string(at) + std::string(") out of bounds (")
+            + std::to_string(length) + std::string(")")
+            + FILENAME(__LINE__));
+        }
+        self.maybeupdate(self.builder().get()->append(array, regular_at));
       })
       .def("extend",
            [](ak::ArrayBuilder& self,
               const std::shared_ptr<ak::Content>& array) {
-        self.extend(array);
+        ak::BuilderPtr tmp = self.builder();
+        for (int64_t i = 0;  i < array.get()->length();  i++) {
+          tmp = self.builder().get()->append(array, i);
+          self.maybeupdate(tmp);
+        }
       })
       .def("fromiter", &builder_fromiter)
   );

@@ -231,18 +231,6 @@ namespace awkward {
     const BuilderPtr builder() const { return builder_; }
 
     /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data, handling
-    /// negative indexing and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    void
-      append(const ContentPtr& array, int64_t at);
-
-    /// @brief Append an element `at` a given index of an arbitrary `array`
     /// (Content instance) to the accumulated data, without
     /// handling negative indexing or bounds-checking.
     ///
@@ -251,25 +239,18 @@ namespace awkward {
     void
       append_nowrap(const ContentPtr& array, int64_t at);
 
-    /// @brief Extend the accumulated data with an entire `array`.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
+    /// @brief Internal function to replace the root node of the ArrayBuilder's
+    /// Builder tree with a new root.
     void
-      extend(const ContentPtr& array);
+      maybeupdate(const BuilderPtr& tmp);
 
-  private:
+private:
     /// @brief Current high level Type of the accumulated array.
     ///
     /// @param typestrs A mapping from `"__record__"` parameters to string
     /// representations of those types, to override the derived strings.
     const TypePtr
-      type(const util::TypeStrs& typestrs) const;
-
-    /// @brief Internal function to replace the root node of the ArrayBuilder's
-    /// Builder tree with a new root.
-    void
-      maybeupdate(const BuilderPtr& tmp);
+        type(const util::TypeStrs& typestrs) const;
 
     /// @brief Constant equal to `nullptr`.
     static const char* no_encoding;

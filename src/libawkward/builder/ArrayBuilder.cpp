@@ -183,34 +183,8 @@ namespace awkward {
   }
 
   void
-  ArrayBuilder::append(const ContentPtr& array, int64_t at) {
-    int64_t length = array.get()->length();
-    int64_t regular_at = at;
-    if (regular_at < 0) {
-      regular_at += length;
-    }
-    if (!(0 <= regular_at  &&  regular_at < length)) {
-      throw std::invalid_argument(
-        std::string("'append' index (")
-        + std::to_string(at) + std::string(") out of bounds (")
-        + std::to_string(length) + std::string(")")
-        + FILENAME(__LINE__));
-    }
-    return append_nowrap(array, regular_at);
-  }
-
-  void
   ArrayBuilder::append_nowrap(const ContentPtr& array, int64_t at) {
     maybeupdate(builder_.get()->append(array, at));
-  }
-
-  void
-  ArrayBuilder::extend(const ContentPtr& array) {
-    BuilderPtr tmp = builder_;
-    for (int64_t i = 0;  i < array.get()->length();  i++) {
-      tmp = builder_.get()->append(array, i);
-      maybeupdate(tmp);
-    }
   }
 
   void
