@@ -17,13 +17,6 @@ tests-cpu-kernels
 tests-cuda-kernels
 tests-spec
 
-dependent-project/CMakeFiles
-dependent-project/CMakeCache.txt
-dependent-project/Makefile
-dependent-project/cmake_install.cmake
-dependent-project/cmake_pybind11
-dependent-project/minimal
-
 # to use all-contributors-cli without adding it to the project
 node_modules
 package.json
