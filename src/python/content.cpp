@@ -1258,6 +1258,16 @@ purelist_parameter(const T& self, const std::string& key) {
 }
 
 template <typename T>
+py::object
+nlist_parameter(const T& self, const std::string& key, int64_t n) {
+  std::string cppvalue = self.nlist_parameter(key, n);
+  py::str pyvalue(PyUnicode_DecodeUTF8(cppvalue.data(),
+                                       cppvalue.length(),
+                                       "surrogateescape"));
+  return py::module::import("json").attr("loads")(pyvalue);
+}
+
+template <typename T>
 void
 setparameters(T& self, const py::object& parameters) {
   self.setparameters(dict2parameters(parameters));
@@ -1303,6 +1313,7 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           .def("withparameter", &withparameter<T>)
           .def("parameter", &parameter<T>)
           .def("purelist_parameter", &purelist_parameter<T>)
+          .def("nlist_parameter", &nlist_parameter<T>)
           .def("type",
                [](const T& self,
                   const std::map<std::string, std::string>& typestrs)

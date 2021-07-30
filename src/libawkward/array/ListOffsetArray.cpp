@@ -115,6 +115,16 @@ namespace awkward {
     }
   }
 
+  const std::string
+  ListOffsetForm::nlist_parameter(const std::string& key, int64_t n) const {
+    if (n == 0) {
+      return parameter(key);
+    }
+    else {
+      return content_.get()->nlist_parameter(key, n - 1);
+    }
+  }
+
   bool
   ListOffsetForm::purelist_isregular() const {
     return false;

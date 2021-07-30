@@ -105,6 +105,11 @@ namespace awkward {
     virtual const std::string
       purelist_parameter(const std::string& key) const = 0;
 
+    /// @brief The parameter associated with `key` n levels of list
+    /// dimensions deep.
+    virtual const std::string
+      nlist_parameter(const std::string& key, int64_t n) const = 0;
+
     /// @brief Returns `true` if the parameter associated with `key` exists
     /// and is equal to `value`; `false` otherwise.
     ///
@@ -558,6 +563,11 @@ namespace awkward {
     /// RecordArray.
     virtual const std::string
       purelist_parameter(const std::string& key) const;
+
+    /// @brief The parameter associated with `key` n levels of list
+    /// dimensions deep.
+    virtual const std::string
+      nlist_parameter(const std::string& key, int64_t n) const;
 
     /// @brief Returns `true` if all nested lists down to the first RecordArray
     /// are RegularArray nodes; `false` otherwise.

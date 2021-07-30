@@ -142,6 +142,40 @@ namespace awkward {
     }
   }
 
+  const std::string
+  UnionForm::nlist_parameter(const std::string& key, int64_t n) const {
+    if (n == 0) {
+      std::string out = parameter(key);
+      if (out == std::string("null")) {
+        if (contents_.empty()) {
+          return "null";
+        }
+        out = contents_[0].get()->nlist_parameter(key, n);
+        for (size_t i = 1;  i < contents_.size();  i++) {
+          if (!util::json_equals(out, contents_[i].get()->nlist_parameter(key, n))) {
+            return "null";
+          }
+        }
+        return out;
+      }
+      else {
+        return out;
+      }
+    }
+    else {
+      if (contents_.empty()) {
+        return "null";
+      }
+      std::string out = contents_[0].get()->nlist_parameter(key, n);
+      for (size_t i = 1;  i < contents_.size();  i++) {
+        if (!util::json_equals(out, contents_[i].get()->nlist_parameter(key, n))) {
+          return "null";
+        }
+      }
+      return out;
+    }
+  }
+
   bool
   UnionForm::purelist_isregular() const {
     for (auto content : contents_) {

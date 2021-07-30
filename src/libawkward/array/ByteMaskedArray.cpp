@@ -112,6 +112,20 @@ namespace awkward {
     }
   }
 
+  const std::string
+  ByteMaskedForm::nlist_parameter(const std::string& key, int64_t n) const {
+    if (n == 0) {
+      std::string out = parameter(key);
+      if (out == std::string("null")) {
+        return content_.get()->nlist_parameter(key, n);
+      }
+      return out;
+    }
+    else {
+      return content_.get()->nlist_parameter(key, n);
+    }
+  }
+
   bool
   ByteMaskedForm::purelist_isregular() const {
     return content_.get()->purelist_isregular();

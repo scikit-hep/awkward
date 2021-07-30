@@ -39,6 +39,9 @@ namespace awkward {
     const std::string
       purelist_parameter(const std::string& key) const override;
 
+    const std::string
+      nlist_parameter(const std::string& key, int64_t n) const override;
+
     bool
       purelist_isregular() const override;
 

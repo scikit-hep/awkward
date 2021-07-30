@@ -914,6 +914,11 @@ namespace awkward {
     return form(false).get()->purelist_parameter(key);
   }
 
+  const std::string
+  Content::nlist_parameter(const std::string& key, int64_t n) const {
+    return form(false).get()->nlist_parameter(key, n);
+  }
+
   bool
   Content::purelist_isregular() const {
     return form(true).get()->purelist_isregular();

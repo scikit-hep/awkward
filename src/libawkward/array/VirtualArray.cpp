@@ -105,6 +105,28 @@ namespace awkward {
     }
   }
 
+  const std::string
+  VirtualForm::nlist_parameter(const std::string& key, int64_t n) const {
+    if (n == 0) {
+      std::string out = parameter(key);
+      if (out == std::string("null")) {
+        if (form_.get() == nullptr) {
+          return out;
+        }
+        return form_.get()->nlist_parameter(key, n);
+      }
+      else {
+        return out;
+      }
+    }
+    else {
+      if (form_.get() == nullptr) {
+        return "null";
+      }
+      return form_.get()->nlist_parameter(key, n);
+    }
+  }
+
   bool
   VirtualForm::purelist_isregular() const {
     if (form_.get() == nullptr) {
