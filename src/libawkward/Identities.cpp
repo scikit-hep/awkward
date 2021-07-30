@@ -266,7 +266,7 @@ namespace awkward {
         carry.length(),
         width_,
         length_);
-      std::cout<<"the result: "<<rawout->printMe()<<std::endl;
+      std::cout<<"the result: "<< rawout->printMe() <<std::endl;
       util::handle_error(err, classname(), nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {
@@ -278,6 +278,7 @@ namespace awkward {
         carry.length(),
         width_,
         length_);
+      std::cout<<"the result: "<< rawout->printMe() <<std::endl;
       util::handle_error(err, classname(), nullptr);
     }
     else {
@@ -288,11 +289,12 @@ namespace awkward {
     return out;
   }
   template <typename T>
-  void
+  int
   IdentitiesOf<T>::printMe() {
       for (int64_t i = 0; i < length(); i++) {
         std::cout << data()[i] << ", ";
       }
+      return 0;
   }
 
   const std::string

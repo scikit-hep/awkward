@@ -370,6 +370,7 @@ namespace awkward {
         ndim(),
         shape_.data(),
         strides_.data());
+        std::cout<<"this is dot data: "<<index.printMe()<<std::endl;
       util::handle_error(err);
     }
     else {
@@ -379,6 +380,15 @@ namespace awkward {
     }
 
     return index;
+  }
+
+template <typename T>
+  int
+  SliceArrayOf<T>::printMe() {
+      for (int64_t i = 0; i < *shape_.data(); i++) {
+        std::cout << this->data()[i] << ", ";
+      }
+      return 0;
   }
 
   template class EXPORT_TEMPLATE_INST SliceArrayOf<int64_t>;

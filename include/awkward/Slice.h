@@ -20,6 +20,7 @@ namespace awkward {
   /// passed to an array's `__getitem__` in Python.
   class LIBAWKWARD_EXPORT_SYMBOL SliceItem {
   public:
+    
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be
     /// emitted.
@@ -315,7 +316,7 @@ namespace awkward {
     /// like NumPy's [ravel](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ravel.html).
     const IndexOf<T>
       ravel() const;
-
+  int printMe();
   private:
     /// @brief See #index.
     const IndexOf<T> index_;

@@ -742,6 +742,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
+      std::cout<<"this is dot get: "<<ptr.get()<<std::endl;
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
