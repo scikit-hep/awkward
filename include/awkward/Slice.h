@@ -20,7 +20,7 @@ namespace awkward {
   /// passed to an array's `__getitem__` in Python.
   class LIBAWKWARD_EXPORT_SYMBOL SliceItem {
   public:
-    
+
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be
     /// emitted.
