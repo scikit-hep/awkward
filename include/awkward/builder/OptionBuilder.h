@@ -116,7 +116,7 @@ namespace awkward {
 
     const GrowableBuffer<int64_t>& buffer() const { return index_; }
 
-    const Builder& builder() const { return *content_; }
+    const BuilderPtr builder() const { return content_; }
 
   private:
     const ArrayBuilderOptions options_;

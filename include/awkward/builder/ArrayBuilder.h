@@ -228,7 +228,7 @@ namespace awkward {
       endrecord();
 
     // @brief Root node of the Builder tree.
-    const Builder& builder() const { return *builder_; }
+    const BuilderPtr builder() const { return builder_; }
 
     /// @brief Append an element `at` a given index of an arbitrary `array`
     /// (Content instance) to the accumulated data, handling

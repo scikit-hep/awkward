@@ -25,3 +25,40 @@ def test_array_bool_builder():
     builder.boolean(True)
 
     assert ak.to_list(builder.snapshot()) == [True, False, True]
+
+
+def test_array_builder_append():
+    array = ak.Array(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], check_valid=True
+    )
+
+    builder = ak.ArrayBuilder()
+    builder.append(array, 3)
+    builder.append(array, 2)
+    builder.append(array, 2)
+    builder.append(array, 0)
+    builder.append(array, 1)
+    builder.append(array, -1)
+    assert ak.to_list(builder.snapshot()) == [
+        [5.5],
+        [3.3, 4.4],
+        [3.3, 4.4],
+        [0.0, 1.1, 2.2],
+        [],
+        [6.6, 7.7, 8.8, 9.9],
+    ]
+
+    builder.extend(array)
+    assert ak.to_list(builder.snapshot()) == [
+        [5.5],
+        [3.3, 4.4],
+        [3.3, 4.4],
+        [0.0, 1.1, 2.2],
+        [],
+        [6.6, 7.7, 8.8, 9.9],
+        [0.0, 1.1, 2.2],
+        [],
+        [3.3, 4.4],
+        [5.5],
+        [6.6, 7.7, 8.8, 9.9],
+    ]
