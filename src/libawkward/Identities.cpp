@@ -17,7 +17,7 @@
 #include "awkward/Identities.h"
 
 namespace awkward {
-  
+
   std::atomic<Identities::Ref> numrefs{0};
 
   Identities::Ref
