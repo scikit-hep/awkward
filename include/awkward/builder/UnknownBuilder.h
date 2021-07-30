@@ -96,7 +96,6 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
-    // FIXME: re-factor
     const int64_t nullcount() const { return nullcount_; }
 
   private:
