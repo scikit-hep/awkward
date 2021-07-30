@@ -64,13 +64,6 @@ namespace awkward {
     buffer_.clear();
   }
 
-  const ContentPtr
-  Complex128Builder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'Complex128Builder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   Complex128Builder::active() const {
     return false;

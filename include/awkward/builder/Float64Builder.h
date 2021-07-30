@@ -53,9 +53,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// A Float64Builder is never active.

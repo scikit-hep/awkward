@@ -57,9 +57,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// An OptionBuilder is active if and only if its `content` is active.

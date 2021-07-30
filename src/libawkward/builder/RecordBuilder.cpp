@@ -85,13 +85,6 @@ namespace awkward {
     keys_size_ = 0;
   }
 
-  const ContentPtr
-  RecordBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'RecordBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   RecordBuilder::active() const {
     return begun_;

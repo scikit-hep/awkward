@@ -45,13 +45,6 @@ namespace awkward {
     nullcount_ = 0;
   }
 
-  const ContentPtr
-  UnknownBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'UnknownBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   UnknownBuilder::active() const {
     return false;

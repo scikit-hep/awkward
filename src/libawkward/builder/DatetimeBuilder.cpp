@@ -45,13 +45,6 @@ namespace awkward {
     content_.clear();
   }
 
-  const ContentPtr
-  DatetimeBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'DatetimeBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   DatetimeBuilder::active() const {
     return false;

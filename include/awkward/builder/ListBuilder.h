@@ -48,9 +48,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// Calling #beginlist makes a ListBuilder active; #endlist makes it

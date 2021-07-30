@@ -44,13 +44,6 @@ namespace awkward {
     buffer_.clear();
   }
 
-  const ContentPtr
-  Int64Builder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'ListBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   Int64Builder::active() const {
     return false;

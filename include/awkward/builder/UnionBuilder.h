@@ -47,9 +47,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// A UnionBuilder is active if and only if one of its `contents` is

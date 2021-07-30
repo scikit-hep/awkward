@@ -52,9 +52,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// Calling #begintuple makes a TupleBuilder active; #endtuple makes it

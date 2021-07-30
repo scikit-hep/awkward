@@ -48,13 +48,6 @@ namespace awkward {
     content_.get()->clear();
   }
 
-  const ContentPtr
-  ListBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'ListBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   ListBuilder::active() const {
     return begun_;

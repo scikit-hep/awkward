@@ -63,13 +63,6 @@ namespace awkward {
     }
   }
 
-  const ContentPtr
-  UnionBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'UnionBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   UnionBuilder::active() const {
     return current_ != -1;

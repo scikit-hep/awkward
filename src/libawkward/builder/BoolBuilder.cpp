@@ -37,13 +37,6 @@ namespace awkward {
     buffer_.clear();
   }
 
-  const ContentPtr
-  BoolBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'BoolBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   BoolBuilder::active() const {
     return false;

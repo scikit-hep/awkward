@@ -57,13 +57,6 @@ namespace awkward {
     buffer_.clear();
   }
 
-  const ContentPtr
-  Float64Builder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'Float64Builder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   Float64Builder::active() const {
     return false;

@@ -54,13 +54,6 @@ namespace awkward {
     content_.get()->clear();
   }
 
-  const ContentPtr
-  OptionBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'OptionBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   OptionBuilder::active() const {
     return content_.get()->active();

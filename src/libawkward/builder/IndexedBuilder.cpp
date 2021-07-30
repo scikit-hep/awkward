@@ -239,13 +239,6 @@ namespace awkward {
     return "IndexedGenericBuilder";
   };
 
-  const ContentPtr
-  IndexedGenericBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'Float64Builder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   const BuilderPtr
   IndexedGenericBuilder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
@@ -274,13 +267,6 @@ namespace awkward {
   IndexedI32Builder::classname() const {
     return "IndexedI32Builder";
   };
-
-  const ContentPtr
-  IndexedI32Builder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'IndexedI32Builder::snapshot'")
-      + FILENAME(__LINE__));
-  }
 
   const BuilderPtr
   IndexedI32Builder::append(const ContentPtr& array, int64_t at) {
@@ -311,13 +297,6 @@ namespace awkward {
     return "IndexedIU32Builder";
   };
 
-  const ContentPtr
-  IndexedIU32Builder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'IndexedIU32Builder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   const BuilderPtr
   IndexedIU32Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
@@ -346,13 +325,6 @@ namespace awkward {
   IndexedI64Builder::classname() const {
     return "IndexedI64Builder";
   };
-
-  const ContentPtr
-  IndexedI64Builder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'IndexedI64Builder::snapshot'")
-      + FILENAME(__LINE__));
-  }
 
   const BuilderPtr
   IndexedI64Builder::append(const ContentPtr& array, int64_t at) {
@@ -386,13 +358,6 @@ namespace awkward {
     return "IndexedIO32Builder";
   };
 
-  const ContentPtr
-  IndexedIO32Builder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'IndexedIO32Builder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   const BuilderPtr
   IndexedIO32Builder::append(const ContentPtr& array, int64_t at) {
     if (array.get() == array_.get()) {
@@ -423,13 +388,6 @@ namespace awkward {
   IndexedIO64Builder::classname() const {
     return "IndexedIO64Builder";
   };
-
-  const ContentPtr
-  IndexedIO64Builder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'IndexedIO64Builder::snapshot'")
-      + FILENAME(__LINE__));
-  }
 
   const BuilderPtr
   IndexedIO64Builder::append(const ContentPtr& array, int64_t at) {

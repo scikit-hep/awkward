@@ -54,13 +54,6 @@ namespace awkward {
     content_.clear();
   }
 
-  const ContentPtr
-  StringBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'StringBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   StringBuilder::active() const {
     return false;

@@ -57,13 +57,6 @@ namespace awkward {
     nextindex_ = -1;
   }
 
-  const ContentPtr
-  TupleBuilder::snapshot() const {
-    throw std::invalid_argument(
-      std::string("called obsolete 'TupleBuilder::snapshot'")
-      + FILENAME(__LINE__));
-  }
-
   bool
   TupleBuilder::active() const {
     return begun_;

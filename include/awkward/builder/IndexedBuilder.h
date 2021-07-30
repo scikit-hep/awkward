@@ -129,9 +129,6 @@ namespace awkward {
     const std::string
       classname() const override;
 
-    const ContentPtr
-      snapshot() const override;
-
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
@@ -149,9 +146,6 @@ namespace awkward {
     const std::string
       classname() const override;
 
-    const ContentPtr
-      snapshot() const override;
-
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
   };
@@ -166,9 +160,6 @@ namespace awkward {
     /// @brief User-friendly name of this class: `"IndexedIU32Builder"`.
     const std::string
       classname() const override;
-
-    const ContentPtr
-      snapshot() const override;
 
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
@@ -185,9 +176,6 @@ namespace awkward {
     const std::string
       classname() const override;
 
-    const ContentPtr
-      snapshot() const override;
-
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
   };
@@ -203,9 +191,6 @@ namespace awkward {
     const std::string
       classname() const override;
 
-    const ContentPtr
-      snapshot() const override;
-
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
   };
@@ -220,9 +205,6 @@ namespace awkward {
     /// @brief User-friendly name of this class: `"IndexedIO64Builder"`.
     const std::string
       classname() const override;
-
-    const ContentPtr
-      snapshot() const override;
 
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
