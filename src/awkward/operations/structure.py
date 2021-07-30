@@ -1369,6 +1369,8 @@ def broadcast_arrays(*arrays, **kwargs):
     def getfunction(inputs):
         if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
             return lambda: tuple(inputs)
+        elif all(isinstance(x, ak.layout.RecordArray) for x in inputs):
+            return lambda: tuple(inputs)
         else:
             return None
 
