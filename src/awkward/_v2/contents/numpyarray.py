@@ -208,7 +208,6 @@ class NumpyArray(Content):
 
         elif isinstance(head, slice) or head is np.newaxis or head is Ellipsis:
             where = (slice(None), head) + tail
-
             try:
                 out = self._data[where]
             except IndexError as err:

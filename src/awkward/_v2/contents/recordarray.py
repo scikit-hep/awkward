@@ -178,6 +178,9 @@ class RecordArray(Content):
             "no field {0} in record with {1} fields".format(repr(key), self.numcontents)
         )
 
+    def haskey(self, key):
+        return key in self._keys
+
     def content(self, index_or_key):
         if ak._util.isint(index_or_key):
             index = index_or_key
@@ -190,6 +193,12 @@ class RecordArray(Content):
                 )
             )
         return self._contents[index][: self._length]
+
+    def contentitems(self):
+        pairs = []
+        for i in range(len(self._contents)):
+            pairs.append((self._keys[i], self._contents[i]))
+        return pairs
 
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))

@@ -214,19 +214,21 @@ class Content(object):
                 return self.__getitem__((where,))
 
             elif isinstance(where, tuple):
+
                 if len(where) == 0:
                     return self
-                #FIXME
-                try:
-                    prepare_tuple = [
-                        self._prepare_tuple_item(x)
-                        for x in where
-                        if len(self._prepare_tuple_item(x)) > 0
-                    ]
-                    if len(prepare_tuple) == 0:
-                        return []
-                except:
-                    prepare_tuple = [self._prepare_tuple_item(x) for x in where]
+
+                prepare_tuple = []
+                for i in range(len(where)):
+                    x = self._prepare_tuple_item(where[i])
+                    if isinstance(x, list) and len(x) == 0:
+                        pass
+                    else:
+                        prepare_tuple.append(x)
+
+                # FIXME
+                if len(prepare_tuple) == 0:
+                    return []
 
                 nextwhere = self._getitem_broadcast(
                     prepare_tuple,
@@ -281,6 +283,7 @@ class Content(object):
 
             elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
                 if len(where) == 0:
+                    # FIXME
                     return []
                 else:
                     return self._getitem_fields(where)
@@ -466,6 +469,31 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return None
         else:
             raise NotImplementedError
+
+    # def setidentifier(self, identifier):
+    #     if identifier is not None and len(self) != len(identifier):
+    #         raise TypeError(
+    #             "{0} content and its identifier must have the same length {1}".format(
+    #                 type(self).__name__, repr(identifier)
+    #             )
+    #         )
+    #     self._identifier = identifier
+
+    def setidentifier(self):
+        # FIXME
+        # nplike = self._nplike
+        # newidentifier = ak._v2.identifier.Identifier.empty(ak._v2.identifier.Identifier.newref(), ak._v2.identifier.Identifier.fieldloc(), len(self), 1, nplike)
+        # self._handle_error(
+        #         nplike[
+        #             "awkward_new_Identities",
+        #             newidentifier.dtype.type
+        #         ](
+        #             newidentifier.to(nplike),
+        #             len(self),
+        #         )
+        # )
+        # self.setidentities(newidentities)
+        return self
 
     @property
     def purelist_isregular(self):

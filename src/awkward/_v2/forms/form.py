@@ -12,7 +12,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def from_iter(input):
     if ak._util.isstr(input):
         return ak._v2.forms.numpyform.NumpyForm(primitive=input)
-
+    assert isinstance(input, dict)
     has_identifier = input.get("has_identifier", input.get("has_identities", False))
     parameters = input.get("parameters", {})
     form_key = input.get("form_key", None)

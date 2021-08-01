@@ -514,13 +514,13 @@ def v1_to_v2_index(v1):
     )
 
     if isinstance(v1, ak.layout.IndexU8):
-        return ak._v2.index.IndexU8(v1.data)
+        return ak._v2.index.IndexU8(np.asarray(v1))
 
     elif isinstance(v1, ak.layout.IndexU32):
-        return ak._v2.index.IndexU32(v1.data)
+        return ak._v2.index.IndexU32(np.asarray(v1))
 
     elif isinstance(v1, ak.layout.Index8):
-        return ak._v2.index.Index8(v1.data)
+        return ak._v2.index.Index8(np.asarray(v1))
 
     elif isinstance(v1, ak.layout.Index32):
         return ak._v2.index.Index32(np.asarray(v1))
