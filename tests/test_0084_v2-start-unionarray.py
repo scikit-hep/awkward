@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2, v1_to_v2_index
 
+
 def test_getitem():
     content0 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
     content1 = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
@@ -31,9 +32,7 @@ def test_getitem():
         3,
         4,
     ]
-    assert np.asarray(array32).dtype == np.dtype(
-        np.int32
-    )
+    assert np.asarray(array32).dtype == np.dtype(np.int32)
     assert np.asarray(arrayU32).tolist() == [
         0,
         1,
@@ -44,9 +43,7 @@ def test_getitem():
         3,
         4,
     ]
-    assert np.asarray(arrayU32).dtype == np.dtype(
-        np.uint32
-    )
+    assert np.asarray(arrayU32).dtype == np.dtype(np.uint32)
     assert np.asarray(array64).tolist() == [
         0,
         1,
@@ -57,9 +54,7 @@ def test_getitem():
         3,
         4,
     ]
-    assert np.asarray(array64).dtype == np.dtype(
-        np.int64
-    )
+    assert np.asarray(array64).dtype == np.dtype(np.int64)
 
     index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
     array = ak.layout.UnionArray8_32(tags, index, [content0, content1])
@@ -112,7 +107,7 @@ def test_getitem():
     ]
     assert ak.to_list(array[2:-2]) == [[1.1, 2.2, 3.3], [], "three", [4.4, 5.5]]
     assert ak.to_list(array[::2]) == ["one", [1.1, 2.2, 3.3], "three", "five"]
-    #FIXME
+    # FIXME
     # assert ak.to_list(array[::2, 1:]) == ["ne", [2.2, 3.3], "hree", "ive"]
     # assert ak.to_list(array[:, :-1]) == [
     #     "on",
@@ -140,7 +135,7 @@ def test_getitem():
         highlevel=False,
     )
     array2 = ak.layout.UnionArray8_32(tags, index, [content2, content3])
-    
+
     array2 = v1_to_v2(array2)
 
     assert ak.to_list(array2) == [
@@ -164,7 +159,7 @@ def test_getitem():
         "four",
         "three",
     ]
-    #FIXME
+    # FIXME
     # assert ak.to_list(array2[:, "y", 1:]) == [
     #     "ero",
     #     "ne",
@@ -205,4 +200,3 @@ def test_getitem():
     # assert set(array2.keys()) == set(["x", "y"])
     # assert set(array3.keys()) == set(["x", "y"])
     # assert array4.keys() == []
-

@@ -20,8 +20,10 @@ starts = ak.layout.Index64(np.array([0, 1]))
 stops = ak.layout.Index64(np.array([2, 3]))
 listarray = ak.layout.ListArray64(starts, stops, regulararray)
 
-regulararray  = v1_to_v2(regulararray)
+regulararray = v1_to_v2(regulararray)
 listarray = v1_to_v2(listarray)
+
+
 def test_iteration():
     assert ak.to_list(regulararray) == [
         [[0.0, 1.1, 2.2], []],
@@ -123,6 +125,7 @@ modelB = np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
 regulararrayA = v1_to_v2(regulararrayA)
 regulararrayB = v1_to_v2(regulararrayB)
 
+
 def test_numpy():
     assert ak.to_list(regulararrayA) == ak.to_list(modelA)
     assert ak.to_list(regulararrayB) == ak.to_list(modelB)
@@ -184,4 +187,3 @@ def test_numpy():
             if any(isinstance(x, slice) for x in cuts):
                 continue
             assert ak.to_list(modelB[cuts]) == ak.to_list(regulararrayB[cuts])
-

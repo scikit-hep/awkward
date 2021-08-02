@@ -10,7 +10,7 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 
 
 def test_empty_array_slice():
-    #FIXME
+    # FIXME
     # inspired by PR021::test_getitem
     a = ak.from_json("[[], [[], []], [[], [], []]]")
     a = v1_to_v2(a.layout)

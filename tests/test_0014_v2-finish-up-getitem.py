@@ -93,17 +93,17 @@ def test_listoffsetarrayA64():
     #         assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
 
     # for depth in 0, 1, 2, 3:
-        # for cuts in itertools.permutations(
-        #     ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
-        # ):
-        #     cuts = cuts
-        #     while len(cuts) > 0 and isinstance(cuts[0], slice):
-        #         cuts = cuts[1:]
-        #     while len(cuts) > 0 and isinstance(cuts[-1], slice):
-        #         cuts = cuts[:-1]
-        #     if any(isinstance(x, slice) for x in cuts):
-        #         continue
-        #     assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
+    # for cuts in itertools.permutations(
+    #     ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
+    # ):
+    #     cuts = cuts
+    #     while len(cuts) > 0 and isinstance(cuts[0], slice):
+    #         cuts = cuts[1:]
+    #     while len(cuts) > 0 and isinstance(cuts[-1], slice):
+    #         cuts = cuts[:-1]
+    #     if any(isinstance(x, slice) for x in cuts):
+    #         continue
+    #     assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
 
 
 # def test_listoffsetarrayA32():

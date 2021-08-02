@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+
 def test_basic():
     content = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
 
@@ -72,7 +73,7 @@ def test_carry():
     assert ak.to_list(listoffsetarray) == [[2.2, 2.2, 0.0], [], [3.3, 4.4]]
     assert ak.to_list(listoffsetarray[::-1]) == [[3.3, 4.4], [], [2.2, 2.2, 0.0]]
     assert ak.to_list(listoffsetarray[[2, 0]]) == [[3.3, 4.4], [2.2, 2.2, 0.0]]
-    #FIXME [3.3, 2.2] 
+    # FIXME [3.3, 2.2]
     # assert ak.to_list(listoffsetarray[[2, 0], 1]) == [4.4, 2.2]  # invokes carry
     assert ak.to_list(listoffsetarray[2:, 1]) == [4.4]  # invokes carry
 
@@ -82,7 +83,7 @@ def test_carry():
     assert ak.to_list(listoffsetarray) == [[2.2, 2.2, 0.0], [], [3.3, None]]
     assert ak.to_list(listoffsetarray[::-1]) == [[3.3, None], [], [2.2, 2.2, 0.0]]
     assert ak.to_list(listoffsetarray[[2, 0]]) == [[3.3, None], [2.2, 2.2, 0.0]]
-    
+
     assert ak.to_list(listoffsetarray[[2, 0], 1]) == [None, 2.2]  # invokes carry
     assert ak.to_list(listoffsetarray[2:, 1]) == [None]  # invokes carry
 

@@ -66,7 +66,8 @@ def test_listoffsetarray_basic():
     assert ak.to_list(array2[1]) == [[4.4, 5.5]]
     assert ak.to_list(array2[1:-1]) == [[[4.4, 5.5]], []]
 
-#FIXME KeyError: ('awkward_ListArray_getitem_next_range', <class 'numpy.int64'>, <class 'numpy.int64'>, <class 'numpy.uint32'>, <class 'numpy.uint32'>)
+
+# FIXME KeyError: ('awkward_ListArray_getitem_next_range', <class 'numpy.int64'>, <class 'numpy.int64'>, <class 'numpy.uint32'>, <class 'numpy.uint32'>)
 # def test_listarray_at():
 #     array1 = ak.layout.ListArrayU32(starts1, stops1, content)
 #     array1 = v1_to_v2(array1)

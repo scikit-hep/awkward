@@ -167,7 +167,7 @@ def test_listarray_slice_slice():
 
     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
-    #FIXME
+    # FIXME
     # assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
 
 
@@ -177,7 +177,7 @@ def test_listoffsetarray_slice_slice():
 
     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
-    #FIXME
+    # FIXME
     # assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
 
 
@@ -210,7 +210,7 @@ def test_listoffsetarray_ellipsis():
 
     array1 = v1_to_v2(array1)
     array2 = v1_to_v2(array2)
-    
+
     if not ak._util.py27:
         assert ak.to_list(array1[Ellipsis, 1:]) == [
             [2.2, 3.3],
@@ -305,7 +305,7 @@ def test_listarray_array():
         [7.7, 8.8, 9.9],
     ]
 
-    #FIXME
+    # FIXME
     # assert ak.to_list(array1[[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]]) == [
     #     5.5,
     #     2.2,
@@ -374,7 +374,7 @@ def test_listoffsetarray_array():
         [],
         [7.7, 8.8, 9.9],
     ]
-    #FIXME
+    # FIXME
     # assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
     #     5.5,
     #     2.2,
