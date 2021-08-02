@@ -470,31 +470,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         else:
             raise NotImplementedError
 
-    # def setidentifier(self, identifier):
-    #     if identifier is not None and len(self) != len(identifier):
-    #         raise TypeError(
-    #             "{0} content and its identifier must have the same length {1}".format(
-    #                 type(self).__name__, repr(identifier)
-    #             )
-    #         )
-    #     self._identifier = identifier
-
-    def setidentifier(self):
-        # FIXME
-        # nplike = self._nplike
-        # newidentifier = ak._v2.identifier.Identifier.empty(ak._v2.identifier.Identifier.newref(), ak._v2.identifier.Identifier.fieldloc(), len(self), 1, nplike)
-        # self._handle_error(
-        #         nplike[
-        #             "awkward_new_Identities",
-        #             newidentifier.dtype.type
-        #         ](
-        #             newidentifier.to(nplike),
-        #             len(self),
-        #         )
-        # )
-        # self.setidentities(newidentities)
-        return self
-
     @property
     def purelist_isregular(self):
         return self.Form.purelist_isregular.__get__(self)

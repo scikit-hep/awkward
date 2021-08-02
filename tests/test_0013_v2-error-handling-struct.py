@@ -44,8 +44,6 @@ def test_numpyarray():
     with pytest.raises(IndexError):
         array[[5, 3, -20, 8]]
 
-    array.setidentifier()
-
     with pytest.raises(IndexError):
         array[20]
 
@@ -132,8 +130,6 @@ def test_listarray_numpyarray():
     array = ak.layout.ListArray64(starts, stops, content)
     array = v1_to_v2(array)
 
-    array.setidentifier()
-
     # FIXME Value errors or Index?
 
     with pytest.raises(ValueError):
@@ -201,8 +197,6 @@ def test_listarray_listarray_numpyarray():
 
     with pytest.raises(ValueError):
         array2[1, 0, 20]
-
-    array2.setidentifier()
 
     with pytest.raises(IndexError):
         array2[20]

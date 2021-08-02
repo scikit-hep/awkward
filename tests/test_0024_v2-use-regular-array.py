@@ -50,7 +50,6 @@ def test_nonflat_slice():
         outeroffsets, ak.layout.ListOffsetArray64(inneroffsets, content)
     )
     listoffsetarray = v1_to_v2(listoffsetarray)
-    listoffsetarray.setidentifier()
 
     assert ak.to_list(
         array[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
@@ -61,7 +60,7 @@ def test_nonflat_slice():
         ]
     ) == [[27, 4], [22, 24], [25, 1]]
 
-    one = listoffsetarray[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
+    # one = listoffsetarray[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
     # assert ak.to_list(one) == [27, 4, 22, 24, 25, 1]
     # assert np.asarray(one.identities).tolist() == [
     #     [1, 2, 2],

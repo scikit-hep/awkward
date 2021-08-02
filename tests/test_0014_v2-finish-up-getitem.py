@@ -52,11 +52,6 @@ listoffsetarrayB32 = v1_to_v2(listoffsetarrayB32)
 listarrayB64 = v1_to_v2(listarrayB64)
 listarrayB32 = v1_to_v2(listarrayB32)
 
-listoffsetarrayB64.setidentifier()
-listoffsetarrayB32.setidentifier()
-listarrayB64.setidentifier()
-listarrayB32.setidentifier()
-
 
 def test_basic():
     assert ak.to_list(modelA) == ak.to_list(listoffsetarrayA64)
