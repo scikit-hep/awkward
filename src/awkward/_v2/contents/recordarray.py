@@ -82,10 +82,6 @@ class RecordArray(Content):
         self._init(identifier, parameters)
 
     @property
-    def numcontents(self):
-        return len(self._contents)
-
-    @property
     def contents(self):
         return self._contents
 
