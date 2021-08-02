@@ -70,7 +70,7 @@ def test_getitem():
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
         ["one", "two", "three", "four", "five"],
     ]
-    assert array.numcontents == 2
+    assert len(array.contents) == 2
     assert ak.to_list(array.content(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert ak.to_list(array.content(1)) == ["one", "two", "three", "four", "five"]
     #  FIXME no project attribute

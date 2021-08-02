@@ -329,11 +329,11 @@ class Content(object):
             raise IndexError(
                 """cannot slice
 
-{0}
+    {0}
 
 with
 
-{1}
+    {1}
 
 at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     repr(ak.Array(v2_to_v1(self))),

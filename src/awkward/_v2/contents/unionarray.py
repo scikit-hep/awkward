@@ -81,10 +81,6 @@ class UnionArray(Content):
     def nplike(self):
         return self._tags.nplike
 
-    @property
-    def numcontents(self):
-        return len(self._contents)
-
     def keys(self):
         keys = set()
         for i in range(len(self._contents)):

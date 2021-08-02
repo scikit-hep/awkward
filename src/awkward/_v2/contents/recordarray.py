@@ -194,12 +194,6 @@ class RecordArray(Content):
             )
         return self._contents[index][: self._length]
 
-    def contentitems(self):
-        pairs = []
-        for i in range(len(self._contents)):
-            pairs.append((self._keys[i], self._contents[i]))
-        return pairs
-
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
 
