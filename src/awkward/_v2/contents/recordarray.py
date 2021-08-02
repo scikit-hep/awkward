@@ -144,14 +144,16 @@ class RecordArray(Content):
         return "".join(out)
 
     def index_to_key(self, index):
-        if 0 <= index < self.numcontents:
+        if 0 <= index < len(self._contents):
             if self._keys is None:
                 return str(index)
             else:
                 return self._keys[index]
         else:
             raise IndexError(
-                "no index {0} in record with {1} fields".format(index, self.numcontents)
+                "no index {0} in record with {1} fields".format(
+                    index, len(self._contents)
+                )
             )
 
     def key_to_index(self, key):
@@ -161,7 +163,7 @@ class RecordArray(Content):
             except ValueError:
                 pass
             else:
-                if 0 <= i < self.numcontents:
+                if 0 <= i < len(self._contents):
                     return i
         else:
             try:
@@ -171,7 +173,9 @@ class RecordArray(Content):
             else:
                 return i
         raise IndexError(
-            "no field {0} in record with {1} fields".format(repr(key), self.numcontents)
+            "no field {0} in record with {1} fields".format(
+                repr(key), len(self._contents)
+            )
         )
 
     def haskey(self, key):
@@ -203,7 +207,7 @@ class RecordArray(Content):
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
         assert step == 1
-        if self.numcontents == 0:
+        if len(self._contents) == 0:
             start = min(max(start, 0), self._length)
             stop = min(max(stop, 0), self._length)
             if stop < start:
@@ -293,7 +297,7 @@ class RecordArray(Content):
         else:
             contents = [
                 self.content(i)._carry(carry, allow_lazy, exception)
-                for i in range(self.numcontents)
+                for i in range(len(self._contents))
             ]
             if issubclass(carry.dtype.type, np.integer):
                 length = len(carry)
