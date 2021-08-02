@@ -422,28 +422,6 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
-  TupleBuilder::append(const ContentPtr& array, int64_t at) {
-    if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-      out.get()->append(array, at);
-      return out;
-    }
-    else if (nextindex_ == -1) {
-      throw std::invalid_argument(
-        std::string("called 'append' immediately after 'begin_tuple'; "
-                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
-    }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->append(array, at));
-    }
-    else {
-      contents_[(size_t)nextindex_].get()->append(array, at);
-    }
-    return shared_from_this();
-  }
-
   void
   TupleBuilder::maybeupdate(int64_t i, const BuilderPtr& tmp) {
     if (tmp.get() != contents_[(size_t)i].get()) {

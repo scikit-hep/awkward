@@ -107,10 +107,14 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const BuilderPtr
-      append(const ContentPtr& array, int64_t at) override;
+    const ArrayBuilderOptions&
+      options() const { return options_; }
 
     const std::vector<BuilderPtr>& contents() const { return contents_; }
+
+    bool begun() { return begun_; }
+
+    int64_t nextindex() { return nextindex_; }
 
   private:
     const ArrayBuilderOptions options_;
@@ -119,6 +123,7 @@ namespace awkward {
     bool begun_;
     int64_t nextindex_;
 
+  public:
     void
       maybeupdate(int64_t i, const BuilderPtr& tmp);
   };

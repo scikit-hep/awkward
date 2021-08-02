@@ -184,7 +184,7 @@ namespace awkward {
 
   void
   ArrayBuilder::append_nowrap(const ContentPtr& array, int64_t at) {
-    maybeupdate(builder_.get()->append(array, at));
+    // FIXME: maybeupdate(builder_.get()->append(array, at));
   }
 
   void

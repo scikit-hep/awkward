@@ -10,8 +10,8 @@
 #include "awkward/common.h"
 
 namespace awkward {
-  class Content;
-  using ContentPtr = std::shared_ptr<Content>;
+  // class Content;
+  // using ContentPtr = std::shared_ptr<Content>;
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
 
@@ -137,13 +137,6 @@ namespace awkward {
     virtual const BuilderPtr
       endrecord() = 0;
 
-    /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    virtual const BuilderPtr
-      append(const ContentPtr& array, int64_t at) = 0;
   };
 }
 

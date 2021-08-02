@@ -1338,8 +1338,248 @@ namespace {
     }
   }
 
+  /// @brief Append an element `at` a given index of an arbitrary `array`
+  /// (Content instance) to the accumulated data.
+  ///
+  /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
+  /// that shares data with the provided `array`.
   const ak::BuilderPtr
-  builder_append(const ak::BuilderPtr builder) {
+  builder_append(const ak::BuilderPtr builder,
+     const std::shared_ptr<ak::Content>& array,
+     int64_t at) {
+    if (builder.get()->classname() == "BoolBuilder") {
+      const std::shared_ptr<ak::BoolBuilder> raw = std::dynamic_pointer_cast<ak::BoolBuilder>(builder);
+      ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+      return ::builder_append(out, array, at);
+    }
+    else if (builder.get()->classname() == "Complex128Builder") {
+      const std::shared_ptr<ak::Complex128Builder> raw = std::dynamic_pointer_cast<ak::Complex128Builder>(builder);
+      ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+      return ::builder_append(out, array, at);
+    }
+    else if (builder.get()->classname() == "DatetimeBuilder") {
+      const std::shared_ptr<ak::DatetimeBuilder> raw = std::dynamic_pointer_cast<ak::DatetimeBuilder>(builder);
+      ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+      return ::builder_append(out, array, at);
+    }
+    else if (builder.get()->classname() == "Float64Builder") {
+      const std::shared_ptr<ak::Float64Builder> raw = std::dynamic_pointer_cast<ak::Float64Builder>(builder);
+      ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+      return ::builder_append(out, array, at);
+    }
+    else if (builder.get()->classname() == "IndexedGenericBuilder") {
+      const std::shared_ptr<ak::IndexedGenericBuilder> raw = std::dynamic_pointer_cast<ak::IndexedGenericBuilder>(builder);
+      if (array.get() == raw.get()->array().get()) {
+        raw.get()->index().append(at);
+      }
+      else {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "IndexedI32Builder") {
+      const std::shared_ptr<ak::IndexedI32Builder> raw = std::dynamic_pointer_cast<ak::IndexedI32Builder>(builder);
+      if (array.get() == raw.get()->array().get()) {
+        raw.get()->index().append((int64_t)raw.get()->array().get()->index_at_nowrap(at));
+      }
+      else {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "IndexedIU32Builder") {
+      const std::shared_ptr<ak::IndexedIU32Builder> raw = std::dynamic_pointer_cast<ak::IndexedIU32Builder>(builder);
+      if (array.get() == raw.get()->array().get()) {
+        raw.get()->index().append((int64_t)raw.get()->array().get()->index_at_nowrap(at));
+      }
+      else {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "IndexedI64Builder") {
+      const std::shared_ptr<ak::IndexedI64Builder> raw = std::dynamic_pointer_cast<ak::IndexedI64Builder>(builder);
+      if (array.get() == raw.get()->array().get()) {
+        raw.get()->index().append(raw.get()->array().get()->index_at_nowrap(at));
+      }
+      else {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "IndexedIO32Builder") {
+      const std::shared_ptr<ak::IndexedI64Builder> raw = std::dynamic_pointer_cast<ak::IndexedI64Builder>(builder);
+      if (array.get() == raw.get()->array().get()) {
+        raw.get()->index().append((int64_t)raw.get()->array().get()->index_at_nowrap(at));
+      }
+      else {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "IndexedIO64Builder") {
+      const std::shared_ptr<ak::IndexedIO64Builder> raw = std::dynamic_pointer_cast<ak::IndexedIO64Builder>(builder);
+      if (array.get() == raw.get()->array().get()) {
+        raw.get()->index().append(raw.get()->array().get()->index_at_nowrap(at));
+      }
+      else {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "Int64Builder") {
+      const std::shared_ptr<ak::Int64Builder> raw = std::dynamic_pointer_cast<ak::Int64Builder>(builder);
+      ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+      return ::builder_append(out, array, at);
+    }
+    else if (builder.get()->classname() == "ListBuilder") {
+      const std::shared_ptr<ak::ListBuilder> raw = std::dynamic_pointer_cast<ak::ListBuilder>(builder);
+      if (!raw.get()->begun()) {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      else {
+        raw.get()->maybeupdate(::builder_append(raw.get()->builder(), array, at));
+        return raw;
+      }
+    }
+    else if (builder.get()->classname() == "OptionBuilder") {
+      const std::shared_ptr<ak::OptionBuilder> raw = std::dynamic_pointer_cast<ak::OptionBuilder>(builder);
+      if (!raw.get()->builder().get()->active()) {
+        int64_t length = raw.get()->builder().get()->length();
+        raw.get()->maybeupdate(::builder_append(raw.get()->builder(), array, at));
+        raw.get()->index().append(length);
+      }
+      else {
+        ::builder_append(raw.get()->builder(), array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "RecordBuilder") {
+      const std::shared_ptr<ak::RecordBuilder> raw = std::dynamic_pointer_cast<ak::RecordBuilder>(builder);
+      if (!raw.get()->begun()) {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      else if (raw.get()->nextindex() == -1) {
+        throw std::invalid_argument(
+          std::string("called 'append' immediately after 'begin_record'; "
+                      "needs 'index' or 'end_record'") + FILENAME(__LINE__));
+      }
+      else if (!raw.get()->builders()[(size_t)raw.get()->nextindex()].get()->active()) {
+        raw.get()->maybeupdate(raw.get()->nextindex(),
+                    ::builder_append(raw.get()->builders()[(size_t)raw.get()->nextindex()], array, at));
+      }
+      else {
+        ::builder_append(raw.get()->builders()[(size_t)raw.get()->nextindex()], array, at);
+      }
+      return raw;
+  }
+    else if (builder.get()->classname() == "StringBuilder") {
+      const std::shared_ptr<ak::StringBuilder> raw = std::dynamic_pointer_cast<ak::StringBuilder>(builder);
+      ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+      return ::builder_append(out, array, at);
+    }
+    else if (builder.get()->classname() == "TupleBuilder") {
+      const std::shared_ptr<ak::TupleBuilder> raw = std::dynamic_pointer_cast<ak::TupleBuilder>(builder);
+      if (!raw.get()->begun()) {
+        ak::BuilderPtr out = ak::UnionBuilder::fromsingle(raw.get()->options(), raw);
+        return ::builder_append(out, array, at);
+      }
+      else if (raw.get()->nextindex() == -1) {
+        throw std::invalid_argument(
+          std::string("called 'append' immediately after 'begin_tuple'; "
+                      "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
+      }
+      else if (!raw.get()->contents()[(size_t)raw.get()->nextindex()].get()->active()) {
+        raw.get()->maybeupdate(raw.get()->nextindex(),
+                    ::builder_append(raw.get()->contents()[(size_t)raw.get()->nextindex()], array, at));
+      }
+      else {
+        ::builder_append(raw.get()->contents()[(size_t)raw.get()->nextindex()], array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "UnionBuilder") {
+      const std::shared_ptr<ak::UnionBuilder> raw = std::dynamic_pointer_cast<ak::UnionBuilder>(builder);
+      if (raw.get()->current() == -1) {
+        ak::BuilderPtr tofill(nullptr);
+        int8_t i = 0;
+        for (auto content : raw.get()->contents()) {
+          if (ak::IndexedGenericBuilder* raw_content =
+              dynamic_cast<ak::IndexedGenericBuilder*>(content.get())) {
+            if (raw_content->arrayptr() == array.get()) {
+              tofill = content;
+              break;
+            }
+          }
+          else if (ak::IndexedI32Builder* raw_content =
+                   dynamic_cast<ak::IndexedI32Builder*>(content.get())) {
+            if (raw_content->arrayptr() == array.get()) {
+              tofill = content;
+              break;
+            }
+          }
+          else if (ak::IndexedIU32Builder* raw_content =
+                   dynamic_cast<ak::IndexedIU32Builder*>(content.get())) {
+            if (raw_content->arrayptr() == array.get()) {
+              tofill = content;
+              break;
+            }
+          }
+          else if (ak::IndexedI64Builder* raw_content =
+                   dynamic_cast<ak::IndexedI64Builder*>(content.get())) {
+            if (raw_content->arrayptr() == array.get()) {
+              tofill = content;
+              break;
+            }
+          }
+          else if (ak::IndexedIO32Builder* raw_content =
+                   dynamic_cast<ak::IndexedIO32Builder*>(content.get())) {
+            if (raw_content->arrayptr() == array.get()) {
+              tofill = content;
+              break;
+            }
+          }
+          else if (ak::IndexedIO64Builder* raw_content =
+                   dynamic_cast<ak::IndexedIO64Builder*>(content.get())) {
+            if (raw_content->arrayptr() == array.get()) {
+              tofill = content;
+              break;
+            }
+          }
+          i++;
+        }
+        if (tofill.get() == nullptr) {
+          tofill = ak::IndexedGenericBuilder::fromnulls(raw.get()->options(), 0, array);
+          raw.get()->builders().push_back(tofill);
+        }
+        int64_t length = tofill.get()->length();
+        ::builder_append(tofill, array, at);
+        raw.get()->tags_buffer().append(i);
+        raw.get()->index_buffer().append(length);
+      }
+      else {
+        ::builder_append(raw.get()->contents()[(size_t)raw.get()->current()], array, at);
+      }
+      return raw;
+    }
+    else if (builder.get()->classname() == "UnknownBuilder") {
+      const std::shared_ptr<ak::UnknownBuilder> raw = std::dynamic_pointer_cast<ak::UnknownBuilder>(builder);
+      ak::BuilderPtr out = ak::IndexedGenericBuilder::fromnulls(raw.get()->options(),
+                                                                raw.get()->nullcount(),
+                                                                array);
+      return ::builder_append(out, array, at);
+    }
+    else {
+      throw std::invalid_argument(std::string("unrecognized builder") + FILENAME(__LINE__));
+    }
     return builder;
   }
 }
@@ -1464,14 +1704,20 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
             + std::to_string(length) + std::string(")")
             + FILENAME(__LINE__));
         }
-        self.maybeupdate(self.builder().get()->append(array, regular_at));
+        self.maybeupdate(::builder_append(self.builder(), array, regular_at));
+      })
+      .def("append_nowrap",
+           [](ak::ArrayBuilder& self,
+              const std::shared_ptr<ak::Content>& array,
+              int64_t at) {
+        self.maybeupdate(::builder_append(self.builder(), array, at));
       })
       .def("extend",
            [](ak::ArrayBuilder& self,
               const std::shared_ptr<ak::Content>& array) {
         ak::BuilderPtr tmp = self.builder();
         for (int64_t i = 0;  i < array.get()->length();  i++) {
-          tmp = self.builder().get()->append(array, i);
+          tmp = ::builder_append(self.builder(), array, i);
           self.maybeupdate(tmp);
         }
       })

@@ -103,12 +103,14 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const BuilderPtr
-      append(const ContentPtr& array, int64_t at) override;
+    const ArrayBuilderOptions&
+      options() const { return options_; }
 
     const GrowableBuffer<int64_t>& buffer() const { return offsets_; }
 
     const BuilderPtr builder() const { return content_; }
+
+    bool begun() { return begun_; }
 
   private:
     const ArrayBuilderOptions options_;
@@ -116,6 +118,7 @@ namespace awkward {
     BuilderPtr content_;
     bool begun_;
 
+  public:
     void
       maybeupdate(const BuilderPtr& tmp);
   };
