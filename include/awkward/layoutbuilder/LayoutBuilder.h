@@ -286,9 +286,8 @@ namespace awkward {
     void
       resume() const;
 
-    // FIXME: refactor
     // @brief Root node of the FormBuilder tree.
-    const FormBuilder& builder() const { return *builder_; }
+    const FormBuilderPtr builder() const { return builder_; }
 
   protected:
     /// @brief A unique ID to use when Form nodes do not have Form key
