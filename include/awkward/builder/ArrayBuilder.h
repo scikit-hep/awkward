@@ -9,6 +9,7 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
+#include "awkward/builder/Builder.h"
 
 namespace awkward {
   class Content;
@@ -16,9 +17,6 @@ namespace awkward {
   class ArrayBuilderOptions;
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
-  class Slice;
-  class Type;
-  using TypePtr = std::shared_ptr<Type>;
 
   /// @class ArrayBuilder
   ///
@@ -33,11 +31,6 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     ArrayBuilder(const ArrayBuilderOptions& options);
 
-    /// @brief Returns a string representation of this array (single-line XML
-    /// indicating the length and type).
-    const std::string
-      tostring() const;
-
     /// @brief Current length of the accumulated array.
     int64_t
       length() const;
@@ -46,59 +39,6 @@ namespace awkward {
     /// knowledge.
     void
       clear();
-
-    /// @brief Current high level Type of the accumulated array.
-    ///
-    /// @param typestrs A mapping from `"__record__"` parameters to string
-    /// representations of those types, to override the derived strings.
-    const TypePtr
-      type(const util::TypeStrs& typestrs) const;
-
-    /// @brief Turns the accumulated data into a Content array.
-    ///
-    /// This operation only converts Builder nodes into Content nodes; the
-    /// buffers holding array data are shared between the Builder and the
-    /// Content. Hence, taking a snapshot is a constant-time operation.
-    ///
-    /// It is safe to take multiple snapshots while accumulating data. The
-    /// shared buffers are only appended to, which affects elements beyond
-    /// the limited view of old snapshots.
-    const ContentPtr
-      snapshot() const;
-
-    /// @brief Returns the element at a given position in the array, handling
-    /// negative indexing and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    const ContentPtr
-      getitem_at(int64_t at) const;
-
-    /// @brief Subinterval of this array, handling negative indexing
-    /// and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    ///
-    /// Ranges beyond the array are not an error; they are trimmed to
-    /// `start = 0` on the left and `stop = length() - 1` on the right.
-    const ContentPtr
-      getitem_range(int64_t start, int64_t stop) const;
-
-    /// @brief This array with the first nested RecordArray replaced by
-    /// the field at `key`.
-    const ContentPtr
-      getitem_field(const std::string& key) const;
-
-    /// @brief This array with the first nested RecordArray replaced by
-    /// a RecordArray of a given subset of `keys`.
-    const ContentPtr
-      getitem_fields(const std::vector<std::string>& keys) const;
-
-    /// @brief Entry point for general slicing: Slice represents a tuple of
-    /// SliceItem nodes applying to each level of nested lists.
-    const ContentPtr
-      getitem(const Slice& where) const;
 
     /// @brief Adds a `null` value to the accumulated data.
     void
@@ -280,17 +220,10 @@ namespace awkward {
     void
       endrecord();
 
-    /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data, handling
-    /// negative indexing and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    void
-      append(const ContentPtr& array, int64_t at);
+    // @brief Root node of the Builder tree.
+    const BuilderPtr builder() const { return builder_; }
+
+    void builder_update(BuilderPtr builder) { builder_ = builder; }
 
     /// @brief Append an element `at` a given index of an arbitrary `array`
     /// (Content instance) to the accumulated data, without
@@ -301,19 +234,12 @@ namespace awkward {
     void
       append_nowrap(const ContentPtr& array, int64_t at);
 
-    /// @brief Extend the accumulated data with an entire `array`.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    void
-      extend(const ContentPtr& array);
-
-  private:
     /// @brief Internal function to replace the root node of the ArrayBuilder's
     /// Builder tree with a new root.
     void
       maybeupdate(const BuilderPtr& tmp);
 
+private:
     /// @brief Constant equal to `nullptr`.
     static const char* no_encoding;
     /// @brief Constant equal to `"utf-8"`.

@@ -42,9 +42,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// A BoolBuilder is never active.
@@ -101,6 +98,11 @@ namespace awkward {
 
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
+
+    const ArrayBuilderOptions&
+      options() const { return options_; }
+
+    const GrowableBuffer<uint8_t>& buffer() const { return buffer_; }
 
   private:
     const ArrayBuilderOptions options_;

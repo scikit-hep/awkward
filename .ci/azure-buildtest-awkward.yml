@@ -199,46 +199,6 @@ jobs:
           python -m pytest -vv -rs tests
         displayName: "Test"
 
-      - script: |
-          echo '===== include directory ============================='
-          ls -R `python -m awkward.config --incdir`
-          echo '===== library directory ============================='
-          ls `python -m awkward.config --libdir`
-          echo '===== compilation ==================================='
-          which g++
-          g++ minimal.cpp `python -m awkward.config --cflags --static-libs` -o minimal
-          otool -L minimal
-          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
-        workingDirectory: dependent-project
-        displayName: "Test dependent project 1"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
-
-      - script: |
-          rm -f minimal
-          g++ minimal.cpp `python -m awkward.config --cflags --libs` -o minimal
-          export DYLD_LIBRARY_PATH=`python -m awkward.config --libdir`:$DYLD_LIBRARY_PATH
-          echo $DYLD_LIBRARY_PATH
-          otool -L minimal
-          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
-        workingDirectory: dependent-project
-        displayName: "Test dependent project 2"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
-
-      - script: |
-          which python
-          python -c 'import sys; print(sys.version)'
-          cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
-          cmake --build build
-          export DYLD_LIBRARY_PATH=`python -m awkward.config --libdir`:$DYLD_LIBRARY_PATH
-          echo $DYLD_LIBRARY_PATH
-          ls build/dependent*
-          otool -L build/dependent*
-          touch build/__init__.py
-          python -m pytest -vv test-python.py
-        workingDirectory: dependent-project
-        displayName: "Test dependent project 3"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
-
   - job: Linux
 
     pool:
@@ -327,39 +287,3 @@ jobs:
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
-
-      - script: |
-          echo '===== include directory ============================='
-          ls -R `python -m awkward.config --incdir`
-          echo '===== library directory ============================='
-          ls `python -m awkward.config --libdir`
-          echo '===== compilation ==================================='
-          g++ minimal.cpp `python -m awkward.config --cflags --static-libs` -o minimal
-          ldd minimal
-          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
-        workingDirectory: dependent-project
-        displayName: "Test dependent project 1"
-
-      - script: |
-          rm -f minimal
-          g++ minimal.cpp `python -m awkward.config --cflags --libs` -o minimal
-          export LD_LIBRARY_PATH=`python -m awkward.config --libdir`:$LD_LIBRARY_PATH
-          echo $LD_LIBRARY_PATH
-          ldd minimal
-          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
-        workingDirectory: dependent-project
-        displayName: "Test dependent project 2"
-
-      - script: |
-          which python
-          python -c 'import sys; print(sys.version)'
-          cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
-          cmake --build build
-          export LD_LIBRARY_PATH=`python -m awkward.config --libdir`:$LD_LIBRARY_PATH
-          echo $LD_LIBRARY_PATH
-          ls build/dependent*
-          ldd build/dependent*
-          touch build/__init__.py
-          python -m pytest -vv test-python.py
-        workingDirectory: dependent-project
-        displayName: "Test dependent project 3"

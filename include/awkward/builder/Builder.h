@@ -8,8 +8,6 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/Content.h"
-#include "awkward/type/Type.h"
 
 namespace awkward {
   class Content;
@@ -40,18 +38,6 @@ namespace awkward {
     /// knowledge.
     virtual void
       clear() = 0;
-
-    /// @brief Turns the accumulated data into a Content array.
-    ///
-    /// This operation only converts Builder nodes into Content nodes; the
-    /// buffers holding array data are shared between the Builder and the
-    /// Content. Hence, taking a snapshot is a constant-time operation.
-    ///
-    /// It is safe to take multiple snapshots while accumulating data. The
-    /// shared buffers are only appended to, which affects elements beyond
-    /// the limited view of old snapshots.
-    virtual const ContentPtr
-      snapshot() const = 0;
 
     /// @brief If `true`, this node has started but has not finished a
     /// multi-step command (e.g. `beginX ... endX`).

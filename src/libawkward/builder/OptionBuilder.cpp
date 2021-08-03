@@ -4,10 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/Identities.h"
-#include "awkward/Index.h"
-#include "awkward/array/IndexedArray.h"
-#include "awkward/type/OptionType.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 #include "awkward/builder/OptionBuilder.h"
@@ -56,15 +52,6 @@ namespace awkward {
   OptionBuilder::clear() {
     index_.clear();
     content_.get()->clear();
-  }
-
-  const ContentPtr
-  OptionBuilder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
-    return IndexedOptionArray64(Identities::none(),
-                                util::Parameters(),
-                                index,
-                                content_.get()->snapshot()).simplify_optiontype();
   }
 
   bool

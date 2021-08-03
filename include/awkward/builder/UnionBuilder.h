@@ -47,9 +47,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// A UnionBuilder is active if and only if one of its `contents` is
@@ -107,6 +104,20 @@ namespace awkward {
 
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
+
+    const ArrayBuilderOptions&
+      options() const { return options_; }
+
+    const GrowableBuffer<int8_t>& tags() const {  return tags_; }
+    GrowableBuffer<int8_t>& tags_buffer() {  return tags_; }
+
+    const GrowableBuffer<int64_t>& index() const { return index_; }
+    GrowableBuffer<int64_t>& index_buffer() { return index_; }
+
+    const std::vector<BuilderPtr>& contents() const { return contents_; }
+    std::vector<BuilderPtr>& builders() { return contents_; }
+
+    int8_t current() { return current_;}
 
   private:
     const ArrayBuilderOptions options_;
