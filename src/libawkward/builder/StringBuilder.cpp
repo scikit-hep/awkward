@@ -182,9 +182,8 @@ namespace awkward {
 
   const BuilderPtr
   StringBuilder::append(const ContentPtr& array, int64_t at) {
-  BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->append(array, at);
     return out;
   }
-
 }

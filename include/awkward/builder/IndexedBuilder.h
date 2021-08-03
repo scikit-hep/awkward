@@ -135,7 +135,7 @@ namespace awkward {
       classname() const override;
 
     const BuilderPtr
-           append(const ContentPtr& array, int64_t at) override;
+      append(const ContentPtr& array, int64_t at) override;
 
     const std::shared_ptr<Content> array() const { return array_; }
   };
@@ -152,7 +152,7 @@ namespace awkward {
       classname() const override;
 
     const BuilderPtr
-           append(const ContentPtr& array, int64_t at) override;
+      append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIU32Builder: public IndexedBuilder<IndexedArrayU32> {
@@ -167,7 +167,7 @@ namespace awkward {
       classname() const override;
 
     const BuilderPtr
-           append(const ContentPtr& array, int64_t at) override;
+      append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedI64Builder: public IndexedBuilder<IndexedArray64> {
@@ -182,7 +182,7 @@ namespace awkward {
       classname() const override;
 
     const BuilderPtr
-           append(const ContentPtr& array, int64_t at) override;
+      append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIO32Builder: public IndexedBuilder<IndexedOptionArray32> {
@@ -197,7 +197,7 @@ namespace awkward {
       classname() const override;
 
     const BuilderPtr
-       append(const ContentPtr& array, int64_t at) override;
+      append(const ContentPtr& array, int64_t at) override;
   };
 
   class IndexedIO64Builder: public IndexedBuilder<IndexedOptionArray64> {
@@ -212,7 +212,7 @@ namespace awkward {
       classname() const override;
 
     const BuilderPtr
-           append(const ContentPtr& array, int64_t at) override;
+      append(const ContentPtr& array, int64_t at) override;
   };
 
 }

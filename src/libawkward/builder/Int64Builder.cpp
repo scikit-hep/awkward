@@ -166,5 +166,4 @@ namespace awkward {
     out.get()->append(array, at);
     return out;
   }
-
 }

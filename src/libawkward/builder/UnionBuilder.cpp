@@ -496,45 +496,45 @@ namespace awkward {
       for (auto content : contents_) {
         if (IndexedGenericBuilder* raw =
           dynamic_cast<IndexedGenericBuilder*>(content.get())) {
-            if (raw->arrayptr() == array.get()) {
-              tofill = content;
-              break;
-            }
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
         }
         else if (IndexedI32Builder* raw =
           dynamic_cast<IndexedI32Builder*>(content.get())) {
-            if (raw->arrayptr() == array.get()) {
-              tofill = content;
-              break;
-            }
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
         }
         else if (IndexedIU32Builder* raw =
           dynamic_cast<IndexedIU32Builder*>(content.get())) {
-            if (raw->arrayptr() == array.get()) {
-              tofill = content;
-              break;
-            }
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
         }
         else if (IndexedI64Builder* raw =
           dynamic_cast<IndexedI64Builder*>(content.get())) {
-            if (raw->arrayptr() == array.get()) {
-              tofill = content;
-              break;
-            }
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
         }
         else if (IndexedIO32Builder* raw =
           dynamic_cast<IndexedIO32Builder*>(content.get())) {
-            if (raw->arrayptr() == array.get()) {
-              tofill = content;
-              break;
-            }
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
         }
         else if (IndexedIO64Builder* raw =
           dynamic_cast<IndexedIO64Builder*>(content.get())) {
-            if (raw->arrayptr() == array.get()) {
-              tofill = content;
-              break;
-            }
+          if (raw->arrayptr() == array.get()) {
+            tofill = content;
+            break;
+          }
         }
         i++;
       }

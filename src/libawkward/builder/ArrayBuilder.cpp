@@ -7,7 +7,6 @@
 
 #include "awkward/common.h"
 #include "awkward/Content.h"
-//#include "awkward/type/Type.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Builder.h"
 #include "awkward/builder/UnknownBuilder.h"
@@ -18,17 +17,6 @@ namespace awkward {
   ArrayBuilder::ArrayBuilder(const ArrayBuilderOptions& options)
       : builder_(UnknownBuilder::fromempty(options)) { }
 
-  // const std::string
-  // ArrayBuilder::tostring() const {
-  //   util::TypeStrs typestrs;
-  //   typestrs["char"] = "char";
-  //   typestrs["string"] = "string";
-  //   std::stringstream out;
-  //   out << "<ArrayBuilder length=\"" << length() << "\" type=\""
-  //       << type(typestrs).get()->tostring() << "\"/>";
-  //   return out.str();
-  // }
-
   int64_t
   ArrayBuilder::length() const {
     return builder_.get()->length();
@@ -38,13 +26,6 @@ namespace awkward {
   ArrayBuilder::clear() {
     builder_.get()->clear();
   }
-
-  // const TypePtr
-  // ArrayBuilder::type(const util::TypeStrs& typestrs) const {
-  //   throw std::invalid_argument(
-  //     std::string("called obsolete 'ArrayBuilder::type'")
-  //     + FILENAME(__LINE__));
-  // }
 
   void
   ArrayBuilder::null() {
