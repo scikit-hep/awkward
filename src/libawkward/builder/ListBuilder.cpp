@@ -263,6 +263,19 @@ namespace awkward {
     }
   }
 
+  const BuilderPtr
+  ListBuilder::append(const ContentPtr& array, int64_t at) {
+    if (!begun_) {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->append(array, at);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->append(array, at));
+      return shared_from_this();
+    }
+  }
+
   void
   ListBuilder::maybeupdate(const BuilderPtr& tmp) {
     if (tmp.get() != content_.get()) {

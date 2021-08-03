@@ -1641,7 +1641,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
                              [](const ak::ArrayBuilder* self) -> size_t {
         return reinterpret_cast<size_t>(self);
       })
-      .def("__repr__", &ak::ArrayBuilder::tostring)
       .def("__len__", &ak::ArrayBuilder::length)
       .def("clear", &ak::ArrayBuilder::clear)
       .def("type", [](const ak::ArrayBuilder& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
@@ -1687,7 +1686,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         self.field_check(x);
       })
       .def("endrecord", &ak::ArrayBuilder::endrecord)
-      // FIXME: refactor
       .def("append",
            [](ak::ArrayBuilder& self,
               const std::shared_ptr<ak::Content>& array,
@@ -1704,7 +1702,10 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
             + std::to_string(length) + std::string(")")
             + FILENAME(__LINE__));
         }
-        self.maybeupdate(::builder_append(self.builder(), array, regular_at));
+        ak::BuilderPtr tmp = ::builder_append(self.builder(), array, regular_at);
+        if (tmp.get() != self.builder().get()) {
+          self.builder_update(tmp);
+        }
       })
       .def("append_nowrap",
            [](ak::ArrayBuilder& self,

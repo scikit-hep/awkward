@@ -159,4 +159,12 @@ namespace awkward {
       std::string("called 'end_record' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));
   }
+
+  const BuilderPtr
+  Int64Builder::append(const ContentPtr& array, int64_t at) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    out.get()->append(array, at);
+    return out;
+  }
+
 }

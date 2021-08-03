@@ -237,7 +237,20 @@ namespace awkward {
   const std::string
   IndexedGenericBuilder::classname() const {
     return "IndexedGenericBuilder";
-  };
+  }
+
+  const BuilderPtr
+  IndexedGenericBuilder::append(const ContentPtr& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append(at);
+    }
+    else {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->append(array, at);
+      return out;
+    }
+    return shared_from_this();
+  }
 
   ////////// IndexedI32Builder (makes IndexedArray32)
 
@@ -253,7 +266,20 @@ namespace awkward {
   const std::string
   IndexedI32Builder::classname() const {
     return "IndexedI32Builder";
-  };
+  }
+
+  const BuilderPtr
+  IndexedI32Builder::append(const ContentPtr& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append((int64_t)array_.get()->index_at_nowrap(at));
+    }
+    else {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->append(array, at);
+      return out;
+    }
+    return shared_from_this();
+  }
 
   ////////// IndexedIU32Builder (makes IndexedArrayU32)
 
@@ -269,7 +295,20 @@ namespace awkward {
   const std::string
   IndexedIU32Builder::classname() const {
     return "IndexedIU32Builder";
-  };
+  }
+
+  const BuilderPtr
+  IndexedIU32Builder::append(const ContentPtr& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append((int64_t)array_.get()->index_at_nowrap(at));
+    }
+    else {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->append(array, at);
+      return out;
+    }
+    return shared_from_this();
+  }
 
   ////////// IndexedI64Builder (makes IndexedArray64)
 
@@ -285,7 +324,20 @@ namespace awkward {
   const std::string
   IndexedI64Builder::classname() const {
     return "IndexedI64Builder";
-  };
+  }
+
+  const BuilderPtr
+  IndexedI64Builder::append(const ContentPtr& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append(array_.get()->index_at_nowrap(at));
+    }
+    else {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->append(array, at);
+      return out;
+    }
+    return shared_from_this();
+  }
 
   ////////// IndexedIO32Builder (makes IndexedOptionArray32)
 
@@ -304,7 +356,20 @@ namespace awkward {
   const std::string
   IndexedIO32Builder::classname() const {
     return "IndexedIO32Builder";
-  };
+  }
+
+  const BuilderPtr
+  IndexedIO32Builder::append(const ContentPtr& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append((int64_t)array_.get()->index_at_nowrap(at));
+    }
+    else {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->append(array, at);
+      return out;
+    }
+    return shared_from_this();
+  }
 
   ////////// IndexedIO64Builder (makes IndexedOptionArray64)
 
@@ -322,6 +387,19 @@ namespace awkward {
   const std::string
   IndexedIO64Builder::classname() const {
     return "IndexedIO64Builder";
-  };
+  }
+
+  const BuilderPtr
+  IndexedIO64Builder::append(const ContentPtr& array, int64_t at) {
+    if (array.get() == array_.get()) {
+      index_.append(array_.get()->index_at_nowrap(at));
+    }
+    else {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->append(array, at);
+      return out;
+    }
+    return shared_from_this();
+  }
 
 }

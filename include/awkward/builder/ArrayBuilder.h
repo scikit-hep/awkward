@@ -17,8 +17,6 @@ namespace awkward {
   class ArrayBuilderOptions;
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
-  class Type;
-  using TypePtr = std::shared_ptr<Type>;
 
   /// @class ArrayBuilder
   ///
@@ -32,11 +30,6 @@ namespace awkward {
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     ArrayBuilder(const ArrayBuilderOptions& options);
-
-    /// @brief Returns a string representation of this array (single-line XML
-    /// indicating the length and type).
-    const std::string
-      tostring() const;
 
     /// @brief Current length of the accumulated array.
     int64_t
@@ -230,6 +223,8 @@ namespace awkward {
     // @brief Root node of the Builder tree.
     const BuilderPtr builder() const { return builder_; }
 
+    void builder_update(BuilderPtr builder) { builder_ = builder; }
+
     /// @brief Append an element `at` a given index of an arbitrary `array`
     /// (Content instance) to the accumulated data, without
     /// handling negative indexing or bounds-checking.
@@ -245,13 +240,6 @@ namespace awkward {
       maybeupdate(const BuilderPtr& tmp);
 
 private:
-    /// @brief Current high level Type of the accumulated array.
-    ///
-    /// @param typestrs A mapping from `"__record__"` parameters to string
-    /// representations of those types, to override the derived strings.
-    const TypePtr
-        type(const util::TypeStrs& typestrs) const;
-
     /// @brief Constant equal to `nullptr`.
     static const char* no_encoding;
     /// @brief Constant equal to `"utf-8"`.

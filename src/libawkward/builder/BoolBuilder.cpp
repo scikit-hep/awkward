@@ -153,4 +153,11 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  const BuilderPtr
+  BoolBuilder::append(const ContentPtr& array, int64_t at) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    out.get()->append(array, at);
+    return out;
+  }
+
 }

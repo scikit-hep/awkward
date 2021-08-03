@@ -102,6 +102,9 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
+    const BuilderPtr
+      append(const ContentPtr& array, int64_t at) override;
+
     const ArrayBuilderOptions&
       options() const { return options_; }
 
