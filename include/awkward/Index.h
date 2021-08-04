@@ -231,7 +231,7 @@ namespace awkward {
 
     bool
       referentially_equal(const IndexOf<T>& other) const;
-  void printMe();
+  void printMe() const;
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;

@@ -65,6 +65,26 @@ def reducer():
     return new_file
 
 
+def slicer():
+    new_file = """"""
+    global num
+    record = False
+    x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Slice.cpp"), "r")
+    lines = x.readlines()
+    for line in lines:
+        if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
+            record = True
+        elif re.search(r"[)];", line) and record == True:
+            record = False
+            new_file += line
+            new_file += 'std::cout<<"awkward_slicearray_ravel_64:index=";index.printMe();std::cout<<";index_=";index_.printMe();std::cout<<";ndim_="<<ndim()<<";shape=";for (auto x : shape_)std::cout << x << ",";std::cout<<"strides=";for (auto x : strides_)std::cout << x << ",";std::cout<<std::endl;'
+            num += 1
+            continue
+        new_file += line
+    x.close()
+    return new_file
+
+
 def others(path):
     new_file = """"""
     global num
@@ -97,6 +117,11 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
         new_file = """"""
         if file == "Reducer.cpp":
             temp = reducer()
+            with open(os.path.join(root, file), "w") as f:
+                f.write(temp)
+                f.close()
+        if file == "Slice.cpp":
+            temp = slicer()
             with open(os.path.join(root, file), "w") as f:
                 f.write(temp)
                 f.close()

@@ -370,15 +370,6 @@ namespace awkward {
         ndim(),
         shape_.data(),
         strides_.data());
-        std::cout<<"awkward_slicearray_ravel_64:index=";
-        index.printMe();
-        std::cout<<";index_=";
-        index_.printMe();
-        std::cout<<";ndim_="<<ndim()<<";shape=";
-        for (auto x : shape_)std::cout << x << ",";
-        std::cout<<"strides=";
-        for (auto x : strides_)std::cout << x << ",";
-        std::cout<<std::endl;
       util::handle_error(err);
     }
     else {
