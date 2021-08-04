@@ -65,6 +65,30 @@ def reducer():
     return new_file
 
 
+def insertPrintMe():
+    new_file = """"""
+    global num
+    flag = 0
+    x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Index.cpp"), "r")
+    lines = x.readlines()
+    for line in lines:
+        if "template class" in line and flag == 0:
+            new_file += """  template <typename T>
+    void
+    IndexOf<T>::printMe() const{
+        for (int64_t i = 0;  i < length();  i++) {
+        std::cout << data()[i] << ", ";
+        }
+    }
+            """
+            flag = 1
+        new_file += line
+    x.close
+    x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Index.cpp"), "w")
+    x.write(new_file)
+    x.close()
+
+
 def slicer():
     new_file = """"""
     global num
@@ -141,6 +165,7 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 f.write(temp)
                 f.close()
         if file == "Slice.cpp":
+            insertPrintMe()
             temp = slicer()
             with open(os.path.join(root, file), "w") as f:
                 f.write(temp)
