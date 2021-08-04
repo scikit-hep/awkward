@@ -85,6 +85,26 @@ def slicer():
     return new_file
 
 
+def identities():
+    new_file = """"""
+    global num
+    record = False
+    x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Identities.cpp"), "r")
+    lines = x.readlines()
+    for line in lines:
+        if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
+            record = True
+        elif re.search(r"[)];", line) and record == True:
+            record = False
+            new_file += line
+            new_file += 'std::cout<<"Identities_getitem_carry_64:";printMe();carry.printMe();std::cout<<carry.length()<<width_<<length_<<std::endl;'
+            num += 1
+            continue
+        new_file += line
+    x.close()
+    return new_file
+
+
 def others(path):
     new_file = """"""
     global num
@@ -122,6 +142,11 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 f.close()
         if file == "Slice.cpp":
             temp = slicer()
+            with open(os.path.join(root, file), "w") as f:
+                f.write(temp)
+                f.close()
+        if file == "Identities.cpp":
+            temp = identities()
             with open(os.path.join(root, file), "w") as f:
                 f.write(temp)
                 f.close()
