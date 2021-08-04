@@ -100,16 +100,9 @@ def test_numpyarray_getitem_next():
     c2 = np.array([2, 2, 0, 1])
     assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
 
-    c1 = np.array([[4, 1], [1, 3], [0, 4]])
-    c2 = np.array([[2, 2], [0, 1], [1, 3]])
-    # FIXME needs implementation isinstance(head, ak._v2.contents.ListOffsetArray):
-
-    # assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
     c = np.array([False, False, True, True, False, True, True])
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    c = a % 2 == 0  # two dimensional
-    # FIXME needs implementation isinstance(head, ak._v2.contents.ListOffsetArray):
-    # assert ak.to_list(b[c]) == ak.to_list(a[c])
+
     c = np.array([], dtype=int)
     assert ak.to_list(b[c]) == ak.to_list(a[c])
     c1 = np.array([], dtype=int)
@@ -133,3 +126,16 @@ def test_numpyarray_getitem_next():
     if not ak._util.py27:
         assert ak.to_list(b[Ellipsis, c]) == ak.to_list(a[Ellipsis, c])
         assert ak.to_list(b[c, Ellipsis]) == ak.to_list(a[c, Ellipsis])
+
+@pytest.mark.skip(reason="RegularArray' object has no attribute 'toListOffsetArray64")
+def test_numpyarray_getitem_next_2():
+    a = np.arange(7 * 5).reshape(7, 5)
+    b = ak.layout.NumpyArray(a)
+    b = v1_to_v2(b)
+
+    c1 = np.array([[4, 1], [1, 3], [0, 4]])
+    c2 = np.array([[2, 2], [0, 1], [1, 3]])
+    assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
+
+    c = a % 2 == 0  # two dimensional
+    assert ak.to_list(b[c]) == ak.to_list(a[c])
