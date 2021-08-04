@@ -127,6 +127,7 @@ def test_numpyarray_getitem_next():
         assert ak.to_list(b[Ellipsis, c]) == ak.to_list(a[Ellipsis, c])
         assert ak.to_list(b[c, Ellipsis]) == ak.to_list(a[c, Ellipsis])
 
+
 @pytest.mark.skip(reason="RegularArray' object has no attribute 'toListOffsetArray64")
 def test_numpyarray_getitem_next_2():
     a = np.arange(7 * 5).reshape(7, 5)
