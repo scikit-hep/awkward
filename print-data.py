@@ -41,8 +41,8 @@ def remove_comments(args):
 def reducer():
     new_file = """"""
     global num
-    record= False
-    x = open(os.path.join(CURRENT_DIR,"src","libawkward","Reducer.cpp"), "r")
+    record = False
+    x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Reducer.cpp"), "r")
     lines = x.readlines()
     for line in lines:
         if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
@@ -63,6 +63,7 @@ def reducer():
         new_file += line
     x.close()
     return new_file
+
 
 def others(path):
     new_file = """"""
@@ -88,15 +89,14 @@ def others(path):
     return new_file
 
 
-
 for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward")):
     record = False
     block = """"""
     new_file = """"""
     for file in files:
         new_file = """"""
-        if(file=='Reducer.cpp'):
-            temp=reducer()
+        if file == "Reducer.cpp":
+            temp = reducer()
             with open(os.path.join(root, file), "w") as f:
                 f.write(temp)
                 f.close()
