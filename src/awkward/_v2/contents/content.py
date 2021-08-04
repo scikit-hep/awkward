@@ -226,9 +226,8 @@ class Content(object):
                     else:
                         prepare_tuple.append(x)
 
-                # FIXME
                 if len(prepare_tuple) == 0:
-                    return []
+                    return self._getitem_range(slice(0, 0))
 
                 nextwhere = self._getitem_broadcast(
                     prepare_tuple,
@@ -283,8 +282,7 @@ class Content(object):
 
             elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
                 if len(where) == 0:
-                    # FIXME
-                    return []
+                    return self._getitem_range(slice(0, 0))
                 else:
                     return self._getitem_fields(where)
 

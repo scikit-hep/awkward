@@ -167,8 +167,7 @@ def test_listarray_slice_slice():
 
     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
-    # FIXME
-    # assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
+    assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
 
 
 def test_listoffsetarray_slice_slice():
@@ -177,8 +176,7 @@ def test_listoffsetarray_slice_slice():
 
     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
-    # FIXME
-    # assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
+    assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
 
 
 def test_listarray_ellipsis():
@@ -305,14 +303,6 @@ def test_listarray_array():
         [7.7, 8.8, 9.9],
     ]
 
-    # FIXME
-    # assert ak.to_list(array1[[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]]) == [
-    #     5.5,
-    #     2.2,
-    #     1.1,
-    #     7.7,
-    # ]
-
     content_deep = ak.layout.NumpyArray(
         np.array(
             [
@@ -374,13 +364,6 @@ def test_listoffsetarray_array():
         [],
         [7.7, 8.8, 9.9],
     ]
-    # FIXME
-    # assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
-    #     5.5,
-    #     2.2,
-    #     1.1,
-    #     7.7,
-    # ]
 
     content_deep = ak.layout.NumpyArray(
         np.array(
@@ -429,3 +412,28 @@ def test_listoffsetarray_array():
         )[s].tolist()
         == ak.to_list(array1_deep[s])
     )
+
+
+@pytest.mark.skip(
+    reason="ListOffsetArray' object has no attribute 'toListOffsetArray64"
+)
+def test_listarray_listoffsetarray_array():
+    array1 = ak.layout.ListArray64(starts1, stops1, content)
+    array1 = v1_to_v2(array1)
+
+    assert ak.to_list(array1[[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]]) == [
+        5.5,
+        2.2,
+        1.1,
+        7.7,
+    ]
+
+    array1 = ak.layout.ListOffsetArray64(offsets1, content)
+    array1 = v1_to_v2(array1)
+
+    assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
+        5.5,
+        2.2,
+        1.1,
+        7.7,
+    ]

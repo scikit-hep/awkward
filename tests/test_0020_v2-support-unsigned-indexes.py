@@ -67,38 +67,37 @@ def test_listoffsetarray_basic():
     assert ak.to_list(array2[1:-1]) == [[[4.4, 5.5]], []]
 
 
-# FIXME KeyError: ('awkward_ListArray_getitem_next_range', <class 'numpy.int64'>, <class 'numpy.int64'>, <class 'numpy.uint32'>, <class 'numpy.uint32'>)
-# def test_listarray_at():
-#     array1 = ak.layout.ListArrayU32(starts1, stops1, content)
-#     array1 = v1_to_v2(array1)
+def test_listarray_at():
+    array1 = ak.layout.ListArrayU32(starts1, stops1, content)
+    array1 = v1_to_v2(array1)
 
-#     assert ak.to_list(array1[2]) == [4.4, 5.5]
-#     assert (
-#         ak.to_list(
-#             array1[
-#                 2,
-#             ]
-#         )
-#         == [4.4, 5.5]
-#     )
-#     assert ak.to_list(array1[2, 1:]) == [5.5]
-#     assert ak.to_list(array1[2:, 0]) == [4.4, 6.6, 7.7]
-#     assert ak.to_list(array1[2:, -1]) == [5.5, 6.6, 9.9]
+    assert ak.to_list(array1[2]) == [4.4, 5.5]
+    assert (
+        ak.to_list(
+            array1[
+                2,
+            ]
+        )
+        == [4.4, 5.5]
+    )
+    assert ak.to_list(array1[2, 1:]) == [5.5]
+    assert ak.to_list(array1[2:, 0]) == [4.4, 6.6, 7.7]
+    assert ak.to_list(array1[2:, -1]) == [5.5, 6.6, 9.9]
 
 
-# def test_listoffsetarray_at():
-#     array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
-#     assert (
-#         ak.to_list(
-#             array1[
-#                 2,
-#             ]
-#         )
-#         == [4.4, 5.5]
-#     )
-#     assert ak.to_list(array1[2, 1:]) == [5.5]
-#     assert ak.to_list(array1[2:, 0]) == [4.4, 6.6, 7.7]
-#     assert ak.to_list(array1[2:, -1]) == [5.5, 6.6, 9.9]
+def test_listoffsetarray_at():
+    array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
+    assert (
+        ak.to_list(
+            array1[
+                2,
+            ]
+        )
+        == [4.4, 5.5]
+    )
+    assert ak.to_list(array1[2, 1:]) == [5.5]
+    assert ak.to_list(array1[2:, 0]) == [4.4, 6.6, 7.7]
+    assert ak.to_list(array1[2:, -1]) == [5.5, 6.6, 9.9]
 
 
 def test_listarray_slice():
@@ -153,245 +152,245 @@ def test_listoffsetarray_slice():
     )
 
 
-# def test_listarray_slice_slice():
-#     array1 = ak.layout.ListArrayU32(starts1, stops1, content)
-#     array1 = v1_to_v2(array1)
+def test_listarray_slice_slice():
+    array1 = ak.layout.ListArrayU32(starts1, stops1, content)
+    array1 = v1_to_v2(array1)
 
-#     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
-#     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
-#     assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
-
-
-# def test_listoffsetarray_slice_slice():
-#     array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
-#     array1 = v1_to_v2(array1)
-
-#     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
-#     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
-#     assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
+    assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
+    assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
 
 
-# def test_listarray_ellipsis():
-#     array1 = ak.layout.ListArrayU32(starts1, stops1, content)
-#     array2 = ak.layout.ListArrayU32(starts2, stops2, array1)
-#     if not ak._util.py27:
-#         assert ak.to_list(array1[Ellipsis, 1:]) == [
-#             [2.2, 3.3],
-#             [],
-#             [5.5],
-#             [],
-#             [8.8, 9.9],
-#         ]
-#         assert ak.to_list(array2[Ellipsis, 1:]) == [
-#             [[2.2, 3.3], []],
-#             [[5.5]],
-#             [],
-#             [[], [8.8, 9.9]],
-#         ]
+def test_listoffsetarray_slice_slice():
+    array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
+    array1 = v1_to_v2(array1)
+
+    assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
+    assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
 
 
-# def test_listoffsetarray_ellipsis():
-#     array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
-#     array2 = ak.layout.ListOffsetArrayU32(offsets2, array1)
-#     if not ak._util.py27:
-#         assert ak.to_list(array1[Ellipsis, 1:]) == [
-#             [2.2, 3.3],
-#             [],
-#             [5.5],
-#             [],
-#             [8.8, 9.9],
-#         ]
-#         assert ak.to_list(array2[Ellipsis, 1:]) == [
-#             [[2.2, 3.3], []],
-#             [[5.5]],
-#             [],
-#             [[], [8.8, 9.9]],
-#         ]
+def test_listarray_ellipsis():
+    array1 = ak.layout.ListArrayU32(starts1, stops1, content)
+    array2 = ak.layout.ListArrayU32(starts2, stops2, array1)
+    if not ak._util.py27:
+        assert ak.to_list(array1[Ellipsis, 1:]) == [
+            [2.2, 3.3],
+            [],
+            [5.5],
+            [],
+            [8.8, 9.9],
+        ]
+        assert ak.to_list(array2[Ellipsis, 1:]) == [
+            [[2.2, 3.3], []],
+            [[5.5]],
+            [],
+            [[], [8.8, 9.9]],
+        ]
 
 
-# def test_listarray_array_slice():
-#     array1 = ak.layout.ListArrayU32(starts1, stops1, content)
-#     array2 = ak.layout.ListArrayU32(starts2, stops2, array1)
-#     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0]]) == [
-#         [[1.1, 2.2, 3.3], []],
-#         [[1.1, 2.2, 3.3], []],
-#         [[4.4, 5.5]],
-#         [[4.4, 5.5]],
-#         [[4.4, 5.5]],
-#         [[1.1, 2.2, 3.3], []],
-#     ]
-#     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :]) == [
-#         [[1.1, 2.2, 3.3], []],
-#         [[1.1, 2.2, 3.3], []],
-#         [[4.4, 5.5]],
-#         [[4.4, 5.5]],
-#         [[4.4, 5.5]],
-#         [[1.1, 2.2, 3.3], []],
-#     ]
-#     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :, 1:]) == [
-#         [[2.2, 3.3], []],
-#         [[2.2, 3.3], []],
-#         [[5.5]],
-#         [[5.5]],
-#         [[5.5]],
-#         [[2.2, 3.3], []],
-#     ]
+def test_listoffsetarray_ellipsis():
+    array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
+    array2 = ak.layout.ListOffsetArrayU32(offsets2, array1)
+    if not ak._util.py27:
+        assert ak.to_list(array1[Ellipsis, 1:]) == [
+            [2.2, 3.3],
+            [],
+            [5.5],
+            [],
+            [8.8, 9.9],
+        ]
+        assert ak.to_list(array2[Ellipsis, 1:]) == [
+            [[2.2, 3.3], []],
+            [[5.5]],
+            [],
+            [[], [8.8, 9.9]],
+        ]
 
 
-# def test_listoffsetarray_array_slice():
-#     array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
-#     array2 = ak.layout.ListOffsetArrayU32(offsets2, array1)
-#     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0]]) == [
-#         [[1.1, 2.2, 3.3], []],
-#         [[1.1, 2.2, 3.3], []],
-#         [[4.4, 5.5]],
-#         [[4.4, 5.5]],
-#         [[4.4, 5.5]],
-#         [[1.1, 2.2, 3.3], []],
-#     ]
-#     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :]) == [
-#         [[1.1, 2.2, 3.3], []],
-#         [[1.1, 2.2, 3.3], []],
-#         [[4.4, 5.5]],
-#         [[4.4, 5.5]],
-#         [[4.4, 5.5]],
-#         [[1.1, 2.2, 3.3], []],
-#     ]
-#     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :, 1:]) == [
-#         [[2.2, 3.3], []],
-#         [[2.2, 3.3], []],
-#         [[5.5]],
-#         [[5.5]],
-#         [[5.5]],
-#         [[2.2, 3.3], []],
-#     ]
+def test_listarray_array_slice():
+    array1 = ak.layout.ListArrayU32(starts1, stops1, content)
+    array2 = ak.layout.ListArrayU32(starts2, stops2, array1)
+    assert ak.to_list(array2[[0, 0, 1, 1, 1, 0]]) == [
+        [[1.1, 2.2, 3.3], []],
+        [[1.1, 2.2, 3.3], []],
+        [[4.4, 5.5]],
+        [[4.4, 5.5]],
+        [[4.4, 5.5]],
+        [[1.1, 2.2, 3.3], []],
+    ]
+    assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :]) == [
+        [[1.1, 2.2, 3.3], []],
+        [[1.1, 2.2, 3.3], []],
+        [[4.4, 5.5]],
+        [[4.4, 5.5]],
+        [[4.4, 5.5]],
+        [[1.1, 2.2, 3.3], []],
+    ]
+    assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :, 1:]) == [
+        [[2.2, 3.3], []],
+        [[2.2, 3.3], []],
+        [[5.5]],
+        [[5.5]],
+        [[5.5]],
+        [[2.2, 3.3], []],
+    ]
 
 
-# def test_listarray_array():
-#     array1 = ak.layout.ListArrayU32(starts1, stops1, content)
-#     assert ak.to_list(array1[np.array([2, 0, 0, 1, -1])]) == [
-#         [4.4, 5.5],
-#         [1.1, 2.2, 3.3],
-#         [1.1, 2.2, 3.3],
-#         [],
-#         [7.7, 8.8, 9.9],
-#     ]
-#     assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
-#         5.5,
-#         2.2,
-#         1.1,
-#         7.7,
-#     ]
-
-#     content_deep = ak.layout.NumpyArray(
-#         np.array(
-#             [
-#                 [0, 0],
-#                 [1, 10],
-#                 [2, 20],
-#                 [3, 30],
-#                 [4, 40],
-#                 [5, 50],
-#                 [6, 60],
-#                 [7, 70],
-#                 [8, 80],
-#             ]
-#         )
-#     )
-#     starts1_deep = ak.layout.IndexU32(np.array([0, 3, 6]))
-#     stops1_deep = ak.layout.IndexU32(np.array([3, 6, 9]))
-#     array1_deep = ak.layout.ListArrayU32(starts1_deep, stops1_deep, content_deep)
-
-#     assert ak.to_list(array1_deep) == [
-#         [[0, 0], [1, 10], [2, 20]],
-#         [[3, 30], [4, 40], [5, 50]],
-#         [[6, 60], [7, 70], [8, 80]],
-#     ]
-#     s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), np.array([0, 1, 0, 1]))
-#     assert (
-#         np.array(
-#             [
-#                 [[0, 0], [1, 10], [2, 20]],
-#                 [[3, 30], [4, 40], [5, 50]],
-#                 [[6, 60], [7, 70], [8, 80]],
-#             ]
-#         )[s].tolist()
-#         == ak.to_list(array1_deep[s])
-#     )
-
-#     s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), slice(1, None))
-#     assert (
-#         np.array(
-#             [
-#                 [[0, 0], [1, 10], [2, 20]],
-#                 [[3, 30], [4, 40], [5, 50]],
-#                 [[6, 60], [7, 70], [8, 80]],
-#             ]
-#         )[s].tolist()
-#         == ak.to_list(array1_deep[s])
-#     )
+def test_listoffsetarray_array_slice():
+    array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
+    array2 = ak.layout.ListOffsetArrayU32(offsets2, array1)
+    assert ak.to_list(array2[[0, 0, 1, 1, 1, 0]]) == [
+        [[1.1, 2.2, 3.3], []],
+        [[1.1, 2.2, 3.3], []],
+        [[4.4, 5.5]],
+        [[4.4, 5.5]],
+        [[4.4, 5.5]],
+        [[1.1, 2.2, 3.3], []],
+    ]
+    assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :]) == [
+        [[1.1, 2.2, 3.3], []],
+        [[1.1, 2.2, 3.3], []],
+        [[4.4, 5.5]],
+        [[4.4, 5.5]],
+        [[4.4, 5.5]],
+        [[1.1, 2.2, 3.3], []],
+    ]
+    assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :, 1:]) == [
+        [[2.2, 3.3], []],
+        [[2.2, 3.3], []],
+        [[5.5]],
+        [[5.5]],
+        [[5.5]],
+        [[2.2, 3.3], []],
+    ]
 
 
-# def test_listoffsetarray_array():
-#     array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
-#     assert ak.to_list(array1[np.array([2, 0, 0, 1, -1])]) == [
-#         [4.4, 5.5],
-#         [1.1, 2.2, 3.3],
-#         [1.1, 2.2, 3.3],
-#         [],
-#         [7.7, 8.8, 9.9],
-#     ]
-#     assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
-#         5.5,
-#         2.2,
-#         1.1,
-#         7.7,
-#     ]
+def test_listarray_array():
+    array1 = ak.layout.ListArrayU32(starts1, stops1, content)
+    assert ak.to_list(array1[np.array([2, 0, 0, 1, -1])]) == [
+        [4.4, 5.5],
+        [1.1, 2.2, 3.3],
+        [1.1, 2.2, 3.3],
+        [],
+        [7.7, 8.8, 9.9],
+    ]
+    assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
+        5.5,
+        2.2,
+        1.1,
+        7.7,
+    ]
 
-#     content_deep = ak.layout.NumpyArray(
-#         np.array(
-#             [
-#                 [0, 0],
-#                 [1, 10],
-#                 [2, 20],
-#                 [3, 30],
-#                 [4, 40],
-#                 [5, 50],
-#                 [6, 60],
-#                 [7, 70],
-#                 [8, 80],
-#             ]
-#         )
-#     )
-#     starts1_deep = ak.layout.IndexU32(np.array([0, 3, 6]))
-#     stops1_deep = ak.layout.IndexU32(np.array([3, 6, 9]))
-#     array1_deep = ak.layout.ListArrayU32(starts1_deep, stops1_deep, content_deep)
+    content_deep = ak.layout.NumpyArray(
+        np.array(
+            [
+                [0, 0],
+                [1, 10],
+                [2, 20],
+                [3, 30],
+                [4, 40],
+                [5, 50],
+                [6, 60],
+                [7, 70],
+                [8, 80],
+            ]
+        )
+    )
+    starts1_deep = ak.layout.IndexU32(np.array([0, 3, 6]))
+    stops1_deep = ak.layout.IndexU32(np.array([3, 6, 9]))
+    array1_deep = ak.layout.ListArrayU32(starts1_deep, stops1_deep, content_deep)
 
-#     assert ak.to_list(array1_deep) == [
-#         [[0, 0], [1, 10], [2, 20]],
-#         [[3, 30], [4, 40], [5, 50]],
-#         [[6, 60], [7, 70], [8, 80]],
-#     ]
-#     s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), np.array([0, 1, 0, 1]))
-#     assert (
-#         np.array(
-#             [
-#                 [[0, 0], [1, 10], [2, 20]],
-#                 [[3, 30], [4, 40], [5, 50]],
-#                 [[6, 60], [7, 70], [8, 80]],
-#             ]
-#         )[s].tolist()
-#         == ak.to_list(array1_deep[s])
-#     )
+    assert ak.to_list(array1_deep) == [
+        [[0, 0], [1, 10], [2, 20]],
+        [[3, 30], [4, 40], [5, 50]],
+        [[6, 60], [7, 70], [8, 80]],
+    ]
+    s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), np.array([0, 1, 0, 1]))
+    assert (
+        np.array(
+            [
+                [[0, 0], [1, 10], [2, 20]],
+                [[3, 30], [4, 40], [5, 50]],
+                [[6, 60], [7, 70], [8, 80]],
+            ]
+        )[s].tolist()
+        == ak.to_list(array1_deep[s])
+    )
 
-#     s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), slice(1, None))
-#     assert (
-#         np.array(
-#             [
-#                 [[0, 0], [1, 10], [2, 20]],
-#                 [[3, 30], [4, 40], [5, 50]],
-#                 [[6, 60], [7, 70], [8, 80]],
-#             ]
-#         )[s].tolist()
-#         == ak.to_list(array1_deep[s])
-#     )
+    s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), slice(1, None))
+    assert (
+        np.array(
+            [
+                [[0, 0], [1, 10], [2, 20]],
+                [[3, 30], [4, 40], [5, 50]],
+                [[6, 60], [7, 70], [8, 80]],
+            ]
+        )[s].tolist()
+        == ak.to_list(array1_deep[s])
+    )
+
+
+def test_listoffsetarray_array():
+    array1 = ak.layout.ListOffsetArrayU32(offsets1, content)
+    assert ak.to_list(array1[np.array([2, 0, 0, 1, -1])]) == [
+        [4.4, 5.5],
+        [1.1, 2.2, 3.3],
+        [1.1, 2.2, 3.3],
+        [],
+        [7.7, 8.8, 9.9],
+    ]
+    assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
+        5.5,
+        2.2,
+        1.1,
+        7.7,
+    ]
+
+    content_deep = ak.layout.NumpyArray(
+        np.array(
+            [
+                [0, 0],
+                [1, 10],
+                [2, 20],
+                [3, 30],
+                [4, 40],
+                [5, 50],
+                [6, 60],
+                [7, 70],
+                [8, 80],
+            ]
+        )
+    )
+    starts1_deep = ak.layout.IndexU32(np.array([0, 3, 6]))
+    stops1_deep = ak.layout.IndexU32(np.array([3, 6, 9]))
+    array1_deep = ak.layout.ListArrayU32(starts1_deep, stops1_deep, content_deep)
+
+    assert ak.to_list(array1_deep) == [
+        [[0, 0], [1, 10], [2, 20]],
+        [[3, 30], [4, 40], [5, 50]],
+        [[6, 60], [7, 70], [8, 80]],
+    ]
+    s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), np.array([0, 1, 0, 1]))
+    assert (
+        np.array(
+            [
+                [[0, 0], [1, 10], [2, 20]],
+                [[3, 30], [4, 40], [5, 50]],
+                [[6, 60], [7, 70], [8, 80]],
+            ]
+        )[s].tolist()
+        == ak.to_list(array1_deep[s])
+    )
+
+    s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), slice(1, None))
+    assert (
+        np.array(
+            [
+                [[0, 0], [1, 10], [2, 20]],
+                [[3, 30], [4, 40], [5, 50]],
+                [[6, 60], [7, 70], [8, 80]],
+            ]
+        )[s].tolist()
+        == ak.to_list(array1_deep[s])
+    )

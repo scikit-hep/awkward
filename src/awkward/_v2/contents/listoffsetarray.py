@@ -172,8 +172,11 @@ class ListOffsetArray(Content):
         elif isinstance(head, slice):
             nexthead, nexttail = self._headtail(tail)
             lenstarts = len(self._offsets) - 1
-            start, stop, step = head.indices(self.stops[0])
+            start, stop, step = head.start, head.stop, head.step
+
             step = 1 if step is None else step
+            start = 0 if start is None else start
+            stop = ak._util.kSliceNone if stop is None else stop
 
             carrylength = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
@@ -193,7 +196,12 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nextoffsets = ak._v2.index.Index64.empty(lenstarts + 1, nplike)
+            if self._starts.dtype == "int64":
+                nextoffsets = ak._v2.index.Index64.empty(lenstarts + 1, nplike)
+            elif self._starts.dtype == "int32":
+                nextoffsets = ak._v2.index.Index32.empty(lenstarts + 1, nplike)
+            elif self._starts.dtype == "uint32":
+                nextoffsets = ak._v2.index.IndexU32.empty(lenstarts + 1, nplike)
             nextcarry = ak._v2.index.Index64.empty(carrylength[0], nplike)
 
             self._handle_error(
