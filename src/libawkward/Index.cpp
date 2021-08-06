@@ -291,6 +291,8 @@ namespace awkward {
         ptr.get(),
         &ptr_.get()[(size_t)offset_],
         length_);
+        std::cout<<"Index_to_Index64:";
+        printMe();
       util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_, ptr_lib);
@@ -422,7 +424,14 @@ namespace awkward {
            length_ == other.length();
   }
 
-  template class EXPORT_TEMPLATE_INST IndexOf<int8_t>;
+  template <typename T>
+    void
+    IndexOf<T>::printMe() const{
+        for (int64_t i = 0;  i < length();  i++) {
+        std::cout << data()[i] << ", ";
+        }
+    }
+              template class EXPORT_TEMPLATE_INST IndexOf<int8_t>;
   template class EXPORT_TEMPLATE_INST IndexOf<uint8_t>;
   template class EXPORT_TEMPLATE_INST IndexOf<int32_t>;
   template class EXPORT_TEMPLATE_INST IndexOf<uint32_t>;
