@@ -131,16 +131,29 @@ def identities():
     new_file = """"""
     global num
     record = False
+    flag = 0
     x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Identities.cpp"), "r")
     lines = x.readlines()
     for line in lines:
         if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
             record = True
         elif re.search(r"[)];", line) and record == True:
+            flag += 1
             record = False
             new_file += line
             new_file += 'std::cout<<"Identities_getitem_carry_64:";printMe();carry.printMe();std::cout<<carry.length()<<width_<<length_<<std::endl;'
             num += 1
+            continue
+        if flag == 2 and "return out;" in line:
+            flag = 3
+        if flag == 3 and "}" in line:
+            flag = 4
+            new_file += line
+            new_file += """  void printMe() const {
+   for (int64_t i = 0; i < length(); i++) {
+    std::cout << data()[i] << ", ";
+   }
+  }"""
             continue
         new_file += line
     x.close()
