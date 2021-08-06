@@ -16,11 +16,29 @@ def get_line(args):
     function_name = str[str.find(":") + 2 : start]
     if function_name[len(function_name) - 1] == ">":
         function_name = function_name[0 : function_name.find("<")]
-    line = 'std::cout<<"awkward_' + function_name + '"<<'
+    if function_name == "RegularArray_combinations_64":
+        return """
+        std::cout<<"awkward_RegularArray_combinations_64:";std::cout<<"tocarryraw.data()=";
+      for(int i=0;i<length();i++){
+        std::cout<<tocarryraw.data()[i]<<",";
+    }
+      std::cout<<"toindex.data()=";toindex.printMe();std::cout<<"fromindex.data()=";fromindex.printMe();std::cout<<"n="<<n;std::cout<<"replacement="<<replacement;std::cout<<"length()="<<length();std::cout<<"1";"""
+    line = 'std::cout<<"awkward_' + function_name + ":" + '";'
     for value in values:
-        line += '"' + value + '="<<' + value + "<<"
-    line = line[0 : len(line) - 2]
-    line = line + ";"
+        if "data()" in value:
+            line += (
+                "std::cout<<"
+                + '"'
+                + value
+                + '=";'
+                + value[0 : value.find(".") + 1]
+                + "printMe();"
+            )
+        elif value.isdigit():
+            line += "std::cout<<" + '"' + value + '";'
+        else:
+            line += "std::cout<<" + '"' + value + '="<<' + value + ";"
+    line = line[0 : len(line)]
     return line
 
 
@@ -129,6 +147,32 @@ def identities():
     return new_file
 
 
+def content():
+    new_file = """"""
+    global num
+    block = """"""
+    record = False
+    x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Content.cpp"), "r")
+    lines = x.readlines()
+    for line in lines:
+        if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
+            block += line
+            record = True
+        elif re.search(r"[)];", line) and record == True:
+            block += line
+            stdout = get_line(block)
+            block = """"""
+            record = False
+            new_file += line
+            new_file += stdout + "\n"
+            num += 1
+            continue
+        elif record == True:
+            block += line
+        new_file += line
+    return new_file
+
+
 def others(path):
     new_file = """"""
     global num
@@ -172,6 +216,11 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 f.close()
         if file == "Identities.cpp":
             temp = identities()
+            with open(os.path.join(root, file), "w") as f:
+                f.write(temp)
+                f.close()
+        if file == "Content.cpp":
+            temp = content()
             with open(os.path.join(root, file), "w") as f:
                 f.write(temp)
                 f.close()
