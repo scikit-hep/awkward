@@ -149,7 +149,9 @@ def identities():
         if flag == 3 and "}" in line:
             flag = 4
             new_file += line
-            new_file += """  void printMe() const {
+            new_file += """ template <typename T>
+  void
+  IdentitiesOf<T>::printMe() const{
    for (int64_t i = 0; i < length(); i++) {
     std::cout << data()[i] << ", ";
    }
