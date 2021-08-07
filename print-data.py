@@ -207,6 +207,31 @@ def index():
     return new_file
 
 
+def union():
+    new_file = """"""
+    global num
+    record = False
+    x = open(
+        os.path.join(
+            CURRENT_DIR, "src", "libawkward", "layoutbuilder", "UnionArrayBuilder.cpp"
+        ),
+        "r",
+    )
+    lines = x.readlines()
+    for line in lines:
+        if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
+            record = True
+        elif re.search(r"[)];", line) and record == True:
+            record = False
+            new_file += line
+            new_file += '\tstd::cout<<"UnionArray_regular_index:"<<lentags;tags.printMe();std::cout<<lentags<<std::endl;\n'
+            num += 1
+            continue
+        new_file += line
+    x.close()
+    return new_file
+
+
 def others(path):
     new_file = """"""
     global num
@@ -260,6 +285,11 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 f.close()
         if file == "Index.cpp":
             temp = index()
+            with open(os.path.join(root, file), "w") as f:
+                f.write(temp)
+                f.close()
+        if file == "UnionArrayBuilder.cpp":
+            temp = union()
             with open(os.path.join(root, file), "w") as f:
                 f.write(temp)
                 f.close()
