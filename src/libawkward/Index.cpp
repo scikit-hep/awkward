@@ -291,8 +291,6 @@ namespace awkward {
         ptr.get(),
         &ptr_.get()[(size_t)offset_],
         length_);
-        std::cout<<"Index_to_Index64:";
-        printMe();
       util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_, ptr_lib);

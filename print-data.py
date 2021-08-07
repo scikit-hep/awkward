@@ -119,7 +119,7 @@ def slicer():
         elif re.search(r"[)];", line) and record == True:
             record = False
             new_file += line
-            new_file += 'std::cout<<"awkward_slicearray_ravel_64:index=";index.printMe();std::cout<<";index_=";index_.printMe();std::cout<<";ndim_="<<ndim()<<";shape=";for (auto x : shape_)std::cout << x << ",";std::cout<<"strides=";for (auto x : strides_)std::cout << x << ",";std::cout<<std::endl;'
+            new_file += 'std::cout<<"awkward_slicearray_ravel_64:index=";index.printMe();std::cout<<";index_=";index_.printMe();std::cout<<";ndim_="<<ndim()<<";shape=";for (auto x : shape_)std::cout << x << ",";std::cout<<"strides=";for (auto x : strides_)std::cout << x << ",";std::cout<<std::endl;\n'
             num += 1
             continue
         new_file += line
@@ -141,7 +141,7 @@ def identities():
             flag += 1
             record = False
             new_file += line
-            new_file += 'std::cout<<"Identities_getitem_carry_64:";printMe();carry.printMe();std::cout<<carry.length()<<width_<<length_<<std::endl;'
+            new_file += 'std::cout<<"Identities_getitem_carry_64:";printMe();carry.printMe();std::cout<<carry.length()<<width_<<length_<<std::endl;\n'
             num += 1
             continue
         if flag == 2 and "return out;" in line:
@@ -185,6 +185,26 @@ def content():
         elif record == True:
             block += line
         new_file += line
+    return new_file
+
+
+def index():
+    new_file = """"""
+    global num
+    record = False
+    x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Index.cpp"), "r")
+    lines = x.readlines()
+    for line in lines:
+        if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
+            record = True
+        elif re.search(r"[)];", line) and record == True:
+            record = False
+            new_file += line
+            new_file += '\tstd::cout<<"Index_to_Index64:";printMe();std::cout<<length_<<std::endl;\n'
+            num += 1
+            continue
+        new_file += line
+    x.close()
     return new_file
 
 
@@ -236,6 +256,11 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 f.close()
         if file == "Content.cpp":
             temp = content()
+            with open(os.path.join(root, file), "w") as f:
+                f.write(temp)
+                f.close()
+        if file == "Index.cpp":
+            temp = index()
             with open(os.path.join(root, file), "w") as f:
                 f.write(temp)
                 f.close()
