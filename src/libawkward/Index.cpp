@@ -422,14 +422,7 @@ namespace awkward {
            length_ == other.length();
   }
 
-  template <typename T>
-    void
-    IndexOf<T>::printMe() const{
-        for (int64_t i = 0;  i < length();  i++) {
-        std::cout << data()[i] << ", ";
-        }
-    }
-              template class EXPORT_TEMPLATE_INST IndexOf<int8_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<int8_t>;
   template class EXPORT_TEMPLATE_INST IndexOf<uint8_t>;
   template class EXPORT_TEMPLATE_INST IndexOf<int32_t>;
   template class EXPORT_TEMPLATE_INST IndexOf<uint32_t>;

@@ -97,8 +97,7 @@ def insertPrintMe():
         for (int64_t i = 0;  i < length();  i++) {
         std::cout << data()[i] << ", ";
         }
-    }
-            """
+    }"""
             flag = 1
         new_file += line
     x.close
