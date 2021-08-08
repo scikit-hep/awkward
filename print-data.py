@@ -11,7 +11,7 @@ def get_line(args):
     start = str.find("(")
     stop = len(str) - 1
     temp = str[start:stop]
-    arguments = temp[temp.find(",") + 1 : len(temp) - 1]
+    arguments = temp[temp.find(",") + 1 : len(temp)-1]
     values = arguments.split(",")
     function_name = str[str.find(":") + 2 : start]
     if function_name[len(function_name) - 1] == ">":
@@ -25,17 +25,26 @@ def get_line(args):
       std::cout<<"toindex.data()=";toindex.printMe();std::cout<<"fromindex.data()=";fromindex.printMe();std::cout<<"n="<<n;std::cout<<"replacement="<<replacement;std::cout<<"length()="<<length();std::cout<<"1";"""
     line = 'std::cout<<"awkward_' + function_name + ":" + '";'
     for value in values:
-        if "data()" in value:
+        if 'reinterpret_cast' in value:
+            value=value[value.find('>')+2:len(value)-1]
+        if 'tocarryraw' in value:
+            line+="""std::cout<<"tocarryraw.data()=";
+            for(int i=0;i<length();i++){
+        std::cout<<tocarryraw.data()[i]<<",";
+    }\n"""
+        elif "data()" in value:
             line += (
                 "std::cout<<"
                 + '"'
                 + value
                 + '=";'
-                + value[0 : value.find(".") + 1]
-                + "printMe();"
+                + value.replace('data()','printMe()')
+                + ";"
             )
         elif value.isdigit():
             line += "std::cout<<" + '"' + value + '";'
+        elif "kernel::" in value:
+            continue
         else:
             line += "std::cout<<" + '"' + value + '="<<' + value + ";"
     line = line[0 : len(line)]
@@ -232,29 +241,35 @@ def union():
     return new_file
 
 
-def others(path):
-    new_file = """"""
-    global num
-    x = open(path, "r")
-    lines = x.readlines()
-    for line in lines:
-        if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
-            block += line
-            record = True
-        elif re.search(r"[)];", line) and record == True:
-            block += line
-            stdout = get_line(block)
-            block = """"""
+def awkward():
+    for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward","array")):
+        for file in files:
+            new_file = """"""
+            global num
             record = False
-            new_file += line
-            new_file += stdout + "\n"
-            num += 1
-            continue
-        elif record == True:
-            block += line
-        new_file += line
-    return new_file
-
+            block =""""""
+            x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "array",file), "r")
+            lines = x.readlines()
+            for line in lines:
+                if re.search(r"struct\sError\s(err|err1|err2)\s=", line):
+                    record = True
+                    block+= line
+                elif re.search(r"[)];", line) and record == True:
+                    record = False
+                    new_file += line
+                    block += line
+                    stdout=get_line(block)
+                    block = """"""
+                    new_file += stdout+'\n'
+                    num += 1
+                    continue
+                elif record == True:
+                    block += line
+                new_file += line
+            x.close()
+            x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "array",file), "w")
+            x.write(new_file)
+            x.close()
 
 for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward")):
     record = False
@@ -294,4 +309,5 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
                 f.write(temp)
                 f.close()
 
+awkward()
 print("Added cout in " + str(num) + " places")
