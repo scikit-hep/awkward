@@ -303,6 +303,7 @@ namespace awkward {
         out.data(),
         offsets_.data(),
         len);
+std::cout<<"awkward_ListOffsetArray_compact_offsets_64:";std::cout<<"out.data()=";out.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"len="<<len;
       util::handle_error(err, classname(), identities_.get());
       return out;
     }
@@ -318,6 +319,7 @@ namespace awkward {
       out.data(),
       offsets_.data(),
       len);
+std::cout<<"awkward_ListOffsetArray_compact_offsets_64:";std::cout<<"out.data()=";out.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"len="<<len;
     util::handle_error(err, classname(), identities_.get());
     return out;
   }
@@ -350,6 +352,7 @@ namespace awkward {
       starts.data(),
       stops.data(),
       content_.get()->length());
+std::cout<<"awkward_ListArray_broadcast_tooffsets_64:";std::cout<<"nextcarry.data()=";nextcarry.printMe();std::cout<<"offsets.data()=";offsets.printMe();std::cout<<"offsets.length()="<<offsets.length();std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"content_.get()->length()="<<content_.get()->length();
     util::handle_error(err, classname(), identities_.get());
 
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
@@ -378,6 +381,7 @@ namespace awkward {
       &size,
       offsets_.data(),
       offsets_.length());
+std::cout<<"awkward_ListOffsetArray_toRegularArray:";std::cout<<"&size="<<&size;std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()="<<offsets_.length();
     util::handle_error(err, classname(), identities_.get());
 
     return std::make_shared<RegularArray>(identities_,
@@ -469,6 +473,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawidentities->width());
+std::cout<<"awkward_Identities_from_ListOffsetArray:";std::cout<<"rawsubidentities->data()=";rawsubidentities->printMe();std::cout<<"rawidentities->data()=";rawidentities->printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"content_.get()->length()="<<content_.get()->length();std::cout<<"length()="<<length();std::cout<<"rawidentities->width()="<<rawidentities->width();
         util::handle_error(err, classname(), identities_.get());
         content_.get()->setidentities(subidentities);
       }
@@ -489,6 +494,7 @@ namespace awkward {
           content_.get()->length(),
           length(),
           rawidentities->width());
+std::cout<<"awkward_Identities_from_ListOffsetArray:";std::cout<<"rawsubidentities->data()=";rawsubidentities->printMe();std::cout<<"rawidentities->data()=";rawidentities->printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"content_.get()->length()="<<content_.get()->length();std::cout<<"length()="<<length();std::cout<<"rawidentities->width()="<<rawidentities->width();
         util::handle_error(err, classname(), identities_.get());
         content_.get()->setidentities(subidentities);
       }
@@ -515,6 +521,7 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         rawidentities->data(),
         length());
+std::cout<<"awkward_new_Identities:";std::cout<<"rawidentities->data()=";rawidentities->printMe();std::cout<<"length()="<<length();
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -530,6 +537,7 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         rawidentities->data(),
         length());
+std::cout<<"awkward_new_Identities:";std::cout<<"rawidentities->data()=";rawidentities->printMe();std::cout<<"length()="<<length();
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -835,6 +843,7 @@ namespace awkward {
       carry.data(),
       offsets_.length() - 1,
       carry.length());
+std::cout<<"awkward_ListArray_getitem_carry_64:";std::cout<<"nextstarts.data()=";nextstarts.printMe();std::cout<<"nextstops.data()=";nextstops.printMe();std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"carry.data()=";carry.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;std::cout<<"carry.length()="<<carry.length();
     util::handle_error(err, classname(), identities_.get());
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
@@ -931,6 +940,7 @@ namespace awkward {
       stops.data(),
       starts.length(),
       content_.get()->length());
+std::cout<<"awkward_ListArray_validity:";std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"starts.length()="<<starts.length();std::cout<<"content_.get()->length()="<<content_.get()->length();
     if (err.str == nullptr) {
       if (parameter_equals("__array__", "\"string\"")  ||
           parameter_equals("__array__", "\"bytestring\"")) {
@@ -975,6 +985,7 @@ namespace awkward {
         starts.data(),
         stops.data(),
         length());
+std::cout<<"awkward_ListArray_num_64:";std::cout<<"tonum.data()=";tonum.printMe();std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"length()="<<length();
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<NumpyArray>(tonum);
     }
@@ -1035,6 +1046,7 @@ namespace awkward {
           offsets_.length(),
           inneroffsets.data(),
           inneroffsets.length());
+std::cout<<"awkward_ListOffsetArray_flatten_offsets_64:";std::cout<<"tooffsets.data()=";tooffsets.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()="<<offsets_.length();std::cout<<"inneroffsets.data()=";inneroffsets.printMe();std::cout<<"inneroffsets.length()="<<inneroffsets.length();
         util::handle_error(err, classname(), identities_.get());
         return std::pair<Index64, ContentPtr>(
                  Index64(0),
@@ -1183,6 +1195,7 @@ namespace awkward {
         offsets.get()->data(),
         offsets_.data(),
         length());
+std::cout<<"awkward_ListOffsetArray_compact_offsets_64:";std::cout<<"offsets.get()->data()=";offsets.get()->printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"length()="<<length();
       util::handle_error(err, classname(), identities_.get());
     }
 
@@ -1202,6 +1215,7 @@ namespace awkward {
           offsets.get()->length() - 1,
           nonzero.data(),
           nonzero.length());
+std::cout<<"awkward_ListOffsetArray_getitem_adjust_offsets_64:";std::cout<<"adjustedoffsets.data()=";adjustedoffsets.printMe();std::cout<<"adjustednonzero.data()=";adjustednonzero.printMe();std::cout<<"offsets.get()->data()=";offsets.get()->printMe();std::cout<<"offsets.get()->length()-1="<<offsets.get()->length()-1;std::cout<<"nonzero.data()=";nonzero.printMe();std::cout<<"nonzero.length()="<<nonzero.length();
         util::handle_error(err, classname(), nullptr);
 
         SliceItemPtr newarray = std::make_shared<SliceArray64>(
@@ -1232,6 +1246,7 @@ namespace awkward {
             nonzero.length(),
             originalmask.data(),
             originalmask.length());
+std::cout<<"awkward_ListOffsetArray_getitem_adjust_offsets_index_64:";std::cout<<"adjustedoffsets.data()=";adjustedoffsets.printMe();std::cout<<"adjustednonzero.data()=";adjustednonzero.printMe();std::cout<<"offsets.get()->data()=";offsets.get()->printMe();std::cout<<"offsets.get()->length()-1="<<offsets.get()->length()-1;std::cout<<"index.data()=";index.printMe();std::cout<<"index.length()="<<index.length();std::cout<<"nonzero.data()=";nonzero.printMe();std::cout<<"nonzero.length()="<<nonzero.length();std::cout<<"originalmask.data()=";originalmask.printMe();std::cout<<"originalmask.length()="<<originalmask.length();
           util::handle_error(err, classname(), nullptr);
 
           SliceItemPtr newarray = std::make_shared<SliceArray64>(
@@ -1281,6 +1296,7 @@ namespace awkward {
         offsets_.length() - 1,
         target,
         &tolength);
+std::cout<<"awkward_ListOffsetArray_rpad_length_axis1:";std::cout<<"offsets.data()=";offsets.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;std::cout<<"target="<<target;std::cout<<"&tolength="<<&tolength;
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 outindex(tolength);
@@ -1290,6 +1306,7 @@ namespace awkward {
         offsets_.data(),
         offsets_.length() - 1,
         target);
+std::cout<<"awkward_ListOffsetArray_rpad_axis1_64:";std::cout<<"outindex.data()=";outindex.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;std::cout<<"target="<<target;
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<IndexedOptionArray64> next =
@@ -1326,6 +1343,7 @@ namespace awkward {
         stops.data(),
         target,
         starts.length());
+std::cout<<"awkward_index_rpad_and_clip_axis1_64:";std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"target="<<target;std::cout<<"starts.length()="<<starts.length();
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 outindex(target*(offsets_.length() - 1));
@@ -1335,6 +1353,7 @@ namespace awkward {
         offsets_.data(),
         offsets_.length() - 1,
         target);
+std::cout<<"awkward_ListOffsetArray_rpad_and_clip_axis1_64:";std::cout<<"outindex.data()=";outindex.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;std::cout<<"target="<<target;
       util::handle_error(err2, classname(), identities_.get());
 
       std::shared_ptr<IndexedOptionArray64> next =
@@ -1389,6 +1408,7 @@ namespace awkward {
         &globalstop,
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_global_startstop_64:";std::cout<<"&globalstart="<<&globalstart;std::cout<<"&globalstop="<<&globalstop;std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err1, classname(), identities_.get());
       int64_t nextlen = globalstop - globalstart;
 
@@ -1400,6 +1420,7 @@ namespace awkward {
         offsetscopy.data(),
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64:";std::cout<<"&maxcount="<<&maxcount;std::cout<<"offsetscopy.data()=";offsetscopy.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err2, classname(), identities_.get());
 
       Index64 nextcarry(nextlen);
@@ -1507,6 +1528,7 @@ namespace awkward {
         &globalstop,
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_global_startstop_64:";std::cout<<"&globalstart="<<&globalstart;std::cout<<"&globalstop="<<&globalstop;std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextparents(globalstop - globalstart);
@@ -1515,6 +1537,7 @@ namespace awkward {
         nextparents.data(),
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_local_nextparents_64:";std::cout<<"nextparents.data()=";nextparents.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err2, classname(), identities_.get());
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
@@ -1586,6 +1609,7 @@ namespace awkward {
         localindex.data(),
         offsets.data(),
         offsets.length() - 1);
+std::cout<<"awkward_ListArray_localindex_64:";std::cout<<"localindex.data()=";localindex.printMe();std::cout<<"offsets.data()=";offsets.printMe();std::cout<<"offsets.length()-1="<<offsets.length()-1;
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<ListOffsetArray64>(
         identities_,
@@ -1643,6 +1667,7 @@ namespace awkward {
         starts.data(),
         stops.data(),
         length());
+std::cout<<"awkward_ListArray_combinations_length_64:";std::cout<<"&totallen="<<&totallen;std::cout<<"offsets.data()=";offsets.printMe();std::cout<<"n="<<n;std::cout<<"replacement="<<replacement;std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"length()="<<length();
       util::handle_error(err1, classname(), identities_.get());
 
       std::vector<std::shared_ptr<int64_t>> tocarry;
@@ -1670,6 +1695,11 @@ namespace awkward {
         starts.data(),
         stops.data(),
         length());
+std::cout<<"awkward_ListArray_combinations_64:";std::cout<<"tocarryraw.data()=";
+            for(int i=0;i<length();i++){
+        std::cout<<tocarryraw.data()[i]<<",";
+    }
+std::cout<<"toindex.get()="<<toindex.get();std::cout<<"fromindex.get()="<<fromindex.get();std::cout<<"n="<<n;std::cout<<"replacement="<<replacement;std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"length()="<<length();
       util::handle_error(err2, classname(), identities_.get());
 
       ContentPtrVec contents;
@@ -1761,6 +1791,7 @@ namespace awkward {
         stable,
         ascending,
         false);
+std::cout<<"awkward_ListOffsetArray_argsort_strings:";std::cout<<"tocarry.data()=";tocarry.printMe();std::cout<<"parents.data()=";parents.printMe();std::cout<<"parents.length()="<<parents.length();std::cout<<"rawcontent->data()=";rawcontent->printMe();std::cout<<"util::make_starts(offsets_).data()=";util::make_starts(offsets_).printMe();std::cout<<"util::make_stops(offsets_).data()=";util::make_stops(offsets_).printMe();std::cout<<"stable="<<stable;std::cout<<"ascending="<<ascending;std::cout<<"false="<<false;
       util::handle_error(err, classname(), identities_.get());
 
       ContentPtr out = carry(tocarry, false);
@@ -1788,6 +1819,7 @@ namespace awkward {
         &globalstop,
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_global_startstop_64:";std::cout<<"&globalstart="<<&globalstart;std::cout<<"&globalstop="<<&globalstop;std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err1, classname(), identities_.get());
       int64_t nextlen = globalstop - globalstart;
 
@@ -1799,6 +1831,7 @@ namespace awkward {
         offsetscopy.data(),
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64:";std::cout<<"&maxcount="<<&maxcount;std::cout<<"offsetscopy.data()=";offsetscopy.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err2, classname(), identities_.get());
 
       Index64 nextcarry(nextlen);
@@ -1860,6 +1893,7 @@ namespace awkward {
         &globalstop,
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_global_startstop_64:";std::cout<<"&globalstart="<<&globalstart;std::cout<<"&globalstop="<<&globalstop;std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextparents(globalstop - globalstart);
@@ -1868,6 +1902,7 @@ namespace awkward {
         nextparents.data(),
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_local_nextparents_64:";std::cout<<"nextparents.data()=";nextparents.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err2, classname(), identities_.get());
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
@@ -1945,6 +1980,7 @@ namespace awkward {
         stable,
         ascending,
         true);
+std::cout<<"awkward_ListOffsetArray_argsort_strings:";std::cout<<"output.data()=";output.printMe();std::cout<<"parents.data()=";parents.printMe();std::cout<<"parents.length()="<<parents.length();std::cout<<"rawcontent->data()=";rawcontent->printMe();std::cout<<"util::make_starts(offsets_).data()=";util::make_starts(offsets_).printMe();std::cout<<"util::make_stops(offsets_).data()=";util::make_stops(offsets_).printMe();std::cout<<"stable="<<stable;std::cout<<"ascending="<<ascending;std::cout<<"true="<<true;
       util::handle_error(err, classname(), identities_.get());
 
       ContentPtr out = std::make_shared<NumpyArray>(output);
@@ -1973,6 +2009,7 @@ namespace awkward {
         &globalstop,
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_global_startstop_64:";std::cout<<"&globalstart="<<&globalstart;std::cout<<"&globalstop="<<&globalstop;std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err1, classname(), identities_.get());
       int64_t nextlen = globalstop - globalstart;
 
@@ -1984,6 +2021,7 @@ namespace awkward {
         offsetscopy.data(),
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64:";std::cout<<"&maxcount="<<&maxcount;std::cout<<"offsetscopy.data()=";offsetscopy.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err2, classname(), identities_.get());
 
       Index64 nextcarry(nextlen);
@@ -2067,6 +2105,7 @@ namespace awkward {
         &globalstop,
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_global_startstop_64:";std::cout<<"&globalstart="<<&globalstart;std::cout<<"&globalstop="<<&globalstop;std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextparents(globalstop - globalstart);
@@ -2075,6 +2114,7 @@ namespace awkward {
         nextparents.data(),
         offsets_.data(),
         offsets_.length() - 1);
+std::cout<<"awkward_ListOffsetArray_reduce_local_nextparents_64:";std::cout<<"nextparents.data()=";nextparents.printMe();std::cout<<"offsets_.data()=";offsets_.printMe();std::cout<<"offsets_.length()-1="<<offsets_.length()-1;
       util::handle_error(err2, classname(), identities_.get());
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
@@ -2120,6 +2160,7 @@ namespace awkward {
       stops.data(),
       lenstarts,
       at.at());
+std::cout<<"awkward_ListArray_getitem_next_at_64:";std::cout<<"nextcarry.data()=";nextcarry.printMe();std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"lenstarts="<<lenstarts;std::cout<<"at.at()="<<at.at();
     util::handle_error(err, classname(), identities_.get());
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
     return nextcontent.get()->getitem_next(nexthead, nexttail, advanced);
@@ -2151,6 +2192,7 @@ namespace awkward {
       start,
       stop,
       step);
+std::cout<<"awkward_ListArray_getitem_next_range_carrylength:";std::cout<<"&carrylength="<<&carrylength;std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"lenstarts="<<lenstarts;std::cout<<"start="<<start;std::cout<<"stop="<<stop;std::cout<<"step="<<step;
     util::handle_error(err1, classname(), identities_.get());
 
     IndexOf<T> nextoffsets(lenstarts + 1);
@@ -2166,6 +2208,7 @@ namespace awkward {
       start,
       stop,
       step);
+std::cout<<"awkward_ListArray_getitem_next_range_64:";std::cout<<"nextoffsets.data()=";nextoffsets.printMe();std::cout<<"nextcarry.data()=";nextcarry.printMe();std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"lenstarts="<<lenstarts;std::cout<<"start="<<start;std::cout<<"stop="<<stop;std::cout<<"step="<<step;
     util::handle_error(err2, classname(), identities_.get());
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
@@ -2183,6 +2226,7 @@ namespace awkward {
         &total,
         nextoffsets.data(),
         lenstarts);
+std::cout<<"awkward_ListArray_getitem_next_range_counts_64:";std::cout<<"&total="<<&total;std::cout<<"nextoffsets.data()=";nextoffsets.printMe();std::cout<<"lenstarts="<<lenstarts;
       util::handle_error(err1, classname(), identities_.get());
       Index64 nextadvanced(total);
       struct Error err2 = kernel::ListArray_getitem_next_range_spreadadvanced_64<T>(
@@ -2191,6 +2235,7 @@ namespace awkward {
         advanced.data(),
         nextoffsets.data(),
         lenstarts);
+std::cout<<"awkward_ListArray_getitem_next_range_spreadadvanced_64:";std::cout<<"nextadvanced.data()=";nextadvanced.printMe();std::cout<<"advanced.data()=";advanced.printMe();std::cout<<"nextoffsets.data()=";nextoffsets.printMe();std::cout<<"lenstarts="<<lenstarts;
       util::handle_error(err2, classname(), identities_.get());
       return std::make_shared<ListOffsetArrayOf<T>>(
         identities_,
@@ -2224,6 +2269,7 @@ namespace awkward {
         lenstarts,
         flathead.length(),
         content_.get()->length());
+std::cout<<"awkward_ListArray_getitem_next_array_64:";std::cout<<"nextcarry.data()=";nextcarry.printMe();std::cout<<"nextadvanced.data()=";nextadvanced.printMe();std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"flathead.data()=";flathead.printMe();std::cout<<"lenstarts="<<lenstarts;std::cout<<"flathead.length()="<<flathead.length();std::cout<<"content_.get()->length()="<<content_.get()->length();
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       if (advanced.is_empty_advanced()) {
@@ -2253,6 +2299,7 @@ namespace awkward {
         lenstarts,
         flathead.length(),
         content_.get()->length());
+std::cout<<"awkward_ListArray_getitem_next_array_advanced_64:";std::cout<<"nextcarry.data()=";nextcarry.printMe();std::cout<<"nextadvanced.data()=";nextadvanced.printMe();std::cout<<"starts.data()=";starts.printMe();std::cout<<"stops.data()=";stops.printMe();std::cout<<"flathead.data()=";flathead.printMe();std::cout<<"advanced.data()=";advanced.printMe();std::cout<<"lenstarts="<<lenstarts;std::cout<<"flathead.length()="<<flathead.length();std::cout<<"content_.get()->length()="<<content_.get()->length();
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
       return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);

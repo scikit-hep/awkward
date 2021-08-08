@@ -589,6 +589,8 @@ namespace awkward {
     bool
       is_subrange_equal(const Index64& starts, const Index64& stops) const override;
 
+  void printMe() const;
+
   protected:
     /// @brief Internal function that propagates the derivation of a contiguous
     /// version of this array from one axis to the next.

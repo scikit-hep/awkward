@@ -792,6 +792,13 @@ namespace awkward {
     }
   }
 
+  void NumpyArray::printMe() const{
+    for (int64_t i = 0;  i < length();  i++) {
+        std::cout << data()[i] << ", ";
+      }
+    }
+  }
+
   void
   NumpyArray::caches(std::vector<ArrayCachePtr>& out) const { }
 
