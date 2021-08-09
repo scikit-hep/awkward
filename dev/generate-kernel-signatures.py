@@ -14,7 +14,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 def reproducible_datetime():
 
     build_date = datetime.datetime.utcfromtimestamp(
-        int(os.environ.get('SOURCE_DATE_EPOCH', time.time()))
+        int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
     )
     return build_date.isoformat().replace("T", " AT ")[:22]
 
