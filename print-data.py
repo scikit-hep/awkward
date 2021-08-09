@@ -122,7 +122,6 @@ def insertPrintMe():
     #         new_file+=
 
 
-
 def slicer():
     new_file = """"""
     global num
