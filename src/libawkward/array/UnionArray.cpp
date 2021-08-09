@@ -517,11 +517,7 @@ namespace awkward {
     util::handle_error(err, classname(), identities_.get());
 
     Index64 nextcarry(tmpcarry.ptr(), 0, lenout, tmpcarry.ptr_lib());
-    auto out = contents_[(size_t)index].get()->carry(nextcarry, false);
-    std::cout << "out " << out->tostring() << std::endl;
-    std::cout << "lentags " << lentags << std::endl;
-    std::cout << "lenout " << lenout << std::endl;
-    return out;
+    return contents_[(size_t)index].get()->carry(nextcarry, false);
   }
 
   template <typename T, typename I>
