@@ -113,6 +113,14 @@ def insertPrintMe():
     x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Index.cpp"), "w")
     x.write(new_file)
     x.close()
+    # flag=0
+    # new_file=""""""
+    # x=open(os.path.join(CURRENT_DIR, "src", "libawkward","array", "NumpyArray.cpp"), "r")
+    # lines=x.readlines()
+    # for line in lines:
+    #     if 'NumpyArray::classname' in line and flag==0:
+    #         new_file+=
+
 
 
 def slicer():
