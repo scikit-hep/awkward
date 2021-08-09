@@ -398,7 +398,6 @@ namespace awkward {
       tags.data(),
       lentags);
     util::handle_error(err2, "UnionArray", nullptr);
-    std::cout<<"outindex "<<outindex.tostring()<<std::endl;
     return outindex;
   }
 
