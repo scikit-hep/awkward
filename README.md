@@ -191,13 +191,9 @@ python -m pytest -vv -rs tests-cuda
 
 Python projects can simply `import awkward`.
 
-C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` and `libawkward.so` or their static library equivalents. These libraries are shipped, along with the include files, as part of pip's installation.
-
-   * See the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/main/dependent-project) directory for examples.
-
 # Roadmap
 
-Since [version 0.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/0.4.0), Awkward Array has been compiled with versions of pybind11 that have [ABI version 4](https://github.com/pybind/pybind11/blob/v2.6.2/include/pybind11/detail/internals.h#L152-L153). Any other Python extension built with pybind11 ABI version 4 can consume and produce Awkward Arrays in the way [described here](https://github.com/scikit-hep/awkward-1.0/tree/main/dependent-project).
+Since [version 0.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/0.4.0), Awkward Array has been compiled with versions of pybind11 that have [ABI version 4](https://github.com/pybind/pybind11/blob/v2.6.2/include/pybind11/detail/internals.h#L152-L153).
 
 The table below indicates when interface-breaking changes are planned; each is discussed in pull requests and issues. It doesn't include new additions that don't interfere with old behavior or corrections to bugs (i.e. behaviors that were _never_ intended and fixed immediately). Each deprecated feature is announced by a `FutureWarning` that indicates the target removal version/date.
 
@@ -286,6 +282,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <td align="center"><a href="https://github.com/drahnreb"><img src="https://avatars.githubusercontent.com/u/25883607?v=4?s=100" width="100px;" alt=""/><br /><sub><b>.hard</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=drahnreb" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=drahnreb" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/HenryDayHall"><img src="https://avatars.githubusercontent.com/u/12996763?v=4?s=100" width="100px;" alt=""/><br /><sub><b>HenryDayHall</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=HenryDayHall" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/agoose77"><img src="https://avatars.githubusercontent.com/u/1248413?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Angus Hollands</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=agoose77" title="Tests">⚠️</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=agoose77" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/ioanaif"><img src="https://avatars.githubusercontent.com/u/9751871?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ioanaif</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ioanaif" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ioanaif" title="Tests">⚠️</a></td>
   </tr>
 </table>
 

@@ -4,9 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/Identities.h"
-#include "awkward/Index.h"
-#include "awkward/type/UnionType.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/BoolBuilder.h"
@@ -19,7 +16,6 @@
 #include "awkward/builder/RecordBuilder.h"
 #include "awkward/builder/IndexedBuilder.h"
 #include "awkward/builder/Complex128Builder.h"
-#include "awkward/array/UnionArray.h"
 
 #include "awkward/builder/UnionBuilder.h"
 
@@ -65,21 +61,6 @@ namespace awkward {
     for (auto x : contents_) {
       x.get()->clear();
     }
-  }
-
-  const ContentPtr
-  UnionBuilder::snapshot() const {
-    Index8 tags(tags_.ptr(), 0, tags_.length(), kernel::lib::cpu);
-    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
-    ContentPtrVec contents;
-    for (auto content : contents_) {
-      contents.push_back(content.get()->snapshot());
-    }
-    return UnionArray8_64(Identities::none(),
-                          util::Parameters(),
-                          tags,
-                          index,
-                          contents).simplify_uniontype(true, false);
   }
 
   bool
@@ -514,42 +495,42 @@ namespace awkward {
       int8_t i = 0;
       for (auto content : contents_) {
         if (IndexedGenericBuilder* raw =
-            dynamic_cast<IndexedGenericBuilder*>(content.get())) {
+          dynamic_cast<IndexedGenericBuilder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
         else if (IndexedI32Builder* raw =
-                 dynamic_cast<IndexedI32Builder*>(content.get())) {
+          dynamic_cast<IndexedI32Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
         else if (IndexedIU32Builder* raw =
-                 dynamic_cast<IndexedIU32Builder*>(content.get())) {
+          dynamic_cast<IndexedIU32Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
         else if (IndexedI64Builder* raw =
-                 dynamic_cast<IndexedI64Builder*>(content.get())) {
+          dynamic_cast<IndexedI64Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
         else if (IndexedIO32Builder* raw =
-                 dynamic_cast<IndexedIO32Builder*>(content.get())) {
+          dynamic_cast<IndexedIO32Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;
           }
         }
         else if (IndexedIO64Builder* raw =
-                 dynamic_cast<IndexedIO64Builder*>(content.get())) {
+          dynamic_cast<IndexedIO64Builder*>(content.get())) {
           if (raw->arrayptr() == array.get()) {
             tofill = content;
             break;

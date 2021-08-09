@@ -5,7 +5,6 @@
 
 #include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/Index.h"
 
 #include <memory>
 

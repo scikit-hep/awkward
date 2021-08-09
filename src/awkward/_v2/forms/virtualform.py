@@ -51,3 +51,39 @@ class VirtualForm(Form):
             out["form"] = self._form._tolist_part(verbose, toplevel=False)
         out["has_length"] = self._has_length
         return self._tolist_extra(out, verbose)
+
+    @property
+    def purelist_isregular(self):
+        if self._form is None:
+            raise ValueError(
+                "cannot determine the type of a virtual array without a Form"
+            )
+        else:
+            return self._form.purelist_isregular()
+
+    @property
+    def purelist_depth(self):
+        if self._form is None:
+            raise ValueError(
+                "cannot determine the type of a virtual array without a Form"
+            )
+        else:
+            return self._form.purelist_depth()
+
+    @property
+    def minmax_depth(self):
+        if self._form is None:
+            raise ValueError(
+                "cannot determine the type of a virtual array without a Form"
+            )
+        else:
+            return self._form.minmax_depth()
+
+    @property
+    def branch_depth(self):
+        if self._form is None:
+            raise ValueError(
+                "cannot determine the type of a virtual array without a Form"
+            )
+        else:
+            return self._form.branch_depth()

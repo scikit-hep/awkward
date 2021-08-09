@@ -112,3 +112,20 @@ class NumpyForm(Form):
             if verbose or len(self._inner_shape) > 0:
                 out["inner_shape"] = list(self._inner_shape)
             return self._tolist_extra(out, verbose)
+
+    @property
+    def purelist_isregular(self):
+        return True
+
+    @property
+    def purelist_depth(self):
+        return len(self.inner_shape) + 1
+
+    @property
+    def minmax_depth(self):
+        depth = len(self.inner_shape) + 1
+        return (depth, depth)
+
+    @property
+    def branch_depth(self):
+        return (False, len(self.inner_shape) + 1)

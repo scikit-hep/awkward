@@ -477,6 +477,7 @@ def zip(
     with_name=None,
     highlevel=True,
     behavior=None,
+    right_broadcast=False,
 ):
     """
     Args:
@@ -496,6 +497,8 @@ def zip(
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        right_broadcast (bool): If True, follow rules for implicit
+            right-broadcasting, as described in #ak.broadcast_arrays.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -639,9 +642,8 @@ def zip(
         layouts,
         getfunction,
         behavior,
-        right_broadcast=False,
+        right_broadcast=right_broadcast,
         pass_depth=True,
-        regular_to_jagged=True,
     )
     assert isinstance(out, tuple) and len(out) == 1
     out = out[0]
@@ -1335,9 +1337,9 @@ def broadcast_arrays(*arrays, **kwargs):
     Awkward Array's broadcasting manages to have it both ways by applying the
     following rules:
 
-       * If a dimension is regular (i.e. #ak.types.RegularType), like NumPy,
+       * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
          implicit broadcasting aligns to the right, like NumPy.
-       * If a dimension is variable (i.e. #ak.types.ListType), which can
+       * If any dimension is variable (i.e. #ak.types.ListType), which can
          never be true of NumPy, implicit broadcasting aligns to the left.
        * Explicit broadcasting with a length-1 regular dimension always
          broadcasts, like NumPy.
@@ -1378,6 +1380,7 @@ def broadcast_arrays(*arrays, **kwargs):
         left_broadcast=left_broadcast,
         right_broadcast=right_broadcast,
         pass_depth=False,
+        numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
     if highlevel:
@@ -2321,7 +2324,7 @@ def _pack_layout(layout):
         return layout
 
     elif isinstance(layout, ak.layout.Record):
-        return layout
+        return ak.layout.Record(layout.array[layout.at : layout.at + 1], 0)
 
     # Finally, fall through to failure
     else:
@@ -2352,6 +2355,7 @@ def packed(array, highlevel=True, behavior=None):
     - #ak.layout.BitMaskedArray becomes an #ak.layout.IndexedOptionArray if it contains records, stays a #ak.layout.BitMaskedArray otherwise
     - #ak.layout.UnionArray gets projected contents
     - #ak.layout.VirtualArray gets materialized
+    - #ak.layout.Record becomes a record over a single-item #ak.layout.RecordArray
 
     Example:
 

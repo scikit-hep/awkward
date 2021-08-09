@@ -4,22 +4,13 @@
 
 #include <stdexcept>
 
-#include "awkward/Identities.h"
-#include "awkward/Index.h"
-
-#include "awkward/Identities.h"
-#include "awkward/Index.h"
-#include "awkward/array/RecordArray.h"
-#include "awkward/array/EmptyArray.h"
-#include "awkward/type/RecordType.h"
-#include "awkward/type/UnknownType.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
-#include "awkward/virtual/ArrayCache.h"
 
 #include "awkward/builder/RecordBuilder.h"
+#include "awkward/util.h"
 
 namespace awkward {
   const BuilderPtr
@@ -92,32 +83,6 @@ namespace awkward {
     nextindex_ = -1;
     nexttotry_ = 0;
     keys_size_ = 0;
-  }
-
-  const ContentPtr
-  RecordBuilder::snapshot() const {
-    if (length_ == -1) {
-      return std::make_shared<EmptyArray>(Identities::none(),
-                                          util::Parameters());
-    }
-    util::Parameters parameters;
-    if (nameptr_ != nullptr) {
-      parameters["__record__"] = util::quote(name_);
-    }
-    ContentPtrVec contents;
-    util::RecordLookupPtr recordlookup =
-      std::make_shared<util::RecordLookup>();
-    for (size_t i = 0;  i < contents_.size();  i++) {
-      contents.push_back(contents_[i].get()->snapshot());
-      recordlookup.get()->push_back(keys_[i]);
-    }
-    std::vector<ArrayCachePtr> caches;  // nothing is virtual here
-    return std::make_shared<RecordArray>(Identities::none(),
-                                         parameters,
-                                         contents,
-                                         recordlookup,
-                                         length_,
-                                         caches);
   }
 
   bool

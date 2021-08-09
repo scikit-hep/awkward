@@ -569,14 +569,6 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const override;
 
-    const ContentPtr
-      getitem_next(const SliceVarNewAxis& varnewaxis,
-                   const Slice& tail,
-                   const Index64& advanced) const override;
-
-    const SliceJagged64
-      varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const override;
-
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
     const ContentPtr
@@ -766,12 +758,6 @@ namespace awkward {
       getitem_next_jagged(const Index64& slicestarts,
                           const Index64& slicestops,
                           const SliceJagged64& slicecontent,
-                          const Slice& tail) const override;
-
-    const ContentPtr
-      getitem_next_jagged(const Index64& slicestarts,
-                          const Index64& slicestops,
-                          const SliceVarNewAxis& slicecontent,
                           const Slice& tail) const override;
 
     /// @brief Internal function to fill JSON with boolean values.

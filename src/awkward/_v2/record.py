@@ -71,10 +71,19 @@ class Record(object):
         elif where is Ellipsis:
             raise IndexError("scalar Record cannot be sliced by an ellipsis (`...`)")
 
-        elif isinstance(where, tuple):
-            raise NotImplementedError("needs _getitem_next")
+        elif isinstance(where, tuple) and len(where) == 0:
+            return self
+
+        elif isinstance(where, tuple) and len(where) == 1:
+            return self.__getitem__(where[0])
+
+        elif isinstance(where, tuple) and ak._util.isstr(where[0]):
+            return self._getitem_field(where[0]).__getitem__(where[1:])
 
         elif isinstance(where, ak.highlevel.Array):
+            raise IndexError("scalar Record cannot be sliced by an array")
+
+        elif isinstance(where, ak.layout.Content):
             raise IndexError("scalar Record cannot be sliced by an array")
 
         elif isinstance(where, Content):

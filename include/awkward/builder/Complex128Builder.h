@@ -56,9 +56,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// A Complex128Builder is never active.
@@ -115,6 +112,11 @@ namespace awkward {
 
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
+
+    const ArrayBuilderOptions&
+      options() const { return options_; }
+
+    const GrowableBuffer<std::complex<double>>& buffer() const { return buffer_; }
 
   private:
     const ArrayBuilderOptions options_;

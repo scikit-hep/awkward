@@ -3,8 +3,9 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
 np = ak.nplike.NumPyMetadata.instance()
 
@@ -54,8 +55,14 @@ class ByteMaskedArray(Content):
         return self._valid_when
 
     @property
+    def nplike(self):
+        return self._mask.nplike
+
+    Form = ByteMaskedForm
+
+    @property
     def form(self):
-        return ak._v2.forms.ByteMaskedForm(
+        return self.Form(
             self._mask.form,
             self._content.form,
             self._valid_when,
@@ -83,30 +90,137 @@ class ByteMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def _getitem_nothing(self):
+        return self._content._getitem_range(slice(0, 0))
+
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+        if not (0 <= where < len(self)):
+            raise NestedIndexError(self, where)
         if self._mask[where] == self._valid_when:
-            return self._content[where]
+            return self._content._getitem_at(where)
         else:
             return None
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
+        assert step == 1
         return ByteMaskedArray(
-            Index(self._mask[start:stop]),
-            self._content[start:stop],
-            valid_when=self._valid_when,
+            self._mask[start:stop],
+            self._content._getitem_range(slice(start, stop)),
+            self._valid_when,
+            self._range_identifier(start, stop),
+            self._parameters,
         )
 
-    def _getitem_field(self, where):
+    def _getitem_field(self, where, only_fields=()):
         return ByteMaskedArray(
-            self._mask, self._content[where], valid_when=self._valid_when
+            self._mask,
+            self._content._getitem_field(where, only_fields),
+            self._valid_when,
+            self._field_identifier(where),
+            None,
         )
 
-    def _getitem_fields(self, where):
+    def _getitem_fields(self, where, only_fields=()):
         return ByteMaskedArray(
-            self._mask, self._content[where], valid_when=self._valid_when
+            self._mask,
+            self._content._getitem_fields(where, only_fields),
+            self._valid_when,
+            self._fields_identifier(where),
+            None,
         )
+
+    def _carry(self, carry, allow_lazy, exception):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        try:
+            nextmask = self._mask[carry.data]
+        except IndexError as err:
+            if issubclass(exception, NestedIndexError):
+                raise exception(self, carry.data, str(err))
+            else:
+                raise exception(str(err))
+
+        return ByteMaskedArray(
+            nextmask,
+            self._content._carry(carry, allow_lazy, exception),
+            self._valid_when,
+            self._carry_identifier(carry, exception),
+            self._parameters,
+        )
+
+    def nextcarry_outindex(self, numnull):
+        nplike = self.nplike
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_numnull",
+                numnull.dtype.type,
+                self._mask.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+            )
+        )
+        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
+        outindex = ak._v2.index.Index64.empty(len(self), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+                nextcarry.dtype.type,
+                outindex.dtype.type,
+                self._mask.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                outindex.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+            )
+        )
+        return nextcarry, outindex
+
+    def _getitem_next(self, head, tail, advanced):
+        nplike = self.nplike  # noqa: F841
+
+        if head == ():
+            return self
+
+        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+            nexthead, nexttail = self._headtail(tail)
+            numnull = ak._v2.index.Index64.empty(1, nplike)
+            nextcarry, outindex = self.nextcarry_outindex(numnull)
+
+            next = self._content._carry(nextcarry, True, NestedIndexError)
+            out = next._getitem_next(head, tail, advanced)
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                outindex,
+                out,
+                self._identifier,
+                self._parameters,
+            )
+            return out2._simplify_optiontype()
+
+        elif ak._util.isstr(head):
+            return self._getitem_next_field(head, tail, advanced)
+
+        elif isinstance(head, list):
+            return self._getitem_next_fields(head, tail, advanced)
+
+        elif head is np.newaxis:
+            return self._getitem_next_newaxis(tail, advanced)
+
+        elif head is Ellipsis:
+            return self._getitem_next_ellipsis(tail, advanced)
+
+        elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+            raise NotImplementedError
+
+        else:
+            raise AssertionError(repr(head))

@@ -3,10 +3,10 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/ArrayBuilder.cpp", line)
 
 #include <sstream>
+#include <stdexcept>
 
 #include "awkward/common.h"
 #include "awkward/Content.h"
-#include "awkward/type/Type.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Builder.h"
 #include "awkward/builder/UnknownBuilder.h"
@@ -17,17 +17,6 @@ namespace awkward {
   ArrayBuilder::ArrayBuilder(const ArrayBuilderOptions& options)
       : builder_(UnknownBuilder::fromempty(options)) { }
 
-  const std::string
-  ArrayBuilder::tostring() const {
-    util::TypeStrs typestrs;
-    typestrs["char"] = "char";
-    typestrs["string"] = "string";
-    std::stringstream out;
-    out << "<ArrayBuilder length=\"" << length() << "\" type=\""
-        << type(typestrs).get()->tostring() << "\"/>";
-    return out.str();
-  }
-
   int64_t
   ArrayBuilder::length() const {
     return builder_.get()->length();
@@ -36,41 +25,6 @@ namespace awkward {
   void
   ArrayBuilder::clear() {
     builder_.get()->clear();
-  }
-
-  const TypePtr
-  ArrayBuilder::type(const util::TypeStrs& typestrs) const {
-    return builder_.get()->snapshot().get()->type(typestrs);
-  }
-
-  const ContentPtr
-  ArrayBuilder::snapshot() const {
-    return builder_.get()->snapshot();
-  }
-
-  const ContentPtr
-  ArrayBuilder::getitem_at(int64_t at) const {
-    return snapshot().get()->getitem_at(at);
-  }
-
-  const ContentPtr
-  ArrayBuilder::getitem_range(int64_t start, int64_t stop) const {
-    return snapshot().get()->getitem_range(start, stop);
-  }
-
-  const ContentPtr
-  ArrayBuilder::getitem_field(const std::string& key) const {
-    return snapshot().get()->getitem_field(key);
-  }
-
-  const ContentPtr
-  ArrayBuilder::getitem_fields(const std::vector<std::string>& keys) const {
-    return snapshot().get()->getitem_fields(keys);
-  }
-
-  const ContentPtr
-  ArrayBuilder::getitem(const Slice& where) const {
-    return snapshot().get()->getitem(where);
   }
 
   void
@@ -210,34 +164,8 @@ namespace awkward {
   }
 
   void
-  ArrayBuilder::append(const ContentPtr& array, int64_t at) {
-    int64_t length = array.get()->length();
-    int64_t regular_at = at;
-    if (regular_at < 0) {
-      regular_at += length;
-    }
-    if (!(0 <= regular_at  &&  regular_at < length)) {
-      throw std::invalid_argument(
-        std::string("'append' index (")
-        + std::to_string(at) + std::string(") out of bounds (")
-        + std::to_string(length) + std::string(")")
-        + FILENAME(__LINE__));
-    }
-    return append_nowrap(array, regular_at);
-  }
-
-  void
   ArrayBuilder::append_nowrap(const ContentPtr& array, int64_t at) {
     maybeupdate(builder_.get()->append(array, at));
-  }
-
-  void
-  ArrayBuilder::extend(const ContentPtr& array) {
-    BuilderPtr tmp = builder_;
-    for (int64_t i = 0;  i < array.get()->length();  i++) {
-      tmp = builder_.get()->append(array, i);
-      maybeupdate(tmp);
-    }
   }
 
   void

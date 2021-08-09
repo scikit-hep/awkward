@@ -2,10 +2,8 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/DatetimeBuilder.cpp", line)
 
-#include "awkward/Identities.h"
-#include "awkward/array/EmptyArray.h"
-#include "awkward/array/NumpyArray.h"
-#include "awkward/type/PrimitiveType.h"
+#include <stdexcept>
+
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Complex128Builder.h"
 #include "awkward/builder/Float64Builder.h"
@@ -13,6 +11,7 @@
 #include "awkward/builder/UnionBuilder.h"
 
 #include "awkward/builder/DatetimeBuilder.h"
+#include "awkward/util.h"
 #include "awkward/datetime_util.h"
 
 namespace awkward {
@@ -44,28 +43,6 @@ namespace awkward {
   void
   DatetimeBuilder::clear() {
     content_.clear();
-  }
-
-  const ContentPtr
-  DatetimeBuilder::snapshot() const {
-    std::vector<ssize_t> shape = { (ssize_t)content_.length() };
-    std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
-
-    auto dtype = util::name_to_dtype(units_);
-    auto format = std::string(util::dtype_to_format(dtype))
-      .append(std::to_string(util::dtype_to_itemsize(dtype)))
-      .append(util::format_to_units(units_));
-    return std::make_shared<NumpyArray>(
-             Identities::none(),
-             util::Parameters(),
-             content_.ptr(),
-             shape,
-             strides,
-             0,
-             sizeof(int64_t),
-             format,
-             dtype,
-             kernel::lib::cpu);
   }
 
   bool

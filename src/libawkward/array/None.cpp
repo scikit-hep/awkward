@@ -290,14 +290,14 @@ namespace awkward {
   const SliceItemPtr
   None::asslice() const {
     throw std::runtime_error(
-      std::string("undefined opteration: None::asslice")
+      std::string("undefined operation: None::asslice")
       + FILENAME(__LINE__));
   }
 
   const ContentPtr
   None::fillna(const ContentPtr& value) const {
     throw std::runtime_error(
-      std::string("undefined opteration: None::fillna")
+      std::string("undefined operation: None::fillna")
       + FILENAME(__LINE__));
   }
 
@@ -454,32 +454,6 @@ namespace awkward {
                             const Slice& tail) const {
     throw std::runtime_error(
       std::string("undefined operation: None::getitem_next_jagged(jagged)")
-      + FILENAME(__LINE__));
-  }
-
-  const ContentPtr
-  None::getitem_next_jagged(const Index64& slicestarts,
-                            const Index64& slicestops,
-                            const SliceVarNewAxis& slicecontent,
-                            const Slice& tail) const {
-    throw std::runtime_error(
-      std::string("undefined operation: None::getitem_next_jagged(varnewaxis)")
-      + FILENAME(__LINE__));
-  }
-
-  const ContentPtr
-  None::getitem_next(const SliceVarNewAxis& varnewaxis,
-                     const Slice& tail,
-                     const Index64& advanced) const {
-    throw std::runtime_error(
-      std::string("undefined operation: None::getitem_next(varnewaxis)")
-      + FILENAME(__LINE__));
-  }
-
-  const SliceJagged64
-  None::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
-    throw std::runtime_error(
-      std::string("undefined operation: None::varaxis_to_jagged(varnewaxis)")
       + FILENAME(__LINE__));
   }
 

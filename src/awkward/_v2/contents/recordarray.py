@@ -7,9 +7,12 @@ try:
 except ImportError:
     from collections import Iterable
 
+import numpy as np
+
 import awkward as ak
-from awkward._v2.contents.content import Content
 from awkward._v2.record import Record
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.recordform import RecordForm
 
 
 class RecordArray(Content):
@@ -79,6 +82,10 @@ class RecordArray(Content):
         self._init(identifier, parameters)
 
     @property
+    def numcontents(self):
+        return len(self._contents)
+
+    @property
     def contents(self):
         return self._contents
 
@@ -91,8 +98,17 @@ class RecordArray(Content):
         return self._keys is None
 
     @property
+    def nplike(self):
+        if len(self._contents) == 0:
+            return ak.nplike.Numpy.instance()
+        else:
+            return self._contents[0].nplike
+
+    Form = RecordForm
+
+    @property
     def form(self):
-        return ak._v2.forms.RecordForm(
+        return self.Form(
             [x.form for x in self._contents],
             self._keys,
             has_identifier=self._identifier is not None,
@@ -132,16 +148,14 @@ class RecordArray(Content):
         return "".join(out)
 
     def index_to_key(self, index):
-        if 0 <= index < len(self._contents):
+        if 0 <= index < self.numcontents:
             if self._keys is None:
                 return str(index)
             else:
                 return self._keys[index]
         else:
             raise IndexError(
-                "no index {0} in record with {1} fields".format(
-                    index, len(self._contents)
-                )
+                "no index {0} in record with {1} fields".format(index, self.numcontents)
             )
 
     def key_to_index(self, key):
@@ -151,7 +165,7 @@ class RecordArray(Content):
             except ValueError:
                 pass
             else:
-                if 0 <= i < len(self._contents):
+                if 0 <= i < self.numcontents:
                     return i
         else:
             try:
@@ -161,9 +175,7 @@ class RecordArray(Content):
             else:
                 return i
         raise IndexError(
-            "no field {0} in record with {1} fields".format(
-                repr(key), len(self._contents)
-            )
+            "no field {0} in record with {1} fields".format(repr(key), self.numcontents)
         )
 
     def content(self, index_or_key):
@@ -179,37 +191,158 @@ class RecordArray(Content):
             )
         return self._contents[index][: self._length]
 
+    def _getitem_nothing(self):
+        return self._getitem_range(slice(0, 0))
+
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+        if not (0 <= where < len(self)):
+            raise NestedIndexError(self, where)
         return Record(self, where)
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
-        if len(self._contents) == 0:
+        assert step == 1
+        if self.numcontents == 0:
             start = min(max(start, 0), self._length)
             stop = min(max(stop, 0), self._length)
             if stop < start:
                 stop = start
-            return RecordArray([], self._keys, stop - start)
-        else:
             return RecordArray(
-                [x[start:stop] for x in self._contents],
+                [],
                 self._keys,
                 stop - start,
+                self._range_identifier(start, stop),
+                self._parameters,
+            )
+        else:
+            nextslice = slice(start, stop)
+            return RecordArray(
+                [x._getitem_range(nextslice) for x in self._contents],
+                self._keys,
+                stop - start,
+                self._range_identifier(start, stop),
+                self._parameters,
             )
 
-    def _getitem_field(self, where):
-        return self.content(where)
+    def _getitem_field(self, where, only_fields=()):
+        if len(only_fields) == 0:
+            return self.content(where)
 
-    def _getitem_fields(self, where):
+        else:
+            nexthead, nexttail = self._headtail(only_fields)
+            if ak.util.isstr(nexthead):
+                return self.content(where)._getitem_field(nexthead, nexttail)
+            else:
+                return self.content(where)._getitem_fields(nexthead, nexttail)
+
+    def _getitem_fields(self, where, only_fields=()):
         indexes = [self.key_to_index(key) for key in where]
         if self._keys is None:
-            return RecordArray([self.content(i) for i in indexes], None)
+            keys = None
         else:
-            return RecordArray(
-                [self.content(i) for i in indexes],
-                [self._keys[i] for i in indexes],
+            keys = [self._keys[i] for i in indexes]
+
+        if len(only_fields) == 0:
+            contents = [self.content(i) for i in indexes]
+        else:
+            nexthead, nexttail = self._headtail(only_fields)
+            if ak._util.isstr(nexthead):
+                contents = [
+                    self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
+                ]
+            else:
+                contents = [
+                    self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
+                ]
+
+        return RecordArray(
+            contents,
+            keys,
+            self._fields_identifier(where),
+            None,
+        )
+
+    def _carry(self, carry, allow_lazy, exception):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        if allow_lazy:
+            nplike, where = carry.nplike, carry.data
+
+            if allow_lazy != "copied":
+                where = where.copy()
+
+            negative = where < 0
+            if nplike.any(negative):
+                where[negative] += self._length
+
+            if nplike.any(where >= self._length):
+                if issubclass(exception, NestedIndexError):
+                    raise exception(self, where)
+                else:
+                    raise exception("index out of range")
+
+            nextindex = ak._v2.index.Index64(where)
+            return ak._v2.contents.indexedarray.IndexedArray(
+                nextindex,
+                self,
+                self._carry_identifier(carry, exception),
+                None,
             )
+
+        else:
+            contents = [
+                self.content(i)._carry(carry, allow_lazy, exception)
+                for i in range(self.numcontents)
+            ]
+            if issubclass(carry.dtype.type, np.integer):
+                length = len(carry)
+            else:
+                length = len(self)
+            return RecordArray(
+                contents,
+                self._keys,
+                length,
+                self._carry_identifier(carry, exception),
+                self._parameters,
+            )
+
+    def _getitem_next(self, head, tail, advanced):
+        nplike = self.nplike  # noqa: F841
+
+        if head == ():
+            return self
+
+        elif ak._util.isstr(head):
+            return self._getitem_next_field(head, tail, advanced)
+
+        elif isinstance(head, list):
+            return self._getitem_next_fields(head, tail, advanced)
+
+        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+            raise NotImplementedError
+
+        else:
+            nexthead, nexttail = self._headtail(tail)
+
+            contents = []
+            for i in range(len(self._contents)):
+                contents.append(self.content(i)._getitem_next(head, (), advanced))
+
+            parameters = None
+            if (
+                isinstance(
+                    head,
+                    (
+                        slice,
+                        ak._v2.contents.ListOffsetArray,
+                        ak._v2.contents.IndexedOptionArray,
+                    ),
+                )
+                or head is Ellipsis
+                or advanced is None
+            ):
+                parameters = self._parameters
+            next = RecordArray(contents, self._keys, None, self._identifier, parameters)
+            return next._getitem_next(nexthead, nexttail, advanced)

@@ -3,8 +3,9 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content
 from awkward._v2.index import Index
+from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.forms.indexedoptionform import IndexedOptionForm
 
 np = ak.nplike.NumPyMetadata.instance()
 
@@ -43,8 +44,14 @@ class IndexedOptionArray(Content):
         return self._content
 
     @property
+    def nplike(self):
+        return self._index.nplike
+
+    Form = IndexedOptionForm
+
+    @property
     def form(self):
-        return ak._v2.forms.IndexedOptionForm(
+        return self.Form(
             self._index.form,
             self._content.form,
             has_identifier=self._identifier is not None,
@@ -69,23 +76,130 @@ class IndexedOptionArray(Content):
         out.append(post)
         return "".join(out)
 
+    def _getitem_nothing(self):
+        return self._content._getitem_range(slice(0, 0))
+
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if 0 > where or where >= len(self):
-            raise IndexError("array index out of bounds")
+        if not (0 <= where < len(self)):
+            raise NestedIndexError(self, where)
         if self._index[where] < 0:
             return None
         else:
-            return self._content[self._index[where]]
+            return self._content._getitem_at(self._index[where])
 
     def _getitem_range(self, where):
+        start, stop, step = where.indices(len(self))
+        assert step == 1
         return IndexedOptionArray(
-            Index(self._index[where.start : where.stop]), self._content
+            self._index[start:stop],
+            self._content,
+            self._range_identifier(start, stop),
+            self._parameters,
         )
 
-    def _getitem_field(self, where):
-        return IndexedOptionArray(self._index, self._content[where])
+    def _getitem_field(self, where, only_fields=()):
+        return IndexedOptionArray(
+            self._index,
+            self._content._getitem_field(where, only_fields),
+            self._field_identifier(where),
+            None,
+        )
 
-    def _getitem_fields(self, where):
-        return IndexedOptionArray(self._index, self._content[where])
+    def _getitem_fields(self, where, only_fields=()):
+        return IndexedOptionArray(
+            self._index,
+            self._content._getitem_fields(where, only_fields),
+            self._fields_identifier(where),
+            None,
+        )
+
+    def _carry(self, carry, allow_lazy, exception):
+        assert isinstance(carry, ak._v2.index.Index)
+
+        try:
+            nextindex = self._index[carry.data]
+        except IndexError as err:
+            if issubclass(exception, NestedIndexError):
+                raise exception(self, carry.data, str(err))
+            else:
+                raise exception(str(err))
+
+        return IndexedOptionArray(
+            nextindex,
+            self._content,
+            self._carry_identifier(carry, exception),
+            self._parameters,
+        )
+
+    def nextcarry_outindex(self, nplike):
+        numnull = ak._v2.index.Index64.empty(1, nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_numnull",
+                numnull.dtype.type,
+                self._index.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._index.to(nplike),
+                len(self._index),
+            )
+        )
+        nextcarry = ak._v2.index.Index64.empty(len(self._index) - numnull[0], nplike)
+        outindex = ak._v2.index.Index64.empty(len(self._index), nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_getitem_nextcarry_outindex",
+                nextcarry.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                outindex.to(nplike),
+                self._index.to(nplike),
+                len(self._index),
+                len(self._content),
+            )
+        )
+
+        return numnull[0], nextcarry, outindex
+
+    def _getitem_next(self, head, tail, advanced):
+        nplike = self.nplike  # noqa: F841
+
+        if head == ():
+            return self
+
+        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+            nexthead, nexttail = self._headtail(tail)
+
+            numnull, nextcarry, outindex = self.nextcarry_outindex(nplike)
+
+            next = self._content._carry(nextcarry, True, NestedIndexError)
+            out = next._getitem_next(head, tail, advanced)
+            out2 = IndexedOptionArray(outindex, out, self._identifier, self._parameters)
+            return out2._simplify_optiontype()
+
+        elif ak._util.isstr(head):
+            return self._getitem_next_field(head, tail, advanced)
+
+        elif isinstance(head, list) and ak._util.isstr(head[0]):
+            return self._getitem_next_fields(head, tail, advanced)
+
+        elif head is np.newaxis:
+            return self._getitem_next_newaxis(tail, advanced)
+
+        elif head is Ellipsis:
+            return self._getitem_next_ellipsis(tail, advanced)
+
+        elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            raise NotImplementedError
+
+        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+            raise NotImplementedError
+
+        else:
+            raise AssertionError(repr(head))
