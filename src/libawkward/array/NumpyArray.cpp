@@ -796,7 +796,6 @@ namespace awkward {
     for (int64_t i = 0;  i < length();  i++) {
         std::cout << data()[i] << ", ";
       }
-    }
   }
 
   void
