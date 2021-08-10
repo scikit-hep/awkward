@@ -158,8 +158,8 @@ namespace awkward {
   int64_t LayoutBuilder::error_id = 0;
 
   LayoutBuilder::LayoutBuilder(const FormPtr& form,
-                                       const ArrayBuilderOptions& options,
-                                       bool vm_init)
+                               const ArrayBuilderOptions& options,
+                               bool vm_init)
     : initial_(options.initial()),
       length_(8),
       builder_(formBuilderFromA(form)),
@@ -295,7 +295,7 @@ namespace awkward {
       std::cout << i.second.get()->toNumpyArray().get()->tostring();
       std::cout << "\n";
     }
-    std::cout << "array:\n" << snapshot().get()->tostring() << "\n";
+    // FIXME refactoring std::cout << "array:\n" << snapshot().get()->tostring() << "\n";
   }
 
   const FormPtr
@@ -306,6 +306,18 @@ namespace awkward {
   const std::string
   LayoutBuilder::vm_source() const {
     return vm_source_;
+  }
+
+  const std::shared_ptr<ForthMachine32>
+  LayoutBuilder::vm() const {
+    if (vm_ != nullptr) {
+      return vm_;
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("LayoutBuilder is not connected to a Virtual Machine ")
+        + FILENAME(__LINE__));
+    }
   }
 
   const std::string
@@ -334,41 +346,46 @@ namespace awkward {
     return length_;
   }
 
+  void
+  LayoutBuilder::pre_snapshot() const {
+    vm_.get()->maybe_throw(util::ForthError::user_halt, ignore_);
+  }
+
   const TypePtr
   LayoutBuilder::type(const util::TypeStrs& typestrs) const {
-    return builder_.get()->snapshot(vm_.get()->outputs()).get()->type(typestrs);
+    // FIXME refactoring return builder_.get()->snapshot(vm().get()->outputs()).get()->type(typestrs);
   }
 
-  const ContentPtr
-  LayoutBuilder::snapshot() const {
-    vm_.get()->maybe_throw(util::ForthError::user_halt, ignore_);
-    return builder_.get()->snapshot(vm_.get()->outputs());
-  }
+  // const ContentPtr
+  // LayoutBuilder::snapshot() const {
+  //   pre_snapshot();
+  //   return builder_.get()->snapshot(vm().get()->outputs());
+  // }
 
-  const ContentPtr
-  LayoutBuilder::getitem_at(int64_t at) const {
-    return snapshot().get()->getitem_at(at);
-  }
-
-  const ContentPtr
-  LayoutBuilder::getitem_range(int64_t start, int64_t stop) const {
-    return snapshot().get()->getitem_range(start, stop);
-  }
-
-  const ContentPtr
-  LayoutBuilder::getitem_field(const std::string& key) const {
-    return snapshot().get()->getitem_field(key);
-  }
-
-  const ContentPtr
-  LayoutBuilder::getitem_fields(const std::vector<std::string>& keys) const {
-    return snapshot().get()->getitem_fields(keys);
-  }
-
-  const ContentPtr
-  LayoutBuilder::getitem(const Slice& where) const {
-    return snapshot().get()->getitem(where);
-  }
+  // const ContentPtr
+  // LayoutBuilder::getitem_at(int64_t at) const {
+  //   return snapshot().get()->getitem_at(at);
+  // }
+  //
+  // const ContentPtr
+  // LayoutBuilder::getitem_range(int64_t start, int64_t stop) const {
+  //   return snapshot().get()->getitem_range(start, stop);
+  // }
+  //
+  // const ContentPtr
+  // LayoutBuilder::getitem_field(const std::string& key) const {
+  //   return snapshot().get()->getitem_field(key);
+  // }
+  //
+  // const ContentPtr
+  // LayoutBuilder::getitem_fields(const std::vector<std::string>& keys) const {
+  //   return snapshot().get()->getitem_fields(keys);
+  // }
+  //
+  // const ContentPtr
+  // LayoutBuilder::getitem(const Slice& where) const {
+  //   return snapshot().get()->getitem(where);
+  // }
 
   void
   LayoutBuilder::null() {

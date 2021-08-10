@@ -27,9 +27,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
+    // /// @brief Turns the accumulated data into a Content array.
+    // const ContentPtr
+    //   snapshot(const ForthOutputBufferMap& outputs) const override;
 
     /// @brief The Form describing the array.
     const FormPtr

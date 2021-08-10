@@ -34,9 +34,9 @@ namespace awkward {
     virtual const std::string
       classname() const = 0;
 
-    /// @brief Turns the accumulated data into a Content array.
-    virtual const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const = 0;
+    // /// @brief Turns the accumulated data into a Content array.
+    // virtual const ContentPtr
+    //   snapshot(const ForthOutputBufferMap& outputs) const = 0;
 
     /// @brief The Form describing the array.
     virtual const FormPtr

@@ -27,9 +27,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
+    // /// @brief Turns the accumulated data into a Content array.
+    // const ContentPtr
+    //   snapshot(const ForthOutputBufferMap& outputs) const override;
 
     /// @brief The Form describing the array.
     const FormPtr
@@ -97,6 +97,8 @@ namespace awkward {
     /// @brief Ends a nested list.
     void
       end_list(LayoutBuilder* builder) override;
+
+    const FormBuilderPtr content() const { return content_; }
 
   private:
     /// @brief This builder Form

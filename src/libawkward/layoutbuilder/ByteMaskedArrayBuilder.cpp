@@ -39,11 +39,11 @@ namespace awkward {
     return "ByteMaskedArrayBuilder";
   }
 
-  const ContentPtr
-  ByteMaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    // FIXME: how to define a mask? is it needed?
-    return content_.get()->snapshot(outputs);
-  }
+  // const ContentPtr
+  // ByteMaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
+  //   // FIXME: how to define a mask? is it needed?
+  //   return content_.get()->snapshot(outputs);
+  // }
 
   const FormPtr
   ByteMaskedArrayBuilder::form() const {

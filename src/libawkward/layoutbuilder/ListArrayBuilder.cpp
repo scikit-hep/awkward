@@ -70,46 +70,46 @@ namespace awkward {
     return "ListArrayBuilder";
   }
 
-  const ContentPtr
-  ListArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      if (form_.get()->starts() == Index::Form::i32) {
-        Index32 offsets = search->second.get()->toIndex32();
-        Index32 starts = util::make_starts(offsets);
-        Index32 stops = util::make_stops(offsets);
-        return std::make_shared<ListArray32>(Identities::none(),
-                                             form_.get()->parameters(),
-                                             starts,
-                                             stops,
-                                             content_.get()->snapshot(outputs));
-      }
-      else if (form_.get()->starts() == Index::Form::u32) {
-        IndexU32 offsets = search->second.get()->toIndexU32();
-        IndexU32 starts = util::make_starts(offsets);
-        IndexU32 stops = util::make_stops(offsets);
-        return std::make_shared<ListArrayU32>(Identities::none(),
-                                              form_.get()->parameters(),
-                                              starts,
-                                              stops,
-                                              content_.get()->snapshot(outputs));
-      }
-      else if (form_.get()->starts() == Index::Form::i64) {
-        Index64 offsets = search->second.get()->toIndex64();
-        Index64 starts = util::make_starts(offsets);
-        Index64 stops = util::make_stops(offsets);
-        return std::make_shared<ListArray64>(Identities::none(),
-                                             form_.get()->parameters(),
-                                             starts,
-                                             stops,
-                                             content_.get()->snapshot(outputs));
-      }
-    }
-    throw std::invalid_argument(
-        std::string("Snapshot of a ") + classname()
-        + std::string(" needs offsets")
-        + FILENAME(__LINE__));
-  }
+  // const ContentPtr
+  // ListArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
+  //   auto search = outputs.find(vm_output_data_);
+  //   if (search != outputs.end()) {
+  //     if (form_.get()->starts() == Index::Form::i32) {
+  //       Index32 offsets = search->second.get()->toIndex32();
+  //       Index32 starts = util::make_starts(offsets);
+  //       Index32 stops = util::make_stops(offsets);
+  //       return std::make_shared<ListArray32>(Identities::none(),
+  //                                            form_.get()->parameters(),
+  //                                            starts,
+  //                                            stops,
+  //                                            content_.get()->snapshot(outputs));
+  //     }
+  //     else if (form_.get()->starts() == Index::Form::u32) {
+  //       IndexU32 offsets = search->second.get()->toIndexU32();
+  //       IndexU32 starts = util::make_starts(offsets);
+  //       IndexU32 stops = util::make_stops(offsets);
+  //       return std::make_shared<ListArrayU32>(Identities::none(),
+  //                                             form_.get()->parameters(),
+  //                                             starts,
+  //                                             stops,
+  //                                             content_.get()->snapshot(outputs));
+  //     }
+  //     else if (form_.get()->starts() == Index::Form::i64) {
+  //       Index64 offsets = search->second.get()->toIndex64();
+  //       Index64 starts = util::make_starts(offsets);
+  //       Index64 stops = util::make_stops(offsets);
+  //       return std::make_shared<ListArray64>(Identities::none(),
+  //                                            form_.get()->parameters(),
+  //                                            starts,
+  //                                            stops,
+  //                                            content_.get()->snapshot(outputs));
+  //     }
+  //   }
+  //   throw std::invalid_argument(
+  //       std::string("Snapshot of a ") + classname()
+  //       + std::string(" needs offsets")
+  //       + FILENAME(__LINE__));
+  // }
 
   const FormPtr
   ListArrayBuilder::form() const {

@@ -22,7 +22,7 @@ namespace awkward {
   class Form;
   using FormPtr = std::shared_ptr<Form>;
 
-  using ForthOtputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
+  using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
   class FormBuilder;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
@@ -79,8 +79,8 @@ namespace awkward {
     /// construction. If 'false' an external Virtial Machine must be connected
     /// to the builder. The flag is used for debugging.
     LayoutBuilder(const FormPtr& form,
-                      const ArrayBuilderOptions& options,
-                      bool vm_init = true);
+                  const ArrayBuilderOptions& options,
+                  bool vm_init = true);
 
     /// @brief Connects a Virtual Machine if it was not initialized before.
     void
@@ -99,6 +99,10 @@ namespace awkward {
     const std::string
       vm_source() const;
 
+    /// @brief
+    const std::shared_ptr<ForthMachine32>
+      vm() const;
+
     /// @brief Returns a string representation of this array (single-line XML
     /// indicating the length and type).
     const std::string
@@ -108,6 +112,10 @@ namespace awkward {
     int64_t
       length() const;
 
+    /// @brief
+    void
+      pre_snapshot() const;
+
     /// @brief Current high level Type of the accumulated array.
     ///
     /// @param typestrs A mapping from `"__record__"` parameters to string
@@ -115,47 +123,47 @@ namespace awkward {
     const TypePtr
       type(const util::TypeStrs& typestrs) const;
 
-    /// @brief Turns the accumulated data into a Content array.
-    ///
-    /// This operation only converts FormBuilder nodes into Content nodes; the
-    /// buffers holding array data are shared between the FormBuilder and the
-    /// Content. Hence, taking a snapshot is a constant-time operation.
-    const ContentPtr
-      snapshot() const;
+    // /// @brief Turns the accumulated data into a Content array.
+    // ///
+    // /// This operation only converts FormBuilder nodes into Content nodes; the
+    // /// buffers holding array data are shared between the FormBuilder and the
+    // /// Content. Hence, taking a snapshot is a constant-time operation.
+    // const ContentPtr
+    //   snapshot() const;
 
-    /// @brief Returns the element at a given position in the array, handling
-    /// negative indexing and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    const ContentPtr
-      getitem_at(int64_t at) const;
-
-    /// @brief Subinterval of this array, handling negative indexing
-    /// and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    ///
-    /// Ranges beyond the array are not an error; they are trimmed to
-    /// `start = 0` on the left and `stop = length() - 1` on the right.
-    const ContentPtr
-      getitem_range(int64_t start, int64_t stop) const;
-
-    /// @brief This array with the first nested RecordArray replaced by
-    /// the field at `key`.
-    const ContentPtr
-      getitem_field(const std::string& key) const;
-
-    /// @brief This array with the first nested RecordArray replaced by
-    /// a RecordArray of a given subset of `keys`.
-    const ContentPtr
-      getitem_fields(const std::vector<std::string>& keys) const;
-
-    /// @brief Entry point for general slicing: Slice represents a tuple of
-    /// SliceItem nodes applying to each level of nested lists.
-    const ContentPtr
-      getitem(const Slice& where) const;
+    // /// @brief Returns the element at a given position in the array, handling
+    // /// negative indexing and bounds-checking like Python.
+    // ///
+    // /// The first item in the array is at `0`, the second at `1`, the last at
+    // /// `-1`, the penultimate at `-2`, etc.
+    // const ContentPtr
+    //   getitem_at(int64_t at) const;
+    //
+    // /// @brief Subinterval of this array, handling negative indexing
+    // /// and bounds-checking like Python.
+    // ///
+    // /// The first item in the array is at `0`, the second at `1`, the last at
+    // /// `-1`, the penultimate at `-2`, etc.
+    // ///
+    // /// Ranges beyond the array are not an error; they are trimmed to
+    // /// `start = 0` on the left and `stop = length() - 1` on the right.
+    // const ContentPtr
+    //   getitem_range(int64_t start, int64_t stop) const;
+    //
+    // /// @brief This array with the first nested RecordArray replaced by
+    // /// the field at `key`.
+    // const ContentPtr
+    //   getitem_field(const std::string& key) const;
+    //
+    // /// @brief This array with the first nested RecordArray replaced by
+    // /// a RecordArray of a given subset of `keys`.
+    // const ContentPtr
+    //   getitem_fields(const std::vector<std::string>& keys) const;
+    //
+    // /// @brief Entry point for general slicing: Slice represents a tuple of
+    // /// SliceItem nodes applying to each level of nested lists.
+    // const ContentPtr
+    //   getitem(const Slice& where) const;
 
     /// @brief Adds a `null` value to the accumulated data.
     void
@@ -332,6 +340,9 @@ namespace awkward {
 
     /// @brief Virtual machine errors to ignore.
     std::set<util::ForthError> ignore_;
+
+    /// @brief Virtual machine output buffers.
+    ForthOutputBufferMap vm_outputs_map_;
 
   };
 

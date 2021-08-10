@@ -25,9 +25,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
+    // /// @brief Turns the accumulated data into a Content array.
+    // const ContentPtr
+    //   snapshot(const ForthOutputBufferMap& outputs) const override;
 
     /// @brief The Form describing the array.
     const FormPtr
@@ -100,6 +100,8 @@ namespace awkward {
     /// multi-step command (e.g. `begin_list ... end_list`).
     bool
       active() override;
+
+    const std::vector<FormBuilderPtr>& contents() const { return contents_; }
 
   private:
     /// @brief Keeps track of a field index.

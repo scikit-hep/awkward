@@ -23,6 +23,20 @@
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
 
+#include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
+#include "awkward/layoutbuilder/ByteMaskedArrayBuilder.h"
+#include "awkward/layoutbuilder/EmptyArrayBuilder.h"
+#include "awkward/layoutbuilder/IndexedArrayBuilder.h"
+#include "awkward/layoutbuilder/IndexedOptionArrayBuilder.h"
+#include "awkward/layoutbuilder/LayoutBuilder.h"
+#include "awkward/layoutbuilder/ListArrayBuilder.h"
+#include "awkward/layoutbuilder/ListOffsetArrayBuilder.h"
+#include "awkward/layoutbuilder/NumpyArrayBuilder.h"
+#include "awkward/layoutbuilder/RecordArrayBuilder.h"
+#include "awkward/layoutbuilder/RegularArrayBuilder.h"
+#include "awkward/layoutbuilder/UnionArrayBuilder.h"
+#include "awkward/layoutbuilder/UnmaskedArrayBuilder.h"
+
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
 #include "awkward/datetime_util.h"
@@ -1728,6 +1742,359 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
 
 ////////// LayoutBuilder
 
+namespace {
+  /// @brief Turns the accumulated data into a Content array.
+  ///
+  /// This operation only converts FormBuilder nodes into Content nodes
+  py::object
+  layoutbuilder_snapshot(const ak::FormBuilderPtr builder, const ak::ForthOutputBufferMap& outputs) {
+    if (builder.get()->classname() == "BitMaskedArrayBuilder") {
+      const std::shared_ptr<const ak::BitMaskedArrayBuilder> raw = std::dynamic_pointer_cast<const ak::BitMaskedArrayBuilder>(builder);
+      return ::layoutbuilder_snapshot(raw.get()->content(), outputs);
+    } else if (builder.get()->classname() == "ByteMaskedArrayBuilder") {
+      const std::shared_ptr<const ak::ByteMaskedArrayBuilder> raw = std::dynamic_pointer_cast<const ak::ByteMaskedArrayBuilder>(builder);
+      return ::layoutbuilder_snapshot(raw.get()->content(), outputs);
+    } else if (builder.get()->classname() == "EmptyArrayBuilder") {
+      const std::shared_ptr<const ak::EmptyArrayBuilder> raw = std::dynamic_pointer_cast<const ak::EmptyArrayBuilder>(builder);
+      return box(std::make_shared<ak::EmptyArray>(ak::Identities::none(),
+                                                  raw.get()->form().get()->parameters()));
+
+    } else if (builder.get()->classname() == "IndexedArrayBuilder") {
+      const std::shared_ptr<const ak::IndexedArrayBuilder> raw = std::dynamic_pointer_cast<const ak::IndexedArrayBuilder>(builder);
+      const std::shared_ptr<const ak::IndexedForm> raw_form = std::dynamic_pointer_cast<const ak::IndexedForm>(raw.get()->form());
+      auto search = outputs.find(raw.get()->vm_output_data());
+      if (search != outputs.end()) {
+        switch (raw_form.get()->index()) {
+       // case Index::Form::i8:
+       // case Index::Form::u8:
+          case ak::Index::Form::i32:
+            return box(std::make_shared<ak::IndexedArray32>(
+              ak::Identities::none(),
+              raw_form.get()->parameters(),
+              ak::Index32(std::static_pointer_cast<int32_t>(search->second.get()->ptr()),
+                      0,
+                      search->second.get()->len(),
+                      ak::kernel::lib::cpu),
+              unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+          case ak::Index::Form::u32:
+            return box(std::make_shared<ak::IndexedArrayU32>(
+              ak::Identities::none(),
+              raw_form.get()->parameters(),
+              ak::IndexU32(std::static_pointer_cast<uint32_t>(search->second.get()->ptr()),
+                       0,
+                       search->second.get()->len(),
+                       ak::kernel::lib::cpu),
+              unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+          case ak::Index::Form::i64:
+            return box(std::make_shared<ak::IndexedArray64>(
+              ak::Identities::none(),
+              raw_form.get()->parameters(),
+              ak::Index64(std::static_pointer_cast<int64_t>(search->second.get()->ptr()),
+                      0,
+                      search->second.get()->len(),
+                      ak::kernel::lib::cpu),
+              unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+          default:
+            break;
+        };
+      }
+      throw std::invalid_argument(
+          std::string("Snapshot of a ") + builder.get()->classname()
+          + std::string(" needs an index ")
+          + FILENAME(__LINE__));
+
+    } else if (builder.get()->classname() == "IndexedOptionArrayBuilder") {
+      const std::shared_ptr<const ak::IndexedOptionArrayBuilder> raw = std::dynamic_pointer_cast<const ak::IndexedOptionArrayBuilder>(builder);
+      const std::shared_ptr<const ak::IndexedOptionForm> raw_form = std::dynamic_pointer_cast<const ak::IndexedOptionForm>(raw.get()->form());
+      auto search = outputs.find(raw.get()->vm_output_data());
+      if (search != outputs.end()) {
+        switch (raw_form.get()->index()) {
+         // case Index::Form::i8:
+            case ak::Index::Form::i32:
+              return box(std::make_shared<ak::IndexedOptionArray32>(
+                ak::Identities::none(),
+                raw_form.get()->parameters(),
+                ak::Index32(
+                  std::static_pointer_cast<int32_t>(search->second.get()->ptr()),
+                  1,
+                  search->second.get()->len() - 1,
+                  ak::kernel::lib::cpu),
+                unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+            case ak::Index::Form::i64:
+              return box(std::make_shared<ak::IndexedOptionArray64>(
+                ak::Identities::none(),
+                raw_form.get()->parameters(),
+                ak::Index64(
+                  std::static_pointer_cast<int64_t>(search->second.get()->ptr()),
+                  1,
+                  search->second.get()->len() - 1,
+                  ak::kernel::lib::cpu),
+                unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+          default:
+            break;
+        };
+      }
+      throw std::invalid_argument(
+        std::string("Snapshot of a ") + builder.get()->classname()
+        + std::string(" needs an index ")
+        + FILENAME(__LINE__));
+
+    } else if (builder.get()->classname() == "ListArrayBuilder") {
+      const std::shared_ptr<const ak::ListArrayBuilder> raw = std::dynamic_pointer_cast<const ak::ListArrayBuilder>(builder);
+      const std::shared_ptr<const ak::ListForm> raw_form = std::dynamic_pointer_cast<const ak::ListForm>(raw.get()->form());
+      auto search = outputs.find(raw.get()->vm_output_data());
+      if (search != outputs.end()) {
+        if (raw_form.get()->starts() == ak::Index::Form::i32) {
+          ak::Index32 offsets = search->second.get()->toIndex32();
+          ak::Index32 starts = ak::util::make_starts(offsets);
+          ak::Index32 stops = ak::util::make_stops(offsets);
+          return box(std::make_shared<ak::ListArray32>(
+            ak::Identities::none(),
+            raw_form.get()->parameters(),
+            starts,
+            stops,
+            unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+        }
+        else if (raw_form.get()->starts() == ak::Index::Form::u32) {
+          ak::IndexU32 offsets = search->second.get()->toIndexU32();
+          ak::IndexU32 starts = ak::util::make_starts(offsets);
+          ak::IndexU32 stops = ak::util::make_stops(offsets);
+          return box(std::make_shared<ak::ListArrayU32>(ak::Identities::none(),
+            raw_form.get()->parameters(),
+            starts,
+            stops,
+            unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+        }
+        else if (raw_form.get()->starts() == ak::Index::Form::i64) {
+          ak::Index64 offsets = search->second.get()->toIndex64();
+          ak::Index64 starts = ak::util::make_starts(offsets);
+          ak::Index64 stops = ak::util::make_stops(offsets);
+          return box(std::make_shared<ak::ListArray64>(ak::Identities::none(),
+            raw_form.get()->parameters(),
+            starts,
+            stops,
+            unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+        }
+      }
+      throw std::invalid_argument(
+          std::string("Snapshot of a ") + builder.get()->classname()
+          + std::string(" needs offsets")
+          + FILENAME(__LINE__));
+
+    } else if (builder.get()->classname().rfind("ListOffsetArrayBuilder", 0) == 0) {
+      const std::shared_ptr<const ak::ListOffsetArrayBuilder> raw = std::dynamic_pointer_cast<const ak::ListOffsetArrayBuilder>(builder);
+      const std::shared_ptr<const ak::ListOffsetForm> raw_form = std::dynamic_pointer_cast<const ak::ListOffsetForm>(raw.get()->form());
+      auto search = outputs.find(raw.get()->vm_output_data());
+      if (search != outputs.end()) {
+        if (raw_form.get()->offsets() == ak::Index::Form::i32) {
+          return box(std::make_shared<ak::ListOffsetArray32>(ak::Identities::none(),
+                                                     raw_form.get()->parameters(),
+                                                     search->second.get()->toIndex32(),
+                                                     unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+        }
+        else if (raw_form.get()->offsets() == ak::Index::Form::u32) {
+          return box(std::make_shared<ak::ListOffsetArrayU32>(ak::Identities::none(),
+                                                     raw_form.get()->parameters(),
+                                                     search->second.get()->toIndexU32(),
+                                                     unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+        }
+        else if (raw_form.get()->offsets() == ak::Index::Form::i64) {
+          return box(std::make_shared<ak::ListOffsetArray64>(ak::Identities::none(),
+                                                     raw_form.get()->parameters(),
+                                                     search->second.get()->toIndex64(),
+                                                     unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
+        }
+      }
+      throw std::invalid_argument(
+          std::string("Snapshot of a ") + builder.get()->classname()
+          + std::string(" needs offsets")
+          + FILENAME(__LINE__));
+
+    } else if (builder.get()->classname() == "NumpyArrayBuilder") {
+      const std::shared_ptr<const ak::NumpyArrayBuilder> raw = std::dynamic_pointer_cast<const ak::NumpyArrayBuilder>(builder);
+      const std::shared_ptr<const ak::NumpyForm> raw_form = std::dynamic_pointer_cast<const ak::NumpyForm>(raw.get()->form());
+      auto search = outputs.find(raw.get()->vm_output_data());
+      if (search != outputs.end()) {
+        std::vector<ssize_t> shape = { (ssize_t)search->second.get()->len() };
+        std::vector<ssize_t> strides = { (ssize_t)raw_form.get()->itemsize() };
+
+        return box(std::make_shared<ak::NumpyArray>(ak::Identities::none(),
+                                            raw_form.get()->parameters(),
+                                            search->second.get()->ptr(),
+                                            shape,
+                                            strides,
+                                            0,
+                                            raw_form.get()->itemsize(),
+                                            raw_form.get()->format(),
+                                            ak::util::format_to_dtype(raw_form.get()->format(), raw_form.get()->itemsize()),
+                                            ak::kernel::lib::cpu));
+      }
+      throw std::invalid_argument(
+          std::string("Snapshot of a ") + builder.get()->classname()
+          + std::string(" needs data")
+          + FILENAME(__LINE__));
+
+    } else if (builder.get()->classname() == "RecordArrayBuilder") {
+      const std::shared_ptr<const ak::RecordArrayBuilder> raw = std::dynamic_pointer_cast<const ak::RecordArrayBuilder>(builder);
+      const std::shared_ptr<const ak::RecordForm> raw_form = std::dynamic_pointer_cast<const ak::RecordForm>(raw.get()->form());
+      ak::ContentPtrVec contents;
+      for (size_t i = 0;  i < raw.get()->contents().size();  i++) {
+        contents.push_back(unbox_content(layoutbuilder_snapshot(raw.get()->contents()[i], outputs)));
+      }
+      return box(std::make_shared<ak::RecordArray>(ak::Identities::none(),
+                                           raw_form.get()->parameters(),
+                                           contents,
+                                           raw_form.get()->recordlookup()));
+
+    } else if (builder.get()->classname() == "RegularArrayBuilder") {
+      const std::shared_ptr<const ak::RegularArrayBuilder> raw = std::dynamic_pointer_cast<const ak::RegularArrayBuilder>(builder);
+      const std::shared_ptr<const ak::RegularForm> raw_form = std::dynamic_pointer_cast<const ak::RegularForm>(raw.get()->form());
+      ak::ContentPtr out;
+      if(raw.get()->content() != nullptr) {
+        out = std::make_shared<ak::RegularArray>(ak::Identities::none(),
+                                             raw_form.get()->parameters(),
+                                             unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs)),
+                                             raw_form.get()->size());
+      }
+      return box(out);
+
+    } else if (builder.get()->classname() == "UnionArrayBuilder") {
+      const std::shared_ptr<const ak::UnionArrayBuilder> raw = std::dynamic_pointer_cast<const ak::UnionArrayBuilder>(builder);
+      const std::shared_ptr<const ak::UnionForm> raw_form = std::dynamic_pointer_cast<const ak::UnionForm>(raw.get()->form());
+      auto search_tags = outputs.find(raw.get()->vm_output_tags());
+      if (search_tags != outputs.end()) {
+        ak::Index8 tags(std::static_pointer_cast<int8_t>(search_tags->second.get()->ptr()),
+                    0,
+                    search_tags->second.get()->len(),
+                    ak::kernel::lib::cpu);
+
+        ak::ContentPtrVec contents;
+        for (auto content : raw.get()->contents()) {
+          contents.push_back(unbox_content(layoutbuilder_snapshot(content, outputs)));
+        }
+
+        int64_t lentags = tags.length();
+
+        if (raw_form.get()->index() == ak::Index::Form::i32) {
+          ak::Index32 current(lentags);
+          ak::Index32 outindex(lentags);
+          struct Error err = ak::kernel::UnionArray_regular_index<int8_t, int32_t>(
+            ak::kernel::lib::cpu,   // DERIVE
+            outindex.data(),
+            current.data(),
+            lentags,
+            tags.data(),
+            lentags);
+          ak::util::handle_error(err, "UnionArray", nullptr);
+
+          return box(ak::UnionArray8_32(ak::Identities::none(),
+                                ak::util::Parameters(),
+                                tags,
+                                outindex,
+                                contents).simplify_uniontype(false, false));
+
+        }
+        else if (raw_form.get()->index() == ak::Index::Form::u32) {
+          ak::IndexU32 current(lentags);
+          ak::IndexU32 outindex(lentags);
+          struct Error err = ak::kernel::UnionArray_regular_index<int8_t, uint32_t>(
+            ak::kernel::lib::cpu,   // DERIVE
+            outindex.data(),
+            current.data(),
+            lentags,
+            tags.data(),
+            lentags);
+          ak::util::handle_error(err, "UnionArray", nullptr);
+
+          return box(ak::UnionArray8_U32(ak::Identities::none(),
+                                 ak::util::Parameters(),
+                                 tags,
+                                 outindex,
+                                 contents).simplify_uniontype(false, false));
+        }
+        else if (raw_form.get()->index() == ak::Index::Form::i64) {
+          ak::Index64 current(lentags);
+          ak::Index64 outindex(lentags);
+          struct Error err = ak::kernel::UnionArray_regular_index<int8_t, int64_t>(
+            ak::kernel::lib::cpu,   // DERIVE
+            outindex.data(),
+            current.data(),
+            lentags,
+            tags.data(),
+            lentags);
+          ak::util::handle_error(err, "UnionArray", nullptr);
+
+          return box(ak::UnionArray8_64(ak::Identities::none(),
+                                ak::util::Parameters(),
+                                tags,
+                                outindex,
+                                contents).simplify_uniontype(false, false));
+        }
+      }
+      throw std::invalid_argument(
+          std::string("Snapshot of a ") + builder.get()->classname()
+          + std::string(" needs tags and index ")
+          + FILENAME(__LINE__));
+
+    } else if (builder.get()->classname() == "UnmaskedArrayBuilder") {
+      // FIXME: how to define a mask? is it needed?
+      const std::shared_ptr<const ak::UnmaskedArrayBuilder> raw = std::dynamic_pointer_cast<const ak::UnmaskedArrayBuilder>(builder);
+      return layoutbuilder_snapshot(raw.get()->content(), outputs);
+
+    }
+    else {
+      throw std::invalid_argument(std::string("unrecognized form builder") + FILENAME(__LINE__));
+    }
+  }
+}
+
+template <>
+py::object
+getitem<ak::LayoutBuilder>(const ak::LayoutBuilder& self, const py::object& obj) {
+  if (py::isinstance<py::int_>(obj)) {
+    return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_at(obj.cast<int64_t>()));
+  }
+  if (py::isinstance<py::slice>(obj)) {
+    py::object pystep = obj.attr("step");
+    if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||
+        pystep.is(py::none())) {
+      int64_t start = ak::Slice::none();
+      int64_t stop = ak::Slice::none();
+      py::object pystart = obj.attr("start");
+      py::object pystop = obj.attr("stop");
+      if (!pystart.is(py::none())) {
+        start = pystart.cast<int64_t>();
+      }
+      if (!pystop.is(py::none())) {
+        stop = pystop.cast<int64_t>();
+      }
+      return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_range(start, stop));
+    }
+    // control flow can pass through here; don't make the last line an 'else'!
+  }
+  if (py::isinstance<py::str>(obj)) {
+    return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_field(obj.cast<std::string>()));
+  }
+  if (!py::isinstance<py::tuple>(obj)  &&  py::isinstance<py::iterable>(obj)) {
+    std::vector<std::string> strings;
+    bool all_strings = true;
+    for (auto x : obj) {
+      if (py::isinstance<py::str>(x)) {
+        strings.push_back(x.cast<std::string>());
+      }
+      else {
+        all_strings = false;
+        break;
+      }
+    }
+    if (all_strings  &&  !strings.empty()) {
+      return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_fields(strings));
+    }
+    // control flow can pass through here; don't make the last line an 'else'!
+  }
+  return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem(toslice(obj)));
+}
+
 py::class_<ak::LayoutBuilder>
 make_LayoutBuilder(const py::handle& m, const std::string& name) {
   return (py::class_<ak::LayoutBuilder>(m, name.c_str())
@@ -1742,11 +2109,11 @@ make_LayoutBuilder(const py::handle& m, const std::string& name) {
       .def("__len__", &ak::LayoutBuilder::length)
       .def("type", &ak::LayoutBuilder::type)
       .def("snapshot", [](const ak::LayoutBuilder& self) -> py::object {
-        return box(self.snapshot());
+        return ::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs());
       })
       .def("__getitem__", &getitem<ak::LayoutBuilder>)
       .def("__iter__", [](const ak::LayoutBuilder& self) -> ak::Iterator {
-        return ak::Iterator(self.snapshot());
+        return ak::Iterator(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())));
       })
       .def("null", &ak::LayoutBuilder::null)
       .def("boolean", &ak::LayoutBuilder::boolean)

@@ -42,17 +42,17 @@ namespace awkward {
     return "RegularArrayBuilder";
   }
 
-  const ContentPtr
-  RegularArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    ContentPtr out;
-    if(content_ != nullptr) {
-      out = std::make_shared<RegularArray>(Identities::none(),
-                                           form_.get()->parameters(),
-                                           content_.get()->snapshot(outputs),
-                                           form_.get()->size());
-    }
-    return out;
-  }
+  // const ContentPtr
+  // RegularArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
+  //   ContentPtr out;
+  //   if(content_ != nullptr) {
+  //     out = std::make_shared<RegularArray>(Identities::none(),
+  //                                          form_.get()->parameters(),
+  //                                          content_.get()->snapshot(outputs),
+  //                                          form_.get()->size());
+  //   }
+  //   return out;
+  // }
 
   const FormPtr
   RegularArrayBuilder::form() const {
