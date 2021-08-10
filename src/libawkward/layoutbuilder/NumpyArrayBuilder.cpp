@@ -55,30 +55,6 @@ namespace awkward {
     return "NumpyArrayBuilder";
   }
 
-  // const ContentPtr
-  // NumpyArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-  //   auto search = outputs.find(vm_output_data_);
-  //   if (search != outputs.end()) {
-  //     std::vector<ssize_t> shape = { (ssize_t)search->second.get()->len() };
-  //     std::vector<ssize_t> strides = { (ssize_t)form_.get()->itemsize() };
-  //
-  //     return std::make_shared<NumpyArray>(Identities::none(),
-  //                                         form_.get()->parameters(),
-  //                                         search->second.get()->ptr(),
-  //                                         shape,
-  //                                         strides,
-  //                                         0,
-  //                                         form_.get()->itemsize(),
-  //                                         form_.get()->format(),
-  //                                         util::format_to_dtype(form_.get()->format(), form_.get()->itemsize()),
-  //                                         kernel::lib::cpu);
-  //   }
-  //   throw std::invalid_argument(
-  //       std::string("Snapshot of a ") + classname()
-  //       + std::string(" needs data")
-  //       + FILENAME(__LINE__));
-  // }
-
   const FormPtr
   NumpyArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);

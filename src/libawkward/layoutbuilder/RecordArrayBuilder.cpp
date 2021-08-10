@@ -48,18 +48,6 @@ namespace awkward {
     return "RecordArrayBuilder";
   }
 
-  // const ContentPtr
-  // RecordArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-  //   ContentPtrVec contents;
-  //   for (size_t i = 0;  i < contents_.size();  i++) {
-  //     contents.push_back(contents_[i].get()->snapshot(outputs));
-  //   }
-  //   return std::make_shared<RecordArray>(Identities::none(),
-  //                                        form_.get()->parameters(),
-  //                                        contents,
-  //                                        form_.get()->recordlookup());
-  // }
-
   const FormPtr
   RecordArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);

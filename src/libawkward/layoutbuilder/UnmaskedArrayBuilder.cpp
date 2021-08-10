@@ -39,12 +39,6 @@ namespace awkward {
     return "UnmaskedArrayBuilder";
   }
 
-  // const ContentPtr
-  // UnmaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-  //   // FIXME: how to define a mask? is it needed?
-  //   return content_.get()->snapshot(outputs);
-  // }
-
   const FormPtr
   UnmaskedArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);

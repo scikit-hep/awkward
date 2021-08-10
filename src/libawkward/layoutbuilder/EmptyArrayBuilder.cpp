@@ -23,12 +23,6 @@ namespace awkward {
     return "EmptyArrayBuilder";
   }
 
-  // const ContentPtr
-  // EmptyArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-  //     return std::make_shared<EmptyArray>(Identities::none(),
-  //                                         form_.get()->parameters());
-  // }
-
   const FormPtr
   EmptyArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);

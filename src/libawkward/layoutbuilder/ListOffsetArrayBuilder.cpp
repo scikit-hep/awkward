@@ -74,35 +74,6 @@ namespace awkward {
     return std::string("ListOffsetArrayBuilder ") + vm_func_name();
   }
 
-  // const ContentPtr
-  // ListOffsetArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-  //   auto search = outputs.find(vm_output_data_);
-  //   if (search != outputs.end()) {
-  //     if (form_.get()->offsets() == Index::Form::i32) {
-  //       return std::make_shared<ListOffsetArray32>(Identities::none(),
-  //                                                  form_.get()->parameters(),
-  //                                                  search->second.get()->toIndex32(),
-  //                                                  content_.get()->snapshot(outputs));
-  //     }
-  //     else if (form_.get()->offsets() == Index::Form::u32) {
-  //       return std::make_shared<ListOffsetArrayU32>(Identities::none(),
-  //                                                  form_.get()->parameters(),
-  //                                                  search->second.get()->toIndexU32(),
-  //                                                  content_.get()->snapshot(outputs));
-  //     }
-  //     else if (form_.get()->offsets() == Index::Form::i64) {
-  //       return std::make_shared<ListOffsetArray64>(Identities::none(),
-  //                                                  form_.get()->parameters(),
-  //                                                  search->second.get()->toIndex64(),
-  //                                                  content_.get()->snapshot(outputs));
-  //     }
-  //   }
-  //   throw std::invalid_argument(
-  //       std::string("Snapshot of a ") + classname()
-  //       + std::string(" needs offsets")
-  //       + FILENAME(__LINE__));
-  // }
-
   const FormPtr
   ListOffsetArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);

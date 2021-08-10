@@ -39,12 +39,6 @@ namespace awkward {
     return "BitMaskedArrayBuilder";
   }
 
-  // const ContentPtr
-  // BitMaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-  //   // FIXME: how to define a mask? is it needed?
-  //   return content_.get()->snapshot(outputs);
-  // }
-
   const FormPtr
   BitMaskedArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);

@@ -354,38 +354,10 @@ namespace awkward {
   const TypePtr
   LayoutBuilder::type(const util::TypeStrs& typestrs) const {
     // FIXME refactoring return builder_.get()->snapshot(vm().get()->outputs()).get()->type(typestrs);
+    throw std::runtime_error(
+      std::string("LayoutBuilder type is obsolete")
+      + FILENAME(__LINE__));
   }
-
-  // const ContentPtr
-  // LayoutBuilder::snapshot() const {
-  //   pre_snapshot();
-  //   return builder_.get()->snapshot(vm().get()->outputs());
-  // }
-
-  // const ContentPtr
-  // LayoutBuilder::getitem_at(int64_t at) const {
-  //   return snapshot().get()->getitem_at(at);
-  // }
-  //
-  // const ContentPtr
-  // LayoutBuilder::getitem_range(int64_t start, int64_t stop) const {
-  //   return snapshot().get()->getitem_range(start, stop);
-  // }
-  //
-  // const ContentPtr
-  // LayoutBuilder::getitem_field(const std::string& key) const {
-  //   return snapshot().get()->getitem_field(key);
-  // }
-  //
-  // const ContentPtr
-  // LayoutBuilder::getitem_fields(const std::vector<std::string>& keys) const {
-  //   return snapshot().get()->getitem_fields(keys);
-  // }
-  //
-  // const ContentPtr
-  // LayoutBuilder::getitem(const Slice& where) const {
-  //   return snapshot().get()->getitem(where);
-  // }
 
   void
   LayoutBuilder::null() {
