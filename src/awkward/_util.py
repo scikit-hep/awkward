@@ -109,7 +109,7 @@ after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::aw
 Issue: {3}.""".format(
         version, date, will_be, message
     )
-    warnings.warn(warning, category)
+    warnings.warn(warning, category, stacklevel=3)
 
 
 # Sentinel object for catching pass-through values
