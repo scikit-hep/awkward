@@ -346,3 +346,6 @@ class RecordArray(Content):
                 parameters = self._parameters
             next = RecordArray(contents, self._keys, None, self._identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)
+
+    def _localindex(self, axis, depth):
+        raise NotImplementedError
