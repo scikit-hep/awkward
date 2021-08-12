@@ -50,7 +50,7 @@ def get_line(args):
             continue
         else:
             line += "std::cout<<" + '"' + value + '="<<' + value + ";"
-    line = line[0 : len(line)]
+    line = line[0 : len(line)]+"std::cout<<std::endl;"
     return line
 
 
@@ -81,7 +81,7 @@ def reducer():
             record = False
             new_file += line
             new_file += """
-    std::cout<<"reduce_argmin_64:";
+    std::cout<<"awkward_reduce_argmin_64:";
     std::cout<<"parents=";
     for(int i=0;i<parents.length();i++){
         std::cout<<data[i]<<",";
@@ -175,7 +175,7 @@ def identities():
             flag += 1
             record = False
             new_file += line
-            new_file += 'std::cout<<"Identities_getitem_carry_64:";printMe();carry.printMe();std::cout<<carry.length()<<width_<<length_<<std::endl;\n'
+            new_file += 'std::cout<<"awkward_Identities_getitem_carry_64:";printMe();carry.printMe();std::cout<<carry.length()<<width_<<length_<<std::endl;\n'
             num += 1
             continue
         if flag == 2 and "return out;" in line:
@@ -234,7 +234,7 @@ def index():
         elif re.search(r"[)];", line) and record == True:
             record = False
             new_file += line
-            new_file += '\tstd::cout<<"Index_to_Index64:";printMe();std::cout<<length_<<std::endl;\n'
+            new_file += '\tstd::cout<<"awkward_Index_to_Index64:";printMe();std::cout<<length_<<std::endl;\n'
             num += 1
             continue
         new_file += line
@@ -259,7 +259,7 @@ def union():
         elif re.search(r"[)];", line) and record == True:
             record = False
             new_file += line
-            new_file += '\tstd::cout<<"UnionArray_regular_index:"<<lentags;tags.printMe();std::cout<<lentags<<std::endl;\n'
+            new_file += '\tstd::cout<<"awkward_UnionArray_regular_index:"<<lentags;tags.printMe();std::cout<<lentags<<std::endl;\n'
             num += 1
             continue
         new_file += line
