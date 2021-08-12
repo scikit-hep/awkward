@@ -16,13 +16,6 @@ def get_line(args):
     function_name = str[str.find(":") + 2 : start]
     if function_name[len(function_name) - 1] == ">":
         function_name = function_name[0 : function_name.find("<")]
-    # if function_name == "RegularArray_combinations_64":
-    #     return """
-    #     std::cout<<"awkward_RegularArray_combinations_64:";std::cout<<"tocarryraw.data()=";
-    #   for(int i=0;i<length();i++){
-    #     std::cout<<tocarryraw.data()[i]<<",";
-    # }
-    #   std::cout<<"toindex.data()=";toindex.printMe();std::cout<<"fromindex.data()=";fromindex.printMe();std::cout<<"n="<<n;std::cout<<"replacement="<<replacement;std::cout<<"length()="<<length();std::cout<<"1";"""
     line = 'std::cout<<"awkward_' + function_name + ":" + '";'
     for value in values:
         if "reinterpret_cast" in value:
