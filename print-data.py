@@ -50,7 +50,7 @@ def get_line(args):
             continue
         else:
             line += "std::cout<<" + '"' + value + '="<<' + value + ";"
-    line = line[0 : len(line)]+"std::cout<<std::endl;"
+    line = line[0 : len(line)] + "std::cout<<std::endl;"
     return line
 
 
