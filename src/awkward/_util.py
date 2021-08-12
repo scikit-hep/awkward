@@ -96,7 +96,7 @@ def deprecate(
     date=None,
     will_be="an error",
     category=DeprecationWarning,
-    stacklevel=1,
+    stacklevel=2,
 ):
     if date is None:
         date = ""
@@ -114,7 +114,7 @@ after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::aw
 Issue: {3}.""".format(
         version, date, will_be, message
     )
-    warnings.warn(warning, category, stacklevel=stacklevel + 2)
+    warnings.warn(warning, category, stacklevel=stacklevel + 1)
 
 
 # Sentinel object for catching pass-through values
