@@ -113,21 +113,23 @@ def insertPrintMe():
     x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Index.cpp"), "w")
     x.write(new_file)
     x.close()
-    flag=0
-    new_file=""""""
-    x=open(os.path.join(CURRENT_DIR, "src", "libawkward","array", "NumpyArray.cpp"), "r")
-    lines=x.readlines()
+    flag = 0
+    new_file = """"""
+    x = open(
+        os.path.join(CURRENT_DIR, "src", "libawkward", "array", "NumpyArray.cpp"), "r"
+    )
+    lines = x.readlines()
     for line in lines:
-        new_file+= line
-        if 'NumpyArray::classname' in line and flag==0:
-            flag=1
-        if '}' in line and flag==1:
-            new_file +="""void NumpyArray::printMe() const{
+        new_file += line
+        if "NumpyArray::classname" in line and flag == 0:
+            flag = 1
+        if "}" in line and flag == 1:
+            new_file += """void NumpyArray::printMe() const{
     for (int64_t i = 0;  i < length();  i++) {
         std::cout << (reinterpret_cast<uint8_t*>(data()))[i];
       }
   }"""
-            flag=2
+            flag = 2
     x.close()
     x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "NumpyArray.cpp"), "w")
     x.write(new_file)
