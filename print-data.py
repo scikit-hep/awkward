@@ -141,7 +141,9 @@ def insertPrintMe():
   }"""
             flag = 2
     x.close()
-    x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "array", "NumpyArray.cpp"), "w")
+    x = open(
+        os.path.join(CURRENT_DIR, "src", "libawkward", "array", "NumpyArray.cpp"), "w"
+    )
     x.write(new_file)
     x.close()
 
