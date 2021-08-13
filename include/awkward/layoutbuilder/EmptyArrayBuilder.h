@@ -12,24 +12,17 @@
 
 namespace awkward {
 
-  class EmptyForm;
-  using EmptyFormPtr = std::shared_ptr<EmptyForm>;
-
   /// @class EmptyArrayBuilder
   ///
   /// @brief
   class LIBAWKWARD_EXPORT_SYMBOL EmptyArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an EmptyArrayBuilder from a full set of parameters.
-    EmptyArrayBuilder(const EmptyFormPtr& form);
+    EmptyArrayBuilder();
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -95,12 +88,6 @@ namespace awkward {
       end_list(LayoutBuilder* builder) override;
 
   private:
-    /// @brief EmptyForm that defines the EmptyArray.
-    const EmptyFormPtr form_;
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-
     /// @brief An empty command.
     std::string vm_empty_command_;
     /// @brief An error message.

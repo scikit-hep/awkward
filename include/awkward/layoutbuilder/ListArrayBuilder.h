@@ -7,8 +7,6 @@
 
 namespace awkward {
 
-  class ListForm;
-  using ListFormPtr = std::shared_ptr<ListForm>;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class ListArrayBuilder
@@ -17,17 +15,15 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL ListArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a ListArrayBuilder from a full set of parameters.
-    ListArrayBuilder(const ListFormPtr& form,
+    ListArrayBuilder(const std::string form_key,
+                     const std::string form_starts,
+                     const std::string form_content,
                      const std::string attribute = "offsets",
                      const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -98,20 +94,20 @@ namespace awkward {
 
     const FormBuilderPtr content() const { return content_; }
 
-  private:
-    /// @brief This builder Form
-    const ListFormPtr form_;
+    const std::string&
+      form_starts() const { return form_starts_; }
 
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
+  private:
     /// @brief 'true' if this builder has recieved a 'begin_list' command.
     /// 'false' if the builder either has not recieved a 'begin_list' command
     /// or has recieved an 'end_list' command.
     bool begun_;
 
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
+    const std::string form_starts_;
+    util::Parameters parameters_;
 
     /// @brief This Form content builder
     FormBuilderPtr content_;

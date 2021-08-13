@@ -4,44 +4,37 @@
 
 #include "awkward/layoutbuilder/UnionArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/UnionArray.h"
 
 namespace awkward {
 
   ///
-  UnionArrayBuilder::UnionArrayBuilder(const UnionFormPtr& form,
+  UnionArrayBuilder::UnionArrayBuilder(const std::string form_key,
+                                       const std::string form_tags,
+                                       const std::vector<const std::string>& form_contents,
                                        const std::string attribute,
-                                       const std::string partition)
-    : form_(form),
-      tag_(0),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition) {
+                                       const std::string partition) {
     vm_func_type_ = std::to_string(static_cast<utype>(state::tag));
 
-    for (auto const& content : form.get()->contents()) {
-      contents_.push_back(LayoutBuilder::formBuilderFromA(content));
+    for (auto const& content : form_contents) {
+      contents_.push_back(LayoutBuilder::formBuilderFromJson(content));
       vm_output_.append(contents_.back().get()->vm_output());
       vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
       vm_error_.append(contents_.back().get()->vm_error());
     }
 
     vm_output_tags_ = std::string("part")
-      .append(partition_)
+      .append(partition)
       .append("-")
-      .append(*form_key_)
+      .append(form_key)
       .append("-tags");
 
     vm_output_.append("output ")
       .append(vm_output_tags_)
       .append(" ")
-      .append(index_form_to_name(form_.get()->tags()))
+      .append(form_tags)
       .append("\n");
 
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
     for (auto const& content : contents_) {
       vm_func_.append(content.get()->vm_func());
     }
@@ -51,7 +44,7 @@ namespace awkward {
       .append(" = if").append("\n");
 
     vm_func_.append("0 data seek\n")
-      .append("data ").append(index_form_to_vm_format(form_.get()->tags()))
+      .append("data ").append(form_tags)
       .append("-> stack dup ").append(vm_output_tags_).append(" <- stack\n");
 
     int64_t tag = 0;
@@ -89,11 +82,6 @@ namespace awkward {
   const std::string
   UnionArrayBuilder::classname() const {
     return "UnionArrayBuilder";
-  }
-
-  const FormPtr
-  UnionArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

@@ -17,17 +17,14 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL RecordArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a RecordArrayBuilder from a full set of parameters.
-    RecordArrayBuilder(const RecordFormPtr& form,
+    RecordArrayBuilder(const std::string form_key,
+                       const std::vector<const std::string>& form_contents,
                        const std::string attribute = "record",
                        const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -99,21 +96,23 @@ namespace awkward {
 
     const std::vector<FormBuilderPtr>& contents() const { return contents_; }
 
+    const util::RecordLookupPtr& form_recordlookup() const { return form_recordlookup_; }
+
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
   private:
     /// @brief Keeps track of a field index.
     int64_t field_index();
 
+    const util::RecordLookupPtr form_recordlookup_;
+    util::Parameters parameters_;
+
     /// @brief This builder Form
-    const RecordFormPtr form_;
+    const std::string form_;
     int64_t field_index_;
     int64_t contents_size_;
     std::vector<int64_t> list_field_index_;
-
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

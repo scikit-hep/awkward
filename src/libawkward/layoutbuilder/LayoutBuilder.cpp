@@ -5,17 +5,6 @@
 #include "awkward/layoutbuilder/LayoutBuilder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/type/Type.h"
-#include "awkward/array/BitMaskedArray.h"
-#include "awkward/array/ByteMaskedArray.h"
-#include "awkward/array/EmptyArray.h"
-#include "awkward/array/IndexedArray.h"
-#include "awkward/array/ListArray.h"
-#include "awkward/array/ListOffsetArray.h"
-#include "awkward/array/NumpyArray.h"
-#include "awkward/array/RecordArray.h"
-#include "awkward/array/RegularArray.h"
-#include "awkward/array/UnionArray.h"
-#include "awkward/array/UnmaskedArray.h"
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
 #include "awkward/layoutbuilder/ByteMaskedArrayBuilder.h"
@@ -30,6 +19,12 @@
 #include "awkward/layoutbuilder/UnionArrayBuilder.h"
 #include "awkward/layoutbuilder/UnmaskedArrayBuilder.h"
 
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
+
+namespace rj = rapidjson;
 
 namespace awkward {
 
@@ -72,83 +67,114 @@ namespace awkward {
   }
 
   const std::string
-  dtype_to_state(util::dtype dt) {
-    switch (dt) {
-    case util::dtype::boolean:
+  primitive_to_state(const std::string& name) {
+    if (name == "bool") {
       return std::to_string(static_cast<utype>(state::boolean));
-    case util::dtype::int8:
+    }
+    else if (name == "int8") {
       return std::to_string(static_cast<utype>(state::int8));
-    case util::dtype::int16:
+    }
+    else if (name == "int16") {
       return std::to_string(static_cast<utype>(state::int16));
-    case util::dtype::int32:
+    }
+    else if (name == "int32") {
       return std::to_string(static_cast<utype>(state::int32));
-    case util::dtype::int64:
+    }
+    else if (name == "int64") {
       return std::to_string(static_cast<utype>(state::int64));
-    case util::dtype::uint8:
+    }
+    else if (name == "uint8") {
       return std::to_string(static_cast<utype>(state::uint8));
-    case util::dtype::uint16:
+    }
+    else if (name == "uint16") {
       return std::to_string(static_cast<utype>(state::uint16));
-    case util::dtype::uint32:
+    }
+    else if (name == "uint32") {
       return std::to_string(static_cast<utype>(state::uint32));
-    case util::dtype::uint64:
+    }
+    else if (name == "uint64") {
       return std::to_string(static_cast<utype>(state::uint64));
-    case util::dtype::float16:
+    }
+    else if (name == "float16") {
       return std::to_string(static_cast<utype>(state::float16));
-    case util::dtype::float32:
+    }
+    else if (name == "float32") {
       return std::to_string(static_cast<utype>(state::float32));
-    case util::dtype::float64:
+    }
+    else if (name == "float64") {
       return std::to_string(static_cast<utype>(state::float64));
-    case util::dtype::float128:
+    }
+    else if (name == "float128") {
       return std::to_string(static_cast<utype>(state::float128));
-    case util::dtype::complex64:
+    }
+    else if (name == "complex64") {
       return std::to_string(static_cast<utype>(state::complex64));
-    case util::dtype::complex128:
+    }
+    else if (name == "complex128") {
       return std::to_string(static_cast<utype>(state::complex128));
-    case util::dtype::complex256:
+    }
+    else if (name == "complex256") {
       return std::to_string(static_cast<utype>(state::complex256));
-      // case datetime64:
-      //   return static_cast<utype>(state::datetime64);
-      // case timedelta64:
-      //   return static_cast<utype>(state::timedelta64);
-    default:
+    }
+    else if (name.rfind("datetime64", 0) == 0) {
+      return std::to_string(static_cast<utype>(state::datetime64));
+    }
+    else if (name.rfind("timedelta64", 0) == 0) {
+      return std::to_string(static_cast<utype>(state::timedelta64));
+    }
+    else {
       throw std::runtime_error(
         std::string("unrecognized util::dtype ") + FILENAME(__LINE__));
     }
   };
 
   const std::string
-  dtype_to_vm_format(util::dtype dt) {
-    switch (dt) {
-    case util::dtype::boolean:
+  primitive_to_vm_format(const std::string& name) {
+    if (name == "bool") {
       return "?";
-    case util::dtype::int8:
+    }
+    else if (name == "int8") {
       return "b";
-    case util::dtype::int16:
+    }
+    else if (name == "int16") {
       return "h";
-    case util::dtype::int32:
+    }
+    else if (name == "int32") {
       return "i";
-    case util::dtype::int64:
+    }
+    else if (name == "int64") {
       return "q";
-    case util::dtype::uint8:
+    }
+    else if (name == "uint8") {
       return "B";
-    case util::dtype::uint16:
+    }
+    else if (name == "uint16") {
       return "H";
-    case util::dtype::uint32:
+    }
+    else if (name == "uint32") {
       return "I";
-    case util::dtype::uint64:
+    }
+    else if (name == "uint64") {
       return "Q";
-    case util::dtype::float16:
-    case util::dtype::float32:
+    }
+    else if ((name == "float16")  ||
+             (name == "float32")) {
       return "f";
-    case util::dtype::float64:
-    case util::dtype::float128:
-    case util::dtype::complex64:
-    case util::dtype::complex128:
-    case util::dtype::complex256:
- // case datetime64:
- // case timedelta64:
+    }
+    else if ((name == "float64")  ||
+             (name == "float128")  ||
+             (name == "complex64")  ||
+             (name == "complex128")  ||
+             (name == "complex256")) {
       return "d";
-    default:
+    }
+    else if (name.rfind("datetime64", 0) == 0) {
+      return "M";
+    }
+    else if (name.rfind("timedelta64", 0) == 0) {
+      return "m";
+    }
+    else {
       throw std::runtime_error(
         std::string("unrecognized util::dtype ") + FILENAME(__LINE__));
     }
@@ -157,12 +183,12 @@ namespace awkward {
   int64_t LayoutBuilder::next_node_id = 0;
   int64_t LayoutBuilder::error_id = 0;
 
-  LayoutBuilder::LayoutBuilder(const FormPtr& form,
+  LayoutBuilder::LayoutBuilder(const std::string& json_form,
                                const ArrayBuilderOptions& options,
                                bool vm_init)
     : initial_(options.initial()),
       length_(8),
-      builder_(formBuilderFromA(form)),
+      builder_(formBuilderFromJson(json_form)),
       vm_(nullptr),
       vm_input_data_("data"),
       vm_source_() {
@@ -189,56 +215,169 @@ namespace awkward {
   }
 
   FormBuilderPtr
-  LayoutBuilder::formBuilderFromA(const FormPtr& form) {
-    if (auto const& downcasted_form = std::dynamic_pointer_cast<BitMaskedForm>(form)) {
-      return std::make_shared<BitMaskedArrayBuilder>(downcasted_form);
+  LayoutBuilder::formBuilderFromJson(const std::string& json_form) {
+    rj::Document json_doc;
+    json_doc.Parse<rj::kParseNanAndInfFlag>(json_form.c_str());
+
+    std::string json_form_key;
+    std::string json_form_content;
+    std::string json_form_index;
+    std::string json_form_offsets;
+
+    if (json_doc.HasMember("form_key")) {
+      if (json_doc["form_key"].IsNull()) {
+        json_form_key = std::string("node-id")
+          + std::to_string(LayoutBuilder::next_id());
+      }
+      else if (json_doc["form_key"].IsString()) {
+        json_form_key = json_doc["form_key"].GetString();
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("'form_key' must be null or a string") + FILENAME(__LINE__));
+      }
     }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ByteMaskedForm>(form)) {
-      return std::make_shared<ByteMaskedArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<EmptyForm>(form)) {
-      return std::make_shared<EmptyArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedForm>(form)) {
-      switch (downcasted_form.get()->index()) {
-      // case Index::Form::i8:
-      // case Index::Form::u8:
-      case Index::Form::i32:
-      case Index::Form::u32:
-      case Index::Form::i64:
-      default:
-        return std::make_shared<IndexedArrayBuilder>(downcasted_form);
-      };
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedOptionForm>(form)) {
-      return std::make_shared<IndexedOptionArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListForm>(form)) {
-      return std::make_shared<ListArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListOffsetForm>(form)) {
-      return std::make_shared<ListOffsetArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<NumpyForm>(form)) {
-      return std::make_shared<NumpyArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<RecordForm>(form)) {
-      return std::make_shared<RecordArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<RegularForm>(form)) {
-      return std::make_shared<RegularArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnionForm>(form)) {
-      return std::make_shared<UnionArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnmaskedForm>(form)) {
-      return std::make_shared<UnmaskedArrayBuilder>(downcasted_form);
-    }
-    else {
+
+    bool isgen;
+    bool is64;
+    bool isU32;
+    bool is32;
+
+    if (json_doc.IsObject()  &&
+        json_doc.HasMember("class")  &&
+        json_doc["class"].IsString()) {
+
+      std::string cls = json_doc["class"].GetString();
+
+      if (cls == std::string("BitMaskedArray")) {
+        return std::make_shared<BitMaskedArrayBuilder>(json_form_key,
+                                                       json_form_content);
+      }
+      if (cls == std::string("ByteMaskedArray")) {
+        return std::make_shared<ByteMaskedArrayBuilder>(json_form_key,
+                                                        json_form_content);
+      }
+      if (cls == std::string("EmptyArray")) {
+        return std::make_shared<EmptyArrayBuilder>();
+      }
+
+      isgen = is64 = isU32 = is32 = false;
+      if ((cls == std::string("IndexedArray"))  ||
+               (cls == std::string("IndexedArray64"))  ||
+               (cls == std::string("IndexedArrayU32"))  ||
+               (cls == std::string("IndexedArray32"))) {
+
+        bool is_categorical(false);
+        //form.get()->parameter_equals("__array__", "\"categorical\"")),
+
+//        index_form_to_name(Index::Form form) {
+
+        return std::make_shared<IndexedArrayBuilder>(json_form_key,
+                                                     json_form_index,
+                                                     json_form_content,
+                                                     is_categorical);
+      }
+
+      isgen = is64 = isU32 = is32 = false;
+      if ((cls == std::string("IndexedOptionArray"))  ||
+               (cls == std::string("IndexedOptionArray64"))  ||
+               (cls == std::string("IndexedOptionArray32"))) {
+
+//        index_form_to_name(Index::Form form) {
+        bool is_categorical(false);
+
+        // form_.get()->parameter_equals("__array__", "\"categorical\"")) {
+
+        return std::make_shared<IndexedOptionArrayBuilder>(json_form_key,
+                                                           json_form_index,
+                                                           json_form_content,
+                                                           is_categorical);
+      }
+
+      isgen = is64 = isU32 = is32 = false;
+      if ((cls == std::string("ListArray"))  ||
+               (cls == std::string("ListArray64")) ||
+               (cls == std::string("ListArrayU32"))  ||
+               (cls == std::string("ListArray32"))) {
+
+//        index_form_to_name(Index::Form form) {
+        std::string json_form_starts;
+
+        return std::make_shared<ListArrayBuilder>(json_form_key,
+                                                  json_form_starts,
+                                                  json_form_content);
+      }
+
+      isgen = is64 = isU32 = is32 = false;
+      if ((cls == std::string("ListOffsetArray"))  ||
+               (cls == std::string("ListOffsetArray64"))  ||
+               (cls == std::string("ListOffsetArrayU32"))  ||
+               (cls == std::string("ListOffsetArray32"))) {
+                 // form.get()->parameter_equals("__array__", "\"string\"")
+                 //     ||  form.get()->parameter_equals("__array__", "\"bytestring\"")),
+        bool is_string_builder(false);
+
+        // index_form_to_name(form_offsets)
+
+        return std::make_shared<ListOffsetArrayBuilder>(json_form_key,
+                                                        json_form_offsets,
+                                                        json_form_content,
+                                                        is_string_builder);
+      }
+      if (cls == std::string("NumpyArray")) {
+        std::string primitive;
+
+        if (json_doc.HasMember("primitive")  &&  json_doc["primitive"].IsString()) {
+          primitive = json_doc["primitive"].GetString();
+         }
+         else {
+           throw std::invalid_argument(
+             std::string("NumpyForm must have a 'primitive' field")
+                         + FILENAME(__LINE__));
+         }
+        return std::make_shared<NumpyArrayBuilder>(json_form_key,
+                                                   primitive,
+                                                   primitive_to_state(primitive),
+                                                   primitive_to_vm_format(primitive));
+      }
+      if (cls == std::string("RecordArray")) {
+        //contents_size_((int64_t)form.get()->contents().size())
+        // FIXME:
+        const std::vector<const std::string> json_form_contents;
+        return std::make_shared<RecordArrayBuilder>(json_form_key, json_form_contents);
+      }
+      if (cls == std::string("RegularArray")) {
+        return std::make_shared<RegularArrayBuilder>(json_form_key, json_form_content);
+      }
+
+      isgen = is64 = isU32 = is32 = false;
+      if ((cls == std::string("UnionArray"))  ||
+               (cls == std::string("UnionArray8_64"))  ||
+               (cls == std::string("UnionArray8_U32"))  ||
+               (cls == std::string("UnionArray8_32"))) {
+                 // index_form_to_name(form_.get()->tags()
+//                 const std::vector<const std::string>& form_contents,
+        // FIXME:
+        const std::vector<const std::string> json_form_contents;
+// index_form_to_name(form_tags)
+        std::string json_form_tags;
+
+        return std::make_shared<UnionArrayBuilder>(json_form_key, json_form_tags, json_form_contents);
+      }
+      if (cls == std::string("UnmaskedArray")) {
+        return std::make_shared<UnmaskedArrayBuilder>(json_form, json_form_key);
+      }
       throw std::invalid_argument(
         std::string("LayoutBuilder does not recognise the Form ")
         + FILENAME(__LINE__));
     }
+
+    rj::StringBuffer stringbuffer;
+    rj::PrettyWriter<rj::StringBuffer> writer(stringbuffer);
+    json_doc.Accept(writer);
+    throw std::invalid_argument(
+            std::string("JSON cannot be recognized as a Form:\n\n")
+            + stringbuffer.GetString() + FILENAME(__LINE__));
   }
 
   void
@@ -296,11 +435,6 @@ namespace awkward {
       std::cout << "\n";
     }
     // FIXME refactoring std::cout << "array:\n" << snapshot().get()->tostring() << "\n";
-  }
-
-  const FormPtr
-  LayoutBuilder::form() const {
-    return builder_.get()->form();
   }
 
   const std::string

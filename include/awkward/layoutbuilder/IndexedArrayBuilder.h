@@ -9,8 +9,6 @@
 
 namespace awkward {
 
-  class IndexedForm;
-  using IndexedFormPtr = std::shared_ptr<IndexedForm>;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class IndexedArrayBuilder
@@ -19,17 +17,16 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL IndexedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an IndexedArrayBuilder from a full set of parameters.
-    IndexedArrayBuilder(const IndexedFormPtr& form,
+    IndexedArrayBuilder(const std::string form_key,
+                        const std::string form_index,
+                        const std::string form_content,
+                        bool is_categorical,
                         const std::string attribute = "index",
                         const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -96,24 +93,27 @@ namespace awkward {
 
     const FormBuilderPtr content() const { return content_; }
 
-  private:
-    /// @brief This builder Form
-    const IndexedFormPtr form_;
+    const std::string&
+      form_index() const { return form_index_; }
 
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
+  private:
     /// @brief If 'true', this array type is categorical.
     bool is_categorical_;
 
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
+    const std::string form_index_;
+    util::Parameters parameters_;
 
-    /// @brief This Form content builder
+    /// @brief This Json Form content builder
     FormBuilderPtr content_;
 
     /// @brief AwkwardForth virtual machine instructions
-    /// generated from the Form
+    /// generated from the Json Form.
+    ///
+    /// An output buffer name is
+    /// "part{partition}-{form_key}-{attribute}"
     std::string vm_output_data_;
     std::string vm_output_;
     std::string vm_func_name_;

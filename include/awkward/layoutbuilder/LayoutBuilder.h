@@ -16,9 +16,6 @@ namespace awkward {
   class Type;
   using TypePtr = std::shared_ptr<Type>;
 
-  class Form;
-  using FormPtr = std::shared_ptr<Form>;
-
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
   class FormBuilder;
@@ -51,15 +48,17 @@ namespace awkward {
     complex256 = 17,
     null = 18,
     index = 19,
-    tag = 20
+    tag = 20,
+    datetime64 = 21,
+    timedelta64 = 22
   };
   using utype = std::underlying_type<state>::type;
 
   const std::string
-    dtype_to_state(util::dtype dt);
+    primitive_to_state(const std::string& name);
 
   const std::string
-    dtype_to_vm_format(util::dtype dt);
+    primitive_to_vm_format(const std::string& name);
 
   /// @class LayoutBuilder
   ///
@@ -75,7 +74,7 @@ namespace awkward {
     /// @param vm_init If 'true' the Virtual Machine is instantiated on
     /// construction. If 'false' an external Virtial Machine must be connected
     /// to the builder. The flag is used for debugging.
-    LayoutBuilder(const FormPtr& form,
+    LayoutBuilder(const std::string& json_form,
                   const ArrayBuilderOptions& options,
                   bool vm_init = true);
 
@@ -86,10 +85,6 @@ namespace awkward {
     /// @brief Prints debug information from the Virtual Machine stack.
     void
       debug_step() const;
-
-    /// @brief Returns the Form used to build the Array.
-    const FormPtr
-      form() const;
 
     /// @brief Returns an AwkwardForth source code generated from the 'Form' and
     /// passed to the 'ForthMachine' virtual machine.
@@ -235,7 +230,7 @@ namespace awkward {
 
     /// @brief Generates an Array builder from a Form
     static FormBuilderPtr
-      formBuilderFromA(const FormPtr& form);
+      formBuilderFromJson(const std::string& form);
 
     /// @brief Generates next unique ID
     static int64_t

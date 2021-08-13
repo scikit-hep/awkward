@@ -7,8 +7,6 @@
 
 namespace awkward {
 
-  class UnmaskedForm;
-  using UnmaskedFormPtr = std::shared_ptr<UnmaskedForm>;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class UnmaskedArrayBuilder
@@ -17,17 +15,14 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnmaskedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an UnmaskedArrayBuilder from a full set of parameters.
-    UnmaskedArrayBuilder(const UnmaskedFormPtr& form,
+    UnmaskedArrayBuilder(const std::string form_key,
+                         const std::string form_content,
                          const std::string attribute = "mask",
                          const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -95,15 +90,6 @@ namespace awkward {
     const FormBuilderPtr content() const { return content_; }
 
   private:
-    /// @brief This builder Form
-    const UnmaskedFormPtr form_;
-
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
-
     /// @brief This Form content builder
     FormBuilderPtr content_;
 

@@ -7,27 +7,22 @@
 
 namespace awkward {
 
-  class BitMaskedForm;
-  using BitMaskedFormPtr = std::shared_ptr<BitMaskedForm>;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class BitMaskedArrayBuilder
   ///
-  /// @brief BitMaskedArray builder from a BitMaskedForm
+  /// @brief BitMaskedArray builder from a Bit Masked Json Form
   class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a BitMaskedArrayBuilder from a full set of parameters.
-    BitMaskedArrayBuilder(const BitMaskedFormPtr& form,
+    BitMaskedArrayBuilder(const std::string json_form_key,
+                          const std::string json_form_content,
                           const std::string attribute = "mask",
                           const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -95,20 +90,14 @@ namespace awkward {
     const FormBuilderPtr content() const { return content_; }
 
   private:
-    /// @brief BitMaskedForm that defines the BitMaskedArray.
-    const BitMaskedFormPtr form_;
-
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
-
-    /// @brief This Form content builder
+    /// @brief This Json Form content builder
     FormBuilderPtr content_;
 
     /// @brief AwkwardForth virtual machine instructions
-    /// generated from the Form
+    /// generated from the Json Form.
+    ///
+    /// An output buffer name is
+    /// "part{partition}-{form_key}-{attribute}"
     std::string vm_output_data_;
     std::string vm_output_;
     std::string vm_func_name_;

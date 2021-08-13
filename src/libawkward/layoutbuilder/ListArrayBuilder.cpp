@@ -4,34 +4,30 @@
 
 #include "awkward/layoutbuilder/ListArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/ListArray.h"
 
 namespace awkward {
 
   ///
-  ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form,
+  ListArrayBuilder::ListArrayBuilder(const std::string form_key,
+                                     const std::string form_starts,
+                                     const std::string form_content,
                                      const std::string attribute,
                                      const std::string partition)
-    : form_(form),
-      begun_(false),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
+    : begun_(false),
+      form_starts_(form_starts),
+      parameters_(util::Parameters()), // FIXME
+      content_(LayoutBuilder::formBuilderFromJson(form_content)) {
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(index_form_to_name(form_.get()->starts()))
+      .append(form_starts)
       .append("\n")
       .append(content_.get()->vm_output());
 
@@ -68,11 +64,6 @@ namespace awkward {
   const std::string
   ListArrayBuilder::classname() const {
     return "ListArrayBuilder";
-  }
-
-  const FormPtr
-  ListArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

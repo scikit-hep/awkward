@@ -4,35 +4,33 @@
 
 #include "awkward/layoutbuilder/IndexedOptionArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/IndexedArray.h"
 
 namespace awkward {
 
   ///
-  IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form,
+  IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(const std::string form_key,
+                                                       const std::string form_index,
+                                                       const std::string form_content,
+                                                       bool is_categorical,
                                                        const std::string attribute,
                                                        const std::string partition)
-    : form_(form),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
+    : is_categorical_(is_categorical),
+      form_index_(form_index),
+      parameters_(util::Parameters()), // FIXME
+      content_(LayoutBuilder::formBuilderFromJson(form_content)) {
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_func_type_ = content_.get()->vm_func_type();
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(index_form_to_name(form_.get()->index()))
+      .append(form_index)
       .append("\n")
       .append(content_.get()->vm_output());
 
@@ -62,7 +60,7 @@ namespace awkward {
 
   void
   IndexedOptionArrayBuilder::validate() const {
-    if (form_.get()->parameter_equals("__array__", "\"categorical\"")) {
+    if (is_categorical_) {
       throw std::invalid_argument(
         std::string("categorical form of a ") + classname()
         + std::string(" is not supported yet ")
@@ -73,11 +71,6 @@ namespace awkward {
   const std::string
   IndexedOptionArrayBuilder::classname() const {
     return "IndexedOptionArrayBuilder";
-  }
-
-  const FormPtr
-  IndexedOptionArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string
