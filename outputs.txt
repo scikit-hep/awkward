@@ -1,0 +1,3037 @@
+============================= test session starts ==============================
+platform linux -- Python 3.8.10, pytest-6.2.4, py-1.10.0, pluggy-0.13.1 -- /usr/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/home/santam/Documents/Projects/awkward-1.0/.hypothesis/examples')
+rootdir: /home/santam/Documents/Projects/awkward-1.0, configfile: setup.cfg
+plugins: hypothesis-6.14.0, anyio-3.2.1
+collecting ... collected 885 items / 43 skipped / 842 selected
+
+tests/test_0001-refcount.py::test_refcount PASSED
+tests/test_0002-minimal-listarray.py::test PASSED
+tests/test_0002-minimal-listarray.py::test_len PASSED
+tests/test_0002-minimal-listarray.py::test_members PASSED
+tests/test_0004-design-surrogate-key.py::test_refcount1 PASSED
+tests/test_0004-design-surrogate-key.py::test_refcount2 PASSED
+tests/test_0004-design-surrogate-key.py::test_refcount3 PASSED
+tests/test_0004-design-surrogate-key.py::test_numpyarray_setidentities PASSED
+tests/test_0004-design-surrogate-key.py::test_listoffsetarray_setidentities PASSED
+tests/test_0004-design-surrogate-key.py::test_setidentities_none PASSED
+tests/test_0004-design-surrogate-key.py::test_setidentities_constructor PASSED
+tests/test_0006-deep-iteration.py::test_iterator PASSED
+tests/test_0006-deep-iteration.py::test_refcount PASSED
+tests/test_0008-slices-and-getitem.py::test_slice PASSED
+tests/test_0008-slices-and-getitem.py::test_numpyarray_getitem_bystrides PASSED
+tests/test_0008-slices-and-getitem.py::test_numpyarray_contiguous PASSED
+tests/test_0008-slices-and-getitem.py::test_numpyarray_getitem_next PASSED
+tests/test_0009-identity-and-getitem.py::test_identity Identities reinterpret_cast: 7,3,3,6,0,0,33,0,-1914439872,32669,
+Identities reinterpret_cast: 0,1,2,6,8,0,49,0,0,0,
+Identities reinterpret_cast: 8,4,4,6,32,0,33,0,-1914439872,
+Identities reinterpret_cast: 1,2,6,8,-2071477328,32669,33,0,-1914439872,
+PASSED
+tests/test_0011-listarray.py::test_listarray_basic PASSED
+tests/test_0011-listarray.py::test_listoffsetarray_basic PASSED
+tests/test_0011-listarray.py::test_listarray_at PASSED
+tests/test_0011-listarray.py::test_listoffsetarray_at PASSED
+tests/test_0011-listarray.py::test_listarray_slice PASSED
+tests/test_0011-listarray.py::test_listoffsetarray_slice PASSED
+tests/test_0011-listarray.py::test_listarray_slice_slice PASSED
+tests/test_0011-listarray.py::test_listoffsetarray_slice_slice PASSED
+tests/test_0011-listarray.py::test_listarray_ellipsis PASSED
+tests/test_0011-listarray.py::test_listoffsetarray_ellipsis PASSED
+tests/test_0011-listarray.py::test_listarray_array_slice PASSED
+tests/test_0011-listarray.py::test_listoffsetarray_array_slice PASSED
+tests/test_0011-listarray.py::test_listarray_array PASSED
+tests/test_0011-listarray.py::test_listoffsetarray_array PASSED
+tests/test_0013-error-handling-struct.py::test_numpyarray Identities reinterpret_cast: 0,1,2,3,4,5,6,7,8,9,
+PASSED
+tests/test_0013-error-handling-struct.py::test_listarray_numpyarray Identities reinterpret_cast: 2,0,0,0,32,
+Identities reinterpret_cast: 2,0,0,0,30575168,
+Identities reinterpret_cast: 3,0,0,0,
+Identities reinterpret_cast: 3,0,0,0,
+Identities reinterpret_cast: 2,2,2,2,35468128,
+Identities reinterpret_cast: 2,2,2,2,35632912,
+Identities reinterpret_cast: 3,3,31992304,0,
+Identities reinterpret_cast: 3,3,-1672975344,32669,
+PASSED
+tests/test_0013-error-handling-struct.py::test_listarray_listarray_numpyarray Identities reinterpret_cast: 2,0,0,0,
+Identities reinterpret_cast: 3,0,0,
+Identities reinterpret_cast: 2,0,0,0,
+Identities reinterpret_cast: 3,0,0,
+Identities reinterpret_cast: 1,0,0,0,
+Identities reinterpret_cast: 3,0,0,
+Identities reinterpret_cast: 3,0,0,0,
+PASSED
+tests/test_0014-finish-up-getitem.py::test_basic PASSED
+tests/test_0014-finish-up-getitem.py::test_listoffsetarrayA64 PASSED
+tests/test_0014-finish-up-getitem.py::test_listoffsetarrayA32 PASSED
+tests/test_0014-finish-up-getitem.py::test_listarrayA64 PASSED
+tests/test_0014-finish-up-getitem.py::test_listarrayA32 PASSED
+tests/test_0014-finish-up-getitem.py::test_listoffsetarrayB64 Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+PASSED
+tests/test_0014-finish-up-getitem.py::test_listoffsetarrayB32 Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+PASSED
+tests/test_0014-finish-up-getitem.py::test_listarrayB64 Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+PASSED
+tests/test_0014-finish-up-getitem.py::test_listarrayB32 Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 1,1,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 0,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+Identities reinterpret_cast: 0,1,
+PASSED
+tests/test_0018-fromiter-fillable.py::test_types PASSED
+tests/test_0018-fromiter-fillable.py::test_boolean PASSED
+tests/test_0018-fromiter-fillable.py::test_big PASSED
+tests/test_0018-fromiter-fillable.py::test_integer PASSED
+tests/test_0018-fromiter-fillable.py::test_real PASSED
+tests/test_0018-fromiter-fillable.py::test_integer_real PASSED
+tests/test_0018-fromiter-fillable.py::test_real_integer PASSED
+tests/test_0018-fromiter-fillable.py::test_list_real PASSED
+tests/test_0018-fromiter-fillable.py::test_list_list_real PASSED
+tests/test_0018-fromiter-fillable.py::test_list_errors PASSED
+tests/test_0019-use-json-library.py::test_fromstring PASSED
+tests/test_0019-use-json-library.py::test_fromfile PASSED
+tests/test_0019-use-json-library.py::test_tostring PASSED
+tests/test_0019-use-json-library.py::test_tofile PASSED
+tests/test_0019-use-json-library.py::test_fromiter PASSED
+tests/test_0019-use-json-library.py::test_numpy PASSED
+tests/test_0020-support-unsigned-indexes.py::test_index PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listarray_basic PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listoffsetarray_basic PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listarray_at PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listoffsetarray_at PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listarray_slice PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listoffsetarray_slice PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listarray_slice_slice PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listoffsetarray_slice_slice PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listarray_ellipsis PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listoffsetarray_ellipsis PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listarray_array_slice PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listoffsetarray_array_slice PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listarray_array PASSED
+tests/test_0020-support-unsigned-indexes.py::test_listoffsetarray_array PASSED
+tests/test_0021-emptyarray.py::test_unknown PASSED
+tests/test_0021-emptyarray.py::test_getitem PASSED
+tests/test_0023-regular-array.py::test_simple_type PASSED
+tests/test_0023-regular-array.py::test_type PASSED
+tests/test_0023-regular-array.py::test_iteration PASSED
+tests/test_0023-regular-array.py::test_tojson PASSED
+tests/test_0023-regular-array.py::test_getitem_at PASSED
+tests/test_0023-regular-array.py::test_getitem_range PASSED
+tests/test_0023-regular-array.py::test_getitem PASSED
+tests/test_0023-regular-array.py::test_getitem_deeper PASSED
+tests/test_0023-regular-array.py::test_numpy PASSED
+tests/test_0023-regular-array.py::test_setidentities PASSED
+tests/test_0024-use-regular-array.py::test_empty_array_slice PASSED
+tests/test_0024-use-regular-array.py::test_nonflat_slice Identities reinterpret_cast: 1,0,
+Identities reinterpret_cast: 1,0,
+PASSED
+tests/test_0024-use-regular-array.py::test_newaxis PASSED
+tests/test_0025-record-array.py::test_basic PASSED
+tests/test_0025-record-array.py::test_scalar_record PASSED
+tests/test_0025-record-array.py::test_type PASSED
+tests/test_0025-record-array.py::test_getitem PASSED
+tests/test_0025-record-array.py::test_getitem_other_types PASSED
+tests/test_0025-record-array.py::test_getitem_next PASSED
+tests/test_0025-record-array.py::test_setidentities Identities reinterpret_cast: 1,0,0,0,-2072041104,
+Identities reinterpret_cast: 1,
+Identities reinterpret_cast: 1,0,0,0,37313536,
+Identities reinterpret_cast: 2,0,0,0,37290036,
+Identities reinterpret_cast: 2,0,0,0,7954802,
+Identities reinterpret_cast: 2,0,0,0,35520564,
+Identities reinterpret_cast: 1,0,0,0,-2072068560,
+Identities reinterpret_cast: 1,
+Identities reinterpret_cast: 1,0,-1942335296,32669,-2072071248,
+Identities reinterpret_cast: 1,0,-1942334272,32669,35562624,
+Identities reinterpret_cast: 2,0,0,0,32374836,
+Identities reinterpret_cast: 2,0,-1957310576,32669,37190288,
+Identities reinterpret_cast: 2,0,0,0,22499312,
+Identities reinterpret_cast: 2,0,0,0,37290036,
+Identities reinterpret_cast: 2,0,0,0,37290036,
+Identities reinterpret_cast: 2,0,-1957273376,32669,37190288,
+Identities reinterpret_cast: 2,0,0,0,33877024,
+Identities reinterpret_cast: 1,0,0,0,0,
+Identities reinterpret_cast: 1,0,0,0,34970992,
+Identities reinterpret_cast: 1,
+Identities reinterpret_cast: 1,0,0,0,-2072068560,
+Identities reinterpret_cast: 1,0,0,0,32724592,
+Identities reinterpret_cast: 1,0,0,0,33154224,
+Identities reinterpret_cast: 1,0,0,0,37352032,
+Identities reinterpret_cast: 1,0,0,0,33535280,
+Identities reinterpret_cast: 1,0,0,0,37276208,
+Identities reinterpret_cast: 1,0,0,0,37190192,
+Identities reinterpret_cast: 1,
+Identities reinterpret_cast: 1,0,0,0,37191312,
+Identities reinterpret_cast: 1,0,0,0,32675312,
+Identities reinterpret_cast: 1,0,0,0,37352032,
+Identities reinterpret_cast: 1,0,0,0,32724560,
+Identities reinterpret_cast: 1,0,0,0,33095732,
+Identities reinterpret_cast: 1,
+Identities reinterpret_cast: 1,0,0,0,31846336,
+Identities reinterpret_cast: 1,0,0,0,37352288,
+Identities reinterpret_cast: 1,0,0,0,37313536,
+Identities reinterpret_cast: 1,0,0,0,37190256,
+Identities reinterpret_cast: 1,0,0,0,32422432,
+Identities reinterpret_cast: 1,0,0,0,37158964,
+Identities reinterpret_cast: 1,
+Identities reinterpret_cast: 2,0,0,0,0,
+Identities reinterpret_cast: 2,0,0,0,35562560,
+Identities reinterpret_cast: 2,0,0,0,31785012,
+Identities reinterpret_cast: 2,0,-1957272576,32669,37352032,
+Identities reinterpret_cast: 2,0,0,0,34208768,
+Identities reinterpret_cast: 2,0,0,0,64,
+Identities reinterpret_cast: 2,0,0,0,33516672,
+Identities reinterpret_cast: 2,0,0,0,37200128,
+Identities reinterpret_cast: 2,0,0,0,31785012,
+Identities reinterpret_cast: 2,
+Identities reinterpret_cast: 2,0,0,0,37313536,
+Identities reinterpret_cast: 2,0,0,0,37352064,
+Identities reinterpret_cast: 2,0,0,0,-2072043088,
+Identities reinterpret_cast: 2,0,0,0,33535280,
+Identities reinterpret_cast: 2,0,0,0,37290036,
+Identities reinterpret_cast: 2,
+PASSED
+tests/test_0025-record-array.py::test_identities Identities reinterpret_cast: 2,0,0,
+Identities reinterpret_cast: 2,0,0,
+Identities reinterpret_cast: 2,0,0,
+Identities reinterpret_cast: 2,0,0,
+Identities reinterpret_cast: 2,0,0,
+Identities reinterpret_cast: 2,0,0,0,32640672,
+Identities reinterpret_cast: 2,0,0,0,34141936,
+Identities reinterpret_cast: 2,0,0,0,35144656,
+Identities reinterpret_cast: 2,0,0,0,35566368,
+Identities reinterpret_cast: 2,0,0,0,52,
+Identities reinterpret_cast: 2,0,0,0,-2072042768,
+Identities reinterpret_cast: 2,0,0,0,0,
+Identities reinterpret_cast: 2,0,0,0,52,
+Identities reinterpret_cast: 2,0,0,0,52,
+PASSED
+tests/test_0025-record-array.py::test_builder_tuple PASSED
+tests/test_0025-record-array.py::test_builder_record PASSED
+tests/test_0025-record-array.py::test_fromiter PASSED
+tests/test_0025-record-array.py::test_json PASSED
+tests/test_0028-add-dressed-types.py::test_fromnumpy PASSED
+tests/test_0028-add-dressed-types.py::test_highlevel PASSED
+tests/test_0028-add-dressed-types.py::test_string1 PASSED
+tests/test_0028-add-dressed-types.py::test_string2 PASSED
+tests/test_0031-pickle-types.py::test_pickle PASSED
+tests/test_0032-replace-dressedtype.py::test_types_with_parameters PASSED
+tests/test_0032-replace-dressedtype.py::test_dress PASSED
+tests/test_0032-replace-dressedtype.py::test_record_name PASSED
+tests/test_0032-replace-dressedtype.py::test_builder_string PASSED
+tests/test_0032-replace-dressedtype.py::test_fromiter_fromjson PASSED
+tests/test_0038-emptyarray-astype.py::test_typeempty PASSED
+tests/test_0039-no-hanging-types.py::test_parameters_on_arrays PASSED
+tests/test_0039-no-hanging-types.py::test_string2 PASSED
+tests/test_0039-no-hanging-types.py::test_dress PASSED
+tests/test_0042-stubs-for-flatten-operation.py::test_flatten PASSED
+tests/test_0043-strings-vs-bytes.py::test PASSED
+tests/test_0046-start-indexedarray.py::test_basic PASSED
+tests/test_0046-start-indexedarray.py::test_type PASSED
+tests/test_0046-start-indexedarray.py::test_null PASSED
+tests/test_0046-start-indexedarray.py::test_carry PASSED
+tests/test_0046-start-indexedarray.py::test_others PASSED
+tests/test_0046-start-indexedarray.py::test_missing PASSED
+tests/test_0046-start-indexedarray.py::test_highlevel PASSED
+tests/test_0046-start-indexedarray.py::test_builder PASSED
+tests/test_0046-start-indexedarray.py::test_json PASSED
+tests/test_0047-missing-odd-fields-in-fillablearray.py::test PASSED
+tests/test_0049-distinguish-record-and-recordarray-behaviors.py::test PASSED
+tests/test_0056-partitioned-array.py::test_basic PASSED
+tests/test_0056-partitioned-array.py::test_range_slices PASSED
+tests/test_0056-partitioned-array.py::test_as_slice PASSED
+tests/test_0056-partitioned-array.py::test_repartition PASSED
+tests/test_0056-partitioned-array.py::test_getitem_basic PASSED
+tests/test_0056-partitioned-array.py::test_getitem_first_dimension_int PASSED
+tests/test_0056-partitioned-array.py::test_getitem_first_dimension_slice PASSED
+tests/test_0056-partitioned-array.py::test_getitem_first_dimension_field PASSED
+tests/test_0056-partitioned-array.py::test_getitem_first_dimension_intarray PASSED
+tests/test_0056-partitioned-array.py::test_getitem_first_dimension_boolarray PASSED
+tests/test_0056-partitioned-array.py::test_getitem_first_dimension_jaggedarray PASSED
+tests/test_0056-partitioned-array.py::test_highlevel PASSED
+tests/test_0056-partitioned-array.py::test_mask PASSED
+tests/test_0056-partitioned-array.py::test_indexed PASSED
+tests/test_0056-partitioned-array.py::test_repartition_again PASSED
+tests/test_0056-partitioned-array.py::test_firsts_singletons PASSED
+tests/test_0056-partitioned-array.py::test_mask2 PASSED
+tests/test_0056-partitioned-array.py::test_zip PASSED
+tests/test_0056-partitioned-array.py::test_with_name_field PASSED
+tests/test_0056-partitioned-array.py::test_atleast_1d PASSED
+tests/test_0056-partitioned-array.py::test_0167_strings PASSED
+tests/test_0057-virtual-array.py::test_forms PASSED
+tests/test_0057-virtual-array.py::test_basic PASSED
+tests/test_0057-virtual-array.py::test_slice PASSED
+tests/test_0057-virtual-array.py::test_field PASSED
+tests/test_0057-virtual-array.py::test_single_level PASSED
+tests/test_0057-virtual-array.py::test_iter PASSED
+tests/test_0057-virtual-array.py::test_nested_virtualness PASSED
+tests/test_0057-virtual-array.py::test_highlevel PASSED
+tests/test_0070-argmin-and-argmax.py::test_2d PASSED
+tests/test_0070-argmin-and-argmax.py::test_3d PASSED
+tests/test_0070-argmin-and-argmax.py::test_jagged PASSED
+tests/test_0070-argmin-and-argmax.py::test_missing PASSED
+tests/test_0070-argmin-and-argmax.py::test_highlevel PASSED
+tests/test_0072-fillna-operation.py::test_fillna_empty_array PASSED
+tests/test_0072-fillna-operation.py::test_fillna_numpy_array PASSED
+tests/test_0072-fillna-operation.py::test_fillna_regular_array PASSED
+tests/test_0072-fillna-operation.py::test_fillna_listarray_array PASSED
+tests/test_0072-fillna-operation.py::test_fillna_unionarray PASSED
+tests/test_0072-fillna-operation.py::test_highlevel PASSED
+tests/test_0074-argsort-and-sort.py::test_bool_sort PASSED
+tests/test_0074-argsort-and-sort.py::test_keep_None_in_place_test PASSED
+tests/test_0074-argsort-and-sort.py::test_EmptyArray PASSED
+tests/test_0074-argsort-and-sort.py::test_NumpyArray PASSED
+tests/test_0074-argsort-and-sort.py::test_IndexedOptionArray PASSED
+tests/test_0074-argsort-and-sort.py::test_3d PASSED
+tests/test_0074-argsort-and-sort.py::test_RecordArray PASSED
+tests/test_0074-argsort-and-sort.py::test_ByteMaskedArray PASSED
+tests/test_0074-argsort-and-sort.py::test_UnionArray PASSED
+tests/test_0074-argsort-and-sort.py::test_sort_strings PASSED
+tests/test_0074-argsort-and-sort.py::test_sort_bytestrings PASSED
+tests/test_0074-argsort-and-sort.py::test_sort_zero_length_arrays PASSED
+tests/test_0077-zip-operation.py::test PASSED
+tests/test_0078-argcross-and-cross.py::test_axis0 PASSED
+tests/test_0078-argcross-and-cross.py::test_axis1 PASSED
+tests/test_0078-argcross-and-cross.py::test_axis2 PASSED
+tests/test_0078-argcross-and-cross.py::test_localindex PASSED
+tests/test_0078-argcross-and-cross.py::test_argcartesian PASSED
+tests/test_0079-argchoose-and-choose.py::test_ListOffsetArray PASSED
+tests/test_0079-argchoose-and-choose.py::test_RegularArray PASSED
+tests/test_0079-argchoose-and-choose.py::test_axis0 PASSED
+tests/test_0079-argchoose-and-choose.py::test_IndexedArray PASSED
+tests/test_0079-argchoose-and-choose.py::test_axis2 PASSED
+tests/test_0079-argchoose-and-choose.py::test_argcombinations PASSED
+tests/test_0080-flatpandas-multiindex-rows-and-columns.py::test PASSED
+tests/test_0082-indexedarray-setidentities.py::test_error PASSED
+tests/test_0082-indexedarray-setidentities.py::test_passthrough_32 PASSED
+tests/test_0082-indexedarray-setidentities.py::test_passthrough_U32 PASSED
+tests/test_0082-indexedarray-setidentities.py::test_passthrough_64 PASSED
+tests/test_0082-indexedarray-setidentities.py::test_dontpass_32 PASSED
+tests/test_0082-indexedarray-setidentities.py::test_dontpass_U32 PASSED
+tests/test_0082-indexedarray-setidentities.py::test_dontpass_64 PASSED
+tests/test_0084-start-unionarray.py::test_getitem outindex <Index32 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x000002396160"/>
+outindex <Index32 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x000002396160"/>
+outindex <IndexU32 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x000002396160"/>
+outindex <IndexU32 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x000002396160"/>
+outindex <Index64 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x0000021693e0"/>
+outindex <Index64 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x0000021693e0"/>
+out <ListOffsetArray64>
+    <offsets><Index64 i="[0 3 3 5]" offset="0" length="4" at="0x0000023e9d70"/></offsets>
+    <content><NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x0000023ebd80"/></content>
+</ListOffsetArray64>
+lentags 8
+lenout 3
+out <ListArray64>
+    <parameters>
+        <param key="__array__">"string"</param>
+    </parameters>
+    <starts><Index64 i="[0 3 6 15 11]" offset="0" length="5" at="0x0000023e3bb0"/></starts>
+    <stops><Index64 i="[3 6 11 19 15]" offset="0" length="5" at="0x000001977fb0"/></stops>
+    <content><NumpyArray format="B" shape="19" data="111 110 101 116 119 ... 114 102 105 118 101" at="0x0000023efda0">
+        <parameters>
+            <param key="__array__">"char"</param>
+        </parameters>
+    </NumpyArray></content>
+</ListArray64>
+lentags 8
+lenout 5
+out <ListOffsetArray64>
+    <offsets><Index64 i="[0 3]" offset="0" length="2" at="0x0000023e9d70"/></offsets>
+    <content><NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x0000023ebd80"/></content>
+</ListOffsetArray64>
+lentags 4
+lenout 1
+out <ListArray64>
+    <parameters>
+        <param key="__array__">"string"</param>
+    </parameters>
+    <starts><Index64 i="[0 6 15]" offset="0" length="3" at="0x000002377ef0"/></starts>
+    <stops><Index64 i="[3 11 19]" offset="0" length="3" at="0x0000023d2d50"/></stops>
+    <content><NumpyArray format="B" shape="19" data="111 110 101 116 119 ... 114 102 105 118 101" at="0x0000023efda0">
+        <parameters>
+            <param key="__array__">"char"</param>
+        </parameters>
+    </NumpyArray></content>
+</ListArray64>
+lentags 4
+lenout 3
+outindex <Index32 i="[0 0 1 2]" offset="0" length="4" at="0x000002386bc0"/>
+out <ListOffsetArray64>
+    <offsets><Index64 i="[0 3 3 5]" offset="0" length="4" at="0x0000023e9d70"/></offsets>
+    <content><NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x0000023ebd80"/></content>
+</ListOffsetArray64>
+lentags 8
+lenout 3
+out <ListArray64>
+    <parameters>
+        <param key="__array__">"string"</param>
+    </parameters>
+    <starts><Index64 i="[0 3 6 15 11]" offset="0" length="5" at="0x0000022309e0"/></starts>
+    <stops><Index64 i="[3 6 11 19 15]" offset="0" length="5" at="0x0000023c99a0"/></stops>
+    <content><NumpyArray format="B" shape="19" data="111 110 101 116 119 ... 114 102 105 118 101" at="0x0000023efda0">
+        <parameters>
+            <param key="__array__">"char"</param>
+        </parameters>
+    </NumpyArray></content>
+</ListArray64>
+lentags 8
+lenout 5
+outindex <Index32 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x0000022309e0"/>
+out <ListOffsetArray64>
+    <offsets><Index64 i="[0 0 1 3]" offset="0" length="4" at="0x0000023f2e00"/></offsets>
+    <content><NumpyArray format="d" shape="3" data="1.1 1.1 2.2" at="0x0000023f4e10"/></content>
+</ListOffsetArray64>
+lentags 8
+lenout 3
+out <ListArray64>
+    <parameters>
+        <param key="__array__">"string"</param>
+    </parameters>
+    <starts><Index64 i="[0 4 7 15 10]" offset="0" length="5" at="0x000002194b70"/></starts>
+    <stops><Index64 i="[4 7 10 19 15]" offset="0" length="5" at="0x000001977fb0"/></stops>
+    <content><NumpyArray format="B" shape="19" data="122 101 114 111 111 ... 101 102 111 117 114" at="0x0000023f05d0">
+        <parameters>
+            <param key="__array__">"char"</param>
+        </parameters>
+    </NumpyArray></content>
+</ListArray64>
+lentags 8
+lenout 5
+outindex <Index64 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x0000023a98b0"/>
+out <ListOffsetArray64>
+    <offsets><Index64 i="[0 0 1 3]" offset="0" length="4" at="0x0000023f2e00"/></offsets>
+    <content><NumpyArray format="d" shape="3" data="1.1 1.1 2.2" at="0x0000023f4e10"/></content>
+</ListOffsetArray64>
+lentags 8
+lenout 3
+out <ListArray64>
+    <parameters>
+        <param key="__array__">"string"</param>
+    </parameters>
+    <starts><Index64 i="[0 4 7 15 10]" offset="0" length="5" at="0x0000021fb790"/></starts>
+    <stops><Index64 i="[4 7 10 19 15]" offset="0" length="5" at="0x0000023d7220"/></stops>
+    <content><NumpyArray format="B" shape="19" data="122 101 114 111 111 ... 101 102 111 117 114" at="0x0000023f05d0">
+        <parameters>
+            <param key="__array__">"char"</param>
+        </parameters>
+    </NumpyArray></content>
+</ListArray64>
+lentags 8
+lenout 5
+outindex <Index64 i="[0 1 0 1 2 2 3 4]" offset="0" length="8" at="0x0000021a09a0"/>
+out <RecordArray length="3">
+    <field index="0" key="x">
+        <NumpyArray format="l" shape="3" data="0 1 2" at="0x0000023f0df0"/>
+    </field>
+    <field index="1" key="y">
+        <ListOffsetArray64>
+            <offsets><Index64 i="[0 0 1 3]" offset="0" length="4" at="0x0000023f2e00"/></offsets>
+            <content><NumpyArray format="d" shape="3" data="1.1 1.1 2.2" at="0x0000023f4e10"/></content>
+        </ListOffsetArray64>
+    </field>
+</RecordArray>
+lentags 8
+lenout 3
+PASSED
+tests/test_0084-start-unionarray.py::test_identities PASSED
+tests/test_0084-start-unionarray.py::test_fromiter PASSED
+tests/test_0086-nep13-ufunc.py::test_basic PASSED
+tests/test_0086-nep13-ufunc.py::test_emptyarray PASSED
+tests/test_0086-nep13-ufunc.py::test_indexedarray PASSED
+tests/test_0086-nep13-ufunc.py::test_indexedoptionarray PASSED
+tests/test_0086-nep13-ufunc.py::test_regularize_shape PASSED
+tests/test_0086-nep13-ufunc.py::test_regulararray PASSED
+tests/test_0086-nep13-ufunc.py::test_listarray PASSED
+tests/test_0086-nep13-ufunc.py::test_unionarray out <NumpyArray format="d" shape="2" data="0 1.1" at="0x0000023743b0"/>
+lentags 2
+lenout 2
+out <NumpyArray format="l" shape="2" data="0 100" at="0x0000023d3a40"/>
+lentags 2
+lenout 2
+out <NumpyArray format="d" shape="2" data="2.2 3.3" at="0x000002374360"/>
+lentags 2
+lenout 2
+out <NumpyArray format="d" shape="2" data="200.3 300.3" at="0x000001f9e4d0"/>
+lentags 2
+lenout 2
+out <NumpyArray format="l" shape="0" data="" at="0x0000023d2d70"/>
+lentags 0
+lenout 0
+out <NumpyArray format="l" shape="0" data="" at="0x0000023d3a40"/>
+lentags 0
+lenout 0
+out <NumpyArray format="l" shape="2" data="4 5" at="0x0000023d2d70"/>
+lentags 2
+lenout 2
+out <NumpyArray format="d" shape="2" data="400.4 500.5" at="0x000001d31560"/>
+lentags 2
+lenout 2
+PASSED
+tests/test_0089-numpy-functions.py::test_mixing_lists_and_none PASSED
+tests/test_0089-numpy-functions.py::test_explicit_broadcasting PASSED
+tests/test_0089-numpy-functions.py::test_implicit_broadcasting PASSED
+tests/test_0089-numpy-functions.py::test_tonumpy out <NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x00000217c690"/>
+lentags 8
+lenout 5
+out <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000023d3ac0"/>
+lentags 8
+lenout 3
+PASSED
+tests/test_0089-numpy-functions.py::test_numpy_array out <NumpyArray format="d" shape="5" data="1.1 2.2 3.3 4.4 5.5" at="0x0000022eb040"/>
+lentags 8
+lenout 5
+out <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000023d3ac0"/>
+lentags 8
+lenout 3
+PASSED
+tests/test_0089-numpy-functions.py::test_where PASSED
+tests/test_0089-numpy-functions.py::test_string_equal PASSED
+tests/test_0089-numpy-functions.py::test_size PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_numpyarray_merge PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_regulararray_merge PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_listarray_merge PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_listoffsetarray_merge PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_recordarray_merge PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_indexedarray_merge PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_unionarray_merge PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_merge_parameters PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_bytemask PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_indexedarray_simplify PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_indexedarray_simplify_more PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_unionarray_simplify_one PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_unionarray_simplify PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_concatenate PASSED
+tests/test_0093-simplify-uniontypes-and-optiontypes.py::test_where PASSED
+tests/test_0094-getattr-for-record-field.py::test_field_names PASSED
+tests/test_0094-getattr-for-record-field.py::test_tuple_ids PASSED
+tests/test_0107-assign-fields-to-records.py::test_record PASSED
+tests/test_0107-assign-fields-to-records.py::test_withfield PASSED
+tests/test_0107-assign-fields-to-records.py::test_regulararray PASSED
+tests/test_0107-assign-fields-to-records.py::test_listarray PASSED
+tests/test_0110-various-cleanups.py::test_na_union PASSED
+tests/test_0110-various-cleanups.py::test_behaviors PASSED
+tests/test_0110-various-cleanups.py::test_flatten PASSED
+tests/test_0110-various-cleanups.py::test_string_equal PASSED
+tests/test_0110-various-cleanups.py::test_string_equal2 PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_array_slice out <NumpyArray format="l" shape="3" data="5 2 2" at="0x0000023e3dd0"/>
+lentags 7
+lenout 3
+out <NumpyArray format="l" shape="4" data="3 9 0 1" at="0x0000023743b0"/>
+lentags 7
+lenout 4
+PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_new_slices PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_missing PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_bool_missing PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_bool_missing2 PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_records_missing PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_jagged PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_double_jagged PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_masked_jagged PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_jagged_masked PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_regular_regular PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_masked_of_jagged_of_whatever PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_emptyarray PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_numpyarray PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_record PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_indexedarray PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_indexedarray2 PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_indexedarray2b PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_bytemaskedarray2b PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_bitmaskedarray2b PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_indexedarray3 PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_sequential PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_union PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_python_to_jaggedslice PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_jagged_mask PASSED
+tests/test_0111-jagged-and-masked-getitem.py::test_jagged_missing_mask PASSED
+tests/test_0114-rpad-operation.py::test_rpad_and_clip_empty_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_and_clip_numpy_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_numpy_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_and_clip_regular_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_regular_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_and_clip_listoffset_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_listoffset_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_list_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_and_clip_list_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_indexed_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_and_clip_indexed_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_indexed_option_array PASSED
+tests/test_0114-rpad-operation.py::test_rpad_recordarray PASSED
+tests/test_0114-rpad-operation.py::test_rpad_unionarray PASSED
+tests/test_0115-generic-reducer-operation.py::test_reproduce_numpy PASSED
+tests/test_0115-generic-reducer-operation.py::test_gaps PASSED
+tests/test_0115-generic-reducer-operation.py::test_complicated PASSED
+tests/test_0115-generic-reducer-operation.py::test_EmptyArray PASSED
+tests/test_0115-generic-reducer-operation.py::test_IndexedOptionArray PASSED
+tests/test_0115-generic-reducer-operation.py::test_UnionArray PASSED
+tests/test_0115-generic-reducer-operation.py::test_sum PASSED
+tests/test_0115-generic-reducer-operation.py::test_sumprod_types PASSED
+tests/test_0115-generic-reducer-operation.py::test_any PASSED
+tests/test_0115-generic-reducer-operation.py::test_all PASSED
+tests/test_0115-generic-reducer-operation.py::test_count PASSED
+tests/test_0115-generic-reducer-operation.py::test_count_nonzero PASSED
+tests/test_0115-generic-reducer-operation.py::test_count_min PASSED
+tests/test_0115-generic-reducer-operation.py::test_count_max PASSED
+tests/test_0115-generic-reducer-operation.py::test_mask PASSED
+tests/test_0115-generic-reducer-operation.py::test_keepdims PASSED
+tests/test_0115-generic-reducer-operation.py::test_highlevel PASSED
+tests/test_0115-generic-reducer-operation.py::test_nonreducers PASSED
+tests/test_0115-generic-reducer-operation.py::test_softmax PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_emptyarray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_numpyarray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_regulararray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_listarray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_listoffsetarray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_indexedarray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_indexedoptionarray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_recordarray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_unionarray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_highlevel PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_flatten_ListOffsetArray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_flatten_IndexedArray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_flatten_RecordArray PASSED
+tests/test_0117-finish-the-sizes-operation.py::test_flatten_UnionArray out <ListOffsetArray64>
+    <offsets><Index64 i="[0 3 5 6]" offset="0" length="4" at="0x000002426f90"/></offsets>
+    <content><ListOffsetArray64>
+        <offsets><Index64 i="[0 3 6 9 11 13 14]" offset="0" length="7" at="0x000002428fa0"/></offsets>
+        <content><NumpyArray format="l" shape="14" data="3 3 3 3 3 ... 2 2 2 2 1" at="0x00000242afb0"/></content>
+    </ListOffsetArray64></content>
+</ListOffsetArray64>
+lentags 6
+lenout 3
+out <ListOffsetArray64>
+    <offsets><Index64 i="[0 3 5 6]" offset="0" length="4" at="0x000002426f90"/></offsets>
+    <content><ListOffsetArray64>
+        <offsets><Index64 i="[0 3 6 9 11 13 14]" offset="0" length="7" at="0x000002428fa0"/></offsets>
+        <content><NumpyArray format="l" shape="14" data="3 3 3 3 3 ... 2 2 2 2 1" at="0x00000242afb0"/></content>
+    </ListOffsetArray64></content>
+</ListOffsetArray64>
+lentags 6
+lenout 3
+outindex <Index64 i="[0 0 1 1 2 2]" offset="0" length="6" at="0x0000023737f0"/>
+PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_jaggedslice0 PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_jaggedslice1 PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_jaggedslice2 PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_jaggedslice3 PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_to_slice PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_as_slice PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_setidentities PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_num PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_flatten PASSED
+tests/test_0127-tomask-operation.py::test_IndexedOptionArray_pad_none PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_pad_none PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_reduce PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_localindex PASSED
+tests/test_0127-tomask-operation.py::test_ByteMaskedArray_combinations PASSED
+tests/test_0127-tomask-operation.py::test_IndexedOptionArray_combinations PASSED
+tests/test_0127-tomask-operation.py::test_merge PASSED
+tests/test_0127-tomask-operation.py::test_BitMaskedArray PASSED
+tests/test_0127-tomask-operation.py::test_UnmaskedArray PASSED
+tests/test_0127-tomask-operation.py::test_tomask PASSED
+tests/test_0138-emptyarray-type.py::test PASSED
+tests/test_0150-attributeerrors.py::test PASSED
+tests/test_0156-array-and-record-constructors.py::test_record PASSED
+tests/test_0156-array-and-record-constructors.py::test_fromiter PASSED
+tests/test_0163-negative-axis-wrap.py::test_array_3d PASSED
+tests/test_0163-negative-axis-wrap.py::test_list_array PASSED
+tests/test_0163-negative-axis-wrap.py::test_record_array PASSED
+tests/test_0163-negative-axis-wrap.py::test_record_array_axis_out_of_range PASSED
+tests/test_0166-0167-0170-random-issues.py::test_0166_IndexedOptionArray PASSED
+tests/test_0166-0167-0170-random-issues.py::test_0166_ByteMaskedArray PASSED
+tests/test_0166-0167-0170-random-issues.py::test_0167_strings PASSED
+tests/test_0166-0167-0170-random-issues.py::test_0167_bytestrings PASSED
+tests/test_0173-astype-operation.py::test_UnmaskedArray PASSED
+tests/test_0173-astype-operation.py::test_RegularArray_and_ListArray PASSED
+tests/test_0173-astype-operation.py::test_ufunc_afterward PASSED
+tests/test_0173-astype-operation.py::test_string PASSED
+tests/test_0184-concatenate-operation.py::test_concatenate_number PASSED
+tests/test_0184-concatenate-operation.py::test_list_offset_array_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_list_array_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_records_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_indexed_array_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_bytemasked_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_listoffsetarray_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_numpyarray_concatenate_axis0 PASSED
+tests/test_0184-concatenate-operation.py::test_numpyarray_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_numbers_and_records_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_broadcast_and_apply_levels PASSED
+tests/test_0184-concatenate-operation.py::test_negative_axis_concatenate PASSED
+tests/test_0184-concatenate-operation.py::test_even_more PASSED
+tests/test_0193-is_none-axis-parameter.py::test PASSED
+tests/test_0198-tutorial-documentation-1.py::test_singletons PASSED
+tests/test_0198-tutorial-documentation-1.py::test_firsts PASSED
+tests/test_0198-tutorial-documentation-1.py::test_allow_missing PASSED
+tests/test_0198-tutorial-documentation-1.py::test_flatten0 PASSED
+tests/test_0222-count-with-axis0.py::test PASSED
+tests/test_0230-virtualarray-segfault.py::test_0230 PASSED
+tests/test_0230-virtualarray-segfault.py::test_SliceGenerator PASSED
+tests/test_0231-indexform.py::test PASSED
+tests/test_0264-reduce-last-empty.py::test PASSED
+tests/test_0273-path-for-with-field.py::test_one_level PASSED
+tests/test_0273-path-for-with-field.py::test_two_level PASSED
+tests/test_0273-path-for-with-field.py::test_replace_the_only_field PASSED
+tests/test_0274-access-ArrayGenerator-in-Python.py::test PASSED
+tests/test_0286-broadcast-single-value-with-field.py::test_broadcast_single_bool PASSED
+tests/test_0315-integerindex.py::test_integerindex_null PASSED
+tests/test_0315-integerindex.py::test_boolindex_null PASSED
+tests/test_0315-integerindex.py::test_integerindex_null_more PASSED
+tests/test_0315-integerindex.py::test_silly_stuff PASSED
+tests/test_0324-fix-partitionedarray-getitem-string-int.py::test PASSED
+tests/test_0331-pandas-indexedarray.py::test PASSED
+tests/test_0331-pandas-indexedarray.py::test_broken PASSED
+tests/test_0331-pandas-indexedarray.py::test_union_to_record out <NumpyArray format="d" shape="3" data="nan nan nan" at="0x0000022a4b80"/>
+lentags 5
+lenout 3
+out <ListOffsetArray64>
+    <parameters>
+        <param key="__array__">"string"</param>
+    </parameters>
+    <offsets><Index64 i="[0 3 6]" offset="0" length="3" at="0x000002435920"/></offsets>
+    <content><NumpyArray format="B" shape="6" data="111 110 101 116 119 111" at="0x00000242a7a0">
+        <parameters>
+            <param key="__array__">"char"</param>
+        </parameters>
+    </NumpyArray></content>
+</ListOffsetArray64>
+lentags 5
+lenout 2
+PASSED
+tests/test_0334-fully-broadcastable-where.py::test PASSED
+tests/test_0334-fully-broadcastable-where.py::test_issue_334 PASSED
+tests/test_0337-numpy-format-integer-size-issues.py::test_index_slice PASSED
+tests/test_0337-numpy-format-integer-size-issues.py::test_dtype_to_form PASSED
+tests/test_0339-highlevel-sorting-function.py::test PASSED
+tests/test_0344-repr-quote-keys.py::test PASSED
+tests/test_0348-form-keys.py::test_numpyarray PASSED
+tests/test_0348-form-keys.py::test_listoffsetarray PASSED
+tests/test_0348-form-keys.py::test_listarray PASSED
+tests/test_0348-form-keys.py::test_indexedoptionarray PASSED
+tests/test_0348-form-keys.py::test_indexedarray PASSED
+tests/test_0348-form-keys.py::test_emptyarray PASSED
+tests/test_0348-form-keys.py::test_bytemaskedarray PASSED
+tests/test_0348-form-keys.py::test_bitmaskedarray PASSED
+tests/test_0348-form-keys.py::test_recordarray PASSED
+tests/test_0348-form-keys.py::test_record PASSED
+tests/test_0348-form-keys.py::test_regulararray PASSED
+tests/test_0348-form-keys.py::test_unionarray out <ListOffsetArray64>
+    <offsets><Index64 i="[0 3 3]" offset="0" length="3" at="0x000002483ed0"/></offsets>
+    <content><NumpyArray format="l" shape="3" data="1 2 3" at="0x000002487ef0"/></content>
+</ListOffsetArray64>
+lentags 4
+lenout 2
+out <NumpyArray format="l" shape="2" data="4 5" at="0x00000248bf10"/>
+lentags 4
+lenout 2
+PASSED
+tests/test_0348-form-keys.py::test_unmaskedarray PASSED
+tests/test_0348-form-keys.py::test_partitioned PASSED
+tests/test_0348-form-keys.py::test_lazy PASSED
+tests/test_0348-form-keys.py::test_lazy_partitioned PASSED
+tests/test_0355-mixins.py::test_make_mixins PASSED
+tests/test_0384-lazy-arrayset.py::test_lazy_buffers PASSED
+tests/test_0384-lazy-arrayset.py::test_longer_than_expected PASSED
+tests/test_0390-virtual-forms.py::test_virtual_record PASSED
+tests/test_0390-virtual-forms.py::test_virtual_slice_numba SKIPPED (...)
+tests/test_0393-fix-bitmaskedarray-mask.py::test PASSED
+tests/test_0395-complex-type-arrays.py::test_count_complex PASSED
+tests/test_0395-complex-type-arrays.py::test_count_nonzero_complex PASSED
+tests/test_0395-complex-type-arrays.py::test_count_min_complex PASSED
+tests/test_0395-complex-type-arrays.py::test_count_max_complex PASSED
+tests/test_0395-complex-type-arrays.py::test_mask_complex PASSED
+tests/test_0395-complex-type-arrays.py::test_keepdims_complex PASSED
+tests/test_0395-complex-type-arrays.py::test_astype_complex PASSED
+tests/test_0402-fix-form-getitem-field.py::test PASSED
+tests/test_0402-fix-form-getitem-field.py::test_no_break_regular_broadcasting PASSED
+tests/test_0404-array-validity-check.py::test_NumpyArray PASSED
+tests/test_0404-array-validity-check.py::test_ListOffsetArray PASSED
+tests/test_0404-array-validity-check.py::test_RegularArray PASSED
+tests/test_0404-array-validity-check.py::test_IndexedArray PASSED
+tests/test_0404-array-validity-check.py::test_RecordArray PASSED
+tests/test_0404-array-validity-check.py::test_same_categories PASSED
+tests/test_0410-fix-argminmax-positions-for-missing-values.py::test_jagged_axis0 PASSED
+tests/test_0410-fix-argminmax-positions-for-missing-values.py::test_jagged_axis1 PASSED
+tests/test_0410-fix-argminmax-positions-for-missing-values.py::test_IndexedOptionArray PASSED
+tests/test_0410-fix-argminmax-positions-for-missing-values.py::test_ByteMaskedArray PASSED
+tests/test_0420-fix-numpyarray-carry-for-noncontiguous.py::test PASSED
+tests/test_0437-stream-of-many-json-files.py::test_unfinished_fragment_exception PASSED
+tests/test_0437-stream-of-many-json-files.py::test_two_arrays PASSED
+tests/test_0437-stream-of-many-json-files.py::test_blanc_lines PASSED
+tests/test_0437-stream-of-many-json-files.py::test_tostring PASSED
+tests/test_0437-stream-of-many-json-files.py::test_fromstring PASSED
+tests/test_0437-stream-of-many-json-files.py::test_array_tojson PASSED
+tests/test_0437-stream-of-many-json-files.py::test_fromfile PASSED
+tests/test_0437-stream-of-many-json-files.py::test_three PASSED
+tests/test_0437-stream-of-many-json-files.py::test_jpivarski PASSED
+tests/test_0446-fix-flatten-of-sliced-array.py::test PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_issue434 PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_nokeepdims PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_keepdims PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_nokeepdims_none1 PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_keepdims_none1 PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_nokeepdims_mask1 PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_keepdims_mask1 PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_nokeepdims_mask2 PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_keepdims_mask2 PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_nokeepdims_mask3 PASSED
+tests/test_0447-preserve-regularness-in-reduce.py::test_keepdims_mask3 PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_numpyarray PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_lists PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_records PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_tuples PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_indexed PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_reverse_indexed PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_bytemasked PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_empty PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_union PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_union_option PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_strings PASSED
+tests/test_0449-merge-many-arrays-in-one-pass.py::test_concatenate PASSED
+tests/test_0457-remove-broadcasting-over-fields.py::test_this_should_raise_a_warning PASSED
+tests/test_0457-remove-broadcasting-over-fields.py::test_this_should_not PASSED
+tests/test_0473-empty-listarray.py::test_empty_listarray PASSED
+tests/test_0479-lazy-arrays-lose-weak-reference.py::test PASSED
+tests/test_0484-masked-take-empty-array.py::test PASSED
+tests/test_0493-zeros-ones-full-like.py::test PASSED
+tests/test_0496-provide-local-index.py::test PASSED
+tests/test_0499-getitem-indexedarray-bug.py::test PASSED
+tests/test_0501-string-comparison-bug.py::test PASSED
+tests/test_0501-string-comparison-bug.py::test_fromnumpy PASSED
+tests/test_0504-block-ufuncs-for-strings.py::test PASSED
+tests/test_0511-copy-and-deepcopy.py::test PASSED
+tests/test_0527-fix-unionarray-ufuncs-and-parameters-in-merging.py::test_0459_types PASSED
+tests/test_0527-fix-unionarray-ufuncs-and-parameters-in-merging.py::test_0459 PASSED
+tests/test_0527-fix-unionarray-ufuncs-and-parameters-in-merging.py::test_0522 out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="5" data="0 1.1 2.2 3.3 4.4" at="0x00000246e760"/>
+lentags 5
+lenout 5
+out <NumpyArray format="d" shape="0" data="" at="0x00000246e760"/>
+lentags 0
+lenout 0
+out <NumpyArray format="l" shape="0" data="" at="0x000002481200"/>
+lentags 0
+lenout 0
+out <NumpyArray format="l" shape="0" data="" at="0x000002481200"/>
+lentags 0
+lenout 0
+out <NumpyArray format="d" shape="0" data="" at="0x00000246e760"/>
+lentags 0
+lenout 0
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+out <NumpyArray format="l" shape="5" data="0 100 200 300 400" at="0x000002481200"/>
+lentags 5
+lenout 5
+PASSED
+tests/test_0546-fill_none-replacement-value-type.py::test PASSED
+tests/test_0552-with_field-should-not-right-broadcast.py::test PASSED
+tests/test_0552-with_field-should-not-right-broadcast.py::test_regular PASSED
+tests/test_0552-with_field-should-not-right-broadcast.py::test_regular_deep PASSED
+tests/test_0557-min-max-initial-argument.py::test PASSED
+tests/test_0560-setting-virtual-field.py::test PASSED
+tests/test_0582-propagate-context-in-broadcast_and_apply.py::test_toregular PASSED
+tests/test_0582-propagate-context-in-broadcast_and_apply.py::test_cartesian PASSED
+tests/test_0582-propagate-context-in-broadcast_and_apply.py::test_firsts PASSED
+tests/test_0583-implement-unflatten-function.py::test PASSED
+tests/test_0585-fix-corner-case.py::test PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_ListOffsetArray_rpad_and_clip PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_toListOffsetArray64 PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_setidentities PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_carry PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_num PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_flatten PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_mergeable PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_fillna PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_pad_none PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_reduce PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_localindex PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_combinations PASSED
+tests/test_0590-allow-regulararray-size-zero.py::test_getitem PASSED
+tests/test_0595-0630-default-for-nep18.py::test PASSED
+tests/test_0597-virtual-virtual-forms.py::test PASSED
+tests/test_0603-concatenate-should-minimally-touch-laziness.py::test_lazy PASSED
+tests/test_0612-partition-axis_wrap_if_negative.py::test PASSED
+tests/test_0618-deprecation-for-selecting-within-multiple-records.py::test_flat PASSED
+tests/test_0618-deprecation-for-selecting-within-multiple-records.py::test_flat_virtual PASSED
+tests/test_0618-deprecation-for-selecting-within-multiple-records.py::test_nested PASSED
+tests/test_0618-deprecation-for-selecting-within-multiple-records.py::test_nested_virtual PASSED
+tests/test_0627-behavior-from-dict-of-arrays.py::test PASSED
+tests/test_0628-accept-numpy-integers-in-slices.py::test PASSED
+tests/test_0634-fill_none-with-record.py::test PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_basics PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_comment_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_literal_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_userdef_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_declarations_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_control_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_if_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_loop_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_io_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_read_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_everything_else_compilation PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_input_output_type PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_stepping PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_running PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_pausing PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_calling PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_calling2 PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_calling3 PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_halt PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_halt2 PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_do PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_errors PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_gforth PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_gforth_lshift_rshift PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_input_output PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_uproot SKIPPED
+tests/test_0648-add-forth-machine-to-codebase.py::test_varint PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_zigzag PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_nbit_little PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_nbit_big PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_output_dup PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_decompile_complex PASSED
+tests/test_0648-add-forth-machine-to-codebase.py::test_parse_strings PASSED
+tests/test_0652-tests-of-complex-numbers.py::test_from_iter PASSED
+tests/test_0652-tests-of-complex-numbers.py::test_from_json PASSED
+tests/test_0652-tests-of-complex-numbers.py::test_to_json PASSED
+tests/test_0652-tests-of-complex-numbers.py::test_reducers PASSED
+tests/test_0652-tests-of-complex-numbers.py::test_minmax PASSED
+tests/test_0652-tests-of-complex-numbers.py::test_sort SKIPPED (Reme...)
+tests/test_0652-tests-of-complex-numbers.py::test_numpy PASSED
+tests/test_0689-fix-dimension-of-empty-slices.py::test PASSED
+tests/test_0690-array-builder-perf-study.py::test PASSED
+tests/test_0693-fixes-for-scipy-prep.py::test_varnewaxis_1 PASSED
+tests/test_0693-fixes-for-scipy-prep.py::test_varnewaxis_2 PASSED
+tests/test_0693-fixes-for-scipy-prep.py::test_varnewaxis_3 PASSED
+tests/test_0693-fixes-for-scipy-prep.py::test_varnewaxis_4 PASSED
+tests/test_0693-fixes-for-scipy-prep.py::test_varnewaxis_5 PASSED
+tests/test_0693-fixes-for-scipy-prep.py::test_varnewaxis_6 PASSED
+tests/test_0699-fixes-for-scipy-prep-2.py::test_partition_methods PASSED
+tests/test_0713-getitem_field-should-simplify_optiontype.py::test PASSED
+tests/test_0719-prevent-nullptr-in-caches.py::test PASSED
+tests/test_0721-unflatten-partitionedarray.py::test PASSED
+tests/test_0723-ensure-that-jagged-slice-fits-array-length.py::test_first_issue PASSED
+tests/test_0723-ensure-that-jagged-slice-fits-array-length.py::test_second_issue PASSED
+tests/test_0724-fix-flatten-segfault.py::test PASSED
+tests/test_0730-unflatten-axis-parameter.py::test PASSED
+tests/test_0730-unflatten-axis-parameter.py::test_issue742 PASSED
+tests/test_0733-run_lengths.py::test PASSED
+tests/test_0733-run_lengths.py::test_groupby PASSED
+tests/test_0733-run_lengths.py::test_onstrings1 PASSED
+tests/test_0733-run_lengths.py::test_onstrings2 PASSED
+tests/test_0734-strings_astype.py::test PASSED
+tests/test_0736-implement-argsort-for-strings.py::test_but_first_fix_sort PASSED
+tests/test_0736-implement-argsort-for-strings.py::test_argsort PASSED
+tests/test_0736-implement-argsort-for-strings.py::test_sort PASSED
+tests/test_0740-numpy-scalars-as-numbers.py::test PASSED
+tests/test_0756-num-of-partitioned-recordarrays.py::test PASSED
+tests/test_0758-ak-zip-scalars.py::test PASSED
+tests/test_0766-prevent-combinations-of-characters.py::test PASSED
+tests/test_0771-akArray-dict-constructor-require-equal-lengths.py::test PASSED
+tests/test_0773-typeparser.py::test_primitive_1 PASSED
+tests/test_0773-typeparser.py::test_primitive_2 PASSED
+tests/test_0773-typeparser.py::test_unknown_1 PASSED
+tests/test_0773-typeparser.py::test_unknown_2 PASSED
+tests/test_0773-typeparser.py::test_record_tuple_1 PASSED
+tests/test_0773-typeparser.py::test_record_tuple_2 PASSED
+tests/test_0773-typeparser.py::test_record_tuple_3 PASSED
+tests/test_0773-typeparser.py::test_record_dict_1 PASSED
+tests/test_0773-typeparser.py::test_record_dict_2 PASSED
+tests/test_0773-typeparser.py::test_record_dict_3 PASSED
+tests/test_0773-typeparser.py::test_record_parmtuple_1 PASSED
+tests/test_0773-typeparser.py::test_record_parmtuple_2 PASSED
+tests/test_0773-typeparser.py::test_record_struct_1 PASSED
+tests/test_0773-typeparser.py::test_record_struct_2 PASSED
+tests/test_0773-typeparser.py::test_option_numpy_1 PASSED
+tests/test_0773-typeparser.py::test_option_numpy_2 PASSED
+tests/test_0773-typeparser.py::test_option_numpy_1_parm PASSED
+tests/test_0773-typeparser.py::test_option_numpy_2_parm PASSED
+tests/test_0773-typeparser.py::test_option_unknown_1 PASSED
+tests/test_0773-typeparser.py::test_option_unknown_2 PASSED
+tests/test_0773-typeparser.py::test_option_unknown_1_parm PASSED
+tests/test_0773-typeparser.py::test_option_unknown_2_parm PASSED
+tests/test_0773-typeparser.py::test_regular_numpy_1 PASSED
+tests/test_0773-typeparser.py::test_regular_numpy_2 PASSED
+tests/test_0773-typeparser.py::test_regular_numpy_2_parm PASSED
+tests/test_0773-typeparser.py::test_regular_unknown_1_parm PASSED
+tests/test_0773-typeparser.py::test_list_numpy_1 PASSED
+tests/test_0773-typeparser.py::test_list_numpy_1_parm PASSED
+tests/test_0773-typeparser.py::test_union_numpy_empty_1 PASSED
+tests/test_0773-typeparser.py::test_union_numpy_empty_1_parm PASSED
+tests/test_0773-typeparser.py::test_arraytype_string PASSED
+tests/test_0773-typeparser.py::test_arraytype_bytestring PASSED
+tests/test_0773-typeparser.py::test_arraytype_categorical_1 PASSED
+tests/test_0773-typeparser.py::test_arraytype_categorical_2 PASSED
+tests/test_0773-typeparser.py::test_arraytype_record_1 PASSED
+tests/test_0773-typeparser.py::test_arraytype_record_2 PASSED
+tests/test_0773-typeparser.py::test_arraytype_1 PASSED
+tests/test_0773-typeparser.py::test_arraytype_2 PASSED
+tests/test_0773-typeparser.py::test_arraytype_3 PASSED
+tests/test_0773-typeparser.py::test_arraytype_4 PASSED
+tests/test_0773-typeparser.py::test_arraytype_5 PASSED
+tests/test_0773-typeparser.py::test_arraytype_6 PASSED
+tests/test_0773-typeparser.py::test_arraytype_7 PASSED
+tests/test_0773-typeparser.py::test_arraytype_8 PASSED
+tests/test_0773-typeparser.py::test_arraytype_9 PASSED
+tests/test_0773-typeparser.py::test_arraytype_10 PASSED
+tests/test_0773-typeparser.py::test_arraytype_11 PASSED
+tests/test_0773-typeparser.py::test_arraytype_12 PASSED
+tests/test_0773-typeparser.py::test_arraytype_13 PASSED
+tests/test_0773-typeparser.py::test_arraytype_14 PASSED
+tests/test_0773-typeparser.py::test_arraytype_15 PASSED
+tests/test_0773-typeparser.py::test_arraytype_16 PASSED
+tests/test_0773-typeparser.py::test_arraytype_17 PASSED
+tests/test_0773-typeparser.py::test_string PASSED
+tests/test_0773-typeparser.py::test_hardcoded PASSED
+tests/test_0773-typeparser.py::test_record_highlevel PASSED
+tests/test_0781-forth-machine-error-handling.py::test_user_defined_error PASSED
+tests/test_0781-forth-machine-error-handling.py::test_user_defined_strings PASSED
+tests/test_0781-forth-machine-error-handling.py::test_user_defined_exception PASSED
+tests/test_0781-forth-machine-error-handling.py::test_undefined_error PASSED
+tests/test_0788-indexedarray-carrying-recordarray-parameters.py::test PASSED
+tests/test_0794-ak-cartesian-on-empty-array.py::test PASSED
+tests/test_0803-argsort-fix-type.py::test_argsort PASSED
+tests/test_0806-empty-lists-cartesian-fix.py::test_empty_arrays_cartesian PASSED
+tests/test_0806-empty-lists-cartesian-fix.py::test_cartesian out <IndexedArray64>
+    <index><Index64 i="[]" offset="0" length="0" at="0x000000000000"/></index>
+    <content><RecordArray length="1">
+        <parameters>
+            <param key="__record__">"muon"</param>
+        </parameters>
+        <field index="0" key="pt">
+            <NumpyArray format="d" shape="1" data="1" at="0x0000023cb050"/>
+        </field>
+    </RecordArray></content>
+</IndexedArray64>
+lentags 0
+lenout 0
+out <IndexedArray64>
+    <index><Index64 i="[]" offset="0" length="0" at="0x000000000000"/></index>
+    <content><RecordArray length="1">
+        <parameters>
+            <param key="__record__">"electron"</param>
+        </parameters>
+        <field index="0" key="pt">
+            <NumpyArray format="d" shape="1" data="1" at="0x0000024c0810"/>
+        </field>
+    </RecordArray></content>
+</IndexedArray64>
+lentags 0
+lenout 0
+out <IndexedArray64>
+    <index><Index64 i="[]" offset="0" length="0" at="0x000000000000"/></index>
+    <content><RecordArray length="1">
+        <parameters>
+            <param key="__record__">"muon"</param>
+        </parameters>
+        <field index="0" key="pt">
+            <NumpyArray format="d" shape="1" data="1" at="0x0000023cb050"/>
+        </field>
+    </RecordArray></content>
+</IndexedArray64>
+lentags 0
+lenout 0
+out <IndexedArray64>
+    <index><Index64 i="[]" offset="0" length="0" at="0x000000000000"/></index>
+    <content><RecordArray length="1">
+        <parameters>
+            <param key="__record__">"electron"</param>
+        </parameters>
+        <field index="0" key="pt">
+            <NumpyArray format="d" shape="1" data="1" at="0x0000024c0810"/>
+        </field>
+    </RecordArray></content>
+</IndexedArray64>
+lentags 0
+lenout 0
+PASSED
+tests/test_0812-argsort-empty-union-type-fix.py::test_empty_slice PASSED
+tests/test_0813-full-like-dtype-arg.py::test PASSED
+tests/test_0815-broadcast-union-types-to-all-possibilities.py::test out <RecordArray length="3">
+    <parameters>
+        <param key="__record__">"Point2"</param>
+    </parameters>
+    <field index="0" key="x">
+        <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024c0810"/>
+    </field>
+    <field index="1" key="y">
+        <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024c4830"/>
+    </field>
+</RecordArray>
+lentags 3
+lenout 3
+out <RecordArray length="3">
+    <parameters>
+        <param key="__record__">"Point"</param>
+    </parameters>
+    <field index="0" key="x">
+        <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024c6840"/>
+    </field>
+    <field index="1" key="y">
+        <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024ca860"/>
+    </field>
+</RecordArray>
+lentags 3
+lenout 3
+out <IndexedArray64>
+    <index><Index64 i="[]" offset="0" length="0" at="0x000000000000"/></index>
+    <content><RecordArray length="3">
+        <parameters>
+            <param key="__record__">"Point2"</param>
+        </parameters>
+        <field index="0" key="x">
+            <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024c0810"/>
+        </field>
+        <field index="1" key="y">
+            <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024c4830"/>
+        </field>
+    </RecordArray></content>
+</IndexedArray64>
+lentags 0
+lenout 0
+out <IndexedArray64>
+    <index><Index64 i="[]" offset="0" length="0" at="0x000000000000"/></index>
+    <content><RecordArray length="3">
+        <parameters>
+            <param key="__record__">"Point"</param>
+        </parameters>
+        <field index="0" key="x">
+            <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024c6840"/>
+        </field>
+        <field index="1" key="y">
+            <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024ca860"/>
+        </field>
+    </RecordArray></content>
+</IndexedArray64>
+lentags 0
+lenout 0
+PASSED
+tests/test_0819-issue.py::test PASSED
+tests/test_0824-fix-akRecord-promote-to-behavior.py::test PASSED
+tests/test_0850-argsort-mask-array.py::test PASSED
+tests/test_0858-complex-array-concatenate.py::test PASSED
+tests/test_0863-is-none-numpy-array.py::test_numpy_array PASSED
+tests/test_0863-is-none-numpy-array.py::test_awkward_from_numpy_array PASSED
+tests/test_0866-getitem_field-and-flatten-unions.py::test_getitem_field PASSED
+tests/test_0866-getitem_field-and-flatten-unions.py::test_flatten_axis_none out <ListArray64>
+    <starts><Index64 i="[0 1]" offset="0" length="2" at="0x0000024596e0"/></starts>
+    <stops><Index64 i="[1 3]" offset="0" length="2" at="0x0000019c4000"/></stops>
+    <content><RecordArray length="3">
+        <parameters>
+            <param key="__record__">"a1"</param>
+        </parameters>
+        <field index="0" key="a">
+            <NumpyArray format="l" shape="3" data="1 2 3" at="0x0000024bbe10"/>
+        </field>
+        <field index="1" key="b">
+            <NumpyArray format="l" shape="3" data="4 5 6" at="0x0000024c2820"/>
+        </field>
+    </RecordArray></content>
+</ListArray64>
+lentags 3
+lenout 2
+out <ListArray64>
+    <starts><Index64 i="[2]" offset="0" length="1" at="0x0000023f4210"/></starts>
+    <stops><Index64 i="[3]" offset="0" length="1" at="0x00000240e200"/></stops>
+    <content><RecordArray length="3">
+        <parameters>
+            <param key="__record__">"a2"</param>
+        </parameters>
+        <field index="0" key="a">
+            <NumpyArray format="l" shape="3" data="7 8 9" at="0x0000024c4830"/>
+        </field>
+        <field index="1" key="b">
+            <NumpyArray format="l" shape="3" data="10 11 12" at="0x0000024c8850"/>
+        </field>
+    </RecordArray></content>
+</ListArray64>
+lentags 3
+lenout 1
+PASSED
+tests/test_0876-fix-lost-slice-array-offset.py::test PASSED
+tests/test_0879-non-primitive-with-field.py::test_unknown_type PASSED
+tests/test_0879-non-primitive-with-field.py::test_in_place_wrapper_broadcasting PASSED
+tests/test_0884-index-and-identifier-refactoring.py::test_index32 PASSED
+tests/test_0884-index-and-identifier-refactoring.py::test_index64 PASSED
+tests/test_0884-index-and-identifier-refactoring.py::test_identifier32 PASSED
+tests/test_0884-index-and-identifier-refactoring.py::test_identifier64 PASSED
+tests/test_0889-ptp.py::test_regular PASSED
+tests/test_0889-ptp.py::test_jagged PASSED
+tests/test_0896-content-classes-refactoring.py::test_EmptyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_RegularArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_ListArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_ListOffsetArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_IndexedArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_IndexedOptionArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_ByteMaskedArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_BitMaskedArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_UnmaskedArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_UnionArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_RegularArray_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_ListArray_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_ListOffsetArray_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_IndexedArray_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_IndexedOptionArray_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_ByteMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_BitMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_UnmaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0896-content-classes-refactoring.py::test_UnionArray_RecordArray_NumpyArray PASSED
+tests/test_0899-distinguish-cache-keys-for-non-leaf-nodes.py::test PASSED
+tests/test_0910-unflatten-counts-relation.py::test PASSED
+tests/test_0912-packed.py::test_numpy_array PASSED
+tests/test_0912-packed.py::test_empty_array PASSED
+tests/test_0912-packed.py::test_indexed_option_array PASSED
+tests/test_0912-packed.py::test_indexed_array PASSED
+tests/test_0912-packed.py::test_list_array PASSED
+tests/test_0912-packed.py::test_list_offset_array PASSED
+tests/test_0912-packed.py::test_unmasked_array PASSED
+tests/test_0912-packed.py::test_union_array out <NumpyArray format="l" shape="4" data="4 5 0 1" at="0x000002443540"/>
+lentags 6
+lenout 4
+out <RegularArray size="3">
+    <content><NumpyArray format="l" shape="6" data="0 1 2 3 4 5" at="0x000002296130"/></content>
+</RegularArray>
+lentags 6
+lenout 2
+PASSED
+tests/test_0912-packed.py::test_record_array PASSED
+tests/test_0912-packed.py::test_regular_array PASSED
+tests/test_0912-packed.py::test_bit_masked_aray PASSED
+tests/test_0912-packed.py::test_byte_masked_array PASSED
+tests/test_0912-packed.py::test_virtual_array PASSED
+tests/test_0912-packed.py::test_partitioned_array PASSED
+tests/test_0912-packed.py::test_record PASSED
+tests/test_0914-types-and-forms.py::test_UnknownType PASSED
+tests/test_0914-types-and-forms.py::test_NumpyType PASSED
+tests/test_0914-types-and-forms.py::test_RegularType PASSED
+tests/test_0914-types-and-forms.py::test_ListType PASSED
+tests/test_0914-types-and-forms.py::test_RecordType PASSED
+tests/test_0914-types-and-forms.py::test_OptionType PASSED
+tests/test_0914-types-and-forms.py::test_UnionType PASSED
+tests/test_0914-types-and-forms.py::test_ArrayType PASSED
+tests/test_0914-types-and-forms.py::test_EmptyForm PASSED
+tests/test_0914-types-and-forms.py::test_NumpyForm PASSED
+tests/test_0914-types-and-forms.py::test_RegularForm PASSED
+tests/test_0914-types-and-forms.py::test_ListForm PASSED
+tests/test_0914-types-and-forms.py::test_ListOffsetForm PASSED
+tests/test_0914-types-and-forms.py::test_RecordForm PASSED
+tests/test_0914-types-and-forms.py::test_IndexedForm PASSED
+tests/test_0914-types-and-forms.py::test_IndexedOptionForm PASSED
+tests/test_0914-types-and-forms.py::test_ByteMaskedForm PASSED
+tests/test_0914-types-and-forms.py::test_BitMaskedForm PASSED
+tests/test_0914-types-and-forms.py::test_UnmaskedForm PASSED
+tests/test_0914-types-and-forms.py::test_UnionForm PASSED
+tests/test_0914-types-and-forms.py::test_VirtualForm PASSED
+tests/test_0916-datetime-values-astype.py::test_values_astype_datetime PASSED
+tests/test_0916-datetime-values-astype.py::test_modulo_units PASSED
+tests/test_0916-datetime-values-astype.py::test_float_values_astype_datetime PASSED
+tests/test_0917-fill-none-axis.py::test_fill_none_axis_0 PASSED
+tests/test_0917-fill-none-axis.py::test_fill_none_axis_1 PASSED
+tests/test_0917-fill-none-axis.py::test_fill_none_axis_none PASSED
+tests/test_0917-fill-none-axis.py::test_fill_none_axis_deprecated PASSED
+tests/test_0924-layout-builder.py::test_bit_masked_form PASSED
+tests/test_0924-layout-builder.py::test_byte_masked_form PASSED
+tests/test_0924-layout-builder.py::test_unmasked_form PASSED
+tests/test_0924-layout-builder.py::test_unsupported_form PASSED
+tests/test_0924-layout-builder.py::test_list_offset_form PASSED
+tests/test_0924-layout-builder.py::test_indexed_form PASSED
+tests/test_0924-layout-builder.py::test_indexed_option_form PASSED
+tests/test_0924-layout-builder.py::test_regular_form PASSED
+tests/test_0924-layout-builder.py::test_union_form PASSED
+tests/test_0924-layout-builder.py::test_union2_form PASSED
+tests/test_0924-layout-builder.py::test_union3_form PASSED
+tests/test_0924-layout-builder.py::test_record_form PASSED
+tests/test_0924-layout-builder.py::test_error_in_record_form PASSED
+tests/test_0924-layout-builder.py::test_error_in_numpy_form PASSED
+tests/test_0924-layout-builder.py::test_categorical_form PASSED
+tests/test_0924-layout-builder.py::test_char_form PASSED
+tests/test_0924-layout-builder.py::test_string_form PASSED
+tests/test_0924-layout-builder.py::test_empty_form PASSED
+tests/test_0927-numpy-array-nbytes.py::test PASSED
+tests/test_0930-bug-in-unionarray-purelist_parameter.py::test PASSED
+tests/test_0940-with-cache-already-exists.py::test PASSED
+tests/test_0945-argsort-sort-nan-array.py::test_nan PASSED
+tests/test_0945-argsort-sort-nan-array.py::test_bool PASSED
+tests/test_0945-argsort-sort-nan-array.py::test_argsort PASSED
+tests/test_0945-argsort-sort-nan-array.py::test_argsort_2d PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_EmptyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_RegularArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_ListArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_ListOffsetArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_IndexedArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_IndexedOptionArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_ByteMaskedArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_BitMaskedArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_UnmaskedArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_UnionArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_RegularArray_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_ListArray_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_ListOffsetArray_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_IndexedArray_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_IndexedOptionArray_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_ByteMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_BitMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_UnmaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0958-new-forms-must-accept-old-form-json.py::test_UnionArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_EmptyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_RegularArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_ListArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_ListOffsetArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_IndexedArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_IndexedOptionArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_ByteMaskedArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_BitMaskedArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_UnmaskedArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_UnionArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_RegularArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_ListArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_ListOffsetArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_IndexedArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_IndexedOptionArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_ByteMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_BitMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_UnmaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_UnionArray_RecordArray_NumpyArray PASSED
+tests/test_0959-_getitem_array-implementation.py::test_RecordArray_NumpyArray_lazy PASSED
+tests/test_0959-_getitem_array-implementation.py::test_reshaping PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_EmptyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_RegularArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_ListArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_ListOffsetArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_IndexedArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_IndexedOptionArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_ByteMaskedArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_BitMaskedArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_UnmaskedArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_UnionArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_RegularArray_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_ListArray_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_ListOffsetArray_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_IndexedArray_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_IndexedOptionArray_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_ByteMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_BitMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_UnmaskedArray_RecordArray_NumpyArray PASSED
+tests/test_0962-convert-between-old-and-new-arrays.py::test_UnionArray_RecordArray_NumpyArray PASSED
+tests/test_0973-flatten-multidimensional-numpy-array.py::test PASSED
+tests/test_0975-mask-multidimensional-numpy-array.py::test PASSED
+tests/test_0979-where-multidimensional-numpy-array.py::test PASSED
+tests/test_0982-missing-case-in-nonlocal-reducers.py::test PASSED
+tests/test_0982-missing-case-in-nonlocal-reducers.py::test_other_axis_values PASSED
+tests/test_0982-missing-case-in-nonlocal-reducers.py::test_actual_issue PASSED
+tests/test_0984-ravel.py::test_one_level PASSED
+tests/test_0984-ravel.py::test_two_levels PASSED
+tests/test_0984-ravel.py::test_record PASSED
+tests/test_0984-ravel.py::test_option PASSED
+tests/test_0992-correct-ptp-unmasking.py::test PASSED
+tests/test_1000-fixes-argmax-for-ListOffsetArray-with-nonzero-start.py::test_mine PASSED
+tests/test_1000-fixes-argmax-for-ListOffsetArray-with-nonzero-start.py::test_998 PASSED
+tests/test_1000-fixes-argmax-for-ListOffsetArray-with-nonzero-start.py::test_1000 PASSED
+tests/test_1006-packed-regular-array-zero-size.py::test PASSED
+tests/test_1007-from_buffers-empty-ndarray.py::test PASSED
+tests/test_1012-zip-regular-arrays.py::test PASSED
+tests/test_1017-numpyarray-broadcast.py::test PASSED
+tests/test_1026-jagged-slicing-of-multidim-NumpyArray.py::test PASSED
+tests/test_1031-start-getitem_next.py::test_EmptyArray PASSED
+tests/test_1031-start-getitem_next.py::test_NumpyArray_toRegularArray PASSED
+tests/test_1031-start-getitem_next.py::test_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_RegularArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_ListArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_ListOffsetArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_IndexedArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_IndexedOptionArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_ByteMaskedArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_BitMaskedArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_UnmaskedArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_UnionArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_RegularArray_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_ListArray_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_ListOffsetArray_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_IndexedArray_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_IndexedOptionArray_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_ByteMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_BitMaskedArray_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_UnmaskedArray_RecordArray_NumpyArray PASSED
+tests/test_1031-start-getitem_next.py::test_UnionArray_RecordArray_NumpyArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_NumpyArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_RegularArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_RecordArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_UnmaskedArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_UniondArray out <RegularArray size="3">
+    <content><NumpyArray format="l" shape="0 5" data="0x " at="0x000001fcdbe0"/></content>
+</RegularArray>
+lentags 1
+lenout 0
+out <RegularArray size="3">
+    <content><NumpyArray format="l" shape="3 5" data="0x 0f000000 00000000 10000000 00000000 ... 1c000000 00000000 1d000000 00000000" at="0x0000021ea440"/></content>
+</RegularArray>
+lentags 1
+lenout 1
+outindex <Index64 i="[0]" offset="0" length="1" at="0x000001d72890"/>
+out <RegularArray size="3">
+    <content><NumpyArray format="l" shape="0 5" data="0x " at="0x000001fcdbe0"/></content>
+</RegularArray>
+lentags 1
+lenout 0
+out <RegularArray size="3">
+    <content><NumpyArray format="l" shape="3 5" data="0x 0f000000 00000000 10000000 00000000 ... 1c000000 00000000 1d000000 00000000" at="0x0000023ebd00"/></content>
+</RegularArray>
+lentags 1
+lenout 1
+outindex <Index64 i="[0]" offset="0" length="1" at="0x000002364b30"/>
+out <RegularArray size="3">
+    <content><NumpyArray format="l" shape="0 5" data="0x " at="0x000001fcdbe0"/></content>
+</RegularArray>
+lentags 2
+lenout 0
+out <RegularArray size="3">
+    <content><NumpyArray format="l" shape="6 5" data="0x 00000000 00000000 01000000 00000000 ... 0d000000 00000000 0e000000 00000000" at="0x000001ae2980"/></content>
+</RegularArray>
+lentags 2
+lenout 2
+outindex <Index64 i="[0 1]" offset="0" length="2" at="0x000002169450"/>
+PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_IndexedArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_BitMaskedArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_ByteMaskedArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_IndexedOptionArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_ListArray PASSED
+tests/test_1031b-start-getitem_next-specialized.py::test_ListOffsetArray_NumpyArray PASSED
+
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_0056b-partitioned-array-numba.py:11: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0057b-virtual-array-numba.py:9: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0118-numba-cpointers.py:12: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0119-numexpr-and-broadcast-arrays.py:9: could not import 'numexpr': No module named 'numexpr'
+SKIPPED [1] tests/test_0120-autograd-support.py:9: could not import 'autograd': No module named 'autograd'
+SKIPPED [1] tests/test_0124-strings-in-numba.py:9: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0127b-tomask-operation-numba.py:9: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0135-awkward0-awkward1-converter.py:9: could not import 'awkward0': No module named 'awkward0'
+SKIPPED [1] tests/test_0224-arrow-to-awkward.py:9: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0290-bug-fixes-for-hats.py:9: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0341-parquet-reader-writer.py:12: could not import 'pyarrow.parquet': No module named 'pyarrow'
+SKIPPED [1] tests/test_0381-fill-documentation-stubs-3.py:19: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0395-fix-numba-indexedarray.py:9: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0397-arrays-as-constants-in-numba.py:11: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0401-add-categorical-type-for-arrow-dictionary.py:395: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0494-numba-array-contains.py:10: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0521-matrix-multiplication.py:56: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0549-numba-array-asarray.py:10: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0559-fix-booleans-in-numba.py:10: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0572-numba-array-ndim.py:9: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0593-preserve-nullability-in-arrow-and-parquet.py:11: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0645-from-jax.py:9: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/test_0645-jax-refcount.py:11: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/test_0645-to-jax.py:9: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/test_0674-categorical-validation.py:10: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0688-lazy-parquet-with-Forms.py:12: could not import 'pyarrow.parquet': No module named 'pyarrow'
+SKIPPED [1] tests/test_0702-partitioned-to-arrow.py:10: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0706-implement-parquet-dataset.py:12: could not import 'pyarrow.parquet': No module named 'pyarrow'
+SKIPPED [1] tests/test_0747-from_parquet-row_groups.py:12: could not import 'pyarrow.parquet': No module named 'pyarrow'
+SKIPPED [1] tests/test_0776-numba-booleans-in-virtual-array.py:10: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0783-disambiguate-parquet-list-cache-keys.py:10: could not import 'pyarrow.parquet': No module named 'pyarrow'
+SKIPPED [1] tests/test_0793-jax-element-wise-ops.py:5: could not import 'jax': No module named 'jax'
+SKIPPED [1] tests/test_0798-forbid-Tensor-in-Parquet.py:12: could not import 'pyarrow.parquet': No module named 'pyarrow'
+SKIPPED [1] tests/test_0828-arrow-datatype-null.py:10: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0835-datetime-type.py:522: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0836-nonflat-bools-in-parquet.py:12: could not import 'pyarrow.parquet': No module named 'pyarrow'
+SKIPPED [1] tests/test_0846-matrix-multiplication-numpy.py:9: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0868-matrix-multiplication-of-vector.py:10: could not import 'vector': No module named 'vector'
+SKIPPED [1] tests/test_0871-nested-virtual-in-numba.py:12: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0875-arrow-null-type.py:12: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0903-ArrayView-expects-contiguous-NumpyArrays.py:10: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0906-arrow-fixed-size-list-type.py:9: could not import 'pyarrow': No module named 'pyarrow'
+SKIPPED [1] tests/test_0921-parquet-from-file-like.py:11: could not import 'pyarrow.parquet': No module named 'pyarrow'
+SKIPPED [1] tests/test_0390-virtual-forms.py:63: could not import 'numba': No module named 'numba'
+SKIPPED [1] tests/test_0648-add-forth-machine-to-codebase.py:2001: could not import 'uproot': No module named 'uproot'
+SKIPPED [1] tests/test_0652-tests-of-complex-numbers.py:187: Remember to implement sorting for complex numbers.
+================== 882 passed, 46 skipped in 75.28s (0:01:15) ==================

@@ -18,8 +18,8 @@ def get_line(args):
         function_name = function_name[0 : function_name.find("<")]
     line = 'std::cout<<"awkward_' + function_name + ":" + '";'
     for value in values:
-        if "reinterpret_cast" in value:
-            value = value[value.find(">") + 2 : len(value) - 1]
+        # if "reinterpret_cast" in value:
+        #     value = value[value.find(">") + 2 : len(value) - 1]
         if "tocarryraw" in value:
             line += """std::cout<<"tocarryraw.data()=";
             for(int i=0;i<length();i++){
@@ -35,7 +35,15 @@ def get_line(args):
             for(int i=0;i<length();i++){
         std::cout<<offsetsraws.data()[i]<<",";
     }\n"""
-        elif "data()" in value:
+        elif "reinterpret_cast" in value:
+            line += (
+                'std::cout<<"'
+                + value
+                + '=";for(int i=0;i<length();i++){std::cout <<'
+                + value
+                + '[i]<<",";}'
+            )
+        elif "data()" in value and "reinterpret_cast" not in value:
             line += (
                 "std::cout<<"
                 + '"'
@@ -51,6 +59,7 @@ def get_line(args):
         else:
             line += "std::cout<<" + '"' + value + '="<<' + value + ";"
     line = line[0 : len(line)] + "std::cout<<std::endl;"
+    line = line.replace("&", "")
     return line
 
 
