@@ -39,7 +39,7 @@ def get_line(args):
             line += (
                 'std::cout<<"'
                 + value
-                + '=";for(int i=0;i<length();i++){std::cout <<'
+                + '=";for(int i=0;i<this->length();i++){std::cout <<'
                 + value
                 + '[i]<<",";}'
             )
