@@ -17,47 +17,44 @@ def get_line(args):
     if function_name[len(function_name) - 1] == ">":
         function_name = function_name[0 : function_name.find("<")]
     line = 'std::cout<<"awkward_' + function_name + ":" + '";'
+    # if function_name=='NumpyArray_getitem_next_null_64': #Exception Case
+    #     return ''
     for value in values:
         # if "reinterpret_cast" in value:
         #     value = value[value.find(">") + 2 : len(value) - 1]
         if "tocarryraw" in value:
-            line += """std::cout<<"tocarryraw.data()=";
+            line += """
             for(int i=0;i<length();i++){
         std::cout<<tocarryraw.data()[i]<<",";
-    }\n"""
+    }
+    std::cout<<":";\n"""
         elif "lencontents" in value:
-            line += """std::cout<<"lencontents.data()=";
+            line += """
             for(int i=0;i<length();i++){
         std::cout<<lencontents.data()[i]<<",";
-    }\n"""
+    }
+    std::cout<<":";\n"""
         elif "offsetsraws" in value:
-            line += """std::cout<<"offsetsraws.data()=";
+            line += """
             for(int i=0;i<length();i++){
         std::cout<<offsetsraws.data()[i]<<",";
-    }\n"""
+    }
+    std::cout<<":";\n"""
         elif "reinterpret_cast" in value:
             line += (
-                'std::cout<<"'
-                + value
-                + '=";for(int i=0;i<this->length();i++){std::cout <<'
-                + value
+                "for(int i=0;i<this->length();i++){std::cout <<"
+                + "reinterpret_cast<int64_t*>"
+                + value[value.find(">") + 1 : len(value)]
                 + '[i]<<",";}'
             )
         elif "data()" in value and "reinterpret_cast" not in value:
-            line += (
-                "std::cout<<"
-                + '"'
-                + value
-                + '=";'
-                + value.replace("data()", "printMe()")
-                + ";"
-            )
+            line += value.replace("data()", "printMe()") + ";" + 'std::cout<<":";'
         elif value.isdigit():
-            line += "std::cout<<" + '"' + value + '";'
+            line += "std::cout<<" + '"' + value + '"<<":";'
         elif "kernel::" in value:
             continue
         else:
-            line += "std::cout<<" + '"' + value + '="<<' + value + ";"
+            line += "std::cout<<" + value + '<<":";'
     line = line[0 : len(line)] + "std::cout<<std::endl;"
     line = line.replace("&", "")
     return line
@@ -91,11 +88,11 @@ def reducer():
             new_file += line
             new_file += """
     std::cout<<"awkward_reduce_argmin_64:";
-    std::cout<<"parents=";
     for(int i=0;i<parents.length();i++){
         std::cout<<data[i]<<",";
     }
-    std::cout<<"lenparents="<<parents.length()<<"outlength="<<outlength<<std::endl;
+    std::cout<<":";
+    std::cout<<parents.length()<<":"<<outlength<<std::endl;
             """
             num += 1
             continue
@@ -138,7 +135,7 @@ def insertPrintMe():
         if "}" in line and flag == 1:
             new_file += """void NumpyArray::printMe() const{
     for (int64_t i = 0;  i < length();  i++) {
-        std::cout << (reinterpret_cast<uint8_t*>(data()))[i];
+        std::cout << (reinterpret_cast<int64_t*>(data()))[i];
       }
   }"""
             flag = 2
@@ -162,7 +159,7 @@ def slicer():
         elif re.search(r"[)];", line) and record == True:
             record = False
             new_file += line
-            new_file += 'std::cout<<"awkward_slicearray_ravel_64:index=";index.printMe();std::cout<<";index_=";index_.printMe();std::cout<<";ndim_="<<ndim()<<";shape=";for (auto x : shape_)std::cout << x << ",";std::cout<<"strides=";for (auto x : strides_)std::cout << x << ",";std::cout<<std::endl;\n'
+            new_file += 'std::cout<<"awkward_slicearray_ravel_64:";index.printMe();std::cout<<":";index_.printMe();std::cout<<":"<<ndim()<<":";for (auto x : shape_)std::cout << x << ",";std::cout<<":";for (auto x : strides_)std::cout << x << ",";std::cout<<std::endl;\n'
             num += 1
             continue
         new_file += line
@@ -184,7 +181,7 @@ def identities():
             flag += 1
             record = False
             new_file += line
-            new_file += 'std::cout<<"awkward_Identities_getitem_carry_64:";printMe();carry.printMe();std::cout<<carry.length()<<width_<<length_<<std::endl;\n'
+            new_file += 'std::cout<<"awkward_Identities_getitem_carry_64:";printMe();std::cout<<":";carry.printMe();std::cout<<":";std::cout<<carry.length()<<":"<<width_<<":"<<length_<<std::endl;\n'
             num += 1
             continue
         if flag == 2 and "return out;" in line:
@@ -243,7 +240,7 @@ def index():
         elif re.search(r"[)];", line) and record == True:
             record = False
             new_file += line
-            new_file += '\tstd::cout<<"awkward_Index_to_Index64:";printMe();std::cout<<length_<<std::endl;\n'
+            new_file += '\tstd::cout<<"awkward_Index_to_Index64:";for(int i=0;i<length();i++){std::cout <<ptr()[i]<<",";}std::cout<<":";printMe();std::cout<<":"<<length_<<std::endl;\n'
             num += 1
             continue
         new_file += line
@@ -268,7 +265,7 @@ def union():
         elif re.search(r"[)];", line) and record == True:
             record = False
             new_file += line
-            new_file += '\tstd::cout<<"awkward_UnionArray_regular_index:"<<lentags;tags.printMe();std::cout<<lentags<<std::endl;\n'
+            new_file += '\tstd::cout<<"awkward_UnionArray_regular_index:"<<lentags<<":";tags.printMe();std::cout<<":"<<lentags<<std::endl;\n'
             num += 1
             continue
         new_file += line
