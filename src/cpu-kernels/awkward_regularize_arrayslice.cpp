@@ -10,12 +10,11 @@ ERROR awkward_regularize_arrayslice(
   int64_t lenflathead,
   int64_t length) {
   for (int64_t i = 0;  i < lenflathead;  i++) {
-    T original = flatheadptr[i];
+    if (flatheadptr[i] < -length  ||  flatheadptr[i] >= length) {
+      return failure("index out of range", kSliceNone, flatheadptr[i], FILENAME(__LINE__));
+    }
     if (flatheadptr[i] < 0) {
       flatheadptr[i] += length;
-    }
-    if (flatheadptr[i] < 0  ||  flatheadptr[i] >= length) {
-      return failure("index out of range", kSliceNone, original, FILENAME(__LINE__));
     }
   }
   return success();
