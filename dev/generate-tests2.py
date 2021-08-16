@@ -35,6 +35,10 @@ class Data:
                 arguments[ind]["type"], items
             )
         result.append(temp)
+<<<<<<< HEAD
+=======
+        print(result)
+>>>>>>> f34b8dd059ca8d0ad1f235b9e06cbbda82333032
 
 
 def remove_duplicates():
@@ -54,6 +58,7 @@ def test():
     )
     dict = yaml.safe_load(specifications)["kernels"]
     lines = open(os.path.join(CURRENT_DIR, "..", "outputs.txt"), "r").readlines()
+<<<<<<< HEAD
     for line in lines:
         data = Data(line.split(":")[0], line.split(":")[1 : len(line.split(":"))])
         function_name = data.function_name
@@ -68,17 +73,25 @@ def generateYaml():
     )
     dict = yaml.safe_load(specifications)["kernels"]
     lines = open(os.path.join(CURRENT_DIR, "..", "outputs.txt"), "r").readlines()
+=======
+>>>>>>> f34b8dd059ca8d0ad1f235b9e06cbbda82333032
     for line in lines:
         data = Data(line.split(":")[0], line.split(":")[1 : len(line.split(":"))])
         function_name = data.function_name
         for kernel in dict:
             if function_name == kernel["name"]:
                 data.printTest(kernel["specializations"][0]["args"])
+<<<<<<< HEAD
     x = {"Data": result}
     with open("generated-data.yml", "w") as ymlfile:
         yaml.dump(x, ymlfile, default_flow_style=False)
+=======
+>>>>>>> f34b8dd059ca8d0ad1f235b9e06cbbda82333032
 
 
 if __name__ == "__main__":
     remove_duplicates()
+<<<<<<< HEAD
     generateYaml()
+=======
+>>>>>>> f34b8dd059ca8d0ad1f235b9e06cbbda82333032
