@@ -165,3 +165,4 @@ Testing/
 #Generated Integration Tests Data
 generated-data.yml
 outputs.txt
+new_tests
