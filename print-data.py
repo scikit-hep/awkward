@@ -234,17 +234,17 @@ def index():
     record = False
     x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Index.cpp"), "r")
     lines = x.readlines()
-    function_name=''
+    function_name = ""
     for line in lines:
         if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
             record = True
-            function_name = line[line.find(":") + 2 : len(line)-2]
+            function_name = line[line.find(":") + 2 : len(line) - 2]
             if function_name[len(function_name) - 1] == ">":
                 function_name = function_name[0 : function_name.find("<")]
         elif re.search(r"[)];", line) and record == True:
             record = False
             new_file += line
-            if function_name == 'Index_iscontiguous':
+            if function_name == "Index_iscontiguous":
                 new_file += '\tstd::cout<<"New Line";std::cout<<std::endl;std::cout<<"awkward_Index_iscontiguous:";std::cout<<result;std::cout<<":";printMe();std::cout<<":"<<length_<<std::endl;'
             else:
                 new_file += '\tstd::cout<<"New Line";std::cout<<std::endl;std::cout<<"awkward_Index_to_Index64:"<<ptr_.get()[(size_t)offset_];std::cout<<":";printMe();std::cout<<":"<<length_<<std::endl;\n'
@@ -352,5 +352,5 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
         #         f.close()
 
 insertPrintMe()
-#awkward()
+# awkward()
 print("Added cout in " + str(num) + " places")
