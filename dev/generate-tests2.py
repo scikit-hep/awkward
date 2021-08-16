@@ -13,13 +13,14 @@ class Data:
         self.args = args
 
     def returnValues(self, type, value):
-        str = ""
+        # print("Type= "+str(type)+" Value= "+str(value))
+        string = ""
         if "List" in type:
-            str += "["
+            string += "["
             for item in value.split(","):
-                str += item + ","
-            str = str[0 : len(str) - 1] + "]"
-            return str
+                string += item + ","
+            string = string[0 : len(string) - 1] + "]"
+            return string
         else:
             return value
 
@@ -62,14 +63,32 @@ def test():
                 data.printTest(kernel["specializations"][0]["args"])
 
 
+def sanitizeLine(line):
+    arr = []
+    args = line.split(":")[1 : len(line.split(":"))]
+    for arg in args:
+        temp = ""
+        for ch in arg:
+            if ch.isdigit() or ch == "," or ch == ":":
+                temp += ch
+        if temp != "":
+            if temp[len(temp) - 1] == "," or temp[len(temp) - 1] == ":":
+                temp = temp[0 : len(temp) - 1]
+            arr.append(temp)
+    return arr
+
+
 def generateYaml():
+    line_num = 0
     specifications = open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification.yml"), "r"
     )
     dict = yaml.safe_load(specifications)["kernels"]
     lines = open(os.path.join(CURRENT_DIR, "..", "outputs.txt"), "r").readlines()
     for line in lines:
-        data = Data(line.split(":")[0], line.split(":")[1 : len(line.split(":"))])
+        data = Data(line.split(":")[0], sanitizeLine(line))
+        line_num += 1
+        # print("Line Number: "+str(line_num)+" Line= "+line+"the Last char: "+str(line[len(line)-1]))
         function_name = data.function_name
         for kernel in dict:
             if function_name == kernel["name"]:

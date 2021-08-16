@@ -161,3 +161,7 @@ Testing/
 # Pip stuff
 /pip-wheel-metadata/*
 /_skbuild/*
+
+#Generated Integration Tests Data
+generated-data.yml
+outputs.txt
