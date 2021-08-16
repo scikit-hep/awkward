@@ -354,4 +354,26 @@ class RegularArray(Content):
             raise AssertionError(repr(head))
 
     def _localindex(self, axis, depth):
-        raise NotImplementedError
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        elif posaxis == depth + 1:
+            localindex = ak._v2.index.Index64(len(self) * self._size)
+            self._handle_error(
+                localindex.nplike[
+                    "awkward_RegularArray_localindex",
+                    np.int64
+                ](
+                    localindex.to(localindex.nplike),
+                    self._size,
+                    len(localindex),
+                )
+            )
+        else:
+            return ak._v2.contents.RegularArray(
+                self._content._localindex(posaxis, depth + 1)
+                self._size,
+                self._length,
+                self._identitfier,
+                self._parameters
+            )

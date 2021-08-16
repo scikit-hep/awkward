@@ -2,6 +2,9 @@
 
 from __future__ import absolute_import
 
+from numpy import dtype
+from awkward._v2.contents.numpyarray import NumpyArray
+
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.emptyform import EmptyForm
@@ -99,4 +102,4 @@ class EmptyArray(Content):
             raise AssertionError(repr(head))
 
     def _localindex(self, axis, depth):
-        raise NotImplementedError
+        return NumpyArray(np.empty(0, dtype=np.int64))

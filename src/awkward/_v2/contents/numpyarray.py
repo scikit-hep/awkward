@@ -244,4 +244,10 @@ class NumpyArray(Content):
             raise AssertionError(repr(head))
 
     def _localindex(self, axis, depth):
-        raise NotImplementedError
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        elif len(self.shape) <= 1:
+            raise IndexError(self, "'axis' out of range for localindex")
+        else:
+            return self.toRegularArray._localindex(posaxis, depth)

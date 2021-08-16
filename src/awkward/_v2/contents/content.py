@@ -44,6 +44,9 @@ class Content(object):
     def parameters(self):
         return self._parameters
 
+    def __len__(self):
+        pass
+
     def parameter(self, key):
         if self._parameters is None:
             return None
@@ -448,6 +451,25 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return None
         else:
             raise NotImplementedError
+
+    def _axis_wrap_if_negative(axis):
+        if axis >= 0:
+            return axis
+
+    def _localindex_axis0(self):
+        localindex = ak._v2.index.Index64(len(self))
+        self._handle_error(
+            localindex.nplike[
+                "awkward_localindex",
+                np.int64
+            ](
+                localindex.to(localindex.nplike),
+                len(localindex),
+            )
+        )
+    
+    def _localindex(self, axis, depth):
+        pass
 
     @property
     def purelist_isregular(self):
