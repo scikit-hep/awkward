@@ -352,8 +352,4 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
         #         f.close()
 
 insertPrintMe()
-<<<<<<< HEAD
-=======
-# awkward()
->>>>>>> f34b8dd059ca8d0ad1f235b9e06cbbda82333032
 print("Added cout in " + str(num) + " places")
