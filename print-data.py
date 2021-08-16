@@ -114,7 +114,7 @@ def insertPrintMe():
     void
     IndexOf<T>::printMe() const{
         for (int64_t i = 0;  i < length();  i++) {
-        std::cout << data()[i] << ", ";
+        std::cout << (int64_t)data()[i] << ", ";
         }
     }"""
             flag = 1
@@ -181,7 +181,7 @@ def identities():
             flag += 1
             record = False
             new_file += line
-            new_file += 'std::cout<<"awkward_Identities_getitem_carry_64:";printMe();std::cout<<":";carry.printMe();std::cout<<":";std::cout<<carry.length()<<":"<<width_<<":"<<length_<<std::endl;\n'
+            new_file += 'std::cout<<"awkward_Identities_getitem_carry:";rawout->printMe();std::cout<<":";printMe();std::cout<<":";carry.printMe();std::cout<<":";std::cout<<carry.length()<<":"<<width_<<":"<<length_<<std::endl;\n'
             num += 1
             continue
         if flag == 2 and "return out;" in line:
@@ -234,17 +234,17 @@ def index():
     record = False
     x = open(os.path.join(CURRENT_DIR, "src", "libawkward", "Index.cpp"), "r")
     lines = x.readlines()
-    function_name=''
+    function_name = ""
     for line in lines:
         if re.search(r"struct\sError\serr\s=\skernel::\w+", line):
             record = True
-            function_name = line[line.find(":") + 2 : len(line)-2]
+            function_name = line[line.find(":") + 2 : len(line) - 2]
             if function_name[len(function_name) - 1] == ">":
                 function_name = function_name[0 : function_name.find("<")]
         elif re.search(r"[)];", line) and record == True:
             record = False
             new_file += line
-            if function_name == 'Index_iscontiguous':
+            if function_name == "Index_iscontiguous":
                 new_file += '\tstd::cout<<"New Line";std::cout<<std::endl;std::cout<<"awkward_Index_iscontiguous:";std::cout<<result;std::cout<<":";printMe();std::cout<<":"<<length_<<std::endl;'
             else:
                 new_file += '\tstd::cout<<"New Line";std::cout<<std::endl;std::cout<<"awkward_Index_to_Index64:"<<ptr_.get()[(size_t)offset_];std::cout<<":";printMe();std::cout<<":"<<length_<<std::endl;\n'
@@ -330,21 +330,21 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
         #     with open(os.path.join(root, file), "w") as f:
         #         f.write(temp)
         #         f.close()
-        # if file == "Identities.cpp":
-        #     temp = identities()
-        #     with open(os.path.join(root, file), "w") as f:
-        #         f.write(temp)
-        #         f.close()
+        if file == "Identities.cpp":
+            temp = identities()
+            with open(os.path.join(root, file), "w") as f:
+                f.write(temp)
+                f.close()
         # if file == "Content.cpp":
         #     temp = content()
         #     with open(os.path.join(root, file), "w") as f:
         #         f.write(temp)
         #         f.close()
-        if file == "Index.cpp":
-            temp = index()
-            with open(os.path.join(root, file), "w") as f:
-                f.write(temp)
-                f.close()
+        # if file == "Index.cpp":
+        #     temp = index()
+        #     with open(os.path.join(root, file), "w") as f:
+        #         f.write(temp)
+        #         f.close()
         # if file == "UnionArrayBuilder.cpp":
         #     temp = union()
         #     with open(os.path.join(root, file), "w") as f:
@@ -352,5 +352,4 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
         #         f.close()
 
 insertPrintMe()
-#awkward()
 print("Added cout in " + str(num) + " places")
