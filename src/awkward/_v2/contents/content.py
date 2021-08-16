@@ -468,20 +468,16 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             raise IndexError(self, "Some error")
         return axis
 
-
     def _localindex_axis0(self):
         localindex = ak._v2.index.Index64.empty(len(self), self.nplike)
         self._handle_error(
-            localindex.nplike[
-                "awkward_localindex",
-                np.int64
-            ](
+            localindex.nplike["awkward_localindex", np.int64](
                 localindex.to(localindex.nplike),
                 len(localindex),
             )
         )
         return ak._v2.contents.NumpyArray(localindex)
-    
+
     def _localindex(self, axis, depth):
         pass
 
