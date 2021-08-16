@@ -29,8 +29,6 @@ def test_date_time():
     array1 = ak.Array(np.array(["2020-07-27T10:41:11.200000011"], "datetime64[us]"))
     assert np.datetime64(array1[0], "us") == date_time
 
-    print(ak.to_numpy(array1))
-
     assert ak.to_list(ak.from_iter(array1)) == [
         np.datetime64("2020-07-27T10:41:11.200000")
     ]
@@ -68,7 +66,6 @@ def test_datetime64_ArrayBuilder():
     builder.datetime("2020-05-01T00:00:00.000000")
     builder.datetime("2020-07-27T10:41:11.200000")
 
-    print(builder.snapshot())
     assert ak.to_list(builder.snapshot()) == [
         datetime.datetime(2020, 3, 27, 10, 41),
         datetime.datetime(2020, 3, 27, 10, 41, 11),

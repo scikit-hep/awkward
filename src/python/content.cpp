@@ -932,6 +932,12 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endrecord();
   }
+  else if (py::isinstance(obj, py::module::import("awkward").attr("Array"))) {
+    builder_fromiter(self, obj.attr("tolist")());
+  }
+  else if (py::isinstance(obj, py::module::import("awkward").attr("Record"))) {
+    builder_fromiter(self, obj.attr("tolist")());
+  }
   else if (py::isinstance<py::iterable>(obj)) {
     py::iterable seq = obj.cast<py::iterable>();
     self.beginlist();
