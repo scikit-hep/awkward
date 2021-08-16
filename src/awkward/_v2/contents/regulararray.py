@@ -371,7 +371,7 @@ class RegularArray(Content):
             )
         else:
             return ak._v2.contents.RegularArray(
-                self._content._localindex(posaxis, depth + 1)
+                self._content._localindex(posaxis, depth + 1),
                 self._size,
                 self._length,
                 self._identitfier,
