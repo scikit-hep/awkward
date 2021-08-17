@@ -302,8 +302,8 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
 
-        return std::make_shared<BitMaskedArrayBuilder>(json_form_key,
-                                                       form_json(json_doc["content"]));
+        return std::make_shared<BitMaskedArrayBuilder>(form_json(json_doc["content"]),
+                                                       json_form_key);
       }
       if (cls == std::string("ByteMaskedArray")) {
         if (!json_doc.HasMember("content")) {
@@ -311,8 +311,8 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
 
-        return std::make_shared<ByteMaskedArrayBuilder>(json_form_key,
-                                                        form_json(json_doc["content"]));
+        return std::make_shared<ByteMaskedArrayBuilder>(form_json(json_doc["content"]),
+                                                        json_form_key);
       }
       if (cls == std::string("EmptyArray")) {
         return std::make_shared<EmptyArrayBuilder>();
@@ -340,9 +340,9 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<IndexedArrayBuilder>(json_form_key,
+        return std::make_shared<IndexedArrayBuilder>(form_json(json_doc["content"]),
+                                                     json_form_key,
                                                      index_form_to_name(json_form_index),
-                                                     form_json(json_doc["content"]),
                                                      is_categorical);
       }
 
@@ -445,7 +445,7 @@ namespace awkward {
       if (cls == std::string("RecordArray")) {
         // FIXME:
         util::RecordLookupPtr recordlookup(nullptr);
-        std::vector<const FormBuilderPtr> contents;
+        std::vector<FormBuilderPtr> contents;
         if (json_doc.HasMember("contents")  &&  json_doc["contents"].IsArray()) {
           for (auto& x : json_doc["contents"].GetArray()) {
             contents.push_back(form_json(x));
@@ -463,7 +463,9 @@ namespace awkward {
             std::string("RecordArray 'contents' must be a JSON list or a "
                         "JSON object") + FILENAME(__LINE__));
         }
-        return std::make_shared<RecordArrayBuilder>(json_form_key, contents);
+        return std::make_shared<RecordArrayBuilder>(contents,
+                                                    recordlookup,
+                                                    json_form_key);
       }
       if (cls == std::string("RegularArray")) {
         if (!json_doc.HasMember("content")) {
@@ -503,7 +505,7 @@ namespace awkward {
             cls + std::string(" is missing a 'index' specification")
             + FILENAME(__LINE__));
         }
-        std::vector<const FormBuilderPtr> contents;
+        std::vector<FormBuilderPtr> contents;
         if (json_doc.HasMember("contents")  &&  json_doc["contents"].IsArray()) {
           for (auto& x : json_doc["contents"].GetArray()) {
             contents.push_back(form_json(x));

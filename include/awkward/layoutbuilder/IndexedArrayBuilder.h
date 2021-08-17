@@ -17,9 +17,9 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL IndexedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an IndexedArrayBuilder from a full set of parameters.
-    IndexedArrayBuilder(const std::string form_key,
-                        const std::string form_index,
-                        const FormBuilderPtr content,
+    IndexedArrayBuilder(const FormBuilderPtr content,
+                        const std::string& form_key,
+                        const std::string& form_index,
                         bool is_categorical,
                         const std::string attribute = "index",
                         const std::string partition = "0");
@@ -100,14 +100,14 @@ namespace awkward {
       form_parameters() const { return parameters_; }
 
   private:
+    /// @brief This Json Form content builder
+    const FormBuilderPtr content_;
+
     /// @brief If 'true', this array type is categorical.
     bool is_categorical_;
 
     const std::string form_index_;
     util::Parameters parameters_;
-
-    /// @brief This Json Form content builder
-    const FormBuilderPtr content_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Json Form.

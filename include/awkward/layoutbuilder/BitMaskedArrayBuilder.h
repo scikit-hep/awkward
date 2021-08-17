@@ -15,8 +15,8 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a BitMaskedArrayBuilder from a full set of parameters.
-    BitMaskedArrayBuilder(const std::string json_form_key,
-                          const FormBuilderPtr content,
+    BitMaskedArrayBuilder(const FormBuilderPtr content,
+                          const std::string& json_form_key,
                           const std::string attribute = "mask",
                           const std::string partition = "0");
 

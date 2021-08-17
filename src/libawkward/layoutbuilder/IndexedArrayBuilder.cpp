@@ -8,16 +8,16 @@
 namespace awkward {
 
   ///
-  IndexedArrayBuilder::IndexedArrayBuilder(const std::string form_key,
-                                           const std::string form_index,
-                                           FormBuilderPtr content,
+  IndexedArrayBuilder::IndexedArrayBuilder(FormBuilderPtr content,
+                                           const std::string& form_key,
+                                           const std::string& form_index,
                                            bool is_categorical,
                                            const std::string attribute,
                                            const std::string partition)
-    : is_categorical_(is_categorical),
+    : content_(content),
+      is_categorical_(is_categorical),
       form_index_(form_index),
-      parameters_(util::Parameters()), // FIXME
-      content_(content) {
+      parameters_(util::Parameters()) { // FIXME
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

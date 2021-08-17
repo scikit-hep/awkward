@@ -8,8 +8,8 @@
 namespace awkward {
 
   /// @brief
-  BitMaskedArrayBuilder::BitMaskedArrayBuilder(const std::string form_key,
-                                               FormBuilderPtr content,
+  BitMaskedArrayBuilder::BitMaskedArrayBuilder(FormBuilderPtr content,
+                                               const std::string& form_key,
                                                const std::string attribute,
                                                const std::string partition)
     : content_(content) {

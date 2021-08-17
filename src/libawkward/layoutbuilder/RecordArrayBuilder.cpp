@@ -8,11 +8,13 @@
 namespace awkward {
 
   ///
-  RecordArrayBuilder::RecordArrayBuilder(const std::string form_key,
-                                         const std::vector<const FormBuilderPtr>& contents,
+  RecordArrayBuilder::RecordArrayBuilder(const std::vector<FormBuilderPtr>& contents,
+                                         const util::RecordLookupPtr recordlookup,
+                                         const std::string& form_key,
                                          const std::string attribute,
                                          const std::string partition)
-    : field_index_(0),
+    : form_recordlookup_(recordlookup),
+      field_index_(0),
       contents_size_((int64_t) contents.size()) {
     for (auto const& content : contents) {
       contents_.push_back(content);

@@ -10,7 +10,7 @@ namespace awkward {
   ///
   UnionArrayBuilder::UnionArrayBuilder(const std::string form_key,
                                        const std::string form_tags,
-                                       const std::vector<const FormBuilderPtr>& contents,
+                                       const std::vector<FormBuilderPtr>& contents,
                                        const std::string attribute,
                                        const std::string partition) {
     vm_func_type_ = std::to_string(static_cast<utype>(state::tag));

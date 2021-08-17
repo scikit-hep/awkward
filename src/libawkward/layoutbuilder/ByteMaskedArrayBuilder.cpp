@@ -10,8 +10,8 @@ namespace awkward {
   /// @class ByteMaskedArrayBuilder
   ///
   /// @brief ByteMaskedArray builder from a Byte Masked Json Form
-  ByteMaskedArrayBuilder::ByteMaskedArrayBuilder(const std::string form_key,
-                                                 FormBuilderPtr content,
+  ByteMaskedArrayBuilder::ByteMaskedArrayBuilder(FormBuilderPtr content,
+                                                 const std::string& form_key,
                                                  const std::string attribute,
                                                  const std::string partition)
     : content_(content) {

@@ -17,8 +17,9 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL RecordArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a RecordArrayBuilder from a full set of parameters.
-    RecordArrayBuilder(const std::string form_key,
-                       const std::vector<const FormBuilderPtr>& contents,
+    RecordArrayBuilder(const std::vector<FormBuilderPtr>& contents,
+                       const util::RecordLookupPtr recordlookup,
+                       const std::string& form_key,
                        const std::string attribute = "record",
                        const std::string partition = "0");
 
@@ -105,6 +106,8 @@ namespace awkward {
     /// @brief Keeps track of a field index.
     int64_t field_index();
 
+    /// @brief This Form content builders
+    std::vector<FormBuilderPtr> contents_;
     const util::RecordLookupPtr form_recordlookup_;
     util::Parameters parameters_;
 
@@ -123,9 +126,6 @@ namespace awkward {
     std::string vm_func_type_;
     std::string vm_data_from_stack_;
     std::string vm_error_;
-
-    /// @brief This Form content builders
-    std::vector<FormBuilderPtr> contents_;
   };
 
 }
