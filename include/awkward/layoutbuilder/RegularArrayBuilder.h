@@ -16,7 +16,8 @@ namespace awkward {
   public:
     /// @brief Creates a RegularArrayBuilder from a full set of parameters.
     RegularArrayBuilder(const FormBuilderPtr content,
-                        const std::string form_key,
+                        const util::Parameters& parameters,
+                        const std::string& form_key,
                         const int64_t size,
                         const std::string attribute = "regular",
                         const std::string partition = "0");
@@ -88,17 +89,23 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
-    const FormBuilderPtr content() const { return content_; }
+    /// @brief
+    const
+      FormBuilderPtr content() const { return content_; }
 
+    /// @brief
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
-    const int64_t form_size() const { return form_size_; }
+    /// @brief
+    const int64_t
+      form_size() const { return form_size_; }
 
   private:
     /// @brief This Form content builder
     const FormBuilderPtr content_;
 
+    /// @brief This Form parameters
     const util::Parameters parameters_;
     const int64_t form_size_;
 

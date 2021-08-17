@@ -2128,11 +2128,10 @@ make_LayoutBuilder(const py::handle& m, const std::string& name) {
                              [](const ak::LayoutBuilder* self) -> size_t {
         return reinterpret_cast<size_t>(self);
       })
-      .def("__repr__", &ak::LayoutBuilder::tostring)
       .def("__len__", &ak::LayoutBuilder::length)
-      // .def("type", [](const ak::ArrayBuilder& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
-      //   return unbox_content(::layoutbuilder_snapshot(self.builder()))->type(typestrs);
-      // })
+      .def("type", [](const ak::LayoutBuilder& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+        return unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs()))->type(typestrs);
+      })
       .def("snapshot", [](const ak::LayoutBuilder& self) -> py::object {
         return ::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs());
       })

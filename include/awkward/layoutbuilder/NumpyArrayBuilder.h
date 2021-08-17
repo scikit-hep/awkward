@@ -15,11 +15,11 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL NumpyArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a NumpyArrayBuilder from a full set of parameters.
-    NumpyArrayBuilder(const std::string& form_key,
+    NumpyArrayBuilder(const util::Parameters& parameters,
+                      const std::string& form_key,
                       const std::string& form_dtype,
                       const std::string& form_dtype_state,
                       const std::string& form_dtype_to_vm_format,
-                      const util::Parameters parameters,
                       const std::string attribute = "data",
                       const std::string partition = "0");
 
@@ -97,6 +97,7 @@ namespace awkward {
       form_primitive() const {return form_primitive_; }
 
   private:
+    /// @brief This Form parameters
     const util::Parameters parameters_;
     const std::string form_primitive_;
 

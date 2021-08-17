@@ -8,11 +8,11 @@
 namespace awkward {
 
   ///
-  NumpyArrayBuilder::NumpyArrayBuilder(const std::string& form_key,
+  NumpyArrayBuilder::NumpyArrayBuilder(const util::Parameters& parameters,
+                                       const std::string& form_key,
                                        const std::string& form_primitive,
                                        const std::string& form_primitive_to_state,
                                        const std::string& form_primitive_to_vm_format,
-                                       const util::Parameters parameters,
                                        const std::string attribute,
                                        const std::string partition)
     : parameters_(parameters),

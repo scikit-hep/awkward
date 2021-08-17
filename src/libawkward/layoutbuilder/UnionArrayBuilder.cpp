@@ -8,13 +8,15 @@
 namespace awkward {
 
   ///
-  UnionArrayBuilder::UnionArrayBuilder(const std::string& form_key,
+  UnionArrayBuilder::UnionArrayBuilder(const std::vector<FormBuilderPtr>& contents,
+                                       const util::Parameters& parameters,
+                                       const std::string& form_key,
                                        const std::string& form_tags,
                                        const std::string& form_index,
-                                       const std::vector<FormBuilderPtr>& contents,
                                        const std::string attribute,
                                        const std::string partition)
-    : tag_(0),
+    : parameters_(parameters),
+      tag_(0),
       form_index_(index_form_to_name(form_index)) {
     vm_func_type_ = std::to_string(static_cast<utype>(state::tag));
 

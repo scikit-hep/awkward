@@ -19,6 +19,7 @@ namespace awkward {
     /// @brief Creates a RecordArrayBuilder from a full set of parameters.
     RecordArrayBuilder(const std::vector<FormBuilderPtr>& contents,
                        const util::RecordLookupPtr recordlookup,
+                       const util::Parameters& parameters,
                        const std::string& form_key,
                        const std::string attribute = "record",
                        const std::string partition = "0");
@@ -109,7 +110,9 @@ namespace awkward {
     /// @brief This Form content builders
     std::vector<FormBuilderPtr> contents_;
     const util::RecordLookupPtr form_recordlookup_;
-    util::Parameters parameters_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
 
     /// @brief This builder Form
     const std::string form_;

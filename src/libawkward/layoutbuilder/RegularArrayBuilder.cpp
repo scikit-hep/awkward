@@ -9,12 +9,13 @@ namespace awkward {
 
   ///
   RegularArrayBuilder::RegularArrayBuilder(const FormBuilderPtr content,
-                                           const std::string form_key,
+                                           const util::Parameters& parameters,
+                                           const std::string& form_key,
                                            const int64_t size,
                                            const std::string attribute,
                                            const std::string partition)
     : content_(content),
-      parameters_(util::Parameters()), // FIXME
+      parameters_(parameters),
       form_size_(size) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")

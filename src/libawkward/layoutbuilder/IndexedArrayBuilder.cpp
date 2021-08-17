@@ -7,9 +7,9 @@
 
 namespace awkward {
 
-  ///
+  /// @brief
   IndexedArrayBuilder::IndexedArrayBuilder(FormBuilderPtr content,
-                                           const util::Parameters parameters,
+                                           const util::Parameters& parameters,
                                            const std::string& form_key,
                                            const std::string& form_index,
                                            bool is_categorical,

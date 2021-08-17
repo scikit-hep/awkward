@@ -15,10 +15,11 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnionArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a UnionArrayBuilder from a full set of parameters.
-    UnionArrayBuilder(const std::string& form_key,
+    UnionArrayBuilder(const std::vector<FormBuilderPtr>& contents,
+                      const util::Parameters& parameters,
+                      const std::string& form_key,
                       const std::string& form_tags,
                       const std::string& form_index,
-                      const std::vector<FormBuilderPtr>& contents,
                       const std::string attribute = "union",
                       const std::string partition = "0");
 
@@ -93,9 +94,11 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
-    const std::vector<FormBuilderPtr>& contents() const { return contents_; }
+    const std::vector<FormBuilderPtr>&
+      contents() const { return contents_; }
 
-    const std::string& vm_output_tags() const { return vm_output_tags_; }
+    const std::string&
+      vm_output_tags() const { return vm_output_tags_; }
 
     const std::string&
       form_index() const { return form_index_; }
@@ -104,14 +107,16 @@ namespace awkward {
       form_parameters() const { return parameters_; }
 
   private:
+    /// @brief This Form content builders
+    std::vector<FormBuilderPtr> contents_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+
     /// @brief UnionArray tag
     int8_t tag_;
 
     const std::string form_index_;
-    util::Parameters parameters_;
-
-    /// @brief This Form content builders
-    std::vector<FormBuilderPtr> contents_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

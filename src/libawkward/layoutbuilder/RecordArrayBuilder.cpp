@@ -10,10 +10,12 @@ namespace awkward {
   ///
   RecordArrayBuilder::RecordArrayBuilder(const std::vector<FormBuilderPtr>& contents,
                                          const util::RecordLookupPtr recordlookup,
+                                         const util::Parameters& parameters,
                                          const std::string& form_key,
                                          const std::string attribute,
                                          const std::string partition)
     : form_recordlookup_(recordlookup),
+      parameters_(parameters),
       field_index_(0),
       contents_size_((int64_t) contents.size()) {
     for (auto const& content : contents) {

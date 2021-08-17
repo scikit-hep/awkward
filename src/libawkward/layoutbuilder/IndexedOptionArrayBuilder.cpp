@@ -8,16 +8,17 @@
 namespace awkward {
 
   ///
-  IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(const std::string form_key,
-                                                       const std::string form_index,
-                                                       FormBuilderPtr content,
+  IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(FormBuilderPtr content,
+                                                       const util::Parameters& parameters,
+                                                       const std::string& form_key,
+                                                       const std::string& form_index,
                                                        bool is_categorical,
                                                        const std::string attribute,
                                                        const std::string partition)
-    : is_categorical_(is_categorical),
-      form_index_(form_index),
-      parameters_(util::Parameters()), // FIXME
-      content_(content) {
+    : content_(content),
+      parameters_(parameters),
+      is_categorical_(is_categorical),
+      form_index_(form_index) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

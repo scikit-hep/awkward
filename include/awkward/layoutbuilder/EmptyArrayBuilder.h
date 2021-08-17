@@ -18,7 +18,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL EmptyArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an EmptyArrayBuilder from a full set of parameters.
-    EmptyArrayBuilder();
+    EmptyArrayBuilder(const util::Parameters& parameters);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -87,7 +87,18 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
+    /// @brief String-to-JSON map that augments the meaning of this
+    /// builder Form.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
   private:
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
     /// @brief An empty command.
     std::string vm_empty_command_;
     /// @brief An error message.

@@ -15,9 +15,10 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL IndexedOptionArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an IndexedOptionArrayBuilder from a full set of parameters.
-    IndexedOptionArrayBuilder(const std::string form_key,
-                              const std::string form_index,
-                              const FormBuilderPtr content,
+    IndexedOptionArrayBuilder(const FormBuilderPtr content,
+                              const util::Parameters& parameters,
+                              const std::string& form_key,
+                              const std::string& form_index,
                               bool is_categorical,
                               const std::string attribute = "index",
                               const std::string partition = "0");
@@ -89,7 +90,8 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
-    const FormBuilderPtr content() const { return content_; }
+    const
+      FormBuilderPtr content() const { return content_; }
 
     const std::string&
       form_index() const { return form_index_; }
@@ -98,16 +100,18 @@ namespace awkward {
       form_parameters() const { return parameters_; }
 
   private:
+    /// @brief This Form layout builder
+    const FormBuilderPtr content_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+
     /// @brief If 'true', this array type is categorical.
     bool is_categorical_;
 
     const std::string form_index_;
-    util::Parameters parameters_;
 
     void validate() const;
-
-    /// @brief This Form content builder
-    const FormBuilderPtr content_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

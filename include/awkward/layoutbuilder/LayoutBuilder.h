@@ -13,9 +13,6 @@
 namespace awkward {
   class ArrayBuilderOptions;
 
-  class Type;
-  using TypePtr = std::shared_ptr<Type>;
-
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
   class FormBuilder;
@@ -95,11 +92,6 @@ namespace awkward {
     const std::shared_ptr<ForthMachine32>
       vm() const;
 
-    /// @brief Returns a string representation of this array (single-line XML
-    /// indicating the length and type).
-    const std::string
-      tostring() const;
-
     /// @brief Current length of the accumulated array.
     int64_t
       length() const;
@@ -107,13 +99,6 @@ namespace awkward {
     /// @brief
     void
       pre_snapshot() const;
-
-    /// @brief Current high level Type of the accumulated array.
-    ///
-    /// @param typestrs A mapping from `"__record__"` parameters to string
-    /// representations of those types, to override the derived strings.
-    const TypePtr
-      type(const util::TypeStrs& typestrs) const;
 
     /// @brief Adds a `null` value to the accumulated data.
     void
@@ -228,10 +213,6 @@ namespace awkward {
     void
       add(T x);
 
-    /// @brief Generates an Array builder from a Form
-    static FormBuilderPtr
-      formBuilderFromJson(const std::string& form);
-
     /// @brief Generates next unique ID
     static int64_t
       next_id();
@@ -258,7 +239,11 @@ namespace awkward {
       error_id;
 
   private:
-    /// @ brief Initialise Layout Builder from a Json Form.
+    /// @brief Generates an Array builder from a Form.
+    FormBuilderPtr
+      form_builder_from_json(const std::string& json_form);
+
+    /// @ brief Initialise Layout Builder from a JSON Form.
     void
       initialise_builder(const std::string& json_form);
 

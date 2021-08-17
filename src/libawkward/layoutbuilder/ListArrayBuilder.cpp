@@ -8,15 +8,16 @@
 namespace awkward {
 
   ///
-  ListArrayBuilder::ListArrayBuilder(const std::string form_key,
-                                     const std::string form_starts,
-                                     FormBuilderPtr content,
+  ListArrayBuilder::ListArrayBuilder(FormBuilderPtr content,
+                                     const util::Parameters& parameters,
+                                     const std::string& form_key,
+                                     const std::string& form_starts,
                                      const std::string attribute,
                                      const std::string partition)
-    : begun_(false),
-      form_starts_(form_starts),
-      parameters_(util::Parameters()), // FIXME
-      content_(content) {
+    : content_(content),
+      parameters_(parameters),
+      begun_(false),
+      form_starts_(form_starts) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

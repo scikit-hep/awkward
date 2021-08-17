@@ -15,9 +15,10 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL ListArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a ListArrayBuilder from a full set of parameters.
-    ListArrayBuilder(const std::string form_key,
-                     const std::string form_starts,
-                     FormBuilderPtr content,
+    ListArrayBuilder(FormBuilderPtr content,
+                     const util::Parameters& parameters,
+                     const std::string& form_key,
+                     const std::string& form_starts,
                      const std::string attribute = "offsets",
                      const std::string partition = "0");
 
@@ -101,16 +102,18 @@ namespace awkward {
       form_parameters() const { return parameters_; }
 
   private:
+    /// @brief This Form content builder
+    FormBuilderPtr content_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+
     /// @brief 'true' if this builder has recieved a 'begin_list' command.
     /// 'false' if the builder either has not recieved a 'begin_list' command
     /// or has recieved an 'end_list' command.
     bool begun_;
 
     const std::string form_starts_;
-    util::Parameters parameters_;
-
-    /// @brief This Form content builder
-    FormBuilderPtr content_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

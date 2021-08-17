@@ -11,12 +11,13 @@ namespace awkward {
 
   /// @class BitMaskedArrayBuilder
   ///
-  /// @brief BitMaskedArray builder from a Bit Masked Json Form
+  /// @brief BitMaskedArray builder from a Bit Masked JSON Form
   class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a BitMaskedArrayBuilder from a full set of parameters.
     BitMaskedArrayBuilder(const FormBuilderPtr content,
-                          const std::string& json_form_key,
+                          const util::Parameters& parameters,
+                          const std::string& form_key,
                           const std::string attribute = "mask",
                           const std::string partition = "0");
 
@@ -87,14 +88,28 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
-    const FormBuilderPtr content() const { return content_; }
+    /// @brief Returns this Form content builder.
+    const
+      FormBuilderPtr content() const { return content_; }
+
+    /// @brief String-to-JSON map that augments the meaning of this
+    /// builder Form.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
 
   private:
-    /// @brief This Json Form content builder
+    /// @brief This Form content builder
     const FormBuilderPtr content_;
 
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+
     /// @brief AwkwardForth virtual machine instructions
-    /// generated from the Json Form.
+    /// generated from the Form.
     ///
     /// An output buffer name is
     /// "part{partition}-{form_key}-{attribute}"

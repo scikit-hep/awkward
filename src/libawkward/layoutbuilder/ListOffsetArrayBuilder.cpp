@@ -8,17 +8,18 @@
 namespace awkward {
 
   ///
-  ListOffsetArrayBuilder::ListOffsetArrayBuilder(const std::string form_key,
-                                                 const std::string form_offsets,
-                                                 FormBuilderPtr content,
+  ListOffsetArrayBuilder::ListOffsetArrayBuilder(FormBuilderPtr content,
+                                                 const util::Parameters& parameters,
+                                                 const std::string& form_key,
+                                                 const std::string& form_offsets,
                                                  bool is_string_builder,
                                                  const std::string attribute,
                                                  const std::string partition)
-    : is_string_builder_(is_string_builder),
+    : content_(content),
+      parameters_(parameters),
+      is_string_builder_(is_string_builder),
       form_offsets_(form_offsets),
-      parameters_(util::Parameters()), // FIXME
-      begun_(false),
-      content_(content) {
+      begun_(false) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

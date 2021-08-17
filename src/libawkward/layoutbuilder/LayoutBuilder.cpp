@@ -4,7 +4,6 @@
 
 #include "awkward/layoutbuilder/LayoutBuilder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/type/Type.h"
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
 #include "awkward/layoutbuilder/ByteMaskedArrayBuilder.h"
@@ -224,7 +223,7 @@ namespace awkward {
   void
   LayoutBuilder::initialise_builder(const std::string& json_form) {
     try {
-      builder_ = formBuilderFromJson(json_form);
+      builder_ = form_builder_from_json(json_form);
     }
     catch (...) {
       throw std::invalid_argument(
@@ -234,18 +233,18 @@ namespace awkward {
 
   template <typename JSON>
   FormBuilderPtr
-  form_json(const JSON& json_doc) {
+  from_json(const JSON& json_doc) {
 
     if (json_doc.IsString()) {
       std::string primitive = json_doc.GetString();
       std::string json_form_key = std::string("node-id")
         + std::to_string(LayoutBuilder::next_id());
 
-      return std::make_shared<NumpyArrayBuilder>(json_form_key,
+      return std::make_shared<NumpyArrayBuilder>(util::Parameters(),
+                                                 json_form_key,
                                                  primitive,
                                                  primitive_to_state(primitive),
-                                                 primitive_to_vm_format(primitive),
-                                                 util::Parameters());
+                                                 primitive_to_vm_format(primitive));
     }
 
     std::string json_form_key;
@@ -270,14 +269,14 @@ namespace awkward {
         json_doc.HasMember("class")  &&
         json_doc["class"].IsString()) {
 
-      util::Parameters p;
+      util::Parameters json_form_parameters;
       if (json_doc.HasMember("parameters")) {
         if (json_doc["parameters"].IsObject()) {
           for (auto& pair : json_doc["parameters"].GetObject()) {
             rj::StringBuffer stringbuffer;
             rj::Writer<rj::StringBuffer> writer(stringbuffer);
             pair.value.Accept(writer);
-            p[pair.name.GetString()] = stringbuffer.GetString();
+            json_form_parameters[pair.name.GetString()] = stringbuffer.GetString();
           }
         }
         else {
@@ -293,7 +292,8 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
 
-        return std::make_shared<BitMaskedArrayBuilder>(form_json(json_doc["content"]),
+        return std::make_shared<BitMaskedArrayBuilder>(from_json(json_doc["content"]),
+                                                       json_form_parameters,
                                                        json_form_key);
       }
       if (cls == std::string("ByteMaskedArray")) {
@@ -302,11 +302,12 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
 
-        return std::make_shared<ByteMaskedArrayBuilder>(form_json(json_doc["content"]),
+        return std::make_shared<ByteMaskedArrayBuilder>(from_json(json_doc["content"]),
+                                                        json_form_parameters,
                                                         json_form_key);
       }
       if (cls == std::string("EmptyArray")) {
-        return std::make_shared<EmptyArrayBuilder>();
+        return std::make_shared<EmptyArrayBuilder>(json_form_parameters);
       }
 
       if ((cls == std::string("IndexedArray"))  ||
@@ -319,7 +320,7 @@ namespace awkward {
         }
 
         bool is_categorical(false);
-        if (util::parameter_equals(p, "__array__", "\"categorical\"")) {
+        if (util::parameter_equals(json_form_parameters, "__array__", "\"categorical\"")) {
           is_categorical = true;
         }
         if (json_doc.HasMember("index")  &&  json_doc["index"].IsString()) {
@@ -331,8 +332,8 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<IndexedArrayBuilder>(form_json(json_doc["content"]),
-                                                     p,
+        return std::make_shared<IndexedArrayBuilder>(from_json(json_doc["content"]),
+                                                     json_form_parameters,
                                                      json_form_key,
                                                      index_form_to_name(json_form_index),
                                                      is_categorical);
@@ -347,7 +348,7 @@ namespace awkward {
         }
 
         bool is_categorical(false);
-        if (util::parameter_equals(p, "__array__", "\"categorical\"")) {
+        if (util::parameter_equals(json_form_parameters, "__array__", "\"categorical\"")) {
           is_categorical = true;
         }
         if (json_doc.HasMember("index")  &&  json_doc["index"].IsString()) {
@@ -359,9 +360,10 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<IndexedOptionArrayBuilder>(json_form_key,
+        return std::make_shared<IndexedOptionArrayBuilder>(from_json(json_doc["content"]),
+                                                           json_form_parameters,
+                                                           json_form_key,
                                                            index_form_to_name(json_form_index),
-                                                           form_json(json_doc["content"]),
                                                            is_categorical);
       }
 
@@ -385,9 +387,10 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<ListArrayBuilder>(json_form_key,
-                                                  index_form_to_name(json_form_starts),
-                                                  form_json(json_doc["content"]));
+        return std::make_shared<ListArrayBuilder>(from_json(json_doc["content"]),
+                                                  json_form_parameters,
+                                                  json_form_key,
+                                                  index_form_to_name(json_form_starts));
       }
 
       if ((cls == std::string("ListOffsetArray"))  ||
@@ -399,8 +402,8 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
         bool is_string_builder(false);
-        if (util::parameter_equals(p, "__array__", "\"string\"")  ||
-            util::parameter_equals(p, "__array__", "\"bytestring\"")) {
+        if (util::parameter_equals(json_form_parameters, "__array__", "\"string\"")  ||
+            util::parameter_equals(json_form_parameters, "__array__", "\"bytestring\"")) {
           is_string_builder = true;
         }
 
@@ -413,9 +416,10 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<ListOffsetArrayBuilder>(json_form_key,
+        return std::make_shared<ListOffsetArrayBuilder>(from_json(json_doc["content"]),
+                                                        json_form_parameters,
+                                                        json_form_key,
                                                         index_form_to_name(json_form_offsets),
-                                                        form_json(json_doc["content"]),
                                                         is_string_builder);
       }
       if (cls == std::string("NumpyArray")) {
@@ -429,25 +433,25 @@ namespace awkward {
              std::string("NumpyForm must have a 'primitive' field")
                          + FILENAME(__LINE__));
          }
-        return std::make_shared<NumpyArrayBuilder>(json_form_key,
+        return std::make_shared<NumpyArrayBuilder>(json_form_parameters,
+                                                   json_form_key,
                                                    primitive,
                                                    primitive_to_state(primitive),
-                                                   primitive_to_vm_format(primitive),
-                                                   p);
+                                                   primitive_to_vm_format(primitive));
       }
       if (cls == std::string("RecordArray")) {
         util::RecordLookupPtr recordlookup(nullptr);
         std::vector<FormBuilderPtr> contents;
         if (json_doc.HasMember("contents")  &&  json_doc["contents"].IsArray()) {
           for (auto& x : json_doc["contents"].GetArray()) {
-            contents.push_back(form_json(x));
+            contents.push_back(from_json(x));
           }
         }
         else if (json_doc.HasMember("contents")  &&  json_doc["contents"].IsObject()) {
           recordlookup = std::make_shared<util::RecordLookup>();
           for (auto& pair : json_doc["contents"].GetObject()) {
             recordlookup.get()->push_back(pair.name.GetString());
-            contents.push_back(form_json(pair.value));
+            contents.push_back(from_json(pair.value));
           }
         }
         else {
@@ -457,6 +461,7 @@ namespace awkward {
         }
         return std::make_shared<RecordArrayBuilder>(contents,
                                                     recordlookup,
+                                                    json_form_parameters,
                                                     json_form_key);
       }
       if (cls == std::string("RegularArray")) {
@@ -469,7 +474,8 @@ namespace awkward {
             cls + std::string(" is missing its 'size'") + FILENAME(__LINE__));
         }
         int64_t json_form_size = json_doc["size"].GetInt64();
-        return std::make_shared<RegularArrayBuilder>(form_json(json_doc["content"]),
+        return std::make_shared<RegularArrayBuilder>(from_json(json_doc["content"]),
+                                                     json_form_parameters,
                                                      json_form_key,
                                                      json_form_size);
       }
@@ -499,7 +505,7 @@ namespace awkward {
         std::vector<FormBuilderPtr> contents;
         if (json_doc.HasMember("contents")  &&  json_doc["contents"].IsArray()) {
           for (auto& x : json_doc["contents"].GetArray()) {
-            contents.push_back(form_json(x));
+            contents.push_back(from_json(x));
           }
         }
         else {
@@ -508,10 +514,11 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<UnionArrayBuilder>(json_form_key,
+        return std::make_shared<UnionArrayBuilder>(contents,
+                                                   json_form_parameters,
+                                                   json_form_key,
                                                    json_form_tags,
-                                                   json_form_index,
-                                                   contents);
+                                                   json_form_index);
       }
       if (cls == std::string("UnmaskedArray")) {
         if (!json_doc.HasMember("content")) {
@@ -519,8 +526,9 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
 
-        return std::make_shared<UnmaskedArrayBuilder>(json_form_key,
-                                                      form_json(json_doc["content"]));
+        return std::make_shared<UnmaskedArrayBuilder>(from_json(json_doc["content"]),
+                                                      json_form_parameters,
+                                                      json_form_key);
       }
       throw std::invalid_argument(
         std::string("LayoutBuilder does not recognise the Form ")
@@ -536,11 +544,11 @@ namespace awkward {
   }
 
   FormBuilderPtr
-  LayoutBuilder::formBuilderFromJson(const std::string& json_form) {
+  LayoutBuilder::form_builder_from_json(const std::string& json_form) {
     rj::Document json_doc;
     json_doc.Parse<rj::kParseNanAndInfFlag>(json_form.c_str());
 
-    return form_json(json_doc);
+    return from_json(json_doc);
   }
 
   void
@@ -617,17 +625,6 @@ namespace awkward {
     }
   }
 
-  const std::string
-  LayoutBuilder::tostring() const {
-    util::TypeStrs typestrs;
-    typestrs["char"] = "char";
-    typestrs["string"] = "string";
-    std::stringstream out;
-    out << "<LayoutBuilder length=\"" << length() << "\" type=\""
-        << type(typestrs).get()->tostring() << "\"/>";
-    return out.str();
-  }
-
   int64_t
   LayoutBuilder::next_id() {
     return LayoutBuilder::next_node_id++;
@@ -646,14 +643,6 @@ namespace awkward {
   void
   LayoutBuilder::pre_snapshot() const {
     vm_.get()->maybe_throw(util::ForthError::user_halt, ignore_);
-  }
-
-  const TypePtr
-  LayoutBuilder::type(const util::TypeStrs& typestrs) const {
-    // FIXME refactoring return builder_.get()->snapshot(vm().get()->outputs()).get()->type(typestrs);
-    throw std::runtime_error(
-      std::string("LayoutBuilder type is obsolete")
-      + FILENAME(__LINE__));
   }
 
   void

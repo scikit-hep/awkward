@@ -10,8 +10,9 @@ namespace awkward {
   /// @class EmptyArrayBuilder
   ///
   /// @brief EmptyArray builder from a Empty Json Form
-  EmptyArrayBuilder::EmptyArrayBuilder()
-    : vm_empty_command_("( This does nothing. )\n"),
+  EmptyArrayBuilder::EmptyArrayBuilder(const util::Parameters& parameters)
+    : parameters_(parameters),
+      vm_empty_command_("( This does nothing. )\n"),
       vm_error_("s\" EmptyArray Builder error\"") { }
 
   const std::string

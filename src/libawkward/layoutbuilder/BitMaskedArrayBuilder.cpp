@@ -7,12 +7,16 @@
 
 namespace awkward {
 
-  /// @brief
+  /// @bclass BitMaskedArrayBuilder
+  ///
+  /// @brief BitMaskedArray builder from a Bit Masked Json Form
   BitMaskedArrayBuilder::BitMaskedArrayBuilder(FormBuilderPtr content,
+                                               const util::Parameters& parameters,
                                                const std::string& form_key,
                                                const std::string attribute,
                                                const std::string partition)
-    : content_(content) {
+    : content_(content),
+      parameters_(parameters) {
     vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_func_type_ = content_.get()->vm_func_type();

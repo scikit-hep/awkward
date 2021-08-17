@@ -18,9 +18,9 @@ namespace awkward {
   public:
     /// @brief Creates an IndexedArrayBuilder from a full set of parameters.
     IndexedArrayBuilder(const FormBuilderPtr content,
-                        const util::Parameters parameters,
-                        const std::string& form_key,
-                        const std::string& form_index,
+                        const util::Parameters& parameters,
+                        const std::string& json_form_key,
+                        const std::string& json_form_index,
                         bool is_categorical,
                         const std::string attribute = "index",
                         const std::string partition = "0");
@@ -92,7 +92,8 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
-    const FormBuilderPtr content() const { return content_; }
+    const
+      FormBuilderPtr content() const { return content_; }
 
     const std::string&
       form_index() const { return form_index_; }
@@ -103,6 +104,8 @@ namespace awkward {
   private:
     /// @brief This Json Form content builder
     const FormBuilderPtr content_;
+
+    /// @brief This Form parameters
     const util::Parameters parameters_;
 
     /// @brief If 'true', this array type is categorical.
