@@ -235,16 +235,12 @@ namespace awkward {
   template <typename JSON>
   FormBuilderPtr
   form_json(const JSON& json_doc) {
-    std::cout << "LayoutBuilder::form_json\n";
 
     if (json_doc.IsString()) {
       std::string primitive = json_doc.GetString();
       std::string json_form_key = std::string("node-id")
         + std::to_string(LayoutBuilder::next_id());
 
-      std::cout << "primitive " << primitive << ", state "
-        << primitive_to_state(primitive) << ", vm_format " << primitive_to_vm_format(primitive)
-        << "\n";
       return std::make_shared<NumpyArrayBuilder>(json_form_key,
                                                  primitive,
                                                  primitive_to_state(primitive),
@@ -269,12 +265,6 @@ namespace awkward {
           std::string("'form_key' must be null or a string") + FILENAME(__LINE__));
       }
     }
-    std::cout << json_form_key << "\n";
-
-    bool isgen;
-    bool is64;
-    bool isU32;
-    bool is32;
 
     if (json_doc.IsObject()  &&
         json_doc.HasMember("class")  &&
@@ -446,7 +436,6 @@ namespace awkward {
                                                    p);
       }
       if (cls == std::string("RecordArray")) {
-        // FIXME:
         util::RecordLookupPtr recordlookup(nullptr);
         std::vector<FormBuilderPtr> contents;
         if (json_doc.HasMember("contents")  &&  json_doc["contents"].IsArray()) {
@@ -485,7 +474,6 @@ namespace awkward {
                                                      json_form_size);
       }
 
-      isgen = is64 = isU32 = is32 = false;
       if ((cls == std::string("UnionArray"))  ||
           (cls == std::string("UnionArray8_64"))  ||
           (cls == std::string("UnionArray8_U32"))  ||
@@ -522,6 +510,7 @@ namespace awkward {
 
         return std::make_shared<UnionArrayBuilder>(json_form_key,
                                                    json_form_tags,
+                                                   json_form_index,
                                                    contents);
       }
       if (cls == std::string("UnmaskedArray")) {

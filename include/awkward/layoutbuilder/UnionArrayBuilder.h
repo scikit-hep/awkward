@@ -15,8 +15,9 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnionArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a UnionArrayBuilder from a full set of parameters.
-    UnionArrayBuilder(const std::string form_key,
-                      const std::string form_tags,
+    UnionArrayBuilder(const std::string& form_key,
+                      const std::string& form_tags,
+                      const std::string& form_index,
                       const std::vector<FormBuilderPtr>& contents,
                       const std::string attribute = "union",
                       const std::string partition = "0");

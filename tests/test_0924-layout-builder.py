@@ -30,12 +30,6 @@ def test_bit_masked_form():
 
 
 def test_byte_masked_form():
-    form = ak.forms.ByteMaskedForm(
-        "i8",
-        ak.forms.NumpyForm([], 8, "d"),
-        True,
-        form_key="node0",
-    )
     form = """
 {
     "class": "ByteMaskedArray",
@@ -221,20 +215,6 @@ def test_indexed_option_form():
 
 
 def test_regular_form():
-    #     form = ak.forms.Form.fromjson(
-    #         """
-    # {
-    #     "class": "RegularArray",
-    #     "size": 3,
-    #         "content": {
-    #             "class": "NumpyArray",
-    #             "primitive": "int64",
-    #             "form_key": "node1"
-    #         },
-    #     "form_key": "node0"
-    # }
-    # """
-    #     )
     form = """
 {
     "class": "RegularArray",
@@ -268,169 +248,141 @@ def test_regular_form():
     assert ak.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66], [77, 88, 99]]
 
 
-# def test_union_form():
-#     # form = ak.forms.UnionForm(
-#     #     "i8",
-#     #     "i64",
-#     #     [ak.forms.NumpyForm([], 8, "d"), ak.forms.NumpyForm([], 1, "?")],
-#     #     form_key="node0",
-#     # )
-#     form = """
-# {
-#     "class": "UnionArray8_64",
-#     "tags": "i8",
-#     "index": "i64",
-#     "contents": [
-#         "float64",
-#         "bool"
-#     ],
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak.layout.LayoutBuilder(form)
-#
-#     builder.tag(0)
-#     builder.float64(1.1)
-#     builder.tag(1)
-#     builder.boolean(False)
-#     builder.tag(0)
-#     builder.float64(2.2)
-#     builder.tag(0)
-#     builder.float64(3.3)
-#     builder.tag(1)
-#     builder.boolean(True)
-#     builder.tag(0)
-#     builder.float64(4.4)
-#     builder.tag(1)
-#     builder.boolean(False)
-#     builder.tag(1)
-#     builder.boolean(True)
-#     builder.tag(0)
-#     builder.float64(-2.2)
-#
-#     assert ak.to_list(builder.snapshot()) == [
-#         1.1,
-#         False,
-#         2.2,
-#         3.3,
-#         True,
-#         4.4,
-#         False,
-#         True,
-#         -2.2,
-#     ]
-#
-#
-# def test_union2_form():
-#     form = ak.forms.UnionForm(
-#         "i8",
-#         "i64",
-#         [ak.forms.NumpyForm([], 8, "d"), ak.forms.NumpyForm([], 8, "d")],
-#         form_key="node0",
-#     )
-#     form = """
-# {
-#     "class": "UnionArray8_64",
-#     "tags": "i8",
-#     "index": "i64",
-#     "contents": [
-#         "float64",
-#         "float64"
-#     ],
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak.layout.LayoutBuilder(form)
-#
-#     builder.tag(0)
-#     builder.float64(1.1)
-#
-#     builder.tag(1)
-#     builder.float64(2.2)
-#
-#     builder.tag(1)
-#     builder.float64(3.3)
-#
-#     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
-#
-#
-# def test_union3_form():
-#     form = ak.forms.UnionForm(
-#         "i8",
-#         "i64",
-#         [
-#             ak.forms.NumpyForm([], 8, "d"),
-#             ak.forms.NumpyForm([], 1, "?"),
-#             ak.forms.NumpyForm([], 8, "q"),
-#         ],
-#         form_key="node0",
-#     )
-#     form = """
-# {
-#     "class": "UnionArray8_64",
-#     "tags": "i8",
-#     "index": "i64",
-#     "contents": [
-#         "float64",
-#         "bool",
-#         "int64"
-#     ],
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak.layout.LayoutBuilder(form)
-#
-#     builder.tag(0)
-#     builder.float64(1.1)
-#     builder.tag(1)
-#     builder.boolean(False)
-#     builder.tag(2)
-#     builder.int64(11)
-#     builder.tag(0)
-#     builder.float64(2.2)
-#     builder.tag(1)
-#     builder.boolean(False)
-#     builder.tag(0)
-#     builder.float64(2.2)
-#     builder.tag(0)
-#     builder.float64(3.3)
-#     builder.tag(1)
-#     builder.boolean(True)
-#     builder.tag(0)
-#     builder.float64(4.4)
-#     builder.tag(1)
-#     builder.boolean(False)
-#     builder.tag(1)
-#     builder.boolean(True)
-#     builder.tag(0)
-#     builder.float64(-2.2)
-#
-#     assert ak.to_list(builder.snapshot()) == [
-#         1.1,
-#         False,
-#         11,
-#         2.2,
-#         False,
-#         2.2,
-#         3.3,
-#         True,
-#         4.4,
-#         False,
-#         True,
-#         -2.2,
-#     ]
-#
+def test_union_form():
+    form = """
+{
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        "float64",
+        "bool"
+    ],
+    "form_key": "node0"
+}
+    """
+
+    builder = ak.layout.LayoutBuilder(form)
+
+    builder.tag(0)
+    builder.float64(1.1)
+    builder.tag(1)
+    builder.boolean(False)
+    builder.tag(0)
+    builder.float64(2.2)
+    builder.tag(0)
+    builder.float64(3.3)
+    builder.tag(1)
+    builder.boolean(True)
+    builder.tag(0)
+    builder.float64(4.4)
+    builder.tag(1)
+    builder.boolean(False)
+    builder.tag(1)
+    builder.boolean(True)
+    builder.tag(0)
+    builder.float64(-2.2)
+
+    assert ak.to_list(builder.snapshot()) == [
+        1.1,
+        False,
+        2.2,
+        3.3,
+        True,
+        4.4,
+        False,
+        True,
+        -2.2,
+    ]
+
+
+def test_union2_form():
+    form = """
+{
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        "float64",
+        "float64"
+    ],
+    "form_key": "node0"
+}
+    """
+
+    builder = ak.layout.LayoutBuilder(form)
+
+    builder.tag(0)
+    builder.float64(1.1)
+
+    builder.tag(1)
+    builder.float64(2.2)
+
+    builder.tag(1)
+    builder.float64(3.3)
+
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
+
+def test_union3_form():
+    form = """
+{
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        "float64",
+        "bool",
+        "int64"
+    ],
+    "form_key": "node0"
+}
+    """
+
+    builder = ak.layout.LayoutBuilder(form)
+
+    builder.tag(0)
+    builder.float64(1.1)
+    builder.tag(1)
+    builder.boolean(False)
+    builder.tag(2)
+    builder.int64(11)
+    builder.tag(0)
+    builder.float64(2.2)
+    builder.tag(1)
+    builder.boolean(False)
+    builder.tag(0)
+    builder.float64(2.2)
+    builder.tag(0)
+    builder.float64(3.3)
+    builder.tag(1)
+    builder.boolean(True)
+    builder.tag(0)
+    builder.float64(4.4)
+    builder.tag(1)
+    builder.boolean(False)
+    builder.tag(1)
+    builder.boolean(True)
+    builder.tag(0)
+    builder.float64(-2.2)
+
+    assert ak.to_list(builder.snapshot()) == [
+        1.1,
+        False,
+        11,
+        2.2,
+        False,
+        2.2,
+        3.3,
+        True,
+        4.4,
+        False,
+        True,
+        -2.2,
+    ]
 
 
 def test_record_form():
-
-    # form = ak.forms.RecordForm(
-    #     {"one": ak.forms.NumpyForm([], 8, "d"), "two": ak.forms.NumpyForm([], 8, "d")},
-    #     form_key="node0",
-    # )
     form = """
 {
     "class": "RecordArray",
@@ -459,11 +411,6 @@ def test_record_form():
 
 
 def test_error_in_record_form():
-
-    # form = ak.forms.RecordForm(
-    #     {"one": ak.forms.NumpyForm([], 8, "d"), "two": ak.forms.NumpyForm([], 8, "d")},
-    #     form_key="node0",
-    # )
     form = """
 {
     "class": "RecordArray",
@@ -487,7 +434,6 @@ def test_error_in_record_form():
 
 
 def test_error_in_numpy_form():
-
     form = """
 {
     "class": "NumpyArray",
@@ -596,15 +542,6 @@ def test_string_form():
 
 
 def test_empty_form():
-    # form = ak.forms.ListOffsetForm(
-    #     "i64",
-    #     ak.forms.ListOffsetForm(
-    #         "i64",
-    #         ak.forms.EmptyForm(),
-    #         form_key="node1",
-    #     ),
-    #     form_key="node0",
-    # )
     form = """{
            "class": "ListOffsetArray64",
            "offsets": "i64",
