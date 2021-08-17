@@ -18,7 +18,7 @@ namespace awkward {
   public:
     /// @brief Creates a RecordArrayBuilder from a full set of parameters.
     RecordArrayBuilder(const std::string form_key,
-                       const std::vector<const std::string>& form_contents,
+                       const std::vector<const FormBuilderPtr>& contents,
                        const std::string attribute = "record",
                        const std::string partition = "0");
 

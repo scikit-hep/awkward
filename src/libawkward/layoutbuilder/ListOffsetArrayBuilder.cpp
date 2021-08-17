@@ -10,7 +10,7 @@ namespace awkward {
   ///
   ListOffsetArrayBuilder::ListOffsetArrayBuilder(const std::string form_key,
                                                  const std::string form_offsets,
-                                                 const std::string form_content,
+                                                 FormBuilderPtr content,
                                                  bool is_string_builder,
                                                  const std::string attribute,
                                                  const std::string partition)
@@ -18,7 +18,7 @@ namespace awkward {
       form_offsets_(form_offsets),
       parameters_(util::Parameters()), // FIXME
       begun_(false),
-      content_(LayoutBuilder::formBuilderFromJson(form_content)) {
+      content_(content) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

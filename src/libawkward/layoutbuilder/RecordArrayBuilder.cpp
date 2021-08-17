@@ -9,13 +9,13 @@ namespace awkward {
 
   ///
   RecordArrayBuilder::RecordArrayBuilder(const std::string form_key,
-                                         const std::vector<const std::string>& form_contents,
+                                         const std::vector<const FormBuilderPtr>& contents,
                                          const std::string attribute,
                                          const std::string partition)
     : field_index_(0),
-      contents_size_((int64_t)form_contents.size()) {
-    for (auto const& content : form_contents) {
-      contents_.push_back(LayoutBuilder::formBuilderFromJson(content));
+      contents_size_((int64_t) contents.size()) {
+    for (auto const& content : contents) {
+      contents_.push_back(content);
       vm_output_.append(contents_.back().get()->vm_output());
       vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
       vm_func_.append(contents_.back().get()->vm_func());

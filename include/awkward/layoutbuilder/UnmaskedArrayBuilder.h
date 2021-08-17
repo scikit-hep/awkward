@@ -16,7 +16,7 @@ namespace awkward {
   public:
     /// @brief Creates an UnmaskedArrayBuilder from a full set of parameters.
     UnmaskedArrayBuilder(const std::string form_key,
-                         const std::string form_content,
+                         FormBuilderPtr content,
                          const std::string attribute = "mask",
                          const std::string partition = "0");
 

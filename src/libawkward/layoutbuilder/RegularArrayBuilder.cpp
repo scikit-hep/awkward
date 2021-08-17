@@ -8,13 +8,14 @@
 namespace awkward {
 
   ///
-  RegularArrayBuilder::RegularArrayBuilder(const std::string form_key,
-                                           const std::string form_content,
+  RegularArrayBuilder::RegularArrayBuilder(const FormBuilderPtr content,
+                                           const std::string form_key,
+                                           const int64_t size,
                                            const std::string attribute,
                                            const std::string partition)
-    : parameters_(util::Parameters()), // FIXME
-      form_size_(1), // FIXME
-      content_(LayoutBuilder::formBuilderFromJson(form_content)) {
+    : content_(content),
+      parameters_(util::Parameters()), // FIXME
+      form_size_(size) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

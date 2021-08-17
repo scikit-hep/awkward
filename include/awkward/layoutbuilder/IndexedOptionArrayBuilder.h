@@ -17,7 +17,7 @@ namespace awkward {
     /// @brief Creates an IndexedOptionArrayBuilder from a full set of parameters.
     IndexedOptionArrayBuilder(const std::string form_key,
                               const std::string form_index,
-                              const std::string form_content,
+                              const FormBuilderPtr content,
                               bool is_categorical,
                               const std::string attribute = "index",
                               const std::string partition = "0");
@@ -107,7 +107,7 @@ namespace awkward {
     void validate() const;
 
     /// @brief This Form content builder
-    FormBuilderPtr content_;
+    const FormBuilderPtr content_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

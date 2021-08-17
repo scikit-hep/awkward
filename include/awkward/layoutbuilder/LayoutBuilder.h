@@ -22,10 +22,10 @@ namespace awkward {
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   const std::string
-    index_form_to_name(Index::Form form);
+    index_form_to_name(const std::string& form_index);
 
   const std::string
-    index_form_to_vm_format(Index::Form form);
+    index_form_to_vm_format(const std::string& form_index);
 
   enum class state : std::int32_t {
     int64 = 0,
@@ -258,6 +258,10 @@ namespace awkward {
       error_id;
 
   private:
+    /// @ brief Initialise Layout Builder from a Json Form.
+    void
+      initialise_builder(const std::string& json_form);
+
     /// @ brief Initialise Virtual machine.
     void
       initialise();

@@ -17,7 +17,7 @@ namespace awkward {
     /// @brief Creates a ListArrayBuilder from a full set of parameters.
     ListArrayBuilder(const std::string form_key,
                      const std::string form_starts,
-                     const std::string form_content,
+                     FormBuilderPtr content,
                      const std::string attribute = "offsets",
                      const std::string partition = "0");
 

@@ -9,10 +9,10 @@ namespace awkward {
 
   ///
   UnmaskedArrayBuilder::UnmaskedArrayBuilder(const std::string form_key,
-                                             const std::string form_content,
+                                             FormBuilderPtr content,
                                              const std::string attribute,
                                              const std::string partition)
-    : content_(LayoutBuilder::formBuilderFromJson(form_content)) {
+    : content_(content) {
     vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_func_type_ = content_.get()->vm_func_type();

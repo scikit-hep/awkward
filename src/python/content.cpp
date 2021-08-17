@@ -1935,9 +1935,11 @@ namespace {
 
     }
     if (builder.get()->classname() == "NumpyArrayBuilder") {
+      std::cout << "NumpyArrayBuilder\n";
       const std::shared_ptr<const ak::NumpyArrayBuilder> raw = std::dynamic_pointer_cast<const ak::NumpyArrayBuilder>(builder);
       auto search = outputs.find(raw.get()->vm_output_data());
       if (search != outputs.end()) {
+        std::cout << raw.get()->form_primitive() << "\n";
         auto dtype = awkward::util::name_to_dtype(raw.get()->form_primitive());
         std::vector<ssize_t> shape = { (ssize_t)search->second.get()->len() };
         std::vector<ssize_t> strides = { (ssize_t)awkward::util::dtype_to_itemsize(dtype) };
@@ -1949,7 +1951,7 @@ namespace {
                                                     strides,
                                                     0,
                                                     strides[0],
-                                                    raw.get()->form_primitive(), // FIXME
+                                                    ak::util::dtype_to_format(ak::util::name_to_dtype(raw.get()->form_primitive())), // FIXME
                                                     dtype,
                                                     ak::kernel::lib::cpu));
       }
@@ -2048,10 +2050,10 @@ namespace {
           ak::util::handle_error(err, "UnionArray", nullptr);
 
           return box(ak::UnionArray8_64(ak::Identities::none(),
-                                ak::util::Parameters(),
-                                tags,
-                                outindex,
-                                contents).simplify_uniontype(false, false));
+                                        ak::util::Parameters(),
+                                        tags,
+                                        outindex,
+                                        contents).simplify_uniontype(false, false));
         }
       }
       throw std::invalid_argument(

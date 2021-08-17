@@ -17,7 +17,7 @@ namespace awkward {
     /// @brief Creates a ListOffsetArrayBuilder from a full set of parameters.
     ListOffsetArrayBuilder(const std::string form_key,
                            const std::string form_offsets,
-                           const std::string form_content,
+                           FormBuilderPtr content,
                            bool is_string_builder,
                            const std::string attribute = "offsets",
                            const std::string partition = "0");

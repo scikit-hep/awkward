@@ -10,13 +10,13 @@ namespace awkward {
   ///
   UnionArrayBuilder::UnionArrayBuilder(const std::string form_key,
                                        const std::string form_tags,
-                                       const std::vector<const std::string>& form_contents,
+                                       const std::vector<const FormBuilderPtr>& contents,
                                        const std::string attribute,
                                        const std::string partition) {
     vm_func_type_ = std::to_string(static_cast<utype>(state::tag));
 
-    for (auto const& content : form_contents) {
-      contents_.push_back(LayoutBuilder::formBuilderFromJson(content));
+    for (auto const& content : contents) {
+      contents_.push_back(content);
       vm_output_.append(contents_.back().get()->vm_output());
       vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
       vm_error_.append(contents_.back().get()->vm_error());
@@ -31,7 +31,7 @@ namespace awkward {
     vm_output_.append("output ")
       .append(vm_output_tags_)
       .append(" ")
-      .append(form_tags)
+      .append(index_form_to_name(form_tags))
       .append("\n");
 
     vm_func_name_ = std::string(form_key).append("-").append(attribute);
@@ -44,7 +44,7 @@ namespace awkward {
       .append(" = if").append("\n");
 
     vm_func_.append("0 data seek\n")
-      .append("data ").append(form_tags)
+      .append("data ").append(index_form_to_vm_format(form_tags))
       .append("-> stack dup ").append(vm_output_tags_).append(" <- stack\n");
 
     int64_t tag = 0;

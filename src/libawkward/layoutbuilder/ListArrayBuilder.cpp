@@ -10,13 +10,13 @@ namespace awkward {
   ///
   ListArrayBuilder::ListArrayBuilder(const std::string form_key,
                                      const std::string form_starts,
-                                     const std::string form_content,
+                                     FormBuilderPtr content,
                                      const std::string attribute,
                                      const std::string partition)
     : begun_(false),
       form_starts_(form_starts),
       parameters_(util::Parameters()), // FIXME
-      content_(LayoutBuilder::formBuilderFromJson(form_content)) {
+      content_(content) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

@@ -19,7 +19,7 @@ namespace awkward {
     /// @brief Creates an IndexedArrayBuilder from a full set of parameters.
     IndexedArrayBuilder(const std::string form_key,
                         const std::string form_index,
-                        const std::string form_content,
+                        const FormBuilderPtr content,
                         bool is_categorical,
                         const std::string attribute = "index",
                         const std::string partition = "0");
@@ -107,7 +107,7 @@ namespace awkward {
     util::Parameters parameters_;
 
     /// @brief This Json Form content builder
-    FormBuilderPtr content_;
+    const FormBuilderPtr content_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Json Form.

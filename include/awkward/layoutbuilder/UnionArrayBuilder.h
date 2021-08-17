@@ -17,7 +17,7 @@ namespace awkward {
     /// @brief Creates a UnionArrayBuilder from a full set of parameters.
     UnionArrayBuilder(const std::string form_key,
                       const std::string form_tags,
-                      const std::vector<const std::string>& form_contents,
+                      const std::vector<const FormBuilderPtr>& contents,
                       const std::string attribute = "union",
                       const std::string partition = "0");
 

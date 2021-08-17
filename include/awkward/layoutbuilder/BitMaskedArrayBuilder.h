@@ -16,7 +16,7 @@ namespace awkward {
   public:
     /// @brief Creates a BitMaskedArrayBuilder from a full set of parameters.
     BitMaskedArrayBuilder(const std::string json_form_key,
-                          const std::string json_form_content,
+                          const FormBuilderPtr content,
                           const std::string attribute = "mask",
                           const std::string partition = "0");
 
@@ -91,7 +91,7 @@ namespace awkward {
 
   private:
     /// @brief This Json Form content builder
-    FormBuilderPtr content_;
+    const FormBuilderPtr content_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Json Form.

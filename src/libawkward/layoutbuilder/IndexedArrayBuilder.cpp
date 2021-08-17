@@ -10,14 +10,14 @@ namespace awkward {
   ///
   IndexedArrayBuilder::IndexedArrayBuilder(const std::string form_key,
                                            const std::string form_index,
-                                           const std::string form_content,
+                                           FormBuilderPtr content,
                                            bool is_categorical,
                                            const std::string attribute,
                                            const std::string partition)
     : is_categorical_(is_categorical),
       form_index_(form_index),
       parameters_(util::Parameters()), // FIXME
-      content_(LayoutBuilder::formBuilderFromJson(form_content)) {
+      content_(content) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")
