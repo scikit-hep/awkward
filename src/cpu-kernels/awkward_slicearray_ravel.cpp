@@ -12,8 +12,15 @@ ERROR awkward_slicearray_ravel(
   const int64_t* shape,
   const int64_t* strides) {
   if (ndim == 1) {
-    for (T i = 0;  i < shape[0];  i++) {
-      toptr[i] = fromptr[i*strides[0]];
+    if ( strides[0] == 1 ) {
+      std::memcpy(toptr, fromptr, shape[0]*sizeof(T));
+    }
+    else {
+      T* end = toptr + shape[0];
+      while (toptr != end) {
+        *(toptr++) = *fromptr;
+        fromptr += strides[0];
+      }
     }
   }
   else {

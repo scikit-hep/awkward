@@ -4704,26 +4704,40 @@ namespace awkward {
     util::handle_error(err1, classname(), identities_.get());
 
     if (advanced.is_empty_advanced()) {
-      Index64 nextcarry(carry.length()*flathead.length());
-      Index64 nextadvanced(carry.length()*flathead.length());
-      struct Error err2 = kernel::NumpyArray_getitem_next_array_64(
-        kernel::lib::cpu,   // DERIVE
-        nextcarry.data(),
-        nextadvanced.data(),
-        carry.data(),
-        flathead.data(),
-        carry.length(),
-        flathead.length(),
-        shape_[1]);   // because this is contiguous
-      util::handle_error(err2, classname(), identities_.get());
+      NumpyArray out = [&]() {
+        if ( carry.length() == 1 && carry.getitem_at(0) == 0 && nexthead.get() == nullptr ) {
+          // specialization for "trivial take" (i.e. this array is wrapped in length-1 array)
+          return next.getitem_next(nexthead,
+                                   nexttail,
+                                   flathead,
+                                   advanced,  // this is a dummy variable now
+                                   length*flathead.length(),
+                                   next.strides_[0],
+                                   false);
+        }
+        else {
+          Index64 nextcarry(carry.length()*flathead.length());
+          Index64 nextadvanced(carry.length()*flathead.length());
+          struct Error err2 = kernel::NumpyArray_getitem_next_array_64(
+            kernel::lib::cpu,   // DERIVE
+            nextcarry.data(),
+            nextadvanced.data(),
+            carry.data(),
+            flathead.data(),
+            carry.length(),
+            flathead.length(),
+            shape_[1]);   // because this is contiguous
+          util::handle_error(err2, classname(), identities_.get());
 
-      NumpyArray out = next.getitem_next(nexthead,
-                                         nexttail,
-                                         nextcarry,
-                                         nextadvanced,
-                                         length*flathead.length(),
-                                         next.strides_[0],
-                                         false);
+          return next.getitem_next(nexthead,
+                                   nexttail,
+                                   nextcarry,
+                                   nextadvanced,
+                                   length*flathead.length(),
+                                   next.strides_[0],
+                                   false);
+        }
+      }();
 
       std::vector<ssize_t> outshape = { (ssize_t)length };
       std::vector<int64_t> arrayshape = array.shape();
