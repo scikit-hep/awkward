@@ -4705,7 +4705,7 @@ namespace awkward {
 
     if (advanced.is_empty_advanced()) {
       NumpyArray out = [&]() {
-        if ( carry.length() == 1 and carry.getitem_at(0) == 0 and nexthead.get() == nullptr ) {
+        if ( carry.length() == 1 && carry.getitem_at(0) == 0 && nexthead.get() == nullptr ) {
           // specialization for "trivial take" (i.e. this array is wrapped in length-1 array)
           return next.getitem_next(nexthead,
                                    nexttail,
