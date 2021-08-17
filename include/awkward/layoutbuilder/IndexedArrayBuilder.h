@@ -18,6 +18,7 @@ namespace awkward {
   public:
     /// @brief Creates an IndexedArrayBuilder from a full set of parameters.
     IndexedArrayBuilder(const FormBuilderPtr content,
+                        const util::Parameters parameters,
                         const std::string& form_key,
                         const std::string& form_index,
                         bool is_categorical,
@@ -102,12 +103,12 @@ namespace awkward {
   private:
     /// @brief This Json Form content builder
     const FormBuilderPtr content_;
+    const util::Parameters parameters_;
 
     /// @brief If 'true', this array type is categorical.
     bool is_categorical_;
 
     const std::string form_index_;
-    util::Parameters parameters_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Json Form.

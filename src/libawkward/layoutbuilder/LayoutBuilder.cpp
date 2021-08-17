@@ -248,7 +248,8 @@ namespace awkward {
       return std::make_shared<NumpyArrayBuilder>(json_form_key,
                                                  primitive,
                                                  primitive_to_state(primitive),
-                                                 primitive_to_vm_format(primitive));
+                                                 primitive_to_vm_format(primitive),
+                                                 util::Parameters());
     }
 
     std::string json_form_key;
@@ -341,6 +342,7 @@ namespace awkward {
         }
 
         return std::make_shared<IndexedArrayBuilder>(form_json(json_doc["content"]),
+                                                     p,
                                                      json_form_key,
                                                      index_form_to_name(json_form_index),
                                                      is_categorical);
@@ -440,7 +442,8 @@ namespace awkward {
         return std::make_shared<NumpyArrayBuilder>(json_form_key,
                                                    primitive,
                                                    primitive_to_state(primitive),
-                                                   primitive_to_vm_format(primitive));
+                                                   primitive_to_vm_format(primitive),
+                                                   p);
       }
       if (cls == std::string("RecordArray")) {
         // FIXME:

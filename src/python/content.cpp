@@ -1935,7 +1935,6 @@ namespace {
 
     }
     if (builder.get()->classname() == "NumpyArrayBuilder") {
-      std::cout << "NumpyArrayBuilder\n";
       const std::shared_ptr<const ak::NumpyArrayBuilder> raw = std::dynamic_pointer_cast<const ak::NumpyArrayBuilder>(builder);
       auto search = outputs.find(raw.get()->vm_output_data());
       if (search != outputs.end()) {

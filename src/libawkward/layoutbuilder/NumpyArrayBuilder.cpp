@@ -8,13 +8,14 @@
 namespace awkward {
 
   ///
-  NumpyArrayBuilder::NumpyArrayBuilder(const std::string form_key,
-                                       const std::string form_primitive,
-                                       const std::string form_primitive_to_state,
-                                       const std::string form_primitive_to_vm_format,
+  NumpyArrayBuilder::NumpyArrayBuilder(const std::string& form_key,
+                                       const std::string& form_primitive,
+                                       const std::string& form_primitive_to_state,
+                                       const std::string& form_primitive_to_vm_format,
+                                       const util::Parameters parameters,
                                        const std::string attribute,
                                        const std::string partition)
-    : parameters_(util::Parameters()), // FIXME
+    : parameters_(parameters),
       form_primitive_(form_primitive) {
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
       .append(form_primitive).append("\"\n");
