@@ -250,4 +250,4 @@ class NumpyArray(Content):
         elif len(self.shape) <= 1:
             raise IndexError(self, "'axis' out of range for localindex")
         else:
-            return self.toRegularArray._localindex(posaxis, depth)
+            return self.toRegularArray()._localindex(posaxis, depth)
