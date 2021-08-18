@@ -330,16 +330,16 @@ for root, subdirs, files in os.walk(os.path.join(CURRENT_DIR, "src", "libawkward
         #     with open(os.path.join(root, file), "w") as f:
         #         f.write(temp)
         #         f.close()
-        if file == "Identities.cpp":
-            temp = identities()
-            with open(os.path.join(root, file), "w") as f:
-                f.write(temp)
-                f.close()
-        if file == "Content.cpp":
-            temp = content()
-            with open(os.path.join(root, file), "w") as f:
-                f.write(temp)
-                f.close()
+        # if file == "Identities.cpp":
+        #     temp = identities()
+        #     with open(os.path.join(root, file), "w") as f:
+        #         f.write(temp)
+        #         f.close()
+        # if file == "Content.cpp":
+        #     temp = content()
+        #     with open(os.path.join(root, file), "w") as f:
+        #         f.write(temp)
+        #         f.close()
         # if file == "Index.cpp":
         #     temp = index()
         #     with open(os.path.join(root, file), "w") as f:

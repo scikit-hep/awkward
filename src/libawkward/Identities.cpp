@@ -284,10 +284,6 @@ namespace awkward {
         carry.length(),
         width_,
         length_);
-        std::cout<<"Identities_getitem_carry:";
-        rawout->printMe();std::cout<<":";
-        this->printMe();std::cout<<":";
-        carry.printMe();std::cout<<":"<<carry.length()<<":"<<width_<<":"<<length_<<std::endl;
       util::handle_error(err, classname(), nullptr);
     }
     else {
