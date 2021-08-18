@@ -57,7 +57,7 @@ When a builder is created, it will accept only "float64", "bool", and "int64" da
 builder = ak.layout.LayoutBuilder(form)
 ```
 
-Each of the union array contents has a tag associated with it. The tags are continues integers, the first content tag is `0`. You have to issue a `tag` command prior to each data method. That uniquely identifies the content to which the data is appended:
+Each of the union array contents has a tag associated with it. The tags are contiguous integers starting with `0` for the first content. You have to issue a `tag` command prior to each data method. The order of filling the contents can be arbitrary - the `tag` command uniquely identifies the content to which the data is appended:
 
 ```{code-cell}
 builder.tag(0)
