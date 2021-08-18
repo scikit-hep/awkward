@@ -1,0 +1,2327 @@
+unit-tests:
+  - name: awkward_Identities_getitem_carry
+    tests:
+    - error: false
+      inputs:
+        carryptr: [0, 0, 0, 0]
+        identitiesptr: [0, 1]
+        lencarry: 4
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0]
+    - error: false
+      inputs:
+        carryptr: [0, 1, 1, 1]
+        identitiesptr: [0, 1]
+        lencarry: 4
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [0, 1, 1, 1]
+    - error: false
+      inputs:
+        carryptr: [0, 1, 2, 6, 8]
+        identitiesptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        lencarry: 5
+        length: 10
+        width: 1
+      outputs:
+        newidentitiesptr: [0, 1, 2, 6, 8]
+    - error: false
+      inputs:
+        carryptr: [1, 0, 0, 1]
+        identitiesptr: [0, 1]
+        lencarry: 4
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1, 0, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 0, 1, 0, 2]
+        lencarry: 1
+        length: 5
+        width: 2
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [1, 0, 1, 1, 1, 0]
+        identitiesptr: [0, 1]
+        lencarry: 6
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1, 1, 0]
+    - error: false
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1]
+        lencarry: 1
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1, 2, 3]
+        lencarry: 1
+        length: 4
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1, 2, 3, 4]
+        lencarry: 1
+        length: 5
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [0]
+        identitiesptr: [1]
+        lencarry: 1
+        length: 1
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [0]
+        identitiesptr: [1]
+        lencarry: 1
+        length: 1
+        width: 2
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [1, 1, 1, 1]
+        identitiesptr: [0, 1]
+        lencarry: 4
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1, 1, 1, 1]
+    - error: false
+      inputs:
+        carryptr: [0, 1, 5, 7]
+        identitiesptr: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        lencarry: 4
+        length: 9
+        width: 1
+      outputs:
+        newidentitiesptr: [1, 2, 6, 8]
+    - error: true
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 0, 1, 0, 2]
+        lencarry: 1
+        length: 5
+        width: 2
+      outputs:
+        newidentitiesptr: [2]
+    - error: false
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 1, 2]
+        lencarry: 1
+        length: 3
+        width: 1
+      outputs:
+        newidentitiesptr: [2]
+    - error: false
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 1, 2, 3]
+        lencarry: 1
+        length: 4
+        width: 1
+      outputs:
+        newidentitiesptr: [2]
+    - error: false
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 1, 2, 3, 4]
+        lencarry: 1
+        length: 5
+        width: 1
+      outputs:
+        newidentitiesptr: [2]
+    - error: true
+      inputs:
+        carryptr: [0]
+        identitiesptr: [2]
+        lencarry: 1
+        length: 1
+        width: 2
+      outputs:
+        newidentitiesptr: [2]
+    - error: false
+      inputs:
+        carryptr: [2, 2, 2, 2]
+        identitiesptr: [0, 1, 2, 3, 4]
+        lencarry: 4
+        length: 5
+        width: 1
+      outputs:
+        newidentitiesptr: [2, 2, 2, 2]
+    - error: false
+      inputs:
+        carryptr: [3]
+        identitiesptr: [0, 1, 2, 3]
+        lencarry: 1
+        length: 4
+        width: 1
+      outputs:
+        newidentitiesptr: [3]
+    - error: false
+      inputs:
+        carryptr: [2]
+        identitiesptr: [1, 2, 3]
+        lencarry: 1
+        length: 3
+        width: 1
+      outputs:
+        newidentitiesptr: [3]
+    - error: false
+      inputs:
+        carryptr: [2]
+        identitiesptr: [1, 2, 3, 4]
+        lencarry: 1
+        length: 4
+        width: 1
+      outputs:
+        newidentitiesptr: [3]
+    - error: false
+      inputs:
+        carryptr: [2, 2]
+        identitiesptr: [1, 2, 3, 4]
+        lencarry: 2
+        length: 4
+        width: 1
+      outputs:
+        newidentitiesptr: [3, 3]
+    - error: false
+      inputs:
+        carryptr: [7, 3, 3, 5]
+        identitiesptr: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        lencarry: 4
+        length: 9
+        width: 1
+      outputs:
+        newidentitiesptr: [8, 4, 4, 6]
+    - error: false
+      inputs:
+        carryptr: [7, 3, 3, 6]
+        identitiesptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        lencarry: 4
+        length: 10
+        width: 1
+      outputs:
+        newidentitiesptr: [7, 3, 3, 6]
+    - error: false
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 1, 2, 3]
+        lencarry: 1
+        length: 4
+        width: 1
+      outputs:
+        newidentitiesptr: [2]
+    - error: false
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 1, 2, 3, 4]
+        lencarry: 1
+        length: 5
+        width: 1
+      outputs:
+        newidentitiesptr: [2]
+    - error: false
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        identitiesptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        lencarry: 10
+        length: 10
+        width: 1
+      outputs:
+        newidentitiesptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1]
+        lencarry: 1
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1]
+        lencarry: 1
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1]
+        lencarry: 1
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1]
+        lencarry: 1
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: false
+      inputs:
+        carryptr: [1, 0, 1, 1, 1, 0]
+        identitiesptr: [0, 1]
+        lencarry: 6
+        length: 2
+        width: 1
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1, 1, 0]
+    - error: false
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 1, 2]
+        lencarry: 1
+        length: 3
+        width: 1
+      outputs:
+        newidentitiesptr: [2]
+    - error: false
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1, 2, 3, 4]
+        lencarry: 1
+        length: 5
+        width: 1
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [1, 6]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0]
+    - error: true
+      inputs:
+        carryptr: [4, 9]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0]
+    - error: true
+      inputs:
+        carryptr: [10]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [11]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [13]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [4]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [5]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [6]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [8]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [9]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 12
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3]
+        lencarry: 12
+        length: 12
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 20, 21, 22, 23, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 15
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]
+        lencarry: 15
+        length: 15
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19, 20, 21, 22, 23, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0]
+        lencarry: 25
+        length: 25
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0,
+          1, 1, 0, 1, 2, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 20, 21, 22,
+          23, 25, 26, 27, 28]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 24
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 1, 0, 0, 1, 1, 0,
+          1, 2, 0, 1, 3]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19, 20, 21, 22, 23]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 1, 0, 0, 1, 1, 0, 1,
+          2, 0, 1, 3]
+        lencarry: 24
+        length: 24
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 1, 0, 0, 1, 1, 0,
+          1, 2, 0, 1, 3]
+    - error: true
+      inputs:
+        carryptr: [0, 1]
+        identitiesptr: [0, 0]
+        lencarry: 2
+        length: 2
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 2, 4, 5, 7, 9, 10, 12, 14, 15, 17, 19, 20, 22, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 15
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 2, 0, 0, 4, 0, 1, 0, 0, 1, 2]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        identitiesptr: [0, 0, 0, 0, 0, 2, 0, 0, 4, 0, 1, 0, 0, 1, 2]
+        lencarry: 15
+        length: 15
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 2, 0, 0, 4, 0, 1, 0, 0, 1, 2]
+    - error: true
+      inputs:
+        carryptr: [0, 2, 4, 5, 7, 9, 10, 12, 14, 15, 17, 19, 20, 22, 24, 25, 27, 29]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 18
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 2, 0, 0, 4, 0, 1, 0, 0, 1, 2, 0, 1, 4]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+        identitiesptr: [0, 0, 0, 0, 0, 2, 0, 0, 4, 0, 1, 0, 0, 1, 2, 0, 1, 4]
+        lencarry: 18
+        length: 18
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 0, 0, 0, 2, 0, 0, 4, 0, 1, 0, 0, 1, 2, 0, 1, 4]
+    - error: true
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 1
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 1
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 1]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0, 0, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0]
+        identitiesptr: [0]
+        lencarry: 1
+        length: 1
+        width: 3
+      outputs:
+        newidentitiesptr: [0]
+    - error: true
+      inputs:
+        carryptr: [1, 2, 3, 4]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [1, 5, 10, 6]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 3, 3, 3]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 0, 1, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [1, 2, 3, 4, 6, 7, 8, 9]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 8
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0, 0, 2, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7]
+        identitiesptr: [0, 0, 1, 0, 0, 2, 0, 0]
+        lencarry: 8
+        length: 8
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0, 0, 2, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [1, 2, 3, 4, 11, 12, 13, 14, 21, 22, 23, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 12
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        identitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]
+        lencarry: 12
+        length: 12
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]
+    - error: true
+      inputs:
+        carryptr: [1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 21, 22, 23,
+          24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 20
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 1, 0, 1, 2, 0,
+          1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19]
+        identitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 1, 0, 1, 2, 0, 1]
+        lencarry: 20
+        length: 20
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 1, 0, 1, 2, 0,
+          1]
+    - error: true
+      inputs:
+        carryptr: [1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 21, 22, 23,
+          24, 26, 27, 28, 29]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 24
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 1, 0, 1, 2, 0,
+          1, 3, 0, 1, 4]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19, 20, 21, 22, 23]
+        identitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 1, 0, 1, 2, 0, 1,
+          3, 0, 1, 4]
+        lencarry: 24
+        length: 24
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 1, 0, 1, 2, 0,
+          1, 3, 0, 1, 4]
+    - error: true
+      inputs:
+        carryptr: [1, 15, 15, 16]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 0, 1, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [2, 7, 12, 17, 22]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 5
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 2, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4]
+        identitiesptr: [0, 0, 2, 0, 1]
+        lencarry: 5
+        length: 5
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 2, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [3, 8, 13, 18, 23]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 5
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 3, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4]
+        identitiesptr: [0, 0, 3, 0, 1]
+        lencarry: 5
+        length: 5
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 3, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [4, 9, 14, 9]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 4, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 0, 4, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 4, 0]
+    - error: true
+      inputs:
+        carryptr: [4, 19, 19, 19]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 4, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 0, 4, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 0, 4, 1]
+    - error: true
+      inputs:
+        carryptr: [5, 1, 4, 6]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [5, 6, 7, 8]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [5, 10]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1]
+    - error: true
+      inputs:
+        carryptr: [6, 11]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1]
+    - error: true
+      inputs:
+        carryptr: [9, 14]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1]
+    - error: true
+      inputs:
+        carryptr: [1, 0, 0, 1]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 1, 0, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [1, 2]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 2
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0, 1]
+    - error: true
+      inputs:
+        carryptr: [1, 4]
+        identitiesptr: [0, 0, 0, 1, 1]
+        lencarry: 2
+        length: 5
+        width: 2
+      outputs:
+        newidentitiesptr: [0, 1]
+    - error: true
+      inputs:
+        carryptr: [5, 6, 7, 8, 10, 11, 12, 13]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 8
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0, 1, 1, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7]
+        identitiesptr: [0, 1, 0, 0, 1, 1, 0, 1]
+        lencarry: 8
+        length: 8
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0, 1, 1, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+          23, 24, 25, 26, 27, 28, 29]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 25
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 1, 4, 0, 2, 0, 0,
+          2, 1, 0, 2, 2, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19, 20, 21, 22, 23, 24]
+        identitiesptr: [0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 1, 4, 0, 2, 0, 0, 2,
+          1, 0, 2, 2, 0]
+        lencarry: 25
+        length: 25
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 1, 4, 0, 2, 0, 0,
+          2, 1, 0, 2, 2, 0]
+    - error: true
+      inputs:
+        carryptr: [5, 6, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26,
+          27, 28]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 20
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 2, 0, 0, 2, 1, 0,
+          2]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19]
+        identitiesptr: [0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 2, 0, 0, 2, 1, 0, 2]
+        lencarry: 20
+        length: 20
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 2, 0, 0, 2, 1, 0,
+          2]
+    - error: true
+      inputs:
+        carryptr: [5, 7, 9, 10, 12, 14, 15, 17, 19, 20, 22, 24, 25, 27, 29]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 15
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0, 1, 2, 0, 1, 4, 0, 2, 0, 0, 2, 2]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        identitiesptr: [0, 1, 0, 0, 1, 2, 0, 1, 4, 0, 2, 0, 0, 2, 2]
+        lencarry: 15
+        length: 15
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 0, 1, 2, 0, 1, 4, 0, 2, 0, 0, 2, 2]
+    - error: true
+      inputs:
+        carryptr: [5, 15, 15, 20]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 1, 0, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1]
+        identitiesptr: [0, 1]
+        lencarry: 2
+        length: 2
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1]
+    - error: true
+      inputs:
+        carryptr: [6, 7, 8, 9]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [1, 3, 3, 4]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0, 1, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 1, 1, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [7, 12, 17, 22, 27]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 5
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 2, 0, 2]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4]
+        identitiesptr: [0, 1, 2, 0, 2]
+        lencarry: 5
+        length: 5
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 2, 0, 2]
+    - error: true
+      inputs:
+        carryptr: [7, 20, 0, 26]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 2, 1]
+    - error: true
+      inputs:
+        carryptr: [7, 22, 2, 27]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 2, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 1, 2, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 2, 1]
+    - error: true
+      inputs:
+        carryptr: [8, 13, 18, 23, 28]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 5
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 3, 0, 2]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4]
+        identitiesptr: [0, 1, 3, 0, 2]
+        lencarry: 5
+        length: 5
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 3, 0, 2]
+    - error: true
+      inputs:
+        carryptr: [8, 23, 3, 28]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 3, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 1, 3, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 3, 1]
+    - error: true
+      inputs:
+        carryptr: [9, 4, 4, 9]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 4, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 1, 4, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 4, 0]
+    - error: true
+      inputs:
+        carryptr: [9, 19, 19, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 4, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 1, 4, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 1, 4, 1]
+    - error: true
+      inputs:
+        carryptr: [10, 11, 12, 13]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [10, 11, 14, 11]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 2, 0, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [10, 25, 25, 25]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 2, 0, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [2, 2, 2, 2]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0, 2, 0, 2]
+    - error: true
+      inputs:
+        carryptr: [11, 10, 10, 11]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [11, 12, 13, 14]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [11, 13, 10, 14]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [11, 3, 0, 9]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 2, 1, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [11, 25, 25, 26]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 2, 1, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [2, 5, 5, 5]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [0, 2, 1, 2]
+    - error: true
+      inputs:
+        carryptr: [12, 10, 10, 11]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 2, 0]
+    - error: true
+      inputs:
+        carryptr: [12, 2, 2, 7]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 2, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 2, 2, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 2, 0]
+    - error: true
+      inputs:
+        carryptr: [13, 13, 13, 13]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 3, 0]
+    - error: true
+      inputs:
+        carryptr: [13, 3, 3, 8]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 3, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [0, 2, 3, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [0, 2, 3, 0]
+    - error: true
+      inputs:
+        carryptr: [15, 1, 4, 16]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [15, 5, 10, 20]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [15, 20]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0]
+    - error: true
+      inputs:
+        carryptr: [16, 21]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0]
+    - error: true
+      inputs:
+        carryptr: [19, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0]
+    - error: true
+      inputs:
+        carryptr: [3, 0, 0, 3]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 0, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [16]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [18]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [19]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [20]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [21]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [22]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [23]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [25]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [26]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [28]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 1
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [3, 4]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 2
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 0, 0, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [3]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 1
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [4]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 1
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [5]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 1
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [2]
+        identitiesptr: [0, 0, 0, 1, 1]
+        lencarry: 1
+        length: 5
+        width: 2
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [15, 16, 17, 18]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [15, 16, 19, 16]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [15, 20, 25, 20]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [3, 1, 2, 4]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 0, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 0, 0, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [3, 3, 3, 3]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 0, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1]
+        identitiesptr: [1, 0]
+        lencarry: 2
+        length: 2
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0]
+    - error: true
+      inputs:
+        carryptr: [16, 15, 15, 16]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [16, 17, 18, 19]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [16, 20, 25, 21]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [3, 4, 5, 4]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [16, 17, 18, 19, 21, 22, 23, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 8
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1, 0, 2, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7]
+        identitiesptr: [1, 0, 1, 1, 0, 2, 1, 0]
+        lencarry: 8
+        length: 8
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1, 0, 2, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 0, 1, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [19, 4, 4, 19]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 4, 0]
+    - error: true
+      inputs:
+        carryptr: [19, 9, 14, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 4, 0]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 0, 4, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 0, 4, 0]
+    - error: true
+      inputs:
+        carryptr: [20, 25]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1]
+    - error: true
+      inputs:
+        carryptr: [21, 26]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1]
+    - error: true
+      inputs:
+        carryptr: [24, 29]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 2
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1]
+    - error: true
+      inputs:
+        carryptr: [4, 5]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 2
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 1]
+    - error: true
+      inputs:
+        carryptr: [20, 15, 15, 20]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [20, 16, 19, 21]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [20, 21, 22, 23]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 1, 0, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [20, 21, 22, 23, 25, 26, 27, 28]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 8
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 0, 1, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5, 6, 7]
+        identitiesptr: [1, 1, 0, 1, 1, 1, 1, 1]
+        lencarry: 8
+        length: 8
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 0, 1, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [0]
+        identitiesptr: [1]
+        lencarry: 1
+        length: 1
+        width: 3
+      outputs:
+        newidentitiesptr: [1]
+    - error: true
+      inputs:
+        carryptr: [4, 3, 3, 4]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 1, 1, 0]
+    - error: true
+      inputs:
+        carryptr: [21, 22, 23, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [21, 23, 20, 24]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1]
+        identitiesptr: [1, 1]
+        lencarry: 2
+        length: 2
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 1, 1, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [22, 20, 20, 21]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 2, 1]
+    - error: true
+      inputs:
+        carryptr: [22, 22, 22, 22]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 2, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 1, 2, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 1, 2, 1]
+    - error: true
+      inputs:
+        carryptr: [25, 10, 10, 25]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [25, 11, 14, 26]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [5, 0, 4, 4, 5, 0]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 6
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 2, 0, 0, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 2, 0, 0]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 0, 0]
+    - error: true
+      inputs:
+        carryptr: [25, 26, 27, 28]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 2, 0, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 0, 1]
+    - error: true
+      inputs:
+        carryptr: [5, 2, 2, 5]
+        identitiesptr: [0, 0, 0, 1, 0, 2]
+        lencarry: 4
+        length: 6
+        width: 2
+      outputs:
+        newidentitiesptr: [1, 2, 0, 2]
+    - error: true
+      inputs:
+        carryptr: [26, 27, 28, 29]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 4
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3]
+        identitiesptr: [1, 2, 1, 1]
+        lencarry: 4
+        length: 4
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 1, 1]
+    - error: true
+      inputs:
+        carryptr: [27, 4, 22, 24, 25, 1]
+        identitiesptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1,
+          1, 0, 1, 2, 0, 1, 3, 0, 1, 4]
+        lencarry: 6
+        length: 30
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 2, 0, 0, 4]
+    - error: true
+      inputs:
+        carryptr: [0, 1, 2, 3, 4, 5]
+        identitiesptr: [1, 2, 2, 0, 0, 4]
+        lencarry: 6
+        length: 6
+        width: 3
+      outputs:
+        newidentitiesptr: [1, 2, 2, 0, 0, 4]
+    - error: true
+      inputs:
+        carryptr: [4]
+        identitiesptr: [0, 0, 0, 1, 0, 2, 2, 0, 2]
+        lencarry: 1
+        length: 9
+        width: 2
+      outputs:
+        newidentitiesptr: [2]
+    - error: true
+      inputs:
+        carryptr: [3]
+        identitiesptr: [0, 0, 0, 1, 0]
+        lencarry: 1
+        length: 5
+        width: 2
+      outputs:
+        newidentitiesptr: [2]
+    - error: true
+      inputs:
+        carryptr: [0]
+        identitiesptr: [2]
+        lencarry: 1
+        length: 1
+        width: 2
+      outputs:
+        newidentitiesptr: [2]
+    - error: true
+      inputs:
+        carryptr: [3]
+        identitiesptr: [0, 0, 0, 1, 1]
+        lencarry: 1
+        length: 5
+        width: 2
+      outputs:
+        newidentitiesptr: [3]
+    - error: true
+      inputs:
+        carryptr: [1]
+        identitiesptr: [0, 1]
+        lencarry: 1
+        length: 2
+        width: 2
+      outputs:
+        newidentitiesptr: [3]
+  - name: awkward_Content_getitem_next_missing_jagged_getmaskstartstop
+    tests:
+    - error: true
+      inputs:
+        index_in: [0, 1]
+        length: 2
+        offsets_in: [0, 1]
+      outputs:
+        mask_out: [0, 1]
+        starts_out: [0, 1]
+        stops_out: [1, 1]
+    - error: true
+      inputs:
+        index_in: [0, 1]
+        length: 2
+        offsets_in: [0, 4]
+      outputs:
+        mask_out: [0, 1]
+        starts_out: [0, 4]
+        stops_out: [4, 4]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1]
+        length: 3
+        offsets_in: [0, 1]
+      outputs:
+        mask_out: [0, 1, 1]
+        starts_out: [0, 1, 1]
+        stops_out: [1, 1, 1]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1]
+        length: 3
+        offsets_in: [0, 1, 2]
+      outputs:
+        mask_out: [0, 1, 2]
+        starts_out: [0, 1, 1]
+        stops_out: [1, 1, 2]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1]
+        length: 3
+        offsets_in: [0, 2, 4]
+      outputs:
+        mask_out: [0, 1, 2]
+        starts_out: [0, 2, 2]
+        stops_out: [2, 2, 4]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 1]
+        length: 4
+        offsets_in: [0, 0, 0]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 0, 0, 0]
+        stops_out: [0, 0, 0, 0]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 1]
+        length: 4
+        offsets_in: [0, 1, 2]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 1, 1, 1]
+        stops_out: [1, 1, 1, 2]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 1]
+        length: 4
+        offsets_in: [0, 2, 3]
+      outputs:
+        mask_out: [0, 1, 2, 1]
+        starts_out: [0, 2, 2, 3]
+        stops_out: [2, 2, 3, 3]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 1, 2]
+        length: 5
+        offsets_in: [0, 2, 2, 4]
+      outputs:
+        mask_out: [0, 1, 2, 1, 4]
+        starts_out: [0, 2, 2, 2, 2]
+        stops_out: [2, 2, 2, 2, 4]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 0, 0, 0]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 0, 0, 0]
+        stops_out: [0, 0, 0, 0]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 0, 1, 1]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 0, 1, 1]
+        stops_out: [0, 1, 1, 1]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 1, 2, 3]
+      outputs:
+        mask_out: [0, 1, 2, 3]
+        starts_out: [0, 1, 1, 2]
+        stops_out: [1, 1, 2, 3]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 2, 3, 3]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 2, 3, 3]
+        stops_out: [2, 3, 3, 3]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 2, 3, 4]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 2, 3, 3]
+        stops_out: [2, 3, 3, 4]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 2, 3, 5]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 2, 3, 3]
+        stops_out: [2, 3, 3, 5]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 2, 3, 5]
+      outputs:
+        mask_out: [0, 1, 2, 3]
+        starts_out: [0, 2, 2, 3]
+        stops_out: [2, 2, 3, 5]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 2, 3, 6]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 2, 3, 3]
+        stops_out: [2, 3, 3, 6]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 2, 4, 5]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 2, 4, 4]
+        stops_out: [2, 4, 4, 5]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 3, 3, 4]
+      outputs:
+        mask_out: [0, 1, 2, 3]
+        starts_out: [0, 3, 3, 3]
+        stops_out: [3, 3, 3, 4]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 3, 3, 5]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 3, 3, 3]
+        stops_out: [3, 3, 3, 5]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 4, 5, 6]
+      outputs:
+        mask_out: [0, 1, 1, 3]
+        starts_out: [0, 4, 5, 5]
+        stops_out: [4, 5, 5, 6]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2]
+        length: 4
+        offsets_in: [0, 4, 5, 6]
+      outputs:
+        mask_out: [0, 1, 2, 3]
+        starts_out: [0, 4, 4, 5]
+        stops_out: [4, 4, 5, 6]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2, 1, 3, 4, 5]
+        length: 8
+        offsets_in: [0, 2, 4, 6, 8, 10, 12]
+      outputs:
+        mask_out: [0, 1, 2, 3, 1, 5, 6, 7]
+        starts_out: [0, 2, 2, 4, 6, 6, 8, 10]
+        stops_out: [2, 2, 4, 6, 6, 8, 10, 12]
+    - error: true
+      inputs:
+        index_in: [0, 1, 1, 2, 3, 4, 5, 6]
+        length: 8
+        offsets_in: [0, 1, 1, 1, 1, 1, 1, 1]
+      outputs:
+        mask_out: [0, 1, 2, 3, 4, 5, 6, 7]
+        starts_out: [0, 1, 1, 1, 1, 1, 1, 1]
+        stops_out: [1, 1, 1, 1, 1, 1, 1, 1]
+  - name: awkward_content_reduce_zeroparents_64
+    tests:
+    - error: true
+      inputs: {}
+      outputs:
+        toparents: [0]
+    - error: false
+      inputs: {length: 10}
+      outputs:
+        toparents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - error: false
+      inputs: {length: 9}
+      outputs:
+        toparents: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - error: false
+      inputs: {length: 8}
+      outputs:
+        toparents: [0, 0, 0, 0, 0, 0, 0, 0]
+    - error: false
+      inputs: {length: 7}
+      outputs:
+        toparents: [0, 0, 0, 0, 0, 0, 0]
+    - error: false
+      inputs: {length: 6}
+      outputs:
+        toparents: [0, 0, 0, 0, 0, 0]
+    - error: false
+      inputs: {length: 5}
+      outputs:
+        toparents: [0, 0, 0, 0, 0]
+    - error: false
+      inputs: {length: 4}
+      outputs:
+        toparents: [0, 0, 0, 0]
+    - error: false
+      inputs: {length: 3}
+      outputs:
+        toparents: [0, 0, 0]
+    - error: false
+      inputs: {length: 2}
+      outputs:
+        toparents: [0, 0]
+    - error: false
+      inputs: {length: 1}
+      outputs:
+        toparents: [0]
+

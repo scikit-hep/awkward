@@ -268,6 +268,14 @@ kSliceNone = kMaxInt64 + 1
                         )
                     outfile.write("\n\n")
 
+    unit_tests = os.path.join(CURRENT_DIR, "..", "unit-tests")
+    if os.path.exists(unit_tests):
+        shutil.rmtree(unit_tests)
+    os.mkdir(unit_tests)
+    final_dest = os.path.join(CURRENT_DIR, "..", "unit-tests")
+    copy_dest = os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")
+    shutil.copy(copy_dest, final_dest)
+
 
 def gettypeval(typename):
     if "int" in typename:
@@ -692,8 +700,46 @@ class Error(ctypes.Structure):
                     f.write("\n")
 
 
+def generateTests():
+    print("Generating Unit Tests")
+    datayml = open(os.path.join(CURRENT_DIR, "..", "test-data.yml"), "r")
+    data = yaml.safe_load(datayml)["unit-tests"]
+    for function in data:
+        num = 0
+        func = "test_" + function["name"] + ".py"
+        with open(os.path.join(CURRENT_DIR, "..", "unit-tests", func), "w") as file:
+            file.write("import pytest\nimport kernels\n\n")
+            for test in function["tests"]:
+                num += 1
+                funcName = "def test_" + function["name"] + "_" + str(num) + "():\n"
+                file.write(funcName)
+                for key, value in test["outputs"].items():
+                    file.write("\t" + key + " = " + str([123] * len(value)) + "\n")
+                for key, value in test["inputs"].items():
+                    file.write("\t" + key + " = " + str(value) + "\n")
+                file.write("\tfuncPy = getattr(kernels, '" + function["name"] + "')\n")
+                line = "\tfuncPy("
+                for key in test["outputs"]:
+                    line += key + " = " + key + ","
+                for key in test["inputs"]:
+                    line += key + " = " + key + ","
+                line = line[0 : len(line) - 1]
+                line += ")\n"
+                if test["error"] == True:
+                    file.write("\twith pytest.raises(Exception):\n")
+                    file.write("\t" + line)
+                else:
+                    file.write(line)
+                    for key, value in test["outputs"].items():
+                        file.write("\tpytest_" + key + " = " + str(value) + "\n")
+                    for key in test["outputs"]:
+                        file.write("\tassert " + key + " == " + "pytest_" + key + "\n")
+                file.write("\n\n")
+
+
 if __name__ == "__main__":
     specdict = readspec()
     genspectests(specdict)
     gencpukerneltests(specdict)
     gencudakerneltests(specdict)
+    generateTests()

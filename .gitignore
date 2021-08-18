@@ -17,6 +17,9 @@ tests-cpu-kernels
 tests-cuda-kernels
 tests-spec
 
+#Unit Tests
+unit-tests
+
 # to use all-contributors-cli without adding it to the project
 node_modules
 package.json
