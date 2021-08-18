@@ -12,8 +12,6 @@
 
 namespace awkward {
 
-  class Content;
-  using ContentPtr = std::shared_ptr<Content>;
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
   class LayoutBuilder;
 
@@ -34,13 +32,9 @@ namespace awkward {
     virtual const std::string
       classname() const = 0;
 
-    /// @brief Turns the accumulated data into a Content array.
-    virtual const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const = 0;
-
-    /// @brief The Form describing the array.
-    virtual const FormPtr
-      form() const = 0;
+    // /// @brief The Form describing the array.
+    // virtual const FormPtr
+    //   form() const = 0;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     virtual const std::string

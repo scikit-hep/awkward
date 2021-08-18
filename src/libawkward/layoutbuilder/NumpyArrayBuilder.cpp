@@ -4,45 +4,43 @@
 
 #include "awkward/layoutbuilder/NumpyArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/NumpyArray.h"
 
 namespace awkward {
 
   ///
-  NumpyArrayBuilder::NumpyArrayBuilder(const NumpyFormPtr& form,
+  NumpyArrayBuilder::NumpyArrayBuilder(const util::Parameters& parameters,
+                                       const std::string& form_key,
+                                       const std::string& form_primitive,
+                                       const std::string& form_primitive_to_state,
+                                       const std::string& form_primitive_to_vm_format,
                                        const std::string attribute,
                                        const std::string partition)
-    : form_(form),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition) {
+    : parameters_(parameters),
+      form_primitive_(form_primitive) {
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
-      .append(dtype_to_name(form_.get()->dtype())).append("\"\n");
+      .append(form_primitive).append("\"\n");
 
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(dtype_to_name(form_.get()->dtype())).append("\n");
+      .append(form_primitive).append("\n");
 
-    vm_func_name_ = std::string(*form_key_)
+    vm_func_name_ = std::string(form_key)
       .append("-")
-      .append(dtype_to_name(form_.get()->dtype()));
+      .append(form_primitive);
 
-    vm_func_type_ = dtype_to_state(form_.get()->dtype());
+    vm_func_type_ = form_primitive_to_state;
 
     vm_func_ = std::string(": ").append(vm_func_name()).append("\n")
       .append(vm_func_type())
       .append(" = if").append("\n")
       .append("0 data seek").append("\n")
-      .append("data ").append(dtype_to_vm_format(form_.get()->dtype()))
+      .append("data ").append(form_primitive_to_vm_format)
       .append("-> ").append(vm_output_data_).append("\n")
       .append("else").append("\n")
       .append(std::to_string(LayoutBuilder::next_error_id())).append(" err ! err @ halt").append("\n")
@@ -53,35 +51,6 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder::classname() const {
     return "NumpyArrayBuilder";
-  }
-
-  const ContentPtr
-  NumpyArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      std::vector<ssize_t> shape = { (ssize_t)search->second.get()->len() };
-      std::vector<ssize_t> strides = { (ssize_t)form_.get()->itemsize() };
-
-      return std::make_shared<NumpyArray>(Identities::none(),
-                                          form_.get()->parameters(),
-                                          search->second.get()->ptr(),
-                                          shape,
-                                          strides,
-                                          0,
-                                          form_.get()->itemsize(),
-                                          form_.get()->format(),
-                                          util::format_to_dtype(form_.get()->format(), form_.get()->itemsize()),
-                                          kernel::lib::cpu);
-    }
-    throw std::invalid_argument(
-        std::string("Snapshot of a ") + classname()
-        + std::string(" needs data")
-        + FILENAME(__LINE__));
-  }
-
-  const FormPtr
-  NumpyArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

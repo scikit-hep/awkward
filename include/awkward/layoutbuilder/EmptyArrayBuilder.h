@@ -12,28 +12,17 @@
 
 namespace awkward {
 
-  class EmptyForm;
-  using EmptyFormPtr = std::shared_ptr<EmptyForm>;
-
   /// @class EmptyArrayBuilder
   ///
   /// @brief
   class LIBAWKWARD_EXPORT_SYMBOL EmptyArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an EmptyArrayBuilder from a full set of parameters.
-    EmptyArrayBuilder(const EmptyFormPtr& form);
+    EmptyArrayBuilder(const util::Parameters& parameters);
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -98,13 +87,18 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
-  private:
-    /// @brief EmptyForm that defines the EmptyArray.
-    const EmptyFormPtr form_;
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
+    /// @brief String-to-JSON map that augments the meaning of this
+    /// builder Form.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
 
+  private:
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
     /// @brief An empty command.
     std::string vm_empty_command_;
     /// @brief An error message.

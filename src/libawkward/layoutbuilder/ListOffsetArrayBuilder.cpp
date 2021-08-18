@@ -4,36 +4,33 @@
 
 #include "awkward/layoutbuilder/ListOffsetArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/ListOffsetArray.h"
 
 namespace awkward {
 
   ///
-  ListOffsetArrayBuilder::ListOffsetArrayBuilder(const ListOffsetFormPtr& form,
+  ListOffsetArrayBuilder::ListOffsetArrayBuilder(FormBuilderPtr content,
+                                                 const util::Parameters& parameters,
+                                                 const std::string& form_key,
+                                                 const std::string& form_offsets,
+                                                 bool is_string_builder,
                                                  const std::string attribute,
                                                  const std::string partition)
-    : form_(form),
-      is_string_builder_(form.get()->parameter_equals("__array__", "\"string\"")
-        ||  form.get()->parameter_equals("__array__", "\"bytestring\"")),
-      begun_(false),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
+    : content_(content),
+      parameters_(parameters),
+      is_string_builder_(is_string_builder),
+      form_offsets_(form_offsets),
+      begun_(false) {
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(index_form_to_name(form_.get()->offsets()))
+      .append(form_offsets)
       .append("\n")
       .append(content_.get()->vm_output());
 
@@ -72,40 +69,6 @@ namespace awkward {
   const std::string
   ListOffsetArrayBuilder::classname() const {
     return std::string("ListOffsetArrayBuilder ") + vm_func_name();
-  }
-
-  const ContentPtr
-  ListOffsetArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      if (form_.get()->offsets() == Index::Form::i32) {
-        return std::make_shared<ListOffsetArray32>(Identities::none(),
-                                                   form_.get()->parameters(),
-                                                   search->second.get()->toIndex32(),
-                                                   content_.get()->snapshot(outputs));
-      }
-      else if (form_.get()->offsets() == Index::Form::u32) {
-        return std::make_shared<ListOffsetArrayU32>(Identities::none(),
-                                                   form_.get()->parameters(),
-                                                   search->second.get()->toIndexU32(),
-                                                   content_.get()->snapshot(outputs));
-      }
-      else if (form_.get()->offsets() == Index::Form::i64) {
-        return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                   form_.get()->parameters(),
-                                                   search->second.get()->toIndex64(),
-                                                   content_.get()->snapshot(outputs));
-      }
-    }
-    throw std::invalid_argument(
-        std::string("Snapshot of a ") + classname()
-        + std::string(" needs offsets")
-        + FILENAME(__LINE__));
-  }
-
-  const FormPtr
-  ListOffsetArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

@@ -7,8 +7,6 @@
 
 namespace awkward {
 
-  class IndexedOptionForm;
-  using IndexedOptionFormPtr = std::shared_ptr<IndexedOptionForm>;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class IndexedOptionArrayBuilder
@@ -17,21 +15,17 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL IndexedOptionArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an IndexedOptionArrayBuilder from a full set of parameters.
-    IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form,
+    IndexedOptionArrayBuilder(const FormBuilderPtr content,
+                              const util::Parameters& parameters,
+                              const std::string& form_key,
+                              const std::string& form_index,
+                              bool is_categorical,
                               const std::string attribute = "index",
                               const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -96,20 +90,28 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
+    const
+      FormBuilderPtr content() const { return content_; }
+
+    const std::string&
+      form_index() const { return form_index_; }
+
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
   private:
+    /// @brief This Form layout builder
+    const FormBuilderPtr content_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+
+    /// @brief If 'true', this array type is categorical.
+    bool is_categorical_;
+
+    const std::string form_index_;
+
     void validate() const;
-
-    /// @brief This builder Form
-    const IndexedOptionFormPtr form_;
-
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
-
-    /// @brief This Form content builder
-    FormBuilderPtr content_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

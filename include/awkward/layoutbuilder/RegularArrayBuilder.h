@@ -7,8 +7,6 @@
 
 namespace awkward {
 
-  class RegularForm;
-  using RegularFormPtr = std::shared_ptr<RegularForm>;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class RegularArrayBuilder
@@ -17,21 +15,16 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL RegularArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a RegularArrayBuilder from a full set of parameters.
-    RegularArrayBuilder(const RegularFormPtr& form,
+    RegularArrayBuilder(const FormBuilderPtr content,
+                        const util::Parameters& parameters,
+                        const std::string& form_key,
+                        const int64_t size,
                         const std::string attribute = "regular",
                         const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -96,18 +89,25 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
+    /// @brief
+    const
+      FormBuilderPtr content() const { return content_; }
+
+    /// @brief
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
+    /// @brief
+    const int64_t
+      form_size() const { return form_size_; }
+
   private:
-    /// @brief This builder Form
-    const RegularFormPtr form_;
-
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
-
     /// @brief This Form content builder
-    FormBuilderPtr content_;
+    const FormBuilderPtr content_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+    const int64_t form_size_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

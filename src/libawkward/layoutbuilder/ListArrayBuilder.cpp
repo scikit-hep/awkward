@@ -4,34 +4,31 @@
 
 #include "awkward/layoutbuilder/ListArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/ListArray.h"
 
 namespace awkward {
 
   ///
-  ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form,
+  ListArrayBuilder::ListArrayBuilder(FormBuilderPtr content,
+                                     const util::Parameters& parameters,
+                                     const std::string& form_key,
+                                     const std::string& form_starts,
                                      const std::string attribute,
                                      const std::string partition)
-    : form_(form),
+    : content_(content),
+      parameters_(parameters),
       begun_(false),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
+      form_starts_(form_starts) {
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(index_form_to_name(form_.get()->starts()))
+      .append(form_starts)
       .append("\n")
       .append(content_.get()->vm_output());
 
@@ -68,52 +65,6 @@ namespace awkward {
   const std::string
   ListArrayBuilder::classname() const {
     return "ListArrayBuilder";
-  }
-
-  const ContentPtr
-  ListArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      if (form_.get()->starts() == Index::Form::i32) {
-        Index32 offsets = search->second.get()->toIndex32();
-        Index32 starts = util::make_starts(offsets);
-        Index32 stops = util::make_stops(offsets);
-        return std::make_shared<ListArray32>(Identities::none(),
-                                             form_.get()->parameters(),
-                                             starts,
-                                             stops,
-                                             content_.get()->snapshot(outputs));
-      }
-      else if (form_.get()->starts() == Index::Form::u32) {
-        IndexU32 offsets = search->second.get()->toIndexU32();
-        IndexU32 starts = util::make_starts(offsets);
-        IndexU32 stops = util::make_stops(offsets);
-        return std::make_shared<ListArrayU32>(Identities::none(),
-                                              form_.get()->parameters(),
-                                              starts,
-                                              stops,
-                                              content_.get()->snapshot(outputs));
-      }
-      else if (form_.get()->starts() == Index::Form::i64) {
-        Index64 offsets = search->second.get()->toIndex64();
-        Index64 starts = util::make_starts(offsets);
-        Index64 stops = util::make_stops(offsets);
-        return std::make_shared<ListArray64>(Identities::none(),
-                                             form_.get()->parameters(),
-                                             starts,
-                                             stops,
-                                             content_.get()->snapshot(outputs));
-      }
-    }
-    throw std::invalid_argument(
-        std::string("Snapshot of a ") + classname()
-        + std::string(" needs offsets")
-        + FILENAME(__LINE__));
-  }
-
-  const FormPtr
-  ListArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

@@ -7,7 +7,6 @@
 
 namespace awkward {
 
-  class NumpyForm;
   using NumpyFormPtr = std::shared_ptr<NumpyForm>;
 
   /// @class NumpyArrayBuilder
@@ -16,21 +15,17 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL NumpyArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a NumpyArrayBuilder from a full set of parameters.
-    NumpyArrayBuilder(const NumpyFormPtr& form,
+    NumpyArrayBuilder(const util::Parameters& parameters,
+                      const std::string& form_key,
+                      const std::string& form_dtype,
+                      const std::string& form_dtype_state,
+                      const std::string& form_dtype_to_vm_format,
                       const std::string attribute = "data",
                       const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -95,15 +90,16 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
-  private:
-    /// @brief This builder Form
-    const NumpyFormPtr form_;
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
 
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
+    const std::string&
+      form_primitive() const {return form_primitive_; }
+
+  private:
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+    const std::string form_primitive_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Form
