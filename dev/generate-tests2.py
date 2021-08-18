@@ -33,23 +33,6 @@ kSliceNone = kMaxInt64 + 1
     if os.path.exists(new_file):
         shutil.rmtree(new_file)
     os.mkdir(new_file)
-    with open(os.path.join(new_file, "__init__.py"), "w") as f:
-        f.write(
-            """# AUTO GENERATED ON {0}
-# DO NOT EDIT BY HAND!
-#
-# To regenerate file, run
-#
-#     python dev/generate-tests.py
-#
-
-# fmt: off
-
-""".format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
-            )
-        )
-
     with open(
         os.path.join(CURRENT_DIR, "..", "new_tests", "kernels.py"), "w"
     ) as outfile:
@@ -109,20 +92,6 @@ def remove_duplicates():
             unique.add(line)
     file.close()
     file = open(os.path.join(CURRENT_DIR, "..", "outputs.txt"), "w").writelines(unique)
-
-
-def generateTests():
-    specifications = open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification.yml"), "r"
-    )
-    dict = yaml.safe_load(specifications)["kernels"]
-    lines = open(os.path.join(CURRENT_DIR, "..", "outputs.txt"), "r").readlines()
-    for line in lines:
-        data = Data(line.split(":")[0], line.split(":")[1 : len(line.split(":"))])
-        function_name = data.function_name
-        for kernel in dict:
-            if function_name == kernel["name"]:
-                data.printTest(kernel["specializations"][0]["args"])
 
 
 def sanitizeLine(line):
