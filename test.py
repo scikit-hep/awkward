@@ -1,5 +1,3 @@
-
-
 def remove_duplicates():
     print("Removing Duplicates from Output File")
     file = open("testing2.txt", "r")
@@ -10,5 +8,6 @@ def remove_duplicates():
             unique.add(line)
     file.close()
     file = open("testing2.txt", "w").writelines(unique)
+
 
 remove_duplicates()
