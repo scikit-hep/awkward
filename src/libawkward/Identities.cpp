@@ -107,14 +107,6 @@ namespace awkward {
   }
 
   template <typename T>
-  void
-  IdentitiesOf<T>::printMe() const{
-   for (int64_t i = 0; i < length(); i++) {
-    std::cout << data()[i] << ", ";
-   }
-  }
-
-  template <typename T>
   const std::string
   IdentitiesOf<T>::classname() const {
     if (std::is_same<T, int32_t>::value) {
