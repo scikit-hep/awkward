@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from __future__ import absolute_import
+import ctypes
 
 import awkward as ak
 from awkward._v2.index import Index
@@ -225,5 +226,54 @@ class ByteMaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def _nextcarry_outindex(self, numnull):
+        assert isinstance(numnull, ctypes.c_int64)
+
+        self._handle_error(
+            self.nplike[
+                "awkward_ByteMaskedArray_numnull", np.int64, self._mask.dtype.type
+            ](
+                ctypes.pointer(numnull),
+                self._mask.to(self.nplike),
+                len(self._mask),
+                self._valid_when,
+            )
+        )
+
+        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value)
+        outindex = ak._v2.index.Index64.empty(len(self))
+
+        self._handle_error(
+            self.nplike[
+                "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+                nextcarry.dtype.type,
+                outindex.dtype.type,
+                self._mask.dtype.type,
+            ](
+                nextcarry.to(self.nplike),
+                self._mask.to(self.nplike),
+                len(self._mask),
+                self._valid_when,
+            )
+        )
+
+        return tuple(nextcarry, outindex)
+
     def _localindex(self, axis, depth):
-        raise NotImplementedError
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        else:
+            # TODO: Is this the right place to declare this?
+            numnull = ctypes.c_int64()
+            nextcarry, outindex = self._nextcarry_outindex(numnull)
+
+            next = self.content._carry(nextcarry, False, NestedIndexError)
+            out = next._localindex(posaxis, depth)
+            out2 = ak.v2.contents.indexedoptionarray.IndexedOptionArray(
+                outindex,
+                out,
+                self._identifier,
+                self._parameters,
+            )
+            return out2._simplify_optiontype()

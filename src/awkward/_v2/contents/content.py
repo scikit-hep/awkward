@@ -44,9 +44,6 @@ class Content(object):
     def parameters(self):
         return self._parameters
 
-    def __len__(self):
-        pass
-
     def parameter(self, key):
         if self._parameters is None:
             return None
@@ -477,9 +474,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
         )
         return ak._v2.contents.NumpyArray(localindex)
-
-    def _localindex(self, axis, depth):
-        pass
 
     @property
     def purelist_isregular(self):

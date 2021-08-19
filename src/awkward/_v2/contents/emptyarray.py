@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-from numpy import dtype
 from awkward._v2.contents.numpyarray import NumpyArray
 
 import awkward as ak
