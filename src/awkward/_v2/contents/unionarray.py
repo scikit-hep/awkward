@@ -277,4 +277,13 @@ class UnionArray(Content):
             raise AssertionError(repr(head))
 
     def _localindex(self, axis, depth):
-        raise NotImplementedError
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content._localindex(posaxis, depth))
+            return UnionArray(
+                self._tags, self._index, contents, self._identifier, self.parameters
+            )
