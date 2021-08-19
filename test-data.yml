@@ -2281,7 +2281,8 @@ unit-tests:
   - name: awkward_content_reduce_zeroparents_64
     tests:
     - error: true
-      inputs: {}
+      inputs:
+        length: 0
       outputs:
         toparents: [0]
     - error: false
@@ -2324,3 +2325,675 @@ unit-tests:
       inputs: {length: 1}
       outputs:
         toparents: [0]
+  - name: awkward_missing_repeat
+    tests:
+    - error: false
+      inputs:
+        index: [0]
+        indexlength: 1
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [0]
+    - error: false
+      inputs:
+        index: [0, 1]
+        indexlength: 2
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [0, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1]
+        indexlength: 3
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1]
+        indexlength: 3
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1]
+        indexlength: 3
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1]
+        indexlength: 4
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1]
+        indexlength: 4
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1]
+        indexlength: 4
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1]
+        indexlength: 4
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 1]
+        indexlength: 5
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 2]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 2]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 2]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 2]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 2]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 2]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 1, 2, 3]
+        indexlength: 6
+        regularsize: 4
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 1, 2, 3]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 2]
+        indexlength: 4
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 2]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 2]
+        indexlength: 4
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 2]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 2, 1]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 2, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 2, 1]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 2, 1]
+    - error: true
+      inputs:
+        index: [0, 1, 1]
+        indexlength: 3
+        regularsize: 2
+        repetitions: 2
+      outputs:
+        outindex: [0, 1, 1, 2, 1, 3]
+    - error: true
+      inputs:
+        index: [0, 1, 1]
+        indexlength: 3
+        regularsize: 2
+        repetitions: 3
+      outputs:
+        outindex: [0, 1, 1, 2, 1, 3, 4, 1, 5]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 2, 3]
+        indexlength: 5
+        regularsize: 4
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 2, 3]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 2, 3]
+        indexlength: 5
+        regularsize: 4
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 2, 3]
+    - error: true
+      inputs:
+        index: [0, 1, 1, 2]
+        indexlength: 4
+        regularsize: 3
+        repetitions: 2
+      outputs:
+        outindex: [0, 1, 1, 2, 3, 1, 4, 5]
+    - error: true
+      inputs:
+        index: [0, 1, 1, 2]
+        indexlength: 4
+        regularsize: 3
+        repetitions: 3
+      outputs:
+        outindex: [0, 1, 1, 2, 3, 1, 4, 5, 6, 1, 7, 8]
+    - error: false
+      inputs:
+        index: [0, 1, 1, 2, 3, 4, 5]
+        indexlength: 7
+        regularsize: 6
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 1, 2, 3, 4, 5]
+    - error: false
+      inputs:
+        index: [0, 1, 2, 1]
+        indexlength: 4
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 2, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 2, 1, 1]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 2, 1, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 2, 1, 3]
+        indexlength: 5
+        regularsize: 4
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 2, 1, 3]
+    - error: true
+      inputs:
+        index: [0, 1, 2, 1, 3]
+        indexlength: 5
+        regularsize: 4
+        repetitions: 2
+      outputs:
+        outindex: [0, 1, 2, 1, 3, 4, 5, 6, 1, 7]
+    - error: true
+      inputs:
+        index: [0, 1, 2, 1, 3]
+        indexlength: 5
+        regularsize: 4
+        repetitions: 3
+      outputs:
+        outindex: [0, 1, 2, 1, 3, 4, 5, 6, 1, 7, 8, 9, 10, 1, 11]
+    - error: false
+      inputs:
+        index: [0, 1, 2, 3, 1]
+        indexlength: 5
+        regularsize: 4
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 2, 3, 1]
+    - error: false
+      inputs:
+        index: [0, 1, 2, 3, 1, 4, 5]
+        indexlength: 7
+        regularsize: 6
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 2, 3, 1, 4, 5]
+    - error: false
+      inputs:
+        index: [0, 1, 2, 3, 4, 5]
+        indexlength: 6
+        regularsize: 6
+        repetitions: 1
+      outputs:
+        outindex: [0, 1, 2, 3, 4, 5]
+    - error: false
+      inputs:
+        index: [1, 0]
+        indexlength: 2
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 0]
+    - error: false
+      inputs:
+        index: [1, 0, 1]
+        indexlength: 3
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1]
+        indexlength: 3
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1]
+        indexlength: 4
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1]
+        indexlength: 4
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1]
+        indexlength: 4
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1, 1]
+        indexlength: 5
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1, 1]
+    - error: true
+      inputs:
+        index: [1, 0, 1]
+        indexlength: 3
+        regularsize: 1
+        repetitions: 2
+      outputs:
+        outindex: [1, 0, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        index: [1, 0, 1]
+        indexlength: 3
+        regularsize: 1
+        repetitions: 3
+      outputs:
+        outindex: [1, 0, 1, 1, 1, 1, 1, 2, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1, 2]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1, 2]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 1, 2]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 1, 2]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 2]
+        indexlength: 4
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 2]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 2, 1]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 2, 1]
+    - error: false
+      inputs:
+        index: [1, 0, 1, 2, 3]
+        indexlength: 5
+        regularsize: 4
+        repetitions: 1
+      outputs:
+        outindex: [1, 0, 1, 2, 3]
+    - error: false
+      inputs:
+        index: [1, 1, 0]
+        indexlength: 3
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 0]
+    - error: false
+      inputs:
+        index: [1, 1, 0, 1]
+        indexlength: 4
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 0, 1]
+    - error: false
+      inputs:
+        index: [1, 1, 0, 1]
+        indexlength: 4
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 0, 1]
+    - error: false
+      inputs:
+        index: [1, 1, 0, 1, 1]
+        indexlength: 5
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 0, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 1, 0, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 0, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 1, 0, 1, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 0, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 1, 0, 1, 2]
+        indexlength: 5
+        regularsize: 3
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 0, 1, 2]
+    - error: false
+      inputs:
+        index: [1, 1, 1, 0]
+        indexlength: 4
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 1, 0]
+    - error: false
+      inputs:
+        index: [1, 1, 1, 0, 1]
+        indexlength: 5
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 1, 0, 1]
+    - error: false
+      inputs:
+        index: [1, 1, 1, 0, 1]
+        indexlength: 5
+        regularsize: 2
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 1, 0, 1]
+    - error: false
+      inputs:
+        index: [1]
+        indexlength: 1
+        regularsize: 0
+        repetitions: 1
+      outputs:
+        outindex: [1]
+    - error: false
+      inputs:
+        index: [1, 1, 1, 1, 0]
+        indexlength: 5
+        regularsize: 1
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 1, 1, 0]
+    - error: false
+      inputs:
+        index: [1, 1, 1, 1, 1]
+        indexlength: 5
+        regularsize: 0
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 1, 1, 1]
+        indexlength: 4
+        regularsize: 0
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 1, 1]
+        indexlength: 3
+        regularsize: 0
+        repetitions: 1
+      outputs:
+        outindex: [1, 1, 1]
+    - error: false
+      inputs:
+        index: [1, 1]
+        indexlength: 2
+        regularsize: 0
+        repetitions: 1
+      outputs:
+        outindex: [1, 1]
+  - name: awkward_index_rpad_and_clip_axis0
+    tests:
+    - error: true
+      inputs: {length: 2, target: 5}
+      outputs:
+        toindex: [0, 1, 1, 1, 1]
+    - error: true
+      inputs: {length: 2, target: 4}
+      outputs:
+        toindex: [0, 1, 1, 1]
+    - error: true
+      inputs: {length: 2, target: 3}
+      outputs:
+        toindex: [0, 1, 1]
+    - error: true
+      inputs: {length: 3, target: 7}
+      outputs:
+        toindex: [0, 1, 2, 1, 1, 1, 1]
+    - error: true
+      inputs: {length: 3, target: 6}
+      outputs:
+        toindex: [0, 1, 2, 1, 1, 1]
+    - error: true
+      inputs: {length: 3, target: 5}
+      outputs:
+        toindex: [0, 1, 2, 1, 1]
+    - error: true
+      inputs: {length: 3, target: 4}
+      outputs:
+        toindex: [0, 1, 2, 1]
+    - error: false
+      inputs: {length: 2, target: 2}
+      outputs:
+        toindex: [0, 1]
+    - error: false
+      inputs: {length: 3, target: 2}
+      outputs:
+        toindex: [0, 1]
+    - error: false
+      inputs: {length: 3, target: 3}
+      outputs:
+        toindex: [0, 1, 2]
+    - error: true
+      inputs: {length: 5, target: 10}
+      outputs:
+        toindex: [0, 1, 2, 3, 4, 1, 1, 1, 1, 1]
+    - error: true
+      inputs: {length: 5, target: 8}
+      outputs:
+        toindex: [0, 1, 2, 3, 4, 1, 1, 1]
+    - error: true
+      inputs: {length: 5, target: 7}
+      outputs:
+        toindex: [0, 1, 2, 3, 4, 1, 1]
+    - error: true
+      inputs: {length: 5, target: 6}
+      outputs:
+        toindex: [0, 1, 2, 3, 4, 1]
+    - error: false
+      inputs: {length: 5, target: 4}
+      outputs:
+        toindex: [0, 1, 2, 3]
+    - error: true
+      inputs: {length: 6, target: 9}
+      outputs:
+        toindex: [0, 1, 2, 3, 4, 5, 1, 1, 1]
+    - error: true
+      inputs: {length: 6, target: 7}
+      outputs:
+        toindex: [0, 1, 2, 3, 4, 5, 1]
+    - error: false
+      inputs: {length: 5, target: 5}
+      outputs:
+        toindex: [0, 1, 2, 3, 4]
+    - error: false
+      inputs: {length: 6, target: 6}
+      outputs:
+        toindex: [0, 1, 2, 3, 4, 5]
+    - error: false
+      inputs: {length: 5, target: 3}
+      outputs:
+        toindex: [0, 1, 2]
+    - error: false
+      inputs: {length: 6, target: 3}
+      outputs:
+        toindex: [0, 1, 2]
+    - error: false
+      inputs: {length: 5, target: 2}
+      outputs:
+        toindex: [0, 1]
+    - error: false
+      inputs: {length: 3, target: 1}
+      outputs:
+        toindex: [0]
+    - error: false
+      inputs: {length: 5, target: 1}
+      outputs:
+        toindex: [0]
+    - error: false
+      inputs: {length: 6, target: 1}
+      outputs:
+        toindex: [0]
+    - error: true
+      inputs: {length: 0, target: 1}
+      outputs:
+        toindex: [1]
+    - error: true
+      inputs: {length: 0, target: 5}
+      outputs:
+        toindex: [1, 1, 1, 1, 1]

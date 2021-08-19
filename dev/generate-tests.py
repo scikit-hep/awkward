@@ -700,7 +700,7 @@ class Error(ctypes.Structure):
                     f.write("\n")
 
 
-def generateTests():
+def genunittests():
     print("Generating Unit Tests")
     datayml = open(os.path.join(CURRENT_DIR, "..", "test-data.yml"), "r")
     data = yaml.safe_load(datayml)["unit-tests"]
@@ -725,7 +725,7 @@ def generateTests():
                     line += key + " = " + key + ","
                 line = line[0 : len(line) - 1]
                 line += ")\n"
-                if test["error"] == True:
+                if test["error"]:
                     file.write("\twith pytest.raises(Exception):\n")
                     file.write("\t" + line)
                 else:
@@ -742,4 +742,4 @@ if __name__ == "__main__":
     genspectests(specdict)
     gencpukerneltests(specdict)
     gencudakerneltests(specdict)
-    generateTests()
+    genunittests()
