@@ -2997,3 +2997,6529 @@ unit-tests:
       inputs: {length: 0, target: 5}
       outputs:
         toindex: [1, 1, 1, 1, 1]
+  - name: awkward_BitMaskedArray_to_ByteMaskedArray
+    tests:
+    - error: false
+      inputs:
+        bitmasklength: 2
+        frombitmask: [58, 59]
+        lsb_order: false
+        validwhen: false
+      outputs:
+        tobytemask: [0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1]
+    - error: false
+      inputs:
+        bitmasklength: 1
+        frombitmask: [66]
+        lsb_order: true
+        validwhen: false
+      outputs:
+        tobytemask: [0, 1, 0, 0, 0, 0, 1, 0]
+    - error: false
+      inputs:
+        bitmasklength: 2
+        frombitmask: [58, 59]
+        lsb_order: true
+        validwhen: false
+      outputs:
+        tobytemask: [0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0]
+  - name: awkward_BitMaskedArray_to_IndexedOptionArray
+    tests:
+    - error: true
+      inputs:
+        bitmasklength: 2
+        frombitmask: [58, 59]
+        lsb_order: false
+        validwhen: false
+      outputs:
+        toindex: [0, 1, 1, 1, 1, 5, 1, 7, 8, 9, 1, 1, 1, 13, 1, 1]
+    - error: true
+      inputs:
+        bitmasklength: 2
+        frombitmask: [58, 59]
+        lsb_order: true
+        validwhen: false
+      outputs:
+        toindex: [0, 1, 2, 1, 1, 1, 6, 7, 1, 1, 10, 1, 1, 1, 14, 15]
+  - name: awkward_ByteMaskedArray_getitem_carry
+    tests:
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 20, 21, 22, 23,
+          24, 10, 11, 12, 13, 14, 25, 26, 27, 28, 29]
+        frommask: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+          1, 1, 1, 0, 0, 0, 0, 0]
+        lencarry: 30
+        lenmask: 30
+      outputs:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0]
+    - error: false
+      inputs:
+        fromcarry: [4]
+        frommask: [0, 0, 1, 1, 0]
+        lencarry: 1
+        lenmask: 5
+      outputs:
+        tomask: [0]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 20, 25, 1, 6, 11, 16, 21, 26, 2, 7, 12, 17, 22, 27,
+          3, 8, 13, 18, 23, 28, 4, 9, 14, 19, 24, 29]
+        frommask: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0]
+        lencarry: 30
+        lenmask: 30
+      outputs:
+        tomask: [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0,
+          0, 0, 0, 1, 1, 0, 0]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        frommask: [0, 1, 0, 0, 1, 0]
+        lencarry: 6
+        lenmask: 6
+      outputs:
+        tomask: [0, 0, 1, 1, 0, 0]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 1, 1, 0, 5, 7, 7, 9, 10]
+        frommask: [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0]
+        lencarry: 10
+        lenmask: 13
+      outputs:
+        tomask: [0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 20, 25, 1, 6, 11, 16, 21, 26, 2, 7, 12, 17, 22, 27,
+          3, 8, 13, 18, 23, 28, 4, 9, 14, 19, 24, 29]
+        frommask: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+          1, 1, 1, 0, 0, 0, 0, 0]
+        lencarry: 30
+        lenmask: 30
+      outputs:
+        tomask: [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+          0, 0, 1, 0, 0, 1, 0]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 4]
+        frommask: [0, 0, 1, 1, 0]
+        lencarry: 3
+        lenmask: 5
+      outputs:
+        tomask: [1, 1, 0]
+  - name: awkward_ByteMaskedArray_getitem_nextcarry
+    tests:
+    - error: false
+      inputs:
+        length: 2
+        mask: [0, 0]
+        validwhen: false
+      outputs:
+        tocarry: [0, 1]
+    - error: false
+      inputs:
+        length: 5
+        mask: [0, 0, 1, 1, 0]
+        validwhen: false
+      outputs:
+        tocarry: [0, 1, 4]
+  - name: awkward_ByteMaskedArray_getitem_nextcarry_outindex
+    tests:
+    - error: false
+      inputs:
+        length: 1
+        mask: [0]
+        validwhen: true
+      outputs:
+        outindex: [0]
+        tocarry: [0]
+    - error: false
+      inputs:
+        length: 4
+        mask: [0, 0, 0, 0]
+        validwhen: true
+      outputs:
+        outindex: [0, 1, 2, 3]
+        tocarry: [0, 1, 2, 3]
+    - error: true
+      inputs:
+        length: 5
+        mask: [0, 0, 1, 1, 0]
+        validwhen: true
+      outputs:
+        outindex: [0, 1, 1, 1, 2]
+        tocarry: [0, 1, 4]
+    - error: true
+      inputs:
+        length: 4
+        mask: [0, 1, 0, 0]
+        validwhen: true
+      outputs:
+        outindex: [0, 1, 1, 2]
+        tocarry: [0, 2, 3]
+    - error: true
+      inputs:
+        length: 1
+        mask: [1]
+      outputs:
+        outindex: [0]
+        tocarry: [1]
+    - error: true
+      inputs:
+        length: 3
+        mask: [0, 1, 0]
+        validwhen: true
+      outputs:
+        outindex: [1, 0, 1]
+        tocarry: [1]
+    - error: true
+      inputs:
+        length: 3
+        mask: [0, 1, 1]
+        validwhen: true
+      outputs:
+        outindex: [1, 0, 1]
+        tocarry: [1, 2]
+    - error: true
+      inputs:
+        length: 10
+        mask: [0, 1, 1, 0, 1, 0, 0, 1, 1, 0]
+        validwhen: true
+      outputs:
+        outindex: [1, 0, 1, 1, 2, 1, 1, 3, 4, 1]
+        tocarry: [1, 2, 4, 7, 8]
+    - error: true
+      inputs:
+        length: 3
+        mask: [1, 1, 0]
+        validwhen: true
+      outputs:
+        outindex: [1, 1, 0]
+        tocarry: [2]
+  - name: awkward_ByteMaskedArray_numnull
+    tests:
+    - error: false
+      inputs:
+        length: 4
+        mask: [0, 0, 0, 0]
+        validwhen: false
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        length: 2
+        mask: [0, 0]
+        validwhen: false
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        length: 1
+        mask: [0]
+        validwhen: false
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        length: 30
+        mask: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+          1, 1, 0, 0, 0, 0, 0]
+        validwhen: false
+      outputs:
+        numnull: [10]
+    - error: false
+      inputs:
+        length: 30
+        mask: [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0,
+          0, 0, 0, 1, 1, 0, 0]
+        validwhen: false
+      outputs:
+        numnull: [10]
+    - error: false
+      inputs:
+        length: 30
+        mask: [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+          0, 0, 1, 0, 0, 1, 0]
+        validwhen: false
+      outputs:
+        numnull: [10]
+    - error: false
+      inputs:
+        length: 4
+        mask: [0, 1, 0, 0]
+        validwhen: false
+      outputs:
+        numnull: [1]
+    - error: false
+      inputs:
+        length: 1
+        mask: [0]
+        validwhen: true
+      outputs:
+        numnull: [1]
+    - error: false
+      inputs:
+        length: 3
+        mask: [0, 1, 1]
+        validwhen: true
+      outputs:
+        numnull: [1]
+    - error: false
+      inputs:
+        length: 6
+        mask: [0, 0, 1, 1, 0, 0]
+        validwhen: false
+      outputs:
+        numnull: [2]
+    - error: false
+      inputs:
+        length: 5
+        mask: [0, 0, 1, 1, 0]
+        validwhen: false
+      outputs:
+        numnull: [2]
+    - error: false
+      inputs:
+        length: 9
+        mask: [0, 1, 0, 0, 0, 0, 1, 0, 0]
+        validwhen: false
+      outputs:
+        numnull: [2]
+    - error: false
+      inputs:
+        length: 6
+        mask: [0, 1, 0, 0, 1, 0]
+        validwhen: false
+      outputs:
+        numnull: [2]
+    - error: false
+      inputs:
+        length: 3
+        mask: [0, 1, 0]
+        validwhen: true
+      outputs:
+        numnull: [2]
+    - error: false
+      inputs:
+        length: 3
+        mask: [1, 1, 0]
+        validwhen: false
+      outputs:
+        numnull: [2]
+    - error: false
+      inputs:
+        length: 8
+        mask: [0, 1, 0, 0, 1, 0, 1, 0]
+        validwhen: false
+      outputs:
+        numnull: [3]
+    - error: false
+      inputs:
+        length: 10
+        mask: [0, 1, 1, 0, 1, 0, 0, 1, 1, 0]
+        validwhen: true
+      outputs:
+        numnull: [5]
+  - name: awkward_carry_arange
+    tests:
+    - error: true
+      inputs: {}
+      outputs:
+        toptr: [0]
+    - error: false
+      inputs: {length: 1}
+      outputs:
+        toptr: [0]
+    - error: false
+      inputs: {length: 2}
+      outputs:
+        toptr: [0, 1]
+    - error: false
+      inputs: {length: 3}
+      outputs:
+        toptr: [0, 1, 2]
+    - error: false
+      inputs: {length: 4}
+      outputs:
+        toptr: [0, 1, 2, 3]
+    - error: false
+      inputs: {length: 5}
+      outputs:
+        toptr: [0, 1, 2, 3, 4]
+    - error: false
+      inputs: {length: 6}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5]
+    - error: false
+      inputs: {length: 7}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6]
+    - error: false
+      inputs: {length: 8}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7]
+    - error: false
+      inputs: {length: 9}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    - error: false
+      inputs: {length: 10}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    - error: false
+      inputs: {length: 11}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    - error: false
+      inputs: {length: 12}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    - error: false
+      inputs: {length: 14}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    - error: false
+      inputs: {length: 15}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    - error: false
+      inputs: {length: 18}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+    - error: false
+      inputs: {length: 20}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    - error: false
+      inputs: {length: 24}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+          20, 21, 22, 23]
+    - error: false
+      inputs: {length: 25}
+      outputs:
+        toptr: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+          20, 21, 22, 23, 24]
+  - name: awkward_ByteMaskedArray_toIndexedOptionArray
+    tests:
+    - error: true
+      inputs:
+        mask: [0]
+      outputs:
+        toindex: [0]
+    - error: false
+      inputs:
+        length: 2
+        mask: [0, 0]
+        validwhen: false
+      outputs:
+        toindex: [0, 1]
+    - error: true
+      inputs:
+        length: 5
+        mask: [0, 0, 1, 1, 0]
+        validwhen: false
+      outputs:
+        toindex: [0, 1, 1, 1, 4]
+    - error: true
+      inputs:
+        length: 6
+        mask: [0, 0, 1, 1, 0, 0]
+        validwhen: false
+      outputs:
+        toindex: [0, 1, 1, 1, 4, 5]
+    - error: true
+      inputs:
+        length: 7
+        mask: [0, 0, 1, 0, 0, 1, 0]
+        validwhen: false
+      outputs:
+        toindex: [0, 1, 1, 3, 4, 1, 6]
+    - error: true
+      inputs:
+        length: 3
+        mask: [0, 1, 0]
+        validwhen: false
+      outputs:
+        toindex: [0, 1, 2]
+    - error: true
+      inputs:
+        length: 5
+        mask: [0, 0, 0, 1, 0]
+        validwhen: false
+      outputs:
+        toindex: [0, 1, 2, 1, 4]
+    - error: false
+      inputs:
+        length: 4
+        mask: [0, 0, 0, 0]
+        validwhen: false
+      outputs:
+        toindex: [0, 1, 2, 3]
+  - name: awkward_Identities_from_ListOffsetArray
+    tests:
+    - error: true
+      inputs:
+        fromlength: 5
+        fromoffsets: [0, 3, 3, 5, 6, 9]
+        fromptr: [0, 0, 1, 0, 2]
+        fromwidth: 2
+        tolength: 9
+      outputs:
+        toptr: [0, 0, 0, 0, 0, 1, 0, 0, 2]
+    - error: true
+      inputs:
+        fromlength: 6
+        fromoffsets: [0, 5, 10, 15, 20, 25, 30]
+        fromptr: [0, 0, 0, 1, 0, 2]
+        fromwidth: 2
+        tolength: 30
+      outputs:
+        toptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 1, 0, 0, 1, 1, 0, 1,
+          2, 0, 1, 3, 0, 1, 4]
+    - error: true
+      inputs:
+        fromlength: 6
+        fromoffsets: [0, 3, 3, 5, 6, 10, 10]
+        fromptr: [0, 0, 0, 1, 1, 0]
+        fromwidth: 2
+        tolength: 10
+      outputs:
+        toptr: [0, 0, 0, 0, 0, 1, 0, 0, 2, 1]
+    - error: true
+      inputs:
+        fromlength: 3
+        fromoffsets: [0, 2, 2, 3]
+        fromptr: [0, 1, 2]
+        fromwidth: 1
+        tolength: 3
+      outputs:
+        toptr: [0, 0, 0]
+    - error: true
+      inputs:
+        fromlength: 3
+        fromoffsets: [0, 3, 3, 5]
+        fromptr: [0, 1, 2]
+        fromwidth: 1
+        tolength: 5
+      outputs:
+        toptr: [0, 0, 0, 1, 0]
+    - error: true
+      inputs:
+        fromlength: 2
+        fromoffsets: [0, 3, 6]
+        fromptr: [0, 1]
+        fromwidth: 1
+        tolength: 6
+      outputs:
+        toptr: [0, 0, 0, 1, 0, 2]
+    - error: true
+      inputs:
+        fromlength: 5
+        fromoffsets: [0, 3, 6, 11, 15, 19]
+        fromptr: [0, 1, 4, 7, 6]
+        fromwidth: 1
+        tolength: 19
+      outputs:
+        toptr: [0, 0, 0, 1, 0, 2, 1, 0, 1, 1, 1, 2, 4, 0, 4, 1, 4, 2, 4]
+    - error: true
+      inputs:
+        fromlength: 5
+        fromoffsets: [0, 3, 3, 5, 6, 9]
+        fromptr: [0, 1, 2, 3, 4]
+        fromwidth: 1
+        tolength: 9
+      outputs:
+        toptr: [0, 0, 0, 1, 0, 2, 2, 0, 2]
+    - error: true
+      inputs:
+        fromlength: 4
+        fromoffsets: [0, 3, 3, 5, 10]
+        fromptr: [0, 1, 2, 3]
+        fromwidth: 1
+        tolength: 10
+      outputs:
+        toptr: [0, 0, 0, 1, 0, 2, 2, 0, 2, 1]
+    - error: true
+      inputs:
+        fromlength: 6
+        fromoffsets: [0, 3, 3, 5, 6, 10, 11]
+        fromptr: [0, 1, 2, 3, 4, 1]
+        fromwidth: 1
+        tolength: 11
+      outputs:
+        toptr: [0, 0, 0, 1, 0, 2, 2, 0, 2, 1, 3]
+    - error: true
+      inputs:
+        fromlength: 5
+        fromoffsets: [0, 0, 1, 3, 6, 10]
+        fromptr: [0, 0, 0, 1, 0]
+        fromwidth: 2
+        tolength: 10
+      outputs:
+        toptr: [0, 1, 0, 0, 2, 0, 0, 2, 1, 2]
+    - error: true
+      inputs:
+        fromlength: 5
+        fromoffsets: [0, 0, 1, 3, 6, 10]
+        fromptr: [0, 1, 2, 3, 4]
+        fromwidth: 1
+        tolength: 10
+      outputs:
+        toptr: [1, 0, 2, 0, 2, 1, 3, 0, 3, 1]
+    - error: true
+      inputs:
+        fromlength: 3
+        fromoffsets: [0, 3, 3, 5]
+        fromptr: [2, 3, 5]
+        fromwidth: 1
+        tolength: 5
+      outputs:
+        toptr: [2, 0, 2, 1, 2]
+  - name: awkward_IndexedArray_flatten_nextcarry
+    tests:
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1]
+        lencontent: 2
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1]
+        lencontent: 2
+        lenindex: 3
+      outputs:
+        tocarry: [0, 1]
+    - error: false
+      inputs:
+        fromindex: [0, 1]
+        lencontent: 2
+        lenindex: 2
+      outputs:
+        tocarry: [0, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1]
+        lencontent: 5
+        lenindex: 3
+      outputs:
+        tocarry: [0, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        lencontent: 3
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3]
+        lencontent: 4
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3, 4]
+        lencontent: 5
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 2, 1, 1, 3, 4, 1]
+        lencontent: 5
+        lenindex: 10
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 5]
+        lencontent: 6
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 1, 4, 5, 6]
+        lencontent: 7
+        lenindex: 9
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 5, 6, 7]
+        lencontent: 8
+        lenindex: 9
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 5, 6, 1, 7, 8]
+        lencontent: 9
+        lenindex: 10
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 1, 5, 6, 7]
+        lencontent: 8
+        lenindex: 9
+      outputs:
+        tocarry: [0, 1, 2, 3, 5, 6, 7]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 3]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 3, 4, 5]
+        lencontent: 6
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 3, 4, 5]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 4, 5, 6]
+        lencontent: 7
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 4, 5, 6]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 4, 5, 6, 7]
+        lencontent: 8
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 4, 5, 6, 7]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 5, 6, 7]
+        lencontent: 8
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 5, 6, 7]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        lencontent: 3
+        lenindex: 4
+      outputs:
+        tocarry: [0, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4]
+        lencontent: 5
+        lenindex: 5
+      outputs:
+        tocarry: [0, 2, 3, 4]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 5, 6]
+        lencontent: 7
+        lenindex: 7
+      outputs:
+        tocarry: [0, 2, 3, 4, 5, 6]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        lencontent: 9
+        lenindex: 9
+      outputs:
+        tocarry: [0, 2, 3, 4, 5, 6, 7, 8]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 1, 6, 7, 8]
+        lencontent: 9
+        lenindex: 9
+      outputs:
+        tocarry: [0, 2, 3, 4, 6, 7, 8]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 4, 5, 6]
+        lencontent: 7
+        lenindex: 7
+      outputs:
+        tocarry: [0, 2, 4, 5, 6]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 3]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [0, 3]
+    - error: true
+      inputs:
+        fromindex: [1]
+        lenindex: 5
+      outputs:
+        tocarry: [1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 2, 1, 4]
+        lencontent: 5
+        lenindex: 5
+      outputs:
+        tocarry: [1, 2, 4]
+    - error: true
+      inputs:
+        fromindex: [1, 2, 1]
+        lencontent: 5
+        lenindex: 3
+      outputs:
+        tocarry: [2]
+    - error: true
+      inputs:
+        fromindex: [2, 1, 4, 0, 8]
+        lencontent: 10
+        lenindex: 5
+      outputs:
+        tocarry: [2, 4, 0, 8]
+    - error: true
+      inputs:
+        fromindex: [3, 2, 1, 0]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [3, 2, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [1, 3, 4]
+        lencontent: 5
+        lenindex: 3
+      outputs:
+        tocarry: [3, 4]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 4, 1, 0]
+        lencontent: 10
+        lenindex: 5
+      outputs:
+        tocarry: [4, 0]
+    - error: true
+      inputs:
+        fromindex: [4, 3, 2, 1, 0]
+        lencontent: 5
+        lenindex: 5
+      outputs:
+        tocarry: [4, 3, 2, 0]
+    - error: true
+      inputs:
+        fromindex: [1, 4, 4, 1, 0]
+        lencontent: 10
+        lenindex: 5
+      outputs:
+        tocarry: [4, 4, 0]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 4, 1, 8]
+        lencontent: 10
+        lenindex: 5
+      outputs:
+        tocarry: [4, 8]
+  - name: awkward_IndexedArray_getitem_carry
+    tests:
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 5, 6, 7, 8]
+        fromindex: [0, 1, 1, 2, 3, 1, 4, 5, 6]
+        lencarry: 7
+        lenindex: 9
+      outputs:
+        toindex: [0, 1, 1, 1, 4, 5, 6]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 5, 6, 7, 8]
+        fromindex: [0, 1, 1, 2, 3, 4, 5, 6, 7]
+        lencarry: 7
+        lenindex: 9
+      outputs:
+        toindex: [0, 1, 1, 4, 5, 6, 7]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 3, 4, 5, 7, 8]
+        fromindex: [0, 1, 1, 2, 3, 4, 1, 5, 6]
+        lencarry: 7
+        lenindex: 9
+      outputs:
+        toindex: [0, 1, 2, 3, 4, 5, 6]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 6, 9, 12, 1, 4, 7, 10, 13, 2, 5, 8, 11, 14]
+        fromindex: [0, 1, 2, 1, 1, 1, 3, 4, 1, 5, 1, 1, 6, 7, 8]
+        lencarry: 15
+        lenindex: 15
+      outputs:
+        toindex: [0, 1, 3, 5, 6, 1, 1, 4, 1, 7, 2, 1, 1, 1, 8]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 20, 1, 6, 11, 16, 21, 2, 7, 12, 17, 22, 3, 8, 13,
+          18, 23, 4, 9, 14, 19, 24]
+        fromindex: [0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 3, 4, 1, 1, 1, 5, 1, 1, 1, 1, 6, 7,
+          8, 1, 1]
+        lencarry: 25
+        lenindex: 25
+      outputs:
+        toindex: [0, 1, 3, 5, 6, 1, 1, 4, 1, 7, 2, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 16, 1, 6, 11, 2, 7, 12, 3, 8, 13, 4, 9, 14]
+        fromindex: [0, 1, 2, 9, 10, 3, 11, 12, 13, 14, 4, 5, 6, 15, 16, 7, 8]
+        lencarry: 17
+        lenindex: 17
+      outputs:
+        toindex: [0, 3, 4, 7, 8, 1, 11, 5, 2, 12, 6, 9, 13, 15, 10, 14, 16]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 16, 1, 6, 11, 2, 7, 12, 3, 8, 13, 4, 9, 14]
+        fromindex: [0, 1, 2, 1, 1, 3, 1, 1, 1, 1, 4, 5, 6, 1, 1, 7, 8]
+        lencarry: 17
+        lenindex: 17
+      outputs:
+        toindex: [0, 3, 4, 7, 8, 1, 1, 5, 2, 1, 6, 1, 1, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 20, 1, 6, 11, 16, 21, 2, 7, 12, 17, 22, 3, 8, 13,
+          18, 23, 4, 9, 14, 19, 24]
+        fromindex: [0, 1, 2, 3, 1, 4, 5, 6, 1, 1, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1]
+        lencarry: 25
+        lenindex: 25
+      outputs:
+        toindex: [0, 4, 7, 1, 1, 1, 5, 8, 1, 1, 2, 6, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1,
+          1, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 20, 1, 6, 11, 16, 21, 2, 7, 12, 17, 22, 3, 8, 13,
+          18, 23, 4, 9, 14, 19, 24]
+        fromindex: [0, 1, 2, 3, 9, 4, 5, 6, 10, 11, 7, 8, 12, 13, 14, 15, 16, 17, 18,
+          19, 20, 21, 22, 23, 24]
+        lencarry: 25
+        lenindex: 25
+      outputs:
+        toindex: [0, 4, 7, 15, 20, 1, 5, 8, 16, 21, 2, 6, 12, 17, 22, 3, 10, 13, 18,
+          23, 9, 11, 14, 19, 24]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 1, 6, 11, 2, 7, 12, 3, 8, 13, 4, 9, 14]
+        fromindex: [0, 1, 2, 3, 1, 4, 5, 6, 1, 1, 7, 8, 1, 1, 1]
+        lencarry: 15
+        lenindex: 15
+      outputs:
+        toindex: [0, 4, 7, 1, 5, 8, 2, 6, 1, 3, 1, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 3, 4, 7, 8]
+        fromindex: [0, 1, 1, 1, 2, 3, 4, 5, 1]
+        lencarry: 6
+        lenindex: 9
+      outputs:
+        toindex: [1, 1, 1, 2, 5, 1]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 3, 6]
+        fromindex: [0, 1, 1, 1, 2, 3, 4]
+        lencarry: 4
+        lenindex: 7
+      outputs:
+        toindex: [1, 1, 1, 4]
+    - error: false
+      inputs:
+        fromcarry: [3, 3, 3]
+        fromindex: [4, 0, 3, 1, 3]
+        lencarry: 3
+        lenindex: 5
+      outputs:
+        toindex: [1, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 8, 11, 14, 1, 6, 9, 12, 15, 2, 7, 10, 13, 16, 3, 4]
+        fromindex: [1, 1, 0, 1, 2, 1, 1, 1, 3, 1, 4, 5, 1, 1, 6, 7, 8]
+        lencarry: 17
+        lenindex: 17
+      outputs:
+        toindex: [1, 1, 3, 5, 6, 1, 1, 1, 1, 7, 0, 1, 4, 1, 8, 1, 2]
+    - error: false
+      inputs:
+        fromcarry: [4]
+        fromindex: [2, 2, 0, 3, 1]
+        lencarry: 1
+        lenindex: 5
+      outputs:
+        toindex: [1]
+    - error: false
+      inputs:
+        fromcarry: [4, 1]
+        fromindex: [2, 2, 0, 3, 1]
+        lencarry: 2
+        lenindex: 5
+      outputs:
+        toindex: [1, 2]
+    - error: false
+      inputs:
+        fromcarry: [3, 4]
+        fromindex: [4, 0, 3, 1, 3]
+        lencarry: 2
+        lenindex: 5
+      outputs:
+        toindex: [1, 3]
+    - error: false
+      inputs:
+        fromcarry: [3, 4]
+        fromindex: [4, 0, 3, 1, 3]
+        lencarry: 2
+        lenindex: 5
+      outputs:
+        toindex: [1, 3]
+    - error: false
+      inputs:
+        fromcarry: [3]
+        fromindex: [4, 0, 3, 1, 3]
+        lencarry: 1
+        lenindex: 5
+      outputs:
+        toindex: [1]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 20, 25, 1, 6, 11, 16, 21, 26, 2, 7, 12, 17, 22, 27,
+          3, 8, 13, 18, 23, 28, 4, 9, 14, 19, 24, 29]
+        fromindex: [15, 16, 17, 18, 19, 1, 1, 1, 1, 1, 10, 11, 12, 13, 14, 5, 6, 7,
+          8, 9, 1, 1, 1, 1, 1, 0, 1, 2, 3, 4]
+        lencarry: 30
+        lenindex: 30
+      outputs:
+        toindex: [15, 1, 10, 5, 1, 0, 16, 1, 11, 6, 1, 1, 17, 1, 12, 7, 1, 2, 18, 1,
+          13, 8, 1, 3, 19, 1, 14, 9, 1, 4]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 6, 11, 16, 17, 1, 7, 12, 18, 2, 8, 13, 19, 3, 9, 14, 20, 4,
+          10, 15, 21]
+        fromindex: [15, 16, 17, 18, 19, 1, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, 1, 0,
+          1, 2, 3, 4]
+        lencarry: 22
+        lenindex: 22
+      outputs:
+        toindex: [15, 1, 10, 5, 1, 0, 16, 11, 6, 1, 17, 12, 7, 2, 18, 13, 8, 3, 19,
+          14, 9, 4]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 3, 4, 11, 12, 13, 14, 15, 5, 16, 6, 7, 8, 9, 10, 17, 18,
+          19, 20, 21]
+        fromindex: [15, 16, 17, 18, 19, 1, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, 1, 0,
+          1, 2, 3, 4]
+        lencarry: 22
+        lenindex: 22
+      outputs:
+        toindex: [15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 1, 1, 10, 11, 12, 13, 14, 0, 1,
+          2, 3, 4]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 20, 21, 22, 23,
+          24, 10, 11, 12, 13, 14, 25, 26, 27, 28, 29]
+        fromindex: [15, 16, 17, 18, 19, 1, 1, 1, 1, 1, 10, 11, 12, 13, 14, 5, 6, 7,
+          8, 9, 1, 1, 1, 1, 1, 0, 1, 2, 3, 4]
+        lencarry: 30
+        lenindex: 30
+      outputs:
+        toindex: [15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10,
+          11, 12, 13, 14, 0, 1, 2, 3, 4]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 15, 20, 25, 1, 6, 11, 16, 21, 26, 2, 7, 12, 17, 22, 27,
+          3, 8, 13, 18, 23, 28, 4, 9, 14, 19, 24, 29]
+        fromindex: [15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+          10, 11, 12, 13, 14, 0, 1, 2, 3, 4]
+        lencarry: 30
+        lenindex: 30
+      outputs:
+        toindex: [15, 5, 1, 1, 10, 0, 16, 6, 1, 1, 11, 1, 17, 7, 1, 1, 12, 2, 18, 8,
+          1, 1, 13, 3, 19, 9, 1, 1, 14, 4]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 10, 11, 12, 17, 1, 6, 13, 18, 2, 7, 14, 19, 3, 8, 15, 20,
+          4, 9, 16, 21]
+        fromindex: [15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 1, 1, 10, 11, 12, 13, 14, 0,
+          1, 2, 3, 4]
+        lencarry: 22
+        lenindex: 22
+      outputs:
+        toindex: [15, 5, 1, 1, 10, 0, 16, 6, 11, 1, 17, 7, 12, 2, 18, 8, 13, 3, 19,
+          9, 14, 4]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 1, 0]
+        fromindex: [0, 1, 1, 2]
+        lencarry: 4
+        lenindex: 4
+      outputs:
+        toindex: [2, 1, 1, 0]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 1]
+        fromindex: [0, 1, 1, 2]
+        lencarry: 3
+        lenindex: 4
+      outputs:
+        toindex: [2, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 1, 1, 0, 5, 7, 7, 9, 10]
+        fromindex: [0, 1, 1, 2, 3, 1, 4, 5, 6, 7, 1, 8, 9]
+        lencarry: 10
+        lenindex: 13
+      outputs:
+        toindex: [2, 1, 1, 1, 0, 1, 5, 5, 7, 1]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 2, 1, 5, 6]
+        fromindex: [0, 1, 1, 2, 3, 1, 4, 5]
+        lencarry: 6
+        lenindex: 8
+      outputs:
+        toindex: [2, 1, 1, 1, 1, 4]
+    - error: false
+      inputs:
+        fromcarry: [1, 2]
+        fromindex: [1, 2, 3]
+        lencarry: 2
+        lenindex: 3
+      outputs:
+        toindex: [2, 3]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 3]
+        fromindex: [1, 2, 3, 4]
+        lencarry: 3
+        lenindex: 4
+      outputs:
+        toindex: [2, 3, 4]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromindex: [3, 1, 2, 1, 1, 0]
+        lencarry: 6
+        lenindex: 6
+      outputs:
+        toindex: [3, 1, 1, 1, 2, 0]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 2]
+        fromindex: [0, 1, 2, 1, 3, 1, 1, 4]
+        lencarry: 3
+        lenindex: 8
+      outputs:
+        toindex: [3, 1, 2]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 2, 1]
+        fromindex: [0, 1, 2, 1, 3, 1, 1, 4]
+        lencarry: 4
+        lenindex: 8
+      outputs:
+        toindex: [3, 1, 2, 1]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 2, 0]
+        fromindex: [0, 1, 1, 2, 3]
+        lencarry: 4
+        lenindex: 5
+      outputs:
+        toindex: [3, 2, 1, 0]
+    - error: false
+      inputs:
+        fromcarry: [4, 5]
+        fromindex: [0, 1, 1, 2, 3, 4]
+        lencarry: 2
+        lenindex: 6
+      outputs:
+        toindex: [3, 4]
+    - error: false
+      inputs:
+        fromcarry: [2, 3]
+        fromindex: [1, 2, 3, 4]
+        lencarry: 2
+        lenindex: 4
+      outputs:
+        toindex: [3, 4]
+    - error: false
+      inputs:
+        fromcarry: [5, 6, 7, 8]
+        fromindex: [0, 1, 1, 1, 2, 3, 4, 5, 1]
+        lencarry: 4
+        lenindex: 9
+      outputs:
+        toindex: [3, 4, 5, 1]
+    - error: false
+      inputs:
+        fromcarry: [4, 5, 7, 8, 9, 10, 11]
+        fromindex: [0, 1, 1, 2, 3, 4, 5, 6, 1, 7, 8, 9]
+        lencarry: 7
+        lenindex: 12
+      outputs:
+        toindex: [3, 4, 6, 1, 7, 8, 9]
+    - error: false
+      inputs:
+        fromcarry: [4]
+        fromindex: [2, 2, 0, 3, 4]
+        lencarry: 1
+        lenindex: 5
+      outputs:
+        toindex: [4]
+    - error: false
+      inputs:
+        fromcarry: [4, 1]
+        fromindex: [2, 2, 0, 3, 4]
+        lencarry: 2
+        lenindex: 5
+      outputs:
+        toindex: [4, 2]
+    - error: false
+      inputs:
+        fromcarry: [6, 7, 8, 9, 5, 3, 4, 0, 1, 2]
+        fromindex: [0, 1, 1, 1, 2, 3, 4, 5, 6, 7]
+        lencarry: 10
+        lenindex: 10
+      outputs:
+        toindex: [4, 5, 6, 7, 3, 1, 2, 0, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromindex: [5, 4, 3, 2, 1, 0]
+        lencarry: 6
+        lenindex: 6
+      outputs:
+        toindex: [5, 2, 4, 1, 3, 0]
+    - error: false
+      inputs:
+        fromcarry: [6, 7, 8, 9, 10, 11]
+        fromindex: [0, 1, 1, 2, 3, 4, 5, 6, 1, 7, 8, 9]
+        lencarry: 6
+        lenindex: 12
+      outputs:
+        toindex: [5, 6, 1, 7, 8, 9]
+  - name: awkward_IndexedArray_getitem_nextcarry
+    tests:
+    - error: false
+      inputs:
+        fromindex: [0, 0, 0, 0, 0, 0, 0]
+        lencontent: 1
+        lenindex: 7
+      outputs:
+        tocarry: [0, 0, 0, 0, 0, 0, 0]
+    - error: false
+      inputs:
+        fromindex: [0, 0, 0, 0, 0, 0]
+        lencontent: 1
+        lenindex: 6
+      outputs:
+        tocarry: [0, 0, 0, 0, 0, 0]
+    - error: false
+      inputs:
+        fromindex: [0, 0, 0, 0, 0]
+        lencontent: 1
+        lenindex: 5
+      outputs:
+        tocarry: [0, 0, 0, 0, 0]
+    - error: false
+      inputs:
+        fromindex: [0, 0, 0]
+        lencontent: 1
+        lenindex: 3
+      outputs:
+        tocarry: [0, 0, 0]
+    - error: false
+      inputs:
+        fromindex: [0, 0]
+        lencontent: 1
+        lenindex: 2
+      outputs:
+        tocarry: [0, 0]
+    - error: false
+      inputs:
+        fromindex: [0, 0, 0, 1, 1, 1, 2, 2, 2]
+        lencontent: 3
+        lenindex: 9
+      outputs:
+        tocarry: [0, 0, 0, 1, 1, 1, 2, 2, 2]
+    - error: false
+      inputs:
+        fromindex: [0, 0, 0, 2, 3, 3, 4]
+        lencontent: 5
+        lenindex: 7
+      outputs:
+        tocarry: [0, 0, 0, 2, 3, 3, 4]
+    - error: false
+      inputs:
+        fromindex: [0, 1]
+        lencontent: 2
+        lenindex: 2
+      outputs:
+        tocarry: [0, 1]
+    - error: false
+      inputs:
+        fromindex: [0, 1, 2]
+        lencontent: 3
+        lenindex: 3
+      outputs:
+        tocarry: [0, 1, 2]
+    - error: false
+      inputs:
+        fromindex: [0, 1, 2, 3]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1, 2, 3]
+    - error: false
+      inputs:
+        fromindex: [0, 1, 2, 3, 4]
+        lencontent: 5
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+    - error: false
+      inputs:
+        fromindex: [1, 1, 1]
+        lencontent: 6
+        lenindex: 3
+      outputs:
+        tocarry: [1, 1, 1]
+    - error: false
+      inputs:
+        fromindex: [1]
+        lencontent: 5
+        lenindex: 1
+      outputs:
+        tocarry: [1]
+    - error: false
+      inputs:
+        fromindex: [1]
+        lencontent: 6
+        lenindex: 1
+      outputs:
+        tocarry: [1]
+    - error: false
+      inputs:
+        fromindex: [1, 2]
+        lencontent: 3
+        lenindex: 2
+      outputs:
+        tocarry: [1, 2]
+    - error: false
+      inputs:
+        fromindex: [1, 3]
+        lencontent: 6
+        lenindex: 2
+      outputs:
+        tocarry: [1, 3]
+    - error: false
+      inputs:
+        fromindex: [2, 1, 0, 3, 3, 4]
+        lencontent: 5
+        lenindex: 6
+      outputs:
+        tocarry: [2, 1, 0, 3, 3, 4]
+    - error: false
+      inputs:
+        fromindex: [2, 2, 1, 0]
+        lencontent: 3
+        lenindex: 4
+      outputs:
+        tocarry: [2, 2, 1, 0]
+    - error: false
+      inputs:
+        fromindex: [2, 2, 1, 0, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [2, 2, 1, 0, 3]
+    - error: false
+      inputs:
+        fromindex: [2]
+        lencontent: 3
+        lenindex: 1
+      outputs:
+        tocarry: [2]
+    - error: false
+      inputs:
+        fromindex: [2]
+        lencontent: 5
+        lenindex: 1
+      outputs:
+        tocarry: [2]
+    - error: false
+      inputs:
+        fromindex: [2, 4, 4, 0, 8]
+        lencontent: 10
+        lenindex: 5
+      outputs:
+        tocarry: [2, 4, 4, 0, 8]
+    - error: false
+      inputs:
+        fromindex: [3, 2, 1, 0]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [3, 2, 1, 0]
+    - error: false
+      inputs:
+        fromindex: [4, 3, 2, 1, 0]
+        lencontent: 5
+        lenindex: 5
+      outputs:
+        tocarry: [4, 3, 2, 1, 0]
+    - error: false
+      inputs:
+        fromindex: [4]
+        lencontent: 5
+        lenindex: 1
+      outputs:
+        tocarry: [4]
+    - error: false
+      inputs:
+        fromindex: [6, 4, 4, 8, 0]
+        lencontent: 10
+        lenindex: 5
+      outputs:
+        tocarry: [6, 4, 4, 8, 0]
+    - error: false
+      inputs:
+        fromindex: [6, 5, 4, 3, 2, 1, 0]
+        lencontent: 7
+        lenindex: 7
+      outputs:
+        tocarry: [6, 5, 4, 3, 2, 1, 0]
+  - name: awkward_IndexedArray_getitem_nextcarry_outindex
+    tests:
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 1]
+        lencontent: 3
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 1, 2, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        lencontent: 3
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1, 3]
+        lencontent: 4
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 1, 2, 1, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 1, 3]
+        lencontent: 4
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 2, 1, 1, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 2, 1, 3]
+    - error: false
+      inputs:
+        fromindex: [0, 1, 2, 3]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3, 4]
+        lencontent: 5
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+        toindex: [0, 1, 1, 1, 2, 3, 4]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3, 1, 4]
+        lencontent: 5
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+        toindex: [0, 1, 2, 1, 3, 1, 4]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3, 4, 5, 1]
+        lencontent: 6
+        lenindex: 9
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5]
+        toindex: [0, 1, 1, 1, 2, 3, 4, 5, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 1, 5]
+        lencontent: 6
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5]
+        toindex: [0, 1, 2, 3, 4, 1, 5]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 4]
+        lencontent: 5
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 4]
+        toindex: [0, 1, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [0, 2, 3]
+        toindex: [0, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 2, 1]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [1, 2]
+        toindex: [1, 0, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 2, 1, 1, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [1, 2, 3]
+        toindex: [0, 1, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 2, 1, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [1, 2, 3]
+        toindex: [1, 0, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 2, 5, 1]
+        lencontent: 6
+        lenindex: 6
+      outputs:
+        tocarry: [1, 2, 5]
+        toindex: [1, 0, 1, 1, 2, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 4]
+        lencontent: 5
+        lenindex: 4
+      outputs:
+        tocarry: [1, 4]
+        toindex: [1, 1, 0, 1]
+    - error: true
+      inputs:
+        fromindex: [2, 1, 2, 1, 1, 0]
+        lencontent: 3
+        lenindex: 6
+      outputs:
+        tocarry: [2, 2, 1, 0]
+        toindex: [0, 1, 1, 2, 1, 3]
+    - error: true
+      inputs:
+        fromindex: [1, 3]
+        lencontent: 6
+        lenindex: 2
+      outputs:
+        tocarry: [3]
+        toindex: [1, 0]
+    - error: true
+      inputs:
+        fromindex: [3, 2, 1, 0]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [3, 2, 0]
+        toindex: [0, 1, 1, 2]
+    - error: false
+      inputs:
+        fromindex: [3, 2, 1, 0]
+        lencontent: 4
+        lenindex: 4
+      outputs:
+        tocarry: [3, 2, 1, 0]
+        toindex: [0, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [3, 4, 5, 1]
+        lencontent: 6
+        lenindex: 4
+      outputs:
+        tocarry: [3, 4, 5]
+        toindex: [0, 1, 2, 1]
+  - name: awkward_IndexedArray_getitem_nextcarry_outindex_mask
+    tests:
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lencontent: 1
+        lenindex: 5
+      outputs:
+        tocarry: [0]
+        toindex: [0, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1]
+        lencontent: 2
+        lenindex: 3
+      outputs:
+        tocarry: [0, 1]
+        toindex: [0, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [0, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [0, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [0, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [0, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 1]
+        lencontent: 1
+        lenindex: 5
+      outputs:
+        tocarry: [0]
+        toindex: [1, 0, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [1, 0, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [1, 0, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [1, 0, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 1]
+        lencontent: 1
+        lenindex: 5
+      outputs:
+        tocarry: [0]
+        toindex: [1, 1, 0, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [1, 1, 0, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [1, 1, 0, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 0, 1]
+        lencontent: 1
+        lenindex: 5
+      outputs:
+        tocarry: [0]
+        toindex: [1, 1, 1, 0, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 0, 1]
+        lencontent: 2
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1]
+        toindex: [1, 1, 1, 0, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 1, 0]
+        lencontent: 1
+        lenindex: 5
+      outputs:
+        tocarry: [0]
+        toindex: [1, 1, 1, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1, 2]
+        lencontent: 3
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        lencontent: 3
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        lencontent: 3
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 2, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 1, 2, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1]
+        lencontent: 3
+        lenindex: 4
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 2, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 1]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [0, 1, 2, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 2]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [1, 0, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 2]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [1, 0, 1, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 2, 1]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [1, 0, 1, 2, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 2]
+        lencontent: 3
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2]
+        toindex: [1, 1, 0, 1, 2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3]
+        lencontent: 4
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 1, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1, 3]
+        lencontent: 4
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 1, 2, 1, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 2, 1, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [0, 1, 2, 3, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 2, 3]
+        lencontent: 4
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 3]
+        toindex: [1, 0, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3, 1, 4]
+        lencontent: 5
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+        toindex: [0, 1, 2, 1, 3, 1, 4]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3, 4]
+        lencontent: 5
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+        toindex: [0, 1, 2, 1, 3, 4]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1, 4]
+        lencontent: 5
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+        toindex: [0, 1, 2, 3, 1, 4]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 1, 5]
+        lencontent: 6
+        lenindex: 8
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5]
+        toindex: [0, 1, 1, 2, 3, 4, 1, 5]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 5]
+        lencontent: 6
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5]
+        toindex: [0, 1, 1, 2, 3, 4, 5]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1, 4, 5]
+        lencontent: 6
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5]
+        toindex: [0, 1, 2, 3, 1, 4, 5]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1, 4, 5, 6]
+        lencontent: 7
+        lenindex: 8
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6]
+        toindex: [0, 1, 2, 3, 1, 4, 5, 6]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1, 4, 5, 6, 7, 8, 1, 9]
+        lencontent: 10
+        lenindex: 12
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        toindex: [0, 1, 2, 3, 1, 4, 5, 6, 7, 8, 1, 9]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 4]
+        lencontent: 5
+        lenindex: 5
+      outputs:
+        tocarry: [0, 1, 2, 4]
+        toindex: [0, 1, 2, 1, 3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 3, 4, 1, 6]
+        lencontent: 7
+        lenindex: 7
+      outputs:
+        tocarry: [0, 1, 3, 4, 6]
+        toindex: [0, 1, 1, 2, 3, 1, 4]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 4, 5]
+        lencontent: 6
+        lenindex: 6
+      outputs:
+        tocarry: [0, 1, 4, 5]
+        toindex: [0, 1, 1, 1, 2, 3]
+    - error: true
+      inputs:
+        fromindex: [1]
+        lenindex: 0
+      outputs:
+        tocarry: [1]
+        toindex: [1]
+    - error: true
+      inputs:
+        fromindex: [5]
+        lenindex: 0
+      outputs:
+        tocarry: [1, 1, 1, 1, 1]
+        toindex: [1, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [3]
+        lenindex: 0
+      outputs:
+        tocarry: [1, 1, 1]
+        toindex: [1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [6, 5, 1, 3, 2, 1, 0]
+        lencontent: 7
+        lenindex: 7
+      outputs:
+        tocarry: [6, 5, 3, 2, 0]
+        toindex: [0, 1, 1, 2, 3, 1, 4]
+  - name: awkward_IndexedArray_mask
+    tests:
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 5, 6, 1, 7, 8]
+        length: 10
+      outputs:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [13, 9, 13, 4, 8, 3, 15, 1, 16, 2, 8]
+        length: 11
+      outputs:
+        tomask: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+    - error: false
+      inputs:
+        fromindex: [3, 2, 1, 0]
+        length: 4
+      outputs:
+        tomask: [0, 0, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3]
+        length: 5
+      outputs:
+        tomask: [0, 0, 0, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [4, 3, 2, 1, 0]
+        length: 5
+      outputs:
+        tomask: [0, 0, 0, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 1, 3, 4, 5, 1, 1]
+        length: 10
+      outputs:
+        tomask: [0, 0, 0, 1, 1, 0, 0, 0, 1, 1]
+    - error: false
+      inputs:
+        fromindex: [0, 1]
+        length: 2
+      outputs:
+        tomask: [0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 1, 4]
+        length: 7
+      outputs:
+        tomask: [0, 0, 1, 0, 0, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        length: 4
+      outputs:
+        tomask: [0, 0, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1, 1, 3]
+        length: 7
+      outputs:
+        tomask: [0, 0, 1, 0, 1, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1]
+        length: 3
+      outputs:
+        tomask: [0, 0, 1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3]
+        length: 6
+      outputs:
+        tomask: [0, 0, 1, 1, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        length: 5
+      outputs:
+        tomask: [0, 0, 1, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 5, 6, 7]
+        length: 9
+      outputs:
+        tomask: [0, 1, 0, 0, 0, 0, 0, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 5]
+        length: 7
+      outputs:
+        tomask: [0, 1, 0, 0, 0, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 4, 5, 6, 7]
+        length: 7
+      outputs:
+        tomask: [0, 1, 0, 0, 0, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 1, 4, 5, 6]
+        length: 9
+      outputs:
+        tomask: [0, 1, 0, 0, 0, 1, 0, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [2, 1, 4, 0, 8]
+        length: 5
+      outputs:
+        tomask: [0, 1, 0, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1]
+        length: 3
+      outputs:
+        tomask: [0, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3, 4]
+        length: 7
+      outputs:
+        tomask: [0, 1, 0, 1, 0, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 4, 5, 6]
+        length: 7
+      outputs:
+        tomask: [0, 1, 0, 1, 0, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        length: 5
+      outputs:
+        tomask: [0, 1, 0, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1]
+        length: 4
+      outputs:
+        tomask: [0, 1, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 2, 1, 1, 3, 4, 1]
+        length: 10
+      outputs:
+        tomask: [1, 0, 0, 1, 0, 1, 1, 0, 0, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1]
+        length: 3
+      outputs:
+        tomask: [1, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [1, 4, 4, 1, 0]
+        length: 5
+      outputs:
+        tomask: [1, 0, 0, 1, 0]
+    - error: true
+      inputs:
+        fromindex: [1, 3, 4]
+        length: 3
+      outputs:
+        tomask: [1, 0, 0]
+    - error: true
+      inputs:
+        fromindex: [1, 2, 1]
+        length: 3
+      outputs:
+        tomask: [1, 0, 1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 1, 2, 3, 4, 5, 1, 1, 1]
+        length: 12
+      outputs:
+        tomask: [1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1]
+    - error: true
+      inputs:
+        fromindex: [1]
+        length: 1
+      outputs:
+        tomask: [1]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 1, 1]
+        length: 5
+      outputs:
+        tomask: [1, 1, 1, 1, 1]
+  - name: awkward_IndexedArray_numnull
+    tests:
+    - error: false
+      inputs:
+        fromindex: [0, 1]
+        lenindex: 2
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [0, 1, 2, 3]
+        lenindex: 4
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 5, 6]
+        lenindex: 7
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [1, 2]
+        lenindex: 2
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [1, 2, 3]
+        lenindex: 3
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [1, 2, 3, 4]
+        lenindex: 4
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [2, 3]
+        lenindex: 2
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [2, 3, 4]
+        lenindex: 3
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [3, 2, 1, 0]
+        lenindex: 4
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [3, 4]
+        lenindex: 2
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [4, 3, 2, 1, 0]
+        lenindex: 5
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [5, 2, 4, 1, 3, 0]
+        lenindex: 6
+      outputs:
+        numnull: [0]
+    - error: false
+      inputs:
+        fromindex: [5, 4, 3, 2, 1, 0]
+        lenindex: 6
+      outputs:
+        numnull: [0]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 5, 6, 7]
+        lenindex: 9
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 5]
+        lenindex: 7
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 5]
+        lenindex: 7
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        lenindex: 4
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        lenindex: 4
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1]
+        lenindex: 3
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 3]
+        lenindex: 4
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 4, 5, 6, 7]
+        lenindex: 7
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3, 4]
+        lenindex: 6
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1]
+        lenindex: 4
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 4]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1, 4, 5, 6]
+        lenindex: 8
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1, 4, 5]
+        lenindex: 7
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1, 4]
+        lenindex: 6
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3]
+        lenindex: 4
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 1, 5]
+        lenindex: 7
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 5, 6, 1, 7, 8]
+        lenindex: 10
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 5, 6]
+        lenindex: 7
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        lenindex: 9
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [15, 1, 10, 5, 1, 0, 16, 1, 11, 6, 1, 1, 17, 1, 12, 7, 1, 2, 18,
+          1, 13, 8, 1, 3, 19, 1, 14, 9, 1, 4]
+        lenindex: 30
+      outputs:
+        numnull: [10]
+    - error: true
+      inputs:
+        fromindex: [15, 16, 17, 18, 19, 1, 1, 1, 1, 1, 10, 11, 12, 13, 14, 5, 6, 7,
+          8, 9, 1, 1, 1, 1, 1, 0, 1, 2, 3, 4]
+        lenindex: 30
+      outputs:
+        numnull: [10]
+    - error: true
+      inputs:
+        fromindex: [15, 5, 1, 1, 10, 0, 16, 6, 1, 1, 11, 1, 17, 7, 1, 1, 12, 2, 18,
+          8, 1, 1, 13, 3, 19, 9, 1, 1, 14, 4]
+        lenindex: 30
+      outputs:
+        numnull: [10]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 2, 3]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1]
+        lenindex: 3
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [1]
+        lenindex: 1
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [1, 3]
+        lenindex: 2
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [1, 3, 4]
+        lenindex: 3
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [2, 1, 4, 0, 8]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [3, 2, 1, 0]
+        lenindex: 4
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [3, 4, 5, 1]
+        lenindex: 4
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [4, 3, 1, 4, 0]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [4, 3, 2, 1, 0]
+        lenindex: 5
+      outputs:
+        numnull: [1]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 3, 5, 6, 1, 1, 4, 1, 7, 2, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1]
+        lenindex: 25
+      outputs:
+        numnull: [16]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3, 4]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3, 4]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3]
+        lenindex: 6
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 3, 4, 5]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1]
+        lenindex: 4
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 4]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 4, 5]
+        lenindex: 6
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 4, 5, 6]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 5, 6, 7]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1, 3]
+        lenindex: 6
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 1, 4, 5, 6]
+        lenindex: 9
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 1, 5, 6, 7]
+        lenindex: 9
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 1, 5, 6]
+        lenindex: 9
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 3, 4, 1, 5]
+        lenindex: 8
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2]
+        lenindex: 4
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 3]
+        lenindex: 4
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 3, 4, 1, 6]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 1, 3]
+        lenindex: 6
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 3, 1, 4]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 1, 4, 5, 6]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 1, 4, 5, 6, 7, 8, 1, 9]
+        lenindex: 12
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 2, 3, 4, 1, 6, 7, 8]
+        lenindex: 9
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 2]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 2]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 2, 1]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 2]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 4]
+        lenindex: 4
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 2, 1, 3]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 2, 1, 4]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 2, 1, 1, 3]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 2, 1]
+        lenindex: 3
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [1, 4, 4, 1, 0]
+        lenindex: 5
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [15, 1, 10, 5, 1, 0, 16, 11, 6, 1, 17, 12, 7, 2, 18, 13, 8, 3, 19,
+          14, 9, 4]
+        lenindex: 22
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [15, 16, 17, 18, 19, 1, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, 1, 0,
+          1, 2, 3, 4]
+        lenindex: 22
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [15, 5, 1, 1, 10, 0, 16, 6, 11, 1, 17, 7, 12, 2, 18, 8, 13, 3, 19,
+          9, 14, 4]
+        lenindex: 22
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [2, 1, 2, 1, 1, 0]
+        lenindex: 6
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [3, 1, 1, 1, 2, 0]
+        lenindex: 6
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [3, 1, 2, 1, 1, 0]
+        lenindex: 6
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [6, 5, 1, 3, 2, 1, 0]
+        lenindex: 7
+      outputs:
+        numnull: [2]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1, 2]
+        lenindex: 6
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1, 2]
+        lenindex: 6
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 1]
+        lenindex: 6
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 2, 3, 4, 5, 1]
+        lenindex: 9
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 2, 1, 3, 1, 4]
+        lenindex: 8
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 0, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 2, 1]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 2, 5, 1]
+        lenindex: 6
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1]
+        lenindex: 3
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 4, 1, 0]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 4, 1, 8]
+        lenindex: 5
+      outputs:
+        numnull: [3]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [4]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [4]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [4]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 0, 1]
+        lenindex: 5
+      outputs:
+        numnull: [4]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 1, 0]
+        lenindex: 5
+      outputs:
+        numnull: [4]
+    - error: true
+      inputs:
+        fromindex: [1, 0, 1, 1, 2, 1, 1, 3, 4, 1]
+        lenindex: 10
+      outputs:
+        numnull: [5]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 1, 1, 1]
+        lenindex: 5
+      outputs:
+        numnull: [5]
+    - error: true
+      inputs:
+        fromindex: [0, 1, 3, 5, 6, 1, 1, 4, 1, 7, 2, 1, 1, 1, 8]
+        lenindex: 15
+      outputs:
+        numnull: [6]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 0, 1, 2, 1, 1, 1, 3, 1, 4, 5, 1, 1, 6, 7, 8]
+        lenindex: 17
+      outputs:
+        numnull: [8]
+    - error: true
+      inputs:
+        fromindex: [1, 1, 3, 5, 6, 1, 1, 1, 1, 7, 0, 1, 4, 1, 8, 1, 2]
+        lenindex: 17
+      outputs:
+        numnull: [8]
+  - name: awkward_ListArray_broadcast_tooffsets
+    tests:
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16]
+        fromstarts: [0, 0, 0, 0, 0, 0, 4, 4, 4, 4]
+        fromstops: [2, 2, 2, 2, 2, 2, 5, 5, 5, 5]
+        lencontent: 5
+        offsetslength: 11
+      outputs:
+        tocarry: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 4, 4, 4, 4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 4, 6, 8, 10]
+        fromstarts: [0, 0, 0, 3, 3]
+        fromstops: [2, 2, 2, 5, 5]
+        lencontent: 5
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 0, 1, 0, 1, 3, 4, 3, 4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+        fromstarts: [0, 0, 0, 3, 3, 5, 5, 5, 8, 8]
+        fromstops: [2, 2, 2, 5, 5, 7, 7, 7, 10, 10]
+        lencontent: 10
+        offsetslength: 11
+      outputs:
+        tocarry: [0, 1, 0, 1, 0, 1, 3, 4, 3, 4, 5, 6, 5, 6, 5, 6, 8, 9, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 9, 12, 15, 18, 21]
+        fromstarts: [0, 0, 0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3, 3, 3]
+        lencontent: 3
+        offsetslength: 8
+      outputs:
+        tocarry: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 9, 12, 15, 18]
+        fromstarts: [0, 0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3, 3]
+        lencontent: 3
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 9, 12, 15]
+        fromstarts: [0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3]
+        lencontent: 3
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 9]
+        fromstarts: [0, 0, 0]
+        fromstops: [3, 3, 3]
+        lencontent: 3
+        offsetslength: 4
+      outputs:
+        tocarry: [0, 1, 2, 0, 1, 2, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6]
+        fromstarts: [0, 0]
+        fromstops: [3, 3]
+        lencontent: 3
+        offsetslength: 3
+      outputs:
+        tocarry: [0, 1, 2, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3]
+        fromstarts: [0, 3]
+        fromstops: [3, 3]
+        lencontent: 20
+        offsetslength: 3
+      outputs:
+        tocarry: [0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 8, 13, 18, 23, 28]
+        fromstarts: [0, 13, 3, 18, 8, 23]
+        fromstops: [3, 18, 8, 23, 13, 28]
+        lencontent: 28
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 13, 14, 15, 16, 17, 3, 4, 5, 6, 7, 18, 19, 20, 21, 22, 8,
+          9, 10, 11, 12, 23, 24, 25, 26, 27]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 4]
+        fromstarts: [0, 2]
+        fromstops: [2, 4]
+        lencontent: 4
+        offsetslength: 3
+      outputs:
+        tocarry: [0, 1, 2, 3]
+    - error: false
+      inputs:
+        fromoffsets: [0, 4, 9, 13, 18, 23, 28]
+        fromstarts: [0, 13, 4, 18, 8, 23]
+        fromstops: [4, 18, 8, 23, 13, 28]
+        lencontent: 28
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 13, 14, 15, 16, 17, 4, 5, 6, 7, 18, 19, 20, 21, 22, 8,
+          9, 10, 11, 12, 23, 24, 25, 26, 27]
+    - error: false
+      inputs:
+        fromoffsets: [0, 4, 9, 14, 19, 24, 29]
+        fromstarts: [0, 14, 4, 19, 9, 24]
+        fromstops: [4, 19, 9, 24, 14, 29]
+        lencontent: 29
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 14, 15, 16, 17, 18, 4, 5, 6, 7, 8, 19, 20, 21, 22, 23,
+          9, 10, 11, 12, 13, 24, 25, 26, 27, 28]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 18, 21, 24, 29]
+        fromstarts: [0, 0, 0, 8, 11, 11, 14]
+        fromstops: [5, 5, 5, 11, 14, 14, 19]
+        lencontent: 19
+        offsetslength: 8
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13,
+          11, 12, 13, 14, 15, 16, 17, 18]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 4, 5]
+        fromstarts: [0, 3, 3, 4]
+        fromstops: [3, 3, 4, 5]
+        lencontent: 5
+        offsetslength: 5
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencontent: 10
+        offsetslength: 4
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencontent: 5
+        offsetslength: 4
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5, 5, 8]
+        fromstarts: [0, 3, 3, 10, 10]
+        fromstops: [3, 3, 5, 10, 13]
+        lencontent: 13
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 10, 11, 12]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20]
+        fromstarts: [0, 10, 15, 25]
+        fromstops: [5, 15, 20, 30]
+        lencontent: 30
+        offsetslength: 5
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 25, 26, 27,
+          28, 29]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 11, 12, 17, 22]
+        fromstarts: [0, 11, 5, 16, 6, 17]
+        fromstops: [5, 16, 6, 17, 11, 22]
+        lencontent: 22
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 11, 12, 13, 14, 15, 5, 16, 6, 7, 8, 9, 10, 17, 18,
+          19, 20, 21]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 14, 18, 23, 28]
+        fromstarts: [0, 14, 5, 19, 9, 23]
+        fromstops: [5, 19, 9, 23, 14, 28]
+        lencontent: 28
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 14, 15, 16, 17, 18, 5, 6, 7, 8, 19, 20, 21, 22, 9,
+          10, 11, 12, 13, 23, 24, 25, 26, 27]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 24, 28]
+        fromstarts: [0, 14, 5, 19, 10, 24]
+        fromstops: [5, 19, 10, 24, 14, 28]
+        lencontent: 28
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 14, 15, 16, 17, 18, 5, 6, 7, 8, 9, 19, 20, 21, 22,
+          23, 10, 11, 12, 13, 24, 25, 26, 27]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5, 6, 10]
+        fromstarts: [0, 3, 3, 15, 16]
+        fromstops: [3, 3, 5, 16, 20]
+        lencontent: 20
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20]
+        fromstarts: [0, 15, 10, 25]
+        fromstops: [5, 20, 15, 30]
+        lencontent: 30
+        offsetslength: 5
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 25, 26, 27,
+          28, 29]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 19, 24, 28]
+        fromstarts: [0, 15, 5, 20, 10, 24]
+        fromstops: [5, 20, 10, 24, 15, 28]
+        lencontent: 28
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 20, 21, 22, 23,
+          10, 11, 12, 13, 14, 24, 25, 26, 27]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 28]
+        fromstarts: [0, 15, 5, 20, 10, 25]
+        fromstops: [5, 20, 10, 25, 15, 28]
+        lencontent: 28
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 20, 21, 22, 23,
+          24, 10, 11, 12, 13, 14, 25, 26, 27]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 29]
+        fromstarts: [0, 15, 5, 20, 10, 25]
+        fromstops: [5, 20, 10, 25, 15, 29]
+        lencontent: 29
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 20, 21, 22, 23,
+          24, 10, 11, 12, 13, 14, 25, 26, 27, 28]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 30]
+        fromstarts: [0, 15, 5, 20, 10, 25]
+        fromstops: [5, 20, 10, 25, 15, 30]
+        lencontent: 30
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 20, 21, 22, 23,
+          24, 10, 11, 12, 13, 14, 25, 26, 27, 28, 29]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 30]
+        fromstarts: [0, 45, 5, 50, 10, 55]
+        fromstops: [5, 50, 10, 55, 15, 60]
+        lencontent: 60
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 45, 46, 47, 48, 49, 5, 6, 7, 8, 9, 50, 51, 52, 53,
+          54, 10, 11, 12, 13, 14, 55, 56, 57, 58, 59]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6]
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        lencontent: 25
+        offsetslength: 3
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6]
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        lencontent: 6
+        offsetslength: 3
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 10, 14, 17]
+        fromstarts: [0, 3, 10, 14, 18]
+        fromstops: [3, 6, 14, 18, 21]
+        lencontent: 21
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 9, 12, 15]
+        fromstarts: [0, 3, 11, 14, 17]
+        fromstops: [3, 6, 14, 17, 20]
+        lencontent: 20
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 9, 12, 15]
+        fromstarts: [0, 3, 11, 14, 17]
+        fromstops: [3, 6, 14, 17, 20]
+        lencontent: 25
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 10, 14, 17]
+        fromstarts: [0, 3, 11, 15, 19]
+        fromstops: [3, 6, 15, 19, 22]
+        lencontent: 22
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 4, 6, 7]
+        fromstarts: [0, 3, 3, 4, 6]
+        fromstops: [3, 3, 4, 6, 7]
+        lencontent: 7
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 7]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 7]
+        lencontent: 7
+        offsetslength: 4
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 7]
+        fromstarts: [0, 3]
+        fromstops: [3, 7]
+        lencontent: 7
+        offsetslength: 3
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5, 6, 10]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        lencontent: 10
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5, 8, 8, 10]
+        fromstarts: [0, 3, 3, 5, 8, 8]
+        fromstops: [3, 3, 5, 8, 8, 10]
+        lencontent: 10
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10]
+        fromstarts: [0, 5]
+        fromstops: [5, 10]
+        lencontent: 10
+        offsetslength: 3
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 4, 7, 7, 9, 9, 11]
+        fromstarts: [0, 4, 7, 7, 9, 9]
+        fromstops: [4, 7, 7, 9, 9, 11]
+        lencontent: 11
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 8, 12, 16, 19]
+        fromstarts: [0, 3, 8, 12, 16]
+        fromstops: [3, 8, 12, 16, 19]
+        lencontent: 19
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 11, 15, 19, 22]
+        fromstarts: [0, 3, 6, 11, 15, 19]
+        fromstops: [3, 6, 11, 15, 19, 22]
+        lencontent: 22
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19, 20, 21]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 30]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencontent: 30
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+    - error: false
+      inputs:
+        fromoffsets: [0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105,
+          112, 119, 126, 133, 140, 147, 154, 161, 168, 175, 182, 189, 196, 203, 210]
+        fromstarts: [0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105,
+          112, 119, 126, 133, 140, 147, 154, 161, 168, 175, 182, 189, 196, 203]
+        fromstops: [7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105, 112,
+          119, 126, 133, 140, 147, 154, 161, 168, 175, 182, 189, 196, 203, 210]
+        lencontent: 210
+        offsetslength: 31
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+          19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+          38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
+          57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
+          76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94,
+          95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+          111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125,
+          126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
+          141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+          156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+          171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185,
+          186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200,
+          201, 202, 203, 204, 205, 206, 207, 208, 209]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 30]
+        fromstarts: [0, 5, 10, 45, 50, 55]
+        fromstops: [5, 10, 15, 50, 55, 60]
+        lencontent: 60
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 45, 46, 47, 48,
+          49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 11, 15, 19, 22]
+        fromstarts: [0, 3, 8, 13, 17, 21]
+        fromstops: [3, 6, 13, 17, 21, 24]
+        lencontent: 24
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          21, 22, 23]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 8, 11, 14, 19]
+        fromstarts: [0, 8, 11, 11, 14]
+        fromstops: [5, 11, 14, 14, 19]
+        lencontent: 19
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 11, 12, 13, 14, 15, 16, 17, 18]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5, 8, 9]
+        fromstarts: [0, 3, 4, 5, 8]
+        fromstops: [3, 3, 6, 8, 9]
+        lencontent: 10
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 4, 5, 5, 6, 7, 8]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 5, 6, 7, 7, 9]
+        fromstarts: [0, 4, 6, 3, 6, 7]
+        fromstops: [3, 6, 7, 4, 6, 9]
+        lencontent: 9
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 4, 5, 6, 3, 7, 8]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 5, 6, 7, 9]
+        fromstarts: [0, 4, 6, 3, 7]
+        fromstops: [3, 6, 7, 4, 9]
+        lencontent: 9
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 4, 5, 6, 3, 7, 8]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 3, 4, 5, 6, 8]
+        fromstarts: [0, 2, 4, 5, 6, 9]
+        fromstops: [2, 3, 5, 6, 7, 11]
+        lencontent: 11
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 4, 5, 6, 9, 10]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5, 6, 8]
+        fromstarts: [0, 4, 4, 6, 9]
+        fromstops: [3, 4, 6, 7, 11]
+        lencontent: 11
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 2, 4, 5, 6, 9, 10]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5]
+        fromstarts: [0, 3, 5]
+        fromstops: [3, 3, 7]
+        lencontent: 7
+        offsetslength: 4
+      outputs:
+        tocarry: [0, 1, 2, 5, 6]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 7]
+        fromstarts: [0, 3, 5]
+        fromstops: [3, 3, 9]
+        lencontent: 9
+        offsetslength: 4
+      outputs:
+        tocarry: [0, 1, 2, 5, 6, 7, 8]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 7]
+        fromstarts: [0, 5]
+        fromstops: [3, 9]
+        lencontent: 9
+        offsetslength: 3
+      outputs:
+        tocarry: [0, 1, 2, 5, 6, 7, 8]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 5, 7, 8, 9, 10]
+        fromstarts: [0, 6, 3, 8, 5, 9]
+        fromstops: [3, 8, 5, 9, 6, 10]
+        lencontent: 10
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 6, 7, 3, 4, 8, 5, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 5, 5, 6, 8, 9]
+        fromstarts: [0, 6, 3, 8, 3, 5]
+        fromstops: [3, 8, 3, 9, 5, 6]
+        lencontent: 9
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 2, 6, 7, 8, 3, 4, 5]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 7]
+        fromstarts: [0, 3, 6]
+        fromstops: [3, 3, 10]
+        lencontent: 10
+        offsetslength: 4
+      outputs:
+        tocarry: [0, 1, 2, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 4, 5, 6, 6, 6]
+        fromstarts: [0, 3, 2, 5, 3, 6]
+        fromstops: [2, 5, 3, 6, 3, 6]
+        lencontent: 6
+        offsetslength: 7
+      outputs:
+        tocarry: [0, 1, 3, 4, 2, 5]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 2, 4, 5, 6]
+        fromstarts: [0, 3, 3, 5, 8]
+        fromstops: [2, 3, 5, 6, 9]
+        lencontent: 9
+        offsetslength: 6
+      outputs:
+        tocarry: [0, 1, 3, 4, 5, 8]
+    - error: true
+      inputs:
+        fromoffsets: [1]
+        offsetslength: 9
+      outputs:
+        tocarry: [0]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 9]
+        fromstarts: [11, 14, 17]
+        fromstops: [14, 17, 20]
+        lencontent: 25
+        offsetslength: 4
+      outputs:
+        tocarry: [11, 12, 13, 14, 15, 16, 17, 18, 19]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 30]
+        fromstarts: [1, 16, 6, 21, 11, 26]
+        fromstops: [6, 21, 11, 26, 16, 31]
+        lencontent: 31
+        offsetslength: 7
+      outputs:
+        tocarry: [1, 2, 3, 4, 5, 16, 17, 18, 19, 20, 6, 7, 8, 9, 10, 21, 22, 23, 24,
+          25, 11, 12, 13, 14, 15, 26, 27, 28, 29, 30]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 3, 5]
+        fromstarts: [1, 99, 5]
+        fromstops: [4, 99, 7]
+        lencontent: 7
+        offsetslength: 4
+      outputs:
+        tocarry: [1, 2, 3, 5, 6]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20]
+        fromstarts: [15, 10, 5, 0]
+        fromstops: [20, 15, 10, 5]
+        lencontent: 20
+        offsetslength: 5
+      outputs:
+        tocarry: [15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, 0, 1, 2, 3,
+          4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20]
+        fromstarts: [15, 5, 10, 0]
+        fromstops: [20, 10, 15, 5]
+        lencontent: 20
+        offsetslength: 5
+      outputs:
+        tocarry: [15, 16, 17, 18, 19, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 0, 1, 2, 3,
+          4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 4]
+        fromstarts: [16]
+        fromstops: [20]
+        lencontent: 20
+        offsetslength: 2
+      outputs:
+        tocarry: [16, 17, 18, 19]
+    - error: false
+      inputs:
+        fromoffsets: [0, 0, 1, 3]
+        fromstarts: [2, 2, 3]
+        fromstops: [2, 3, 5]
+        lencontent: 5
+        offsetslength: 4
+      outputs:
+        tocarry: [2, 3, 4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 1, 2, 3]
+        fromstarts: [2, 4, 5]
+        fromstops: [3, 5, 6]
+        lencontent: 6
+        offsetslength: 4
+      outputs:
+        tocarry: [2, 4, 5]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 30]
+        fromstarts: [25, 10, 20, 5, 15, 0]
+        fromstops: [30, 15, 25, 10, 20, 5]
+        lencontent: 30
+        offsetslength: 7
+      outputs:
+        tocarry: [25, 26, 27, 28, 29, 10, 11, 12, 13, 14, 20, 21, 22, 23, 24, 5, 6,
+          7, 8, 9, 15, 16, 17, 18, 19, 0, 1, 2, 3, 4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 10, 15, 20, 25, 30]
+        fromstarts: [25, 20, 15, 10, 5, 0]
+        fromstops: [30, 25, 20, 15, 10, 5]
+        lencontent: 30
+        offsetslength: 7
+      outputs:
+        tocarry: [25, 26, 27, 28, 29, 20, 21, 22, 23, 24, 15, 16, 17, 18, 19, 10, 11,
+          12, 13, 14, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4]
+    - error: false
+      inputs:
+        fromoffsets: [0, 1, 2, 2, 5, 7]
+        fromstarts: [3, 3, 3, 0, 4]
+        fromstops: [4, 4, 3, 3, 6]
+        lencontent: 6
+        offsetslength: 6
+      outputs:
+        tocarry: [3, 3, 0, 1, 2, 4, 5]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 2, 5, 6, 7, 11]
+        fromstarts: [3, 3, 0, 5, 5, 6]
+        fromstops: [5, 3, 3, 6, 6, 10]
+        lencontent: 10
+        offsetslength: 7
+      outputs:
+        tocarry: [3, 4, 0, 1, 2, 5, 5, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 3]
+        fromstarts: [3, 15]
+        fromstops: [5, 16]
+        lencontent: 20
+        offsetslength: 3
+      outputs:
+        tocarry: [3, 4, 15]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 4, 4, 7]
+        fromstarts: [3, 3, 3, 0]
+        fromstops: [5, 5, 3, 3]
+        lencontent: 5
+        offsetslength: 5
+      outputs:
+        tocarry: [3, 4, 3, 4, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 4, 7, 7, 9, 9, 11]
+        fromstarts: [3, 0, 999, 2, 6, 10]
+        fromstops: [7, 3, 999, 4, 6, 12]
+        lencontent: 12
+        offsetslength: 7
+      outputs:
+        tocarry: [3, 4, 5, 6, 0, 1, 2, 2, 3, 10, 11]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 2, 2, 2, 6]
+        fromstarts: [3, 5, 5, 5, 5]
+        fromstops: [5, 5, 5, 5, 9]
+        lencontent: 9
+        offsetslength: 6
+      outputs:
+        tocarry: [3, 4, 5, 6, 7, 8]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 6, 9, 12, 14, 16]
+        fromstarts: [3, 6, 17, 20, 11, 25]
+        fromstops: [6, 9, 20, 23, 13, 27]
+        lencontent: 28
+        offsetslength: 7
+      outputs:
+        tocarry: [3, 4, 5, 6, 7, 8, 17, 18, 19, 20, 21, 22, 11, 12, 25, 26]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 8, 12, 16, 19]
+        fromstarts: [3, 6, 11, 15, 19]
+        fromstops: [6, 11, 15, 19, 22]
+        lencontent: 22
+        offsetslength: 6
+      outputs:
+        tocarry: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    - error: false
+      inputs:
+        fromoffsets: [0, 0, 2, 6]
+        fromstarts: [3, 3, 6]
+        fromstops: [3, 5, 10]
+        lencontent: 10
+        offsetslength: 4
+      outputs:
+        tocarry: [3, 4, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 2, 6]
+        fromstarts: [3, 6]
+        fromstops: [5, 10]
+        lencontent: 10
+        offsetslength: 3
+      outputs:
+        tocarry: [3, 4, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 0, 2]
+        fromstarts: [4, 4]
+        fromstops: [4, 6]
+        lencontent: 6
+        offsetslength: 3
+      outputs:
+        tocarry: [4, 5]
+    - error: false
+      inputs:
+        fromoffsets: [0, 0, 2, 7]
+        fromstarts: [4, 4, 7]
+        fromstops: [4, 6, 12]
+        lencontent: 12
+        offsetslength: 4
+      outputs:
+        tocarry: [4, 5, 7, 8, 9, 10, 11]
+    - error: false
+      inputs:
+        fromoffsets: [0, 1, 2, 5, 5, 7, 7, 11]
+        fromstarts: [5, 5, 0, 3, 3, 6, 6]
+        fromstops: [6, 6, 3, 3, 5, 6, 10]
+        lencontent: 10
+        offsetslength: 8
+      outputs:
+        tocarry: [5, 5, 0, 1, 2, 3, 4, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 0, 1, 4]
+        fromstarts: [5, 5, 6]
+        fromstops: [5, 6, 9]
+        lencontent: 9
+        offsetslength: 4
+      outputs:
+        tocarry: [5, 6, 7, 8]
+    - error: false
+      inputs:
+        fromoffsets: [0, 1, 1, 5]
+        fromstarts: [5, 6, 6]
+        fromstops: [6, 6, 10]
+        lencontent: 10
+        offsetslength: 4
+      outputs:
+        tocarry: [5, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 1, 5]
+        fromstarts: [5, 6]
+        fromstops: [6, 10]
+        lencontent: 10
+        offsetslength: 3
+      outputs:
+        tocarry: [5, 6, 7, 8, 9]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 4, 6, 6, 9]
+        fromstarts: [6, 5, 3, 3, 0]
+        fromstops: [9, 6, 5, 3, 3]
+        lencontent: 9
+        offsetslength: 6
+      outputs:
+        tocarry: [6, 7, 8, 5, 3, 4, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 3, 4, 7, 10]
+        fromstarts: [6, 5, 6, 0]
+        fromstops: [9, 6, 9, 3]
+        lencontent: 9
+        offsetslength: 5
+      outputs:
+        tocarry: [6, 7, 8, 5, 6, 7, 8, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 1, 1, 6]
+        fromstarts: [6, 7, 7]
+        fromstops: [7, 7, 12]
+        lencontent: 12
+        offsetslength: 4
+      outputs:
+        tocarry: [6, 7, 8, 9, 10, 11]
+    - error: false
+      inputs:
+        fromoffsets: [0, 5, 8, 11, 14, 19]
+        fromstarts: [6, 11, 14, 17, 20]
+        fromstops: [11, 14, 17, 20, 25]
+        lencontent: 25
+        offsetslength: 6
+      outputs:
+        tocarry: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+          24]
+    - error: false
+      inputs:
+        fromoffsets: [0, 4, 5, 7, 10]
+        fromstarts: [6, 5, 3, 0]
+        fromstops: [10, 6, 5, 3]
+        lencontent: 10
+        offsetslength: 5
+      outputs:
+        tocarry: [6, 7, 8, 9, 5, 3, 4, 0, 1, 2]
+    - error: false
+      inputs:
+        fromoffsets: [0, 4, 5, 7, 7, 10]
+        fromstarts: [6, 5, 3, 3, 0]
+        fromstops: [10, 6, 5, 3, 3]
+        lencontent: 10
+        offsetslength: 6
+      outputs:
+        tocarry: [6, 7, 8, 9, 5, 3, 4, 0, 1, 2]
+  - name: awkward_ListArray_compact_offsets
+    tests:
+    - error: true
+      inputs:
+        fromstarts: [0]
+      outputs:
+        tooffsets: [0]
+    - error: false
+      inputs:
+        fromstarts: [2, 2, 3]
+        fromstops: [2, 3, 5]
+        length: 3
+      outputs:
+        tooffsets: [0, 0, 1, 3]
+    - error: false
+      inputs:
+        fromstarts: [5, 5, 6]
+        fromstops: [5, 6, 9]
+        length: 3
+      outputs:
+        tooffsets: [0, 0, 1, 4]
+    - error: false
+      inputs:
+        fromstarts: [4, 4]
+        fromstops: [4, 6]
+        length: 2
+      outputs:
+        tooffsets: [0, 0, 2]
+    - error: false
+      inputs:
+        fromstarts: [3, 3, 6]
+        fromstops: [3, 5, 10]
+        length: 3
+      outputs:
+        tooffsets: [0, 0, 2, 6]
+    - error: false
+      inputs:
+        fromstarts: [4, 4, 7]
+        fromstops: [4, 6, 12]
+        length: 3
+      outputs:
+        tooffsets: [0, 0, 2, 7]
+    - error: false
+      inputs:
+        fromstarts: [5, 6, 6]
+        fromstops: [6, 6, 10]
+        length: 3
+      outputs:
+        tooffsets: [0, 1, 1, 5]
+    - error: false
+      inputs:
+        fromstarts: [6, 7, 7]
+        fromstops: [7, 7, 12]
+        length: 3
+      outputs:
+        tooffsets: [0, 1, 1, 6]
+    - error: false
+      inputs:
+        fromstarts: [3, 3, 3, 0, 4]
+        fromstops: [4, 4, 3, 3, 6]
+        length: 5
+      outputs:
+        tooffsets: [0, 1, 2, 2, 5, 7]
+    - error: false
+      inputs:
+        fromstarts: [2, 4, 5]
+        fromstops: [3, 5, 6]
+        length: 3
+      outputs:
+        tooffsets: [0, 1, 2, 3]
+    - error: false
+      inputs:
+        fromstarts: [5, 5, 0, 3, 3, 6, 6]
+        fromstops: [6, 6, 3, 3, 5, 6, 10]
+        length: 7
+      outputs:
+        tooffsets: [0, 1, 2, 5, 5, 7, 7, 11]
+    - error: false
+      inputs:
+        fromstarts: [3, 5, 5, 5, 5]
+        fromstops: [5, 5, 5, 5, 9]
+        length: 5
+      outputs:
+        tooffsets: [0, 2, 2, 2, 2, 6]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 3, 5, 8]
+        fromstops: [2, 3, 5, 6, 9]
+        length: 5
+      outputs:
+        tooffsets: [0, 2, 2, 4, 5, 6]
+    - error: false
+      inputs:
+        fromstarts: [3, 3, 0, 5, 5, 6]
+        fromstops: [5, 3, 3, 6, 6, 10]
+        length: 6
+      outputs:
+        tooffsets: [0, 2, 2, 5, 6, 7, 11]
+    - error: false
+      inputs:
+        fromstarts: [3, 15]
+        fromstops: [5, 16]
+        length: 2
+      outputs:
+        tooffsets: [0, 2, 3]
+    - error: false
+      inputs:
+        fromstarts: [0, 2, 4, 5, 6, 9]
+        fromstops: [2, 3, 5, 6, 7, 11]
+        length: 6
+      outputs:
+        tooffsets: [0, 2, 3, 4, 5, 6, 8]
+    - error: false
+      inputs:
+        fromstarts: [0, 2]
+        fromstops: [2, 4]
+        length: 2
+      outputs:
+        tooffsets: [0, 2, 4]
+    - error: false
+      inputs:
+        fromstarts: [3, 3, 3, 0]
+        fromstops: [5, 5, 3, 3]
+        length: 4
+      outputs:
+        tooffsets: [0, 2, 4, 4, 7]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 2, 5, 3, 6]
+        fromstops: [2, 5, 3, 6, 3, 6]
+        length: 6
+      outputs:
+        tooffsets: [0, 2, 4, 5, 6, 6, 6]
+    - error: false
+      inputs:
+        fromstarts: [0, 0, 0, 3, 3]
+        fromstops: [2, 2, 2, 5, 5]
+        length: 5
+      outputs:
+        tooffsets: [0, 2, 4, 6, 8, 10]
+    - error: false
+      inputs:
+        fromstarts: [0, 0, 0, 0, 0, 0, 4, 4, 4, 4]
+        fromstops: [2, 2, 2, 2, 2, 2, 5, 5, 5, 5]
+        length: 10
+      outputs:
+        tooffsets: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16]
+    - error: false
+      inputs:
+        fromstarts: [0, 0, 0, 3, 3, 5, 5, 5, 8, 8]
+        fromstops: [2, 2, 2, 5, 5, 7, 7, 7, 10, 10]
+        length: 10
+      outputs:
+        tooffsets: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+    - error: false
+      inputs:
+        fromstarts: [3, 6]
+        fromstops: [5, 10]
+        length: 2
+      outputs:
+        tooffsets: [0, 2, 6]
+    - error: false
+      inputs:
+        fromstarts: [0, 3]
+        fromstops: [3, 3]
+        length: 2
+      outputs:
+        tooffsets: [0, 3, 3]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 3, 4]
+        fromstops: [3, 3, 4, 5]
+        length: 4
+      outputs:
+        tooffsets: [0, 3, 3, 4, 5]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        length: 3
+      outputs:
+        tooffsets: [0, 3, 3, 5]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 5]
+        fromstops: [3, 3, 7]
+        length: 3
+      outputs:
+        tooffsets: [0, 3, 3, 5]
+    - error: false
+      inputs:
+        fromstarts: [1, 99, 5]
+        fromstops: [4, 99, 7]
+        length: 3
+      outputs:
+        tooffsets: [0, 3, 3, 5]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 3, 10, 10]
+        fromstops: [3, 3, 5, 10, 13]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 3, 5, 5, 8]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 3, 15, 16]
+        fromstops: [3, 3, 5, 16, 20]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 3, 5, 6, 10]
+    - error: false
+      inputs:
+        fromstarts: [0, 4, 4, 6, 9]
+        fromstops: [3, 4, 6, 7, 11]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 3, 5, 6, 8]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 4, 5, 8]
+        fromstops: [3, 3, 6, 8, 9]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 3, 5, 8, 9]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 5]
+        fromstops: [3, 3, 9]
+        length: 3
+      outputs:
+        tooffsets: [0, 3, 3, 7]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 6]
+        fromstops: [3, 3, 10]
+        length: 3
+      outputs:
+        tooffsets: [0, 3, 3, 7]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 3, 0]
+        fromstops: [9, 6, 5, 3, 3]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 4, 6, 6, 9]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 6, 0]
+        fromstops: [9, 6, 9, 3]
+        length: 4
+      outputs:
+        tooffsets: [0, 3, 4, 7, 10]
+    - error: false
+      inputs:
+        fromstarts: [0, 6, 3, 8, 3, 5]
+        fromstops: [3, 8, 3, 9, 5, 6]
+        length: 6
+      outputs:
+        tooffsets: [0, 3, 5, 5, 6, 8, 9]
+    - error: false
+      inputs:
+        fromstarts: [0, 4, 6, 3, 6, 7]
+        fromstops: [3, 6, 7, 4, 6, 9]
+        length: 6
+      outputs:
+        tooffsets: [0, 3, 5, 6, 7, 7, 9]
+    - error: false
+      inputs:
+        fromstarts: [0, 4, 6, 3, 7]
+        fromstops: [3, 6, 7, 4, 9]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 5, 6, 7, 9]
+    - error: false
+      inputs:
+        fromstarts: [0, 6, 3, 8, 5, 9]
+        fromstops: [3, 8, 5, 9, 6, 10]
+        length: 6
+      outputs:
+        tooffsets: [0, 3, 5, 7, 8, 9, 10]
+    - error: false
+      inputs:
+        fromstarts: [0, 0]
+        fromstops: [3, 3]
+        length: 2
+      outputs:
+        tooffsets: [0, 3, 6]
+    - error: false
+      inputs:
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        length: 2
+      outputs:
+        tooffsets: [0, 3, 6]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 10, 14, 18]
+        fromstops: [3, 6, 14, 18, 21]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 6, 10, 14, 17]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 6, 11, 15, 19]
+        fromstops: [3, 6, 11, 15, 19, 22]
+        length: 6
+      outputs:
+        tooffsets: [0, 3, 6, 11, 15, 19, 22]
+    - error: false
+      inputs:
+        fromstarts: [0, 0, 0]
+        fromstops: [3, 3, 3]
+        length: 3
+      outputs:
+        tooffsets: [0, 3, 6, 9]
+    - error: false
+      inputs:
+        fromstarts: [3, 6, 17, 20, 11, 25]
+        fromstops: [6, 9, 20, 23, 13, 27]
+        length: 6
+      outputs:
+        tooffsets: [0, 3, 6, 9, 12, 14, 16]
+    - error: false
+      inputs:
+        fromstarts: [0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 6, 9, 12, 15]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 11, 14, 17]
+        fromstops: [3, 6, 14, 17, 20]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 6, 9, 12, 15]
+    - error: false
+      inputs:
+        fromstarts: [0, 0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3, 3]
+        length: 6
+      outputs:
+        tooffsets: [0, 3, 6, 9, 12, 15, 18]
+    - error: false
+      inputs:
+        fromstarts: [0, 0, 0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3, 3, 3]
+        length: 7
+      outputs:
+        tooffsets: [0, 3, 6, 9, 12, 15, 18, 21]
+    - error: false
+      inputs:
+        fromstarts: [0, 5]
+        fromstops: [3, 9]
+        length: 2
+      outputs:
+        tooffsets: [0, 3, 7]
+    - error: false
+      inputs:
+        fromstarts: [3, 6, 11, 15, 19]
+        fromstops: [6, 11, 15, 19, 22]
+        length: 5
+      outputs:
+        tooffsets: [0, 3, 8, 12, 16, 19]
+    - error: false
+      inputs:
+        fromstarts: [0, 13, 3, 18, 8, 23]
+        fromstops: [3, 18, 8, 23, 13, 28]
+        length: 6
+      outputs:
+        tooffsets: [0, 3, 8, 13, 18, 23, 28]
+    - error: false
+      inputs:
+        fromstarts: [16]
+        fromstops: [20]
+        length: 1
+      outputs:
+        tooffsets: [0, 4]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 0]
+        fromstops: [10, 6, 5, 3]
+        length: 4
+      outputs:
+        tooffsets: [0, 4, 5, 7, 10]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 3, 0]
+        fromstops: [10, 6, 5, 3, 3]
+        length: 5
+      outputs:
+        tooffsets: [0, 4, 5, 7, 7, 10]
+    - error: false
+      inputs:
+        fromstarts: [3, 0, 999, 2, 6, 10]
+        fromstops: [7, 3, 999, 4, 6, 12]
+        length: 6
+      outputs:
+        tooffsets: [0, 4, 7, 7, 9, 9, 11]
+    - error: false
+      inputs:
+        fromstarts: [0, 13, 4, 18, 8, 23]
+        fromstops: [4, 18, 8, 23, 13, 28]
+        length: 6
+      outputs:
+        tooffsets: [0, 4, 9, 13, 18, 23, 28]
+    - error: false
+      inputs:
+        fromstarts: [0, 14, 4, 19, 9, 24]
+        fromstops: [4, 19, 9, 24, 14, 29]
+        length: 6
+      outputs:
+        tooffsets: [0, 4, 9, 14, 19, 24, 29]
+    - error: false
+      inputs:
+        fromstarts: [0, 11, 5, 16, 6, 17]
+        fromstops: [5, 16, 6, 17, 11, 22]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 11, 12, 17, 22]
+    - error: false
+      inputs:
+        fromstarts: [0, 14, 5, 19, 9, 23]
+        fromstops: [5, 19, 9, 23, 14, 28]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 14, 18, 23, 28]
+    - error: false
+      inputs:
+        fromstarts: [0, 0, 0, 8, 11, 11, 14]
+        fromstops: [5, 5, 5, 11, 14, 14, 19]
+        length: 7
+      outputs:
+        tooffsets: [0, 5, 10, 15, 18, 21, 24, 29]
+    - error: false
+      inputs:
+        fromstarts: [0, 15, 5, 20, 10, 24]
+        fromstops: [5, 20, 10, 24, 15, 28]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 19, 24, 28]
+    - error: false
+      inputs:
+        fromstarts: [0, 10, 15, 25]
+        fromstops: [5, 15, 20, 30]
+        length: 4
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20]
+    - error: false
+      inputs:
+        fromstarts: [0, 15, 10, 25]
+        fromstops: [5, 20, 15, 30]
+        length: 4
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20]
+    - error: false
+      inputs:
+        fromstarts: [15, 10, 5, 0]
+        fromstops: [20, 15, 10, 5]
+        length: 4
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20]
+    - error: false
+      inputs:
+        fromstarts: [15, 5, 10, 0]
+        fromstops: [20, 10, 15, 5]
+        length: 4
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20]
+    - error: false
+      inputs:
+        fromstarts: [0, 14, 5, 19, 10, 24]
+        fromstops: [5, 19, 10, 24, 14, 28]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 24, 28]
+    - error: false
+      inputs:
+        fromstarts: [0, 15, 5, 20, 10, 25]
+        fromstops: [5, 20, 10, 25, 15, 28]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 28]
+    - error: false
+      inputs:
+        fromstarts: [0, 15, 5, 20, 10, 25]
+        fromstops: [5, 20, 10, 25, 15, 29]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 29]
+    - error: false
+      inputs:
+        fromstarts: [0, 15, 5, 20, 10, 25]
+        fromstops: [5, 20, 10, 25, 15, 30]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 30]
+    - error: false
+      inputs:
+        fromstarts: [0, 45, 5, 50, 10, 55]
+        fromstops: [5, 50, 10, 55, 15, 60]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 30]
+    - error: false
+      inputs:
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 30]
+    - error: false
+      inputs:
+        fromstarts: [0, 5, 10, 45, 50, 55]
+        fromstops: [5, 10, 15, 50, 55, 60]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 30]
+    - error: false
+      inputs:
+        fromstarts: [1, 16, 6, 21, 11, 26]
+        fromstops: [6, 21, 11, 26, 16, 31]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 30]
+    - error: false
+      inputs:
+        fromstarts: [25, 10, 20, 5, 15, 0]
+        fromstops: [30, 15, 25, 10, 20, 5]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 30]
+    - error: false
+      inputs:
+        fromstarts: [25, 20, 15, 10, 5, 0]
+        fromstops: [30, 25, 20, 15, 10, 5]
+        length: 6
+      outputs:
+        tooffsets: [0, 5, 10, 15, 20, 25, 30]
+    - error: false
+      inputs:
+        fromstarts: [0, 8, 11, 11, 14]
+        fromstops: [5, 11, 14, 14, 19]
+        length: 5
+      outputs:
+        tooffsets: [0, 5, 8, 11, 14, 19]
+    - error: false
+      inputs:
+        fromstarts: [6, 11, 14, 17, 20]
+        fromstops: [11, 14, 17, 20, 25]
+        length: 5
+      outputs:
+        tooffsets: [0, 5, 8, 11, 14, 19]
+    - error: false
+      inputs:
+        fromstarts: [0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105,
+          112, 119, 126, 133, 140, 147, 154, 161, 168, 175, 182, 189, 196, 203]
+        fromstops: [7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105, 112,
+          119, 126, 133, 140, 147, 154, 161, 168, 175, 182, 189, 196, 203, 210]
+        length: 30
+      outputs:
+        tooffsets: [0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105, 112,
+          119, 126, 133, 140, 147, 154, 161, 168, 175, 182, 189, 196, 203, 210]
+  - name: awkward_ListArray_getitem_carry
+    tests:
+    - error: false
+      inputs:
+        fromcarry: [1, 3, 4]
+        fromstarts: [0, 0, 0, 0, 0]
+        fromstops: [0, 0, 0, 0, 0]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 0, 0]
+        tostops: [0, 0, 0]
+    - error: false
+      inputs:
+        fromcarry: [3]
+        fromstarts: [0, 0, 0, 0, 0]
+        fromstops: [0, 0, 0, 0, 0]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [0]
+        tostops: [0]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 2, 3, 3, 4]
+        fromstarts: [0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3]
+        lencarry: 7
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 0, 0, 0, 0, 0, 0]
+        tostops: [3, 3, 3, 3, 3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 0, 0, 0, 0]
+        fromstarts: [0]
+        fromstops: [3]
+        lencarry: 7
+        lenstarts: 1
+      outputs:
+        tostarts: [0, 0, 0, 0, 0, 0, 0]
+        tostops: [3, 3, 3, 3, 3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 0, 0, 0]
+        fromstarts: [0]
+        fromstops: [3]
+        lencarry: 6
+        lenstarts: 1
+      outputs:
+        tostarts: [0, 0, 0, 0, 0, 0]
+        tostops: [3, 3, 3, 3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+        fromstarts: [0, 0, 0, 4, 4]
+        fromstops: [2, 2, 2, 5, 5]
+        lencarry: 10
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 0, 0, 0, 0, 0, 4, 4, 4, 4]
+        tostops: [2, 2, 2, 2, 2, 2, 5, 5, 5, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 5]
+        fromstarts: [0, 0, 0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3, 3, 3]
+        lencarry: 5
+        lenstarts: 7
+      outputs:
+        tostarts: [0, 0, 0, 0, 0]
+        tostops: [3, 3, 3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 5]
+        fromstarts: [0, 0, 0, 0, 0, 0]
+        fromstops: [3, 3, 3, 3, 3, 3]
+        lencarry: 5
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 0, 0, 0, 0]
+        tostops: [3, 3, 3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 0, 0]
+        fromstarts: [0]
+        fromstops: [3]
+        lencarry: 5
+        lenstarts: 1
+      outputs:
+        tostarts: [0, 0, 0, 0, 0]
+        tostops: [3, 3, 3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 0]
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        lencarry: 4
+        lenstarts: 2
+      outputs:
+        tostarts: [0, 0, 0, 0]
+        tostops: [3, 3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 2, 2]
+        fromstarts: [0, 2, 3]
+        fromstops: [2, 3, 5]
+        lencarry: 5
+        lenstarts: 3
+      outputs:
+        tostarts: [0, 0, 0, 3, 3]
+        tostops: [2, 2, 2, 5, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0]
+        fromstarts: [0]
+        fromstops: [3]
+        lencarry: 3
+        lenstarts: 1
+      outputs:
+        tostarts: [0, 0, 0]
+        tostops: [3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 2, 2, 3, 3, 3, 5, 5]
+        fromstarts: [0, 2, 3, 5, 7, 8]
+        fromstops: [2, 3, 5, 7, 8, 10]
+        lencarry: 10
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 0, 0, 3, 3, 5, 5, 5, 8, 8]
+        tostops: [2, 2, 2, 5, 5, 7, 7, 7, 10, 10]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 2, 2]
+        fromstarts: [0, 2, 4]
+        fromstops: [2, 4, 5]
+        lencarry: 5
+        lenstarts: 3
+      outputs:
+        tostarts: [0, 0, 0, 4, 4]
+        tostops: [2, 2, 2, 5, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 0, 2, 3, 3, 4]
+        fromstarts: [0, 5, 8, 11, 14]
+        fromstops: [5, 8, 11, 14, 19]
+        lencarry: 7
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 0, 0, 8, 11, 11, 14]
+        tostops: [5, 5, 5, 11, 14, 14, 19]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 1, 1, 1, 0]
+        fromstarts: [0, 2, 3, 3]
+        fromstops: [2, 3, 3, 5]
+        lencarry: 6
+        lenstarts: 4
+      outputs:
+        tostarts: [0, 0, 2, 2, 2, 0]
+        tostops: [2, 2, 3, 3, 3, 2]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 1, 5]
+        fromstarts: [0, 3, 3, 5, 6, 10, 10]
+        fromstops: [3, 3, 5, 6, 10, 10, 13]
+        lencarry: 4
+        lenstarts: 7
+      outputs:
+        tostarts: [0, 0, 3, 10]
+        tostops: [3, 3, 3, 10]
+    - error: false
+      inputs:
+        fromcarry: [0, 0]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [0, 0]
+        tostops: [3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 0, 1, 3]
+        fromstarts: [0, 4, 4, 7, 8]
+        fromstops: [4, 4, 7, 8, 13]
+        lencarry: 4
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 0, 4, 7]
+        tostops: [4, 4, 4, 8]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 0, 1]
+        fromstops: [0, 1, 1]
+        lencarry: 1
+        lenstarts: 3
+      outputs:
+        tostarts: [0]
+        tostops: [1]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 4, 4, 4, 4]
+        fromstarts: [0, 1, 2, 3, 4]
+        fromstops: [1, 2, 3, 4, 5]
+        lencarry: 16
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 4, 4, 4, 4]
+        tostops: [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 5, 5, 5, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 3, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 10, 15, 25]
+        tostops: [5, 15, 20, 30]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 4]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 3
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 10, 20]
+        tostops: [5, 15, 25]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 4, 1, 3, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 10, 20, 5, 15, 25]
+        tostops: [5, 15, 25, 10, 20, 30]
+    - error: false
+      inputs:
+        fromcarry: [0, 2]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 1]
+        tostops: [1, 1]
+    - error: false
+      inputs:
+        fromcarry: [0, 3]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 1]
+        tostops: [1, 1]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 4]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 1, 1]
+        tostops: [1, 1, 4]
+    - error: false
+      inputs:
+        fromcarry: [1, 2]
+        fromstarts: [0, 0, 1]
+        fromstops: [0, 1, 2]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [0, 1]
+        tostops: [1, 2]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 5, 6, 11, 16, 17]
+        fromstops: [5, 6, 11, 16, 17, 22]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 11, 5, 16, 6, 17]
+        tostops: [5, 16, 6, 17, 11, 22]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 4, 7, 8]
+        fromstarts: [0, 0, 1, 2, 2, 3, 3, 3, 4, 5]
+        fromstops: [0, 1, 2, 2, 3, 3, 3, 4, 5, 5]
+        lencarry: 5
+        lenstarts: 10
+      outputs:
+        tostarts: [0, 1, 2, 3, 4]
+        tostops: [1, 2, 3, 4, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 3, 8, 13, 18, 23]
+        fromstops: [3, 8, 13, 18, 23, 28]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 13, 3, 18, 8, 23]
+        tostops: [3, 18, 8, 23, 13, 28]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 4, 8, 13, 18, 23]
+        fromstops: [4, 8, 13, 18, 23, 28]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 13, 4, 18, 8, 23]
+        tostops: [4, 18, 8, 23, 13, 28]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 4, 9, 14, 19, 24]
+        fromstops: [4, 9, 14, 19, 24, 29]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 14, 4, 19, 9, 24]
+        tostops: [4, 19, 9, 24, 14, 29]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 5, 10, 14, 19, 24]
+        fromstops: [5, 10, 14, 19, 24, 28]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 14, 5, 19, 10, 24]
+        tostops: [5, 19, 10, 24, 14, 28]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 5, 9, 14, 19, 23]
+        fromstops: [5, 9, 14, 19, 23, 28]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 14, 5, 19, 9, 23]
+        tostops: [5, 19, 9, 23, 14, 28]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 4, 5]
+        fromstarts: [0, 15, 5, 20, 10, 25]
+        fromstops: [5, 20, 10, 25, 15, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 15, 10, 25]
+        tostops: [5, 20, 15, 30]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 3, 3]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 15, 15, 15]
+        tostops: [5, 20, 20, 20]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 5, 10, 15, 20, 24]
+        fromstops: [5, 10, 15, 20, 24, 28]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 15, 5, 20, 10, 24]
+        tostops: [5, 20, 10, 24, 15, 28]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 28]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 15, 5, 20, 10, 25]
+        tostops: [5, 20, 10, 25, 15, 28]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 29]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 15, 5, 20, 10, 25]
+        tostops: [5, 20, 10, 25, 15, 29]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 15, 5, 20, 10, 25]
+        tostops: [5, 20, 10, 25, 15, 30]
+    - error: false
+      inputs:
+        fromcarry: [0, 5, 2, 6, 1, 3, 4]
+        fromstarts: [0, 3, 6, 11, 14, 17, 20]
+        fromstops: [3, 6, 11, 14, 17, 20, 25]
+        lencarry: 7
+        lenstarts: 7
+      outputs:
+        tostarts: [0, 17, 6, 20, 3, 11, 14]
+        tostops: [3, 20, 11, 25, 6, 14, 17]
+    - error: false
+      inputs:
+        fromcarry: [1, 2]
+        fromstarts: [0, 0, 2]
+        fromstops: [0, 2, 5]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [0, 2]
+        tostops: [2, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 5, 8]
+        fromstarts: [0, 2, 3, 4, 5, 6, 7, 8, 9]
+        fromstops: [2, 3, 4, 5, 6, 7, 8, 9, 11]
+        lencarry: 6
+        lenstarts: 9
+      outputs:
+        tostarts: [0, 2, 4, 5, 6, 9]
+        tostops: [2, 3, 5, 6, 7, 11]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 0, 1, 2, 2, 2, 0, 1]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 9
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 3, 0, 3, 3, 3, 3, 0, 3]
+        tostops: [3, 3, 3, 3, 5, 5, 5, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 0, 1, 2, 3, 2, 3]
+        fromstarts: [0, 3, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 10, 10]
+        lencarry: 8
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 3, 0, 3, 3, 5, 3, 5]
+        tostops: [3, 3, 3, 3, 5, 6, 5, 6]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 4, 6, 7]
+        fromstarts: [0, 3, 6, 6, 10, 14, 14, 18, 21]
+        fromstops: [3, 6, 6, 10, 14, 14, 18, 21, 21]
+        lencarry: 5
+        lenstarts: 9
+      outputs:
+        tostarts: [0, 3, 10, 14, 18]
+        tostops: [3, 6, 14, 18, 21]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 4, 6, 7]
+        fromstarts: [0, 3, 6, 6, 10, 14, 14, 18]
+        fromstops: [3, 6, 6, 10, 14, 14, 18, 21]
+        lencarry: 5
+        lenstarts: 8
+      outputs:
+        tostarts: [0, 3, 10, 14, 18]
+        tostops: [3, 6, 14, 18, 21]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 5]
+        fromstarts: [0, 3, 6, 11, 14, 17, 20]
+        fromstops: [3, 6, 11, 14, 17, 20, 25]
+        lencarry: 5
+        lenstarts: 7
+      outputs:
+        tostarts: [0, 3, 11, 14, 17]
+        tostops: [3, 6, 14, 17, 20]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 5]
+        fromstarts: [0, 3, 6, 11, 14, 17]
+        fromstops: [3, 6, 11, 14, 17, 20]
+        lencarry: 5
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 3, 11, 14, 17]
+        tostops: [3, 6, 14, 17, 20]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 4, 6, 7]
+        fromstarts: [0, 3, 6, 6, 11, 15, 15, 19, 22]
+        fromstops: [3, 6, 6, 11, 15, 15, 19, 22, 22]
+        lencarry: 5
+        lenstarts: 9
+      outputs:
+        tostarts: [0, 3, 11, 15, 19]
+        tostops: [3, 6, 15, 19, 22]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 4, 6, 7]
+        fromstarts: [0, 3, 6, 6, 11, 15, 15, 19]
+        fromstops: [3, 6, 6, 11, 15, 15, 19, 22]
+        lencarry: 5
+        lenstarts: 8
+      outputs:
+        tostarts: [0, 3, 11, 15, 19]
+        tostops: [3, 6, 15, 19, 22]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 2, 3, 3, 5, 6]
+        fromstops: [2, 3, 3, 5, 6, 6]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 3, 2, 5, 3, 6]
+        tostops: [2, 5, 3, 6, 3, 6]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 1, 0]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 4
+        lenstarts: 3
+      outputs:
+        tostarts: [0, 3, 3, 0]
+        tostops: [3, 5, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 5, 6]
+        fromstarts: [0, 3, 3, 5, 6, 10, 10]
+        fromstops: [3, 3, 5, 6, 10, 10, 13]
+        lencarry: 5
+        lenstarts: 7
+      outputs:
+        tostarts: [0, 3, 3, 10, 10]
+        tostops: [3, 3, 5, 10, 13]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 1, 1]
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        lencarry: 4
+        lenstarts: 2
+      outputs:
+        tostarts: [0, 3, 3, 3]
+        tostops: [3, 6, 6, 6]
+    - error: false
+      inputs:
+        fromcarry: [0, 2]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [0, 3]
+        tostops: [3, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 4, 7]
+        fromstarts: [0, 3, 0, 3, 3, 5, 3, 5]
+        fromstops: [3, 3, 3, 3, 5, 6, 5, 6]
+        lencarry: 4
+        lenstarts: 8
+      outputs:
+        tostarts: [0, 3, 3, 5]
+        tostops: [3, 3, 5, 6]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 3, 2, 3, 4, 5]
+        fromstarts: [0, 3, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 10, 10]
+        lencarry: 8
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 3, 3, 5, 3, 5, 6, 10]
+        tostops: [3, 3, 5, 6, 5, 6, 10, 10]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 3, 5, 7]
+        fromstarts: [0, 2, 3, 3, 5, 5, 6, 8]
+        fromstops: [2, 3, 3, 5, 5, 6, 8, 9]
+        lencarry: 5
+        lenstarts: 8
+      outputs:
+        tostarts: [0, 3, 3, 5, 8]
+        tostops: [2, 3, 5, 6, 9]
+    - error: false
+      inputs:
+        fromcarry: [0, 2]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 7]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [0, 3]
+        tostops: [3, 7]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 4]
+        fromstarts: [0, 3, 3, 4, 5]
+        fromstops: [3, 3, 4, 5, 7]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 3, 5]
+        tostops: [3, 3, 7]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3]
+        fromstarts: [0, 3, 3, 5]
+        fromstops: [3, 3, 5, 9]
+        lencarry: 3
+        lenstarts: 4
+      outputs:
+        tostarts: [0, 3, 5]
+        tostops: [3, 3, 9]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 6, 7]
+        fromstarts: [0, 3, 6, 6, 11, 15, 15, 19, 22]
+        fromstops: [3, 6, 6, 11, 15, 15, 19, 22, 22]
+        lencarry: 6
+        lenstarts: 9
+      outputs:
+        tostarts: [0, 3, 6, 11, 15, 19]
+        tostops: [3, 6, 11, 15, 19, 22]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 6, 7]
+        fromstarts: [0, 3, 6, 6, 11, 15, 15, 19]
+        fromstops: [3, 6, 6, 11, 15, 15, 19, 22]
+        lencarry: 6
+        lenstarts: 8
+      outputs:
+        tostarts: [0, 3, 6, 11, 15, 19]
+        tostops: [3, 6, 11, 15, 19, 22]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 4, 3]
+        fromstarts: [0, 3, 6, 11, 15]
+        fromstops: [3, 6, 11, 15, 19]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 3, 6, 15, 11]
+        tostops: [3, 6, 11, 19, 15]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 3, 6]
+        tostops: [3, 3, 10]
+    - error: false
+      inputs:
+        fromcarry: [1, 3, 4, 6, 7]
+        fromstarts: [0, 0, 3, 3, 8, 12, 12, 16]
+        fromstops: [0, 3, 3, 8, 12, 12, 16, 19]
+        lencarry: 5
+        lenstarts: 8
+      outputs:
+        tostarts: [0, 3, 8, 12, 16]
+        tostops: [3, 8, 12, 16, 19]
+    - error: false
+      inputs:
+        fromcarry: [1, 3, 4, 6, 7]
+        fromstarts: [0, 0, 3, 3, 8, 12, 12, 16, 19]
+        fromstops: [0, 3, 3, 8, 12, 12, 16, 19, 19]
+        lencarry: 5
+        lenstarts: 9
+      outputs:
+        tostarts: [0, 3, 8, 12, 16]
+        tostops: [3, 8, 12, 16, 19]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 6, 7]
+        fromstarts: [0, 3, 6, 8, 13, 17, 17, 21, 24]
+        fromstops: [3, 6, 8, 13, 17, 17, 21, 24, 24]
+        lencarry: 6
+        lenstarts: 9
+      outputs:
+        tostarts: [0, 3, 8, 13, 17, 21]
+        tostops: [3, 6, 13, 17, 21, 24]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 6, 7]
+        fromstarts: [0, 3, 6, 8, 13, 17, 17, 21]
+        fromstops: [3, 6, 8, 13, 17, 17, 21, 24]
+        lencarry: 6
+        lenstarts: 8
+      outputs:
+        tostarts: [0, 3, 8, 13, 17, 21]
+        tostops: [3, 6, 13, 17, 21, 24]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 3, 5, 7]
+        fromstarts: [0, 3, 4, 4, 6, 6, 7, 9]
+        fromstops: [3, 4, 4, 6, 6, 7, 9, 11]
+        lencarry: 5
+        lenstarts: 8
+      outputs:
+        tostarts: [0, 4, 4, 6, 9]
+        tostops: [3, 4, 6, 7, 11]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 5, 10, 45, 50, 55]
+        fromstops: [5, 10, 15, 50, 55, 60]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 45, 5, 50, 10, 55]
+        tostops: [5, 50, 10, 55, 15, 60]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 4, 1, 3, 5]
+        fromstarts: [0, 3, 4, 6, 6, 7]
+        fromstops: [3, 4, 6, 6, 7, 9]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 4, 6, 3, 6, 7]
+        tostops: [3, 6, 7, 4, 6, 9]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 3, 1, 4]
+        fromstarts: [0, 3, 4, 6, 7]
+        fromstops: [3, 4, 6, 7, 9]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 4, 6, 3, 7]
+        tostops: [3, 6, 7, 4, 9]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 4, 3]
+        fromstarts: [0, 4, 7, 10, 15]
+        fromstops: [4, 7, 10, 15, 19]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 4, 7, 15, 10]
+        tostops: [4, 7, 10, 19, 15]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 2, 1]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 5, 10, 5]
+        tostops: [5, 10, 15, 10]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 3, 2]
+        fromstarts: [0, 3, 3, 5]
+        fromstops: [3, 3, 5, 5]
+        lencarry: 5
+        lenstarts: 4
+      outputs:
+        tostarts: [0, 5, 3, 5, 3]
+        tostops: [3, 5, 3, 5, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 3, 2]
+        fromstarts: [0, 3, 3, 5]
+        fromstops: [3, 3, 5, 8]
+        lencarry: 5
+        lenstarts: 4
+      outputs:
+        tostarts: [0, 5, 3, 5, 3]
+        tostops: [3, 8, 3, 8, 5]
+    - error: false
+      inputs:
+        fromcarry: [0, 3]
+        fromstarts: [0, 3, 3, 5]
+        fromstops: [3, 3, 5, 9]
+        lencarry: 2
+        lenstarts: 4
+      outputs:
+        tostarts: [0, 5]
+        tostops: [3, 9]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 3]
+        fromstarts: [0, 3, 5, 6]
+        fromstops: [3, 5, 6, 10]
+        lencarry: 3
+        lenstarts: 4
+      outputs:
+        tostarts: [0, 5, 6]
+        tostops: [3, 6, 10]
+    - error: false
+      inputs:
+        fromcarry: [0, 2, 4]
+        fromstarts: [0, 3, 6, 11, 15]
+        fromstops: [3, 6, 11, 15, 19]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [0, 6, 15]
+        tostops: [3, 11, 19]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 2, 4, 6, 8, 10]
+        fromstops: [2, 4, 6, 8, 10, 12]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 6, 2, 8, 4, 10]
+        tostops: [2, 8, 4, 10, 6, 12]
+    - error: false
+      inputs:
+        fromcarry: [0, 4, 1, 5, 2, 3]
+        fromstarts: [0, 3, 3, 5, 6, 8]
+        fromstops: [3, 3, 5, 6, 8, 9]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 6, 3, 8, 3, 5]
+        tostops: [3, 8, 3, 9, 5, 6]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [0, 3, 5, 6, 8, 9]
+        fromstops: [3, 5, 6, 8, 9, 10]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [0, 6, 3, 8, 5, 9]
+        tostops: [3, 8, 5, 9, 6, 10]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 4, 5, 6]
+        fromstarts: [0, 0, 0, 8, 11, 11, 14]
+        fromstops: [5, 5, 5, 11, 14, 14, 19]
+        lencarry: 5
+        lenstarts: 7
+      outputs:
+        tostarts: [0, 8, 11, 11, 14]
+        tostops: [5, 11, 14, 14, 19]
+    - error: false
+      inputs:
+        fromcarry: [2, 0, 0, 1]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [10, 0, 0, 5]
+        tostops: [15, 5, 5, 10]
+    - error: false
+      inputs:
+        fromcarry: [2, 2, 2, 2]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [10, 10, 10, 10]
+        tostops: [15, 15, 15, 15]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [6, 10]
+        fromstops: [10, 10]
+        lencarry: 1
+        lenstarts: 2
+      outputs:
+        tostarts: [10]
+        tostops: [10]
+    - error: false
+      inputs:
+        fromcarry: [3, 0]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 0]
+        tostops: [1, 1]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 1
+        lenstarts: 6
+      outputs:
+        tostarts: [10]
+        tostops: [15]
+    - error: false
+      inputs:
+        fromcarry: [2, 5, 5, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [10, 25, 25, 25]
+        tostops: [15, 30, 30, 30]
+    - error: false
+      inputs:
+        fromcarry: [1, 0]
+        fromstarts: [0, 1]
+        fromstops: [2, 3]
+        lencarry: 2
+        lenstarts: 2
+      outputs:
+        tostarts: [1, 0]
+        tostops: [3, 2]
+    - error: false
+      inputs:
+        fromcarry: [2, 1, 0, 5, 4, 3]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [10, 5, 0, 25, 20, 15]
+        tostops: [15, 10, 5, 30, 25, 20]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [1]
+        tostops: [1]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [1]
+        tostops: [1]
+    - error: false
+      inputs:
+        fromcarry: [4, 2, 0]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1, 0]
+        tostops: [4, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 1, 0]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 4
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1, 1, 0]
+        tostops: [1, 1, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [1, 3]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1]
+        tostops: [1, 1]
+    - error: false
+      inputs:
+        fromcarry: [3, 1]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1]
+        tostops: [1, 1]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 2, 1, 0]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1, 1, 1, 0]
+        tostops: [4, 1, 1, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 2, 1]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 4
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1, 1, 1]
+        tostops: [4, 1, 1, 1]
+    - error: false
+      inputs:
+        fromcarry: [1, 4]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1]
+        tostops: [1, 4]
+    - error: false
+      inputs:
+        fromcarry: [4, 1]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1]
+        tostops: [4, 1]
+    - error: false
+      inputs:
+        fromcarry: [4, 4]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [1, 1]
+        tostops: [4, 4]
+    - error: false
+      inputs:
+        fromcarry: [0, 3, 1, 4, 2, 5]
+        fromstarts: [1, 6, 11, 16, 21, 26]
+        fromstops: [6, 11, 16, 21, 26, 31]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [1, 16, 6, 21, 11, 26]
+        tostops: [6, 21, 11, 26, 16, 31]
+    - error: false
+      inputs:
+        fromcarry: [3]
+        fromstarts: [0, 1, 1, 1]
+        fromstops: [1, 1, 1, 2]
+        lencarry: 1
+        lenstarts: 4
+      outputs:
+        tostarts: [1]
+        tostops: [2]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [0, 0, 1, 3, 6]
+        fromstops: [0, 1, 3, 6, 10]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [1]
+        tostops: [3]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 1]
+        fromstops: [2, 3]
+        lencarry: 1
+        lenstarts: 2
+      outputs:
+        tostarts: [1]
+        tostops: [3]
+    - error: false
+      inputs:
+        fromcarry: [4]
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [1]
+        tostops: [4]
+    - error: false
+      inputs:
+        fromcarry: [3, 0, 0, 3]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [15, 0, 0, 15]
+        tostops: [20, 5, 5, 20]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 1, 0]
+        fromstarts: [0, 5, 10, 15]
+        fromstops: [5, 10, 15, 20]
+        lencarry: 4
+        lenstarts: 4
+      outputs:
+        tostarts: [15, 10, 5, 0]
+        tostops: [20, 15, 10, 5]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 0, 2, 1]
+        fromstarts: [0, 3, 6, 11, 15]
+        fromstops: [3, 6, 11, 15, 19]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [15, 11, 0, 6, 3]
+        tostops: [19, 15, 3, 11, 6]
+    - error: false
+      inputs:
+        fromcarry: [3, 3, 3, 3]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [15, 15, 15, 15]
+        tostops: [20, 20, 20, 20]
+    - error: false
+      inputs:
+        fromcarry: [3]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 1
+        lenstarts: 6
+      outputs:
+        tostarts: [15]
+        tostops: [20]
+    - error: false
+      inputs:
+        fromcarry: [3, 4]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 2
+        lenstarts: 6
+      outputs:
+        tostarts: [15, 20]
+        tostops: [20, 25]
+    - error: false
+      inputs:
+        fromcarry: [3, 4, 5, 4]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [15, 20, 25, 20]
+        tostops: [20, 25, 30, 25]
+    - error: false
+      inputs:
+        fromcarry: [3, 1, 2, 0]
+        fromstarts: [0, 5, 10, 15]
+        fromstops: [5, 10, 15, 20]
+        lencarry: 4
+        lenstarts: 4
+      outputs:
+        tostarts: [15, 5, 10, 0]
+        tostops: [20, 10, 15, 5]
+    - error: false
+      inputs:
+        fromcarry: [3, 1, 2, 4]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [15, 5, 10, 20]
+        tostops: [20, 10, 15, 25]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 3, 4]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [20, 15, 15, 20]
+        tostops: [25, 20, 20, 25]
+    - error: false
+      inputs:
+        fromcarry: [4, 4, 4, 4]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [20, 20, 20, 20]
+        tostops: [25, 25, 25, 25]
+    - error: false
+      inputs:
+        fromcarry: [4]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 1
+        lenstarts: 6
+      outputs:
+        tostarts: [20]
+        tostops: [25]
+    - error: false
+      inputs:
+        fromcarry: [4, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 2
+        lenstarts: 6
+      outputs:
+        tostarts: [20, 25]
+        tostops: [25, 30]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 3]
+        fromstarts: [0, 2, 2, 3]
+        fromstops: [2, 2, 3, 5]
+        lencarry: 3
+        lenstarts: 4
+      outputs:
+        tostarts: [2, 2, 3]
+        tostops: [2, 3, 5]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 2, 3, 3]
+        fromstops: [2, 3, 3, 5]
+        lencarry: 1
+        lenstarts: 4
+      outputs:
+        tostarts: [2]
+        tostops: [3]
+    - error: false
+      inputs:
+        fromcarry: [1, 2]
+        fromstarts: [0, 2, 3, 3]
+        fromstops: [2, 3, 3, 5]
+        lencarry: 2
+        lenstarts: 4
+      outputs:
+        tostarts: [2, 3]
+        tostops: [3, 3]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 2]
+        fromstops: [2, 4]
+        lencarry: 1
+        lenstarts: 2
+      outputs:
+        tostarts: [2]
+        tostops: [4]
+    - error: false
+      inputs:
+        fromcarry: [2, 4, 5]
+        fromstarts: [0, 1, 2, 3, 4, 5]
+        fromstops: [1, 2, 3, 4, 5, 6]
+        lencarry: 3
+        lenstarts: 6
+      outputs:
+        tostarts: [2, 4, 5]
+        tostops: [3, 5, 6]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [0, 0, 2]
+        fromstops: [0, 2, 5]
+        lencarry: 1
+        lenstarts: 3
+      outputs:
+        tostarts: [2]
+        tostops: [5]
+    - error: false
+      inputs:
+        fromcarry: [5, 0, 4, 4, 5, 0]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [25, 0, 20, 20, 25, 0]
+        tostops: [30, 5, 25, 25, 30, 5]
+    - error: false
+      inputs:
+        fromcarry: [5, 2, 2, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [25, 10, 10, 25]
+        tostops: [30, 15, 15, 30]
+    - error: false
+      inputs:
+        fromcarry: [5, 2, 4, 1, 3, 0]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [25, 10, 20, 5, 15, 0]
+        tostops: [30, 15, 25, 10, 20, 5]
+    - error: false
+      inputs:
+        fromcarry: [5, 4, 3, 2, 1, 0]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [25, 20, 15, 10, 5, 0]
+        tostops: [30, 25, 20, 15, 10, 5]
+    - error: false
+      inputs:
+        fromcarry: [5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 1
+        lenstarts: 6
+      outputs:
+        tostarts: [25]
+        tostops: [30]
+    - error: false
+      inputs:
+        fromcarry: [2, 0, 0, 2]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 4
+        lenstarts: 3
+      outputs:
+        tostarts: [3, 0, 0, 3]
+        tostops: [5, 3, 3, 5]
+    - error: false
+      inputs:
+        fromcarry: [1, 0, 0, 1]
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        lencarry: 4
+        lenstarts: 2
+      outputs:
+        tostarts: [3, 0, 0, 3]
+        tostops: [6, 3, 3, 6]
+    - error: false
+      inputs:
+        fromcarry: [2, 0, 0, 1, 4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 0, 0, 3, 6]
+        tostops: [5, 3, 3, 3, 9]
+    - error: false
+      inputs:
+        fromcarry: [2, 0, 0, 4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 4
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 0, 0, 6]
+        tostops: [5, 3, 3, 9]
+    - error: false
+      inputs:
+        fromcarry: [1, 0]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [3, 0]
+        tostops: [3, 3]
+    - error: false
+      inputs:
+        fromcarry: [1, 0, 1, 1, 1, 0]
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        lencarry: 6
+        lenstarts: 2
+      outputs:
+        tostarts: [3, 0, 3, 3, 3, 0]
+        tostops: [6, 3, 6, 6, 6, 3]
+    - error: false
+      inputs:
+        fromcarry: [1, 0, 1, 3, 2, 3, 5, 4, 5, 7, 6, 7]
+        fromstarts: [0, 3, 3, 5, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 5, 6, 10, 10]
+        lencarry: 12
+        lenstarts: 8
+      outputs:
+        tostarts: [3, 0, 3, 5, 3, 5, 5, 3, 5, 10, 6, 10]
+        tostops: [3, 3, 3, 6, 5, 6, 6, 5, 6, 10, 10, 10]
+    - error: false
+      inputs:
+        fromcarry: [2, 0]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [3, 0]
+        tostops: [5, 3]
+    - error: false
+      inputs:
+        fromcarry: [1, 0, 3, 2, 5, 4, 7, 6]
+        fromstarts: [0, 3, 3, 5, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 5, 6, 10, 10]
+        lencarry: 8
+        lenstarts: 8
+      outputs:
+        tostarts: [3, 0, 5, 3, 5, 3, 10, 6]
+        tostops: [3, 3, 6, 5, 6, 5, 10, 10]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [0, 2, 3, 3]
+        fromstops: [2, 3, 3, 5]
+        lencarry: 1
+        lenstarts: 4
+      outputs:
+        tostarts: [3]
+        tostops: [3]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 3]
+        fromstops: [3, 3]
+        lencarry: 1
+        lenstarts: 2
+      outputs:
+        tostarts: [3]
+        tostops: [3]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 1
+        lenstarts: 3
+      outputs:
+        tostarts: [3]
+        tostops: [3]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [3]
+        tostops: [3]
+    - error: false
+      inputs:
+        fromcarry: [2, 1, 0]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 3
+        lenstarts: 3
+      outputs:
+        tostarts: [3, 3, 0]
+        tostops: [5, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [2, 1, 0, 3, 3, 4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        lencarry: 6
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 3, 0, 5, 5, 6]
+        tostops: [5, 3, 3, 6, 6, 10]
+    - error: false
+      inputs:
+        fromcarry: [2, 2, 1, 0, 3]
+        fromstarts: [0, 3, 3, 4]
+        fromstops: [3, 3, 4, 6]
+        lencarry: 5
+        lenstarts: 4
+      outputs:
+        tostarts: [3, 3, 3, 0, 4]
+        tostops: [4, 4, 3, 3, 6]
+    - error: false
+      inputs:
+        fromcarry: [2, 2, 1, 0]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 4
+        lenstarts: 3
+      outputs:
+        tostarts: [3, 3, 3, 0]
+        tostops: [5, 5, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 2, 6]
+        fromstarts: [0, 3, 3, 5, 6, 10, 10]
+        fromstops: [3, 3, 5, 6, 10, 10, 13]
+        lencarry: 4
+        lenstarts: 7
+      outputs:
+        tostarts: [3, 3, 3, 10]
+        tostops: [3, 5, 5, 13]
+    - error: false
+      inputs:
+        fromcarry: [2, 2, 2, 2]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        lencarry: 4
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 3, 3, 3]
+        tostops: [5, 5, 5, 5]
+    - error: false
+      inputs:
+        fromcarry: [1, 1, 1, 1]
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        lencarry: 4
+        lenstarts: 2
+      outputs:
+        tostarts: [3, 3, 3, 3]
+        tostops: [6, 6, 6, 6]
+    - error: false
+      inputs:
+        fromcarry: [1, 2]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [3, 3]
+        tostops: [3, 5]
+    - error: false
+      inputs:
+        fromcarry: [2, 1]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [3, 3]
+        tostops: [5, 3]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 3]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 3, 5]
+        tostops: [3, 5, 6]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 5]
+        fromstarts: [0, 3, 3, 5, 6, 6]
+        fromstops: [3, 3, 5, 6, 6, 10]
+        lencarry: 3
+        lenstarts: 6
+      outputs:
+        tostarts: [3, 3, 6]
+        tostops: [3, 5, 10]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 1
+        lenstarts: 3
+      outputs:
+        tostarts: [3]
+        tostops: [5]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [3]
+        tostops: [5]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [3]
+        tostops: [5]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 0, 1]
+        fromstarts: [0, 3, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 10, 10]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [3, 5, 0, 3]
+        tostops: [5, 6, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [2, 3, 3]
+        fromstops: [3, 3, 5]
+        lencarry: 1
+        lenstarts: 3
+      outputs:
+        tostarts: [3]
+        tostops: [5]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 2, 3, 0, 1, 0, 1]
+        fromstarts: [0, 3, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 10, 10]
+        lencarry: 8
+        lenstarts: 6
+      outputs:
+        tostarts: [3, 5, 3, 5, 0, 3, 0, 3]
+        tostops: [5, 6, 5, 6, 3, 3, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [2, 3]
+        fromstarts: [0, 3, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 10, 10]
+        lencarry: 2
+        lenstarts: 6
+      outputs:
+        tostarts: [3, 5]
+        tostops: [5, 6]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 4, 5]
+        fromstarts: [0, 3, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 10, 10]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [3, 5, 6, 10]
+        tostops: [5, 6, 10, 10]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 5, 6]
+        tostops: [5, 6, 10]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 5, 6]
+        tostops: [5, 6, 9]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 0, 3, 4]
+        fromstarts: [0, 3, 6, 11, 15]
+        fromstops: [3, 6, 11, 15, 19]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 6, 0, 11, 15]
+        tostops: [6, 11, 3, 15, 19]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        lencarry: 1
+        lenstarts: 2
+      outputs:
+        tostarts: [3]
+        tostops: [6]
+    - error: false
+      inputs:
+        fromcarry: [1, 3, 4, 6, 7]
+        fromstarts: [0, 3, 6, 6, 11, 15, 15, 19, 22]
+        fromstops: [3, 6, 6, 11, 15, 15, 19, 22, 22]
+        lencarry: 5
+        lenstarts: 9
+      outputs:
+        tostarts: [3, 6, 11, 15, 19]
+        tostops: [6, 11, 15, 19, 22]
+    - error: false
+      inputs:
+        fromcarry: [1, 3, 4, 6, 7]
+        fromstarts: [0, 3, 6, 6, 11, 15, 15, 19]
+        fromstops: [3, 6, 6, 11, 15, 15, 19, 22]
+        lencarry: 5
+        lenstarts: 8
+      outputs:
+        tostarts: [3, 6, 11, 15, 19]
+        tostops: [6, 11, 15, 19, 22]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 4]
+        fromstarts: [0, 3, 6, 9, 11, 13]
+        fromstops: [3, 6, 9, 11, 13, 14]
+        lencarry: 3
+        lenstarts: 6
+      outputs:
+        tostarts: [3, 6, 11]
+        tostops: [6, 9, 13]
+    - error: false
+      inputs:
+        fromcarry: [0, 1, 3, 4, 2, 5]
+        fromstarts: [3, 6, 11, 17, 20, 25]
+        fromstops: [6, 9, 13, 20, 23, 27]
+        lencarry: 6
+        lenstarts: 6
+      outputs:
+        tostarts: [3, 6, 17, 20, 11, 25]
+        tostops: [6, 9, 20, 23, 13, 27]
+    - error: false
+      inputs:
+        fromcarry: [1, 4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 6]
+        tostops: [3, 9]
+    - error: false
+      inputs:
+        fromcarry: [1, 4]
+        fromstarts: [0, 3, 5, 6, 6]
+        fromstops: [3, 5, 6, 6, 10]
+        lencarry: 2
+        lenstarts: 5
+      outputs:
+        tostarts: [3, 6]
+        tostops: [5, 10]
+    - error: false
+      inputs:
+        fromcarry: [1, 2]
+        fromstarts: [0, 4, 4]
+        fromstops: [4, 4, 6]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [4, 4]
+        tostops: [4, 6]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 2, 4]
+        fromstarts: [0, 4, 4, 7, 8]
+        fromstops: [4, 4, 7, 8, 13]
+        lencarry: 4
+        lenstarts: 5
+      outputs:
+        tostarts: [4, 4, 4, 8]
+        tostops: [4, 7, 7, 13]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 5]
+        fromstarts: [0, 4, 4, 6, 7, 7]
+        fromstops: [4, 4, 6, 7, 7, 12]
+        lencarry: 3
+        lenstarts: 6
+      outputs:
+        tostarts: [4, 4, 7]
+        tostops: [4, 6, 12]
+    - error: false
+      inputs:
+        fromcarry: [1, 2]
+        fromstarts: [0, 4, 8]
+        fromstops: [4, 8, 12]
+        lencarry: 2
+        lenstarts: 3
+      outputs:
+        tostarts: [4, 8]
+        tostops: [8, 12]
+    - error: false
+      inputs:
+        fromcarry: [1, 0, 0, 1]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [5, 0, 0, 5]
+        tostops: [10, 5, 5, 10]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 1
+        lenstarts: 6
+      outputs:
+        tostarts: [5]
+        tostops: [10]
+    - error: false
+      inputs:
+        fromcarry: [1, 2]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 2
+        lenstarts: 6
+      outputs:
+        tostarts: [5, 10]
+        tostops: [10, 15]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 3, 4, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 5
+        lenstarts: 6
+      outputs:
+        tostarts: [5, 10, 15, 20, 25]
+        tostops: [10, 15, 20, 25, 30]
+    - error: false
+      inputs:
+        fromcarry: [1, 3, 3, 4]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [5, 15, 15, 20]
+        tostops: [10, 20, 20, 25]
+    - error: false
+      inputs:
+        fromcarry: [1, 4, 0, 5]
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        lencarry: 4
+        lenstarts: 6
+      outputs:
+        tostarts: [5, 20, 0, 25]
+        tostops: [10, 25, 5, 30]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 5, 6]
+        fromstarts: [3, 5, 3, 5, 0, 3, 0, 3]
+        fromstops: [5, 6, 5, 6, 3, 3, 3, 3]
+        lencarry: 4
+        lenstarts: 8
+      outputs:
+        tostarts: [5, 3, 3, 0]
+        tostops: [6, 5, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [3, 3, 0, 1, 2, 4, 5]
+        fromstarts: [0, 3, 3, 5, 6, 6]
+        fromstops: [3, 3, 5, 6, 6, 10]
+        lencarry: 7
+        lenstarts: 6
+      outputs:
+        tostarts: [5, 5, 0, 3, 3, 6, 6]
+        tostops: [6, 6, 3, 3, 5, 6, 10]
+    - error: false
+      inputs:
+        fromcarry: [1, 2, 3]
+        fromstarts: [0, 5, 5, 6]
+        fromstops: [5, 5, 6, 9]
+        lencarry: 3
+        lenstarts: 4
+      outputs:
+        tostarts: [5, 5, 6]
+        tostops: [5, 6, 9]
+    - error: false
+      inputs:
+        fromcarry: [2, 2]
+        fromstarts: [3, 3, 5, 6]
+        fromstops: [3, 5, 6, 10]
+        lencarry: 2
+        lenstarts: 4
+      outputs:
+        tostarts: [5, 5]
+        tostops: [6, 6]
+    - error: false
+      inputs:
+        fromcarry: [3]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [5]
+        tostops: [6]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [3, 3, 5, 6]
+        fromstops: [3, 5, 6, 10]
+        lencarry: 1
+        lenstarts: 4
+      outputs:
+        tostarts: [5]
+        tostops: [6]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [3, 5]
+        fromstops: [5, 6]
+        lencarry: 1
+        lenstarts: 2
+      outputs:
+        tostarts: [5]
+        tostops: [6]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 4]
+        fromstarts: [0, 3, 5, 6, 6]
+        fromstops: [3, 5, 6, 6, 10]
+        lencarry: 3
+        lenstarts: 5
+      outputs:
+        tostarts: [5, 6, 6]
+        tostops: [6, 6, 10]
+    - error: false
+      inputs:
+        fromcarry: [2, 0, 0, 2]
+        fromstarts: [0, 3, 6]
+        fromstops: [3, 6, 9]
+        lencarry: 4
+        lenstarts: 3
+      outputs:
+        tostarts: [6, 0, 0, 6]
+        tostops: [9, 3, 3, 9]
+    - error: false
+      inputs:
+        fromcarry: [4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [6]
+        tostops: [10]
+    - error: false
+      inputs:
+        fromcarry: [4, 5]
+        fromstarts: [0, 3, 3, 5, 6, 10]
+        fromstops: [3, 3, 5, 6, 10, 10]
+        lencarry: 2
+        lenstarts: 6
+      outputs:
+        tostarts: [6, 10]
+        tostops: [10, 10]
+    - error: false
+      inputs:
+        fromcarry: [2]
+        fromstarts: [3, 5, 6]
+        fromstops: [5, 6, 10]
+        lencarry: 1
+        lenstarts: 3
+      outputs:
+        tostarts: [6]
+        tostops: [10]
+    - error: false
+      inputs:
+        fromcarry: [2, 3, 4, 5, 6]
+        fromstarts: [0, 3, 6, 11, 14, 17, 20]
+        fromstops: [3, 6, 11, 14, 17, 20, 25]
+        lencarry: 5
+        lenstarts: 7
+      outputs:
+        tostarts: [6, 11, 14, 17, 20]
+        tostops: [11, 14, 17, 20, 25]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 0]
+        fromstarts: [0, 3, 5, 6]
+        fromstops: [3, 5, 6, 10]
+        lencarry: 3
+        lenstarts: 4
+      outputs:
+        tostarts: [6, 5, 0]
+        tostops: [10, 6, 3]
+    - error: false
+      inputs:
+        fromcarry: [7, 3, 0, 2, 3, 7]
+        fromstarts: [0, 3, 3, 5, 6, 6, 6, 6]
+        fromstops: [3, 3, 5, 6, 6, 6, 6, 9]
+        lencarry: 6
+        lenstarts: 8
+      outputs:
+        tostarts: [6, 5, 0, 3, 5, 6]
+        tostops: [9, 6, 3, 5, 6, 9]
+    - error: false
+      inputs:
+        fromcarry: [3, 2, 1, 0]
+        fromstarts: [0, 3, 5, 6]
+        fromstops: [3, 5, 6, 10]
+        lencarry: 4
+        lenstarts: 4
+      outputs:
+        tostarts: [6, 5, 3, 0]
+        tostops: [10, 6, 5, 3]
+    - error: false
+      inputs:
+        fromcarry: [7, 3, 2, 0, 2, 3, 7]
+        fromstarts: [0, 3, 3, 5, 6, 6, 6, 6]
+        fromstops: [3, 3, 5, 6, 6, 6, 6, 9]
+        lencarry: 7
+        lenstarts: 8
+      outputs:
+        tostarts: [6, 5, 3, 0, 3, 5, 6]
+        tostops: [9, 6, 5, 3, 5, 6, 9]
+    - error: false
+      inputs:
+        fromcarry: [7, 3, 2, 0, 3, 7]
+        fromstarts: [0, 3, 3, 5, 6, 6, 6, 6]
+        fromstops: [3, 3, 5, 6, 6, 6, 6, 9]
+        lencarry: 6
+        lenstarts: 8
+      outputs:
+        tostarts: [6, 5, 3, 0, 5, 6]
+        tostops: [9, 6, 5, 3, 6, 9]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 2, 1, 0]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [6, 5, 3, 3, 0]
+        tostops: [10, 6, 5, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 2, 1, 0]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 5
+        lenstarts: 5
+      outputs:
+        tostarts: [6, 5, 3, 3, 0]
+        tostops: [9, 6, 5, 3, 3]
+    - error: false
+      inputs:
+        fromcarry: [4, 3, 4, 0]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 4
+        lenstarts: 5
+      outputs:
+        tostarts: [6, 5, 6, 0]
+        tostops: [9, 6, 9, 3]
+    - error: false
+      inputs:
+        fromcarry: [3, 4, 5]
+        fromstarts: [0, 4, 4, 6, 7, 7]
+        fromstops: [4, 4, 6, 7, 7, 12]
+        lencarry: 3
+        lenstarts: 6
+      outputs:
+        tostarts: [6, 7, 7]
+        tostops: [7, 7, 12]
+    - error: false
+      inputs:
+        fromcarry: [4]
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        lencarry: 1
+        lenstarts: 5
+      outputs:
+        tostarts: [6]
+        tostops: [9]
+    - error: false
+      inputs:
+        fromcarry: [1]
+        fromstarts: [3, 6]
+        fromstops: [3, 9]
+        lencarry: 1
+        lenstarts: 2
+      outputs:
+        tostarts: [6]
+        tostops: [9]
+    - error: false
+      inputs:
+        fromcarry: [2, 3]
+        fromstarts: [0, 4, 6, 9]
+        fromstops: [4, 6, 9, 14]
+        lencarry: 2
+        lenstarts: 4
+      outputs:
+        tostarts: [6, 9]
+        tostops: [9, 14]
