@@ -19371,3 +19371,559 @@ unit-tests:
       outputs:
         toadvanced: [0, 1, 2, 3]
         tocarry: [8, 7, 7, 6]
+  - name: awkward_ListArray_min_range
+    tests:
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 4, 5, 8]
+        fromstops: [3, 3, 6, 8, 9]
+        lenstarts: 5
+      outputs:
+        tomin: [0]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 5]
+        fromstops: [3, 3, 7]
+        lenstarts: 3
+      outputs:
+        tomin: [0]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 3, 0]
+        fromstops: [10, 6, 5, 3, 3]
+        lenstarts: 5
+      outputs:
+        tomin: [0]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 0]
+        fromstops: [10, 6, 5, 3]
+        lenstarts: 4
+      outputs:
+        tomin: [1]
+  - name: awkward_ListArray_rpad_and_clip_length_axis1
+    tests:
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 4, 5, 8]
+        fromstops: [3, 3, 6, 8, 9]
+        lenstarts: 5
+        target: 1
+      outputs:
+        tomin: [10]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 0]
+        fromstops: [10, 6, 5, 3]
+        lenstarts: 4
+        target: 1
+      outputs:
+        tomin: [10]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 4, 5, 8]
+        fromstops: [3, 3, 6, 8, 9]
+        lenstarts: 5
+        target: 2
+      outputs:
+        tomin: [12]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 0]
+        fromstops: [10, 6, 5, 3]
+        lenstarts: 4
+        target: 3
+      outputs:
+        tomin: [13]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 3, 0]
+        fromstops: [10, 6, 5, 3, 3]
+        lenstarts: 5
+        target: 2
+      outputs:
+        tomin: [13]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 4, 5, 8]
+        fromstops: [3, 3, 6, 8, 9]
+        lenstarts: 5
+        target: 3
+      outputs:
+        tomin: [15]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 0]
+        fromstops: [10, 6, 5, 3]
+        lenstarts: 4
+        target: 4
+      outputs:
+        tomin: [16]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 3, 0]
+        fromstops: [10, 6, 5, 3, 3]
+        lenstarts: 5
+        target: 3
+      outputs:
+        tomin: [16]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 4, 5, 8]
+        fromstops: [3, 3, 6, 8, 9]
+        lenstarts: 5
+        target: 4
+      outputs:
+        tomin: [20]
+    - error: false
+      inputs:
+        fromstarts: [6, 5, 3, 3, 0]
+        fromstops: [10, 6, 5, 3, 3]
+        lenstarts: 5
+        target: 4
+      outputs:
+        tomin: [20]
+    - error: false
+      inputs:
+        fromstarts: [0, 3, 5]
+        fromstops: [3, 3, 7]
+        lenstarts: 3
+        target: 3
+      outputs:
+        tomin: [9]
+  - name: awkward_ListArray_validity
+    tests:
+    - error: false
+      inputs:
+        lencontent: 0
+        length: 5
+        starts: [0, 0, 0, 0, 0]
+        stops: [0, 0, 0, 0, 0]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 0
+        length: 4
+        starts: [0, 0, 0, 0]
+        stops: [0, 0, 0, 0]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 0
+        length: 3
+        starts: [0, 0, 0]
+        stops: [0, 0, 0]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 1
+        length: 3
+        starts: [0, 0, 1]
+        stops: [0, 1, 1]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 4
+        length: 3
+        starts: [0, 0, 1]
+        stops: [0, 1, 4]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 1
+        length: 4
+        starts: [0, 0, 1, 1]
+        stops: [0, 1, 1, 1]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 6
+        length: 4
+        starts: [0, 0, 1, 3]
+        stops: [0, 1, 3, 6]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 10
+        length: 5
+        starts: [0, 0, 1, 3, 6]
+        stops: [0, 1, 3, 6, 10]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 19
+        length: 8
+        starts: [0, 0, 3, 3, 8, 12, 12, 16]
+        stops: [0, 3, 3, 8, 12, 12, 16, 19]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 19
+        length: 9
+        starts: [0, 0, 3, 3, 8, 12, 12, 16, 19]
+        stops: [0, 3, 3, 8, 12, 12, 16, 19, 19]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 6
+        length: 3
+        starts: [0, 1, 3]
+        stops: [1, 3, 6]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 15
+        length: 5
+        starts: [0, 1, 3, 6, 10]
+        stops: [1, 3, 6, 10, 15]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 12
+        length: 6
+        starts: [0, 1, 3, 6, 7, 9]
+        stops: [1, 3, 6, 7, 9, 12]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 8
+        length: 4
+        starts: [0, 1, 4, 5]
+        stops: [1, 4, 5, 8]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 3
+        length: 3
+        starts: [0, 2, 2]
+        stops: [2, 2, 3]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 4
+        length: 3
+        starts: [0, 2, 2]
+        stops: [2, 2, 4]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 3
+        length: 2
+        starts: [0, 2]
+        stops: [2, 3]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 4
+        length: 2
+        starts: [0, 2]
+        stops: [2, 4]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 8
+        length: 7
+        starts: [0, 2, 2, 4, 4, 5, 5]
+        stops: [2, 2, 4, 4, 5, 5, 8]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 6
+        length: 5
+        starts: [0, 2, 2, 4, 5]
+        stops: [2, 2, 4, 5, 6]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 9
+        length: 5
+        starts: [0, 2, 2, 4, 5]
+        stops: [2, 2, 4, 5, 9]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 3
+        length: 3
+        starts: [0, 2, 3]
+        stops: [2, 3, 3]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 4
+        length: 3
+        starts: [0, 2, 3]
+        stops: [2, 3, 4]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 5
+        length: 3
+        starts: [0, 2, 3]
+        stops: [2, 3, 5]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 6
+        length: 3
+        starts: [0, 2, 3]
+        stops: [2, 3, 6]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 5
+        length: 4
+        starts: [0, 2, 3, 3]
+        stops: [2, 3, 3, 5]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 7
+        length: 4
+        starts: [0, 2, 3, 4]
+        stops: [2, 3, 4, 7]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 6
+        length: 3
+        starts: [0, 2, 4]
+        stops: [2, 4, 6]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 7
+        length: 3
+        starts: [0, 2, 5]
+        stops: [2, 5, 7]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 8
+        length: 3
+        starts: [0, 2, 6]
+        stops: [2, 6, 8]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 5
+        length: 3
+        starts: [0, 3, 3]
+        stops: [3, 3, 5]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 7
+        length: 3
+        starts: [0, 3, 3]
+        stops: [3, 3, 7]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 8
+        length: 3
+        starts: [0, 3, 3]
+        stops: [3, 3, 8]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 4
+        length: 2
+        starts: [0, 3]
+        stops: [3, 4]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 9
+        length: 4
+        starts: [0, 3, 3, 5]
+        stops: [3, 3, 5, 9]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 11
+        length: 6
+        starts: [0, 3, 3, 5, 6, 10]
+        stops: [3, 3, 5, 6, 10, 11]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 9
+        length: 5
+        starts: [0, 3, 3, 5, 6]
+        stops: [3, 3, 5, 6, 9]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 9
+        length: 6
+        starts: [0, 3, 3, 5, 6, 8]
+        stops: [3, 3, 5, 6, 8, 9]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 6
+        length: 2
+        starts: [0, 3]
+        stops: [3, 6]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 7
+        length: 2
+        starts: [0, 3]
+        stops: [3, 7]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 11
+        length: 4
+        starts: [0, 3, 4, 7]
+        stops: [3, 4, 7, 11]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 25
+        length: 7
+        starts: [0, 3, 6, 11, 14, 17, 20]
+        stops: [3, 6, 11, 14, 17, 20, 25]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 20
+        length: 6
+        starts: [0, 3, 6, 11, 14, 17]
+        stops: [3, 6, 11, 14, 17, 20]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 19
+        length: 5
+        starts: [0, 3, 6, 11, 15]
+        stops: [3, 6, 11, 15, 19]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 10
+        length: 3
+        starts: [0, 3, 6]
+        stops: [3, 6, 10]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 11
+        length: 3
+        starts: [0, 3, 6]
+        stops: [3, 6, 11]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 21
+        length: 9
+        starts: [0, 3, 6, 6, 10, 14, 14, 18, 21]
+        stops: [3, 6, 6, 10, 14, 14, 18, 21, 21]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 21
+        length: 8
+        starts: [0, 3, 6, 6, 10, 14, 14, 18]
+        stops: [3, 6, 6, 10, 14, 14, 18, 21]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 22
+        length: 9
+        starts: [0, 3, 6, 6, 11, 15, 15, 19, 22]
+        stops: [3, 6, 6, 11, 15, 15, 19, 22, 22]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 22
+        length: 8
+        starts: [0, 3, 6, 6, 11, 15, 15, 19]
+        stops: [3, 6, 6, 11, 15, 15, 19, 22]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 24
+        length: 9
+        starts: [0, 3, 6, 8, 13, 17, 17, 21, 24]
+        stops: [3, 6, 8, 13, 17, 17, 21, 24, 24]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 24
+        length: 8
+        starts: [0, 3, 6, 8, 13, 17, 17, 21]
+        stops: [3, 6, 8, 13, 17, 17, 21, 24]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 9
+        length: 3
+        starts: [0, 3, 7]
+        stops: [3, 7, 9]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 10
+        length: 2
+        starts: [0, 4]
+        stops: [4, 10]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 6
+        length: 3
+        starts: [0, 4, 4]
+        stops: [4, 4, 6]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 10
+        length: 3
+        starts: [0, 4, 6]
+        stops: [4, 6, 10]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 14
+        length: 4
+        starts: [0, 4, 6, 9]
+        stops: [4, 6, 9, 14]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 11
+        length: 6
+        starts: [0, 4, 7, 7, 9, 9]
+        stops: [4, 7, 7, 9, 9, 11]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 12
+        length: 3
+        starts: [0, 4, 8]
+        stops: [4, 8, 12]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 30
+        length: 6
+        starts: [0, 5, 10, 15, 20, 25]
+        stops: [5, 10, 15, 20, 25, 30]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 10
+        length: 2
+        starts: [0, 5]
+        stops: [5, 10]
+      outputs: {}
+    - error: false
+      inputs:
+        lencontent: 12
+        length: 6
+        starts: [3, 0, 999, 2, 6, 10]
+        stops: [7, 3, 999, 4, 6, 12]
+      outputs: {}
