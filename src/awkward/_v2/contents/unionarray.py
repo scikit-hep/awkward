@@ -287,3 +287,6 @@ class UnionArray(Content):
             return UnionArray(
                 self._tags, self._index, contents, self._identifier, self.parameters
             )
+
+    def localindex(self, axis):
+        return self._localindex(axis, 0)

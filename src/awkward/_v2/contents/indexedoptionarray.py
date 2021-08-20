@@ -278,3 +278,6 @@ class IndexedOptionArray(Content):
                 self._parameters,
             )
             return out2
+
+    def localindex(self, axis):
+        return self._localindex(axis, 0)

@@ -277,3 +277,6 @@ class ByteMaskedArray(Content):
                 self._parameters,
             )
             return out2._simplify_optiontype()
+
+    def localindex(self, axis):
+        return self._localindex(axis, 0)

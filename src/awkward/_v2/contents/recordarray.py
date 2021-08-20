@@ -358,3 +358,6 @@ class RecordArray(Content):
             return RecordArray(
                 contents, self._keys, len(self), self._identifier, self._parameters
             )
+
+    def localindex(self, axis):
+        return self._localindex(axis, 0)

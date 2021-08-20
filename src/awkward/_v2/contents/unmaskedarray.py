@@ -137,3 +137,6 @@ class UnmaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def localindex(self, axis):
+        return self._localindex(axis, 0)
