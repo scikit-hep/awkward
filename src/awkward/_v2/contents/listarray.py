@@ -367,7 +367,7 @@ class ListArray(Content):
                 "awkward_ListArray_compact_offsets",
                 out.dtype.type,
                 self._starts.dtype.type,
-                self._stops.dtype,
+                self._stops.dtype.type,
             ](
                 out.to(self.nplike),
                 self._starts.to(self.nplike),
@@ -399,7 +399,7 @@ class ListArray(Content):
                 self._parameters,
             )
         else:
-            return ak._v2.contents.listoffsetarray.ListArray(
+            return ak._v2.contents.listarray.ListArray(
                 self._starts,
                 self._stops,
                 self._content._localindex(posaxis, depth + 1),

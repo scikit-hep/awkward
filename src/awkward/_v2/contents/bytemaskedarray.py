@@ -251,13 +251,14 @@ class ByteMaskedArray(Content):
                 self._mask.dtype.type,
             ](
                 nextcarry.to(self.nplike),
+                outindex.to(self.nplike),
                 self._mask.to(self.nplike),
                 len(self._mask),
                 self._valid_when,
             )
         )
 
-        return tuple(nextcarry, outindex)
+        return nextcarry, outindex
 
     def _localindex(self, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
@@ -270,7 +271,7 @@ class ByteMaskedArray(Content):
 
             next = self.content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
-            out2 = ak.v2.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,

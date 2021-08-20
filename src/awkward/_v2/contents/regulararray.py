@@ -358,12 +358,12 @@ class RegularArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         elif posaxis == depth + 1:
-            localindex = ak._v2.index.Index64.empty(len(self) * self._size, self.nplike)
+            localindex = ak._v2.index.Index64.empty(self._length * self._size, self.nplike)
             self._handle_error(
                 localindex.nplike["awkward_RegularArray_localindex", np.int64](
                     localindex.to(localindex.nplike),
                     self._size,
-                    len(localindex),
+                    self._length,
                 )
             )
 
