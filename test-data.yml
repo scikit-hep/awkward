@@ -19927,3 +19927,263 @@ unit-tests:
         starts: [3, 0, 999, 2, 6, 10]
         stops: [7, 3, 999, 4, 6, 12]
       outputs: {}
+  - name: awkward_reduce_argmin
+    tests:
+    - error: true
+      inputs:
+        fromptr: [15]
+        parents: [5]
+      outputs:
+        toptr: [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
+    - error: true
+      inputs:
+        fromptr: [6]
+        parents: [2]
+      outputs:
+        toptr: [0, 0, 0, 1, 1, 1]
+    - error: true
+      inputs:
+        fromptr: [22]
+        parents: [6]
+      outputs:
+        toptr: [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
+    - error: true
+      inputs:
+        fromptr: [19]
+        parents: [5]
+      outputs:
+        toptr: [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromptr: [22]
+        parents: [8]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 116, 104, 114, 101, 101, 102, 111, 117,
+          114, 102, 105, 118, 101, 115, 105, 120]
+    - error: true
+      inputs:
+        fromptr: [22]
+        parents: [9]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 116, 104, 114, 101, 101, 102, 111, 117,
+          114, 102, 105, 118, 101, 115, 105, 120]
+    - error: true
+      inputs:
+        fromptr: [11]
+        parents: [3]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 116, 104, 114, 101, 101]
+    - error: true
+      inputs:
+        fromptr: [25]
+        parents: [7]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 116, 104, 114, 101, 101, 116, 119, 111,
+          116, 119, 111, 111, 110, 101, 116, 104, 114, 101, 101]
+    - error: true
+      inputs:
+        fromptr: [20]
+        parents: [6]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 116, 104, 114, 101, 101, 116, 119, 111,
+          116, 119, 111, 111, 110, 101]
+    - error: true
+      inputs:
+        fromptr: [21]
+        parents: [8]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 116, 104, 114, 101, 102, 111, 117, 114,
+          102, 105, 118, 101, 115, 105, 120]
+    - error: true
+      inputs:
+        fromptr: [21]
+        parents: [9]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 116, 104, 114, 101, 102, 111, 117, 114,
+          102, 105, 118, 101, 115, 105, 120]
+    - error: true
+      inputs:
+        fromptr: [24]
+        parents: [8]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 58, 41, 116, 104, 114, 101, 101, 102,
+          111, 117, 114, 102, 105, 118, 101, 115, 105, 120]
+    - error: true
+      inputs:
+        fromptr: [24]
+        parents: [9]
+      outputs:
+        toptr: [111, 110, 101, 116, 119, 111, 58, 41, 116, 104, 114, 101, 101, 102,
+          111, 117, 114, 102, 105, 118, 101, 115, 105, 120]
+    - error: true
+      inputs:
+        fromptr: [22]
+        parents: [8]
+      outputs:
+        toptr: [111, 110, 101, 84, 119, 111, 116, 104, 114, 101, 69, 102, 111, 117,
+          114, 102, 105, 118, 101, 115, 105, 88]
+    - error: true
+      inputs:
+        fromptr: [22]
+        parents: [9]
+      outputs:
+        toptr: [111, 110, 101, 84, 119, 111, 116, 104, 114, 101, 69, 102, 111, 117,
+          114, 102, 105, 118, 101, 115, 105, 88]
+    - error: true
+      inputs:
+        fromptr: [9]
+        parents: [3]
+      outputs:
+        toptr: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    - error: true
+      inputs:
+        fromptr: [22]
+        parents: [6]
+      outputs:
+        toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromptr: [19]
+        parents: [5]
+      outputs:
+        toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromptr: [17]
+        parents: [5]
+      outputs:
+        toptr: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    - error: true
+      inputs:
+        fromptr: [29]
+        parents: [7]
+      outputs:
+        toptr: [116, 104, 114, 101, 101, 116, 104, 114, 101, 101, 116, 104, 114, 101,
+          101, 111, 110, 101, 111, 110, 101, 111, 110, 101, 116, 104, 114, 101, 101]
+    - error: true
+      inputs:
+        fromptr: [5]
+        parents: [1]
+      outputs:
+        toptr: [116, 104, 114, 101, 101]
+    - error: true
+      inputs:
+        fromptr: [19]
+        parents: [8]
+      outputs:
+        toptr: [116, 119, 111, 116, 104, 114, 101, 101, 102, 111, 117, 114, 102, 105,
+          118, 101, 115, 105, 120]
+    - error: true
+      inputs:
+        fromptr: [19]
+        parents: [9]
+      outputs:
+        toptr: [116, 119, 111, 116, 104, 114, 101, 101, 102, 111, 117, 114, 102, 105,
+          118, 101, 115, 105, 120]
+    - error: true
+      inputs:
+        fromptr: [9]
+        parents: [3]
+      outputs:
+        toptr: [116, 119, 111, 116, 119, 111, 111, 110, 101]
+    - error: true
+      inputs:
+        fromptr: [21]
+        parents: [7]
+      outputs:
+        toptr: [116, 119, 111, 116, 119, 111, 116, 119, 111, 116, 119, 111, 116, 119,
+          111, 116, 119, 111, 116, 119, 111]
+    - error: true
+      inputs:
+        fromptr: [18]
+        parents: [6]
+      outputs:
+        toptr: [116, 119, 111, 116, 119, 111, 116, 119, 111, 116, 119, 111, 116, 119,
+          111, 116, 119, 111]
+    - error: true
+      inputs:
+        fromptr: [9]
+        parents: [3]
+      outputs:
+        toptr: [116, 119, 111, 116, 119, 111, 116, 119, 111]
+    - error: true
+      inputs:
+        fromptr: [3]
+        parents: [1]
+      outputs:
+        toptr: [116, 119, 111]
+    - error: true
+      inputs:
+        fromptr: [9]
+        parents: [5]
+      outputs:
+        toptr: [22, 11, 33, 44, 55, 55, 44, 55, 66]
+    - error: true
+      inputs:
+        fromptr: [6]
+        parents: [3]
+      outputs:
+        toptr: [22, 11, 33, 44, 55, 66]
+    - error: true
+      inputs:
+        fromptr: [12]
+        parents: [3]
+      outputs:
+        toptr: [33, 11, 55, 11, 44, 44, 22, 11, 66, 22, 33, 11]
+    - error: true
+      inputs:
+        fromptr: [15]
+        parents: [3]
+      outputs:
+        toptr: [33, 22, 55, 11, 44, 44, 22, 11, 33, 55, 22, 11, 44, 33, 55]
+    - error: true
+      inputs:
+        fromptr: [30]
+        parents: [6]
+      outputs:
+        toptr: [33, 22, 55, 11, 44, 44, 22, 11, 33, 55, 22, 11, 44, 33, 55, 33, 22,
+          55, 11, 44, 44, 22, 11, 33, 55, 22, 11, 44, 33, 55]
+    - error: true
+      inputs:
+        fromptr: [30]
+        parents: [15]
+      outputs:
+        toptr: [33, 33, 44, 44, 22, 22, 22, 22, 22, 22, 11, 11, 55, 55, 11, 11, 44,
+          44, 11, 11, 33, 33, 33, 33, 44, 44, 55, 55, 55, 55]
+    - error: true
+      inputs:
+        fromptr: [12]
+        parents: [5]
+      outputs:
+        toptr: [33, 44, 22, 11, 22, 33, 55, 11, 11, 11, 66, 44]
+    - error: true
+      inputs:
+        fromptr: [15]
+        parents: [5]
+      outputs:
+        toptr: [33, 44, 22, 22, 22, 11, 55, 11, 44, 11, 33, 33, 44, 55, 55]
+    - error: true
+      inputs:
+        fromptr: [30]
+        parents: [10]
+      outputs:
+        toptr: [33, 44, 22, 33, 44, 22, 22, 22, 11, 22, 22, 11, 55, 11, 44, 55, 11,
+          44, 11, 33, 33, 11, 33, 33, 44, 55, 55, 44, 55, 55]
+    - error: true
+      inputs:
+        fromptr: [9]
+        parents: [5]
+      outputs:
+        toptr: [44, 55, 66, 55, 44, 55, 22, 11, 33]
+    - error: true
+      inputs:
+        fromptr: [10]
+        parents: [4]
+      outputs:
+        toptr: [44, 55, 66, 55, 44, 55, 66, 22, 11, 33]
+    - error: true
+      inputs:
+        fromptr: [10]
+        parents: [3]
+      outputs:
+        toptr: [79, 78, 69, 116, 119, 111, 102, 111, 117, 114]
