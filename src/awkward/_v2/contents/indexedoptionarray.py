@@ -215,7 +215,7 @@ class IndexedOptionArray(Content):
             ](ctypes.pointer(numnull), self._index.to(self.nplike), len(self._index))
         )
 
-        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value)
+        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value, self.nplike)
 
         self._handle_error(
             self.nplike[
@@ -241,8 +241,8 @@ class IndexedOptionArray(Content):
             ](ctypes.pointer(numnull), self._index.to(self.nplike), len(self._index))
         )
 
-        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value)
-        outindex = ak._v2.index.Index64.empty(len(self))
+        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value, self.nplike)
+        outindex = ak._v2.index.Index64.empty(len(self), self.nplike)
 
         self._handle_error(
             self.nplike[

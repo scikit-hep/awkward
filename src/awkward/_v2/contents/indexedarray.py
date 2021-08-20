@@ -179,7 +179,7 @@ class IndexedArray(Content):
             raise AssertionError(repr(head))
 
     def _project(self):
-        nextcarry = ak._v2.index.Index64.empty(len(self))
+        nextcarry = ak._v2.index.Index64.empty(len(self), self.nplike)
         self._handle_error(
             self.nplike[
                 "awkward_IndexedArray_getitem_nextcarry",
