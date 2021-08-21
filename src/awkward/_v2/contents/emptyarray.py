@@ -2,8 +2,6 @@
 
 from __future__ import absolute_import
 
-from awkward._v2.contents.numpyarray import NumpyArray
-
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.emptyform import EmptyForm
@@ -103,6 +101,7 @@ class EmptyArray(Content):
     def _localindex(self, axis, depth):
         # TODO: Why isn't nplike working?
         import numpy as np
+
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 
     def localindex(self, axis):
