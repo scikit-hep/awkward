@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import awkward as ak
-import ctypes
 
 np = ak.nplike.NumpyMetadata.instance()
 

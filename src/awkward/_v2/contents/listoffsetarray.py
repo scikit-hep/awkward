@@ -364,9 +364,7 @@ class ListOffsetArray(Content):
             return self._localindex_axis0()
         elif posaxis == depth + 1:
             offsets = self._compact_offsets(True)
-            print(offsets)
             innerlength = offsets[len(offsets) - 1]
-            print("Inner Length", innerlength)
             localindex = ak._v2.index.Index64.empty(innerlength, self.nplike)
             self._handle_error(
                 self.nplike[
