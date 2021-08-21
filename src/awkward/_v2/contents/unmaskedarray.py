@@ -133,7 +133,7 @@ class UnmaskedArray(Content):
             return self._localindex_axis0()
         else:
             return UnmaskedArray(
-                self._content.localindex(posaxis, depth),
+                self._content._localindex(posaxis, depth),
                 self._identifier,
                 self._parameters,
             )

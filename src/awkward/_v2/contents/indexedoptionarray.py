@@ -259,7 +259,7 @@ class IndexedOptionArray(Content):
             )
         )
 
-        return tuple(nextcarry, outindex)
+        return nextcarry, outindex
 
     def _localindex(self, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
@@ -269,7 +269,7 @@ class IndexedOptionArray(Content):
             numnull = ctypes.c_int64()
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-            next = self._content.carry(nextcarry, False, NestedIndexError)
+            next = self._content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
             out2 = ak.v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
