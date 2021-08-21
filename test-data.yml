@@ -20187,3 +20187,636 @@ unit-tests:
         parents: [3]
       outputs:
         toptr: [79, 78, 69, 116, 119, 111, 102, 111, 117, 114]
+  - name: awkward_ListArray_getitem_jagged_apply
+    tests:
+    - error: false
+      inputs:
+        contentlen: 0
+        fromstarts: [0, 0, 0, 0]
+        fromstops: [0, 0, 0, 0]
+        sliceindex: []
+        sliceinnerlen: 0
+        sliceouterlen: 4
+        slicestarts: [0, 0, 0, 0]
+        slicestops: [0, 0, 0, 0]
+      outputs:
+        tocarry: []
+        tooffsets: [0, 0, 0, 0, 0]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: []
+        sliceinnerlen: 0
+        sliceouterlen: 3
+        slicestarts: [0, 0, 0]
+        slicestops: [0, 0, 0]
+      outputs:
+        tocarry: []
+        tooffsets: [0, 0, 0, 0]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [0, 1]
+        sliceinnerlen: 2
+        sliceouterlen: 3
+        slicestarts: [0, 0, 0]
+        slicestops: [0, 0, 2]
+      outputs:
+        tocarry: [3, 4]
+        tooffsets: [0, 0, 0, 2]
+    - error: true
+      inputs:
+        contentlen: 0
+        fromstarts: [0, 0, 0, 0]
+        fromstops: [0, 0, 0, 0]
+        sliceindex: [0]
+        sliceinnerlen: 1
+        sliceouterlen: 4
+        slicestarts: [0, 0, 1, 1]
+        slicestops: [0, 1, 1, 1]
+      outputs:
+        tocarry: [49186528]
+        tooffsets: [0, 0, 4, 5, 48]
+    - error: true
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        sliceindex: [1, 0, 1]
+        sliceinnerlen: 3
+        sliceouterlen: 5
+        slicestarts: [0, 1, 1, 2, 2]
+        slicestops: [1, 1, 2, 2, 3]
+      outputs:
+        tocarry: [2, 3, 7]
+        tooffsets: [0, 1, 1, 2, 2, 3]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [0, 0, 1]
+        sliceinnerlen: 3
+        sliceouterlen: 3
+        slicestarts: [0, 1, 1]
+        slicestops: [1, 1, 3]
+      outputs:
+        tocarry: [0, 3, 4]
+        tooffsets: [0, 1, 1, 3]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [2, 0, 1]
+        sliceinnerlen: 3
+        sliceouterlen: 3
+        slicestarts: [0, 1, 1]
+        slicestops: [1, 1, 3]
+      outputs:
+        tocarry: [2, 3, 4]
+        tooffsets: [0, 1, 1, 3]
+    - error: false
+      inputs:
+        contentlen: 10
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 10]
+        sliceindex: [1, 0, 1, 0, 3]
+        sliceinnerlen: 5
+        sliceouterlen: 5
+        slicestarts: [0, 1, 1, 3, 3]
+        slicestops: [1, 1, 3, 3, 5]
+      outputs:
+        tocarry: [1, 3, 4, 6, 9]
+        tooffsets: [0, 1, 1, 3, 3, 5]
+    - error: true
+      inputs:
+        contentlen: 20
+        fromstarts: [0, 5, 10, 15]
+        fromstops: [5, 10, 15, 20]
+        sliceindex: [2, 1, 0, 3, 5, 4]
+        sliceinnerlen: 6
+        sliceouterlen: 4
+        slicestarts: [0, 1, 3, 4]
+        slicestops: [1, 3, 4, 6]
+      outputs:
+        tocarry: [2, 9, 5, 12, 15, 19]
+        tooffsets: [0, 1, 3, 4, 6]
+    - error: true
+      inputs:
+        contentlen: 30
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        sliceindex: [2, 1, 2, 1, 0, 3, 4, 3, 5, 4]
+        sliceinnerlen: 10
+        sliceouterlen: 6
+        slicestarts: [0, 1, 3, 5, 6, 8]
+        slicestops: [1, 3, 5, 6, 8, 10]
+      outputs:
+        tocarry: [2, 6, 8, 14, 10, 17, 21, 23, 25, 29]
+        tooffsets: [0, 1, 3, 5, 6, 8, 10]
+    - error: true
+      inputs:
+        contentlen: 30
+        fromstarts: [0, 5, 10, 15, 20, 25]
+        fromstops: [5, 10, 15, 20, 25, 30]
+        sliceindex: [2, 1, 2, 1, 2, 0, 3, 4, 3, 5, 3, 4]
+        sliceinnerlen: 12
+        sliceouterlen: 6
+        slicestarts: [0, 1, 3, 6, 7, 9]
+        slicestops: [1, 3, 6, 7, 9, 12]
+      outputs:
+        tocarry: [2, 6, 8, 14, 12, 10, 17, 21, 23, 25, 27, 29]
+        tooffsets: [0, 1, 3, 6, 7, 9, 12]
+    - error: true
+      inputs:
+        contentlen: 20
+        fromstarts: [0, 5, 10, 15]
+        fromstops: [5, 10, 15, 20]
+        sliceindex: [2, 1, 2, 0, 3, 5, 3, 4]
+        sliceinnerlen: 8
+        sliceouterlen: 4
+        slicestarts: [0, 1, 4, 5]
+        slicestops: [1, 4, 5, 8]
+      outputs:
+        tocarry: [2, 9, 7, 5, 12, 15, 17, 19]
+        tooffsets: [0, 1, 4, 5, 8]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [0, 1]
+        sliceinnerlen: 2
+        sliceouterlen: 3
+        slicestarts: [0, 2, 2]
+        slicestops: [2, 2, 2]
+      outputs:
+        tocarry: [0, 1]
+        tooffsets: [0, 2, 2, 2]
+    - error: true
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        sliceindex: [1, 2, 2, 0]
+        sliceinnerlen: 4
+        sliceouterlen: 5
+        slicestarts: [0, 2, 2, 2, 2]
+        slicestops: [2, 2, 2, 2, 4]
+      outputs:
+        tocarry: [2, 1, 7, 6]
+        tooffsets: [0, 2, 2, 2, 2, 4]
+    - error: false
+      inputs:
+        contentlen: 4
+        fromstarts: [0, 1, 1, 1, 1]
+        fromstops: [1, 1, 1, 1, 4]
+        sliceindex: [0, 0, 2, 1, 1, 2]
+        sliceinnerlen: 6
+        sliceouterlen: 5
+        slicestarts: [0, 2, 2, 2, 2]
+        slicestops: [2, 2, 2, 2, 6]
+      outputs:
+        tocarry: [0, 0, 3, 2, 2, 3]
+        tooffsets: [0, 2, 2, 2, 2, 6]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [0, 1, 0]
+        sliceinnerlen: 3
+        sliceouterlen: 3
+        slicestarts: [0, 2, 2]
+        slicestops: [2, 2, 3]
+      outputs:
+        tocarry: [0, 1, 3]
+        tooffsets: [0, 2, 2, 3]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [0, 1, 1]
+        sliceinnerlen: 3
+        sliceouterlen: 3
+        slicestarts: [0, 2, 2]
+        slicestops: [2, 2, 3]
+      outputs:
+        tocarry: [0, 1, 4]
+        tooffsets: [0, 2, 2, 3]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [2, 0, 1]
+        sliceinnerlen: 3
+        sliceouterlen: 3
+        slicestarts: [0, 2, 2]
+        slicestops: [2, 2, 3]
+      outputs:
+        tocarry: [2, 0, 4]
+        tooffsets: [0, 2, 2, 3]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [0, 2, 0, 1]
+        sliceinnerlen: 4
+        sliceouterlen: 3
+        slicestarts: [0, 2, 2]
+        slicestops: [2, 2, 4]
+      outputs:
+        tocarry: [0, 2, 3, 4]
+        tooffsets: [0, 2, 2, 4]
+    - error: true
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 7]
+        fromstops: [3, 7, 9]
+        sliceindex: [1, 1, 1, 2]
+        sliceinnerlen: 4
+        sliceouterlen: 3
+        slicestarts: [0, 2, 2]
+        slicestops: [2, 2, 4]
+      outputs:
+        tocarry: [2, 1, 8, 7]
+        tooffsets: [0, 2, 2, 4]
+    - error: true
+      inputs:
+        contentlen: 10
+        fromstarts: [0, 4, 6]
+        fromstops: [4, 6, 10]
+        sliceindex: [1, 1, 1, 2]
+        sliceinnerlen: 4
+        sliceouterlen: 3
+        slicestarts: [0, 2, 2]
+        slicestops: [2, 2, 4]
+      outputs:
+        tocarry: [3, 1, 9, 8]
+        tooffsets: [0, 2, 2, 4]
+    - error: true
+      inputs:
+        contentlen: 12
+        fromstarts: [0, 3, 3, 5, 6, 8, 8]
+        fromstops: [3, 3, 5, 6, 8, 8, 12]
+        sliceindex: [0, 1, 1, 1, 1, 1, 2, 1]
+        sliceinnerlen: 8
+        sliceouterlen: 7
+        slicestarts: [0, 2, 2, 4, 4, 5, 5]
+        slicestops: [2, 2, 4, 4, 5, 5, 8]
+      outputs:
+        tocarry: [0, 2, 4, 4, 7, 9, 10, 11]
+        tooffsets: [0, 2, 2, 4, 4, 5, 5, 8]
+    - error: false
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        sliceindex: [0, 2, 0, 1, 0, 0, 1, 2]
+        sliceinnerlen: 8
+        sliceouterlen: 5
+        slicestarts: [0, 2, 2, 4, 5]
+        slicestops: [2, 2, 4, 5, 8]
+      outputs:
+        tocarry: [0, 2, 3, 4, 5, 6, 7, 8]
+        tooffsets: [0, 2, 2, 4, 5, 8]
+    - error: false
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        sliceindex: [1, 2, 0, 1, 0, 0, 1, 2]
+        sliceinnerlen: 8
+        sliceouterlen: 5
+        slicestarts: [0, 2, 2, 4, 5]
+        slicestops: [2, 2, 4, 5, 8]
+      outputs:
+        tocarry: [1, 2, 3, 4, 5, 6, 7, 8]
+        tooffsets: [0, 2, 2, 4, 5, 8]
+    - error: true
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        sliceindex: [0, 1, 1, 0, 1, 1, 1, 2, 0]
+        sliceinnerlen: 9
+        sliceouterlen: 5
+        slicestarts: [0, 2, 2, 4, 5]
+        slicestops: [2, 2, 4, 5, 9]
+      outputs:
+        tocarry: [0, 2, 4, 3, 5, 7, 7, 7, 6]
+        tooffsets: [0, 2, 2, 4, 5, 9]
+    - error: true
+      inputs:
+        contentlen: 10
+        fromstarts: [6, 5, 3, 0]
+        fromstops: [10, 6, 5, 3]
+        sliceindex: [0, 1, 0]
+        sliceinnerlen: 3
+        sliceouterlen: 4
+        slicestarts: [0, 2, 3, 3]
+        slicestops: [2, 3, 3, 3]
+      outputs:
+        tocarry: [6, 9, 5]
+        tooffsets: [0, 2, 3, 3, 3]
+    - error: true
+      inputs:
+        contentlen: 10
+        fromstarts: [0, 3, 5, 6]
+        fromstops: [3, 5, 6, 10]
+        sliceindex: [0, 1, 0, 1, 1]
+        sliceinnerlen: 5
+        sliceouterlen: 4
+        slicestarts: [0, 2, 3, 3]
+        slicestops: [2, 3, 3, 5]
+      outputs:
+        tocarry: [0, 2, 3, 7, 7]
+        tooffsets: [0, 2, 3, 3, 5]
+    - error: true
+      inputs:
+        contentlen: 10
+        fromstarts: [6, 5, 3, 0]
+        fromstops: [10, 6, 5, 3]
+        sliceindex: [0, 1, 0, 1, 1]
+        sliceinnerlen: 5
+        sliceouterlen: 4
+        slicestarts: [0, 2, 3, 3]
+        slicestops: [2, 3, 3, 5]
+      outputs:
+        tocarry: [6, 9, 5, 1, 1]
+        tooffsets: [0, 2, 3, 3, 5]
+    - error: true
+      inputs:
+        contentlen: 10
+        fromstarts: [0, 5, 6]
+        fromstops: [3, 6, 10]
+        sliceindex: [1, 1, 0, 0, 1]
+        sliceinnerlen: 5
+        sliceouterlen: 3
+        slicestarts: [0, 2, 3]
+        slicestops: [2, 3, 5]
+      outputs:
+        tocarry: [1, 1, 5, 6, 9]
+        tooffsets: [0, 2, 3, 5]
+    - error: true
+      inputs:
+        contentlen: 10
+        fromstarts: [6, 5, 0]
+        fromstops: [10, 6, 3]
+        sliceindex: [0, 1, 0, 1, 1]
+        sliceinnerlen: 5
+        sliceouterlen: 3
+        slicestarts: [0, 2, 3]
+        slicestops: [2, 3, 5]
+      outputs:
+        tocarry: [6, 9, 5, 1, 1]
+        tooffsets: [0, 2, 3, 5]
+    - error: true
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 7]
+        fromstops: [3, 7, 9]
+        sliceindex: [1, 1, 0, 0, 1, 1, 2]
+        sliceinnerlen: 7
+        sliceouterlen: 3
+        slicestarts: [0, 2, 5]
+        slicestops: [2, 5, 7]
+      outputs:
+        tocarry: [2, 1, 3, 3, 4, 8, 7]
+        tooffsets: [0, 2, 5, 7]
+    - error: true
+      inputs:
+        contentlen: 10
+        fromstarts: [0, 4, 6]
+        fromstops: [4, 6, 10]
+        sliceindex: [1, 1, 0, 0, 1, 1, 2]
+        sliceinnerlen: 7
+        sliceouterlen: 3
+        slicestarts: [0, 2, 5]
+        slicestops: [2, 5, 7]
+      outputs:
+        tocarry: [3, 1, 4, 4, 5, 9, 8]
+        tooffsets: [0, 2, 5, 7]
+    - error: false
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        sliceindex: [0, 1, 2, 0, 0, 1, 2]
+        sliceinnerlen: 7
+        sliceouterlen: 5
+        slicestarts: [0, 3, 3, 3, 4]
+        slicestops: [3, 3, 3, 4, 7]
+      outputs:
+        tocarry: [0, 1, 2, 5, 6, 7, 8]
+        tooffsets: [0, 3, 3, 3, 4, 7]
+    - error: false
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        sliceindex: [0, 1, 2, 1, 0, 0, 1, 2]
+        sliceinnerlen: 8
+        sliceouterlen: 5
+        slicestarts: [0, 3, 3, 4, 5]
+        slicestops: [3, 3, 4, 5, 8]
+      outputs:
+        tocarry: [0, 1, 2, 4, 5, 6, 7, 8]
+        tooffsets: [0, 3, 3, 4, 5, 8]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [0, 1, 2, 0, 1]
+        sliceinnerlen: 5
+        sliceouterlen: 3
+        slicestarts: [0, 3, 3]
+        slicestops: [3, 3, 5]
+      outputs:
+        tocarry: [0, 1, 2, 3, 4]
+        tooffsets: [0, 3, 3, 5]
+    - error: false
+      inputs:
+        contentlen: 5
+        fromstarts: [0, 3, 3]
+        fromstops: [3, 3, 5]
+        sliceindex: [2, 1, 0, 0, 1]
+        sliceinnerlen: 5
+        sliceouterlen: 3
+        slicestarts: [0, 3, 3]
+        slicestops: [3, 3, 5]
+      outputs:
+        tocarry: [2, 1, 0, 3, 4]
+        tooffsets: [0, 3, 3, 5]
+    - error: false
+      inputs:
+        contentlen: 9
+        fromstarts: [0, 3, 3, 5, 6]
+        fromstops: [3, 3, 5, 6, 9]
+        sliceindex: [0, 1, 2, 0, 1, 0, 0, 1, 2]
+        sliceinnerlen: 9
+        sliceouterlen: 5
+        slicestarts: [0, 3, 3, 5, 6]
+        slicestops: [3, 3, 5, 6, 9]
+      outputs:
+        tocarry: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        tooffsets: [0, 3, 3, 5, 6, 9]
+    - error: true
+      inputs:
+        contentlen: 14
+        fromstarts: [0, 4, 6, 9]
+        fromstops: [4, 6, 9, 14]
+        sliceindex: [2, 1, 0, 1, 1, 2, 3, 2, 1, 1, 3]
+        sliceinnerlen: 11
+        sliceouterlen: 4
+        slicestarts: [0, 3, 4, 7]
+        slicestops: [3, 4, 7, 11]
+      outputs:
+        tocarry: [2, 1, 0, 5, 8, 7, 6, 11, 10, 10, 12]
+        tooffsets: [0, 3, 4, 7, 11]
+    - error: true
+      inputs:
+        contentlen: 14
+        fromstarts: [0, 4, 6, 9]
+        fromstops: [4, 6, 9, 14]
+        sliceindex: [2, 1, 0, 1]
+        sliceinnerlen: 4
+        sliceouterlen: 4
+        slicestarts: [0, 3, 0, 3]
+        slicestops: [3, 4, 3, 4]
+      outputs:
+        tocarry: [2, 1, 0, 5, 8, 7, 6, 13]
+        tooffsets: [0, 3, 4, 7, 8]
+    - error: true
+      inputs:
+        contentlen: 14
+        fromstarts: [6, 9]
+        fromstops: [9, 14]
+        sliceindex: [2, 1, 0, 1]
+        sliceinnerlen: 4
+        sliceouterlen: 2
+        slicestarts: [0, 3]
+        slicestops: [3, 4]
+      outputs:
+        tocarry: [8, 7, 6, 13]
+        tooffsets: [0, 3, 4]
+    - error: false
+      inputs:
+        contentlen: 6
+        fromstarts: [0, 3]
+        fromstops: [3, 6]
+        sliceindex: [2, 1, 0, 2, 1, 0]
+        sliceinnerlen: 6
+        sliceouterlen: 2
+        slicestarts: [0, 3]
+        slicestops: [3, 6]
+      outputs:
+        tocarry: [2, 1, 0, 5, 4, 3]
+        tooffsets: [0, 3, 6]
+    - error: false
+      inputs:
+        contentlen: 6
+        fromstarts: [0, 3, 5]
+        fromstops: [3, 5, 6]
+        sliceindex: [2, 1, 1, 0, 1, 0]
+        sliceinnerlen: 6
+        sliceouterlen: 3
+        slicestarts: [0, 4, 5]
+        slicestops: [4, 4, 6]
+      outputs:
+        tocarry: [2, 1, 1, 0, 5]
+        tooffsets: [0, 4, 4, 5]
+    - error: false
+      inputs:
+        contentlen: 6
+        fromstarts: [0, 3, 5]
+        fromstops: [3, 5, 6]
+        sliceindex: [2, 1, 1, 0, 1, 0]
+        sliceinnerlen: 6
+        sliceouterlen: 3
+        slicestarts: [0, 4, 5]
+        slicestops: [4, 5, 6]
+      outputs:
+        tocarry: [2, 1, 1, 0, 4, 5]
+        tooffsets: [0, 4, 5, 6]
+    - error: false
+      inputs:
+        contentlen: 8
+        fromstarts: [0, 4, 7]
+        fromstops: [4, 7, 8]
+        sliceindex: [3, 2, 2, 1, 1, 2]
+        sliceinnerlen: 6
+        sliceouterlen: 3
+        slicestarts: [0, 4, 6]
+        slicestops: [4, 6, 6]
+      outputs:
+        tocarry: [3, 2, 2, 1, 5, 6]
+        tooffsets: [0, 4, 6, 6]
+    - error: false
+      inputs:
+        contentlen: 13
+        fromstarts: [0, 4, 4, 7, 8]
+        fromstops: [4, 4, 7, 8, 13]
+        sliceindex: [3, 2, 1, 1, 0, 1, 0, 0, 1, 2]
+        sliceinnerlen: 10
+        sliceouterlen: 5
+        slicestarts: [0, 5, 5, 6, 8]
+        slicestops: [5, 5, 6, 8, 10]
+      outputs:
+        tocarry: [3, 2, 1, 1, 0, 5, 7, 7, 9, 10]
+        tooffsets: [0, 5, 5, 6, 8, 10]
+  - name: awkward_UnionArray_regular_index
+    tests:
+    - error: false
+      inputs:
+        fromtags: [0, 1, 0, 1, 0, 1]
+        length: 6
+        size: 2
+      outputs:
+        current: [3, 3]
+        toindex: [0, 0, 1, 1, 2, 2]
+    - error: false
+      inputs:
+        fromtags: [1, 0, 1, 1]
+        length: 4
+        size: 2
+      outputs:
+        current: [1, 3]
+        toindex: [0, 0, 1, 2]
+    - error: false
+      inputs:
+        fromtags: [1, 1, 0, 0, 1, 0, 1, 1]
+        length: 8
+        size: 2
+      outputs:
+        current: [3, 5]
+        toindex: [0, 1, 0, 1, 2, 2, 3, 4]
+  - name: awkward_UnionArray_regular_index_getsize
+    tests:
+    - error: false
+      inputs:
+        fromtags: [0, 1, 0, 1, 0, 1]
+        length: 6
+      outputs:
+        size: [2]
+    - error: false
+      inputs:
+        fromtags: [1, 0, 1, 1]
+        length: 4
+      outputs:
+        size: [2]
+    - error: false
+      inputs:
+        fromtags: [1, 1, 0, 0, 1, 0, 1, 1]
+        length: 8
+      outputs:
+        size: [2]
