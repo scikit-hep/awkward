@@ -104,7 +104,7 @@ builder.float64(-2.2)
 Snapshot
 --------
 
-To turn a `LayoutBuilder` into a layout, call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffacted).
+To turn a `LayoutBuilder` into a layout, call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffected).
 
 ```{code-cell}
 layout = builder.snapshot()

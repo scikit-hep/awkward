@@ -89,7 +89,7 @@ builder.type
 Snapshot
 --------
 
-To turn an [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) into an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html), call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffacted).
+To turn an [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) into an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html), call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffected).
 
 ```{code-cell}
 array = builder.snapshot()
