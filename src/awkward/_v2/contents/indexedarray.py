@@ -178,7 +178,7 @@ class IndexedArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _project(self):
+    def project(self):
         nextcarry = ak._v2.index.Index64.empty(len(self), self.nplike)
         self._handle_error(
             self.nplike[
@@ -199,7 +199,7 @@ class IndexedArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         else:
-            return self._project()._localindex(posaxis, depth)
+            return self.project()._localindex(posaxis, depth)
 
     def localindex(self, axis):
         return self._localindex(axis, 0)

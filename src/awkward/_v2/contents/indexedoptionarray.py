@@ -7,8 +7,6 @@ from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.indexedoptionform import IndexedOptionForm
 
-import ctypes
-
 np = ak.nplike.NumpyMetadata.instance()
 
 
@@ -206,13 +204,15 @@ class IndexedOptionArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _project(self):
-        numnull = ctypes.c_int64()
+    def project(self):
+        numnull = ak._v2.index.Index64.empty(1, self.nplike)
 
         self._handle_error(
             self.nplike[
-                "awkward_IndexedArray_numnull", np.int64, self._index.dtype.type
-            ](ctypes.pointer(numnull), self._index.to(self.nplike), len(self._index))
+                "awkward_IndexedArray_numnull",
+                numnull.dtype.type,
+                self._index.dtype.type,
+            ](numnull.to(self.nplike), self._index.to(self.nplike), len(self._index))
         )
 
         nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value, self.nplike)
@@ -232,42 +232,12 @@ class IndexedOptionArray(Content):
 
         return self._content._carry(nextcarry, False, NestedIndexError)
 
-    def _nextcarry_outindex(self, numnull):
-        assert isinstance(numnull, ctypes.c_int64)
-
-        self._handle_error(
-            self.nplike[
-                "awkward_IndexedArray_numnull", np.int64, self._index.dtype.type
-            ](ctypes.pointer(numnull), self._index.to(self.nplike), len(self._index))
-        )
-
-        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value, self.nplike)
-        outindex = ak._v2.index.Index64.empty(len(self), self.nplike)
-
-        self._handle_error(
-            self.nplike[
-                "awkward_IndexedArray_getitem_nextcarry_outindex",
-                nextcarry.dtype.type,
-                outindex.dtype.type,
-                self._index.dtype.type,
-            ](
-                nextcarry.to(self.nplike),
-                outindex.to(self.nplike),
-                self._index.to(self.nplike),
-                len(self._index),
-                len(self._content),
-            )
-        )
-
-        return nextcarry, outindex
-
     def _localindex(self, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
-            numnull = ctypes.c_int64()
-            nextcarry, outindex = self._nextcarry_outindex(numnull)
+            _, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
 
             next = self._content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
