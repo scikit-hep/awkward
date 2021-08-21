@@ -459,10 +459,26 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         if mindepth == depth and maxdepth == depth:
             posaxis = depth + axis
             if posaxis < 0:
-                raise IndexError(self, "Some error")
+                raise IndexError(
+                    self,
+                    "axis == "
+                    + str(axis)
+                    + " exceeds the depth == "
+                    + str(depth)
+                    + " of this array\n"
+                    + str(self),
+                )
             return posaxis
         elif mindepth + axis == 0:
-            raise IndexError(self, "Some error")
+            raise IndexError(
+                self,
+                "axis == "
+                + str(axis)
+                + " exceeds the min depth == "
+                + str(depth)
+                + " of this array\n"
+                + str(self),
+            )
         return axis
 
     def _localindex_axis0(self):

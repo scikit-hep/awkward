@@ -99,9 +99,6 @@ class EmptyArray(Content):
             raise AssertionError(repr(head))
 
     def _localindex(self, axis, depth):
-        # TODO: Why isn't nplike working?
-        import numpy as np
-
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 
     def localindex(self, axis):

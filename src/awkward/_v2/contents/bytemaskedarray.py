@@ -265,7 +265,6 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         else:
-            # TODO: Is this the right place to declare this?
             numnull = ctypes.c_int64()
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
