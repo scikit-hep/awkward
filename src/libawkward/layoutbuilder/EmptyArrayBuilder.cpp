@@ -10,97 +10,117 @@ namespace awkward {
   /// @class EmptyArrayBuilder
   ///
   /// @brief EmptyArray builder from a Empty Json Form
-  EmptyArrayBuilder::EmptyArrayBuilder(const util::Parameters& parameters)
+  template <typename T, typename I>
+  EmptyArrayBuilder<T, I>::EmptyArrayBuilder(const util::Parameters& parameters)
     : parameters_(parameters),
-      vm_empty_command_("( This does nothing. )\n"),
+      vm_empty_command_("( This does nothing. ) "),
       vm_error_("s\" EmptyArray Builder error\"") { }
 
+  template <typename T, typename I>
   const std::string
-  EmptyArrayBuilder::classname() const {
+  EmptyArrayBuilder<T, I>::classname() const {
     return "EmptyArrayBuilder";
   }
 
+  template <typename T, typename I>
   const std::string
-  EmptyArrayBuilder::vm_output() const {
+  EmptyArrayBuilder<T, I>::vm_output() const {
     return vm_empty_command_;
   }
 
+  template <typename T, typename I>
   const std::string
-  EmptyArrayBuilder::vm_output_data() const {
+  EmptyArrayBuilder<T, I>::vm_output_data() const {
     return vm_empty_command_;
   }
 
+  template <typename T, typename I>
   const std::string
-  EmptyArrayBuilder::vm_func() const {
+  EmptyArrayBuilder<T, I>::vm_func() const {
     return vm_empty_command_;
   }
 
+  template <typename T, typename I>
   const std::string
-  EmptyArrayBuilder::vm_func_name() const {
+  EmptyArrayBuilder<T, I>::vm_func_name() const {
     return vm_empty_command_;
   }
 
+  template <typename T, typename I>
   const std::string
-  EmptyArrayBuilder::vm_func_type() const {
+  EmptyArrayBuilder<T, I>::vm_func_type() const {
     return vm_empty_command_;
   }
 
+  template <typename T, typename I>
   const std::string
-  EmptyArrayBuilder::vm_from_stack() const {
+  EmptyArrayBuilder<T, I>::vm_from_stack() const {
     return vm_empty_command_;
   }
 
+  template <typename T, typename I>
   const std::string
-  EmptyArrayBuilder::vm_error() const {
+  EmptyArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  EmptyArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  EmptyArrayBuilder<T, I>::boolean(bool x, LayoutBuilder<T, I>* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'bool'"));
   }
 
+  template <typename T, typename I>
   void
-  EmptyArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  EmptyArrayBuilder<T, I>::int64(int64_t x, LayoutBuilder<T, I>* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'int64'"));
   }
 
+  template <typename T, typename I>
   void
-  EmptyArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  EmptyArrayBuilder<T, I>::float64(double x, LayoutBuilder<T, I>* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'float64'"));
   }
 
+  template <typename T, typename I>
   void
-  EmptyArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  EmptyArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilder<T, I>* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'complex'"));
   }
 
+  template <typename T, typename I>
   void
-  EmptyArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  EmptyArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilder<T, I>* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'bytestring'"));
   }
 
+  template <typename T, typename I>
   void
-  EmptyArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  EmptyArrayBuilder<T, I>::string(const std::string& x, LayoutBuilder<T, I>* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'string'"));
   }
 
+  template <typename T, typename I>
   void
-  EmptyArrayBuilder::begin_list(LayoutBuilder* builder) {
+  EmptyArrayBuilder<T, I>::begin_list(LayoutBuilder<T, I>* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'begin_list'"));
   }
 
+  template <typename T, typename I>
   void
-  EmptyArrayBuilder::end_list(LayoutBuilder* builder) {
+  EmptyArrayBuilder<T, I>::end_list(LayoutBuilder<T, I>* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'end_list'"));
   }
+
+  template class EXPORT_TEMPLATE_INST EmptyArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST EmptyArrayBuilder<int64_t, int32_t>;
 
 }

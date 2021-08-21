@@ -1746,28 +1746,29 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
   );
 }
 
-////////// LayoutBuilder
+////////// LayoutBuilder32
 
 namespace {
   /// @brief Turns the accumulated data into a Content array.
   ///
   /// This operation only converts FormBuilder nodes into Content nodes
+  template <typename T, typename I>
   py::object
-  layoutbuilder_snapshot(const ak::FormBuilderPtr builder, const ak::ForthOutputBufferMap& outputs) {
+  layoutbuilder_snapshot(const ak::FormBuilderPtr<T, I> builder, const ak::ForthOutputBufferMap& outputs) {
     if (builder.get()->classname() == "BitMaskedArrayBuilder") {
-      const std::shared_ptr<const ak::BitMaskedArrayBuilder> raw = std::dynamic_pointer_cast<const ak::BitMaskedArrayBuilder>(builder);
+      const std::shared_ptr<const ak::BitMaskedArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::BitMaskedArrayBuilder<T, I>>(builder);
       return ::layoutbuilder_snapshot(raw.get()->content(), outputs);
     }
     if (builder.get()->classname() == "ByteMaskedArrayBuilder") {
-      const std::shared_ptr<const ak::ByteMaskedArrayBuilder> raw = std::dynamic_pointer_cast<const ak::ByteMaskedArrayBuilder>(builder);
+      const std::shared_ptr<const ak::ByteMaskedArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::ByteMaskedArrayBuilder<T, I>>(builder);
       return ::layoutbuilder_snapshot(raw.get()->content(), outputs);
     }
     if (builder.get()->classname() == "EmptyArrayBuilder") {
-      const std::shared_ptr<const ak::EmptyArrayBuilder> raw = std::dynamic_pointer_cast<const ak::EmptyArrayBuilder>(builder);
+      const std::shared_ptr<const ak::EmptyArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::EmptyArrayBuilder<T, I>>(builder);
       return py::module::import("awkward").attr("layout").attr("EmptyArray")();
     }
     if (builder.get()->classname() == "IndexedArrayBuilder") {
-      const std::shared_ptr<const ak::IndexedArrayBuilder> raw = std::dynamic_pointer_cast<const ak::IndexedArrayBuilder>(builder);
+      const std::shared_ptr<const ak::IndexedArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::IndexedArrayBuilder<T, I>>(builder);
       auto search = outputs.find(raw.get()->vm_output_data());
       if (search != outputs.end()) {
         if (raw.get()->form_index() == "int32") {
@@ -1816,7 +1817,7 @@ namespace {
 
     }
     if (builder.get()->classname() == "IndexedOptionArrayBuilder") {
-      const std::shared_ptr<const ak::IndexedOptionArrayBuilder> raw = std::dynamic_pointer_cast<const ak::IndexedOptionArrayBuilder>(builder);
+      const std::shared_ptr<const ak::IndexedOptionArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::IndexedOptionArrayBuilder<T, I>>(builder);
       auto search = outputs.find(raw.get()->vm_output_data());
       if (search != outputs.end()) {
          if (raw.get()->form_index() == "int32") {
@@ -1856,7 +1857,7 @@ namespace {
 
     }
     if (builder.get()->classname() == "ListArrayBuilder") {
-      const std::shared_ptr<const ak::ListArrayBuilder> raw = std::dynamic_pointer_cast<const ak::ListArrayBuilder>(builder);
+      const std::shared_ptr<const ak::ListArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::ListArrayBuilder<T, I>>(builder);
       auto search = outputs.find(raw.get()->vm_output_data());
       if (search != outputs.end()) {
         if (raw.get()->form_starts() == "int32") {
@@ -1905,7 +1906,7 @@ namespace {
 
     }
     if (builder.get()->classname().rfind("ListOffsetArrayBuilder", 0) == 0) {
-      const std::shared_ptr<const ak::ListOffsetArrayBuilder> raw = std::dynamic_pointer_cast<const ak::ListOffsetArrayBuilder>(builder);
+      const std::shared_ptr<const ak::ListOffsetArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::ListOffsetArrayBuilder<T, I>>(builder);
       auto search = outputs.find(raw.get()->vm_output_data());
       if (search != outputs.end()) {
         if (raw.get()->form_offsets() == "int32") {
@@ -1941,7 +1942,7 @@ namespace {
 
     }
     if (builder.get()->classname() == "NumpyArrayBuilder") {
-      const std::shared_ptr<const ak::NumpyArrayBuilder> raw = std::dynamic_pointer_cast<const ak::NumpyArrayBuilder>(builder);
+      const std::shared_ptr<const ak::NumpyArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::NumpyArrayBuilder<T, I>>(builder);
       auto search = outputs.find(raw.get()->vm_output_data());
       if (search != outputs.end()) {
         auto dtype = awkward::util::name_to_dtype(raw.get()->form_primitive());
@@ -1965,7 +1966,7 @@ namespace {
           + FILENAME(__LINE__));
 
     } else if (builder.get()->classname() == "RecordArrayBuilder") {
-      const std::shared_ptr<const ak::RecordArrayBuilder> raw = std::dynamic_pointer_cast<const ak::RecordArrayBuilder>(builder);
+      const std::shared_ptr<const ak::RecordArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::RecordArrayBuilder<T, I>>(builder);
       ak::ContentPtrVec contents;
       for (size_t i = 0;  i < raw.get()->contents().size();  i++) {
         contents.push_back(unbox_content(layoutbuilder_snapshot(raw.get()->contents()[i], outputs)));
@@ -1977,7 +1978,7 @@ namespace {
 
     }
     if (builder.get()->classname() == "RegularArrayBuilder") {
-      const std::shared_ptr<const ak::RegularArrayBuilder> raw = std::dynamic_pointer_cast<const ak::RegularArrayBuilder>(builder);
+      const std::shared_ptr<const ak::RegularArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::RegularArrayBuilder<T, I>>(builder);
       ak::ContentPtr out;
       if(raw.get()->content() != nullptr) {
         out = std::make_shared<ak::RegularArray>(ak::Identities::none(),
@@ -1989,7 +1990,7 @@ namespace {
 
     }
     if (builder.get()->classname() == "UnionArrayBuilder") {
-      const std::shared_ptr<const ak::UnionArrayBuilder> raw = std::dynamic_pointer_cast<const ak::UnionArrayBuilder>(builder);
+      const std::shared_ptr<const ak::UnionArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::UnionArrayBuilder<T, I>>(builder);
       auto search_tags = outputs.find(raw.get()->vm_output_tags());
       if (search_tags != outputs.end()) {
         ak::Index8 tags(std::static_pointer_cast<int8_t>(search_tags->second.get()->ptr()),
@@ -2068,7 +2069,7 @@ namespace {
     }
     if (builder.get()->classname() == "UnmaskedArrayBuilder") {
       // FIXME: how to define a mask? is it needed?
-      const std::shared_ptr<const ak::UnmaskedArrayBuilder> raw = std::dynamic_pointer_cast<const ak::UnmaskedArrayBuilder>(builder);
+      const std::shared_ptr<const ak::UnmaskedArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::UnmaskedArrayBuilder<T, I>>(builder);
       return layoutbuilder_snapshot(raw.get()->content(), outputs);
 
     }
@@ -2079,7 +2080,7 @@ namespace {
 
 template <>
 py::object
-getitem<ak::LayoutBuilder>(const ak::LayoutBuilder& self, const py::object& obj) {
+getitem<ak::LayoutBuilder32>(const ak::LayoutBuilder32& self, const py::object& obj) {
   if (py::isinstance<py::int_>(obj)) {
     return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_at(obj.cast<int64_t>()));
   }
@@ -2124,59 +2125,122 @@ getitem<ak::LayoutBuilder>(const ak::LayoutBuilder& self, const py::object& obj)
   return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem(toslice(obj)));
 }
 
-py::class_<ak::LayoutBuilder>
+template <>
+py::object
+getitem<ak::LayoutBuilder64>(const ak::LayoutBuilder64& self, const py::object& obj) {
+  if (py::isinstance<py::int_>(obj)) {
+    return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_at(obj.cast<int64_t>()));
+  }
+  if (py::isinstance<py::slice>(obj)) {
+    py::object pystep = obj.attr("step");
+    if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||
+        pystep.is(py::none())) {
+      int64_t start = ak::Slice::none();
+      int64_t stop = ak::Slice::none();
+      py::object pystart = obj.attr("start");
+      py::object pystop = obj.attr("stop");
+      if (!pystart.is(py::none())) {
+        start = pystart.cast<int64_t>();
+      }
+      if (!pystop.is(py::none())) {
+        stop = pystop.cast<int64_t>();
+      }
+      return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_range(start, stop));
+    }
+    // control flow can pass through here; don't make the last line an 'else'!
+  }
+  if (py::isinstance<py::str>(obj)) {
+    return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_field(obj.cast<std::string>()));
+  }
+  if (!py::isinstance<py::tuple>(obj)  &&  py::isinstance<py::iterable>(obj)) {
+    std::vector<std::string> strings;
+    bool all_strings = true;
+    for (auto x : obj) {
+      if (py::isinstance<py::str>(x)) {
+        strings.push_back(x.cast<std::string>());
+      }
+      else {
+        all_strings = false;
+        break;
+      }
+    }
+    if (all_strings  &&  !strings.empty()) {
+      return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem_fields(strings));
+    }
+    // control flow can pass through here; don't make the last line an 'else'!
+  }
+  return box(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())).get()->getitem(toslice(obj)));
+}
+
+template <typename T, typename I>
+py::class_<ak::LayoutBuilder<T, I>>
 make_LayoutBuilder(const py::handle& m, const std::string& name) {
-  return (py::class_<ak::LayoutBuilder>(m, name.c_str())
-      .def(py::init([](const std::string& form, int64_t initial, double resize, bool vm_init) -> ak::LayoutBuilder {
-        return ak::LayoutBuilder(form, ak::ArrayBuilderOptions(initial, resize), vm_init);
+  return (py::class_<ak::LayoutBuilder<T, I>>(m, name.c_str())
+      .def(py::init([](const std::string& form, int64_t initial, double resize, bool vm_init) -> ak::LayoutBuilder<T, I> {
+        return ak::LayoutBuilder<T, I>(form, ak::ArrayBuilderOptions(initial, resize), vm_init);
       }), py::arg("form"), py::arg("initial") = 8, py::arg("resize") = 1.5, py::arg("vm_init") = true)
       .def_property_readonly("_ptr",
-                             [](const ak::LayoutBuilder* self) -> size_t {
+                             [](const ak::LayoutBuilder<T, I>* self) -> size_t {
         return reinterpret_cast<size_t>(self);
       })
-      .def("__len__", &ak::LayoutBuilder::length)
-      .def("type", [](const ak::LayoutBuilder& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
+      .def("__len__", &ak::LayoutBuilder<T, I>::length)
+      .def("type", [](const ak::LayoutBuilder<T, I>& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
         return unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs()))->type(typestrs);
       })
-      .def("snapshot", [](const ak::LayoutBuilder& self) -> py::object {
+      .def("snapshot", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
         return ::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs());
       })
-      .def("__getitem__", &getitem<ak::LayoutBuilder>)
-      .def("__iter__", [](const ak::LayoutBuilder& self) -> ak::Iterator {
+      .def("__getitem__", &getitem<ak::LayoutBuilder<T, I>>)
+      .def("__iter__", [](const ak::LayoutBuilder<T, I>& self) -> ak::Iterator {
         return ak::Iterator(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())));
       })
-      .def("null", &ak::LayoutBuilder::null)
-      .def("boolean", &ak::LayoutBuilder::boolean)
-      .def("int64", &ak::LayoutBuilder::int64)
-      .def("float64", &ak::LayoutBuilder::float64)
-      .def("complex", &ak::LayoutBuilder::complex)
+      .def("null", &ak::LayoutBuilder<T, I>::null)
+      .def("boolean", &ak::LayoutBuilder<T, I>::boolean)
+      .def("int64", &ak::LayoutBuilder<T, I>::int64)
+      .def("float64", &ak::LayoutBuilder<T, I>::float64)
+      .def("complex", &ak::LayoutBuilder<T, I>::complex)
       .def("bytestring",
-           [](ak::LayoutBuilder& self, const py::bytes& x) -> void {
+           [](ak::LayoutBuilder<T, I>& self, const py::bytes& x) -> void {
         self.bytestring(x.cast<std::string>());
       })
-      .def("string", [](ak::LayoutBuilder& self, const py::str& x) -> void {
+      .def("string", [](ak::LayoutBuilder<T, I>& self, const py::str& x) -> void {
         self.string(x.cast<std::string>());
       })
-      .def("begin_list", &ak::LayoutBuilder::begin_list)
-      .def("end_list", &ak::LayoutBuilder::end_list)
-      .def("tag", [](ak::LayoutBuilder& self, int64_t tag) -> void {
+      .def("begin_list", &ak::LayoutBuilder<T, I>::begin_list)
+      .def("end_list", &ak::LayoutBuilder<T, I>::end_list)
+      .def("tag", [](ak::LayoutBuilder<T, I>& self, int64_t tag) -> void {
         self.tag(tag);
       })
       .def("debug_step",
-           [](const ak::LayoutBuilder& self) -> void {
+           [](const ak::LayoutBuilder<T, I>& self) -> void {
         return self.debug_step();
       })
       .def("vm_source",
-            [](ak::LayoutBuilder& self) -> const std::string {
+            [](ak::LayoutBuilder<T, I>& self) -> const std::string {
          return self.vm_source();
       })
       .def("connect",
-           [](ak::LayoutBuilder& self,
-              const std::shared_ptr<ak::ForthMachine32>& vm) -> void {
+           [](ak::LayoutBuilder<T, I>& self,
+              const std::shared_ptr<ak::ForthMachineOf<T, I>>& vm) -> void {
         self.connect(vm);
+      })
+      .def("vm",
+           [](ak::LayoutBuilder<T, I>& self) -> const std::shared_ptr<ak::ForthMachineOf<T, I>> {
+        return self.vm();
+      })
+      .def("resume",
+            [](ak::LayoutBuilder<T, I>& self) -> void {
+         return self.resume();
       })
   );
 }
+
+template py::class_<ak::LayoutBuilder32>
+make_LayoutBuilder(const py::handle& m, const std::string& name);
+
+template py::class_<ak::LayoutBuilder64>
+make_LayoutBuilder(const py::handle& m, const std::string& name);
+
 
 ////////// Iterator
 

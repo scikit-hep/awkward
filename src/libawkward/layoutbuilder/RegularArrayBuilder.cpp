@@ -8,12 +8,13 @@
 namespace awkward {
 
   ///
-  RegularArrayBuilder::RegularArrayBuilder(const FormBuilderPtr content,
-                                           const util::Parameters& parameters,
-                                           const std::string& form_key,
-                                           const int64_t size,
-                                           const std::string attribute,
-                                           const std::string partition)
+  template <typename T, typename I>
+  RegularArrayBuilder<T, I>::RegularArrayBuilder(const FormBuilderPtr<T, I> content,
+                                                 const util::Parameters& parameters,
+                                                 const std::string& form_key,
+                                                 const int64_t size,
+                                                 const std::string attribute,
+                                                 const std::string partition)
     : content_(content),
       parameters_(parameters),
       form_size_(size) {
@@ -27,91 +28,110 @@ namespace awkward {
     vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_func_.append(content_.get()->vm_func())
-      .append(": ").append(vm_func_name()).append("\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append(";").append("\n");
+      .append(": ").append(vm_func_name()).append(" ")
+      .append(content_.get()->vm_func_name())
+      .append(" ; ");
 
     vm_error_.append(content_.get()->vm_error());
   }
 
+  template <typename T, typename I>
   const std::string
-  RegularArrayBuilder::classname() const {
+  RegularArrayBuilder<T, I>::classname() const {
     return "RegularArrayBuilder";
   }
 
+  template <typename T, typename I>
   const std::string
-  RegularArrayBuilder::vm_output() const {
+  RegularArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RegularArrayBuilder::vm_output_data() const {
+  RegularArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RegularArrayBuilder::vm_func() const {
+  RegularArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RegularArrayBuilder::vm_func_name() const {
+  RegularArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RegularArrayBuilder::vm_func_type() const {
+  RegularArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RegularArrayBuilder::vm_from_stack() const {
+  RegularArrayBuilder<T, I>::vm_from_stack() const {
     return vm_data_from_stack_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RegularArrayBuilder::vm_error() const {
+  RegularArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  RegularArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  RegularArrayBuilder<T, I>::boolean(bool x, LayoutBuilder<T, I>* builder) {
     content_.get()->boolean(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RegularArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  RegularArrayBuilder<T, I>::int64(int64_t x, LayoutBuilder<T, I>* builder) {
     content_.get()->int64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RegularArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  RegularArrayBuilder<T, I>::float64(double x, LayoutBuilder<T, I>* builder) {
     content_.get()->float64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RegularArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  RegularArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilder<T, I>* builder) {
     content_.get()->complex(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RegularArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  RegularArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilder<T, I>* builder) {
     content_.get()->bytestring(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RegularArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  RegularArrayBuilder<T, I>::string(const std::string& x, LayoutBuilder<T, I>* builder) {
     content_.get()->string(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RegularArrayBuilder::begin_list(LayoutBuilder* builder) {
+  RegularArrayBuilder<T, I>::begin_list(LayoutBuilder<T, I>* builder) {
     content_.get()->begin_list(builder);
   }
 
+  template <typename T, typename I>
   void
-  RegularArrayBuilder::end_list(LayoutBuilder* builder) {
+  RegularArrayBuilder<T, I>::end_list(LayoutBuilder<T, I>* builder) {
     content_.get()->end_list(builder);
   }
+
+  template class EXPORT_TEMPLATE_INST RegularArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST RegularArrayBuilder<int64_t, int32_t>;
 
 }

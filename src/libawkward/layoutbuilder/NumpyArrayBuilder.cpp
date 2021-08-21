@@ -8,17 +8,18 @@
 namespace awkward {
 
   ///
-  NumpyArrayBuilder::NumpyArrayBuilder(const util::Parameters& parameters,
-                                       const std::string& form_key,
-                                       const std::string& form_primitive,
-                                       const std::string& form_primitive_to_state,
-                                       const std::string& form_primitive_to_vm_format,
-                                       const std::string attribute,
-                                       const std::string partition)
+  template <typename T, typename I>
+  NumpyArrayBuilder<T, I>::NumpyArrayBuilder(const util::Parameters& parameters,
+                                             const std::string& form_key,
+                                             const std::string& form_primitive,
+                                             const std::string& form_primitive_to_state,
+                                             const std::string& form_primitive_to_vm_format,
+                                             const std::string attribute,
+                                             const std::string partition)
     : parameters_(parameters),
       form_primitive_(form_primitive) {
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
-      .append(form_primitive).append("\"\n");
+      .append(form_primitive).append("\" ");
 
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
@@ -28,7 +29,7 @@ namespace awkward {
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(form_primitive).append("\n");
+      .append(form_primitive).append(" ");
 
     vm_func_name_ = std::string(form_key)
       .append("-")
@@ -36,94 +37,110 @@ namespace awkward {
 
     vm_func_type_ = form_primitive_to_state;
 
-    vm_func_ = std::string(": ").append(vm_func_name()).append("\n")
+    vm_func_ = std::string(": ").append(vm_func_name()).append(" ")
       .append(vm_func_type())
-      .append(" = if").append("\n")
-      .append("0 data seek").append("\n")
-      .append("data ").append(form_primitive_to_vm_format)
-      .append("-> ").append(vm_output_data_).append("\n")
-      .append("else").append("\n")
-      .append(std::to_string(LayoutBuilder::next_error_id())).append(" err ! err @ halt").append("\n")
-      .append("then").append("\n")
-      .append(";").append("\n");
+      .append(" = if 0 data seek data ").append(form_primitive_to_vm_format)
+      .append("-> ").append(vm_output_data_)
+      .append(" else ")
+      .append(std::to_string(LayoutBuilder<T, I>::next_error_id()))
+      .append(" err ! err @ halt then ; ");
   }
 
+  template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder::classname() const {
+  NumpyArrayBuilder<T, I>::classname() const {
     return "NumpyArrayBuilder";
   }
 
+  template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder::vm_output() const {
+  NumpyArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder::vm_output_data() const {
+  NumpyArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
 
+  template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder::vm_func() const {
+  NumpyArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder::vm_func_name() const {
+  NumpyArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder::vm_func_type() const {
+  NumpyArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder::vm_from_stack() const {
+  NumpyArrayBuilder<T, I>::vm_from_stack() const {
     return std::string();
   }
 
+  template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder::vm_error() const {
+  NumpyArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  NumpyArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
-    builder->add<bool>(x);
+  NumpyArrayBuilder<T, I>::boolean(bool x, LayoutBuilder<T, I>* builder) {
+    builder->add_bool(x);
   }
 
+  template <typename T, typename I>
   void
-  NumpyArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
-    builder->add<int64_t>(x);
+  NumpyArrayBuilder<T, I>::int64(int64_t x, LayoutBuilder<T, I>* builder) {
+    builder->add_int64(x);
   }
 
+  template <typename T, typename I>
   void
-  NumpyArrayBuilder::float64(double x, LayoutBuilder* builder) {
-    builder->add<double>(x);
+  NumpyArrayBuilder<T, I>::float64(double x, LayoutBuilder<T, I>* builder) {
+    builder->add_double(x);
   }
 
+  template <typename T, typename I>
   void
-  NumpyArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
-    builder->add<std::complex<double>>(x);
+  NumpyArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilder<T, I>* builder) {
+    builder->add_complex(x);
   }
 
+  template <typename T, typename I>
   void
-  NumpyArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  NumpyArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilder<T, I>* builder) {
     builder->bytestring(x.c_str(), (int64_t)x.length());
   }
 
+  template <typename T, typename I>
   void
-  NumpyArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  NumpyArrayBuilder<T, I>::string(const std::string& x, LayoutBuilder<T, I>* builder) {
     builder->string(x.c_str(), (int64_t)x.length());
   }
 
+  template <typename T, typename I>
   void
-  NumpyArrayBuilder::begin_list(LayoutBuilder* builder) {
+  NumpyArrayBuilder<T, I>::begin_list(LayoutBuilder<T, I>* builder) {
   }
 
+  template <typename T, typename I>
   void
-  NumpyArrayBuilder::end_list(LayoutBuilder* builder) {
+  NumpyArrayBuilder<T, I>::end_list(LayoutBuilder<T, I>* builder) {
   }
+
+  template class EXPORT_TEMPLATE_INST NumpyArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST NumpyArrayBuilder<int64_t, int32_t>;
 
 }

@@ -15,8 +15,10 @@ namespace awkward {
 
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
-  class FormBuilder;
-  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
+  template <typename T, typename I> class FormBuilder;
+
+  template <typename T, typename I>
+  using FormBuilderPtr = std::shared_ptr<FormBuilder<T, I>>;
 
   const std::string
     index_form_to_name(const std::string& form_index);
@@ -62,6 +64,7 @@ namespace awkward {
   /// @brief User interface to the FormBuilder system: the LayoutBuilder is a
   /// fixed reference while the FormBuilder subclass instances change in
   /// response to accumulating data.
+  template <typename T, typename I>
   class LIBAWKWARD_EXPORT_SYMBOL LayoutBuilder {
   public:
     /// @brief Creates an LayoutBuilder from a full set of parameters.
@@ -77,7 +80,7 @@ namespace awkward {
 
     /// @brief Connects a Virtual Machine if it was not initialized before.
     void
-      connect(const std::shared_ptr<ForthMachine32>& vm);
+      connect(const std::shared_ptr<ForthMachineOf<T, I>>& vm);
 
     /// @brief Prints debug information from the Virtual Machine stack.
     void
@@ -89,7 +92,7 @@ namespace awkward {
       vm_source() const;
 
     /// @brief
-    const std::shared_ptr<ForthMachine32>
+    const std::shared_ptr<ForthMachineOf<T, I>>
       vm() const;
 
     /// @brief Current length of the accumulated array.
@@ -190,13 +193,13 @@ namespace awkward {
 
     /// @brief Finds an index of a data in a VM output buffer.
     /// This is used to build a 'categorical' array.
-    template <typename T>
+    template <typename D>
     bool
-      find_index_of(T x, const std::string& vm_output_data) {
+      find_index_of(D x, const std::string& vm_output_data) {
         auto const& outputs = vm_.get()->outputs();
         auto search = outputs.find(vm_output_data);
         if (search != outputs.end()) {
-          auto data = std::static_pointer_cast<T>(search->second.get()->ptr());
+          auto data = std::static_pointer_cast<D>(search->second.get()->ptr());
           auto size = search->second.get()->len();
           for (int64_t i = 0; i < size; i++) {
             if (data.get()[i] == x) {
@@ -208,10 +211,25 @@ namespace awkward {
         return false;
       }
 
-    /// @brief Adds an integer value `x` to the accumulated data.
-    template <typename T>
+    /// @brief Adds a bolean value `x` to the accumulated data.
     void
-      add(T x);
+      add_bool(bool x);
+
+    /// @brief Adds an int64_t value `x` to the accumulated data.
+    void
+      add_int64(int64_t x);
+
+    /// @brief Adds a double value `x` to the accumulated data.
+    void
+      add_double(double x);
+
+    /// @brief Adds a complex value `x` to the accumulated data.
+    void
+      add_complex(std::complex<double> x);
+
+    /// @brief Adds a string value `x` to the accumulated data.
+    void
+      add_string(const std::string& x);
 
     /// @brief Generates next unique ID
     static int64_t
@@ -223,10 +241,10 @@ namespace awkward {
 
     /// @brief Resume Virtual machine run.
     void
-      resume() const;
+      resume();
 
     // @brief Root node of the FormBuilder tree.
-    const FormBuilderPtr builder() const { return builder_; }
+    const FormBuilderPtr<T, I> builder() const { return builder_; }
 
   protected:
     /// @brief A unique ID to use when Form nodes do not have Form key
@@ -240,8 +258,13 @@ namespace awkward {
 
   private:
     /// @brief Generates an Array builder from a Form.
-    FormBuilderPtr
+    FormBuilderPtr<T, I>
       form_builder_from_json(const std::string& json_form);
+
+    /// @brief
+    template <typename JSON>
+    FormBuilderPtr<T, I>
+      from_json(const JSON& json_doc);
 
     /// @ brief Initialise Layout Builder from a JSON Form.
     void
@@ -252,9 +275,9 @@ namespace awkward {
       initialise();
 
     /// @brief Place data of a type 'T' to the VM output buffer.
-    template <typename T>
+    template <typename D>
     void
-      set_data(T x);
+      set_data(D x);
 
     /// See #initial.
     int64_t initial_;
@@ -263,10 +286,10 @@ namespace awkward {
     int64_t length_;
 
     /// @brief Root node of the FormBuilder tree.
-    FormBuilderPtr builder_;
+    FormBuilderPtr<T, I> builder_;
 
     /// @brief Virtual machine.
-    std::shared_ptr<ForthMachine32> vm_;
+    std::shared_ptr<ForthMachineOf<T, I>> vm_;
 
     /// @brief Virtual machine input buffers.
     std::map<std::string, std::shared_ptr<ForthInputBuffer>> vm_inputs_map_;
@@ -283,7 +306,13 @@ namespace awkward {
     /// @brief Virtual machine output buffers.
     ForthOutputBufferMap vm_outputs_map_;
 
+    /// @brief
+    bool is_ready_;
+
   };
+
+  using LayoutBuilder32 = LayoutBuilder<int32_t, int32_t>;
+  using LayoutBuilder64 = LayoutBuilder<int64_t, int32_t>;
 
 }
 
