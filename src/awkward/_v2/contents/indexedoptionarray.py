@@ -148,7 +148,7 @@ class IndexedOptionArray(Content):
             )
         )
         nextcarry = ak._v2.index.Index64.empty(len(self._index) - numnull[0], nplike)
-        outindex = ak._v2.index.Index64.empty(len(self._index), nplike)
+        outindex = ak._v2.index.Index.empty(len(self._index), nplike, self._index.dtype)
 
         self._handle_error(
             nplike[
