@@ -62,7 +62,7 @@ form = """
 When a layout builder is created from this form, it cannot be modified. The builder accepts only data types spcified in the form: `float64`, `bool`, or `int64`. The appending data builder methods are restricted to `float64`, `boolean`, and `int64`. The methods have similar to the data type names.
 
 ```{code-cell}
-builder = ak.layout.LayoutBuilder(form)
+builder = ak.layout.LayoutBuilder32(form)
 ```
 
 A tag is associated with each of the `UnionArray` contents. The tags are contiguous integers, starting with `0` for the first content.
@@ -140,7 +140,7 @@ form = """
 ```
 
 ```{code-cell}
-builder = ak.layout.LayoutBuilder(form)
+builder = ak.layout.LayoutBuilder32(form)
 ```
 
 If record contents have the same type, the fields alternate:
