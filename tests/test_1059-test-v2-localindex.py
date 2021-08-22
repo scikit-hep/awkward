@@ -333,7 +333,7 @@ def test_bitmaskedarray_localindex():
         length=13,
         lsb_order=False,
     )
-    v1_array = v2_to_v1(v2_array)
+
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [
         0,
         1,
@@ -402,7 +402,7 @@ def test_bitmaskedarray_localindex():
         length=13,
         lsb_order=False,
     )
-    v1_array = v2_to_v1(v2_array)
+
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [
         0,
         1,
@@ -474,7 +474,6 @@ def test_bitmaskedarray_localindex():
         length=13,
         lsb_order=True,
     )
-    v1_array = v2_to_v1(v2_array)
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [
         0,
         1,
@@ -518,17 +517,8 @@ def test_unmaskedarray_localindex():
             np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
         )
     )
-    v1_array = v2_to_v1(v2_array)
-    assert (
-        ak.to_list(v1_array.localindex(0))
-        == ak.to_list(v2_to_v1(v2_array.localindex(0)))
-        == [0, 1, 2, 3]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-1)))
-        == [0, 1, 2, 3]
-    )
+    assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2, 3]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [0, 1, 2, 3]
 
     with pytest.raises(IndexError):
         v2_array.localindex(-2)
@@ -545,7 +535,6 @@ def test_unionarray_localindex():
             ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
-    v1_array = v2_to_v1(v2_array)
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2, 3, 4, 5, 6]
     assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [0, 1, 2, 3, 4, 5, 6]
 
@@ -567,7 +556,6 @@ def test_recordarray_localindex():
         ),
         3,
     )
-    v1_array = v2_to_v1(v2_array)
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1]
     assert ak.to_list(v2_to_v1(v2_array.localindex(1))) == [[0, 1, 2], [0, 1, 2]]
     assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [[0, 1, 2], [0, 1, 2]]
@@ -585,27 +573,55 @@ def test_recordarray_localindex():
         0,
         zeros_length=10,
     )
-    v1_array = v2_to_v1(v2_array)
-    assert (
-        ak.to_list(v1_array.localindex(0))
-        == ak.to_list(v2_to_v1(v2_array.localindex(0)))
-        == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(1)))
-        == [[], [], [], [], [], [], [], [], [], []]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-1)))
-        == [[], [], [], [], [], [], [], [], [], []]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-2))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-2)))
-        == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    )
+
+    assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(1))) == [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-2))) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+    ]
 
     with pytest.raises(IndexError):
         v2_array.localindex(-3)
@@ -622,27 +638,11 @@ def test_recordarray_localindex():
             ["nest"],
         ),
     )
-    v1_array = v2_to_v1(v2_array)
-    assert (
-        ak.to_list(v1_array.localindex(0))
-        == ak.to_list(v2_to_v1(v2_array.localindex(0)))
-        == [0, 1, 2]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(1)))
-        == [[0, 1, 2], [], [0, 1]]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-1)))
-        == [[0, 1, 2], [], [0, 1]]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-2))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-2)))
-        == [0, 1, 2]
-    )
+
+    assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(1))) == [[0, 1, 2], [], [0, 1]]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [[0, 1, 2], [], [0, 1]]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-2))) == [0, 1, 2]
 
     with pytest.raises(IndexError):
         v2_array.localindex(-3)
@@ -660,27 +660,10 @@ def test_recordarray_localindex():
             ["nest"],
         ),
     )
-    v1_array = v2_to_v1(v2_array)
-    assert (
-        ak.to_list(v1_array.localindex(0))
-        == ak.to_list(v2_to_v1(v2_array.localindex(0)))
-        == [0, 1, 2]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(1)))
-        == [[0, 1, 2], [], [0, 1]]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-1)))
-        == [[0, 1, 2], [], [0, 1]]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-2))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-2)))
-        == [0, 1, 2]
-    )
+    assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(1))) == [[0, 1, 2], [], [0, 1]]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [[0, 1, 2], [], [0, 1]]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-2))) == [0, 1, 2]
 
     with pytest.raises(IndexError):
         v2_array.localindex(-3)
@@ -698,7 +681,6 @@ def test_recordarray_localindex():
             ["nest"],
         ),
     )
-    v1_array = v2_to_v1(v2_array)
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2, 3, 4, 5, 6]
     assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [0, 1, 2, 3, 4, 5, 6]
 
@@ -718,13 +700,8 @@ def test_recordarray_localindex():
             ["nest"],
         ),
     )
-    v1_array = v2_to_v1(v2_array)
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2, 3, 4, 5, 6]
-    assert (
-        ak.to_list(v1_array.localindex(-1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-1)))
-        == [0, 1, 2, 3, 4, 5, 6]
-    )
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [0, 1, 2, 3, 4, 5, 6]
 
     with pytest.raises(IndexError):
         v2_array.localindex(-2)
@@ -743,7 +720,7 @@ def test_recordarray_localindex():
         ),
         valid_when=True,
     )
-    v1_array = v2_to_v1(v2_array)
+
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2, 3, 4]
     assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [0, 1, 2, 3, 4]
 
@@ -764,17 +741,9 @@ def test_recordarray_localindex():
         ),
         valid_when=False,
     )
-    v1_array = v2_to_v1(v2_array)
-    assert (
-        ak.to_list(v1_array.localindex(0))
-        == ak.to_list(v2_to_v1(v2_array.localindex(0)))
-        == [0, 1, 2, 3, 4]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-1)))
-        == [0, 1, 2, 3, 4]
-    )
+
+    assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2, 3, 4]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [0, 1, 2, 3, 4]
 
     with pytest.raises(IndexError):
         v2_array.localindex(-2)
@@ -832,16 +801,37 @@ def test_recordarray_localindex():
         length=13,
         lsb_order=False,
     )
-    v1_array = v2_to_v1(v2_array)
-    assert ak.to_list(v1_array.localindex(0)) == ak.to_list(
-        v2_to_v1(v2_array.localindex(0))
-    )
-    assert ak.to_list(v1_array.localindex(-0)) == ak.to_list(
-        v2_to_v1(v2_array.localindex(-0))
-    )
-    assert ak.to_list(v1_array.localindex(-1)) == ak.to_list(
-        v2_to_v1(v2_array.localindex(-1))
-    )
+
+    assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+    ]
     with pytest.raises(IndexError):
         v2_array.localindex(-2)
     with pytest.raises(IndexError):
@@ -899,7 +889,7 @@ def test_recordarray_localindex():
         length=13,
         lsb_order=False,
     )
-    v1_array = v2_to_v1(v2_array)
+
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [
         0,
         1,
@@ -915,11 +905,21 @@ def test_recordarray_localindex():
         11,
         12,
     ]
-    assert (
-        ak.to_list(v1_array.localindex(-1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-1)))
-        == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-    )
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+    ]
 
     with pytest.raises(IndexError):
         v2_array.localindex(-2)
@@ -981,7 +981,7 @@ def test_recordarray_localindex():
         length=13,
         lsb_order=True,
     )
-    v1_array = v2_to_v1(v2_array)
+
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [
         0,
         1,
@@ -1073,7 +1073,7 @@ def test_recordarray_localindex():
         length=13,
         lsb_order=True,
     )
-    v1_array = v2_to_v1(v2_array)
+
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [
         0,
         1,
@@ -1120,17 +1120,9 @@ def test_recordarray_localindex():
             ["nest"],
         )
     )
-    v1_array = v2_to_v1(v2_array)
-    assert (
-        ak.to_list(v1_array.localindex(0))
-        == ak.to_list(v2_to_v1(v2_array.localindex(0)))
-        == [0, 1, 2, 3]
-    )
-    assert (
-        ak.to_list(v1_array.localindex(-1))
-        == ak.to_list(v2_to_v1(v2_array.localindex(-1)))
-        == [0, 1, 2, 3]
-    )
+
+    assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2, 3]
+    assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [0, 1, 2, 3]
 
     with pytest.raises(IndexError):
         v2_array.localindex(-2)
@@ -1154,7 +1146,7 @@ def test_recordarray_localindex():
             ),
         ],
     )
-    v1_array = v2_to_v1(v2_array)
+
     assert ak.to_list(v2_to_v1(v2_array.localindex(0))) == [0, 1, 2, 3, 4, 5, 6]
     assert ak.to_list(v2_to_v1(v2_array.localindex(-1))) == [0, 1, 2, 3, 4, 5, 6]
 
