@@ -100,6 +100,3 @@ class EmptyArray(Content):
 
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
-
-    def localindex(self, axis):
-        return self._localindex(axis, 0)

@@ -459,25 +459,17 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         if mindepth == depth and maxdepth == depth:
             posaxis = depth + axis
             if posaxis < 0:
-                raise IndexError(
-                    self,
-                    "axis == "
-                    + str(axis)
-                    + " exceeds the depth == "
-                    + str(depth)
-                    + " of this array\n"
-                    + str(self),
+                raise np.AxisError(
+                    "axis={0} exceeds the depth of this array ({1})".format(
+                        axis, depth
+                    )
                 )
             return posaxis
         elif mindepth + axis == 0:
-            raise IndexError(
-                self,
-                "axis == "
-                + str(axis)
-                + " exceeds the min depth == "
-                + str(depth)
-                + " of this array\n"
-                + str(self),
+            raise np.AxisError(
+                "axis={0} exceeds the depth of this array ({1})".format(
+                    axis, depth
+                )
             )
         return axis
 
@@ -490,6 +482,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
         )
         return ak._v2.contents.NumpyArray(localindex)
+
+    def localindex(self, axis):
+        return self._localindex(axis, 0)
 
     @property
     def purelist_isregular(self):

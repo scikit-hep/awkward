@@ -248,6 +248,3 @@ class BitMaskedArray(Content):
 
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
-
-    def localindex(self, axis):
-        return self._localindex(axis, 0)

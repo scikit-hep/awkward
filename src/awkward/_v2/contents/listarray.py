@@ -151,6 +151,24 @@ class ListArray(Content):
             self._parameters,
         )
 
+    def _compact_offsets64(self, start_at_zero):
+        starts_len = len(self._starts)
+        out = ak._v2.index.Index64.empty(starts_len + 1, self.nplike)
+        self._handle_error(
+            self.nplike[
+                "awkward_ListArray_compact_offsets",
+                out.dtype.type,
+                self._starts.dtype.type,
+                self._stops.dtype.type,
+            ](
+                out.to(self.nplike),
+                self._starts.to(self.nplike),
+                self._stops.to(self.nplike),
+                starts_len,
+            )
+        )
+        return out
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -359,30 +377,12 @@ class ListArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def compact_offsets(self, start_at_zero):
-        starts_len = len(self._starts)
-        out = ak._v2.index.Index64.empty(starts_len + 1, self.nplike)
-        self._handle_error(
-            self.nplike[
-                "awkward_ListArray_compact_offsets",
-                out.dtype.type,
-                self._starts.dtype.type,
-                self._stops.dtype.type,
-            ](
-                out.to(self.nplike),
-                self._starts.to(self.nplike),
-                self._stops.to(self.nplike),
-                starts_len,
-            )
-        )
-        return out
-
     def _localindex(self, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         elif posaxis == depth + 1:
-            offsets = self.compact_offsets(True)
+            offsets = self._compact_offsets64(True)
             innerlength = offsets[len(offsets) - 1]
             localindex = ak._v2.index.Index64.empty(innerlength, self.nplike)
             self._handle_error(
@@ -406,6 +406,3 @@ class ListArray(Content):
                 self._identifier,
                 self._parameters,
             )
-
-    def localindex(self, axis):
-        return self._localindex(axis, 0)

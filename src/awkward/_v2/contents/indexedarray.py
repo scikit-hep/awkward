@@ -200,6 +200,3 @@ class IndexedArray(Content):
             return self._localindex_axis0()
         else:
             return self.project()._localindex(posaxis, depth)
-
-    def localindex(self, axis):
-        return self._localindex(axis, 0)

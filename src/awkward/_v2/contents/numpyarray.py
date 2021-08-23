@@ -251,6 +251,3 @@ class NumpyArray(Content):
             raise IndexError(self, "'axis' out of range for localindex")
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
-
-    def localindex(self, axis):
-        return self._localindex(axis, 0)

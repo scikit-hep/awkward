@@ -4,7 +4,6 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError  # noqa: F401
-from awkward._v2.contents.unionarray import UnionArray  # noqa: F401
 from awkward._v2.forms.unmaskedform import UnmaskedForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -137,6 +136,3 @@ class UnmaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
-
-    def localindex(self, axis):
-        return self._localindex(axis, 0)
