@@ -460,16 +460,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             posaxis = depth + axis
             if posaxis < 0:
                 raise np.AxisError(
-                    "axis={0} exceeds the depth of this array ({1})".format(
-                        axis, depth
-                    )
+                    "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
                 )
             return posaxis
         elif mindepth + axis == 0:
             raise np.AxisError(
-                "axis={0} exceeds the depth of this array ({1})".format(
-                    axis, depth
-                )
+                "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
             )
         return axis
 
