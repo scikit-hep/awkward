@@ -177,3 +177,26 @@ class IndexedArray(Content):
 
         else:
             raise AssertionError(repr(head))
+
+    def project(self):
+        nextcarry = ak._v2.index.Index64.empty(len(self), self.nplike)
+        self._handle_error(
+            self.nplike[
+                "awkward_IndexedArray_getitem_nextcarry",
+                nextcarry.dtype.type,
+                self._index.dtype.type,
+            ](
+                nextcarry.to(self.nplike),
+                self._index.to(self.nplike),
+                len(self._index),
+                len(self._content),
+            )
+        )
+        return self._content._carry(nextcarry, False, NestedIndexError)
+
+    def _localindex(self, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        else:
+            return self.project()._localindex(posaxis, depth)

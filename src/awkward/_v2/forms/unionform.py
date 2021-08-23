@@ -99,7 +99,7 @@ class UnionForm(Form):
         out = None
         for content in self._contents:
             if out is None:
-                out = self._content.purelist_depth
+                out = content.purelist_depth
             elif out != content.purelist_depth:
                 return -1
         else:

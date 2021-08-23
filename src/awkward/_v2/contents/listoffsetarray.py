@@ -147,6 +147,18 @@ class ListOffsetArray(Content):
             self._parameters,
         )
 
+    def _compact_offsets64(self, start_at_zero):
+        offsets_len = len(self._offsets) - 1
+        out = ak._v2.index.Index64.empty(offsets_len + 1, self.nplike)
+        self._handle_error(
+            self.nplike[
+                "awkward_ListOffsetArray_compact_offsets",
+                out.dtype.type,
+                self._offsets.dtype.type,
+            ](out.to(self.nplike), self._offsets.to(self.nplike), offsets_len)
+        )
+        return out
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
         if head == ():
@@ -345,3 +357,32 @@ class ListOffsetArray(Content):
 
         else:
             raise AssertionError(repr(head))
+
+    def _localindex(self, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        elif posaxis == depth + 1:
+            offsets = self._compact_offsets64(True)
+            innerlength = offsets[len(offsets) - 1]
+            localindex = ak._v2.index.Index64.empty(innerlength, self.nplike)
+            self._handle_error(
+                self.nplike[
+                    "awkward_ListArray_localindex",
+                    localindex.dtype.type,
+                    offsets.dtype.type,
+                ](localindex.to(self.nplike), offsets.to(self.nplike), len(offsets) - 1)
+            )
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                offsets,
+                ak._v2.contents.NumpyArray(localindex),
+                self._identifier,
+                self._parameters,
+            )
+        else:
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                self._offsets,
+                self._content._localindex(posaxis, depth + 1),
+                self._identifier,
+                self._parameters,
+            )

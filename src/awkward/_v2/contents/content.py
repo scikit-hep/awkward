@@ -449,6 +449,39 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         else:
             raise NotImplementedError
 
+    def _axis_wrap_if_negative(self, axis):
+        if axis >= 0:
+            return axis
+        minmax = self.minmax_depth
+        mindepth = minmax[0]
+        maxdepth = minmax[1]
+        depth = self.purelist_depth
+        if mindepth == depth and maxdepth == depth:
+            posaxis = depth + axis
+            if posaxis < 0:
+                raise np.AxisError(
+                    "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
+                )
+            return posaxis
+        elif mindepth + axis == 0:
+            raise np.AxisError(
+                "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
+            )
+        return axis
+
+    def _localindex_axis0(self):
+        localindex = ak._v2.index.Index64.empty(len(self), self.nplike)
+        self._handle_error(
+            localindex.nplike["awkward_localindex", np.int64](
+                localindex.to(localindex.nplike),
+                len(localindex),
+            )
+        )
+        return ak._v2.contents.NumpyArray(localindex)
+
+    def localindex(self, axis):
+        return self._localindex(axis, 0)
+
     @property
     def purelist_isregular(self):
         return self.Form.purelist_isregular.__get__(self)
