@@ -56,6 +56,9 @@ class Content(object):
     def _simplify_uniontype(self):
         return self
 
+    def maybe_to_nplike(self, nplike):
+        return None
+
     def _handle_error(self, error, slicer=None):
         if error.str is not None:
             if error.filename is None:
@@ -179,17 +182,23 @@ class Content(object):
                 else:
                     if issubclass(x.dtype.type, np.int64):
                         out.append(ak._v2.index.Index64(x.reshape(-1)))
+                        out[-1].metadata["shape"] = x.shape
                     elif issubclass(x.dtype.type, np.integer):
                         out.append(ak._v2.index.Index64(x.astype(np.int64).reshape(-1)))
+                        out[-1].metadata["shape"] = x.shape
                     elif issubclass(x.dtype.type, (np.bool_, bool)):
-                        out.append(ak._v2.index.Index64(np.nonzero(x.reshape(-1))[0]))
+                        if len(x.shape) == 1:
+                            out.append(ak._v2.index.Index64(nplike.nonzero(x)[0]))
+                            out[-1].metadata["shape"] = x.shape
+                        else:
+                            for w in nplike.nonzero(x):
+                                out.append(ak._v2.index.Index64(w))
                     else:
                         raise TypeError(
                             "array slice must be an array of integers or booleans, not\n\n    {0}".format(
                                 repr(x).replace("\n", "\n    ")
                             )
                         )
-                    out[-1].metadata["shape"] = x.shape
 
         return tuple(out)
 
@@ -216,6 +225,7 @@ class Content(object):
             elif isinstance(where, tuple):
                 if len(where) == 0:
                     return self
+
                 nextwhere = self._getitem_broadcast(
                     [self._prepare_tuple_item(x) for x in where],
                     self.nplike,
@@ -225,7 +235,7 @@ class Content(object):
 
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
                 if len(out) == 0:
-                    raise out._getitem_nothing()
+                    return out._getitem_nothing()
                 else:
                     return out._getitem_at(0)
 
@@ -245,14 +255,20 @@ class Content(object):
                     )
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 elif issubclass(where.dtype.type, (np.bool_, bool)):
-                    carry = ak._v2.index.Index64(np.nonzero(where.data.reshape(-1))[0])
-                    allow_lazy = "copied"  # True, but also can be modified in-place
+                    if len(where.data.shape) == 1:
+                        where = self.nplike.nonzero(where.data)[0]
+                        carry = ak._v2.index.Index64(where)
+                        allow_lazy = "copied"  # True, but also can be modified in-place
+                    else:
+                        wheres = self.nplike.nonzero(where.data)
+                        return self.__getitem__(wheres)
                 else:
                     raise TypeError(
                         "array slice must be an array of integers or booleans, not\n\n    {0}".format(
                             repr(where.data).replace("\n", "\n    ")
                         )
                     )
+
                 out = self._getitem_next_array_wrap(
                     self._carry(carry, allow_lazy, NestedIndexError), where.shape
                 )
@@ -268,9 +284,12 @@ class Content(object):
                 return self._getitem_fields(where)
 
             elif isinstance(where, Iterable):
-                return self.__getitem__(
-                    v1_to_v2(ak.operations.convert.to_layout(where))
-                )
+                layout = v1_to_v2(ak.operations.convert.to_layout(where))
+                as_nplike = layout.maybe_to_nplike(layout.nplike)
+                if as_nplike is None:
+                    return self.__getitem__(layout)
+                else:
+                    return self.__getitem__(ak._v2.contents.NumpyArray(as_nplike))
 
             else:
                 raise TypeError(
@@ -378,9 +397,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return list(item)
 
         elif isinstance(item, Iterable):
-            return self._prepare_tuple_item(
-                v1_to_v2(ak.operations.convert.to_layout(item))
-            )
+            layout = v1_to_v2(ak.operations.convert.to_layout(item))
+            as_nplike = layout.maybe_to_nplike(layout.nplike)
+            if as_nplike is None:
+                return self._prepare_tuple_item(layout)
+            else:
+                return self._prepare_tuple_item(ak._v2.contents.NumpyArray(as_nplike))
 
         else:
             raise TypeError(
@@ -497,6 +519,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     @property
     def branch_depth(self):
         return self.Form.branch_depth.__get__(self)
+
+    @property
+    def keys(self):
+        return self.Form.keys.__get__(self)
 
 
 class NestedIndexError(IndexError):

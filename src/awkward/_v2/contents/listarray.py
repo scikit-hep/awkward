@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -169,6 +170,13 @@ class ListArray(Content):
         )
         return out
 
+    def _broadcast_tooffsets64(self, offsets):
+        return ListOffsetArray._broadcast_tooffsets64(self, offsets)
+
+    def toListOffsetArray64(self, start_at_zero=False):
+        offsets = self._compact_offsets64(start_at_zero)
+        return self._broadcast_tooffsets64(offsets)
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -176,7 +184,7 @@ class ListArray(Content):
             return self
 
         elif isinstance(head, int):
-            assert advanced is not None
+            assert advanced is None
             nexthead, nexttail = self._headtail(tail)
             lenstarts = len(self._starts)
             nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
@@ -202,8 +210,11 @@ class ListArray(Content):
 
             nexthead, nexttail = self._headtail(tail)
 
-            start, stop, step = head.indices(self._stops[0])
+            start, stop, step = head.start, head.stop, head.step
+
             step = 1 if step is None else step
+            start = ak._util.kSliceNone if start is None else start
+            stop = ak._util.kSliceNone if stop is None else stop
 
             carrylength = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
@@ -222,9 +233,14 @@ class ListArray(Content):
                     step,
                 )
             )
-
-            nextoffsets = ak._v2.index.Index64.empty(lenstarts + 1, nplike)
+            if self._starts.dtype == "int64":
+                nextoffsets = ak._v2.index.Index64.empty(lenstarts + 1, nplike)
+            elif self._starts.dtype == "int32":
+                nextoffsets = ak._v2.index.Index32.empty(lenstarts + 1, nplike)
+            elif self._starts.dtype == "uint32":
+                nextoffsets = ak._v2.index.IndexU32.empty(lenstarts + 1, nplike)
             nextcarry = ak._v2.index.Index64.empty(carrylength[0], nplike)
+
             self._handle_error(
                 nplike[
                     "awkward_ListArray_getitem_next_range",
@@ -266,6 +282,7 @@ class ListArray(Content):
                         lenstarts,
                     )
                 )
+
                 nextadvanced = ak._v2.index.Index64.empty(total[0], nplike)
                 self._handle_error(
                     nplike[
@@ -304,8 +321,7 @@ class ListArray(Content):
 
             nexthead, nexttail = self._headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
-            regular_flathead = ak._v2.index.Index64.zeros(len(flathead), nplike)
-
+            regular_flathead = ak._v2.index.Index64(flathead)
             if advanced is None or len(advanced) == 0:
                 nextcarry = ak._v2.index.Index64.empty(
                     lenstarts * len(flathead), nplike
@@ -318,6 +334,8 @@ class ListArray(Content):
                         "awkward_ListArray_getitem_next_array",
                         nextcarry.dtype.type,
                         nextadvanced.dtype.type,
+                        self._starts.dtype.type,
+                        self._stops.dtype.type,
                         regular_flathead.dtype.type,
                     ](
                         nextcarry.to(nplike),
@@ -335,14 +353,15 @@ class ListArray(Content):
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
-                    return self._getitem_next_array_wrap(out, head.metadata["shape"])
+                    return self._getitem_next_array_wrap(
+                        out, head.metadata.get("shape", (len(head),))
+                    )
                 else:
                     return out
 
             else:
                 nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
                 nextadvanced = ak._v2.index.Index64.empty(lenstarts, nplike)
-
                 self._handle_error(
                     nplike[
                         "awkward_ListArray_getitem_next_array_advanced",

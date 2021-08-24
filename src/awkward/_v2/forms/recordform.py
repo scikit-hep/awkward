@@ -44,10 +44,6 @@ class RecordForm(Form):
         self._init(has_identifier, parameters, form_key)
 
     @property
-    def keys(self):
-        return self._keys
-
-    @property
     def contents(self):
         return self._contents
 
@@ -102,3 +98,7 @@ class RecordForm(Form):
             if mindepth > depth:
                 mindepth = depth
         return (anybranch, mindepth)
+
+    @property
+    def keys(self):
+        return self._keys

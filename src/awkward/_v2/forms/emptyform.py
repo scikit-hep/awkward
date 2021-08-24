@@ -31,3 +31,7 @@ class EmptyForm(Form):
     @property
     def branch_depth(self):
         return (False, 1)
+
+    @property
+    def keys(self):
+        return []

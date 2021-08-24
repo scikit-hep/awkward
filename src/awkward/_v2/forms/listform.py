@@ -97,3 +97,7 @@ class ListForm(Form):
         else:
             branch, depth = self._content.branch_depth
             return (branch, depth + 1)
+
+    @property
+    def keys(self):
+        return self._content.keys

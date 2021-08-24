@@ -127,6 +127,9 @@ class NumpyArray(Content):
                 self._parameters,
             )
 
+    def maybe_to_nplike(self, nplike):
+        return nplike.asarray(self._data)
+
     def _getitem_nothing(self):
         tmp = self._data[0:0]
         return NumpyArray(
@@ -167,6 +170,8 @@ class NumpyArray(Content):
         raise NestedIndexError(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
+        if len(where) == 0:
+            return self._getitem_range(slice(0, 0))
         raise NestedIndexError(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy, exception):
@@ -208,7 +213,6 @@ class NumpyArray(Content):
 
         elif isinstance(head, slice) or head is np.newaxis or head is Ellipsis:
             where = (slice(None), head) + tail
-
             try:
                 out = self._data[where]
             except IndexError as err:

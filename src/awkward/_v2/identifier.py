@@ -44,7 +44,7 @@ class Identifier(object):
         return self._ref
 
     @property
-    def filedloc(self):
+    def fieldloc(self):
         return self._fieldloc
 
     @property
