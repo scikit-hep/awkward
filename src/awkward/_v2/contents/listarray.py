@@ -187,7 +187,7 @@ class ListArray(Content):
             start, stop, step = head.start, head.stop, head.step
 
             step = 1 if step is None else step
-            start = 0 if start is None else start
+            start = ak._util.kSliceNone if start is None else start
             stop = ak._util.kSliceNone if stop is None else stop
 
             carrylength = ak._v2.index.Index64.empty(1, nplike)
