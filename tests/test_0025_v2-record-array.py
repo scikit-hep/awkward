@@ -131,8 +131,8 @@ def test_scalar_record():
     str(recordarray[2])
 
     assert recordarray[2].keys == ["one", "two"]
-    assert [ak.to_list(x) for x in recordarray[2].fields()] == [3, [4.4, 5.5]]
-    pairs = recordarray[2].fielditems()
+    assert [ak.to_list(x) for x in recordarray[2].contents] == [3, [4.4, 5.5]]
+    pairs = [(key, recordarray[2].content(key)) for key in recordarray[2].keys]
     assert pairs[0][0] == "one"
     assert pairs[1][0] == "two"
     assert pairs[0][1] == 3

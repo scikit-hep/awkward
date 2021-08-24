@@ -45,17 +45,15 @@ class Record(object):
     def keys(self):
         return self._array.keys
 
-    def fielditems(self):
-        out = []
-        for key in self._array.keys:
-            out.append((key, self._array[key][self._at]))
-        return out
-
-    def fields(self):
+    @property
+    def contents(self):
         out = []
         for key in self._array.keys:
             out.append(self._array[key][self._at])
         return out
+
+    def content(self, index_or_key):
+        return self._array.content(index_or_key)[self._at]
 
     def __repr__(self):
         return self._repr("", "", "")
