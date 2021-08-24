@@ -606,7 +606,7 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  LayoutBuilder<T, I>::resume() {
+  LayoutBuilder<T, I>::resume() const {
     if (vm_.get()->resume() == util::ForthError::user_halt) {
       throw std::invalid_argument(vm_.get()->string_at(vm_.get()->stack().back()));
     }

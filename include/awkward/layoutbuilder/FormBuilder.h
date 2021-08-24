@@ -9,7 +9,6 @@
 #include <string>
 #include "awkward/forth/ForthMachine.h"
 #include "awkward/forth/ForthOutputBuffer.h"
-#include "awkward/layoutbuilder/LayoutBuilder.h"
 
 namespace awkward {
 
@@ -145,8 +144,8 @@ namespace awkward {
 
   };
 
-  // template <typename T, typename I>
-  // using FormBuilderPtr = std::shared_ptr<FormBuilder<T, I>>;
+  template <typename T, typename I>
+  using FormBuilderPtr = std::shared_ptr<FormBuilder<T, I>>;
 
 }
 

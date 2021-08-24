@@ -96,48 +96,48 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  NumpyArrayBuilder<T, I>::boolean(bool x, LayoutBuilder<T, I>* builder) {
+  NumpyArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     builder->add_bool(x);
   }
 
   template <typename T, typename I>
   void
-  NumpyArrayBuilder<T, I>::int64(int64_t x, LayoutBuilder<T, I>* builder) {
+  NumpyArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     builder->add_int64(x);
   }
 
   template <typename T, typename I>
   void
-  NumpyArrayBuilder<T, I>::float64(double x, LayoutBuilder<T, I>* builder) {
+  NumpyArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     builder->add_double(x);
   }
 
   template <typename T, typename I>
   void
-  NumpyArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilder<T, I>* builder) {
+  NumpyArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     builder->add_complex(x);
   }
 
   template <typename T, typename I>
   void
-  NumpyArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilder<T, I>* builder) {
+  NumpyArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     builder->bytestring(x.c_str(), (int64_t)x.length());
   }
 
   template <typename T, typename I>
   void
-  NumpyArrayBuilder<T, I>::string(const std::string& x, LayoutBuilder<T, I>* builder) {
+  NumpyArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     builder->string(x.c_str(), (int64_t)x.length());
   }
 
   template <typename T, typename I>
   void
-  NumpyArrayBuilder<T, I>::begin_list(LayoutBuilder<T, I>* builder) {
+  NumpyArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
   }
 
   template <typename T, typename I>
   void
-  NumpyArrayBuilder<T, I>::end_list(LayoutBuilder<T, I>* builder) {
+  NumpyArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
   }
 
   template class EXPORT_TEMPLATE_INST NumpyArrayBuilder<int32_t, int32_t>;

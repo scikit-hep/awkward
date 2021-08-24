@@ -82,49 +82,49 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder<T, I>::boolean(bool x, LayoutBuilder<T, I>* builder) {
+  ByteMaskedArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->boolean(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder<T, I>::int64(int64_t x, LayoutBuilder<T, I>* builder) {
+  ByteMaskedArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->int64(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder<T, I>::float64(double x, LayoutBuilder<T, I>* builder) {
+  ByteMaskedArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->float64(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilder<T, I>* builder) {
+  ByteMaskedArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->complex(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilder<T, I>* builder) {
+  ByteMaskedArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->bytestring(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder<T, I>::string(const std::string& x, LayoutBuilder<T, I>* builder) {
+  ByteMaskedArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->string(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder<T, I>::begin_list(LayoutBuilder<T, I>* builder) {
+  ByteMaskedArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     content_.get()->begin_list(builder);
   }
 
   template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder<T, I>::end_list(LayoutBuilder<T, I>* builder) {
+  ByteMaskedArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     content_.get()->end_list(builder);
   }
 

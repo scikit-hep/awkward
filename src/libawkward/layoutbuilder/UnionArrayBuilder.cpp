@@ -137,49 +137,49 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  UnionArrayBuilder<T, I>::boolean(bool x, LayoutBuilder<T, I>* builder) {
+  UnionArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->boolean(x, builder);
   }
 
   template <typename T, typename I>
   void
-  UnionArrayBuilder<T, I>::int64(int64_t x, LayoutBuilder<T, I>* builder) {
+  UnionArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->int64(x, builder);
   }
 
   template <typename T, typename I>
   void
-  UnionArrayBuilder<T, I>::float64(double x, LayoutBuilder<T, I>* builder) {
+  UnionArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->float64(x, builder);
   }
 
   template <typename T, typename I>
   void
-  UnionArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilder<T, I>* builder) {
+  UnionArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->complex(x, builder);
   }
 
   template <typename T, typename I>
   void
-  UnionArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilder<T, I>* builder) {
+  UnionArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->bytestring(x, builder);
   }
 
   template <typename T, typename I>
   void
-  UnionArrayBuilder<T, I>::string(const std::string& x, LayoutBuilder<T, I>* builder) {
+  UnionArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->string(x, builder);
   }
 
   template <typename T, typename I>
   void
-  UnionArrayBuilder<T, I>::begin_list(LayoutBuilder<T, I>* builder) {
+  UnionArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->begin_list(builder);
   }
 
   template <typename T, typename I>
   void
-  UnionArrayBuilder<T, I>::end_list(LayoutBuilder<T, I>* builder) {
+  UnionArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->end_list(builder);
   }
 

@@ -102,43 +102,43 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ListArrayBuilder<T, I>::boolean(bool x, LayoutBuilder<T, I>* builder) {
+  ListArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->boolean(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ListArrayBuilder<T, I>::int64(int64_t x, LayoutBuilder<T, I>* builder) {
+  ListArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->int64(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ListArrayBuilder<T, I>::float64(double x, LayoutBuilder<T, I>* builder) {
+  ListArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->float64(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ListArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilder<T, I>* builder) {
+  ListArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->complex(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ListArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilder<T, I>* builder) {
+  ListArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->bytestring(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ListArrayBuilder<T, I>::string(const std::string& x, LayoutBuilder<T, I>* builder) {
+  ListArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->string(x, builder);
   }
 
   template <typename T, typename I>
   void
-  ListArrayBuilder<T, I>::begin_list(LayoutBuilder<T, I>* builder) {
+  ListArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     if (!begun_) {
       throw std::invalid_argument(
         std::string("called 'end_list' without 'begin_list' at the same level before it")
@@ -155,7 +155,7 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ListArrayBuilder<T, I>::end_list(LayoutBuilder<T, I>* builder) {
+  ListArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     if (!begun_) {
       throw std::invalid_argument(
         std::string("called 'end_list' without 'begin_list' at the same level before it")

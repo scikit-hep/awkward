@@ -15,11 +15,6 @@ namespace awkward {
 
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
-  template <typename T, typename I> class FormBuilder;
-
-  template <typename T, typename I>
-  using FormBuilderPtr = std::shared_ptr<FormBuilder<T, I>>;
-
   const std::string
     index_form_to_name(const std::string& form_index);
 
@@ -241,7 +236,7 @@ namespace awkward {
 
     /// @brief Resume Virtual machine run.
     void
-      resume();
+      resume() const;
 
     // @brief Root node of the FormBuilder tree.
     const FormBuilderPtr<T, I> builder() const { return builder_; }

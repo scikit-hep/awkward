@@ -98,50 +98,50 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::boolean(bool x, LayoutBuilder<T, I>* builder) {
+  RecordArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->boolean(x, builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::int64(int64_t x, LayoutBuilder<T, I>* builder) {
+  RecordArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->int64(x, builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::float64(double x, LayoutBuilder<T, I>* builder) {
+  RecordArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->float64(x, builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilder<T, I>* builder) {
+  RecordArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->complex(x, builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilder<T, I>* builder) {
+  RecordArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->bytestring(x, builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::string(const std::string& x, LayoutBuilder<T, I>* builder) {
+  RecordArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->string(x, builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::begin_list(LayoutBuilder<T, I>* builder) {
+  RecordArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     list_field_index_.emplace_back(field_index_);
     contents_[(size_t)field_index_].get()->begin_list(builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::end_list(LayoutBuilder<T, I>* builder) {
+  RecordArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     field_index_ = list_field_index_.back();
     contents_[(size_t)field_index_].get()->end_list(builder);
     list_field_index_.pop_back();
