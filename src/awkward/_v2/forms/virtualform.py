@@ -59,7 +59,7 @@ class VirtualForm(Form):
                 "cannot determine the type of a virtual array without a Form"
             )
         else:
-            return self._form.purelist_isregular()
+            return self._form.purelist_isregular
 
     @property
     def purelist_depth(self):
@@ -68,7 +68,7 @@ class VirtualForm(Form):
                 "cannot determine the type of a virtual array without a Form"
             )
         else:
-            return self._form.purelist_depth()
+            return self._form.purelist_depth
 
     @property
     def minmax_depth(self):
@@ -77,7 +77,7 @@ class VirtualForm(Form):
                 "cannot determine the type of a virtual array without a Form"
             )
         else:
-            return self._form.minmax_depth()
+            return self._form.minmax_depth
 
     @property
     def branch_depth(self):
@@ -86,4 +86,13 @@ class VirtualForm(Form):
                 "cannot determine the type of a virtual array without a Form"
             )
         else:
-            return self._form.branch_depth()
+            return self._form.branch_depth
+
+    @property
+    def keys(self):
+        if self._form is None:
+            raise ValueError(
+                "cannot determine the type of a virtual array without a Form"
+            )
+        else:
+            return self._form.keys

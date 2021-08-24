@@ -100,3 +100,7 @@ class BitMaskedForm(Form):
     @property
     def branch_depth(self):
         return self._content.branch_depth
+
+    @property
+    def keys(self):
+        return self._content.keys
