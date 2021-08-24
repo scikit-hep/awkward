@@ -125,3 +125,14 @@ class UnmaskedArray(Content):
 
         else:
             raise AssertionError(repr(head))
+
+    def _localindex(self, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        else:
+            return UnmaskedArray(
+                self._content._localindex(posaxis, depth),
+                self._identifier,
+                self._parameters,
+            )

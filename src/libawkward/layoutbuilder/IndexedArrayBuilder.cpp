@@ -4,38 +4,36 @@
 
 #include "awkward/layoutbuilder/IndexedArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/IndexedArray.h"
 
 namespace awkward {
 
-  ///
-  IndexedArrayBuilder::IndexedArrayBuilder(const IndexedFormPtr& form,
+  /// @brief
+  IndexedArrayBuilder::IndexedArrayBuilder(FormBuilderPtr content,
+                                           const util::Parameters& parameters,
+                                           const std::string& form_key,
+                                           const std::string& form_index,
+                                           bool is_categorical,
                                            const std::string attribute,
                                            const std::string partition)
-    : form_(form),
-      is_categorical_(form.get()->parameter_equals("__array__", "\"categorical\"")),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
+    : content_(content),
+      parameters_(parameters),
+      is_categorical_(is_categorical),
+      form_index_(form_index) {
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
-    vm_func_name_ = std::string(*form_key_).append("-")
-      .append(attribute_).append("-")
-      .append(index_form_to_name(form_.get()->index()));
+    vm_func_name_ = std::string(form_key).append("-")
+      .append(attribute).append("-")
+      .append(form_index);
 
     vm_func_type_ = content_.get()->vm_func_type();
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(index_form_to_name(form_.get()->index()))
+      .append(form_index)
       .append("\n")
       .append(content_.get()->vm_output())
       .append("variable index").append("\n");
@@ -60,55 +58,6 @@ namespace awkward {
   const std::string
   IndexedArrayBuilder::classname() const {
     return "IndexedArrayBuilder";
-  }
-
-  const ContentPtr
-  IndexedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      switch (form_.get()->index()) {
-     // case Index::Form::i8:
-     // case Index::Form::u8:
-        case Index::Form::i32:
-          return std::make_shared<IndexedArray32>(
-            Identities::none(),
-            form_.get()->parameters(),
-            Index32(std::static_pointer_cast<int32_t>(search->second.get()->ptr()),
-                    0,
-                    search->second.get()->len(),
-                    kernel::lib::cpu),
-            content_.get()->snapshot(outputs));
-        case Index::Form::u32:
-          return std::make_shared<IndexedArrayU32>(
-            Identities::none(),
-            form_.get()->parameters(),
-            IndexU32(std::static_pointer_cast<uint32_t>(search->second.get()->ptr()),
-                     0,
-                     search->second.get()->len(),
-                     kernel::lib::cpu),
-            content_.get()->snapshot(outputs));
-        case Index::Form::i64:
-          return std::make_shared<IndexedArray64>(
-            Identities::none(),
-            form_.get()->parameters(),
-            Index64(std::static_pointer_cast<int64_t>(search->second.get()->ptr()),
-                    0,
-                    search->second.get()->len(),
-                    kernel::lib::cpu),
-            content_.get()->snapshot(outputs));
-        default:
-          break;
-      };
-    }
-    throw std::invalid_argument(
-        std::string("Snapshot of a ") + classname()
-        + std::string(" needs an index ")
-        + FILENAME(__LINE__));
-  }
-
-  const FormPtr
-  IndexedArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

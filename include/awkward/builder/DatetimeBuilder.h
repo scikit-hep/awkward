@@ -40,9 +40,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// A DatetimeBuilder is never active.
@@ -100,8 +97,15 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
+    const ArrayBuilderOptions&
+      options() const { return options_; }
+
     const std::string&
       units() const;
+
+    const GrowableBuffer<int64_t>& buffer() const { return content_; }
+
+    const std::string& unit() const { return units_; }
 
   private:
     const ArrayBuilderOptions options_;

@@ -7,8 +7,6 @@
 
 namespace awkward {
 
-  class UnmaskedForm;
-  using UnmaskedFormPtr = std::shared_ptr<UnmaskedForm>;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class UnmaskedArrayBuilder
@@ -17,21 +15,15 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnmaskedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an UnmaskedArrayBuilder from a full set of parameters.
-    UnmaskedArrayBuilder(const UnmaskedFormPtr& form,
+    UnmaskedArrayBuilder(FormBuilderPtr content,
+                         const util::Parameters& parameters,
+                         const std::string& form_key,
                          const std::string attribute = "mask",
                          const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -96,18 +88,25 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
+    /// @brief Returns this Form content builder.
+    const
+      FormBuilderPtr content() const { return content_; }
+
+    /// @brief String-to-JSON map that augments the meaning of this
+    /// builder Form.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
   private:
-    /// @brief This builder Form
-    const UnmaskedFormPtr form_;
-
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
-
     /// @brief This Form content builder
     FormBuilderPtr content_;
+
+    /// @brief This Form parameters
+    const util::Parameters& parameters_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

@@ -4,10 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/Identities.h"
-#include "awkward/Index.h"
-#include "awkward/array/IndexedArray.h"
-#include "awkward/type/OptionType.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/UnionBuilder.h"
 
@@ -241,25 +237,6 @@ namespace awkward {
   const std::string
   IndexedGenericBuilder::classname() const {
     return "IndexedGenericBuilder";
-  };
-
-  const ContentPtr
-  IndexedGenericBuilder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
-    if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(
-        Identities::none(),
-        util::Parameters(),
-        index,
-        array_);
-    }
-    else {
-      return std::make_shared<IndexedArray64>(
-        Identities::none(),
-        util::Parameters(),
-        index,
-        array_);
-    }
   }
 
   const BuilderPtr
@@ -289,25 +266,6 @@ namespace awkward {
   const std::string
   IndexedI32Builder::classname() const {
     return "IndexedI32Builder";
-  };
-
-  const ContentPtr
-  IndexedI32Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
-    if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(
-        Identities::none(),
-        array_.get()->content().get()->parameters(),
-        index,
-        array_.get()->content());
-    }
-    else {
-      return std::make_shared<IndexedArray64>(
-        Identities::none(),
-        array_.get()->content().get()->parameters(),
-        index,
-        array_.get()->content());
-    }
   }
 
   const BuilderPtr
@@ -337,25 +295,6 @@ namespace awkward {
   const std::string
   IndexedIU32Builder::classname() const {
     return "IndexedIU32Builder";
-  };
-
-  const ContentPtr
-  IndexedIU32Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
-    if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(
-        Identities::none(),
-        array_.get()->content().get()->parameters(),
-        index,
-        array_.get()->content());
-    }
-    else {
-      return std::make_shared<IndexedArray64>(
-        Identities::none(),
-        array_.get()->content().get()->parameters(),
-        index,
-        array_.get()->content());
-    }
   }
 
   const BuilderPtr
@@ -385,25 +324,6 @@ namespace awkward {
   const std::string
   IndexedI64Builder::classname() const {
     return "IndexedI64Builder";
-  };
-
-  const ContentPtr
-  IndexedI64Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
-    if (hasnull_) {
-      return std::make_shared<IndexedOptionArray64>(
-        Identities::none(),
-        array_.get()->content().get()->parameters(),
-        index,
-        array_.get()->content());
-    }
-    else {
-      return std::make_shared<IndexedArray64>(
-        Identities::none(),
-        array_.get()->content().get()->parameters(),
-        index,
-        array_.get()->content());
-    }
   }
 
   const BuilderPtr
@@ -436,16 +356,6 @@ namespace awkward {
   const std::string
   IndexedIO32Builder::classname() const {
     return "IndexedIO32Builder";
-  };
-
-  const ContentPtr
-  IndexedIO32Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
-    return std::make_shared<IndexedOptionArray64>(
-      Identities::none(),
-      array_.get()->content().get()->parameters(),
-      index,
-      array_.get()->content());
   }
 
   const BuilderPtr
@@ -477,16 +387,6 @@ namespace awkward {
   const std::string
   IndexedIO64Builder::classname() const {
     return "IndexedIO64Builder";
-  };
-
-  const ContentPtr
-  IndexedIO64Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
-    return std::make_shared<IndexedOptionArray64>(
-      Identities::none(),
-      array_.get()->content().get()->parameters(),
-      index,
-      array_.get()->content());
   }
 
   const BuilderPtr

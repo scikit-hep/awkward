@@ -224,3 +224,21 @@ class ByteMaskedArray(Content):
 
         else:
             raise AssertionError(repr(head))
+
+    def _localindex(self, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        else:
+            numnull = ak._v2.index.Index64.empty(1, self.nplike)
+            nextcarry, outindex = self.nextcarry_outindex(numnull)
+
+            next = self.content._carry(nextcarry, False, NestedIndexError)
+            out = next._localindex(posaxis, depth)
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                outindex,
+                out,
+                self._identifier,
+                self._parameters,
+            )
+            return out2._simplify_optiontype()

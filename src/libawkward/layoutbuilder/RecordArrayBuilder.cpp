@@ -4,32 +4,29 @@
 
 #include "awkward/layoutbuilder/RecordArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/RecordArray.h"
 
 namespace awkward {
 
   ///
-  RecordArrayBuilder::RecordArrayBuilder(const RecordFormPtr& form,
+  RecordArrayBuilder::RecordArrayBuilder(const std::vector<FormBuilderPtr>& contents,
+                                         const util::RecordLookupPtr recordlookup,
+                                         const util::Parameters& parameters,
+                                         const std::string& form_key,
                                          const std::string attribute,
                                          const std::string partition)
-    : form_(form),
+    : form_recordlookup_(recordlookup),
+      parameters_(parameters),
       field_index_(0),
-      contents_size_((int64_t)form.get()->contents().size()),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition) {
-    for (auto const& content : form.get()->contents()) {
-      contents_.push_back(LayoutBuilder::formBuilderFromA(content));
+      contents_size_((int64_t) contents.size()) {
+    for (auto const& content : contents) {
+      contents_.push_back(content);
       vm_output_.append(contents_.back().get()->vm_output());
       vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
       vm_func_.append(contents_.back().get()->vm_func());
       vm_error_.append(contents_.back().get()->vm_error());
     }
 
-    vm_func_name_ = std::string(*form_key_).append(attribute_);
+    vm_func_name_ = std::string(form_key).append(attribute);
 
     vm_func_.append(": ")
       .append(vm_func_name_);
@@ -46,23 +43,6 @@ namespace awkward {
   const std::string
   RecordArrayBuilder::classname() const {
     return "RecordArrayBuilder";
-  }
-
-  const ContentPtr
-  RecordArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    ContentPtrVec contents;
-    for (size_t i = 0;  i < contents_.size();  i++) {
-      contents.push_back(contents_[i].get()->snapshot(outputs));
-    }
-    return std::make_shared<RecordArray>(Identities::none(),
-                                         form_.get()->parameters(),
-                                         contents,
-                                         form_.get()->recordlookup());
-  }
-
-  const FormPtr
-  RecordArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

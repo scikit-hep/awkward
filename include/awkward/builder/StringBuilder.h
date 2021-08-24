@@ -56,9 +56,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// A StringBuilder is never active.
@@ -115,6 +112,13 @@ namespace awkward {
 
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
+
+    const ArrayBuilderOptions&
+      options() const { return options_; }
+
+    const GrowableBuffer<int64_t>& buffer() const { return offsets_; }
+
+    const GrowableBuffer<uint8_t>& content() const { return content_; }
 
   private:
     const ArrayBuilderOptions options_;

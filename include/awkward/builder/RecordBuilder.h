@@ -66,9 +66,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// Calling #beginrecord makes a RecordBuilder active; #endrecord makes it
@@ -127,6 +124,17 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
+    const ArrayBuilderOptions&
+      options() const { return options_; }
+
+    const std::vector<std::string>& keys() const { return keys_; }
+
+    const std::vector<BuilderPtr>& builders() const { return contents_; }
+
+    bool begun() { return begun_; }
+
+    int64_t nextindex() { return nextindex_; }
+
   private:
     const BuilderPtr
       field_fast(const char* key);
@@ -146,6 +154,7 @@ namespace awkward {
     int64_t nexttotry_;
     int64_t keys_size_;
 
+  public:
     void
       maybeupdate(int64_t i, const BuilderPtr& tmp);
   };

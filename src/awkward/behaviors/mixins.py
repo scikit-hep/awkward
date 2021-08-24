@@ -7,12 +7,13 @@ import sys
 import awkward as ak
 
 
-def mixin_class(registry):
+def mixin_class(registry, name=None):
     """
     Args:
         registry (dict): The destination behavior mapping registry. Typically,
             this would be the global registry #ak.behavior, but one may wish
             to register methods in an alternative way.
+        name (str): The name to assign to the behaviour class.
 
     This decorator can be used to register a behavior mixin class.
 
@@ -23,30 +24,41 @@ def mixin_class(registry):
     """
 
     def register(cls):
-        name = cls.__name__
+        cls_name = cls.__name__
+        if name is None:
+            behavior_name = cls_name
+        else:
+            behavior_name = name
+
         record = type(
-            name + "Record", (cls, ak.highlevel.Record), {"__module__": cls.__module__}
+            cls_name + "Record",
+            (cls, ak.highlevel.Record),
+            {"__module__": cls.__module__},
         )
-        setattr(sys.modules[cls.__module__], name + "Record", record)
-        registry[name] = record
+        setattr(sys.modules[cls.__module__], cls_name + "Record", record)
+        registry[behavior_name] = record
         array = type(
-            name + "Array", (cls, ak.highlevel.Array), {"__module__": cls.__module__}
+            cls_name + "Array",
+            (cls, ak.highlevel.Array),
+            {"__module__": cls.__module__},
         )
-        setattr(sys.modules[cls.__module__], name + "Array", array)
-        registry["*", name] = array
+        setattr(sys.modules[cls.__module__], cls_name + "Array", array)
+        registry["*", behavior_name] = array
         for basecls in cls.mro():
             for method in basecls.__dict__.values():
                 if hasattr(method, "_awkward_mixin"):
                     ufunc, rhs, transpose = method._awkward_mixin
                     if rhs is None:
-                        registry.setdefault((ufunc, name), method)
+                        registry.setdefault((ufunc, behavior_name), method)
                         continue
-                    for rhs_name in list(rhs) + [name]:
-                        registry.setdefault((ufunc, name, rhs_name), method)
-                        if transpose is not None and rhs_name != name:
-                            registry.setdefault((ufunc, rhs_name, name), transpose)
+                    for rhs_name in list(rhs) + [behavior_name]:
+                        registry.setdefault((ufunc, behavior_name, rhs_name), method)
+                        if transpose is not None and rhs_name != behavior_name:
+                            registry.setdefault(
+                                (ufunc, rhs_name, behavior_name), transpose
+                            )
                     if basecls.__name__ in rhs:
-                        rhs.add(name)
+                        rhs.add(behavior_name)
         return cls
 
     return register

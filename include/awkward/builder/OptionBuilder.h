@@ -36,7 +36,7 @@ namespace awkward {
       fromvalids(const ArrayBuilderOptions& options,
                  const BuilderPtr& content);
 
-    /// @brief Create a StringBuilder from a full set of parameters.
+    /// @brief Create a OptionBuilder from a full set of parameters.
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
@@ -56,9 +56,6 @@ namespace awkward {
 
     void
       clear() override;
-
-    const ContentPtr
-      snapshot() const override;
 
     /// @copydoc Builder::active()
     ///
@@ -117,11 +114,18 @@ namespace awkward {
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
 
+    const GrowableBuffer<int64_t>& buffer() const { return index_; }
+
+    GrowableBuffer<int64_t>& index() { return index_; }
+
+    const BuilderPtr builder() const { return content_; }
+
   private:
     const ArrayBuilderOptions options_;
     GrowableBuffer<int64_t> index_;
     BuilderPtr content_;
 
+  public:
     void
       maybeupdate(const BuilderPtr& tmp);
   };

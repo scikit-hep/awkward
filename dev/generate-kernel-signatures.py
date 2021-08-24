@@ -4,10 +4,19 @@ from __future__ import absolute_import
 
 import os
 import datetime
+import time
 
 import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def reproducible_datetime():
+
+    build_date = datetime.datetime.utcfromtimestamp(
+        int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
+    )
+    return build_date.isoformat().replace("T", " AT ")[:22]
 
 
 def type_to_ctype(typename):
@@ -49,7 +58,7 @@ def include_kernels_h(specification):
 extern "C" {{
 
 """.format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                reproducible_datetime()
             )
         )
         for spec in specification["kernels"]:
@@ -169,7 +178,7 @@ class ERROR(Structure):
 def by_signature(lib):
     out = {{}}
 """.format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                reproducible_datetime()
             )
         )
 

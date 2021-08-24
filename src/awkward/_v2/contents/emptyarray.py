@@ -99,3 +99,6 @@ class EmptyArray(Content):
 
         else:
             raise AssertionError(repr(head))
+
+    def _localindex(self, axis, depth):
+        return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))

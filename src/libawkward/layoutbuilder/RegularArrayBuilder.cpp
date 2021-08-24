@@ -4,30 +4,27 @@
 
 #include "awkward/layoutbuilder/RegularArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/RegularArray.h"
 
 namespace awkward {
 
   ///
-  RegularArrayBuilder::RegularArrayBuilder(const RegularFormPtr& form,
+  RegularArrayBuilder::RegularArrayBuilder(const FormBuilderPtr content,
+                                           const util::Parameters& parameters,
+                                           const std::string& form_key,
+                                           const int64_t size,
                                            const std::string attribute,
                                            const std::string partition)
-    : form_(form),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
+    : content_(content),
+      parameters_(parameters),
+      form_size_(size) {
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
     vm_output_ = content_.get()->vm_output();
 
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_func_.append(content_.get()->vm_func())
       .append(": ").append(vm_func_name()).append("\n")
@@ -40,23 +37,6 @@ namespace awkward {
   const std::string
   RegularArrayBuilder::classname() const {
     return "RegularArrayBuilder";
-  }
-
-  const ContentPtr
-  RegularArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    ContentPtr out;
-    if(content_ != nullptr) {
-      out = std::make_shared<RegularArray>(Identities::none(),
-                                           form_.get()->parameters(),
-                                           content_.get()->snapshot(outputs),
-                                           form_.get()->size());
-    }
-    return out;
-  }
-
-  const FormPtr
-  RegularArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

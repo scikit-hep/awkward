@@ -7,8 +7,6 @@
 
 namespace awkward {
 
-  class UnionForm;
-  using UnionFormPtr = std::shared_ptr<UnionForm>;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class UnionArrayBuilder
@@ -17,21 +15,17 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnionArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a UnionArrayBuilder from a full set of parameters.
-    UnionArrayBuilder(const UnionFormPtr& form,
+    UnionArrayBuilder(const std::vector<FormBuilderPtr>& contents,
+                      const util::Parameters& parameters,
+                      const std::string& form_key,
+                      const std::string& form_tags,
+                      const std::string& form_index,
                       const std::string attribute = "union",
                       const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -100,20 +94,29 @@ namespace awkward {
     void
       end_list(LayoutBuilder* builder) override;
 
+    const std::vector<FormBuilderPtr>&
+      contents() const { return contents_; }
+
+    const std::string&
+      vm_output_tags() const { return vm_output_tags_; }
+
+    const std::string&
+      form_index() const { return form_index_; }
+
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
   private:
-    /// @brief This builder Form
-    const UnionFormPtr form_;
+    /// @brief This Form content builders
+    std::vector<FormBuilderPtr> contents_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+
     /// @brief UnionArray tag
     int8_t tag_;
 
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
-
-    /// @brief This Form content builders
-    std::vector<FormBuilderPtr> contents_;
+    const std::string form_index_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

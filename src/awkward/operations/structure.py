@@ -2787,7 +2787,15 @@ def fill_none(array, value, axis=ak._util.MISSING, highlevel=True, behavior=None
             )
 
     # Convert value type to appropriate layout
-    if isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
+    if (
+        isinstance(value, np.ndarray)
+        and issubclass(value.dtype.type, (np.bool_, np.number))
+        and len(value.shape) != 0
+    ):
+        valuelayout = ak.operations.convert.to_layout(
+            nplike.asarray(value)[np.newaxis], allow_record=False, allow_other=False
+        )
+    elif isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
         isinstance(value, np.ndarray)
         and issubclass(value.dtype.type, (np.bool_, np.number))
     ):

@@ -10,13 +10,16 @@ import awkward.forth
 
 
 def test_bit_masked_form():
-    form = ak.forms.BitMaskedForm(
-        "i8",
-        ak.forms.NumpyForm([], 8, "d"),
-        True,
-        False,
-        form_key="node0",
-    )
+    form = """
+{
+    "class": "BitMaskedArray",
+    "mask": "i8",
+    "content": "float64",
+    "valid_when": true,
+    "lsb_order": false,
+    "form_key": "node0"
+}
+    """
     builder = ak.layout.LayoutBuilder(form)
 
     builder.float64(1.1)
@@ -27,12 +30,16 @@ def test_bit_masked_form():
 
 
 def test_byte_masked_form():
-    form = ak.forms.ByteMaskedForm(
-        "i8",
-        ak.forms.NumpyForm([], 8, "d"),
-        True,
-        form_key="node0",
-    )
+    form = """
+{
+    "class": "ByteMaskedArray",
+    "mask": "i8",
+    "content": "float64",
+    "valid_when": true,
+    "form_key": "node0"
+}
+    """
+
     builder = ak.layout.LayoutBuilder(form)
 
     builder.float64(1.1)
@@ -43,10 +50,13 @@ def test_byte_masked_form():
 
 
 def test_unmasked_form():
-    form = ak.forms.UnmaskedForm(
-        ak.forms.NumpyForm([], 8, "d"),
-        form_key="node0",
-    )
+    form = """
+{
+    "class": "UnmaskedArray",
+    "content": "float64",
+    "form_key": "node0"
+}
+"""
     builder = ak.layout.LayoutBuilder(form)
 
     builder.float64(1.1)
@@ -57,15 +67,20 @@ def test_unmasked_form():
 
 
 def test_unsupported_form():
-    form = ak.forms.VirtualForm(ak.forms.NumpyForm([], 8, "d"), True)
+    form = """
+{
+    "class": "VirtualArray",
+    "form": "float64",
+    "has_length": true
+}
+           """
 
     with pytest.raises(ValueError):
         ak.layout.LayoutBuilder(form)
 
 
 def test_list_offset_form():
-    form = ak.forms.Form.fromjson(
-        """
+    form = """
 {
     "class": "ListOffsetArray64",
     "offsets": "i64",
@@ -92,8 +107,7 @@ def test_list_offset_form():
     },
     "form_key": "node0"
 }
-"""
-    )
+    """
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -121,8 +135,6 @@ def test_list_offset_form():
     builder.end_list()
     builder.end_list()
 
-    assert builder.form() == form
-
     assert ak.to_list(builder.snapshot()) == [
         [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
         [],
@@ -131,20 +143,20 @@ def test_list_offset_form():
 
 
 def test_indexed_form():
-    form = ak.forms.Form.fromjson(
-        """
+    form = """
 {
     "class": "IndexedArray64",
     "index": "i64",
-        "content": {
-            "class": "NumpyArray",
-            "primitive": "int64",
-            "form_key": "node1"
-        },
+    "content": {
+        "class": "NumpyArray",
+        "itemsize": 8,
+        "format": "l",
+        "primitive": "int64",
+        "form_key": "node1"
+    },
     "form_key": "node0"
 }
-"""
-    )
+    """
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -160,20 +172,20 @@ def test_indexed_form():
 
 
 def test_indexed_option_form():
-    form = ak.forms.Form.fromjson(
-        """
+    form = """
 {
     "class": "IndexedOptionArray64",
     "index": "i64",
-        "content": {
-            "class": "NumpyArray",
-            "primitive": "int64",
-            "form_key": "node1"
-        },
+    "content": {
+        "class": "NumpyArray",
+        "itemsize": 8,
+        "format": "l",
+        "primitive": "int64",
+        "form_key": "node1"
+    },
     "form_key": "node0"
 }
-"""
-    )
+    """
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -203,20 +215,20 @@ def test_indexed_option_form():
 
 
 def test_regular_form():
-    form = ak.forms.Form.fromjson(
-        """
+    form = """
 {
     "class": "RegularArray",
+    "content": {
+        "class": "NumpyArray",
+        "itemsize": 8,
+        "format": "l",
+        "primitive": "int64",
+        "form_key": "node1"
+    },
     "size": 3,
-        "content": {
-            "class": "NumpyArray",
-            "primitive": "int64",
-            "form_key": "node1"
-        },
     "form_key": "node0"
 }
-"""
-    )
+    """
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -237,12 +249,18 @@ def test_regular_form():
 
 
 def test_union_form():
-    form = ak.forms.UnionForm(
-        "i8",
-        "i64",
-        [ak.forms.NumpyForm([], 8, "d"), ak.forms.NumpyForm([], 1, "?")],
-        form_key="node0",
-    )
+    form = """
+{
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        "float64",
+        "bool"
+    ],
+    "form_key": "node0"
+}
+    """
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -279,12 +297,18 @@ def test_union_form():
 
 
 def test_union2_form():
-    form = ak.forms.UnionForm(
-        "i8",
-        "i64",
-        [ak.forms.NumpyForm([], 8, "d"), ak.forms.NumpyForm([], 8, "d")],
-        form_key="node0",
-    )
+    form = """
+{
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        "float64",
+        "float64"
+    ],
+    "form_key": "node0"
+}
+    """
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -301,16 +325,19 @@ def test_union2_form():
 
 
 def test_union3_form():
-    form = ak.forms.UnionForm(
-        "i8",
-        "i64",
-        [
-            ak.forms.NumpyForm([], 8, "d"),
-            ak.forms.NumpyForm([], 1, "?"),
-            ak.forms.NumpyForm([], 8, "q"),
-        ],
-        form_key="node0",
-    )
+    form = """
+{
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        "float64",
+        "bool",
+        "int64"
+    ],
+    "form_key": "node0"
+}
+    """
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -356,11 +383,16 @@ def test_union3_form():
 
 
 def test_record_form():
-
-    form = ak.forms.RecordForm(
-        {"one": ak.forms.NumpyForm([], 8, "d"), "two": ak.forms.NumpyForm([], 8, "d")},
-        form_key="node0",
-    )
+    form = """
+{
+    "class": "RecordArray",
+    "contents": {
+        "one": "float64",
+        "two": "float64"
+    },
+    "form_key": "node0"
+}
+    """
     builder = ak.layout.LayoutBuilder(form)
 
     # if record contents have the same type,
@@ -379,11 +411,17 @@ def test_record_form():
 
 
 def test_error_in_record_form():
+    form = """
+{
+    "class": "RecordArray",
+    "contents": {
+        "one": "float64",
+        "two": "float64"
+    },
+    "form_key": "node0"
+}
+    """
 
-    form = ak.forms.RecordForm(
-        {"one": ak.forms.NumpyForm([], 8, "d"), "two": ak.forms.NumpyForm([], 8, "d")},
-        form_key="node0",
-    )
     builder = ak.layout.LayoutBuilder(form)
 
     # if record contents have the same type,
@@ -396,8 +434,14 @@ def test_error_in_record_form():
 
 
 def test_error_in_numpy_form():
-
-    form = ak.forms.NumpyForm([], 8, "d")
+    form = """
+{
+    "class": "NumpyArray",
+    "itemsize": 8,
+    "format": "d",
+    "primitive": "float64"
+}
+    """
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -409,8 +453,7 @@ def test_error_in_numpy_form():
 
 
 def test_categorical_form():
-    form = ak.forms.Form.fromjson(
-        """
+    form = """
 {
     "class": "IndexedArray64",
     "index": "i64",
@@ -420,7 +463,6 @@ def test_categorical_form():
     }
 }
 """
-    )
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -451,8 +493,7 @@ def test_categorical_form():
 
 
 def test_char_form():
-    form = ak.forms.Form.fromjson(
-        """
+    form = """
 {
     "class": "NumpyArray",
     "itemsize": 1,
@@ -462,7 +503,6 @@ def test_char_form():
         "__array__": "char"
     }
 }"""
-    )
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -474,8 +514,7 @@ def test_char_form():
 
 
 def test_string_form():
-    form = ak.forms.Form.fromjson(
-        """
+    form = """
 {
     "class": "ListOffsetArray64",
     "offsets": "i64",
@@ -492,7 +531,6 @@ def test_string_form():
         "__array__": "string"
     }
 }"""
-    )
 
     builder = ak.layout.LayoutBuilder(form)
 
@@ -504,15 +542,19 @@ def test_string_form():
 
 
 def test_empty_form():
-    form = ak.forms.ListOffsetForm(
-        "i64",
-        ak.forms.ListOffsetForm(
-            "i64",
-            ak.forms.EmptyForm(),
-            form_key="node1",
-        ),
-        form_key="node0",
-    )
+    form = """{
+           "class": "ListOffsetArray64",
+           "offsets": "i64",
+           "content": {
+               "class": "ListOffsetArray64",
+               "offsets": "i64",
+               "content": {
+                   "class": "EmptyArray"
+               },
+               "form_key": "node1"
+           },
+           "form_key": "node0"
+       }"""
 
     builder = ak.layout.LayoutBuilder(form)
 

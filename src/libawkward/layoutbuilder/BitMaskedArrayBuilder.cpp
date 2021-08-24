@@ -4,23 +4,20 @@
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/BitMaskedArray.h"
 
 namespace awkward {
 
-  /// @brief
-  BitMaskedArrayBuilder::BitMaskedArrayBuilder(const BitMaskedFormPtr& form,
+  /// @bclass BitMaskedArrayBuilder
+  ///
+  /// @brief BitMaskedArray builder from a Bit Masked Json Form
+  BitMaskedArrayBuilder::BitMaskedArrayBuilder(FormBuilderPtr content,
+                                               const util::Parameters& parameters,
+                                               const std::string& form_key,
                                                const std::string attribute,
                                                const std::string partition)
-    : form_(form),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    : content_(content),
+      parameters_(parameters) {
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_func_type_ = content_.get()->vm_func_type();
 
@@ -37,17 +34,6 @@ namespace awkward {
   const std::string
   BitMaskedArrayBuilder::classname() const {
     return "BitMaskedArrayBuilder";
-  }
-
-  const ContentPtr
-  BitMaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    // FIXME: how to define a mask? is it needed?
-    return content_.get()->snapshot(outputs);
-  }
-
-  const FormPtr
-  BitMaskedArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
   }
 
   const std::string

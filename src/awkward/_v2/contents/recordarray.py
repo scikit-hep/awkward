@@ -359,3 +359,15 @@ class RecordArray(Content):
                 parameters = self._parameters
             next = RecordArray(contents, self._keys, None, self._identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)
+
+    def _localindex(self, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content._localindex(posaxis, depth))
+            return RecordArray(
+                contents, self._keys, len(self), self._identifier, self._parameters
+            )

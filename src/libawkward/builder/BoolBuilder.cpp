@@ -2,9 +2,8 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/BoolBuilder.cpp", line)
 
-#include "awkward/Identities.h"
-#include "awkward/array/NumpyArray.h"
-#include "awkward/type/PrimitiveType.h"
+#include <stdexcept>
+
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
@@ -36,22 +35,6 @@ namespace awkward {
   void
   BoolBuilder::clear() {
     buffer_.clear();
-  }
-
-  const ContentPtr
-  BoolBuilder::snapshot() const {
-    std::vector<ssize_t> shape = { (ssize_t)buffer_.length() };
-    std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
-    return std::make_shared<NumpyArray>(Identities::none(),
-                                        util::Parameters(),
-                                        buffer_.ptr(),
-                                        shape,
-                                        strides,
-                                        0,
-                                        sizeof(bool),
-                                        "?",
-                                        util::dtype::boolean,
-                                        kernel::lib::cpu);
   }
 
   bool

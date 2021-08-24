@@ -43,9 +43,6 @@ namespace awkward {
     void
       clear() override;
 
-    const ContentPtr
-      snapshot() const override;
-
     /// @copydoc Builder::active()
     ///
     /// A Int64Builder is never active.
@@ -102,6 +99,9 @@ namespace awkward {
 
     const BuilderPtr
       append(const ContentPtr& array, int64_t at) override;
+
+    const ArrayBuilderOptions&
+      options() const { return options_; }
 
   private:
     const ArrayBuilderOptions options_;

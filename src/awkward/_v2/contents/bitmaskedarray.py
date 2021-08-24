@@ -245,3 +245,6 @@ class BitMaskedArray(Content):
 
         else:
             raise AssertionError(repr(head))
+
+    def _localindex(self, axis, depth):
+        return self.toByteMaskedArray()._localindex(axis, depth)

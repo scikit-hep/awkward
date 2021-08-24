@@ -104,6 +104,8 @@ class NumpyMetadata(Singleton):
     datetime_data = numpy.datetime_data
     issubdtype = numpy.issubdtype
 
+    AxisError = numpy.AxisError
+
 
 if hasattr(numpy, "float16"):
     NumpyMetadata.float16 = numpy.float16

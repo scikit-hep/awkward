@@ -3,6 +3,7 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 #include "awkward/builder/GrowableBuffer.h"
+#include "awkward/kernel-dispatch.h"
 
 #include <complex>
 #include <cmath>
