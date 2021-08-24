@@ -22,7 +22,6 @@ def test_record_form2():
     """
     builder = ak.layout.LayoutBuilder32(form)
 
-    # if record contents have the same type,
     # the fields alternate
     builder.float64(1.1)  # "one"
     builder.int64(2)  # "two"

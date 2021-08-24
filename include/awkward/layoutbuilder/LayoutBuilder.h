@@ -306,9 +306,6 @@ namespace awkward {
     /// @brief Virtual machine output buffers.
     ForthOutputBufferMap vm_outputs_map_;
 
-    /// @brief
-    bool is_ready_;
-
   };
 
   using LayoutBuilder32 = LayoutBuilder<int32_t, int32_t>;

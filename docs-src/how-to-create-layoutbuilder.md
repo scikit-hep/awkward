@@ -121,10 +121,91 @@ array
 Nested lists
 ------------
 
+To fill data inside of a list use the following commands:
+
+  * `begin_list`/`end_list`
+
+Here is an example of a list offset array form:
+
+```{code-cell}
+form = """
+{
+  "class": "ListOffsetArray64",
+  "offsets": "i64",
+  "content": "float64",
+  "form_key": "node0"
+}
+"""
+```
+Create a builder from the form:
+
+```{code-cell}
+builder = ak.layout.LayoutBuilder32(form)
+```
+
+and append the data between `begin_list` and `end_list`:
+
+```{code-cell}
+builder.begin_list()
+builder.float64(1.1)
+builder.float64(2.2)
+builder.float64(3.3)
+builder.end_list()
+```
+
+To append an empty list:
+
+```{code-cell}
+builder.begin_list()
+builder.end_list()
+```
+
+and continue:
+
+```{code-cell}
+builder.begin_list()
+builder.float64(4.4)
+builder.float64(5.5)
+builder.end_list()
+```
+Remember, you can taka a snapshot at any time:
+
+```{code-cell}
+layout = builder.snapshot()
+layout
+```
+
 Nested records
 --------------
 
 When using a RecordArray form you do not have to specify a field, the fields alternate.
+
+```{code-cell}
+form = """
+{
+"class": "RecordArray",
+"contents": {
+    "one": "float64",
+    "two": "int64"
+},
+"form_key": "node0"
+}
+"""
+builder = ak.layout.LayoutBuilder32(form)
+
+# the fields alternate
+builder.float64(1.1)  # "one"
+builder.int64(2)      # "two"
+builder.float64(3.3)  # "one"
+builder.int64(4)      # "two"
+```
+
+```{code-cell}
+layout = builder.snapshot()
+layout
+```
+
+Similarly, for the record contents with the same type:
 
 ```{code-cell}
 form = """
@@ -151,3 +232,85 @@ builder.float64(2.2)  # "two"
 builder.float64(3.3)  # "one"
 builder.float64(4.4)  # "two"
 ```
+
+A more complex example
+----------------------
+
+A more complex example that contains both nestsed lists and records:
+
+```{code-cell}
+form = """
+{
+  "class": "ListOffsetArray64",
+  "offsets": "i64",
+  "content": {
+      "class": "RecordArray",
+      "contents": {
+          "x": {
+              "class": "NumpyArray",
+              "primitive": "float64",
+              "form_key": "node2"
+          },
+          "y": {
+              "class": "ListOffsetArray64",
+              "offsets": "i64",
+              "content": {
+                  "class": "NumpyArray",
+                  "primitive": "int64",
+                  "form_key": "node4"
+              },
+              "form_key": "node3"
+          }
+      },
+      "form_key": "node1"
+  },
+  "form_key": "node0"
+}
+  """
+```
+
+Create a builder from a form:
+
+```{code-cell}
+builder = ak.layout.LayoutBuilder32(form)
+```
+
+Start appending the data:
+
+```{code-cell}
+builder.begin_list()
+builder.float64(1.1)
+builder.begin_list()
+builder.int64(1)
+builder.end_list()
+builder.float64(2.2)
+builder.begin_list()
+builder.int64(1)
+builder.int64(2)
+builder.end_list()
+builder.end_list()
+
+builder.begin_list()
+builder.end_list()
+
+builder.begin_list()
+builder.float64(3.3)
+builder.begin_list()
+builder.int64(1)
+builder.int64(2)
+builder.int64(3)
+builder.end_list()
+builder.end_list()
+```
+
+and take a snapshot:
+
+```{code-cell}
+layout = builder.snapshot()
+layout
+```
+
+Error handling
+--------------
+
+The commands given to the `LayoutBuilder` must be in the order described by its Form. Issuing a non conforming command or issuing a command in an incorrect order is treated as a user error. As soon as an unexpected command is issued, the builder stops appending data. It is not possible to recover from this state. All you can do is to take a `snapshot` to recover the accumulated data.

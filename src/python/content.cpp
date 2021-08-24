@@ -1746,7 +1746,7 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
   );
 }
 
-////////// LayoutBuilder32
+////////// LayoutBuilder<T, I>
 
 namespace {
   /// @brief Turns the accumulated data into a Content array.

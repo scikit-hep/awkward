@@ -198,8 +198,7 @@ namespace awkward {
       builder_(nullptr),
       vm_(nullptr),
       vm_input_data_("data"),
-      vm_source_(),
-      is_ready_(false) {
+      vm_source_() {
     LayoutBuilder<T, I>::error_id = 0;
     vm_source_ = std::string("variable err ");
     vm_source_.append("input ")
@@ -596,7 +595,6 @@ namespace awkward {
 
     vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, initial_);
     vm_.get()->run(vm_inputs_map_);
-    is_ready_ = vm_.get()->is_ready();
   }
 
   template <typename T, typename I>
@@ -610,7 +608,6 @@ namespace awkward {
   void
   LayoutBuilder<T, I>::resume() {
     if (vm_.get()->resume() == util::ForthError::user_halt) {
-      is_ready_ = vm_.get()->is_ready();
       throw std::invalid_argument(vm_.get()->string_at(vm_.get()->stack().back()));
     }
   }
@@ -698,7 +695,17 @@ namespace awkward {
   template <typename T, typename I>
   void
   LayoutBuilder<T, I>::int64(int64_t x) {
-    builder_.get()->int64(x, this);
+    if (vm_.get()->is_ready()) {
+      builder_.get()->int64(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
   template<typename T, typename I>
@@ -712,7 +719,17 @@ namespace awkward {
   template <typename T, typename I>
   void
   LayoutBuilder<T, I>::float64(double x) {
-    builder_.get()->float64(x, this);
+    if (vm_.get()->is_ready()) {
+      builder_.get()->float64(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
   template<typename T, typename I>
@@ -726,7 +743,17 @@ namespace awkward {
   template <typename T, typename I>
   void
   LayoutBuilder<T, I>::complex(std::complex<double> x) {
-    builder_.get()->complex(x, this);
+    if (vm_.get()->is_ready()) {
+      builder_.get()->complex(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
   template<typename T, typename I>
@@ -758,7 +785,17 @@ namespace awkward {
   template <typename T, typename I>
   void
   LayoutBuilder<T, I>::bytestring(const std::string& x) {
-    builder_.get()->bytestring(x, this);
+    if (vm_.get()->is_ready()) {
+      builder_.get()->bytestring(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
   template <typename T, typename I>
@@ -782,7 +819,17 @@ namespace awkward {
   template <typename T, typename I>
   void
   LayoutBuilder<T, I>::string(const std::string& x) {
-    builder_.get()->string(x, this);
+    if (vm_.get()->is_ready()) {
+      builder_.get()->string(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
   template<typename T, typename I>
@@ -796,7 +843,17 @@ namespace awkward {
   template <typename T, typename I>
   void
   LayoutBuilder<T, I>::begin_list() {
-    builder_.get()->begin_list(this);
+    if (vm_.get()->is_ready()) {
+      builder_.get()->begin_list(this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
   template <typename T, typename I>
@@ -809,7 +866,17 @@ namespace awkward {
   template <typename T, typename I>
   void
   LayoutBuilder<T, I>::end_list() {
-    builder_.get()->end_list(this);
+    if (vm_.get()->is_ready()) {
+      builder_.get()->end_list(this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
   template <typename T, typename I>
