@@ -287,3 +287,6 @@ class UnionArray(Content):
             return UnionArray(
                 self._tags, self._index, contents, self._identifier, self.parameters
             )
+
+    def _sort(self, axis, ascending, stable, depth):
+        raise NotImplementedError

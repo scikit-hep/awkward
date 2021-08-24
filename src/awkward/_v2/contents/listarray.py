@@ -425,3 +425,6 @@ class ListArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def _sort(self, axis, ascending, stable, depth):
+        raise NotImplementedError

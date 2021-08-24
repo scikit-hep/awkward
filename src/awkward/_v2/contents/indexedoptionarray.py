@@ -248,3 +248,6 @@ class IndexedOptionArray(Content):
                 self._parameters,
             )
             return out2
+
+    def _sort(self, axis, ascending, stable, depth):
+        raise NotImplementedError

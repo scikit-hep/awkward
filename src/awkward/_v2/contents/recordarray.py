@@ -371,3 +371,6 @@ class RecordArray(Content):
             return RecordArray(
                 contents, self._keys, len(self), self._identifier, self._parameters
             )
+
+    def _sort(self, axis, ascending, stable, depth):
+        raise NotImplementedError
