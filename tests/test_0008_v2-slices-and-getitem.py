@@ -90,6 +90,7 @@ def test_numpyarray_getitem_next():
 
     c1 = np.array([], np.int64)
     c2 = np.array([], np.int64)
+
     assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
     assert ak.Array(b[c1, c2]).ndim == a[c1, c2].ndim
 

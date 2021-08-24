@@ -295,8 +295,7 @@ class ListArray(Content):
 
             nexthead, nexttail = self._headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
-            regular_flathead = ak._v2.index.Index64.zeros(len(flathead), nplike)
-
+            regular_flathead = ak._v2.index.Index64(flathead)
             if advanced is None or len(advanced) == 0:
                 nextcarry = ak._v2.index.Index64.empty(
                     lenstarts * len(flathead), nplike
@@ -309,6 +308,8 @@ class ListArray(Content):
                         "awkward_ListArray_getitem_next_array",
                         nextcarry.dtype.type,
                         nextadvanced.dtype.type,
+                        self._starts.dtype.type,
+                        self._stops.dtype.type,
                         regular_flathead.dtype.type,
                     ](
                         nextcarry.to(nplike),
@@ -333,7 +334,6 @@ class ListArray(Content):
             else:
                 nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
                 nextadvanced = ak._v2.index.Index64.empty(lenstarts, nplike)
-
                 self._handle_error(
                     nplike[
                         "awkward_ListArray_getitem_next_array_advanced",

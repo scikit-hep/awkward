@@ -167,6 +167,8 @@ class NumpyArray(Content):
         raise NestedIndexError(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
+        if len(where) == 0:
+            return self._getitem_range(slice(0, 0))
         raise NestedIndexError(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy, exception):

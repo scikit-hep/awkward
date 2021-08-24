@@ -131,3 +131,10 @@ class UnionForm(Form):
             if mindepth > depth:
                 mindepth = depth
         return (anybranch, mindepth)
+
+    def keys(self):
+        keyslists = []
+        for i in range(len(self._contents)):
+            if hasattr(self._contents[i], "keys"):
+                keyslists.append(self._contents[i].keys)
+        return list(set.intersection(*[set(x) for x in keyslists]))

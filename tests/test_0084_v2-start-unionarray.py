@@ -73,9 +73,8 @@ def test_getitem():
     assert len(array.contents) == 2
     assert ak.to_list(array.content(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert ak.to_list(array.content(1)) == ["one", "two", "three", "four", "five"]
-    #  FIXME no project attribute
-    # assert ak.to_list(array.project(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    # assert ak.to_list(array.project(1)) == ["one", "two", "three", "five", "four"]
+    assert ak.to_list(array._project(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert ak.to_list(array._project(1)) == ["one", "two", "three", "five", "four"]
     repr(array)
 
     assert ak.to_list(array[0]) == "one"
@@ -107,18 +106,17 @@ def test_getitem():
     ]
     assert ak.to_list(array[2:-2]) == [[1.1, 2.2, 3.3], [], "three", [4.4, 5.5]]
     assert ak.to_list(array[::2]) == ["one", [1.1, 2.2, 3.3], "three", "five"]
-    # FIXME
-    # assert ak.to_list(array[::2, 1:]) == ["ne", [2.2, 3.3], "hree", "ive"]
-    # assert ak.to_list(array[:, :-1]) == [
-    #     "on",
-    #     "tw",
-    #     [1.1, 2.2],
-    #     [],
-    #     "thre",
-    #     [4.4],
-    #     "fiv",
-    #     "fou",
-    # ]
+    assert ak.to_list(array[::2, 1:]) == ["ne", [2.2, 3.3], "hree", "ive"]
+    assert ak.to_list(array[:, :-1]) == [
+        "on",
+        "tw",
+        [1.1, 2.2],
+        [],
+        "thre",
+        [4.4],
+        "fiv",
+        "fou",
+    ]
 
     content2 = ak.from_iter(
         [{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}],
@@ -159,27 +157,26 @@ def test_getitem():
         "four",
         "three",
     ]
-    # FIXME
-    # assert ak.to_list(array2[:, "y", 1:]) == [
-    #     "ero",
-    #     "ne",
-    #     [],
-    #     [],
-    #     "wo",
-    #     [2.2],
-    #     "our",
-    #     "hree",
-    # ]
-    # assert ak.to_list(array2["y", :, 1:]) == [
-    #     "ero",
-    #     "ne",
-    #     [],
-    #     [],
-    #     "wo",
-    #     [2.2],
-    #     "our",
-    #     "hree",
-    # ]
+    assert ak.to_list(array2[:, "y", 1:]) == [
+        "ero",
+        "ne",
+        [],
+        [],
+        "wo",
+        [2.2],
+        "our",
+        "hree",
+    ]
+    assert ak.to_list(array2["y", :, 1:]) == [
+        "ero",
+        "ne",
+        [],
+        [],
+        "wo",
+        [2.2],
+        "our",
+        "hree",
+    ]
     with pytest.raises(IndexError) as err:
         array2[:, 1:, "y"]
     assert str(err.value).startswith("cannot slice")
@@ -194,9 +191,8 @@ def test_getitem():
 
     array3 = v1_to_v2(array3)
     array4 = v1_to_v2(array4)
-
     assert set(content2.keys()) == set(["x", "y"])
     assert set(content3.keys()) == set(["x", "y", "z"])
-    # assert set(array2.keys()) == set(["x", "y"])
-    # assert set(array3.keys()) == set(["x", "y"])
-    # assert array4.keys() == []
+    assert set(array2.keys()) == set(["x", "y"])
+    assert set(array3.keys()) == set(["x", "y"])
+    assert set(array4.keys()) == set(["x", "y"])

@@ -72,37 +72,36 @@ def test_listoffsetarrayA64():
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
             assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
 
-    # for depth in 0, 1, 2, 3:
-    #     for cuts in itertools.permutations(
-    #         (slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth
-    #     ):
-    #         assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            (slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth
+        ):
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
 
-    # for depth in 0, 1, 2, 3:
-    #     for cuts in itertools.permutations(
-    #         (slice(1, None), slice(None, -1), 2, -2), depth
-    #     ):
-    #         assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            (slice(1, None), slice(None, -1), 2, -2), depth
+        ):
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
 
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
+        ):
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
 
-#     # for depth in 0, 1, 2, 3:
-#     #     for cuts in itertools.permutations(
-#     #         ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
-#     #     ):
-#     #         assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
-
-#     # for depth in 0, 1, 2, 3:
-#     # for cuts in itertools.permutations(
-#     #     ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
-#     # ):
-#     #     cuts = cuts
-#     #     while len(cuts) > 0 and isinstance(cuts[0], slice):
-#     #         cuts = cuts[1:]
-#     #     while len(cuts) > 0 and isinstance(cuts[-1], slice):
-#     #         cuts = cuts[:-1]
-#     #     if any(isinstance(x, slice) for x in cuts):
-#     #         continue
-#     #     assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
+        ):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA64[cuts])
 
 
 def test_listoffsetarrayA32():
@@ -122,25 +121,24 @@ def test_listoffsetarrayA32():
         ):
             assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA32[cuts])
 
-    # for depth in 0, 1, 2, 3:
-    #     for cuts in itertools.permutations(
-    #         ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
-    #     ):
-    #         assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA32[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
+        ):
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA32[cuts])
 
-
-#     # for depth in 0, 1, 2, 3:
-#     #     for cuts in itertools.permutations(
-#     #         ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
-#     #     ):
-#     #         cuts = cuts
-#     #         while len(cuts) > 0 and isinstance(cuts[0], slice):
-#     #             cuts = cuts[1:]
-#     #         while len(cuts) > 0 and isinstance(cuts[-1], slice):
-#     #             cuts = cuts[:-1]
-#     #         if any(isinstance(x, slice) for x in cuts):
-#     #             continue
-#     #         assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA32[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
+        ):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listoffsetarrayA32[cuts])
 
 
 def test_listarrayA64():
@@ -160,25 +158,24 @@ def test_listarrayA64():
         ):
             assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA64[cuts])
 
-    # for depth in 0, 1, 2, 3:
-    #     for cuts in itertools.permutations(
-    #         ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
-    #     ):
-    #         assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA64[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
+        ):
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA64[cuts])
 
-
-#     for depth in 0, 1, 2, 3:
-#         for cuts in itertools.permutations(
-#             ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
-#         ):
-#             cuts = cuts
-#             while len(cuts) > 0 and isinstance(cuts[0], slice):
-#                 cuts = cuts[1:]
-#             while len(cuts) > 0 and isinstance(cuts[-1], slice):
-#                 cuts = cuts[:-1]
-#             if any(isinstance(x, slice) for x in cuts):
-#                 continue
-#             assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA64[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
+        ):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA64[cuts])
 
 
 def test_listarrayA32():
@@ -198,25 +195,24 @@ def test_listarrayA32():
         ):
             assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA32[cuts])
 
-    # for depth in 0, 1, 2, 3:
-    #     for cuts in itertools.permutations(
-    #         ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
-    #     ):
-    #         assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA32[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
+        ):
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA32[cuts])
 
-
-#     for depth in 0, 1, 2, 3:
-#         for cuts in itertools.permutations(
-#             ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
-#         ):
-#             cuts = cuts
-#             while len(cuts) > 0 and isinstance(cuts[0], slice):
-#                 cuts = cuts[1:]
-#             while len(cuts) > 0 and isinstance(cuts[-1], slice):
-#                 cuts = cuts[:-1]
-#             if any(isinstance(x, slice) for x in cuts):
-#                 continue
-#             assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA32[cuts])
+    for depth in 0, 1, 2, 3:
+        for cuts in itertools.permutations(
+            ([2, 0, 0, 1], [1, -2, 0, -1], slice(1, None), slice(None, -1)), depth
+        ):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert ak.to_list(modelA[cuts]) == ak.to_list(listarrayA32[cuts])
 
 
 def test_listoffsetarrayB64():
@@ -230,18 +226,18 @@ def test_listoffsetarrayB64():
         ):
             assert ak.to_list(modelB[cuts]) == ak.to_list(listoffsetarrayB64[cuts])
 
-    # for depth in 0, 1, 2, 3, 4:
-    #     for cuts in itertools.permutations(
-    #         (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
-    #     ):
-    #         cuts = cuts
-    #         while len(cuts) > 0 and isinstance(cuts[0], slice):
-    #             cuts = cuts[1:]
-    #         while len(cuts) > 0 and isinstance(cuts[-1], slice):
-    #             cuts = cuts[:-1]
-    #         if any(isinstance(x, slice) for x in cuts):
-    #             continue
-    #         assert ak.to_list(modelB[cuts]) == ak.to_list(listoffsetarrayB64[cuts])
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations(
+            (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
+        ):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert ak.to_list(modelB[cuts]) == ak.to_list(listoffsetarrayB64[cuts])
 
 
 def test_listoffsetarrayB32():
@@ -255,19 +251,18 @@ def test_listoffsetarrayB32():
         ):
             assert ak.to_list(modelB[cuts]) == ak.to_list(listoffsetarrayB64[cuts])
 
-
-#     for depth in 0, 1, 2, 3, 4:
-#         for cuts in itertools.permutations(
-#             (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
-#         ):
-#             cuts = cuts
-#             while len(cuts) > 0 and isinstance(cuts[0], slice):
-#                 cuts = cuts[1:]
-#             while len(cuts) > 0 and isinstance(cuts[-1], slice):
-#                 cuts = cuts[:-1]
-#             if any(isinstance(x, slice) for x in cuts):
-#                 continue
-#             assert ak.to_list(modelB[cuts]) == ak.to_list(listoffsetarrayB64[cuts])
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations(
+            (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
+        ):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert ak.to_list(modelB[cuts]) == ak.to_list(listoffsetarrayB64[cuts])
 
 
 def test_listarrayB64():
@@ -281,19 +276,18 @@ def test_listarrayB64():
         ):
             assert ak.to_list(modelB[cuts]) == ak.to_list(listarrayB64[cuts])
 
-
-#     for depth in 0, 1, 2, 3, 4:
-#         for cuts in itertools.permutations(
-#             (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
-#         ):
-#             cuts = cuts
-#             while len(cuts) > 0 and isinstance(cuts[0], slice):
-#                 cuts = cuts[1:]
-#             while len(cuts) > 0 and isinstance(cuts[-1], slice):
-#                 cuts = cuts[:-1]
-#             if any(isinstance(x, slice) for x in cuts):
-#                 continue
-#             assert ak.to_list(modelB[cuts]) == ak.to_list(listarrayB64[cuts])
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations(
+            (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
+        ):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert ak.to_list(modelB[cuts]) == ak.to_list(listarrayB64[cuts])
 
 
 def test_listarrayB32():
@@ -307,15 +301,15 @@ def test_listarrayB32():
         ):
             assert ak.to_list(modelB[cuts]) == ak.to_list(listarrayB64[cuts])
 
-    # for depth in 0, 1, 2, 3, 4:
-    #     for cuts in itertools.permutations(
-    #         (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
-    #     ):
-    #         cuts = cuts
-    #         while len(cuts) > 0 and isinstance(cuts[0], slice):
-    #             cuts = cuts[1:]
-    #         while len(cuts) > 0 and isinstance(cuts[-1], slice):
-    #             cuts = cuts[:-1]
-    #         if any(isinstance(x, slice) for x in cuts):
-    #             continue
-    #         assert ak.to_list(modelB[cuts]) == ak.to_list(listarrayB64[cuts])
+    for depth in 0, 1, 2, 3, 4:
+        for cuts in itertools.permutations(
+            (-1, 0, [1, 0, 0, 1], [0, 1, -1, 1], slice(None, -1)), depth
+        ):
+            cuts = cuts
+            while len(cuts) > 0 and isinstance(cuts[0], slice):
+                cuts = cuts[1:]
+            while len(cuts) > 0 and isinstance(cuts[-1], slice):
+                cuts = cuts[:-1]
+            if any(isinstance(x, slice) for x in cuts):
+                continue
+            assert ak.to_list(modelB[cuts]) == ak.to_list(listarrayB64[cuts])

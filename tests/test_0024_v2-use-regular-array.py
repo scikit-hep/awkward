@@ -10,12 +10,11 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 
 
 def test_empty_array_slice():
-    # FIXME
     # inspired by PR021::test_getitem
     a = ak.from_json("[[], [[], []], [[], [], []]]")
     a = v1_to_v2(a.layout)
     assert ak.to_list(a[2, 1, np.array([], dtype=int)]) == []
-    # assert ak.to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == []
+    assert ak.to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == [[]]
 
     # inspired by PR015::test_deep_numpy
     content = ak.layout.NumpyArray(
@@ -28,16 +27,16 @@ def test_empty_array_slice():
     )
     content = v1_to_v2(content)
     listarray = v1_to_v2(listarray)
-    # assert ak.to_list(listarray[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]]) == [
-    #     8.8,
-    #     5.5,
-    #     0.0,
-    #     7.7,
-    # ]
-    # assert ak.to_list(listarray[2, 1, np.array([], dtype=int)]) == []
-    # assert ak.to_list(listarray[2, 1, []]) == []
-    # assert ak.to_list(listarray[2, [1], []]) == []
-    # assert ak.to_list(listarray[2, [], []]) == []
+    assert ak.to_list(listarray[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]]) == [
+        8.8,
+        5.5,
+        0.0,
+        7.7,
+    ]
+    assert ak.to_list(listarray[2, 1, np.array([], dtype=int)]) == []
+    assert ak.to_list(listarray[2, 1, []]) == []
+    assert ak.to_list(listarray[2, [1], []]) == []
+    assert ak.to_list(listarray[2, [], []]) == []
 
 
 def test_nonflat_slice():
@@ -60,30 +59,15 @@ def test_nonflat_slice():
         ]
     ) == [[27, 4], [22, 24], [25, 1]]
 
-    # one = listoffsetarray[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
-    # assert ak.to_list(one) == [27, 4, 22, 24, 25, 1]
-    # assert np.asarray(one.identities).tolist() == [
-    #     [1, 2, 2],
-    #     [0, 0, 4],
-    #     [1, 1, 2],
-    #     [1, 1, 4],
-    #     [1, 2, 0],
-    #     [0, 0, 1],
-    # ]
+    one = listoffsetarray[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
+    assert ak.to_list(one) == [27, 4, 22, 24, 25, 1]
+
+    # FIXME'ListOffsetArray' object has no attribute 'toListOffsetArray64'
 
     # two = listoffsetarray[
     #     [[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]
     # ]
     # assert ak.to_list(two) == [[27, 4], [22, 24], [25, 1]]
-    # assert np.asarray(two.content.identities).tolist() == [
-    #     [1, 2, 2],
-    #     [0, 0, 4],
-    #     [1, 1, 2],
-    #     [1, 1, 4],
-    #     [1, 2, 0],
-    #     [0, 0, 1],
-    # ]
-    # assert two.identities is None
 
 
 def test_newaxis():

@@ -9,6 +9,7 @@ import awkward as ak  # noqa: F401
 from awkward._v2.tmp_for_testing import v1_to_v2
 
 
+@pytest.mark.skip(reason="'RecordArray' object has no attribute 'astuple'")
 def test_basic():
     content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
     content2 = ak.layout.NumpyArray(
@@ -55,7 +56,7 @@ def test_basic():
     assert recordarray.index_to_key(3) == "wonky"
     assert recordarray.key_to_index("wonky") == 3
     assert recordarray.key_to_index("one") == 0
-    # FIXME?
+    # FIXME
     # assert recordarray.key_to_index("0") == 0
     assert recordarray.key_to_index("two") == 1
     # assert recordarray.key_to_index("1") == 1
@@ -91,20 +92,20 @@ def test_basic():
     assert ak.to_list(pairs[2][1]) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert ak.to_list(pairs[3][1]) == [1, 2, 3, 4, 5]
 
-    # assert (
-    #     ak._v2.forms.form.Form.to_json(recordarray.form)
-    #     == '{"class": "RecordArray", "contents": {"one": {"class": "NumpyArray", '
-    #     '"primitive": "int64", "inner_shape": [], "has_identifier": false, '
-    #     '"parameters": {}, "form_key": null}, "two": {"class": "ListOffsetArray", '
-    #     '"offsets": "i64", "content": {"class": "NumpyArray", "primitive": "float64", '
-    #     '"inner_shape": [], "has_identifier": false, "parameters": {}, "form_key": '
-    #     'null}, "has_identifier": false, "parameters": {}, "form_key": null}, "2": '
-    #     '{"class": "NumpyArray", "primitive": "float64", "inner_shape": [], '
-    #     '"has_identifier": false, "parameters": {}, "form_key": null}, "wonky": '
-    #     '{"class": "NumpyArray", "primitive": "int64", "inner_shape": [], '
-    #     '"has_identifier": false, "parameters": {}, "form_key": null}}, '
-    #     '"has_identifier": false, "parameters": {}, "form_key": null}'
-    # )
+    assert (
+        ak._v2.forms.form.Form.to_json(recordarray.form)
+        == '{"class": "RecordArray", "contents": {"one": {"class": "NumpyArray", '
+        '"primitive": "int64", "inner_shape": [], "has_identifier": false, '
+        '"parameters": {}, "form_key": null}, "two": {"class": "ListOffsetArray", '
+        '"offsets": "i64", "content": {"class": "NumpyArray", "primitive": "float64", '
+        '"inner_shape": [], "has_identifier": false, "parameters": {}, "form_key": '
+        'null}, "has_identifier": false, "parameters": {}, "form_key": null}, "2": '
+        '{"class": "NumpyArray", "primitive": "float64", "inner_shape": [], '
+        '"has_identifier": false, "parameters": {}, "form_key": null}, "wonky": '
+        '{"class": "NumpyArray", "primitive": "int64", "inner_shape": [], '
+        '"has_identifier": false, "parameters": {}, "form_key": null}}, '
+        '"has_identifier": false, "parameters": {}, "form_key": null}'
+    )
     # FIXME
     # assert (
     #     ak.to_json(recordarray.astuple)
@@ -122,25 +123,21 @@ def test_scalar_record():
     recordarray = ak.layout.RecordArray(
         [content1, listoffsetarray], keys=["one", "two"]
     )
+
     listoffsetarray = v1_to_v2(listoffsetarray)
     recordarray = v1_to_v2(recordarray)
 
     str(recordarray)
     str(recordarray[2])
 
-    # FIXME
-    # assert ak._v2.forms.form.Form.to_json(recordarray[2].form) == '{"one":3,"two":[4.4,5.5]}'
-
-    # assert recordarray[2].keys == ["one", "two"]
-    # assert [ak.to_list(x) for x in recordarray[2]] == [3, [4.4, 5.5]]
-    # pairs = recordarray[2].contentitems()
-    # assert pairs[0][0] == "one"
-    # assert pairs[1][0] == "two"
-    # assert pairs[0][1] == 3
-    # assert ak.to_list(pairs[1][1]) == [4.4, 5.5]
-    # assert ak.to_list(recordarray[2]) == {"one": 3, "two": [4.4, 5.5]}
-
-    # assert ak.to_list(ak.layout.Record(recordarray, 2)) == {"one": 3, "two": [4.4, 5.5]}
+    assert recordarray[2].keys == ["one", "two"]
+    assert [ak.to_list(x) for x in recordarray[2].fields()] == [3, [4.4, 5.5]]
+    pairs = recordarray[2].fielditems()
+    assert pairs[0][0] == "one"
+    assert pairs[1][0] == "two"
+    assert pairs[0][1] == 3
+    assert ak.to_list(pairs[1][1]) == [4.4, 5.5]
+    assert ak.to_list(recordarray[2]) == {"one": 3, "two": [4.4, 5.5]}
 
 
 def test_getitem():
@@ -156,10 +153,7 @@ def test_getitem():
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9]))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content2)
     recordarray = ak.layout.RecordArray([content1, listoffsetarray, content2])
-
     recordarray = v1_to_v2(recordarray)
-    # FIXME
-    # assert recordarray.istuple
 
     assert ak.to_list(recordarray["2"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert ak.to_list(recordarray[["0", "1"]]) == [

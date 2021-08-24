@@ -214,23 +214,11 @@ class Content(object):
                 return self.__getitem__((where,))
 
             elif isinstance(where, tuple):
-
                 if len(where) == 0:
                     return self
 
-                prepare_tuple = []
-                for i in range(len(where)):
-                    x = self._prepare_tuple_item(where[i])
-                    if isinstance(x, list) and len(x) == 0:
-                        pass
-                    else:
-                        prepare_tuple.append(x)
-
-                if len(prepare_tuple) == 0:
-                    return self._getitem_range(slice(0, 0))
-
                 nextwhere = self._getitem_broadcast(
-                    prepare_tuple,
+                    [self._prepare_tuple_item(x) for x in where],
                     self.nplike,
                 )
 
@@ -238,7 +226,7 @@ class Content(object):
 
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
                 if len(out) == 0:
-                    raise out._getitem_nothing()
+                    return out._getitem_nothing()
                 else:
                     return out._getitem_at(0)
 
@@ -258,8 +246,7 @@ class Content(object):
                     )
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 elif issubclass(where.dtype.type, (np.bool_, bool)):
-                    nplike = ak.nplike.of(where)
-                    where = nplike.nonzero(where.data.reshape(-1))[0]
+                    where = self.nplike.nonzero(where.data.reshape(-1))[0]
                     carry = ak._v2.index.Index64(where)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
@@ -281,10 +268,7 @@ class Content(object):
                 return self.__getitem__((where,))
 
             elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
-                if len(where) == 0:
-                    return self._getitem_range(slice(0, 0))
-                else:
-                    return self._getitem_fields(where)
+                return self._getitem_fields(where)
 
             elif isinstance(where, Iterable):
                 return self.__getitem__(
@@ -483,6 +467,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     @property
     def branch_depth(self):
         return self.Form.branch_depth.__get__(self)
+
+    @property
+    def keys(self):
+        return self.Form.keys.__get__(self)
 
 
 class NestedIndexError(IndexError):

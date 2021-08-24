@@ -106,14 +106,12 @@ def test_getitem_deeper():
         [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]],
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
     ]
-
-    # assert ak.to_list(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [
-    #     [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]
-    # ]
-    # FIXME  KeyError: ('awkward_ListArray_getitem_next_array', <class 'numpy.int64'>, <class 'numpy.int64'>, <class 'numpy.int64'>)
-    # assert ak.to_list(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [
-    #     [[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]
-    # ]
+    assert ak.to_list(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]
+    ]
+    assert ak.to_list(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [
+        [[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]
+    ]
 
 
 content2 = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))

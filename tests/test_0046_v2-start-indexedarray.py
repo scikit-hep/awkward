@@ -73,8 +73,7 @@ def test_carry():
     assert ak.to_list(listoffsetarray) == [[2.2, 2.2, 0.0], [], [3.3, 4.4]]
     assert ak.to_list(listoffsetarray[::-1]) == [[3.3, 4.4], [], [2.2, 2.2, 0.0]]
     assert ak.to_list(listoffsetarray[[2, 0]]) == [[3.3, 4.4], [2.2, 2.2, 0.0]]
-    # FIXME [3.3, 2.2]
-    # assert ak.to_list(listoffsetarray[[2, 0], 1]) == [4.4, 2.2]  # invokes carry
+    assert ak.to_list(listoffsetarray[[2, 0], 1]) == [4.4, 2.2]  # invokes carry
     assert ak.to_list(listoffsetarray[2:, 1]) == [4.4]  # invokes carry
 
     index = ak.layout.Index64(np.array([2, 2, 0, 3, -1], dtype=np.int64))
@@ -83,7 +82,6 @@ def test_carry():
     assert ak.to_list(listoffsetarray) == [[2.2, 2.2, 0.0], [], [3.3, None]]
     assert ak.to_list(listoffsetarray[::-1]) == [[3.3, None], [], [2.2, 2.2, 0.0]]
     assert ak.to_list(listoffsetarray[[2, 0]]) == [[3.3, None], [2.2, 2.2, 0.0]]
-
     assert ak.to_list(listoffsetarray[[2, 0], 1]) == [None, 2.2]  # invokes carry
     assert ak.to_list(listoffsetarray[2:, 1]) == [None]  # invokes carry
 

@@ -130,8 +130,6 @@ def test_listarray_numpyarray():
     array = ak.layout.ListArray64(starts, stops, content)
     array = v1_to_v2(array)
 
-    # FIXME Value errors or Index?
-
     with pytest.raises(ValueError):
         array[2, 20]
 
@@ -144,18 +142,17 @@ def test_listarray_numpyarray():
     with pytest.raises(ValueError):
         array[1:][2, -20]
 
-    # FIXME
-    # with pytest.raises(IndexError):
-    #     array[2, [1, 0, 0, 20]]
+    with pytest.raises(ValueError):
+        array[2, [1, 0, 0, 20]]
 
-    # with pytest.raises(IndexError):
-    #     array[2, [1, 0, 0, -20]]
+    with pytest.raises(ValueError):
+        array[2, [1, 0, 0, -20]]
 
-    # with pytest.raises(IndexError):
-    #     array[1:][2, [0, 20]]
+    with pytest.raises(ValueError):
+        array[1:][2, [0, 20]]
 
-    # with pytest.raises(IndexError):
-    #     array[1:][2, [0, -20]]
+    with pytest.raises(ValueError):
+        array[1:][2, [0, -20]]
 
 
 def test_listarray_listarray_numpyarray():

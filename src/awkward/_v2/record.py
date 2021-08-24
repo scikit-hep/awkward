@@ -41,6 +41,22 @@ class Record(object):
     def at(self):
         return self._at
 
+    @property
+    def keys(self):
+        return self._array.keys
+
+    def fielditems(self):
+        out = []
+        for key in self._array.keys:
+            out.append((key, self._array[key][self._at]))
+        return out
+
+    def fields(self):
+        out = []
+        for key in self._array.keys:
+            out.append(self._array[key][self._at])
+        return out
+
     def __repr__(self):
         return self._repr("", "", "")
 

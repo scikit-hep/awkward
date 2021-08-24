@@ -283,7 +283,7 @@ class ListOffsetArray(Content):
             nexthead, nexttail = self._headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
             lenstarts = len(self.starts)
-            regular_flathead = ak._v2.index.Index64.zeros(len(flathead), nplike)
+            regular_flathead = ak._v2.index.Index64(flathead)
             if advanced is None or len(advanced) == 0:
                 nextcarry = ak._v2.index.Index64.empty(
                     lenstarts * len(flathead), nplike

@@ -165,7 +165,7 @@ class RegularArray(Content):
             self._parameters,
         )
 
-    def compact_offsets64(self, start_at_zero):
+    def _compact_offsets64(self, start_at_zero):
         nplike = self.nplike
         out = ak._v2.index.Index64.empty(self._length + 1, self.nplike)
         self._handle_error(
@@ -177,7 +177,7 @@ class RegularArray(Content):
         )
         return out
 
-    def broadcast_tooffsets64(self, offsets):
+    def _broadcast_tooffsets64(self, offsets):
         nplike = self.nplike
         if len(offsets) == 0 or offsets[0] != 0:
             raise ValueError(
