@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -10,11 +12,11 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 
 
 def test_basic():
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
     content2 = ak.layout.NumpyArray(
-        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9]))
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content2)
     recordarray = ak.layout.RecordArray(
         [content1, listoffsetarray, content2, content1],
@@ -34,18 +36,55 @@ def test_basic():
     assert ak.to_list(recordarray.content("wonky")) == [1, 2, 3, 4, 5]
 
     str(recordarray)
-    assert ak._v2.forms.form.Form.to_json(recordarray.form) == (
-        '{"class": "RecordArray", "contents": {"one": {"class": "NumpyArray", '
-        '"primitive": "int64", "inner_shape": [], "has_identifier": false, '
-        '"parameters": {}, "form_key": null}, "two": {"class": "ListOffsetArray", '
-        '"offsets": "i64", "content": {"class": "NumpyArray", "primitive": "float64", '
-        '"inner_shape": [], "has_identifier": false, "parameters": {}, "form_key": '
-        'null}, "has_identifier": false, "parameters": {}, "form_key": null}, "2": '
-        '{"class": "NumpyArray", "primitive": "float64", "inner_shape": [], '
-        '"has_identifier": false, "parameters": {}, "form_key": null}, "wonky": '
-        '{"class": "NumpyArray", "primitive": "int64", "inner_shape": [], '
-        '"has_identifier": false, "parameters": {}, "form_key": null}}, '
-        '"has_identifier": false, "parameters": {}, "form_key": null}'
+
+    assert json.loads(ak._v2.forms.form.Form.to_json(recordarray.form)) == (
+        {
+            "class": "RecordArray",
+            "contents": {
+                "one": {
+                    "class": "NumpyArray",
+                    "primitive": "int64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                },
+                "two": {
+                    "class": "ListOffsetArray",
+                    "offsets": "i64",
+                    "content": {
+                        "class": "NumpyArray",
+                        "primitive": "float64",
+                        "inner_shape": [],
+                        "has_identifier": False,
+                        "parameters": {},
+                        "form_key": None,
+                    },
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                },
+                "2": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                },
+                "wonky": {
+                    "class": "NumpyArray",
+                    "primitive": "int64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                },
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        }
     )
 
     assert len(recordarray) == 5
@@ -91,32 +130,68 @@ def test_basic():
     assert ak.to_list(pairs[2][1]) == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert ak.to_list(pairs[3][1]) == [1, 2, 3, 4, 5]
 
-    assert (
-        ak._v2.forms.form.Form.to_json(recordarray.form)
-        == '{"class": "RecordArray", "contents": {"one": {"class": "NumpyArray", '
-        '"primitive": "int64", "inner_shape": [], "has_identifier": false, '
-        '"parameters": {}, "form_key": null}, "two": {"class": "ListOffsetArray", '
-        '"offsets": "i64", "content": {"class": "NumpyArray", "primitive": "float64", '
-        '"inner_shape": [], "has_identifier": false, "parameters": {}, "form_key": '
-        'null}, "has_identifier": false, "parameters": {}, "form_key": null}, "2": '
-        '{"class": "NumpyArray", "primitive": "float64", "inner_shape": [], '
-        '"has_identifier": false, "parameters": {}, "form_key": null}, "wonky": '
-        '{"class": "NumpyArray", "primitive": "int64", "inner_shape": [], '
-        '"has_identifier": false, "parameters": {}, "form_key": null}}, '
-        '"has_identifier": false, "parameters": {}, "form_key": null}'
-    )
-    assert (
-        ak.to_json(recordarray.as_tuple)
-        == '[{"0":1,"1":[1.1,2.2,3.3],"2":1.1,"3":1},{"0":2,"1":[],"2":2.2,"3":2},{"0":3,"1":[4.4,5.5],"2":3.3,"3":3},{"0":4,"1":[6.6],"2":4.4,"3":4},{"0":5,"1":[7.7,8.8,9.9],"2":5.5,"3":5}]'
-    )
+    assert json.loads(ak._v2.forms.form.Form.to_json(recordarray.form)) == {
+        "class": "RecordArray",
+        "contents": {
+            "one": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            "two": {
+                "class": "ListOffsetArray",
+                "offsets": "i64",
+                "content": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                },
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            "2": {
+                "class": "NumpyArray",
+                "primitive": "float64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            "wonky": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert json.loads(ak.to_json(recordarray.as_tuple)) == [
+        {"0": 1, "1": [1.1, 2.2, 3.3], "2": 1.1, "3": 1},
+        {"0": 2, "1": [], "2": 2.2, "3": 2},
+        {"0": 3, "1": [4.4, 5.5], "2": 3.3, "3": 3},
+        {"0": 4, "1": [6.6], "2": 4.4, "3": 4},
+        {"0": 5, "1": [7.7, 8.8, 9.9], "2": 5.5, "3": 5},
+    ]
 
 
 def test_scalar_record():
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
     content2 = ak.layout.NumpyArray(
-        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9]))
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content2)
     recordarray = ak.layout.RecordArray(
         [content1, listoffsetarray], keys=["one", "two"]
@@ -148,7 +223,7 @@ def test_getitem():
     content2 = ak.layout.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9]))
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content2)
     recordarray = ak.layout.RecordArray([content1, listoffsetarray, content2])
     recordarray = v1_to_v2(recordarray)
@@ -214,13 +289,13 @@ def test_getitem_other_types():
     content2 = ak.layout.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9]))
+    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
     listoffsetarray1 = ak.layout.ListOffsetArray64(offsets1, content2)
     recordarray = ak.layout.RecordArray(
         {"one": content1, "two": listoffsetarray1, "three": content2}
     )
 
-    offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5]))
+    offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
     listoffsetarray2 = ak.layout.ListOffsetArray64(offsets2, recordarray)
 
     listoffsetarray2 = v1_to_v2(listoffsetarray2)
@@ -242,8 +317,8 @@ def test_getitem_other_types():
         [{"two": [6.6], "three": 4.4}, {"two": [7.7, 8.8, 9.9], "three": 5.5}],
     ]
 
-    starts2 = ak.layout.Index64(np.array([0, 3, 3]))
-    stops2 = ak.layout.Index64(np.array([3, 3, 5]))
+    starts2 = ak.layout.Index64(np.array([0, 3, 3], dtype=np.int64))
+    stops2 = ak.layout.Index64(np.array([3, 3, 5], dtype=np.int64))
     listarray2 = ak.layout.ListArray64(starts2, stops2, recordarray)
     assert ak.to_list(listarray2["one"]) == [[1, 2, 3], [], [4, 5]]
     assert ak.to_list(listarray2["two"]) == [
@@ -289,7 +364,7 @@ def test_getitem_next():
     content3 = ak.layout.NumpyArray(
         np.array([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
     )
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9]))
+    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
     listoffsetarray1 = ak.layout.ListOffsetArray64(offsets1, content2)
     listoffsetarray3 = ak.layout.ListOffsetArray64(offsets1, content3)
     recordarray = ak.layout.RecordArray(
@@ -300,7 +375,7 @@ def test_getitem_next():
             "four": listoffsetarray3,
         }
     )
-    offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5]))
+    offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
     listoffsetarray2 = ak.layout.ListOffsetArray64(offsets2, recordarray)
 
     listoffsetarray2 = v1_to_v2(listoffsetarray2)

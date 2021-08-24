@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -168,6 +169,13 @@ class ListArray(Content):
             )
         )
         return out
+
+    def _broadcast_tooffsets64(self, offsets):
+        return ListOffsetArray._broadcast_tooffsets64(self, offsets)
+
+    def toListOffsetArray64(self, start_at_zero=False):
+        offsets = self._compact_offsets64(start_at_zero)
+        return self._broadcast_tooffsets64(offsets)
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
@@ -345,7 +353,9 @@ class ListArray(Content):
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
-                    return self._getitem_next_array_wrap(out, head.metadata["shape"])
+                    return self._getitem_next_array_wrap(
+                        out, head.metadata.get("shape", (len(head),))
+                    )
                 else:
                     return out
 

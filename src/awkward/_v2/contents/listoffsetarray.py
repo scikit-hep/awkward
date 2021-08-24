@@ -159,6 +159,68 @@ class ListOffsetArray(Content):
         )
         return out
 
+    def _broadcast_tooffsets64(self, offsets):
+        nplike = self.nplike
+        if len(offsets) == 0 or offsets[0] != 0:
+            raise ValueError(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0"
+            )
+
+        if len(offsets) - 1 != len(self):
+            raise ValueError(
+                "cannot broadcast {0} of length {1} to length {2}".format(
+                    type(self).__name__, len(self), len(offsets) - 1
+                )
+            )
+
+        if self._identifier is not None:
+            identifier = self._identifier[slice(0, len(offsets) - 1)]
+        else:
+            identifier = self._identifier
+
+        starts, stops = self.starts, self.stops
+
+        nextcarry = ak._v2.index.Index64.empty(offsets[-1], nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ListArray_broadcast_tooffsets",
+                nextcarry.dtype.type,
+                offsets.dtype.type,
+                starts.dtype.type,
+                stops.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                offsets.to(nplike),
+                len(offsets),
+                starts.to(nplike),
+                stops.to(nplike),
+                len(self._content),
+            )
+        )
+
+        nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+
+        return ListOffsetArray(offsets, nextcontent, identifier, self._parameters)
+
+    def toListOffsetArray64(self, start_at_zero=False):
+        if issubclass(self._offsets.dtype.type, np.int64):
+            if not start_at_zero or self._offsets[0] == 0:
+                return self
+
+            if start_at_zero:
+                offsets = ak._v2.index.Index64(
+                    self._offsets.to(self._offsets.nplike) - self._offsets[0]
+                )
+                content = self._content[self._offsets[0] :]
+            else:
+                offsets, content = self._offsets, self._content
+
+            return ListOffsetArray(offsets, content, self._identifier, self._parameters)
+
+        else:
+            offsets = self._compact_offsets64(start_at_zero)
+            return self._broadcast_tooffsets64(offsets)
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
         if head == ():
@@ -325,7 +387,9 @@ class ListOffsetArray(Content):
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
-                    return self._getitem_next_array_wrap(out, head.metadata["shape"])
+                    return self._getitem_next_array_wrap(
+                        out, head.metadata.get("shape", (len(head),))
+                    )
                 else:
                     return out
 

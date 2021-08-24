@@ -414,14 +414,11 @@ def test_listoffsetarray_array():
     )
 
 
-@pytest.mark.skip(
-    reason="ListOffsetArray' object has no attribute 'toListOffsetArray64"
-)
 def test_listarray_listoffsetarray_array():
     array1 = ak.layout.ListArray64(starts1, stops1, content)
     array1 = v1_to_v2(array1)
 
-    assert ak.to_list(array1[[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]]) == [
+    assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
         5.5,
         2.2,
         1.1,

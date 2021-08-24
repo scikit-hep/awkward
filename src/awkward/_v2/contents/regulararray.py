@@ -186,10 +186,9 @@ class RegularArray(Content):
 
         if len(offsets) - 1 != self._length:
             raise ValueError(
-                "cannot broadcast RegularArray of length ",
-                self._length,
-                " to length ",
-                len(offsets) - 1,
+                "cannot broadcast RegularArray of length {0} to length {1}".format(
+                    self._length, len(offsets) - 1
+                )
             )
 
         if self._identifier is not None:
@@ -227,6 +226,17 @@ class RegularArray(Content):
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 offsets, self._content, self._identifier, self._parameters
             )
+
+    def toListOffsetArray64(self, start_at_zero=False):
+        offsets = self._compact_offsets64(start_at_zero)
+        return self._broadcast_tooffsets64(offsets)
+
+    def maybe_to_nplike(self, nplike):
+        out = self._content.maybe_to_nplike(nplike)
+        if out is None:
+            return out
+        else:
+            return out.reshape((len(self), -1) + out.shape[1:])
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike
@@ -373,7 +383,9 @@ class RegularArray(Content):
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
-                    return self._getitem_next_array_wrap(out, head.metadata["shape"])
+                    return self._getitem_next_array_wrap(
+                        out, head.metadata.get("shape", (len(head),))
+                    )
                 else:
                     return out
 
