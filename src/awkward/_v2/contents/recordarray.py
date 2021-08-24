@@ -94,6 +94,16 @@ class RecordArray(Content):
         return self._keys is None
 
     @property
+    def as_tuple(self):
+        return RecordArray(
+            self._contents,
+            None,
+            length=self._length,
+            identifier=None,
+            parameters=None,
+        )
+
+    @property
     def nplike(self):
         if len(self._contents) == 0:
             return ak.nplike.Numpy.instance()

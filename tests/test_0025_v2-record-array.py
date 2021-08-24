@@ -9,7 +9,6 @@ import awkward as ak  # noqa: F401
 from awkward._v2.tmp_for_testing import v1_to_v2
 
 
-@pytest.mark.skip(reason="'RecordArray' object has no attribute 'astuple'")
 def test_basic():
     content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
     content2 = ak.layout.NumpyArray(
@@ -106,11 +105,10 @@ def test_basic():
         '"has_identifier": false, "parameters": {}, "form_key": null}}, '
         '"has_identifier": false, "parameters": {}, "form_key": null}'
     )
-    # FIXME
-    # assert (
-    #     ak.to_json(recordarray.astuple)
-    #     == '[{"0":1,"1":[1.1,2.2,3.3],"2":1.1,"3":1},{"0":2,"1":[],"2":2.2,"3":2},{"0":3,"1":[4.4,5.5],"2":3.3,"3":3},{"0":4,"1":[6.6],"2":4.4,"3":4},{"0":5,"1":[7.7,8.8,9.9],"2":5.5,"3":5}]'
-    # )
+    assert (
+        ak.to_json(recordarray.as_tuple)
+        == '[{"0":1,"1":[1.1,2.2,3.3],"2":1.1,"3":1},{"0":2,"1":[],"2":2.2,"3":2},{"0":3,"1":[4.4,5.5],"2":3.3,"3":3},{"0":4,"1":[6.6],"2":4.4,"3":4},{"0":5,"1":[7.7,8.8,9.9],"2":5.5,"3":5}]'
+    )
 
 
 def test_scalar_record():

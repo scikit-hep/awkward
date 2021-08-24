@@ -46,6 +46,14 @@ class Record(object):
         return self._array.keys
 
     @property
+    def is_tuple(self):
+        return self._array.keys is None
+
+    @property
+    def as_tuple(self):
+        return Record(self._array.as_tuple, self._at)
+
+    @property
     def contents(self):
         out = []
         for key in self._array.keys:

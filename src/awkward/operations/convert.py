@@ -1205,6 +1205,9 @@ def to_json(
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         out = array
 
+    elif isinstance(array, ak._v2.contents.Content):
+        out = ak._v2.tmp_for_testing.v2_to_v1(array)
+
     else:
         raise TypeError(
             "unrecognized array type: {0}".format(repr(array))
