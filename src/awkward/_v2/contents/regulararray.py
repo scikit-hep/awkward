@@ -233,7 +233,7 @@ class RegularArray(Content):
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         out = self.toListOffsetArray64(True)
-        return out.getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
+        return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def maybe_to_nplike(self, nplike):
         out = self._content.maybe_to_nplike(nplike)
@@ -455,7 +455,7 @@ class RegularArray(Content):
                 multistarts, multistops, head._content, tail
             )
 
-            return RegularArray(down, len(head), self._length)
+            return RegularArray(down, len(head), self._length, None, self._parameters)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             raise NotImplementedError

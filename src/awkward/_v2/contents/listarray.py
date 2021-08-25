@@ -444,7 +444,41 @@ class ListArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            if advanced is not None:
+                raise ValueError(
+                    "cannot mix jagged slice with NumPy-style advanced indexing"
+                )
+            length = len(self._starts)
+            singleoffsets = head._offsets
+            multistarts = ak._v2.index.Index64.empty(len(head) * length, nplike)
+            multistops = ak._v2.index.Index64.empty(len(head) * length, nplike)
+            nextcarry = ak._v2.index.Index64.empty(len(head) * length, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_getitem_jagged_expand",
+                    multistarts.dtype.type,
+                    multistops.dtype.type,
+                    singleoffsets.dtype.type,
+                    nextcarry.dtype.type,
+                ](
+                    multistarts.to(nplike),
+                    multistops.to(nplike),
+                    singleoffsets.to(nplike),
+                    nextcarry.to(nplike),
+                    self._starts.to(nplike),
+                    self._stops.to(nplike),
+                    head.to(nplike),
+                    length,
+                ),
+            )
+            carried = self._content._carry(nextcarry, True)
+            down = carried._getitem_next_jagged(
+                multistarts, multistops, head._content, tail
+            )
+
+            return ak._v2.contents.regulararray.RegularArray(
+                down, len(head), 1, None, self._parameters
+            )
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             raise NotImplementedError
