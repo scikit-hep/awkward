@@ -460,5 +460,35 @@ class RegularArray(Content):
                 self._parameters,
             )
 
-    def _sort(self, axis, ascending, stable, depth):
-        raise NotImplementedError
+    def _sort(self, axis, kind, order):
+        def sort_next(x, axis, kind, order):
+            return x._sort(axis, kind, order)
+
+        if isinstance(self._content, ak._v2.contents.NumpyArray):
+            out = np.concatenate(
+                [
+                    sort_next(
+                        self._content[i * self._size : (i + 1) * self._size],
+                        axis,
+                        kind,
+                        order,
+                    )
+                    for i in range(self._length)
+                ]
+            )
+
+            return ak._v2.contents.RegularArray(
+                ak._v2.contents.NumpyArray(out),
+                self._size,
+                self._length,
+                self._identifier,
+                self._parameters,
+            )
+        else:
+            return ak._v2.contents.RegularArray(
+                self._content._sort(axis, kind, order),
+                self._size,
+                self._length,
+                self._identifier,
+                self._parameters,
+            )

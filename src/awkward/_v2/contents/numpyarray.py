@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
+import numpy
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.numpyform import NumpyForm
 
@@ -256,5 +257,13 @@ class NumpyArray(Content):
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
 
-    def _sort(self, axis, ascending, stable, depth):
-        raise NotImplementedError
+    def _sort(self, axis, kind, order):
+        if len(self.shape) == 0:
+            raise TypeError(
+                "{0} attempting to sort a scalar ".format(type(self).__name__)
+            )
+        elif len(self.shape) != 1:  # or not self.iscontiguous:?
+            return self.toRegularArray._sort(axis, kind, order)
+        else:
+            out = self._data
+            return ak._v2.contents.NumpyArray(numpy.sort(out, axis, kind, order))

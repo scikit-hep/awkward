@@ -201,5 +201,5 @@ class IndexedArray(Content):
         else:
             return self.project()._localindex(posaxis, depth)
 
-    def _sort(self, axis, ascending, stable, depth):
+    def _sort(self, axis, kind, order):
         raise NotImplementedError

@@ -504,8 +504,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def localindex(self, axis):
         return self._localindex(axis, 0)
 
-    def sort(self, axis, ascending=True, stable=True):
-        return self._sort(axis, ascending, stable, 0)
+    def sort(self, axis=-1, kind=None, order=None):
+        return self._sort(axis, kind, order)
 
     @property
     def purelist_isregular(self):

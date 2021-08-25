@@ -372,5 +372,10 @@ class RecordArray(Content):
                 contents, self._keys, len(self), self._identifier, self._parameters
             )
 
-    def _sort(self, axis, ascending, stable, depth):
-        raise NotImplementedError
+    def _sort(self, axis, kind, order):
+        contents = []
+        for content in self._contents:
+            contents.append(content._sort(axis, kind, order))
+        return RecordArray(
+            contents, self._keys, len(self), self._identifier, self._parameters
+        )

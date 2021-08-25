@@ -7,6 +7,7 @@ from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
+import numpy
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -426,5 +427,38 @@ class ListArray(Content):
                 self._parameters,
             )
 
-    def _sort(self, axis, ascending, stable, depth):
+    def _sort(self, axis, kind, order):
+        def sort_next(x, axis, kind, order):
+            return x._sort(axis, kind, order)
+
+        if isinstance(self._content, ak._v2.contents.NumpyArray):
+            out = numpy.concatenate(
+                [
+                    sort_next(
+                        self._content[self._starts[i] : self._stops[i]],
+                        axis,
+                        kind,
+                        order,
+                    )
+                    for i in range(len(self._starts))
+                ]
+            )
+
+            return ak._v2.contents.ListArray(
+                self._starts,
+                self._stops,
+                ak._v2.contents.NumpyArray(out),
+                self._identifier,
+                self._parameters,
+            )
+        else:
+            # FIXME: convert it to ListOffsetArray
+            return ak._v2.contents.ListArray(
+                self._starts,
+                self._stops,
+                self._content._sort(axis, kind, order),
+                self._identifier,
+                self._parameters,
+            )
+
         raise NotImplementedError

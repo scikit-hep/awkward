@@ -243,5 +243,5 @@ class ByteMaskedArray(Content):
             )
             return out2._simplify_optiontype()
 
-    def _sort(self, axis, ascending, stable, depth):
+    def _sort(self, axis, kind, order):
         raise NotImplementedError

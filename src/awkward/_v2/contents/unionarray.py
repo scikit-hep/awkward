@@ -288,5 +288,9 @@ class UnionArray(Content):
                 self._tags, self._index, contents, self._identifier, self.parameters
             )
 
-    def _sort(self, axis, ascending, stable, depth):
-        raise NotImplementedError
+    def _sort(self, axis, kind, order):
+        out = self._simplify_uniontype()
+
+        if isinstance(out, ak._v2.contents.UnionArray):
+            raise ValueError("cannot sort unsimplified {0}".format(type(self).__name__))
+        return out._sort(axis, kind, order)

@@ -249,5 +249,5 @@ class IndexedOptionArray(Content):
             )
             return out2
 
-    def _sort(self, axis, ascending, stable, depth):
+    def _sort(self, axis, kind, order):
         raise NotImplementedError

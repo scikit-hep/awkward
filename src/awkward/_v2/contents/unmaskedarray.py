@@ -137,5 +137,5 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
-    def _sort(self, axis, ascending, stable, depth):
+    def _sort(self, axis, kind, order):
         raise NotImplementedError
