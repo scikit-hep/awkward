@@ -3,8 +3,13 @@
 from __future__ import absolute_import
 
 import awkward as ak
+<<<<<<< HEAD
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
+=======
+import numpy
+from awkward._v2.contents.content import Content, NestedIndexError
+>>>>>>> using numpy sort to sort the arrays - let's see how it performs. I'll replace it with kernel function calls later.
 from awkward._v2.forms.numpyform import NumpyForm
 
 np = ak.nplike.NumpyMetadata.instance()

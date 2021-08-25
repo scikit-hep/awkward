@@ -8,6 +8,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
+import numpy
 
 np = ak.nplike.NumpyMetadata.instance()
 

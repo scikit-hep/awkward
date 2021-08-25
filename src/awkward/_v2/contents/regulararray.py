@@ -623,6 +623,7 @@ class RegularArray(Content):
                 self._parameters,
             )
         else:
+<<<<<<< HEAD
             next = self._content._getitem_range(
                 slice(0, len(self) * self._size)
             )._combinations(
@@ -630,6 +631,14 @@ class RegularArray(Content):
             )
             return ak._v2.contents.regulararray.RegularArray(
                 next, self._size, len(self), self._identifier, self._parameters
+=======
+            return ak._v2.contents.RegularArray(
+                self._content._sort(axis, kind, order),
+                self._size,
+                self._length,
+                self._identifier,
+                self._parameters,
+>>>>>>> using numpy sort to sort the arrays - let's see how it performs. I'll replace it with kernel function calls later.
             )
 
     def _reduce_next(

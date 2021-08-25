@@ -7,6 +7,10 @@ from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.listoffsetform import ListOffsetForm
+<<<<<<< HEAD
+=======
+import numpy
+>>>>>>> using numpy sort to sort the arrays - let's see how it performs. I'll replace it with kernel function calls later.
 
 np = ak.nplike.NumpyMetadata.instance()
 
