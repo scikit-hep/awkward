@@ -428,7 +428,14 @@ class ListOffsetArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            listarray = ak._v2.contents.listarray.ListArray(
+                self.starts,
+                self.stops,
+                self._content,
+                self._identifier,
+                self._parameters,
+            )
+            return listarray._getitem_next(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             raise NotImplementedError

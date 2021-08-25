@@ -231,7 +231,7 @@ class ListArray(Content):
         nexthead, nexttail = self._headtail(tail)
         outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
 
-        return self.ListOffsetArray(outoffsets, outcontent)
+        return ak._v2.contents.listoffsetarray.ListOffsetArray(outoffsets, outcontent)
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
