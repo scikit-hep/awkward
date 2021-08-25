@@ -10,7 +10,9 @@ from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
 
 
 def test_numpyarray_sort1():
-    v1_array = ak.from_numpy(np.array([3.3, 2.2, 1.1, 5.5, 4.4]), regulararray=True, highlevel=False)
+    v1_array = ak.from_numpy(
+        np.array([3.3, 2.2, 1.1, 5.5, 4.4]), regulararray=True, highlevel=False
+    )
     v2_array = v1_to_v2(v1_array)
     assert ak.to_list(np.sort(v2_array, -1)) == [
         1.1,
@@ -20,19 +22,21 @@ def test_numpyarray_sort1():
         5.5,
     ]
 
-# def test_listoffsetarray_sort1():
-#     v1_array = ak.from_iter(
-#         [[3.3, 2.2, 1.1], [], [5.5, 4.4], [6.6], [9.9, 7.7, 8.8, 10.1]], highlevel=False
-#     )
-#     v2_array = v1_to_v2(v1_array)
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [
-#         [1.1, 2.2, 3.3],
-#         [],
-#         [4.4, 5.5],
-#         [6.6],
-#         [ 7.7, 8.8, 9.9, 10.10],
-#     ]
-#
+
+def test_listoffsetarray_sort1():
+    v1_array = ak.from_iter(
+        [[3.3, 2.2, 1.1], [], [5.5, 4.4], [6.6], [9.9, 7.7, 8.8, 10.1]], highlevel=False
+    )
+    v2_array = v1_to_v2(v1_array)
+    assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [
+        [1.1, 2.2, 3.3],
+        [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9, 10.10],
+    ]
+
+
 # def test_regulararray_sort():
 #     v1_array = ak.from_numpy(
 #         np.arange(2 * 3 * 5).reshape(2, 3, 5), regulararray=True, highlevel=False
