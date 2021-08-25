@@ -248,3 +248,6 @@ class IndexedOptionArray(Content):
                 self._parameters,
             )
             return out2
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        raise NotImplementedError

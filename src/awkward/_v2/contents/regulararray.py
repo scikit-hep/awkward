@@ -459,3 +459,6 @@ class RegularArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        raise NotImplementedError

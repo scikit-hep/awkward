@@ -242,3 +242,6 @@ class ByteMaskedArray(Content):
                 self._parameters,
             )
             return out2._simplify_optiontype()
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        raise NotImplementedError

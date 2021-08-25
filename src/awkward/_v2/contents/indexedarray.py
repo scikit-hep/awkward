@@ -200,3 +200,6 @@ class IndexedArray(Content):
             return self._localindex_axis0()
         else:
             return self.project()._localindex(posaxis, depth)
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        raise NotImplementedError
