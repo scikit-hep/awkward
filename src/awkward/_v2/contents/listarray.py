@@ -177,6 +177,62 @@ class ListArray(Content):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        nplike = self.nplike
+
+        # FIXME
+        # if len(slicestarts) != len(self):
+        #     raise ValueError("cannot fit jagged slice with length {0} into {1} of size {2}".format(len(slicestarts), type(self).__name__, len(self)))
+
+        carrylen = ak._v2.index.Index64.empty(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ListArray_getitem_jagged_carrylen",
+                carrylen.dtype.type,
+                slicestarts.dtype.type,
+                slicestops.dtype.type,
+            ](
+                carrylen.to(nplike),
+                slicestarts.to(nplike),
+                slicestops.to(nplike),
+                len(slicestarts),
+            )
+        )
+
+        sliceindex = ak._v2.index.Index64(slicecontent.data)
+        outoffsets = ak._v2.index.Index64.zeros(len(slicestarts) + 1, nplike)
+        nextcarry = ak._v2.index.Index64.zeros(carrylen[0], nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_ListArray_getitem_jagged_apply",
+                outoffsets.dtype.type,
+                nextcarry.dtype.type,
+                slicestarts.dtype.type,
+                slicestops.dtype.type,
+                sliceindex.dtype.type,
+                self._starts.dtype.type,
+                self._stops.dtype.type,
+            ](
+                outoffsets.to(nplike),
+                nextcarry.to(nplike),
+                slicestarts.to(nplike),
+                slicestops.to(nplike),
+                len(slicestarts),
+                sliceindex.to(nplike),
+                len(sliceindex),
+                self._starts.to(nplike),
+                self._stops.to(nplike),
+                len(self._content),
+            )
+        )
+
+        nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+        nexthead, nexttail = self._headtail(tail)
+        outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
+
+        return self.ListOffsetArray(outoffsets, outcontent)
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 

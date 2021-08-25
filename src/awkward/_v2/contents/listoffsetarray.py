@@ -221,6 +221,12 @@ class ListOffsetArray(Content):
             offsets = self._compact_offsets64(start_at_zero)
             return self._broadcast_tooffsets64(offsets)
 
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        out = ak._v2.contents.listarray.ListArray(
+            self.starts, self.stops, self._content, self._identifier, self._parameters
+        )
+        return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
         if head == ():

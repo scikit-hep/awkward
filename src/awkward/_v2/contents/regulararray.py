@@ -231,6 +231,10 @@ class RegularArray(Content):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        out = self.toListOffsetArray64(True)
+        return out.getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
+
     def maybe_to_nplike(self, nplike):
         out = self._content.maybe_to_nplike(nplike)
         if out is None:
@@ -420,7 +424,38 @@ class RegularArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            if advanced is not None:
+                raise ValueError(
+                    "cannot mix jagged slice with NumPy-style advanced indexing"
+                )
+
+            # if len(head) != self._size:
+            #     raise ValueError("cannot fit jagged slice with length {0} into {1} of size {2}".format(len(head), type(self).__name__, self._size))
+
+            regularlength = self._length
+            singleoffsets = head._offsets
+            multistarts = ak._v2.index.Index64.empty(len(head) * regularlength, nplike)
+            multistops = ak._v2.index.Index64.empty(len(head) * regularlength, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_RegularArray_getitem_jagged_expand",
+                    multistarts.dtype.type,
+                    multistops.dtype.type,
+                    singleoffsets.dtype.type,
+                ](
+                    multistarts.to(nplike),
+                    multistops.to(nplike),
+                    singleoffsets.to(nplike),
+                    len(head),
+                    regularlength,
+                ),
+            )
+
+            down = self._content._getitem_next_jagged(
+                multistarts, multistops, head._content, tail
+            )
+
+            return RegularArray(down, len(head), self._length)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             raise NotImplementedError
