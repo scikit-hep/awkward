@@ -153,88 +153,177 @@ def test_regulararray_sort():
     ]
 
 
-# def test_bytemaskedarray_sort():
-#     content = ak.from_iter(
-#         [
-#             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
-#             [],
-#             [[5.5]],
-#             [[6.6, 7.7, 8.8, 9.9]],
-#             [[], [10.0, 11.1, 12.2]],
-#         ],
-#         highlevel=False,
-#     )
-#     mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-#     v1_array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-#     v2_array = v1_to_v2(v1_array)
-#
-#     assert ak.to_list(v1_array) == [
-#         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
-#         [],
-#         None,
-#         None,
-#         [[], [10.0, 11.1, 12.2]],
-#     ]
-#     assert ak.to_list(v2_to_v1(v2_array.sort(axis=1))) == [
-#         [0, 1, 2],
-#         [],
-#         None,
-#         None,
-#         [0, 1],
-#     ]
-#
-#
-# def test_bitmaskedarray_sort():
-#     v2_array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                     ],
-#                     dtype=np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=False,
-#     )
-#
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [
-#         0,
-#         1,
-#         2,
-#         3,
-#         4,
-#         5,
-#         6,
-#         7,
-#         8,
-#         9,
-#         10,
-#         11,
-#         12,
-#     ]
-#
-#
+def test_bytemaskedarray_sort():
+    content = ak.from_iter(
+        [
+            [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
+            [],
+            [[5.5]],
+            [[6.6, 9.9, 8.8, 7.7]],
+            [[], [12.2, 11.1, 10.0]],
+        ],
+        highlevel=False,
+    )
+    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    v1_array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
+    v2_array = v1_to_v2(v1_array)
+
+    assert ak.to_list(v1_array) == [
+        [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
+        [],
+        None,
+        None,
+        [[], [12.2, 11.1, 10.0]],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
+        [],
+        None,
+        None,
+        [[], [10.0, 11.1, 12.2]],
+    ]
+
+    v2_array = ak._v2.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+    )
+
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+        {"nest": 1.1},
+        None,
+        {"nest": 3.3},
+        None,
+        {"nest": 5.5},
+    ]
+
+
+def test_bitmaskedarray_sort():
+    v2_array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    dtype=np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
+    )
+
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+        0.0,
+        1.0,
+        1.1,
+        2.0,
+        None,
+        None,
+        None,
+        None,
+        3.0,
+        None,
+        3.3,
+        None,
+        5.5,
+    ]
+
+    v2_array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        True,
+                        True,
+                        True,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        False,
+                        True,
+                        False,
+                        True,
+                    ]
+                )
+            )
+        ),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
+    )
+
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+        {"nest": 0.0},
+        {"nest": 1.0},
+        {"nest": 1.1},
+        {"nest": 2.0},
+        None,
+        None,
+        None,
+        None,
+        {"nest": 3.0},
+        None,
+        {"nest": 3.3},
+        None,
+        {"nest": 5.5},
+    ]
+
+
 # def test_unmaskedarray_sort():
 #     v2_array = ak._v2.contents.unmaskedarray.UnmaskedArray(
 #         ak._v2.contents.numpyarray.NumpyArray(
@@ -259,22 +348,38 @@ def test_unionarray_sort():
         v2_array.sort()
     assert str(err.value).startswith("cannot sort unsimplified UnionArray")
 
+    v2_array = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
+        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
+        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+        [
+            ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3])),
+            ak._v2.contents.numpyarray.NumpyArray(np.array([7, 0, 3, 4, 5])),
+        ],
+    )
 
-# def test_recordarray_sort():
-#     v2_array = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         3,
-#     )
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [[0, 1, 2], [0, 1, 2]]
-#
-#
+    assert ak.to_list(v2_to_v1(v2_array)) == [5, 4, 1, 2, 3, 3, 5]
+    # FIXME: _simplify_uniontype() does not simplify them yet
+    # assert ak.to_list(v2_to_v1(v2_array.sort())) == [5, 4, 1, 2, 3, 3, 5]
+
+
+def test_recordarray_sort():
+    v2_array = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        3,
+    )
+    assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [
+        [{"nest": 0.0}, {"nest": 1.1}, {"nest": 2.2}],
+        [{"nest": 3.3}, {"nest": 4.4}, {"nest": 5.5}],
+    ]
+
+
 # def test_indexedarray_sort():
 #     v2_array = ak._v2.contents.indexedarray.IndexedArray(  # noqa: F841
 #         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
@@ -288,127 +393,26 @@ def test_unionarray_sort():
 #         ),
 #     )
 #     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [0, 1, 2, 3, 4, 5, 6]
-#
-#
-# def test_indexedoptionarray_sort():
-#     v2_array = ak._v2.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
-#         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#     )
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [0, 1, 2, 3, 4, 5, 6]
-#
-#
-# def test_bytemaskedarray_sort():
-#     v2_array = ak._v2.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
-#         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         valid_when=True,
-#     )
-#
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [0, 1, 2, 3, 4]
-#
-#
-# def test_bitmaskedarray_sort():
-#     v2_array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         True,
-#                         True,
-#                         True,
-#                         True,
-#                         False,
-#                         False,
-#                         False,
-#                         False,
-#                         True,
-#                         False,
-#                         True,
-#                         False,
-#                         True,
-#                     ]
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array(
-#                         [
-#                             0.0,
-#                             1.0,
-#                             2.0,
-#                             3.0,
-#                             4.0,
-#                             5.0,
-#                             6.0,
-#                             7.0,
-#                             1.1,
-#                             2.2,
-#                             3.3,
-#                             4.4,
-#                             5.5,
-#                             6.6,
-#                         ]
-#                     )
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=False,
-#     )
-#
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [
-#         0,
-#         1,
-#         2,
-#         3,
-#         4,
-#         5,
-#         6,
-#         7,
-#         8,
-#         9,
-#         10,
-#         11,
-#         12,
-#     ]
-#
-#
-# def test_unionarray_sort():
-#     v2_array = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
-#         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
-#         ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
-#         [
-#             ak._v2.contents.recordarray.RecordArray(
-#                 [ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3]))], ["nest"]
-#             ),
-#             ak._v2.contents.recordarray.RecordArray(
-#                 [
-#                     ak._v2.contents.numpyarray.NumpyArray(
-#                         np.array([1.1, 2.2, 3.3, 4.4, 5.5])
-#                     )
-#                 ],
-#                 ["nest"],
-#             ),
-#         ],
-#     )
-#
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [0, 1, 2, 3, 4, 5, 6]
+
+
+def test_indexedoptionarray_sort():
+    v2_array = ak._v2.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
+        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+    )
+    assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [
+        {"nest": 2.2},
+        {"nest": 3.3},
+        None,
+        {"nest": 3.3},
+        None,
+        {"nest": 5.5},
+        {"nest": 6.6},
+    ]

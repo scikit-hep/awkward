@@ -250,4 +250,4 @@ class BitMaskedArray(Content):
         return self.toByteMaskedArray()._localindex(axis, depth)
 
     def _sort(self, axis, kind, order):
-        raise NotImplementedError
+        return self.toByteMaskedArray()._sort(axis, kind, order)

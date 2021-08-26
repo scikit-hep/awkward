@@ -241,7 +241,7 @@ class IndexedOptionArray(Content):
 
             next = self._content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
-            out2 = ak.v2.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,
@@ -250,4 +250,15 @@ class IndexedOptionArray(Content):
             return out2
 
     def _sort(self, axis, kind, order):
+        numnull, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
+
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+
+        return ak._v2.contents.IndexedOptionArray(
+            outindex,
+            next._sort(axis, kind, order),
+            self._identifier,
+            self._parameters,
+        )
+
         raise NotImplementedError

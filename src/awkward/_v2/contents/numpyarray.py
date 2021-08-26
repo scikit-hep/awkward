@@ -265,5 +265,36 @@ class NumpyArray(Content):
         elif len(self.shape) != 1:  # or not self.iscontiguous:?
             return self.toRegularArray._sort(axis, kind, order)
         else:
-            out = self._data
-            return ak._v2.contents.NumpyArray(numpy.sort(out, axis, kind, order))
+            # nplike = self.nplike
+            #
+            # offsets = ak._v2.index.Index64([0, self.shape[0]])
+            # index = ak._v2.index.Index64.empty(self.shape[0], self.nplike)
+            #
+            # for x in range(len(index)):
+            #     print(index[x])
+            #
+            # self._handle_error(
+            #     nplike[
+            #         "awkward_sort",
+            #         self._data.dtype.type,
+            #         self._data.dtype.type,
+            #         numpy.int64,
+            #     ](
+            #         index.to(nplike), # toptr POINTER(c_int64)
+            #         self._data, # fromptr POINTER(c_int64)
+            #         self.shape[0], # length c_int64
+            #         offsets.to(nplike), # offsets POINTER(c_int64)
+            #         len(offsets), # offsetslength c_int64
+            #         1, # parentslength c_int64
+            #         True, # ascending c_bool
+            #         True, # stable c_bool
+            #     )
+            # )
+            # for x in range(len(index)):
+            #     print(index[x])
+            #
+            # return ak._v2.contents.NumpyArray(index)
+
+            # out = self._data
+            # return ak._v2.contents.NumpyArray(numpy.sort(out, axis, kind, order))
+            return ak._v2.contents.NumpyArray(numpy.sort(self._data, axis, kind, order))
