@@ -19,7 +19,7 @@ What is LayoutBuilder
 
 `ak.layout.LayoutBuilder` is the low-level LayoutBuilder that builds layouts, or `ak.layout.Content` arrays. It must be initialized by a JSON string that represents a valid `ak.forms.Form`.
 
-A layout is the composable `ak.layout.Content` elements that determine how an array is structured. The layout may be considered a "low-level" view, as it distinguishes between arrays that have the same logical meaning (i.e. same JSON output and high-level `type`) but different
+A layout consists of composable `ak.layout.Content` elements that determine how an array is structured. The layout may be considered a "low-level" view, as it distinguishes between arrays that have the same logical meaning (i.e. same JSON output and high-level `type`) but different
   * node types, such as `ak.layout.ListArray64` and `ak.layout.ListOffsetArray64`,
   * integer type specialization, such as `ak.layout.ListArray64` and `ak.layout.ListArray32`,
   * or specific values, such as gaps in a `ak.layout.ListArray64`.
@@ -178,7 +178,7 @@ layout
 Nested records
 --------------
 
-When using a RecordArray form you do not have to specify a field, the fields alternate.
+When using a RecordArray form you can not specify a field, the fields alternate.
 
 ```{code-cell}
 form = """
