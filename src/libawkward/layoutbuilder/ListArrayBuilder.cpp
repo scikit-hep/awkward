@@ -8,7 +8,8 @@
 namespace awkward {
 
   ///
-  ListArrayBuilder::ListArrayBuilder(FormBuilderPtr content,
+  template <typename T, typename I>
+  ListArrayBuilder<T, I>::ListArrayBuilder(FormBuilderPtr<T, I> content,
                                      const util::Parameters& parameters,
                                      const std::string& form_key,
                                      const std::string& form_starts,
@@ -29,111 +30,115 @@ namespace awkward {
       .append(vm_output_data_)
       .append(" ")
       .append(form_starts)
-      .append("\n")
+      .append(" ")
       .append(content_.get()->vm_output());
 
     vm_func_.append(content_.get()->vm_func())
-      .append(": ").append(vm_func_name()).append("\n")
+      .append(": ").append(vm_func_name()).append(" ")
       .append(std::to_string(static_cast<utype>(state::begin_list)))
-      .append(" <> if").append("\n")
-      .append(std::to_string(LayoutBuilder::next_error_id())).append(" err ! err @ halt").append("\n")
-      .append("then").append("\n")
-      .append("\n")
-      .append("0").append("\n")
-      .append("begin").append("\n")
-      .append("pause").append("\n")
-      .append("dup ")
+      .append(" <> if ")
+      .append(std::to_string(LayoutBuilder<T, I>::next_error_id())).append(" err ! err @ halt ")
+      .append("then 0 begin pause dup ")
       .append(std::to_string(static_cast<utype>(state::end_list)))
-      .append(" = if").append("\n")
-      .append("drop").append("\n")
-      .append(vm_output_data_).append(" +<- stack").append("\n")
-      .append("exit").append("\n")
-      .append("else").append("\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append("1+").append("\n")
-      .append("then").append("\n")
-      .append("again").append("\n")
-      .append(";").append("\n");
+      .append(" = if drop ")
+      .append(vm_output_data_).append(" +<- stack exit else ")
+      .append(content_.get()->vm_func_name()).append(" ")
+      .append("1+ then again ; ");
 
     vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
-      .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
+      .append("0 ").append(vm_output_data_).append(" <- stack ");
 
     vm_error_.append(content_.get()->vm_error());
-    vm_error_.append("s\"ListArray Builder needs begin_list\"").append("\n");
- }
+    vm_error_.append("s\"ListArray Builder needs begin_list\" ");
+  }
 
+  template <typename T, typename I>
   const std::string
-  ListArrayBuilder::classname() const {
+  ListArrayBuilder<T, I>::classname() const {
     return "ListArrayBuilder";
   }
 
+  template <typename T, typename I>
   const std::string
-  ListArrayBuilder::vm_output() const {
+  ListArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListArrayBuilder::vm_output_data() const {
+  ListArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListArrayBuilder::vm_func() const {
+  ListArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListArrayBuilder::vm_func_name() const {
+  ListArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListArrayBuilder::vm_func_type() const {
+  ListArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListArrayBuilder::vm_from_stack() const {
+  ListArrayBuilder<T, I>::vm_from_stack() const {
     return vm_data_from_stack_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListArrayBuilder::vm_error() const {
+  ListArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  ListArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  ListArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->boolean(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  ListArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->int64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  ListArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->float64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  ListArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->complex(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  ListArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->bytestring(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  ListArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->string(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListArrayBuilder::begin_list(LayoutBuilder* builder) {
+  ListArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     if (!begun_) {
       throw std::invalid_argument(
         std::string("called 'end_list' without 'begin_list' at the same level before it")
@@ -148,8 +153,9 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   void
-  ListArrayBuilder::end_list(LayoutBuilder* builder) {
+  ListArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     if (!begun_) {
       throw std::invalid_argument(
         std::string("called 'end_list' without 'begin_list' at the same level before it")
@@ -164,9 +170,13 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   bool
-  ListArrayBuilder::active() {
+  ListArrayBuilder<T, I>::active() {
     return begun_;
   }
+
+  template class EXPORT_TEMPLATE_INST ListArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST ListArrayBuilder<int64_t, int32_t>;
 
 }

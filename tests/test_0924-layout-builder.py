@@ -9,6 +9,33 @@ import awkward as ak  # noqa: F401
 import awkward.forth
 
 
+def test_record_form2():
+    form = """
+{
+    "class": "RecordArray",
+    "contents": {
+        "one": "float64",
+        "two": "int64"
+    },
+    "form_key": "node0"
+}
+    """
+    builder = ak.layout.LayoutBuilder32(form)
+
+    # the fields alternate
+    builder.float64(1.1)  # "one"
+    builder.int64(2)  # "two"
+    builder.float64(3.3)  # "one"
+    builder.int64(4)  # "two"
+
+    # etc.
+
+    assert ak.to_list(builder.snapshot()) == [
+        {"one": 1.1, "two": 2},
+        {"one": 3.3, "two": 4},
+    ]
+
+
 def test_bit_masked_form():
     form = """
 {
@@ -20,7 +47,7 @@ def test_bit_masked_form():
     "form_key": "node0"
 }
     """
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
@@ -40,7 +67,7 @@ def test_byte_masked_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
@@ -57,7 +84,7 @@ def test_unmasked_form():
     "form_key": "node0"
 }
 """
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
@@ -76,7 +103,7 @@ def test_unsupported_form():
            """
 
     with pytest.raises(ValueError):
-        ak.layout.LayoutBuilder(form)
+        ak.layout.LayoutBuilder32(form)
 
 
 def test_list_offset_form():
@@ -109,7 +136,7 @@ def test_list_offset_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.begin_list()
     builder.float64(1.1)
@@ -158,7 +185,7 @@ def test_indexed_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.int64(11)
     builder.int64(22)
@@ -187,7 +214,7 @@ def test_indexed_option_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.null()
     builder.int64(11)
@@ -230,7 +257,7 @@ def test_regular_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.int64(11)
     builder.int64(22)
@@ -262,7 +289,7 @@ def test_union_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.tag(0)
     builder.float64(1.1)
@@ -310,7 +337,7 @@ def test_union2_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.tag(0)
     builder.float64(1.1)
@@ -339,7 +366,7 @@ def test_union3_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.tag(0)
     builder.float64(1.1)
@@ -393,7 +420,7 @@ def test_record_form():
     "form_key": "node0"
 }
     """
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     # if record contents have the same type,
     # the fields alternate
@@ -422,7 +449,7 @@ def test_error_in_record_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     # if record contents have the same type,
     # the fields alternate
@@ -443,7 +470,7 @@ def test_error_in_numpy_form():
 }
     """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
@@ -464,7 +491,7 @@ def test_categorical_form():
 }
 """
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.int64(2019)
     builder.int64(2020)
@@ -504,7 +531,7 @@ def test_char_form():
     }
 }"""
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.string("one")
     builder.string("two")
@@ -532,7 +559,7 @@ def test_string_form():
     }
 }"""
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.string("one")
     builder.string("two")
@@ -556,7 +583,7 @@ def test_empty_form():
            "form_key": "node0"
        }"""
 
-    builder = ak.layout.LayoutBuilder(form)
+    builder = ak.layout.LayoutBuilder32(form)
 
     builder.begin_list()
     builder.end_list()

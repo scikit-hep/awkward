@@ -30,7 +30,8 @@ def _to_rectilinear(arg):
             ak.layout.Content,
             ak.layout.Record,
             ak.layout.ArrayBuilder,
-            ak.layout.LayoutBuilder,
+            ak.layout.LayoutBuilder32,
+            ak.layout.LayoutBuilder64,
         ),
     ):
         nplike = ak.nplike.of(arg)

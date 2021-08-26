@@ -184,67 +184,71 @@ namespace awkward {
     }
   };
 
-  int64_t LayoutBuilder::next_node_id = 0;
-  int64_t LayoutBuilder::error_id = 0;
+  template <typename T, typename I>
+  int64_t LayoutBuilder<T, I>::next_node_id = 0;
+  template <typename T, typename I>
+  int64_t LayoutBuilder<T, I>::error_id = 0;
 
-  LayoutBuilder::LayoutBuilder(const std::string& json_form,
-                               const ArrayBuilderOptions& options,
-                               bool vm_init)
+  template <typename T, typename I>
+  LayoutBuilder<T, I>::LayoutBuilder(const std::string& json_form,
+                                     const ArrayBuilderOptions& options,
+                                     bool vm_init)
     : initial_(options.initial()),
       length_(8),
       builder_(nullptr),
       vm_(nullptr),
       vm_input_data_("data"),
       vm_source_() {
-    LayoutBuilder::error_id = 0;
-    vm_source_ = std::string("variable err").append("\n");
+    LayoutBuilder<T, I>::error_id = 0;
+    vm_source_ = std::string("variable err ");
     vm_source_.append("input ")
-      .append(vm_input_data_).append("\n");
+      .append(vm_input_data_).append(" ");
 
     initialise_builder(json_form);
 
-    vm_source_.append(builder_.get()->vm_error()).append("\n");
-    vm_source_.append(builder_.get()->vm_output()).append("\n");
-    vm_source_.append(builder_.get()->vm_func()).append("\n");
-    vm_source_.append(builder_.get()->vm_from_stack()).append("\n");
+    vm_source_.append(builder_.get()->vm_error()).append(" ");
+    vm_source_.append(builder_.get()->vm_output()).append(" ");
+    vm_source_.append(builder_.get()->vm_func()).append(" ");
+    vm_source_.append(builder_.get()->vm_from_stack()).append(" ");
 
-    vm_source_.append("0").append("\n")
-      .append("begin").append("\n")
-      .append("pause").append("\n")
-      .append(builder_.get()->vm_func_name()).append("\n")
-      .append("1+").append("\n")
-      .append("again").append("\n");
+    vm_source_.append("0 begin pause ")
+      .append(builder_.get()->vm_func_name())
+      .append(" 1+ again ");
 
     if (vm_init) {
       initialise();
     }
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::initialise_builder(const std::string& json_form) {
+  LayoutBuilder<T, I>::initialise_builder(const std::string& json_form) {
     try {
       builder_ = form_builder_from_json(json_form);
     }
-    catch (...) {
+    catch (const std::exception& e) {
       throw std::invalid_argument(
-        std::string("builder initialization failed ") + FILENAME(__LINE__));
+        std::string("builder initialization failed:\n\t")
+        + e.what() + std::string(" ")
+        + FILENAME(__LINE__));
     }
   }
 
+  template <typename T, typename I>
   template <typename JSON>
-  FormBuilderPtr
-  from_json(const JSON& json_doc) {
+  FormBuilderPtr<T, I>
+  LayoutBuilder<T, I>::from_json(const JSON& json_doc) {
 
     if (json_doc.IsString()) {
       std::string primitive = json_doc.GetString();
       std::string json_form_key = std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id());
+        + std::to_string(LayoutBuilder<T, I>::next_id());
 
-      return std::make_shared<NumpyArrayBuilder>(util::Parameters(),
-                                                 json_form_key,
-                                                 primitive,
-                                                 primitive_to_state(primitive),
-                                                 primitive_to_vm_format(primitive));
+      return std::make_shared<NumpyArrayBuilder<T, I>>(util::Parameters(),
+                                                       json_form_key,
+                                                       primitive,
+                                                       primitive_to_state(primitive),
+                                                       primitive_to_vm_format(primitive));
     }
 
     std::string json_form_key;
@@ -254,7 +258,7 @@ namespace awkward {
     if (json_doc.HasMember("form_key")) {
       if (json_doc["form_key"].IsNull()) {
         json_form_key = std::string("node-id")
-          + std::to_string(LayoutBuilder::next_id());
+          + std::to_string(LayoutBuilder<T, I>::next_id());
       }
       else if (json_doc["form_key"].IsString()) {
         json_form_key = json_doc["form_key"].GetString();
@@ -263,6 +267,10 @@ namespace awkward {
         throw std::invalid_argument(
           std::string("'form_key' must be null or a string") + FILENAME(__LINE__));
       }
+    }
+    else {
+      json_form_key = std::string("node-id")
+        + std::to_string(LayoutBuilder<T, I>::next_id());
     }
 
     if (json_doc.IsObject()  &&
@@ -292,9 +300,9 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
 
-        return std::make_shared<BitMaskedArrayBuilder>(from_json(json_doc["content"]),
-                                                       json_form_parameters,
-                                                       json_form_key);
+        return std::make_shared<BitMaskedArrayBuilder<T, I>>(from_json(json_doc["content"]),
+                                                             json_form_parameters,
+                                                             json_form_key);
       }
       if (cls == std::string("ByteMaskedArray")) {
         if (!json_doc.HasMember("content")) {
@@ -302,12 +310,12 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
 
-        return std::make_shared<ByteMaskedArrayBuilder>(from_json(json_doc["content"]),
-                                                        json_form_parameters,
-                                                        json_form_key);
+        return std::make_shared<ByteMaskedArrayBuilder<T, I>>(from_json(json_doc["content"]),
+                                                              json_form_parameters,
+                                                              json_form_key);
       }
       if (cls == std::string("EmptyArray")) {
-        return std::make_shared<EmptyArrayBuilder>(json_form_parameters);
+        return std::make_shared<EmptyArrayBuilder<T, I>>(json_form_parameters);
       }
 
       if ((cls == std::string("IndexedArray"))  ||
@@ -332,11 +340,11 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<IndexedArrayBuilder>(from_json(json_doc["content"]),
-                                                     json_form_parameters,
-                                                     json_form_key,
-                                                     index_form_to_name(json_form_index),
-                                                     is_categorical);
+        return std::make_shared<IndexedArrayBuilder<T, I>>(from_json(json_doc["content"]),
+                                                           json_form_parameters,
+                                                           json_form_key,
+                                                           index_form_to_name(json_form_index),
+                                                           is_categorical);
       }
 
       if ((cls == std::string("IndexedOptionArray"))  ||
@@ -360,11 +368,11 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<IndexedOptionArrayBuilder>(from_json(json_doc["content"]),
-                                                           json_form_parameters,
-                                                           json_form_key,
-                                                           index_form_to_name(json_form_index),
-                                                           is_categorical);
+        return std::make_shared<IndexedOptionArrayBuilder<T, I>>(from_json(json_doc["content"]),
+                                                                 json_form_parameters,
+                                                                 json_form_key,
+                                                                 index_form_to_name(json_form_index),
+                                                                 is_categorical);
       }
 
       if ((cls == std::string("ListArray"))  ||
@@ -387,10 +395,10 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<ListArrayBuilder>(from_json(json_doc["content"]),
-                                                  json_form_parameters,
-                                                  json_form_key,
-                                                  index_form_to_name(json_form_starts));
+        return std::make_shared<ListArrayBuilder<T, I>>(from_json(json_doc["content"]),
+                                                        json_form_parameters,
+                                                        json_form_key,
+                                                        index_form_to_name(json_form_starts));
       }
 
       if ((cls == std::string("ListOffsetArray"))  ||
@@ -416,11 +424,11 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<ListOffsetArrayBuilder>(from_json(json_doc["content"]),
-                                                        json_form_parameters,
-                                                        json_form_key,
-                                                        index_form_to_name(json_form_offsets),
-                                                        is_string_builder);
+        return std::make_shared<ListOffsetArrayBuilder<T, I>>(from_json(json_doc["content"]),
+                                                              json_form_parameters,
+                                                              json_form_key,
+                                                              index_form_to_name(json_form_offsets),
+                                                              is_string_builder);
       }
       if (cls == std::string("NumpyArray")) {
         std::string primitive;
@@ -433,15 +441,15 @@ namespace awkward {
              std::string("NumpyForm must have a 'primitive' field")
                          + FILENAME(__LINE__));
          }
-        return std::make_shared<NumpyArrayBuilder>(json_form_parameters,
-                                                   json_form_key,
-                                                   primitive,
-                                                   primitive_to_state(primitive),
-                                                   primitive_to_vm_format(primitive));
+        return std::make_shared<NumpyArrayBuilder<T, I>>(json_form_parameters,
+                                                         json_form_key,
+                                                         primitive,
+                                                         primitive_to_state(primitive),
+                                                         primitive_to_vm_format(primitive));
       }
       if (cls == std::string("RecordArray")) {
         util::RecordLookupPtr recordlookup(nullptr);
-        std::vector<FormBuilderPtr> contents;
+        std::vector<FormBuilderPtr<T, I>> contents;
         if (json_doc.HasMember("contents")  &&  json_doc["contents"].IsArray()) {
           for (auto& x : json_doc["contents"].GetArray()) {
             contents.push_back(from_json(x));
@@ -459,10 +467,10 @@ namespace awkward {
             std::string("RecordArray 'contents' must be a JSON list or a "
                         "JSON object") + FILENAME(__LINE__));
         }
-        return std::make_shared<RecordArrayBuilder>(contents,
-                                                    recordlookup,
-                                                    json_form_parameters,
-                                                    json_form_key);
+        return std::make_shared<RecordArrayBuilder<T, I>>(contents,
+                                                          recordlookup,
+                                                          json_form_parameters,
+                                                          json_form_key);
       }
       if (cls == std::string("RegularArray")) {
         if (!json_doc.HasMember("content")) {
@@ -474,10 +482,10 @@ namespace awkward {
             cls + std::string(" is missing its 'size'") + FILENAME(__LINE__));
         }
         int64_t json_form_size = json_doc["size"].GetInt64();
-        return std::make_shared<RegularArrayBuilder>(from_json(json_doc["content"]),
-                                                     json_form_parameters,
-                                                     json_form_key,
-                                                     json_form_size);
+        return std::make_shared<RegularArrayBuilder<T, I>>(from_json(json_doc["content"]),
+                                                           json_form_parameters,
+                                                           json_form_key,
+                                                           json_form_size);
       }
 
       if ((cls == std::string("UnionArray"))  ||
@@ -502,7 +510,7 @@ namespace awkward {
             cls + std::string(" is missing a 'index' specification")
             + FILENAME(__LINE__));
         }
-        std::vector<FormBuilderPtr> contents;
+        std::vector<FormBuilderPtr<T, I>> contents;
         if (json_doc.HasMember("contents")  &&  json_doc["contents"].IsArray()) {
           for (auto& x : json_doc["contents"].GetArray()) {
             contents.push_back(from_json(x));
@@ -514,11 +522,11 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
 
-        return std::make_shared<UnionArrayBuilder>(contents,
-                                                   json_form_parameters,
-                                                   json_form_key,
-                                                   json_form_tags,
-                                                   json_form_index);
+        return std::make_shared<UnionArrayBuilder<T, I>>(contents,
+                                                         json_form_parameters,
+                                                         json_form_key,
+                                                         json_form_tags,
+                                                         json_form_index);
       }
       if (cls == std::string("UnmaskedArray")) {
         if (!json_doc.HasMember("content")) {
@@ -526,9 +534,9 @@ namespace awkward {
             cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
 
-        return std::make_shared<UnmaskedArrayBuilder>(from_json(json_doc["content"]),
-                                                      json_form_parameters,
-                                                      json_form_key);
+        return std::make_shared<UnmaskedArrayBuilder<T, I>>(from_json(json_doc["content"]),
+                                                            json_form_parameters,
+                                                            json_form_key);
       }
       throw std::invalid_argument(
         std::string("LayoutBuilder does not recognise the Form ")
@@ -539,20 +547,28 @@ namespace awkward {
     rj::PrettyWriter<rj::StringBuffer> writer(stringbuffer);
     json_doc.Accept(writer);
     throw std::invalid_argument(
-            std::string("JSON cannot be recognized as a Form:\n\n")
+            std::string("JSON cannot be recognized as a Form:\n")
             + stringbuffer.GetString() + FILENAME(__LINE__));
   }
 
-  FormBuilderPtr
-  LayoutBuilder::form_builder_from_json(const std::string& json_form) {
+  template <typename T, typename I>
+  FormBuilderPtr<T, I>
+  LayoutBuilder<T, I>::form_builder_from_json(const std::string& json_form) {
     rj::Document json_doc;
     json_doc.Parse<rj::kParseNanAndInfFlag>(json_form.c_str());
 
-    return from_json(json_doc);
+    if (json_doc.IsObject()) {
+      return from_json(json_doc);
+    }
+
+    throw std::invalid_argument(
+            std::string("JSON cannot be recognized as a Form:\n")
+            + json_form + FILENAME(__LINE__));
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::connect(const std::shared_ptr<ForthMachine32>& vm) {
+  LayoutBuilder<T, I>::connect(const std::shared_ptr<ForthMachineOf<T, I>>& vm) {
     if (vm_ == nullptr) {
       vm_ = vm;
 
@@ -569,9 +585,10 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::initialise() {
-    vm_ = std::make_shared<ForthMachine32>(vm_source());
+  LayoutBuilder<T, I>::initialise() {
+    vm_ = std::make_shared<ForthMachineOf<T, I>>(vm_source());
 
     std::shared_ptr<void> ptr(
       kernel::malloc<void>(kernel::lib::cpu, initial_*(int64_t)sizeof(uint8_t)));
@@ -580,21 +597,24 @@ namespace awkward {
     vm_.get()->run(vm_inputs_map_);
   }
 
-  template<typename T>
+  template <typename T, typename I>
+  template <typename D>
   void
-  LayoutBuilder::set_data(T x) {
-    reinterpret_cast<T*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
+  LayoutBuilder<T, I>::set_data(D x) {
+    reinterpret_cast<D*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::resume() const {
+  LayoutBuilder<T, I>::resume() const {
     if (vm_.get()->resume() == util::ForthError::user_halt) {
       throw std::invalid_argument(vm_.get()->string_at(vm_.get()->stack().back()));
     }
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::debug_step() const {
+  LayoutBuilder<T, I>::debug_step() const {
     std::cout << "stack ";
     for (auto const& i : vm_.get()->stack()) {
       std::cout << i << ", ";
@@ -608,13 +628,15 @@ namespace awkward {
     // FIXME refactoring std::cout << "array:\n" << snapshot().get()->tostring() << "\n";
   }
 
+  template <typename T, typename I>
   const std::string
-  LayoutBuilder::vm_source() const {
+  LayoutBuilder<T, I>::vm_source() const {
     return vm_source_;
   }
 
-  const std::shared_ptr<ForthMachine32>
-  LayoutBuilder::vm() const {
+  template <typename T, typename I>
+  const std::shared_ptr<ForthMachineOf<T, I>>
+  LayoutBuilder<T, I>::vm() const {
     if (vm_ != nullptr) {
       return vm_;
     }
@@ -625,93 +647,134 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   int64_t
-  LayoutBuilder::next_id() {
-    return LayoutBuilder::next_node_id++;
+  LayoutBuilder<T, I>::next_id() {
+    return LayoutBuilder<T, I>::next_node_id++;
   }
 
+  template <typename T, typename I>
   int64_t
-  LayoutBuilder::next_error_id() {
-    return LayoutBuilder::error_id++;
+  LayoutBuilder<T, I>::next_error_id() {
+    return LayoutBuilder<T, I>::error_id++;
   }
 
+  template <typename T, typename I>
   int64_t
-  LayoutBuilder::length() const {
+  LayoutBuilder<T, I>::length() const {
     return length_;
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::pre_snapshot() const {
-    vm_.get()->maybe_throw(util::ForthError::user_halt, ignore_);
+  LayoutBuilder<T, I>::pre_snapshot() const {
+    vm().get()->maybe_throw(util::ForthError::user_halt, ignore_);
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::null() {
+  LayoutBuilder<T, I>::null() {
     vm_.get()->stack_push(static_cast<utype>(state::null));
     resume();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::boolean(bool x) {
+  LayoutBuilder<T, I>::boolean(bool x) {
     builder_.get()->boolean(x, this);
   }
 
-  template<>
+  template<typename T, typename I>
   void
-  LayoutBuilder::add<bool>(bool x) {
+  LayoutBuilder<T, I>::add_bool(bool x) {
     set_data<bool>(x);
     vm_.get()->stack_push(static_cast<utype>(state::boolean));
     resume();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::int64(int64_t x) {
-    builder_.get()->int64(x, this);
+  LayoutBuilder<T, I>::int64(int64_t x) {
+    if (vm_.get()->is_ready()) {
+      builder_.get()->int64(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
-  template<>
+  template<typename T, typename I>
   void
-  LayoutBuilder::add<int64_t>(int64_t x) {
+  LayoutBuilder<T, I>::add_int64(int64_t x) {
     set_data<int64_t>(x);
     vm_.get()->stack_push(static_cast<utype>(state::int64));
     resume();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::float64(double x) {
-    builder_.get()->float64(x, this);
+  LayoutBuilder<T, I>::float64(double x) {
+    if (vm_.get()->is_ready()) {
+      builder_.get()->float64(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
-  template<>
+  template<typename T, typename I>
   void
-  LayoutBuilder::add<double>(double x) {
+  LayoutBuilder<T, I>::add_double(double x) {
     set_data<double>(x);
     vm_.get()->stack_push(static_cast<utype>(state::float64));
     resume();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::complex(std::complex<double> x) {
-    builder_.get()->complex(x, this);
+  LayoutBuilder<T, I>::complex(std::complex<double> x) {
+    if (vm_.get()->is_ready()) {
+      builder_.get()->complex(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
-  template<>
+  template<typename T, typename I>
   void
-  LayoutBuilder::add<std::complex<double>>(std::complex<double> x) {
+  LayoutBuilder<T, I>::add_complex(std::complex<double> x) {
     set_data<std::complex<double>>(x);
     vm_.get()->stack_push(static_cast<utype>(state::complex128));
     resume();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::bytestring(const char* x) {
+  LayoutBuilder<T, I>::bytestring(const char* x) {
     throw std::runtime_error(
       std::string("LayoutBuilder a null terminated 'bytestring' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::bytestring(const char* x, int64_t length) {
+  LayoutBuilder<T, I>::bytestring(const char* x, int64_t length) {
     for (int64_t i = 0; i < length; i++) {
       set_data<uint8_t>((uint8_t)x[i]);
       vm_.get()->stack_push(static_cast<utype>(state::uint8));
@@ -719,20 +782,33 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::bytestring(const std::string& x) {
-    builder_.get()->bytestring(x, this);
+  LayoutBuilder<T, I>::bytestring(const std::string& x) {
+    if (vm_.get()->is_ready()) {
+      builder_.get()->bytestring(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::string(const char* x) {
+  LayoutBuilder<T, I>::string(const char* x) {
     throw std::runtime_error(
       std::string("LayoutBuilder a null terminated 'string' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::string(const char* x, int64_t length) {
+  LayoutBuilder<T, I>::string(const char* x, int64_t length) {
     for (int64_t i = 0; i < length; i++) {
       set_data<uint8_t>((uint8_t)x[i]);
       vm_.get()->stack_push(static_cast<utype>(state::uint8));
@@ -740,53 +816,93 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::string(const std::string& x) {
-    builder_.get()->string(x, this);
+  LayoutBuilder<T, I>::string(const std::string& x) {
+    if (vm_.get()->is_ready()) {
+      builder_.get()->string(x, this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
-  template<>
+  template<typename T, typename I>
   void
-  LayoutBuilder::add<const std::string&>(const std::string& x) {
+  LayoutBuilder<T, I>::add_string(const std::string& x) {
     begin_list();
     string(x.c_str(), (int64_t)x.length());
     end_list();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::begin_list() {
-    builder_.get()->begin_list(this);
+  LayoutBuilder<T, I>::begin_list() {
+    if (vm_.get()->is_ready()) {
+      builder_.get()->begin_list(this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::add_begin_list() {
+  LayoutBuilder<T, I>::add_begin_list() {
     vm_.get()->stack_push(static_cast<utype>(state::begin_list));
     vm_.get()->resume();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::end_list() {
-    builder_.get()->end_list(this);
+  LayoutBuilder<T, I>::end_list() {
+    if (vm_.get()->is_ready()) {
+      builder_.get()->end_list(this);
+    }
+    else {
+      throw std::invalid_argument(
+        "Virtual Machine has been halted; "
+        "the last user error was: "
+        + vm_.get()->string_at(vm_.get()->stack().back())
+        + FILENAME(__LINE__)
+      );
+    }
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::add_end_list() {
+  LayoutBuilder<T, I>::add_end_list() {
     vm_.get()->stack_push(static_cast<utype>(state::end_list));
     vm_.get()->resume();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::index(int64_t x) {
+  LayoutBuilder<T, I>::index(int64_t x) {
     vm_.get()->stack_push((int32_t)x);
     vm_.get()->stack_push(static_cast<utype>(state::index));
     vm_.get()->resume();
   }
 
+  template <typename T, typename I>
   void
-  LayoutBuilder::tag(int8_t x) {
+  LayoutBuilder<T, I>::tag(int8_t x) {
     set_data<int8_t>(x);
     vm_.get()->stack_push(static_cast<utype>(state::tag));
     vm_.get()->resume();
   }
+
+  template class EXPORT_TEMPLATE_INST LayoutBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST LayoutBuilder<int64_t, int32_t>;
 
 }

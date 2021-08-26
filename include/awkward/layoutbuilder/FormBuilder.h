@@ -13,7 +13,11 @@
 namespace awkward {
 
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
-  class LayoutBuilder;
+
+  template <typename T, typename I> class LayoutBuilder;
+
+  template<typename T, typename I>
+  using LayoutBuilderPtr = LayoutBuilder<T, I>*;
 
   /// @class FormBuilder
   ///
@@ -21,6 +25,7 @@ namespace awkward {
   /// Every builder will have an output buffer based on the
   /// key_format="part{partition}-{form_key}-{attribute}"
   ///
+  template<typename T, typename I>
   class LIBAWKWARD_EXPORT_SYMBOL FormBuilder {
   public:
     /// @brief Virtual destructor acts as a first non-inline virtual function
@@ -74,28 +79,28 @@ namespace awkward {
 
     /// @brief Adds a boolean value `x` to the accumulated data.
     virtual void
-      boolean(bool x, LayoutBuilder* builder) {
+      boolean(bool x, LayoutBuilderPtr<T, I> builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'boolean' is not implemented yet"));
       }
 
     /// @brief Adds an integer value `x` to the accumulated data.
     virtual void
-      int64(int64_t x, LayoutBuilder* builder) {
+      int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'int64' is not implemented yet"));
       }
 
     /// @brief Adds a real value `x` to the accumulated data.
     virtual void
-      float64(double x, LayoutBuilder* builder) {
+      float64(double x, LayoutBuilderPtr<T, I> builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'float64' is not implemented yet"));
       }
 
     /// @brief Adds a complex value `x` to the accumulated data.
     virtual void
-      complex(std::complex<double> x, LayoutBuilder* builder) {
+      complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'complex' is not implemented yet"));
       }
@@ -103,7 +108,7 @@ namespace awkward {
     /// @brief Adds an unencoded bytestring `x` in STL format to the
     /// accumulated data.
     virtual void
-      bytestring(const std::string& x, LayoutBuilder* builder) {
+      bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'bytestring' is not implemented yet"));
       }
@@ -111,21 +116,21 @@ namespace awkward {
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
     virtual void
-      string(const std::string& x, LayoutBuilder* builder) {
+      string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'string' is not implemented yet"));
       }
 
     /// @brief Begins building a nested list.
     virtual void
-      begin_list(LayoutBuilder* builder) {
+      begin_list(LayoutBuilderPtr<T, I> builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'begin_list' is not implemented yet"));
       }
 
     /// @brief Ends a nested list.
     virtual void
-      end_list(LayoutBuilder* builder) {
+      end_list(LayoutBuilderPtr<T, I> builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'end_list' is not implemented yet"));
       }
@@ -138,6 +143,10 @@ namespace awkward {
       }
 
   };
+
+  template <typename T, typename I>
+  using FormBuilderPtr = std::shared_ptr<FormBuilder<T, I>>;
+
 }
 
 #endif // AWKWARD_FORMBUILDER_H_

@@ -6,6 +6,10 @@
 
 namespace awkward {
 
-  FormBuilder::~FormBuilder() = default;
+  template <typename T, typename I>
+  FormBuilder<T, I>::~FormBuilder() = default;
+
+  template class EXPORT_TEMPLATE_INST FormBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST FormBuilder<int64_t, int32_t>;
 
 }

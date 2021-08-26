@@ -8,13 +8,14 @@
 namespace awkward {
 
   ///
-  UnionArrayBuilder::UnionArrayBuilder(const std::vector<FormBuilderPtr>& contents,
-                                       const util::Parameters& parameters,
-                                       const std::string& form_key,
-                                       const std::string& form_tags,
-                                       const std::string& form_index,
-                                       const std::string attribute,
-                                       const std::string partition)
+  template <typename T, typename I>
+  UnionArrayBuilder<T, I>::UnionArrayBuilder(const std::vector<FormBuilderPtr<T, I>>& contents,
+                                             const util::Parameters& parameters,
+                                             const std::string& form_key,
+                                             const std::string& form_tags,
+                                             const std::string& form_index,
+                                             const std::string attribute,
+                                             const std::string partition)
     : parameters_(parameters),
       tag_(0),
       form_index_(index_form_to_name(form_index)) {
@@ -37,20 +38,20 @@ namespace awkward {
       .append(vm_output_tags_)
       .append(" ")
       .append(index_form_to_name(form_tags))
-      .append("\n");
+      .append(" ");
 
     vm_func_name_ = std::string(form_key).append("-").append(attribute);
     for (auto const& content : contents_) {
       vm_func_.append(content.get()->vm_func());
     }
     vm_func_.append(": ")
-      .append(vm_func_name_).append("\n")
+      .append(vm_func_name_).append(" ")
       .append(vm_func_type())
-      .append(" = if").append("\n");
+      .append(" = if ");
 
-    vm_func_.append("0 data seek\n")
-      .append("data ").append(index_form_to_vm_format(form_tags))
-      .append("-> stack dup ").append(vm_output_tags_).append(" <- stack\n");
+    vm_func_.append("0 data seek data ")
+      .append(index_form_to_vm_format(form_tags))
+      .append("-> stack dup ").append(vm_output_tags_).append(" <- stack ");
 
     int64_t tag = 0;
     int64_t contents_size = (int64_t)contents_.size();
@@ -62,111 +63,127 @@ namespace awkward {
       }
 
       vm_func_.append(std::to_string(tag++))
-        .append(" = if").append("\n");
+        .append(" = if ");
 
       if (drop) {
-        vm_func_.append("drop").append("\n");
+        vm_func_.append("drop ");
         drop = false;
       }
 
-      vm_func_.append("pause").append("\n");
+      vm_func_.append("pause ");
 
       vm_func_.append(content.get()->vm_func_name())
-        .append("\n")
-        .append("exit").append("\n");
-
-      vm_func_.append("then").append("\n");
+        .append(" exit then ");
     }
-    vm_func_.append(std::to_string(LayoutBuilder::next_error_id()))
-    .append(" err ! err @ halt").append("\n")
-    .append("then\n;\n\n");
+    vm_func_.append(std::to_string(LayoutBuilder<T, I>::next_error_id()))
+    .append(" err ! err @ halt then ; ");
 
-    vm_error_.append("s\" Union Array Builder error\"\n");
+    vm_error_.append("s\" Union Array Builder error\" ");
   }
 
+  template <typename T, typename I>
   const std::string
-  UnionArrayBuilder::classname() const {
+  UnionArrayBuilder<T, I>::classname() const {
     return "UnionArrayBuilder";
   }
 
+  template <typename T, typename I>
   const std::string
-  UnionArrayBuilder::vm_output() const {
+  UnionArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnionArrayBuilder::vm_output_data() const {
+  UnionArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnionArrayBuilder::vm_func() const {
+  UnionArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnionArrayBuilder::vm_func_name() const {
+  UnionArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnionArrayBuilder::vm_func_type() const {
+  UnionArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnionArrayBuilder::vm_from_stack() const {
+  UnionArrayBuilder<T, I>::vm_from_stack() const {
     return vm_data_from_stack_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnionArrayBuilder::vm_error() const {
+  UnionArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::tag(int8_t x) {
+  UnionArrayBuilder<T, I>::tag(int8_t x) {
     tag_ = x;
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  UnionArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->boolean(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  UnionArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->int64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  UnionArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->float64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  UnionArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->complex(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  UnionArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->bytestring(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  UnionArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->string(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::begin_list(LayoutBuilder* builder) {
+  UnionArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->begin_list(builder);
   }
 
+  template <typename T, typename I>
   void
-  UnionArrayBuilder::end_list(LayoutBuilder* builder) {
+  UnionArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)tag_].get()->end_list(builder);
   }
+
+  template class EXPORT_TEMPLATE_INST UnionArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST UnionArrayBuilder<int64_t, int32_t>;
 
 }
