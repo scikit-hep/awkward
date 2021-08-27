@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from __future__ import absolute_import
+from awkward.operations.structure import combinations
 
 try:
     from collections.abc import Iterable
@@ -9,6 +10,8 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
+
+from functools import reduce
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -503,6 +506,33 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def localindex(self, axis):
         return self._localindex(axis, 0)
+
+    def _combinations_axis0(self, n, replacement, recordlookup, parameters):
+        size = len(self)
+        if replacement:
+            size += (n - 1);
+        thisn = n
+        combinationslen = 0
+        if thisn < size:
+            combinationslen = 0
+        elif thisn == size:
+            combinationslen = 1
+        else:
+            if thisn * 2 > size:
+                thisn = size - thisn
+            combinationslen = size
+            loopenumerator = range(2, thisn)
+            combinationslen = reduce(lambda x, y: x * y, loopenumerator, combinationslen)
+            combinationslen = reduce(lambda x, y: x / y, loopenumerator, combinationslen)
+        tocarry = []
+        tocarryraw = []
+        for j in range(n):
+            ptr = ak._v2.index.Index64.empty(combinationslen)
+            tocarry.append(ptr)
+            tocarryraw.append(ptr.to(self.nplike))
+            toindex = ak._v2.index.Index64.empty(n)
+            fromindex = ak._v2.index.Index64.empty(n)
+        
 
     def combinations(self, n, replacement, keys, parameters, axis):
         recordlookup = []

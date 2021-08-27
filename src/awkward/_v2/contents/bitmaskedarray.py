@@ -250,4 +250,4 @@ class BitMaskedArray(Content):
         return self.toByteMaskedArray()._localindex(axis, depth)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        raise NotImplementedError
+        return self.toByteMaskedArray()._combinations(n, replacement, recordlookup, parameters, axis, depth)
