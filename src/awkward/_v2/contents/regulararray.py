@@ -461,7 +461,7 @@ class RegularArray(Content):
             )
 
     def _sort(self, axis, kind, order):
-        def sort_next(x, axis, kind, order):
+        def sort_next(x, axis=axis, kind=kind, order=order):
             return x._sort(axis, kind, order)
 
         if isinstance(self._content, ak._v2.contents.NumpyArray):
@@ -469,9 +469,6 @@ class RegularArray(Content):
                 [
                     sort_next(
                         self._content[i * self._size : (i + 1) * self._size],
-                        axis,
-                        kind,
-                        order,
                     )
                     for i in range(self._length)
                 ]

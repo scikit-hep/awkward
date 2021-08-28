@@ -428,7 +428,7 @@ class ListArray(Content):
             )
 
     def _sort(self, axis, kind, order):
-        def sort_next(x, axis, kind, order):
+        def sort_next(x, axis=axis, kind=kind, order=order):
             return x._sort(axis, kind, order)
 
         if isinstance(self._content, ak._v2.contents.NumpyArray):
@@ -436,9 +436,6 @@ class ListArray(Content):
                 [
                     sort_next(
                         self._content[self._starts[i] : self._stops[i]],
-                        axis,
-                        kind,
-                        order,
                     )
                     for i in range(len(self._starts))
                 ]
