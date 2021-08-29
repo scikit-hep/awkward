@@ -184,7 +184,9 @@ def readspec():
     ) as specfile:
         loadfile = yaml.safe_load(specfile)
         indspec = loadfile["kernels"]
-        data = loadfile["tests"]
+        data = yaml.safe_load(
+            open(os.path.join(CURRENT_DIR, "..", "test-data.yml"), "r")
+        )["tests"]
         for spec in indspec:
             if "def " in spec["definition"]:
                 for childfunc in spec["specializations"]:
