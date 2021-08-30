@@ -167,6 +167,48 @@ class IndexedOptionArray(Content):
 
         return numnull[0], nextcarry, outindex
 
+    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+        nplike = self.nplike
+        if len(slicestarts) != len(self):
+            raise ValueError(
+                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                    len(slicestarts), type(self).__name__, len(self)
+                )
+            )
+
+        numnull, nextcarry, outindex = self.nextcarry_outindex(nplike)
+
+        reducedstarts = ak._v2.index.Index64.empty(len(self) - numnull, nplike)
+        reducedstops = ak._v2.index.Index64.empty(len(self) - numnull, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_MaskedArray_getitem_next_jagged_project",
+                outindex.dtype.type,
+                slicestarts.dtype.type,
+                slicestops.dtype.type,
+                reducedstarts.dtype.type,
+                reducedstops.dtype.type,
+            ](
+                outindex.to(nplike),
+                slicestarts.to(nplike),
+                slicestops.to(nplike),
+                reducedstarts.to(nplike),
+                reducedstops.to(nplike),
+                len(self),
+            )
+        )
+        next = self._content._carry(nextcarry, True, NestedIndexError)
+        out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
+        out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            outindex, out, self._identifier, self._parameters
+        )
+        return out2._simplify_optiontype()
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -199,7 +241,7 @@ class IndexedOptionArray(Content):
             raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))

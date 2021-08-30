@@ -202,6 +202,132 @@ class Content(object):
 
         return tuple(out)
 
+    def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
+        # if this is in a tuple-slice and really should be 0, it will be trimmed later
+        length = 1 if length == 0 else length
+        nplike = self.nplike
+
+        index = ak._v2.index.Index64(head._index)
+        outindex = ak._v2.index.Index64.empty(len(index) * length, nplike)
+
+        self._handle_error(
+            nplike["awkward_missing_repeat", outindex.dtype.type, index.dtype.type](
+                outindex.to(nplike),
+                index.to(nplike),
+                len(index),
+                length,
+                raw._size,
+            )
+        )
+
+        out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            outindex, raw._content, None, self._parameters
+        )
+
+        return ak._v2.contents.regulararray.RegularArray(
+            out._simplify_optiontype(), len(index), 1, None, self._parameters
+        )
+
+    def _getitem_next_missing_jagged(self, head, tail, advanced, that):
+        nplike = self.nplike
+        jagged = head._content.toListOffsetArray64()
+        if not jagged:
+            raise ValueError(
+                "logic error: calling getitem_next_missing_jagged with bad slice type"
+            )
+
+        index = ak._v2.index.Index64(head._index)
+        content = that._getitem_at(0)
+        if len(content) < len(index):
+            raise ValueError(
+                "cannot fit masked jagged slice with length {0} into {1} of size {2}".format(
+                    len(index), type(that).__name__, len(content)
+                )
+            )
+
+        outputmask = ak._v2.index.Index64.empty(len(index), nplike)
+        starts = ak._v2.index.Index64.empty(len(index), nplike)
+        stops = ak._v2.index.Index64.empty(len(index), nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+                index.dtype.type,
+                jagged._offsets.dtype.type,
+                outputmask.dtype.type,
+                starts.dtype.type,
+                stops.dtype.type,
+            ](
+                index.to(nplike),
+                jagged._offsets.to(nplike),
+                outputmask.to(nplike),
+                starts.to(nplike),
+                stops.to(nplike),
+                len(index),
+            )
+        )
+
+        tmp = content._getitem_next_jagged(starts, stops, jagged._content, tail)
+        out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            outputmask, tmp, None, self._parameters
+        )
+
+        return ak._v2.contents.regulararray.RegularArray(
+            out._simplify_optiontype(), len(index), 1, None, self._parameters
+        )
+
+    def _getitem_next_missing(self, head, tail, advanced):
+        if advanced is not None:
+            raise ValueError(
+                "cannot mix missing values in slice with NumPy-style "
+                "advanced indexing"
+            )
+
+        if isinstance(head._content, ak._v2.contents.listoffsetarray.ListOffsetArray):
+            if len(self) != 1:
+                raise ValueError("reached a not-well-considered code pathg")
+            return self._getitem_next_missing_jagged(head, tail, advanced, self)
+
+        if isinstance(head._content, ak._v2.contents.numpyarray.NumpyArray):
+            headcontent = ak._v2.index.Index64(head._content._data)
+        else:
+            headcontent = head._content
+
+        nextcontent = self._getitem_next(headcontent, tail, advanced)
+
+        if isinstance(nextcontent, ak._v2.contents.regulararray.RegularArray):
+            return self._getitem_next_regular_missing(
+                head, tail, advanced, nextcontent, nextcontent._length
+            )
+        elif isinstance(nextcontent, ak._v2.contents.recordarray.RecordArray):
+            if len(nextcontent._keys) == 0:
+                return nextcontent
+
+            contents = []
+
+            for content in nextcontent._contents:
+                if isinstance(content, ak._v2.contents.regulararray.RegularArray):
+                    contents.append(
+                        self._getitem_next_regular_missing(
+                            head, tail, advanced, content, content._length
+                        )
+                    )
+                else:
+                    raise ValueError(
+                        "FIXME: unhandled case of SliceMissing with RecordArray containing {0}".format(
+                            content
+                        )
+                    )
+
+            return ak._v2.contents.recordarray.RecordArray(
+                contents, nextcontent._keys, None, None, self._parameters
+            )
+
+        else:
+            raise ValueError(
+                "FIXME: unhandled case of SliceMissing with {0}".format(nextcontent)
+            )
+
     def __getitem__(self, where):
         try:
             if ak._util.isint(where):
@@ -384,8 +510,14 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
         elif isinstance(
             item,
+            (ak._v2.contents.IndexedOptionArray),
+        ):
+            return item
+
+        elif isinstance(
+            item,
             (
-                ak._v2.contents.IndexedOptionArray,
+                ak._v2.contents.IndexedArray,
                 ak._v2.contents.ByteMaskedArray,
                 ak._v2.contents.BitMaskedArray,
                 ak._v2.contents.UnmaskedArray,

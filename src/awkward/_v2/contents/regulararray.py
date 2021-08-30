@@ -143,6 +143,7 @@ class RegularArray(Content):
             raise NestedIndexError(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
+
         self._handle_error(
             nplike[
                 "awkward_RegularArray_getitem_carry",
@@ -454,11 +455,10 @@ class RegularArray(Content):
             down = self._content._getitem_next_jagged(
                 multistarts, multistops, head._content, tail
             )
-
             return RegularArray(down, len(head), self._length, None, self._parameters)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))

@@ -238,13 +238,37 @@ class BitMaskedArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            return self.toByteMaskedArray()._getitem_next(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))
 
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
+
+    def toIndexedOptionArray64(self):
+        nplike = self._mask.nplike
+        index = ak._v2.index.Index64.empty(len(self._mask) * 8, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_BitMaskedArray_to_IndexedOptionArray64",
+                index.dtype.type,
+                self._mask.dtype.type,
+            ](
+                index.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+                self._lsb_order,
+            ),
+        )
+
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            index._getitem_range(0, self, self._length),
+            self._content,
+            self._identifier,
+            self._parameters,
+        )

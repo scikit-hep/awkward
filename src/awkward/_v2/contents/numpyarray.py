@@ -239,10 +239,17 @@ class NumpyArray(Content):
             return NumpyArray(out, None, self._parameters, nplike=nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            where = (slice(None), head) + tail
+            try:
+                out = self._data[where]
+            except IndexError as err:
+                raise NestedIndexError(self, (head,) + tail, str(err))
+            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
+            return out2
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            next = self.toRegularArray()
+            return next._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))
@@ -255,3 +262,6 @@ class NumpyArray(Content):
             raise IndexError(self, "'axis' out of range for localindex")
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
+
+    def isscalar(self):
+        return self._data.ndim == 0

@@ -131,6 +131,37 @@ class IndexedArray(Content):
             self._parameters,
         )
 
+    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+        nplike = self.nplike
+        if len(slicestarts) != len(self):
+            raise ValueError(
+                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                    len(slicestarts), type(self).__name__, len(self)
+                )
+            )
+
+        nextcarry = ak._v2.index.Index64.empty(len(self), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_getitem_nextcarry",
+                nextcarry.dtype.type,
+                self._index.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                self._index.to(nplike),
+                len(self._index),
+                len(self._content),
+            )
+        )
+        # an eager carry (allow_lazy = false) to avoid infinite loop (unproven)
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        return next._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -173,7 +204,7 @@ class IndexedArray(Content):
             raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))
@@ -200,3 +231,8 @@ class IndexedArray(Content):
             return self._localindex_axis0()
         else:
             return self.project()._localindex(posaxis, depth)
+
+    def toIndexedOptionArray64(self):
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            self._index, self._content, self._identifier, self._parameters
+        )

@@ -199,7 +199,12 @@ class ListArray(Content):
             )
         )
 
-        sliceindex = ak._v2.index.Index64(slicecontent.data)
+        while not hasattr(slicecontent, "data"):
+            if isinstance(slicecontent, ak._v2.contents.emptyarray.EmptyArray):
+                return self
+            slicecontent = slicecontent._content
+
+        sliceindex = ak._v2.index.Index64(slicecontent._data)
         outoffsets = ak._v2.index.Index64.zeros(len(slicestarts) + 1, nplike)
         nextcarry = ak._v2.index.Index64.zeros(carrylen[0], nplike)
 
@@ -481,7 +486,7 @@ class ListArray(Content):
             )
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))

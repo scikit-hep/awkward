@@ -233,6 +233,23 @@ class UnionArray(Content):
         )
         return outindex
 
+    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+        simplified = self._simplify_uniontype()
+        if (
+            simplified.index.dtype == np.dtype(np.int32)
+            or simplified.index.dtype == np.dtype(np.uint32)
+            or simplified.index.dtype == np.dtype(np.int64)
+        ):
+            raise ValueError("cannot apply jagged slices to irreducible union arrays")
+        return simplified._getitem_next_jagged(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -271,7 +288,7 @@ class UnionArray(Content):
             raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))

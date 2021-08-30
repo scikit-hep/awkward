@@ -92,10 +92,10 @@ class EmptyArray(Content):
             raise NestedIndexError(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         else:
             raise AssertionError(repr(head))
