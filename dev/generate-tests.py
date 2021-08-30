@@ -709,7 +709,9 @@ def genunittests():
     for function in data:
         num = 0
         func = "test_" + function["name"] + ".py"
-        with open(os.path.join(CURRENT_DIR, "..", "tests-spec-explicit", func), "w") as file:
+        with open(
+            os.path.join(CURRENT_DIR, "..", "tests-spec-explicit", func), "w"
+        ) as file:
             file.write("import pytest\nimport kernels\n\n")
             for test in function["tests"]:
                 num += 1
