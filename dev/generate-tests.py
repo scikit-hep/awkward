@@ -270,11 +270,11 @@ kSliceNone = kMaxInt64 + 1
                         )
                     outfile.write("\n\n")
 
-    unit_tests = os.path.join(CURRENT_DIR, "..", "unit-tests")
+    unit_tests = os.path.join(CURRENT_DIR, "..", "tests-spec-explicit")
     if os.path.exists(unit_tests):
         shutil.rmtree(unit_tests)
     os.mkdir(unit_tests)
-    final_dest = os.path.join(CURRENT_DIR, "..", "unit-tests")
+    final_dest = os.path.join(CURRENT_DIR, "..", "tests-spec-explicit")
     copy_dest = os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")
     shutil.copy(copy_dest, final_dest)
 
