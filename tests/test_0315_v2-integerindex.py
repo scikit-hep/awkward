@@ -9,7 +9,6 @@ import awkward as ak  # noqa: F401
 from awkward._v2.tmp_for_testing import v1_to_v2
 
 
-
 def test_integerindex_null():
     a = ak.Array([[0, 1, 2], None, [5, 6], [7]])
     b = ak.Array([[0, 1, 2], [3, 4], [5, 6], [7]])
