@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2, v1_to_v2_index
 
+
 def test():
     one_content = ak.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9, 10.0]]
@@ -39,7 +40,7 @@ def test():
     two_starts = ak.layout.Index64(np.array([1, 4, 5, 6], dtype=np.int64))
     two_stops = ak.layout.Index64(np.array([3, 5, 5, 8], dtype=np.int64))
     two = ak.layout.ListArray64(two_starts, two_stops, two_content)
-    
+
     two = v1_to_v2(two)
     assert ak.to_list(two) == [
         [[1.1, 2.2, 3.3], []],
@@ -48,7 +49,7 @@ def test():
         [[6.6], [7.7, 8.8, 9.9, 10.0]],
     ]
 
-    #FIXME
+    # FIXME
     # assert ak.to_list(one[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]]) == [
     #     [[1.1, 2.2, 3.3], []],
     #     [[4.4, 5.5]],
