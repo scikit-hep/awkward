@@ -6,7 +6,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2, v1_to_v2_index
+from awkward._v2.tmp_for_testing import v1_to_v2
+
 
 def test_integerindex_null():
     a = ak.Array([[0, 1, 2], None, [5, 6], [7]])
@@ -42,7 +43,7 @@ def test_boolindex_null():
     d = v1_to_v2(d.layout)
     e = v1_to_v2(e.layout)
 
-    #FIXME
+    # FIXME
     # assert ak.to_list(a[c]) == [[1], None, [5]]
     # assert ak.to_list(a[d]) == [[1], None, [5]]
     # assert ak.to_list(a[e]) == [[1], None, None]
@@ -67,7 +68,7 @@ def test_integerindex_null_more():
     g2 = v1_to_v2(g2.layout)
     g3 = v1_to_v2(g3.layout)
 
-    #FIXME
+    # FIXME
     # assert ak.to_list(f[g1]) == [[None, 2, None], None, [], [None]]
     # assert ak.to_list(f[g2]) == [[], None, None, []]
     # assert ak.to_list(f[g3]) == [[], None, [], []]
