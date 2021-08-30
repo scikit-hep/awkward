@@ -248,4 +248,4 @@ class ByteMaskedArray(Content):
             raise ValueError("in combinations, 'n' must be at least 1")
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return 
+            return
