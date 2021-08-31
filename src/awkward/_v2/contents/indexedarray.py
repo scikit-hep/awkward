@@ -140,7 +140,7 @@ class IndexedArray(Content):
                 )
             )
 
-        nextcarry = ak._v2.index.Index64.empty(len(self), nplike)
+        nextcarry = ak._v2.index.Index64.zeros(len(self), nplike)
         self._handle_error(
             nplike[
                 "awkward_IndexedArray_getitem_nextcarry",

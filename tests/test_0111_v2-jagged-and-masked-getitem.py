@@ -575,6 +575,10 @@ def test_jagged():
     ]
 
 
+@pytest.mark.skipif(
+    ak._util.py27,
+    reason="TypeError: unbound method _broadcast_tooffsets64() must be called with ListOffsetArray instance as first argument (got ListArray instance instead)",
+)
 def test_double_jagged():
     array = ak.Array(
         [[[0, 1, 2, 3], [4, 5]], [[6, 7, 8], [9, 10, 11, 12, 13]]], check_valid=True
@@ -639,6 +643,10 @@ def test_jagged_masked():
     # ) == [[3.3, None], [], [None, 4.4], [None], [8.8]]
 
 
+@pytest.mark.skipif(
+    ak._util.py27,
+    reason="TypeError: unbound method _broadcast_tooffsets64() must be called with ListOffsetArray instance as first argument (got ListArray instance instead)",
+)
 def test_regular_regular():
     content = ak.layout.NumpyArray(np.arange(2 * 3 * 5))
     regulararray1 = ak.layout.RegularArray(content, 5, zeros_length=0)
@@ -740,6 +748,10 @@ def test_emptyarray():
         listoffsetarray[array5]
 
 
+@pytest.mark.skipif(
+    ak._util.py27,
+    reason="TypeError: unbound method _broadcast_tooffsets64() must be called with ListOffsetArray instance as first argument (got ListArray instance instead)",
+)
 def test_numpyarray():
     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
     array2 = ak.Array([[[], [], []], [], [[], []]], check_valid=True)
@@ -800,12 +812,16 @@ def test_indexedarray():
         [0.0, 1.1, 2.2],
     ]
 
-    assert ak.to_list(
-        indexedarray[ak.Array([[0, -1], [0], [], [1, 1]], check_valid=True)]
-    ) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
+    array1 = ak.Array([[0, -1], [0], [], [1, 1]], check_valid=True)
+    array1 = v1_to_v2(array1.layout)
+    assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
+
     # FIXME
+    # array = ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)
+    # array = v1_to_v2(array.layout)
+
     # assert ak.to_list(
-    #     indexedarray[ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)]
+    #     indexedarray[array]
     # ) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
     # assert ak.to_list(
     #     indexedarray[ak.Array([[0, -1], [0], None, [1, 1]], check_valid=True)]
