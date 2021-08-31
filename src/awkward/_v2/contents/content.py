@@ -289,12 +289,14 @@ class Content(object):
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
         if isinstance(head._content, ak._v2.contents.numpyarray.NumpyArray):
-            headcontent = ak._v2.index.Index64(head._content._data)
+            if head._content._data.dtype == bool:
+                data = [i for i in range(len(head)) if head[i]]
+                headcontent = ak._v2.index.Index64(data)
+            else:
+                headcontent = ak._v2.index.Index64(head._content._data)
         else:
             headcontent = head._content
-
         nextcontent = self._getitem_next(headcontent, tail, advanced)
-
         if isinstance(nextcontent, ak._v2.contents.regulararray.RegularArray):
             return self._getitem_next_regular_missing(
                 head, tail, advanced, nextcontent, nextcontent._length

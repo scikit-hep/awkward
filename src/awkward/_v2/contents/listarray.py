@@ -177,9 +177,104 @@ class ListArray(Content):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
+    def _getitem_next_jagged_missing(self, slicestarts, slicestops, slicecontent, tail):
+        nplike = self.nplike
+        if len(slicestarts) != len(self):
+            raise ValueError(
+                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                    len(slicestarts), type(self).__name_, len(self)
+                )
+            )
+
+        if len(self._starts) < len(slicestarts):
+            raise ValueError("jagged slice length differs from array length")
+
+        missing = ak._v2.index.Index64(slicecontent._index)
+        numvalid = ak._v2.index.Index64.empty(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ListArray_getitem_jagged_numvalid",
+                numvalid.dtype.type,
+                slicestarts.dtype.type,
+                slicestops.dtype.type,
+                missing.dtype.type,
+            ](
+                numvalid.to(nplike),
+                slicestarts.to(nplike),
+                slicestops.to(nplike),
+                len(slicestarts),
+                missing.to(nplike),
+                len(missing),
+            )
+        )
+
+        nextcarry = ak._v2.index.Index64(numvalid._data)
+        smalloffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
+        largeoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_ListArray_getitem_jagged_shrink",
+                nextcarry.dtype.type,
+                smalloffsets.dtype.type,
+                largeoffsets.dtype.type,
+                slicestops.dtype.type,
+                slicestops.dtype.type,
+                missing.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                smalloffsets.to(nplike),
+                largeoffsets.to(nplike),
+                slicestarts.to(nplike),
+                slicestops.to(nplike),
+                len(slicestarts),
+                missing.to(nplike),
+            )
+        )
+
+        if isinstance(
+            slicecontent._content, ak._v2.contents.indexedoptionarray.IndexedOptionArray
+        ):
+            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            next = ak._v2.contents.listoffsetarray.ListOffsetArra(
+                smalloffsets, nextcontent, None, self._parameters
+            )
+            out = next._getitem_next_jagged(
+                smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
+            )
+
+        else:
+            out = self._getitem_next_jagged(
+                smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
+            )
+
+        if isinstance(out, ak._v2.contents.listoffsetarray.ListOffsetArray):
+            content = out._content
+            missing_trim = ak._v2.index.Index64(missing[0, largeoffsets[-1]])
+            indexedoptionarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                missing_trim, content, None, self._parameters
+            )
+            return ak._v2.contents.listoffsetarray.ListOffsetArray64(
+                largeoffsets,
+                indexedoptionarray._simplify_optiontype(),
+                None,
+                self._parameters,
+            )
+        else:
+            raise ValueError(
+                "expected ListOffsetArray64 from {0}"
+                "ListArray::getitem_next_jagged, got ".format(type(self).__name__)
+            )
+
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
 
+        if isinstance(
+            slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray
+        ):
+            return self._getitem_next_jagged_missing(
+                slicestarts, slicestops, slicecontent, tail
+            )
         # FIXME
         # if len(slicestarts) != len(self):
         #     raise ValueError("cannot fit jagged slice with length {0} into {1} of size {2}".format(len(slicestarts), type(self).__name__, len(self)))

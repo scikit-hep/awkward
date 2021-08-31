@@ -263,6 +263,10 @@ class NumpyLike(Singleton):
         # array, element
         return self._module.append(*args, **kwargs)
 
+    def where(self, *args, **kwargs):
+        # array, element
+        return self._module.where(*args, **kwargs)
+
     ############################ ufuncs
 
     def sqrt(self, *args, **kwargs):

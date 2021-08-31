@@ -9,7 +9,6 @@ import awkward as ak  # noqa: F401
 from awkward._v2.tmp_for_testing import v1_to_v2
 
 
-
 def test_array_slice():
     array = ak.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
@@ -442,9 +441,11 @@ def test_bool_missing2():
     array1 = v1_to_v2(array1.layout)
 
     # FIXME
+    # print("dadadada", regulararray[:, array1])
     # assert ak.to_list(
     #     regulararray[:, array1]
     # ) == [[0.0, None, 3.3], [4.4, None, 7.7], [8.8, None, 11.1]]
+    # assert 1 == 2
     # assert ak.to_list(
     #     regulararray[1:, array1]
     # ) == [[4.4, None, 7.7], [8.8, None, 11.1]]
