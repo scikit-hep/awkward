@@ -257,37 +257,126 @@ class NumpyArray(Content):
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
 
+    def iscontiguous(self):
+        x = self._data.itemsize
+
+        for i in range(len(self.shape), 0, -1):
+            if x != self.strides[i - 1]:
+                return False
+            else:
+                x = x * self.shape[i - 1]
+
+        return True
+
     def _sort(self, axis, kind, order):
         if len(self.shape) == 0:
             raise TypeError(
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
-        elif len(self.shape) != 1:  # or not self.iscontiguous:?
-            return self.toRegularArray._sort(axis, kind, order)
-        else:
-            nplike = self.nplike
-
-            offsets = ak._v2.index.Index64([0, self.shape[0]])
-            nextcarry = ak._v2.index.Index64.zeros(self.shape[0], nplike)
-
-            self._handle_error(
-                nplike[
-                    "awkward_argsort",
-                    numpy.int64,
-                    self._data.dtype.type,
-                    numpy.int64,
-                ](
-                    nextcarry.to(nplike),
-                    self._data,
-                    self.shape[0],
-                    offsets.to(nplike),
-                    len(offsets),
-                    True,  # ascending
-                    True,  # stable
-                )
+        elif len(self.shape) != 1 or not self.iscontiguous():
+            contiguous_self = ak._v2.contents.NumpyArray(
+                self._data[self.localindex(axis)]
             )
-
-            return ak._v2.contents.NumpyArray(self._data[nextcarry])
-
+            return contiguous_self.toRegularArray()._sort(axis, kind, order)
+        else:
+            # std::stable_sort
+            # In [1]: import awkward as ak
+            #
+            # In [2]: from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
+            #
+            # In [3]: import numpy as np
+            #
+            # In [4]: nparray = np.random.rand(1000000)
+            #
+            # In [5]: v2_array = ak._v2.contents.NumpyArray(nparray)
+            #
+            # In [6]: %timeit v2_array.sort()
+            # 1.88 s ± 17.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+            #
+            # In [7]: %timeit nparray.sort()
+            # 17.3 ms ± 264 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+            #
+            # In [8]: %timeit v2_array.sort()
+            # 1.28 s ± 11.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+            #
+            # In [9]: %timeit v2_array.sort()
+            # 1.28 s ± 23.3 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+            #
+            # In [10]: %timeit v2_array.sort()
+            # 1.26 s ± 11.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+            #
+            # In [11]: %timeit nparray.sort()
+            # 17.3 ms ± 127 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+            # nplike = self.nplike
+            #
+            # offsets = ak._v2.index.Index64([0, self.shape[0]])
+            # nextcarry = ak._v2.index.Index64.zeros(self.shape[0], nplike)
+            #
+            # self._handle_error(
+            #     nplike[
+            #         "awkward_argsort",
+            #         numpy.int64,
+            #         self._data.dtype.type,
+            #         numpy.int64,
+            #     ](
+            #         nextcarry.to(nplike),
+            #         self._data,
+            #         self.shape[0],
+            #         offsets.to(nplike),
+            #         len(offsets),
+            #         True,  # ascending
+            #         False,  # stable
+            #     )
+            # )
+            #
+            # return ak._v2.contents.NumpyArray(self._data[nextcarry])
+            #
             # FIXME: use Numpy sort?
-            # return ak._v2.contents.NumpyArray(numpy.sort(self._data, axis, kind, order))
+            # In [1]: import awkward as ak
+            #
+            # In [2]: from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
+            #
+            # In [3]: import numpy as np
+            #
+            # In [4]: nparray = np.random.rand(1000000)
+            #
+            # In [5]: v2_array = ak._v2.contents.NumpyArray(nparray)
+            #
+            # In [6]: %timeit v2_array.sort()
+            # 75.2 ms ± 1.34 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+            #
+            # In [7]: %timeit nparray.sort()
+            # 17.3 ms ± 209 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+            #
+            # In [8]: %timeit v2_array.sort()
+            # 18.6 ms ± 363 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+            #
+            # In [9]: %timeit v2_array.sort()
+            # 18.5 ms ± 310 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+            #
+            # In [10]: %timeit nparray.sort()
+            # 17.3 ms ± 297 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+            #
+            #
+            # In [1]: import numpy as np
+            #
+            # In [2]: import awkward as ak
+            #
+            # In [3]: matrix = np.arange(64).reshape(8, -1)
+            #
+            # In [4]: v2_array = ak._v2.contents.NumpyArray(matrix[:, 0])
+            #
+            # In [5]: %timeit v2_array.sort()
+            # 866 µs ± 5.76 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+            #
+            # In [6]: %timeit v2_array.sort()
+            # 868 µs ± 2.4 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+            #
+            # In [7]: %timeit v2_array.sort()
+            # 880 µs ± 13.6 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+            #
+            # In [8]: %timeit v2_array.sort()
+            # 865 µs ± 6.23 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+            #
+
+            return ak._v2.contents.NumpyArray(numpy.sort(self._data, axis, kind, order))

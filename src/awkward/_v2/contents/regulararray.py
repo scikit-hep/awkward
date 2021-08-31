@@ -466,7 +466,7 @@ class RegularArray(Content):
 
             offsets = ak._v2.index.Index64.zeros(self._length + 1, nplike)
             self._handle_error(
-                nplike["awkward_RegularArray_compact_offsets", np.int64](
+                nplike["awkward_RegularArray_compact_offsets", np.int64,](  # noqa: E231
                     offsets.to(nplike),
                     self._length,
                     self._size,
