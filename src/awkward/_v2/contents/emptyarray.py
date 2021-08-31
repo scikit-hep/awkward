@@ -7,6 +7,7 @@ from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.emptyform import EmptyForm
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class EmptyArray(Content):
@@ -102,3 +103,6 @@ class EmptyArray(Content):
 
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
+
+    def _toNumpyArray(self, dtype):
+        return ak._v2.contents.numpyarray.NumpyArray(numpy.empty(0, dtype), self._identifier, self._parameters)

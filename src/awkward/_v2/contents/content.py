@@ -58,7 +58,7 @@ class Content(object):
         
         tags = ak._v2.index.Index8.empty(length, nplike)
         index = ak._v2.index.Index64.empty(length, nplike)
-        contents = self._contents
+        contents = []
 
         for i in range(len(contents)):
             if isinstance(contents[i], ak._v2.contents.unionarray.UnionArray) and contents[i]._index.dtype == np.dtype(np.int32):
@@ -304,9 +304,9 @@ class Content(object):
                                 )  
                             )
                         contents.append(self._contents[i])
-        if contents.size > 2 ^ 7:
+        if len(contents) > 2 ^ 7:
             raise ValueError("FIXME: handle UnionArray with more than 127 contents")
-        if contents.size == 1:
+        if len(contents) == 1:
             return contents[0]._carry(index, True, NestedIndexError)
         else:
             return ak._v2.contents.unionarray.UnionArray(tags, index, contents, self._identifier, self._contents)
@@ -630,6 +630,9 @@ class Content(object):
 
             elif isinstance(where, ak.layout.Content):
                 return self.__getitem__(v1_to_v2(where))
+
+            elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
+                return where._toNumpyArray(np.int64)
 
             elif isinstance(where, ak._v2.contents.numpyarray.NumpyArray):
                 if issubclass(where.dtype.type, np.int64):
