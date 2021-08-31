@@ -746,9 +746,8 @@ def test_numpyarray():
 
     array = v1_to_v2(array.layout)
     array2 = v1_to_v2(array2.layout)
-    # FIXME
-    # with pytest.raises(ValueError):
-    #     array[array2]
+    with pytest.raises(ValueError):
+        array[array2]
 
 
 def test_record():

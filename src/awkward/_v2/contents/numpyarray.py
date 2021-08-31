@@ -192,6 +192,15 @@ class NumpyArray(Content):
             nplike=self._nplike,
         )
 
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        if self._data.ndim == 1:
+            raise ValueError("too many jagged slice dimensions for array")
+        else:
+            next = self._toRegularArray()
+            return next._getitem_next_jagged(
+                slicestarts, slicestops, slicecontent, tail
+            )
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self._nplike
 
