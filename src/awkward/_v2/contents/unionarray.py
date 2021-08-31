@@ -234,7 +234,7 @@ class UnionArray(Content):
         return outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        simplified = self._simplify_uniontype()
+        simplified = self._simplify_uniontype(True, False)
         if (
             simplified.index.dtype == np.dtype(np.int32)
             or simplified.index.dtype == np.dtype(np.uint32)
@@ -256,7 +256,7 @@ class UnionArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+        elif isinstance(head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)):
             outcontents = []
             for i in range(len(self._contents)):
                 projection = self._project(i)
@@ -270,7 +270,7 @@ class UnionArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out._simplify_uniontype()
+            return out._simplify_uniontype(True, False)
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -283,9 +283,6 @@ class UnionArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)

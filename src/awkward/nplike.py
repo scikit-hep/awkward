@@ -387,10 +387,10 @@ class Numpy(NumpyLike):
         return ak.operations.convert.to_numpy(array, *args, **kwargs)
 
     def __getitem__(self, args):
-        # for key in ak._cpu_kernels.kernel.keys():
-        #     if "ListArray_getitem_jagged" in key[0]:
-        #         print("**************")
-        #         print(key)
+        for key in ak._cpu_kernels.kernel.keys():
+            if "UnionArray_simplify_one" in key[0]:
+                print("**************")
+                print(key)
         return NumpyKernel(ak._cpu_kernels.kernel[args], args)
 
     def __init__(self):
