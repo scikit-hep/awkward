@@ -256,7 +256,9 @@ class UnionArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)):
+        elif isinstance(
+            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+        ):
             outcontents = []
             for i in range(len(self._contents)):
                 projection = self._project(i)
