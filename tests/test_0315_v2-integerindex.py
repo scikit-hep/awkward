@@ -68,8 +68,8 @@ def test_integerindex_null_more():
     g2 = v1_to_v2(g2.layout)
     g3 = v1_to_v2(g3.layout)
 
+    assert ak.to_list(f[g1]) == [[None, 2, None], None, [], [None]]
     # FIXME
-    # assert ak.to_list(f[g1]) == [[None, 2, None], None, [], [None]]
     # assert ak.to_list(f[g2]) == [[], None, None, []]
     # assert ak.to_list(f[g3]) == [[], None, [], []]
 
@@ -79,16 +79,16 @@ def test_integerindex_null_more():
     a = v1_to_v2(a.layout)
     b = v1_to_v2(b.layout)
 
-    # assert ak.to_list(a[b]) == [[2, 1, None, None], None]
+    assert ak.to_list(a[b]) == [[2, 1, None, None], None]
 
     b = ak.Array([[2, 1, None, 3], []])
     b = v1_to_v2(b.layout)
 
-    # assert ak.to_list(a[b]) == [[2, 1, None, None], None]
+    assert ak.to_list(a[b]) == [[2, 1, None, None], None]
 
     b = ak.Array([[2, 1, None, 3], [0, 1]])
     b = v1_to_v2(b.layout)
-    # assert ak.to_list(a[b]) == [[2, 1, None, None], None]
+    assert ak.to_list(a[b]) == [[2, 1, None, None], None]
 
     a = ak.Array([[[0, 1, 2, None], None], [[3, 4], [5]], None, [[6]]])
     b = ak.Array([[[2, 1, None, 3], [0, 1]], [[0], None], None, [None]])
@@ -105,6 +105,7 @@ def test_integerindex_null_more():
     b = v1_to_v2(b.layout)
     c = v1_to_v2(c.layout)
 
+    # FIXME
     # assert ak.to_list(a[b]) == [[[2, 1, None, None], None], [[3], None], None, [None]]
     # assert ak.to_list(a[c]) == [[[1, None], None], [[4], None], None, [None]]
 

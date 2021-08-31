@@ -176,7 +176,6 @@ class NumpyArray(Content):
 
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
-
         try:
             nextdata = self._data[carry.data]
         except IndexError as err:

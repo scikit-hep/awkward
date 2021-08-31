@@ -1819,7 +1819,6 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceArray64& slicecontent,
                                       const Slice& tail) const {
-    std::cout<<"SliceArray64"<<std::endl;
     if (slicestarts.length() != length()) {
       throw std::invalid_argument(
         std::string("cannot fit jagged slice with length ")
@@ -1880,7 +1879,6 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceMissing64& slicecontent,
                                       const Slice& tail) const {
-    std::cout<<"SliceMissing64"<<std::endl;
     if (slicestarts.length() != length()) {
       throw std::invalid_argument(
         std::string("cannot fit jagged slice with length ")
@@ -1969,7 +1967,6 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceJagged64& slicecontent,
                                       const Slice& tail) const {
-    std::cout<<"SliceJagged64"<<std::endl;
     if (slicestarts.length() != length()) {
       throw std::invalid_argument(
         std::string("cannot fit jagged slice with length ")

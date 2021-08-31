@@ -221,7 +221,7 @@ class ListArray(Content):
             )
 
         elif isinstance(slicecontent, ak._v2.contents.numpyarray.NumpyArray):
-            carrylen = ak._v2.index.Index64.empty(1, nplike)
+            carrylen = ak._v2.index.Index64.zeros(1, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListArray_getitem_jagged_carrylen",
@@ -235,10 +235,9 @@ class ListArray(Content):
                     len(slicestarts),
                 )
             )
-
             sliceindex = ak._v2.index.Index64(slicecontent._data)
-            outoffsets = ak._v2.index.Index64.zeros(len(slicestarts) + 1, nplike)
-            nextcarry = ak._v2.index.Index64.zeros(carrylen[0], nplike)
+            outoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
+            nextcarry = ak._v2.index.Index64.empty(carrylen[0], nplike)
 
             self._handle_error(
                 nplike[
@@ -268,9 +267,10 @@ class ListArray(Content):
             nexthead, nexttail = self._headtail(tail)
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
 
-            return ak._v2.contents.listoffsetarray.ListOffsetArray(
-                outoffsets, outcontent
+            out = ak._v2.contents.listoffsetarray.ListOffsetArray(
+                outoffsets, outcontent, None, self._parameters
             )
+            return out
 
         elif isinstance(
             slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray
@@ -340,13 +340,13 @@ class ListArray(Content):
 
             if isinstance(out, ak._v2.contents.listoffsetarray.ListOffsetArray):
                 content = out._content
-                missing_trim = ak._v2.index.Index64(missing[0, largeoffsets[-1]])
+                missing_trim = ak._v2.index.Index64(missing[0 : largeoffsets[-1]])
                 indexedoptionarray = (
                     ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                         missing_trim, content, None, self._parameters
                     )
                 )
-                return ak._v2.contents.listoffsetarray.ListOffsetArray64(
+                return ak._v2.contents.listoffsetarray.ListOffsetArray(
                     largeoffsets,
                     indexedoptionarray._simplify_optiontype(),
                     None,

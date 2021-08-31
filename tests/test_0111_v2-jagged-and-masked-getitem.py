@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+can_slice_with_unionarray = False
+
 
 def test_array_slice():
     array = ak.Array(
@@ -637,10 +639,7 @@ def test_jagged_masked():
     array = v1_to_v2(array.layout)
     array1 = v1_to_v2(array1.layout)
 
-    # FIXME
-    # assert ak.to_list(
-    #     array[array1]
-    # ) == [[3.3, None], [], [None, 4.4], [None], [8.8]]
+    assert ak.to_list(array[array1]) == [[3.3, None], [], [None, 4.4], [None], [8.8]]
 
 
 @pytest.mark.skipif(
@@ -669,15 +668,10 @@ def test_regular_regular():
         [[17], [21, 23], [25, 27, 29]],
     ]
 
-    # FIXME
-    # assert (
-    #     ak.to_list(
-    #         regulararray2[
-    #            array2
-    #         ]
-    #     )
-    #     == [[[2], [6, 8], [14, None, 10]], [[17], [21, 23], [25, None, 29]]]
-    # )
+    assert ak.to_list(regulararray2[array2]) == [
+        [[2], [6, 8], [14, None, 10]],
+        [[17], [21, 23], [25, None, 29]],
+    ]
 
 
 def test_masked_of_jagged_of_whatever():
@@ -816,19 +810,25 @@ def test_indexedarray():
     array1 = v1_to_v2(array1.layout)
     assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
 
-    # FIXME
-    # array = ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)
-    # array = v1_to_v2(array.layout)
+    array1 = ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)
+    array1 = v1_to_v2(array1.layout)
 
-    # assert ak.to_list(
-    #     indexedarray[array]
-    # ) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
-    # assert ak.to_list(
-    #     indexedarray[ak.Array([[0, -1], [0], None, [1, 1]], check_valid=True)]
-    # ) == [[6.6, 9.9], [5.5], None, [1.1, 1.1]]
-    # assert ak.to_list(
-    #     indexedarray[ak.Array([[0, -1], [0], None, [None]], check_valid=True)]
-    # ) == [[6.6, 9.9], [5.5], None, [None]]
+    assert ak.to_list(indexedarray[array1]) == [
+        [6.6, 9.9],
+        [5.5],
+        [None],
+        [1.1, None, 1.1],
+    ]
+
+    array1 = ak.Array([[0, -1], [0], None, [1, 1]], check_valid=True)
+    array1 = v1_to_v2(array1.layout)
+
+    assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, [1.1, 1.1]]
+
+    array1 = ak.Array([[0, -1], [0], None, [None]], check_valid=True)
+    array1 = v1_to_v2(array1.layout)
+
+    assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, [None]]
 
     index = ak.layout.Index64(np.array([3, 2, 1, 0], dtype=np.int64))
     indexedarray = ak.layout.IndexedOptionArray64(index, array)
@@ -845,16 +845,34 @@ def test_indexedarray():
     assert ak.to_list(
         indexedarray[ak.Array([[0, -1], [0], [], [1, 1]], check_valid=True)]
     ) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
+
+    array1 = ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)
+    array1 = v1_to_v2(array1.layout)
+
+    assert ak.to_list(indexedarray[array1]) == [
+        [6.6, 9.9],
+        [5.5],
+        [None],
+        [1.1, None, 1.1],
+    ]
+
+    array1 = ak.Array([[0, -1], [0], None, []], check_valid=True)
+    array1 = v1_to_v2(array1.layout)
+
     # FIXME
     # assert ak.to_list(
-    #     indexedarray[ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)]
-    # ) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
-    # assert ak.to_list(
-    #     indexedarray[ak.Array([[0, -1], [0], None, []], check_valid=True)]
+    #     indexedarray[array]
     # ) == [[6.6, 9.9], [5.5], None, []]
-    # assert ak.to_list(
-    #     indexedarray[ak.Array([[0, -1], [0], None, [1, None, 1]], check_valid=True)]
-    # ) == [[6.6, 9.9], [5.5], None, [1.1, None, 1.1]]
+
+    array1 = ak.Array([[0, -1], [0], None, [1, None, 1]], check_valid=True)
+    array1 = v1_to_v2(array1.layout)
+
+    assert ak.to_list(indexedarray[array1]) == [
+        [6.6, 9.9],
+        [5.5],
+        None,
+        [1.1, None, 1.1],
+    ]
 
 
 def test_indexedarray2():
