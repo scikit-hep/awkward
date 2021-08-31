@@ -16,6 +16,7 @@ src/cuda-kernels/awkward_*.cu
 tests-cpu-kernels
 tests-cuda-kernels
 tests-spec
+tests-spec-explicit
 
 # to use all-contributors-cli without adding it to the project
 node_modules
