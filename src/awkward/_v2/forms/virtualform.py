@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, parameters_equal
 
 
 class VirtualForm(Form):
@@ -51,6 +51,32 @@ class VirtualForm(Form):
             out["form"] = self._form._tolist_part(verbose, toplevel=False)
         out["has_length"] = self._has_length
         return self._tolist_extra(out, verbose)
+
+    def generated_compatibility(self, layout):
+        from awkward._v2.contents.virtualarray import VirtualArray
+
+        if isinstance(layout, VirtualArray):
+            if self._form is None or layout.form is None:
+                return parameters_equal(self._parameters, layout.parameters)
+            else:
+                self_parameters = {}
+                if self._form.parameters is not None:
+                    self_parameters.update(self._form.parameters)
+                if self._parameters is not None:
+                    self_parameters.update(self._parameters)
+
+                layout_parameters = {}
+                if layout.form.parameters is not None:
+                    layout_parameters.update(layout.form.parameters)
+                if layout.parameters is not None:
+                    layout_parameters.update(layout.parameters)
+
+                return parameters_equal(
+                    self_parameters, layout_parameters
+                ) and self._form.generated_compatibility(layout.form)
+
+        else:
+            return False
 
     @property
     def purelist_isregular(self):

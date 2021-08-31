@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, parameters_equal
 
 
 class BitMaskedForm(Form):
@@ -84,6 +84,20 @@ class BitMaskedForm(Form):
             },
             verbose,
         )
+
+    def generated_compatibility(self, layout):
+        from awkward._v2.contents.bitmaskedarray import BitMaskedArray
+
+        if isinstance(layout, BitMaskedArray):
+            return (
+                self._mask == layout.mask.form
+                and self._valid_when == layout.valid_when
+                and self._lsb_order == layout.lsb_order
+                and parameters_equal(self._parameters, layout.parameters)
+                and self._content.generated_compatibility(layout.content)
+            )
+        else:
+            return False
 
     @property
     def purelist_isregular(self):

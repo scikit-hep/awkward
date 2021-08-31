@@ -168,6 +168,15 @@ def from_json(input):
     return from_iter(json.loads(input))
 
 
+def parameters_equal(one, two):
+    keys = set(one.keys()).union(two.keys())
+    for key in keys:
+        if one.get(key) != two.get(key):
+            return False
+    else:
+        return True
+
+
 class Form(object):
     def _init(self, has_identifier, parameters, form_key):
         if parameters is None:

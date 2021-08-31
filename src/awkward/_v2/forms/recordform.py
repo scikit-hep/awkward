@@ -7,7 +7,8 @@ try:
 except ImportError:
     from collections import Iterable
 
-from awkward._v2.forms.form import Form
+import awkward as ak
+from awkward._v2.forms.form import Form, parameters_equal
 
 
 class RecordForm(Form):
@@ -44,12 +45,82 @@ class RecordForm(Form):
         self._init(has_identifier, parameters, form_key)
 
     @property
+    def keys(self):
+        if self._keys is None:
+            return [str(i) for i in range(len(self._contents))]
+        else:
+            return self._keys
+
+    @property
+    def is_tuple(self):
+        return self._keys is None
+
+    @property
     def contents(self):
         return self._contents
 
     def __repr__(self):
         args = [repr(self._contents), repr(self._keys)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
+
+    def index_to_key(self, index):
+        if 0 <= index < len(self._contents):
+            if self._keys is None:
+                return str(index)
+            else:
+                return self._keys[index]
+        else:
+            raise IndexError(
+                "no index {0} in record with {1} fields".format(
+                    index, len(self._contents)
+                )
+            )
+
+    def key_to_index(self, key):
+        if self._keys is None:
+            try:
+                i = int(key)
+            except ValueError:
+                pass
+            else:
+                if 0 <= i < len(self._contents):
+                    return i
+        else:
+            try:
+                i = self._keys.index(key)
+            except ValueError:
+                pass
+            else:
+                return i
+        raise IndexError(
+            "no field {0} in record with {1} fields".format(
+                repr(key), len(self._contents)
+            )
+        )
+
+    def haskey(self, key):
+        if self._keys is None:
+            try:
+                i = int(key)
+            except ValueError:
+                return False
+            else:
+                return 0 <= i < len(self._contents)
+        else:
+            return key in self._keys
+
+    def content(self, index_or_key):
+        if ak._util.isint(index_or_key):
+            index = index_or_key
+        elif ak._util.isstr(index_or_key):
+            index = self.key_to_index(index_or_key)
+        else:
+            raise TypeError(
+                "index_or_key must be an integer (index) or string (key), not {0}".format(
+                    repr(index_or_key)
+                )
+            )
+        return self._contents[index]
 
     def _tolist_part(self, verbose, toplevel):
         out = {"class": "RecordArray"}
@@ -63,6 +134,27 @@ class RecordForm(Form):
             out["contents"] = contents_tolist
 
         return self._tolist_extra(out, verbose)
+
+    def generated_compatibility(self, layout):
+        from awkward._v2.contents.recordarray import RecordArray
+
+        if isinstance(layout, RecordArray):
+            if self.is_tuple == layout.is_tuple:
+                self_keys = set(self.keys)
+                layout_keys = set(layout.keys)
+                if self_keys == layout_keys:
+                    return parameters_equal(
+                        self._parameters, layout.parameters
+                    ) and all(
+                        self.content(x).generated_compatibility(layout.content(x))
+                        for x in self_keys
+                    )
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
 
     @property
     def purelist_isregular(self):
@@ -98,7 +190,3 @@ class RecordForm(Form):
             if mindepth > depth:
                 mindepth = depth
         return (anybranch, mindepth)
-
-    @property
-    def keys(self):
-        return self._keys

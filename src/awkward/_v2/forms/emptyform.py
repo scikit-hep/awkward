@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, parameters_equal
 
 
 class EmptyForm(Form):
@@ -15,6 +15,14 @@ class EmptyForm(Form):
 
     def _tolist_part(self, verbose, toplevel):
         return self._tolist_extra({"class": "EmptyArray"}, verbose)
+
+    def generated_compatibility(self, layout):
+        from awkward._v2.contents.emptyarray import EmptyArray
+
+        if isinstance(layout, EmptyArray):
+            return parameters_equal(self._parameters, layout.parameters)
+        else:
+            return False
 
     @property
     def purelist_isregular(self):

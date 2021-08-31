@@ -8,7 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, parameters_equal
 
 
 class UnionForm(Form):
@@ -64,6 +64,9 @@ class UnionForm(Form):
     def contents(self):
         return self._contents
 
+    def content(self, index):
+        return self._contents[index]
+
     def __repr__(self):
         args = [
             repr(self._tags),
@@ -85,6 +88,20 @@ class UnionForm(Form):
             },
             verbose,
         )
+
+    def generated_compatibility(self, layout):
+        from awkward._v2.contents.unionarray import UnionArray
+
+        if isinstance(layout, UnionArray):
+            if len(self._contents) == len(layout.contents):
+                return parameters_equal(self._parameters, layout.parameters) and all(
+                    x.generated_compatibility(y)
+                    for x, y in zip(self._contents, layout.contents)
+                )
+            else:
+                return False
+        else:
+            return False
 
     @property
     def purelist_isregular(self):

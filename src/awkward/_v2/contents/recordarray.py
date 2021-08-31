@@ -87,7 +87,10 @@ class RecordArray(Content):
 
     @property
     def keys(self):
-        return self._keys
+        if self._keys is None:
+            return [str(i) for i in range(len(self._contents))]
+        else:
+            return self._keys
 
     @property
     def is_tuple(self):
@@ -154,55 +157,16 @@ class RecordArray(Content):
         return "".join(out)
 
     def index_to_key(self, index):
-        if 0 <= index < len(self._contents):
-            if self._keys is None:
-                return str(index)
-            else:
-                return self._keys[index]
-        else:
-            raise IndexError(
-                "no index {0} in record with {1} fields".format(
-                    index, len(self._contents)
-                )
-            )
+        return self.Form.index_to_key(self, index)
 
     def key_to_index(self, key):
-        if self._keys is None:
-            try:
-                i = int(key)
-            except ValueError:
-                pass
-            else:
-                if 0 <= i < len(self._contents):
-                    return i
-        else:
-            try:
-                i = self._keys.index(key)
-            except ValueError:
-                pass
-            else:
-                return i
-        raise IndexError(
-            "no field {0} in record with {1} fields".format(
-                repr(key), len(self._contents)
-            )
-        )
+        return self.Form.key_to_index(self, key)
 
     def haskey(self, key):
-        return key in self._keys
+        return self.Form.haskey(self, key)
 
     def content(self, index_or_key):
-        if ak._util.isint(index_or_key):
-            index = index_or_key
-        elif ak._util.isstr(index_or_key):
-            index = self.key_to_index(index_or_key)
-        else:
-            raise TypeError(
-                "index_or_key must be an integer (index) or string (key), not {0}".format(
-                    repr(index_or_key)
-                )
-            )
-        return self._contents[index][: self._length]
+        return self.Form.content(self, index_or_key)[: self._length]
 
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))

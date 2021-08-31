@@ -78,7 +78,7 @@ def v1v2_equal(v1, v2):
     elif isinstance(v1, ak.layout.RecordArray) and isinstance(
         v2, ak._v2.contents.RecordArray
     ):
-        return v1.recordlookup == v2.keys and all(
+        return v1.istuple == v2.is_tuple and all(
             v1v2_equal(v1.field(i)[: len(v1)], v2.content(i))
             for i in range(v1.numfields)
         )
@@ -409,7 +409,7 @@ def v2_to_v1(v2):
     elif isinstance(v2, ak._v2.contents.RecordArray):
         return ak.layout.RecordArray(
             [v2_to_v1(x) for x in v2.contents],
-            v2.keys,
+            None if v2.is_tuple else v2.keys,
             len(v2),
             identities=v2_to_v1_id(v2.identifier),
             parameters=v2.parameters,

@@ -7,7 +7,7 @@ try:
 except ImportError:
     from collections import Iterable
 
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, parameters_equal
 
 import awkward as ak
 
@@ -112,6 +112,18 @@ class NumpyForm(Form):
             if verbose or len(self._inner_shape) > 0:
                 out["inner_shape"] = list(self._inner_shape)
             return self._tolist_extra(out, verbose)
+
+    def generated_compatibility(self, layout):
+        from awkward._v2.contents.numpyarray import NumpyArray
+
+        if isinstance(layout, NumpyArray):
+            return (
+                self._primitive == layout.primitive
+                and self._inner_shape == layout.shape[1:]
+                and parameters_equal(self._parameters, layout.parameters)
+            )
+        else:
+            return False
 
     @property
     def purelist_isregular(self):

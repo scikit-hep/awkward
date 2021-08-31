@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, parameters_equal
 
 
 class ListOffsetForm(Form):
@@ -45,6 +45,18 @@ class ListOffsetForm(Form):
             },
             verbose,
         )
+
+    def generated_compatibility(self, layout):
+        from awkward._v2.contents.listoffsetarray import ListOffsetArray
+
+        if isinstance(layout, ListOffsetArray):
+            return (
+                self._offsets == layout.offsets.form
+                and parameters_equal(self._parameters, layout.parameters)
+                and self._content.generated_compatibility(layout.content)
+            )
+        else:
+            return False
 
     @property
     def purelist_isregular(self):
