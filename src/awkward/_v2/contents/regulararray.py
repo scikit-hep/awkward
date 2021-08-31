@@ -461,21 +461,39 @@ class RegularArray(Content):
             )
 
     def _sort(self, axis, kind, order):
-        def sort_next(x, axis=axis, kind=kind, order=order):
-            return x._sort(axis, kind, order)
-
         if isinstance(self._content, ak._v2.contents.NumpyArray):
-            out = np.concatenate(
-                [
-                    sort_next(
-                        self._content[i * self._size : (i + 1) * self._size],
-                    )
-                    for i in range(self._length)
-                ]
+            nplike = self.nplike
+
+            offsets = ak._v2.index.Index64.zeros(self._length + 1, nplike)
+            self._handle_error(
+                nplike["awkward_RegularArray_compact_offsets", np.int64](
+                    offsets.to(nplike),
+                    self._length,
+                    self._size,
+                )
+            )
+
+            nextcarry = ak._v2.index.Index64.zeros(len(self._content), nplike)
+
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_argsort",
+                    np.int64,
+                    self._content._data.dtype.type,
+                    np.int64,
+                ](
+                    nextcarry.to(nplike),
+                    self._content._data,
+                    len(self._content),
+                    offsets.to(nplike),
+                    len(offsets),
+                    True,  # ascending
+                    True,  # stable
+                )
             )
 
             return ak._v2.contents.RegularArray(
-                ak._v2.contents.NumpyArray(out),
+                self._content._carry(nextcarry, True, NestedIndexError),
                 self._size,
                 self._length,
                 self._identifier,

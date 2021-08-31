@@ -138,4 +138,22 @@ class UnmaskedArray(Content):
             )
 
     def _sort(self, axis, kind, order):
-        raise NotImplementedError
+        out = self._content._sort(axis, kind, order)
+
+        if isinstance(out, ak._v2.contents.RegularArray):
+            tmp = ak._v2.contents.UnmaskedArray(
+                out._content,
+                self._identifier,
+                self._parameters,
+            )._simplify_optiontype()
+
+            return ak._v2.contents.RegularArray(
+                tmp,
+                out._size,
+                out._length,
+                self._identifier,
+                self._parameters,
+            )
+
+        else:
+            return out

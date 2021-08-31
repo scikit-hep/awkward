@@ -7,7 +7,6 @@ from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
-import numpy
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -428,28 +427,39 @@ class ListArray(Content):
             )
 
     def _sort(self, axis, kind, order):
-        def sort_next(x, axis=axis, kind=kind, order=order):
-            return x._sort(axis, kind, order)
-
         if isinstance(self._content, ak._v2.contents.NumpyArray):
-            out = numpy.concatenate(
-                [
-                    sort_next(
-                        self._content[self._starts[i] : self._stops[i]],
-                    )
-                    for i in range(len(self._starts))
-                ]
+            nplike = self.nplike
+
+            nextcarry = ak._v2.index.Index64.zeros(len(self._content), nplike)
+
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_argsort",
+                    np.int64,
+                    self._content._data.dtype.type,
+                    np.int64,
+                    np.int64,
+                ](
+                    nextcarry.to(nplike),
+                    self._content._data,
+                    len(self._content),
+                    self._starts.to(nplike),
+                    self._stops.to(nplike),
+                    len(self._starts),
+                    True,  # ascending
+                    True,  # stable
+                )
             )
 
             return ak._v2.contents.ListArray(
                 self._starts,
                 self._stops,
-                ak._v2.contents.NumpyArray(out),
+                ak._v2.contents.NumpyArray(self._content._data[nextcarry]),
                 self._identifier,
                 self._parameters,
             )
         else:
-            # FIXME: convert it to ListOffsetArray
+            # FIXME: convert it to ListOffsetArray???
             return ak._v2.contents.ListArray(
                 self._starts,
                 self._stops,

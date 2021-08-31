@@ -460,26 +460,58 @@ class ListOffsetArray(Content):
             )
 
     def _sort(self, axis, kind, order):
-        def sort_next(x, axis=axis, kind=kind, order=order):
-            return x._sort(axis, kind, order)
+        # %timeit v2_array.sort()
+        # 3.94 ms ± 98.8 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+        # def sort_next(x, axis=axis, kind=kind, order=order):
+        #     return x._sort(axis, kind, order)
+        #
+        # if isinstance(self._content, ak._v2.contents.NumpyArray):
+        #     out = numpy.concatenate(
+        #         [
+        #             sort_next(
+        #                 self._content[
+        #                     self._offsets[i + self._offsets[0]] : self._offsets[
+        #                         i + 1 + self._offsets[0]
+        #                     ]
+        #                 ],
+        #             )
+        #             for i in range(len(self._offsets) - 1)
+        #         ]
+        #     )
+        #
+        #     return ak._v2.contents.ListOffsetArray(
+        #         self._offsets,
+        #         ak._v2.contents.NumpyArray(out),
+        #         self._identifier,
+        #         self._parameters,
+        #     )
 
+        # %timeit v2_array.sort()
+        # 50.2 µs ± 817 ns per loop (mean ± std. dev. of 7 runs, 10000 loops each)
         if isinstance(self._content, ak._v2.contents.NumpyArray):
-            out = numpy.concatenate(
-                [
-                    sort_next(
-                        self._content[
-                            self._offsets[i + self._offsets[0]] : self._offsets[
-                                i + 1 + self._offsets[0]
-                            ]
-                        ],
-                    )
-                    for i in range(len(self._offsets) - 1)
-                ]
-            )
+            nplike = self.nplike
 
+            nextcarry = ak._v2.index.Index64.zeros(len(self._content), nplike)
+
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_argsort",
+                    numpy.int64,
+                    self._content._data.dtype.type,
+                    numpy.int64,
+                ](
+                    nextcarry.to(nplike),
+                    self._content._data,
+                    len(self._content),
+                    self._offsets.to(nplike),
+                    len(self._offsets),
+                    True,  # ascending
+                    True,  # stable
+                )
+            )
             return ak._v2.contents.ListOffsetArray(
                 self._offsets,
-                ak._v2.contents.NumpyArray(out),
+                ak._v2.contents.NumpyArray(self._content._data[nextcarry]),
                 self._identifier,
                 self._parameters,
             )

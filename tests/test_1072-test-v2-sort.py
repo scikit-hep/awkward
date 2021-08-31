@@ -70,6 +70,17 @@ def test_listarray_sort():
     ]
     # FIXME: assert ak.to_list(v2_to_v1(v2_array.sort())) == [[{'nest': 1.1}, {'nest': 2.2}, {'nest': 3.3}], [], [{'nest': 4.4}, {'nest': 5.5}]]
 
+    v2_array = ak._v2.contents.listarray.ListArray(  # noqa: F841
+        ak._v2.index.Index(np.array([4, 100, 1])),
+        ak._v2.index.Index(
+            np.array([7, 100, 3, 200])
+        ),  # FIXME: should it be an error - different starts/stops lengths?
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
+        ),
+    )
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
 
 def test_listoffsetarray_sort():
     v2_array = ak._v2.contents.listoffsetarray.ListOffsetArray(  # noqa: F841
@@ -324,13 +335,13 @@ def test_bitmaskedarray_sort():
     ]
 
 
-# def test_unmaskedarray_sort():
-#     v2_array = ak._v2.contents.unmaskedarray.UnmaskedArray(
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
-#         )
-#     )
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [0, 1, 2, 3]
+def test_unmaskedarray_sort():
+    v2_array = ak._v2.contents.unmaskedarray.UnmaskedArray(
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([0.0, 2.2, 1.1, 3.3], dtype=np.float64)
+        )
+    )
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [0.0, 1.1, 2.2, 3.3]
 
 
 def test_unionarray_sort():
@@ -380,19 +391,12 @@ def test_recordarray_sort():
     ]
 
 
-# def test_indexedarray_sort():
-#     v2_array = ak._v2.contents.indexedarray.IndexedArray(  # noqa: F841
-#         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#     )
-#     assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [0, 1, 2, 3, 4, 5, 6]
+def test_indexedarray_sort():
+    v2_array = ak._v2.contents.indexedarray.IndexedArray(  # noqa: F841
+        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    )
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [1.1, 2.2, 3.3, 3.3, 5.5, 5.5, 6.6]
 
 
 def test_indexedoptionarray_sort():
@@ -407,7 +411,7 @@ def test_indexedoptionarray_sort():
             ["nest"],
         ),
     )
-    assert ak.to_list(v2_to_v1(v2_array.sort(-1))) == [
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
         {"nest": 2.2},
         {"nest": 3.3},
         None,

@@ -260,5 +260,3 @@ class IndexedOptionArray(Content):
             self._identifier,
             self._parameters,
         )
-
-        raise NotImplementedError
