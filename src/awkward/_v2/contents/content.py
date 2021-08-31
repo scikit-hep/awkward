@@ -55,13 +55,15 @@ class Content(object):
         length = len(self)
         if len(self._index) < length:
             raise ValueError("len(index) < len(tags")
-        
+
         tags = ak._v2.index.Index8.empty(length, nplike)
         index = ak._v2.index.Index64.empty(length, nplike)
         contents = []
 
         for i in range(len(contents)):
-            if isinstance(contents[i], ak._v2.contents.unionarray.UnionArray) and contents[i]._index.dtype == np.dtype(np.int32):
+            if isinstance(
+                contents[i], ak._v2.contents.unionarray.UnionArray
+            ) and contents[i]._index.dtype == np.dtype(np.int32):
                 innertags = ak._v2.index.Index8(contents[i]._tags)
                 innerindex = ak._v2.index.Index32(contents[i]._index)
                 innercontents = contents[i]._contents
@@ -89,8 +91,8 @@ class Content(object):
                                     j,
                                     i,
                                     length,
-                                    len(contents[k])
-                                )   
+                                    len(contents[k]),
+                                )
                             )
                             contents[k] = contents[k].merge(innercontents[j])
                             unmerged = False
@@ -116,10 +118,12 @@ class Content(object):
                                     i,
                                     length,
                                     0,
-                                )   
+                                )
                             )
                             contents.append(innercontents[j])
-            elif isinstance(contents[i], ak._v2.contents.unionarray.UnionArray) and contents[i]._index.dtype == np.dtype(np.uint32):
+            elif isinstance(
+                contents[i], ak._v2.contents.unionarray.UnionArray
+            ) and contents[i]._index.dtype == np.dtype(np.uint32):
                 innertags = ak._v2.index.Index8(contents[i]._tags)
                 innerindex = ak._v2.index.IndexU32(contents[i]._index)
                 innercontents = contents[i]._contents
@@ -148,8 +152,8 @@ class Content(object):
                                     j,
                                     i,
                                     length,
-                                    len(contents[k])
-                                )   
+                                    len(contents[k]),
+                                )
                             )
                             contents[k] = contents[k].merge(innercontents[j])
                             unmerged = False
@@ -175,10 +179,12 @@ class Content(object):
                                     i,
                                     length,
                                     0,
-                                )   
+                                )
                             )
                             contents.append(innercontents[j])
-            elif isinstance(contents[i], ak._v2.contents.unionarray.UnionArray) and contents[i]._index.dtype == np.dtype(np.int64):
+            elif isinstance(
+                contents[i], ak._v2.contents.unionarray.UnionArray
+            ) and contents[i]._index.dtype == np.dtype(np.int64):
                 innertags = ak._v2.index.Index8(contents[i]._tags)
                 innerindex = ak._v2.index.Index64(contents[i]._index)
                 innercontents = contents[i]._contents
@@ -208,7 +214,7 @@ class Content(object):
                                     i,
                                     length,
                                     len(contents[k]),
-                                )   
+                                )
                             )
                             contents[k] = contents[k].merge(innercontents[j])
                             unmerged = False
@@ -234,82 +240,84 @@ class Content(object):
                                     i,
                                     length,
                                     0,
-                                )   
+                                )
                             )
                             contents.append(innercontents[j])
             else:
                 unmerged = True
                 for k in range(len(contents)):
-                    #FIXME
+                    # FIXME
                     if contents[k] is self._contents[i]:
                         self._handle_error(
-                                nplike[
-                                    "awkward_UnionArray_simplify_one",
-                                    tags.dtype.type,
-                                    index.dtype.type,
-                                    self._tags.dtype.type,
-                                    self._index.dtype.type
-                                ](
-                                    tags.to(nplike),
-                                    index.to(nplike),
-                                    self._tags.to(nplike),
-                                    self._index.to(nplike),
-                                    k,
-                                    i,
-                                    length,
-                                    0,
-                                )  
+                            nplike[
+                                "awkward_UnionArray_simplify_one",
+                                tags.dtype.type,
+                                index.dtype.type,
+                                self._tags.dtype.type,
+                                self._index.dtype.type,
+                            ](
+                                tags.to(nplike),
+                                index.to(nplike),
+                                self._tags.to(nplike),
+                                self._index.to(nplike),
+                                k,
+                                i,
+                                length,
+                                0,
                             )
+                        )
                         unmerged = False
                         break
                     elif merge and contents[k].meargeable(self._contents[i], mergebool):
                         self._handle_error(
-                                nplike[
-                                    "awkward_UnionArray_simplify_one",
-                                    tags.dtype.type,
-                                    index.dtype.type,
-                                    self._tags.dtype.type,
-                                    self._index.dtype.type
-                                ](
-                                    tags.to(nplike),
-                                    index.to(nplike),
-                                    self._tags.to(nplike),
-                                    self._index.to(nplike),
-                                    k,
-                                    i,
-                                    length,
-                                    0,
-                                )  
+                            nplike[
+                                "awkward_UnionArray_simplify_one",
+                                tags.dtype.type,
+                                index.dtype.type,
+                                self._tags.dtype.type,
+                                self._index.dtype.type,
+                            ](
+                                tags.to(nplike),
+                                index.to(nplike),
+                                self._tags.to(nplike),
+                                self._index.to(nplike),
+                                k,
+                                i,
+                                length,
+                                0,
                             )
+                        )
                         contents[k] = contents[k].merge(self._contents[i])
                         unmerged = False
-                        break   
+                        break
                     if unmerged:
                         self._handle_error(
-                                nplike[
-                                    "awkward_UnionArray_simplify_one",
-                                    tags.dtype.type,
-                                    index.dtype.type,
-                                    self._tags.dtype.type,
-                                    self._index.dtype.type
-                                ](
-                                    tags.to(nplike),
-                                    index.to(nplike),
-                                    self._tags.to(nplike),
-                                    self._index.to(nplike),
-                                    k,
-                                    i,
-                                    length,
-                                    0,
-                                )  
+                            nplike[
+                                "awkward_UnionArray_simplify_one",
+                                tags.dtype.type,
+                                index.dtype.type,
+                                self._tags.dtype.type,
+                                self._index.dtype.type,
+                            ](
+                                tags.to(nplike),
+                                index.to(nplike),
+                                self._tags.to(nplike),
+                                self._index.to(nplike),
+                                k,
+                                i,
+                                length,
+                                0,
                             )
+                        )
                         contents.append(self._contents[i])
         if len(contents) > 2 ^ 7:
             raise ValueError("FIXME: handle UnionArray with more than 127 contents")
         if len(contents) == 1:
             return contents[0]._carry(index, True, NestedIndexError)
         else:
-            return ak._v2.contents.unionarray.UnionArray(tags, index, contents, self._identifier, self._contents)
+            return ak._v2.contents.unionarray.UnionArray(
+                tags, index, contents, self._identifier, self._contents
+            )
 
     def _simplify_optiontype(self):
         return self
