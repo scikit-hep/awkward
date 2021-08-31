@@ -19256,3 +19256,142 @@ unit-tests:
     inputs: {length: 5}
     outputs:
       tomask: [0, 0, 0, 0, 0]
+- name: awkward_BitMaskedArray_to_IndexedOptionArray
+  tests:
+  - error: false
+    inputs:
+      bitmasklength: 2
+      frombitmask: [58, 59]
+      lsb_order: false
+      validwhen: false
+    outputs:
+      toindex: [0, 1, -1, -1, -1, 5, -1, 7, 8, 9, -1, -1, -1, 13, -1, -1]
+  - error: false
+    inputs:
+      bitmasklength: 2
+      frombitmask: [58, 59]
+      lsb_order: true
+      validwhen: false
+    outputs:
+      toindex: [0, -1, 2, -1, -1, -1, 6, 7, -1, -1, 10, -1, -1, -1, 14, 15]
+- name: awkward_ListArray_getitem_jagged_shrink
+  tests:
+  - error: false
+    inputs:
+      length: 1
+      slicestarts: [0, 1, 1, 1]
+      slicestops: [4]
+      missing: [0, 0, 0, 0]
+    outputs:
+      tocarry: [0, 1, 2, 3]
+      tolargeoffsets: [0, 4]
+      tosmalloffsets: [0, 4]
+  - error: false
+    inputs:
+      length: 2
+      missing: [0, 1, 1]
+      slicestarts: [0, 2, 2]
+      slicestops: [2, 2, 3]
+      missing: [0, 0, 0, 0]
+    outputs:
+      tocarry: [0, 1]
+      tolargeoffsets: [0, 2, 2]
+      tosmalloffsets: [0, 2, 2]
+  - error: false
+    inputs:
+      length: 2
+      missing: [0, 1, 2, 1]
+      slicestarts: [0, 2, 2]
+      slicestops: [2, 2, 4]
+      missing: [0, 0, 0, 0]
+    outputs:
+      tocarry: [0, 1]
+      tolargeoffsets: [0, 2, 2]
+      tosmalloffsets: [0, 2, 2]
+  - error: false
+    inputs:
+      length: 3
+      missing: [0, 1, 2, 1]
+      slicestarts: [0, 2, 3, 3]
+      slicestops: [2, 3, 3, 4]
+      missing: [0, 0, 0, 0]
+    outputs:
+      tocarry: [0, 1, 2]
+      tolargeoffsets: [0, 2, 3, 3]
+      tosmalloffsets: [0, 2, 3, 3]
+  - error: false
+    inputs:
+      length: 3
+      missing: [0, 1, 2, 3, 1, 4]
+      slicestarts: [0, 2, 3, 3]
+      slicestops: [2, 3, 3, 6]
+      missing: [0, 0, 0, 0]
+    outputs:
+      tocarry: [0, 1, 2]
+      tolargeoffsets: [0, 2, 3, 3]
+      tosmalloffsets: [0, 2, 3, 3]
+- name: awkward_NumpyArray_getitem_boolean_nonzero
+  tests:
+  - error: false
+    inputs:
+      fromptr: [0, 0, 0, 0, 4]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: []
+  - error: false
+    inputs:
+      fromptr: [0, 0, 0, 0, 4]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: []
+  - error: false
+    inputs:
+      fromptr: [1, 0, 0, 0, 4]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: [0]
+  - error: false
+    inputs:
+      fromptr: [0, 0, 0, 3]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: []
+  - error: false
+    inputs:
+      fromptr: [0, 0, 0, 3]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: []
+  - error: false
+    inputs:
+      fromptr: [0, 1]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: []
+  - error: false
+    inputs:
+      fromptr: [0, 0, 2]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: []
+  - error: false
+    inputs:
+      fromptr: [0, 1]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: []
+  - error: false
+    inputs:
+      fromptr: [0, 1]
+      length: 1
+      stride: 1
+    outputs:
+      toptr: []
