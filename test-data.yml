@@ -19289,7 +19289,6 @@ unit-tests:
   - error: false
     inputs:
       length: 2
-      missing: [0, 1, 1]
       slicestarts: [0, 2, 2]
       slicestops: [2, 2, 3]
       missing: [0, 0, 0, 0]
@@ -19300,7 +19299,6 @@ unit-tests:
   - error: false
     inputs:
       length: 2
-      missing: [0, 1, 2, 1]
       slicestarts: [0, 2, 2]
       slicestops: [2, 2, 4]
       missing: [0, 0, 0, 0]
@@ -19311,7 +19309,6 @@ unit-tests:
   - error: false
     inputs:
       length: 3
-      missing: [0, 1, 2, 1]
       slicestarts: [0, 2, 3, 3]
       slicestops: [2, 3, 3, 4]
       missing: [0, 0, 0, 0]
@@ -19322,7 +19319,6 @@ unit-tests:
   - error: false
     inputs:
       length: 3
-      missing: [0, 1, 2, 3, 1, 4]
       slicestarts: [0, 2, 3, 3]
       slicestops: [2, 3, 3, 6]
       missing: [0, 0, 0, 0]
