@@ -105,4 +105,6 @@ class EmptyArray(Content):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 
     def _toNumpyArray(self, dtype):
-        return ak._v2.contents.numpyarray.NumpyArray(numpy.empty(0, dtype), self._identifier, self._parameters)
+        return ak._v2.contents.numpyarray.NumpyArray(
+            numpy.empty(0, dtype), self._identifier, self._parameters
+        )

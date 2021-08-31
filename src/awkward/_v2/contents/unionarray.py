@@ -234,7 +234,7 @@ class UnionArray(Content):
         return outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        simplified = self._simplify_uniontype(True, False)
+        simplified = self._simplify_uniontype()
         if (
             simplified.index.dtype == np.dtype(np.int32)
             or simplified.index.dtype == np.dtype(np.uint32)
@@ -272,7 +272,7 @@ class UnionArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out._simplify_uniontype(True, False)
+            return out._simplify_uniontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
