@@ -385,7 +385,7 @@ def test_bool_missing():
         ak._ext._slice_tostring(ak.Array([None, None, None], check_valid=True))
         == "[missing([-1, -1, -1], array([]))]"
     )
-
+    # FIXME
     # for x1 in [True, False, None]:
     #     for x2 in [True, False, None]:
     #         for x3 in [True, False, None]:
@@ -399,11 +399,10 @@ def test_bool_missing():
     #                     ]
     #                     array2 = ak.Array(mask, check_valid=True)
     #                     array2 = v1_to_v2(array2.layout)
-    # FIXME
-    # assert (
-    #     ak.to_list(array[array2])
-    #     == expected
-    # )
+    #                     assert (
+    #                         ak.to_list(array[array2])
+    #                         == expected
+    #                     )
 
 
 def test_bool_missing2():
@@ -441,11 +440,10 @@ def test_bool_missing2():
     array1 = v1_to_v2(array1.layout)
 
     # FIXME
-    # print("dadadada", regulararray[:, array1])
     # assert ak.to_list(
     #     regulararray[:, array1]
     # ) == [[0.0, None, 3.3], [4.4, None, 7.7], [8.8, None, 11.1]]
-    # assert 1 == 2
+
     # assert ak.to_list(
     #     regulararray[1:, array1]
     # ) == [[4.4, None, 7.7], [8.8, None, 11.1]]
@@ -588,12 +586,10 @@ def test_double_jagged():
     array = v1_to_v2(array.layout)
     array2 = v1_to_v2(array2.layout)
 
-    # FIXME
-    # assert ak.to_list(
-    #     array[
-    #         array2
-    #     ]
-    # ) == [[[2, 1, 0], [5]], [[8, 7, 6], [11, 10, 10, 12]]]
+    assert ak.to_list(array[array2]) == [
+        [[2, 1, 0], [5]],
+        [[8, 7, 6], [11, 10, 10, 12]],
+    ]
 
     content = ak.from_iter(
         [[0, 1, 2, 3], [4, 5], [6, 7, 8], [9, 10, 11, 12, 13]], highlevel=False
@@ -660,14 +656,12 @@ def test_regular_regular():
     array1 = v1_to_v2(array1.layout)
     array2 = v1_to_v2(array2.layout)
 
-    # FIXME
-    # assert (
-    #     ak.to_list(
-    #         regulararray2[array1]
-    #     )
-    #     == [[[2], [6, 8], [14, 12, 10]], [[17], [21, 23], [25, 27, 29]]]
-    # )
+    assert ak.to_list(regulararray2[array1]) == [
+        [[2], [6, 8], [14, 12, 10]],
+        [[17], [21, 23], [25, 27, 29]],
+    ]
 
+    # FIXME
     # assert (
     #     ak.to_list(
     #         regulararray2[
@@ -812,7 +806,7 @@ def test_indexedarray():
     ) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
     # FIXME
     # assert ak.to_list(
-    # #     indexedarray[ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)]
+    #     indexedarray[ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)]
     # ) == [[6.6, 9.9], [5.5], [None], [1.1, None, 1.1]]
     # assert ak.to_list(
     #     indexedarray[ak.Array([[0, -1], [0], None, [1, 1]], check_valid=True)]

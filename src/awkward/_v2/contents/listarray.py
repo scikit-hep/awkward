@@ -177,8 +177,9 @@ class ListArray(Content):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
-    def _getitem_next_jagged_missing(self, slicestarts, slicestops, slicecontent, tail):
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
+
         if len(slicestarts) != len(self):
             raise ValueError(
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
@@ -186,152 +187,186 @@ class ListArray(Content):
                 )
             )
 
-        if len(self._starts) < len(slicestarts):
-            raise ValueError("jagged slice length differs from array length")
+        if isinstance(slicecontent, ak._v2.contents.listoffsetarray.ListOffsetArray):
+            outoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
 
-        missing = ak._v2.index.Index64(slicecontent._index)
-        numvalid = ak._v2.index.Index64.empty(1, nplike)
-        self._handle_error(
-            nplike[
-                "awkward_ListArray_getitem_jagged_numvalid",
-                numvalid.dtype.type,
-                slicestarts.dtype.type,
-                slicestops.dtype.type,
-                missing.dtype.type,
-            ](
-                numvalid.to(nplike),
-                slicestarts.to(nplike),
-                slicestops.to(nplike),
-                len(slicestarts),
-                missing.to(nplike),
-                len(missing),
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_getitem_jagged_descend",
+                    outoffsets.dtype.type,
+                    slicestarts.dtype.type,
+                    slicestops.dtype.type,
+                    self._starts.dtype.type,
+                    self._stops.dtype.type,
+                ](
+                    outoffsets.to(nplike),
+                    slicestarts.to(nplike),
+                    slicestops.to(nplike),
+                    len(slicestarts),
+                    self._starts.to(nplike),
+                    self._stops.to(nplike),
+                )
             )
-        )
 
-        nextcarry = ak._v2.index.Index64(numvalid._data)
-        smalloffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
-        largeoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
+            asListOffsetArray64 = self.toListOffsetArray64(True)
+            next_content = asListOffsetArray64._content
 
-        self._handle_error(
-            nplike[
-                "awkward_ListArray_getitem_jagged_shrink",
-                nextcarry.dtype.type,
-                smalloffsets.dtype.type,
-                largeoffsets.dtype.type,
-                slicestops.dtype.type,
-                slicestops.dtype.type,
-                missing.dtype.type,
-            ](
-                nextcarry.to(nplike),
-                smalloffsets.to(nplike),
-                largeoffsets.to(nplike),
-                slicestarts.to(nplike),
-                slicestops.to(nplike),
-                len(slicestarts),
-                missing.to(nplike),
+            sliceoffsets = ak._v2.index.Index64(slicecontent._offsets)
+            outcontent = next_content._getitem_next_jagged(
+                sliceoffsets[:-1], sliceoffsets[1:], slicecontent._content, tail
             )
-        )
 
-        if isinstance(
-            slicecontent._content, ak._v2.contents.indexedoptionarray.IndexedOptionArray
-        ):
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                outoffsets, outcontent, None, self._parameters
+            )
+
+        elif isinstance(slicecontent, ak._v2.contents.numpyarray.NumpyArray):
+            carrylen = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_getitem_jagged_carrylen",
+                    carrylen.dtype.type,
+                    slicestarts.dtype.type,
+                    slicestops.dtype.type,
+                ](
+                    carrylen.to(nplike),
+                    slicestarts.to(nplike),
+                    slicestops.to(nplike),
+                    len(slicestarts),
+                )
+            )
+
+            sliceindex = ak._v2.index.Index64(slicecontent._data)
+            outoffsets = ak._v2.index.Index64.zeros(len(slicestarts) + 1, nplike)
+            nextcarry = ak._v2.index.Index64.zeros(carrylen[0], nplike)
+
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_getitem_jagged_apply",
+                    outoffsets.dtype.type,
+                    nextcarry.dtype.type,
+                    slicestarts.dtype.type,
+                    slicestops.dtype.type,
+                    sliceindex.dtype.type,
+                    self._starts.dtype.type,
+                    self._stops.dtype.type,
+                ](
+                    outoffsets.to(nplike),
+                    nextcarry.to(nplike),
+                    slicestarts.to(nplike),
+                    slicestops.to(nplike),
+                    len(slicestarts),
+                    sliceindex.to(nplike),
+                    len(sliceindex),
+                    self._starts.to(nplike),
+                    self._stops.to(nplike),
+                    len(self._content),
+                )
+            )
+
             nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
-            next = ak._v2.contents.listoffsetarray.ListOffsetArra(
-                smalloffsets, nextcontent, None, self._parameters
-            )
-            out = next._getitem_next_jagged(
-                smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
+            nexthead, nexttail = self._headtail(tail)
+            outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
+
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                outoffsets, outcontent
             )
 
-        else:
-            out = self._getitem_next_jagged(
-                smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
-            )
-
-        if isinstance(out, ak._v2.contents.listoffsetarray.ListOffsetArray):
-            content = out._content
-            missing_trim = ak._v2.index.Index64(missing[0, largeoffsets[-1]])
-            indexedoptionarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                missing_trim, content, None, self._parameters
-            )
-            return ak._v2.contents.listoffsetarray.ListOffsetArray64(
-                largeoffsets,
-                indexedoptionarray._simplify_optiontype(),
-                None,
-                self._parameters,
-            )
-        else:
-            raise ValueError(
-                "expected ListOffsetArray64 from {0}"
-                "ListArray::getitem_next_jagged, got ".format(type(self).__name__)
-            )
-
-    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        nplike = self.nplike
-
-        if isinstance(
+        elif isinstance(
             slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray
         ):
-            return self._getitem_next_jagged_missing(
-                slicestarts, slicestops, slicecontent, tail
+            if len(self._starts) < len(slicestarts):
+                raise ValueError("jagged slice length differs from array length")
+
+            missing = ak._v2.index.Index64(slicecontent._index)
+            numvalid = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_getitem_jagged_numvalid",
+                    numvalid.dtype.type,
+                    slicestarts.dtype.type,
+                    slicestops.dtype.type,
+                    missing.dtype.type,
+                ](
+                    numvalid.to(nplike),
+                    slicestarts.to(nplike),
+                    slicestops.to(nplike),
+                    len(slicestarts),
+                    missing.to(nplike),
+                    len(missing),
+                )
             )
-        # FIXME
-        # if len(slicestarts) != len(self):
-        #     raise ValueError("cannot fit jagged slice with length {0} into {1} of size {2}".format(len(slicestarts), type(self).__name__, len(self)))
 
-        carrylen = ak._v2.index.Index64.empty(1, nplike)
-        self._handle_error(
-            nplike[
-                "awkward_ListArray_getitem_jagged_carrylen",
-                carrylen.dtype.type,
-                slicestarts.dtype.type,
-                slicestops.dtype.type,
-            ](
-                carrylen.to(nplike),
-                slicestarts.to(nplike),
-                slicestops.to(nplike),
-                len(slicestarts),
+            nextcarry = ak._v2.index.Index64(numvalid._data)
+            smalloffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
+            largeoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
+
+            self._handle_error(
+                nplike[
+                    "awkward_ListArray_getitem_jagged_shrink",
+                    nextcarry.dtype.type,
+                    smalloffsets.dtype.type,
+                    largeoffsets.dtype.type,
+                    slicestops.dtype.type,
+                    slicestops.dtype.type,
+                    missing.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    smalloffsets.to(nplike),
+                    largeoffsets.to(nplike),
+                    slicestarts.to(nplike),
+                    slicestops.to(nplike),
+                    len(slicestarts),
+                    missing.to(nplike),
+                )
             )
-        )
 
-        while not hasattr(slicecontent, "data"):
-            if isinstance(slicecontent, ak._v2.contents.emptyarray.EmptyArray):
-                return self
-            slicecontent = slicecontent._content
+            if isinstance(
+                slicecontent._content,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+            ):
+                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                next = ak._v2.contents.listoffsetarray.ListOffsetArra(
+                    smalloffsets, nextcontent, None, self._parameters
+                )
+                out = next._getitem_next_jagged(
+                    smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
+                )
 
-        sliceindex = ak._v2.index.Index64(slicecontent._data)
-        outoffsets = ak._v2.index.Index64.zeros(len(slicestarts) + 1, nplike)
-        nextcarry = ak._v2.index.Index64.zeros(carrylen[0], nplike)
+            else:
+                out = self._getitem_next_jagged(
+                    smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
+                )
 
-        self._handle_error(
-            nplike[
-                "awkward_ListArray_getitem_jagged_apply",
-                outoffsets.dtype.type,
-                nextcarry.dtype.type,
-                slicestarts.dtype.type,
-                slicestops.dtype.type,
-                sliceindex.dtype.type,
-                self._starts.dtype.type,
-                self._stops.dtype.type,
-            ](
-                outoffsets.to(nplike),
-                nextcarry.to(nplike),
-                slicestarts.to(nplike),
-                slicestops.to(nplike),
-                len(slicestarts),
-                sliceindex.to(nplike),
-                len(sliceindex),
-                self._starts.to(nplike),
-                self._stops.to(nplike),
-                len(self._content),
+            if isinstance(out, ak._v2.contents.listoffsetarray.ListOffsetArray):
+                content = out._content
+                missing_trim = ak._v2.index.Index64(missing[0, largeoffsets[-1]])
+                indexedoptionarray = (
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                        missing_trim, content, None, self._parameters
+                    )
+                )
+                return ak._v2.contents.listoffsetarray.ListOffsetArray64(
+                    largeoffsets,
+                    indexedoptionarray._simplify_optiontype(),
+                    None,
+                    self._parameters,
+                )
+            else:
+                raise ValueError(
+                    "expected ListOffsetArray from {0}"
+                    "ListArray::getitem_next_jagged, got ".format(type(self).__name__)
+                )
+
+        elif isinstance(slicecontent, ak._v2.contents.emptyarray.EmptyArray):
+            return self
+
+        else:
+            raise ValueError(
+                "expected Index/IndexedOptionArray/ListOffsetArray from ListArray::getitem_next_jagged, got {0}".format(
+                    type(self).__name__
+                )
             )
-        )
-
-        nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
-        nexthead, nexttail = self._headtail(tail)
-        outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
-
-        return ak._v2.contents.listoffsetarray.ListOffsetArray(outoffsets, outcontent)
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
