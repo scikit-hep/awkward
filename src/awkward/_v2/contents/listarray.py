@@ -499,9 +499,9 @@ class ListArray(Content):
             )
         else:
             compact = self.toListOffsetArray64(True)
-            next = compact._combinations(
-                n, replacement, recordlookup, parameters, axis, depth + 1
+            next = compact._content._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth + 1
             )
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
-                compact.offsets(), next, self._identifier, self._parameters
+                compact.offsets, next, self._identifier, self._parameters
             )

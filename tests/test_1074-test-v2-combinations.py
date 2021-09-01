@@ -441,3 +441,129 @@ def test_axis2():
             ],
         ],
     ]
+
+
+def test_ByteMaskedArray_combinations():
+    content = ak.from_iter(
+        [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
+        highlevel=False,
+    )
+    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    array = ak.Array(ak.layout.ByteMaskedArray(mask, content, valid_when=False))
+    v2_array = v1_to_v2(array.layout)
+
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=0))) == [
+        ([[0, 1, 2], [], [3, 4]], []),
+        ([[0, 1, 2], [], [3, 4]], None),
+        ([[0, 1, 2], [], [3, 4]], None),
+        ([[0, 1, 2], [], [3, 4]], [[], [10, 11, 12]]),
+        ([], None),
+        ([], None),
+        ([], [[], [10, 11, 12]]),
+        (None, None),
+        (None, [[], [10, 11, 12]]),
+        (None, [[], [10, 11, 12]]),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=-3))) == [
+        ([[0, 1, 2], [], [3, 4]], []),
+        ([[0, 1, 2], [], [3, 4]], None),
+        ([[0, 1, 2], [], [3, 4]], None),
+        ([[0, 1, 2], [], [3, 4]], [[], [10, 11, 12]]),
+        ([], None),
+        ([], None),
+        ([], [[], [10, 11, 12]]),
+        (None, None),
+        (None, [[], [10, 11, 12]]),
+        (None, [[], [10, 11, 12]]),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=1))) == [
+        [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
+        [],
+        None,
+        None,
+        [([], [10, 11, 12])],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=-2))) == [
+        [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
+        [],
+        None,
+        None,
+        [([], [10, 11, 12])],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=2))) == [
+        [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
+        [],
+        None,
+        None,
+        [[], [(10, 11), (10, 12), (11, 12)]],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=-1))) == [
+        [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
+        [],
+        None,
+        None,
+        [[], [(10, 11), (10, 12), (11, 12)]],
+    ]
+
+
+def test_IndexedOptionArray_combinations():
+    content = ak.from_iter(
+        [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
+        highlevel=False,
+    )
+    index = ak.layout.Index64(np.array([0, 1, -1, -1, 4], dtype=np.int64))
+    array = ak.Array(ak.layout.IndexedOptionArray64(index, content))
+    v2_array = v1_to_v2(array.layout)
+
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=0))) == [
+        ([[0, 1, 2], [], [3, 4]], []),
+        ([[0, 1, 2], [], [3, 4]], None),
+        ([[0, 1, 2], [], [3, 4]], None),
+        ([[0, 1, 2], [], [3, 4]], [[], [10, 11, 12]]),
+        ([], None),
+        ([], None),
+        ([], [[], [10, 11, 12]]),
+        (None, None),
+        (None, [[], [10, 11, 12]]),
+        (None, [[], [10, 11, 12]]),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=-3))) == [
+        ([[0, 1, 2], [], [3, 4]], []),
+        ([[0, 1, 2], [], [3, 4]], None),
+        ([[0, 1, 2], [], [3, 4]], None),
+        ([[0, 1, 2], [], [3, 4]], [[], [10, 11, 12]]),
+        ([], None),
+        ([], None),
+        ([], [[], [10, 11, 12]]),
+        (None, None),
+        (None, [[], [10, 11, 12]]),
+        (None, [[], [10, 11, 12]]),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=1))) == [
+        [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
+        [],
+        None,
+        None,
+        [([], [10, 11, 12])],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=-2))) == [
+        [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
+        [],
+        None,
+        None,
+        [([], [10, 11, 12])],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=2))) == [
+        [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
+        [],
+        None,
+        None,
+        [[], [(10, 11), (10, 12), (11, 12)]],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=-1))) == [
+        [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
+        [],
+        None,
+        None,
+        [[], [(10, 11), (10, 12), (11, 12)]],
+    ]

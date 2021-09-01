@@ -250,7 +250,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
-            numnull = ak._v2.index.Index64.empty(1, dtype=np.int64)
+            numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
             nextcarry, outindex = self.nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
