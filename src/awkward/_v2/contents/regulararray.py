@@ -435,8 +435,8 @@ class RegularArray(Content):
 
             regularlength = self._length
             singleoffsets = head._offsets
-            multistarts = ak._v2.index.Index64.zeros(len(head) * regularlength, nplike)
-            multistops = ak._v2.index.Index64.zeros(len(head) * regularlength, nplike)
+            multistarts = ak._v2.index.Index64.empty(len(head) * regularlength, nplike)
+            multistops = ak._v2.index.Index64.empty(len(head) * regularlength, nplike)
 
             self._handle_error(
                 nplike[

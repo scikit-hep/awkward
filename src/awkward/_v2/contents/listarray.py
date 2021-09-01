@@ -221,7 +221,7 @@ class ListArray(Content):
             )
 
         elif isinstance(slicecontent, ak._v2.contents.numpyarray.NumpyArray):
-            carrylen = ak._v2.index.Index64.zeros(1, nplike)
+            carrylen = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListArray_getitem_jagged_carrylen",
@@ -236,8 +236,8 @@ class ListArray(Content):
                 )
             )
             sliceindex = ak._v2.index.Index64(slicecontent._data)
-            outoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
-            nextcarry = ak._v2.index.Index64.empty(carrylen[0], nplike)
+            outoffsets = ak._v2.index.Index64.zeros(len(slicestarts) + 1, nplike)
+            nextcarry = ak._v2.index.Index64.zeros(carrylen[0], nplike)
 
             self._handle_error(
                 nplike[
@@ -267,10 +267,9 @@ class ListArray(Content):
             nexthead, nexttail = self._headtail(tail)
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
 
-            out = ak._v2.contents.listoffsetarray.ListOffsetArray(
-                outoffsets, outcontent, None, self._parameters
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                outoffsets, outcontent
             )
-            return out
 
         elif isinstance(
             slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray

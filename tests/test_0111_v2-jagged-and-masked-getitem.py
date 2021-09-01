@@ -1111,6 +1111,7 @@ def test_jagged_mask():
 def test_jagged_missing_mask():
     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
     array = v1_to_v2(array.layout)
+    print(array)
     # FIXME
     # assert ak.to_list(array[[[True, True, True], [], [True, True]]]) == [
     #     [1.1, 2.2, 3.3],
