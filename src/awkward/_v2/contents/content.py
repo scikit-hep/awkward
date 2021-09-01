@@ -538,9 +538,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         for i in range(n):
             tocarry.append(
                 ak._v2.index.Index64(self.nplike.empty(combinationslen, dtype=np.int64))
+<<<<<<< HEAD
             )
             nplike_tocarryraw[i] = NumpyKernel._cast(
                 tocarry[i].to(self.nplike), ctypes.POINTER(ctypes.c_int64)
+=======
+>>>>>>> a459c8fd6b42ab42789b15bb8b0cde88c8b3f646
             )
         tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
 
