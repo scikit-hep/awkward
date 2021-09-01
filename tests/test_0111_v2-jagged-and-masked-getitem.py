@@ -8,7 +8,9 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
-can_slice_with_unionarray = False
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
 
 
 def test_array_slice():
@@ -577,10 +579,6 @@ def test_jagged():
     ]
 
 
-@pytest.mark.skipif(
-    ak._util.py27,
-    reason="TypeError: unbound method _broadcast_tooffsets64() must be called with ListOffsetArray instance as first argument (got ListArray instance instead)",
-)
 def test_double_jagged():
     array = ak.Array(
         [[[0, 1, 2, 3], [4, 5]], [[6, 7, 8], [9, 10, 11, 12, 13]]], check_valid=True
@@ -642,10 +640,6 @@ def test_jagged_masked():
     assert ak.to_list(array[array1]) == [[3.3, None], [], [None, 4.4], [None], [8.8]]
 
 
-@pytest.mark.skipif(
-    ak._util.py27,
-    reason="TypeError: unbound method _broadcast_tooffsets64() must be called with ListOffsetArray instance as first argument (got ListArray instance instead)",
-)
 def test_regular_regular():
     content = ak.layout.NumpyArray(np.arange(2 * 3 * 5))
     regulararray1 = ak.layout.RegularArray(content, 5, zeros_length=0)
@@ -742,10 +736,6 @@ def test_emptyarray():
         listoffsetarray[array5]
 
 
-@pytest.mark.skipif(
-    ak._util.py27,
-    reason="TypeError: unbound method _broadcast_tooffsets64() must be called with ListOffsetArray instance as first argument (got ListArray instance instead)",
-)
 def test_numpyarray():
     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
     array2 = ak.Array([[[], [], []], [], [[], []]], check_valid=True)

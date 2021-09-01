@@ -8,6 +8,10 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 
 def test_integerindex_null():
     a = ak.Array([[0, 1, 2], None, [5, 6], [7]])

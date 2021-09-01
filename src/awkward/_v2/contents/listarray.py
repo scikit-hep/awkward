@@ -339,7 +339,11 @@ class ListArray(Content):
 
             if isinstance(out, ak._v2.contents.listoffsetarray.ListOffsetArray):
                 content = out._content
-                missing_trim = ak._v2.index.Index64(missing[0 : largeoffsets[-1]])
+
+                missing_trim = ak._v2.index.Index64(
+                    missing._getitem_range_nowrap(0, largeoffsets[-1])
+                )
+
                 indexedoptionarray = (
                     ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                         missing_trim, content, None, self._parameters
