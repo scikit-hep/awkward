@@ -500,35 +500,22 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         elif isinstance(item, ak.layout.Content):
             return self._prepare_tuple_item(v1_to_v2(item))
 
+        elif isinstance(item, ak._v2.contents.EmptyArray):
+            return self._prepare_tuple_item(item._toNumpyArray(np.int64))
+
         elif isinstance(item, ak._v2.contents.NumpyArray):
             return item.data
 
-        elif isinstance(
-            item,
-            (
-                ak._v2.contents.ListOffsetArray,
-                ak._v2.contents.ListArray,
-                ak._v2.contents.RegularArray,
-            ),
-        ):
-            return item.toListOffsetArray64(False)
+        elif isinstance(item, ak._v2.contents.Content):
+            out = self._prepare_tuple_bool_to_int(self._prepare_tuple_nested(item))
 
-        elif isinstance(
-            item,
-            (ak._v2.contents.IndexedOptionArray),
-        ):
-            return item
+            print(out)
+            print(ak.to_list(out))
+            print()
 
-        elif isinstance(
-            item,
-            (
-                ak._v2.contents.IndexedArray,
-                ak._v2.contents.ByteMaskedArray,
-                ak._v2.contents.BitMaskedArray,
-                ak._v2.contents.UnmaskedArray,
-            ),
-        ):
-            return item.toIndexedOptionArray64()
+            raise Exception
+
+            return out
 
         elif isinstance(item, Iterable) and all(ak._util.isstr(x) for x in item):
             return list(item)
@@ -549,6 +536,183 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 "iterable of str) are valid indices for slicing, not\n\n    "
                 + repr(item).replace("\n", "\n    ")
             )
+
+    def _prepare_tuple_RegularArray_toListOffsetArray64(self, item):
+        if isinstance(item, ak._v2.contents.RegularArray):
+            next = item.toListOffsetArray64()
+            return ak._v2.contents.ListOffsetArray(
+                next.offsets,
+                self._prepare_tuple_RegularArray_toListOffsetArray64(next.content),
+                identifier=item.identifier,
+                parameters=item.parameters,
+            )
+
+        elif isinstance(item, ak._v2.contents.NumpyArray):
+            return item
+
+        else:
+            raise AssertionError(type(item))
+
+    def _prepare_tuple_nested(self, item):
+        if isinstance(item, ak._v2.contents.EmptyArray):
+            return self._prepare_tuple_nested(item._toNumpyArray())
+
+        elif isinstance(item, ak._v2.contents.NumpyArray) and issubclass(
+            item.dtype.type, (bool, np.bool_, np.integer)
+        ):
+            if issubclass(item.dtype.type, (bool, np.bool_, np.int64)):
+                next = item
+            else:
+                next = ak._v2.contents.NumpyArray(
+                    item.data.astype(np.int64),
+                    identifier=item.identifier,
+                    parameters=item.parameters,
+                    nplike=item.nplike,
+                )
+            next = next.toRegularArray()
+            next = self._prepare_tuple_RegularArray_toListOffsetArray64(next)
+            return next
+
+        elif isinstance(
+            item,
+            ak._v2.contents.ListOffsetArray,
+        ) and issubclass(item.offsets.dtype.type, np.int64):
+            return ak._v2.contents.ListOffsetArray(
+                item.offsets,
+                self._prepare_tuple_nested(item.content),
+                identifier=item.identifier,
+                parameters=item.parameters,
+            )
+
+        elif isinstance(
+            item,
+            (
+                ak._v2.contents.ListOffsetArray,
+                ak._v2.contents.ListArray,
+                ak._v2.contents.RegularArray,
+            ),
+        ):
+            next = item.toListOffsetArray64(False)
+            return self._prepare_tuple_nested(next)
+
+        elif isinstance(
+            item,
+            ak._v2.contents.IndexedArray,
+        ):
+            next = item.project()
+            return self._prepare_tuple_nested(next)
+
+        elif isinstance(
+            item,
+            ak._v2.contents.IndexedOptionArray,
+        ) and issubclass(item.index.dtype.type, np.int64):
+            return ak._v2.contents.IndexedOptionArray(
+                item.index,
+                self._prepare_tuple_nested(item.content),
+                identifier=item.identifier,
+                parameters=item.parameters,
+            )._simplify_optiontype()
+
+        elif isinstance(
+            item,
+            (
+                ak._v2.contents.IndexedOptionArray,
+                ak._v2.contents.ByteMaskedArray,
+                ak._v2.contents.BitMaskedArray,
+                ak._v2.contents.UnmaskedArray,
+            ),
+        ):
+            next = item.toIndexedOptionArray64()
+            return self._prepare_tuple_nested(next)
+
+        else:
+            raise TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(item).replace("\n", "\n    ")
+            )
+
+    def _prepare_tuple_bool_to_int(self, item):
+        if isinstance(item, ak._v2.contents.ListOffsetArray) and isinstance(
+            item.content, ak._v2.contents.NumpyArray
+        ) and issubclass(item.content.dtype.type, (bool, np.bool_)):
+            localindex = item.localindex(axis=1)
+            nextcontent = localindex.content.data[item.content.data]
+
+            cumsum = item.nplike.empty(len(item.content.data) + 1, np.int64)
+            cumsum[0] = 0
+            cumsum[1:] = item.nplike.cumsum(item.content.data)
+            nextoffsets = cumsum[item.offsets]
+
+            return ak._v2.contents.ListOffsetArray(
+                ak._v2.index.Index64(nextoffsets),
+                ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
+            )
+
+        elif isinstance(item, ak._v2.contents.ListOffsetArray) and isinstance(
+            item.content, ak._v2.contents.IndexedOptionArray
+        ) and isinstance(item.content.content, ak._v2.contents.NumpyArray) and issubclass(
+            item.content.content.dtype.type, (bool, np.bool_)
+        ):
+            numnull, nextcarry, outindex = item.content.nextcarry_outindex(item.content.nplike)
+
+            print(item)
+
+            print(f"{numnull = }")
+            print(f"{nextcarry = }")
+            print(f"{outindex = }")
+
+            print(f"{item.content.content = }")
+            print(f"{item.content.content._carry(nextcarry, False, NestedIndexError) = }")
+
+
+            localindex = item.localindex(axis=1)
+            nextcontent = localindex.content.data[
+                item.content.content._carry(nextcarry, False, NestedIndexError).data
+            ]
+
+            # cumsum = item.nplike.empty(len(item.content.data) + 1, np.int64)
+            # cumsum[0] = 0
+            # cumsum[1:] = item.nplike.cumsum(item.content.data)
+            # nextoffsets = cumsum[item.offsets]
+
+
+            print(f"{localindex = }")
+            print(f"{nextcontent = }")
+            # print(f"{cumsum = }")
+            # print(f"{nextoffsets = }")
+
+            raise Exception("STOP")
+
+
+            return ak._v2.contents.ListOffsetArray(
+                ak._v2.index.Index64(nextoffsets),
+                ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
+            )
+
+        elif isinstance(item, ak._v2.contents.ListOffsetArray):
+            return ak._v2.contents.ListOffsetArray(
+                item.offsets,
+                item.content,
+                identifier=item.identifier,
+                parameters=item.parameters,
+            )
+
+        elif isinstance(item, ak._v2.contents.IndexedOptionArray):
+            return ak._v2.contents.IndexedOptionArray(
+                item.index,
+                item.content,
+                identifier=item.identifier,
+                parameters=item.parameters,
+            )
+
+        elif isinstance(item, ak._v2.contents.NumpyArray):
+            assert item.shape == (len(item),)
+
+        else:
+            raise AssertionError(type(item))
 
     def _getitem_next_array_wrap(self, outcontent, shape):
         length = shape[-2] if len(shape) >= 2 else 0

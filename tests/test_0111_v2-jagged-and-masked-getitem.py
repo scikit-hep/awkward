@@ -407,21 +407,36 @@ def test_bool_missing():
         ak._ext._slice_tostring(ak.Array([None, None, None], check_valid=True))
         == "[missing([-1, -1, -1], array([]))]"
     )
-    if fixed_value_error:
-        for x1 in [True, False, None]:
-            for x2 in [True, False, None]:
-                for x3 in [True, False, None]:
-                    for x4 in [True, False, None]:
-                        for x5 in [True, False, None]:
-                            mask = [x1, x2, x3, x4, x5]
-                            expected = [
-                                m if m is None else x
-                                for x, m in zip(data, mask)
-                                if m is not False
-                            ]
-                            array2 = ak.Array(mask, check_valid=True)
-                            array2 = v1_to_v2(array2.layout)
-                            assert ak.to_list(array[array2]) == expected
+
+    x1, x2, x3, x4, x5 = True, True, True, False, None
+    mask = [x1, x2, x3, x4, x5]
+    expected = [
+        m if m is None else x
+        for x, m in zip(data, mask)
+        if m is not False
+    ]
+    array2 = ak.Array(mask, check_valid=True)
+    array2 = v1_to_v2(array2.layout)
+
+    print(array2)
+
+    assert ak.to_list(array[array2]) == expected
+
+    # if fixed_value_error:
+    #     for x1 in [True, False, None]:
+    #         for x2 in [True, False, None]:
+    #             for x3 in [True, False, None]:
+    #                 for x4 in [True, False, None]:
+    #                     for x5 in [True, False, None]:
+    #                         mask = [x1, x2, x3, x4, x5]
+    #                         expected = [
+    #                             m if m is None else x
+    #                             for x, m in zip(data, mask)
+    #                             if m is not False
+    #                         ]
+    #                         array2 = ak.Array(mask, check_valid=True)
+    #                         array2 = v1_to_v2(array2.layout)
+    #                         assert ak.to_list(array[array2]) == expected
 
 
 def test_bool_missing2():
