@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2, v1v2_equal
 
+pytestmark = pytest.mark.skipif(ak._util.py27, reason="No Python 2.7 support in Awkward 2.x")
+
 
 def test_NumpyArray():
     a = ak._v2.contents.RegularArray(
