@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from __future__ import absolute_import
+import ctypes
 from awkward.nplike import NumpyKernel
 
 try:
@@ -536,11 +537,11 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         tocarry = []
         for i in range(n):
             tocarry.append(
-                ak._v2.index.Index64(
-                    self.nplike.empty(combinationslen, dtype=np.int64)
-                )
+                ak._v2.index.Index64(self.nplike.empty(combinationslen, dtype=np.int64))
             )
-            nplike_tocarryraw[i] = NumpyKernel._cast(tocarry[i].to(self.nplike))
+            nplike_tocarryraw[i] = NumpyKernel._cast(
+                tocarry[i].to(self.nplike), ctypes.POINTER(ctypes.c_int64)
+            )
         tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
 
         toindex = ak._v2.index.Index64.empty(n, dtype=np.int64)

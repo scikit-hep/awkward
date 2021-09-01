@@ -138,4 +138,16 @@ class UnmaskedArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        raise NotImplementedError
+        if n < 1:
+            raise ValueError("in combinations, 'n' must be at least 1")
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                self._content._combinations(
+                    n, replacement, recordlookup, parameters, posaxis, depth
+                ),
+                self._identifier,
+                self._parameters,
+            )

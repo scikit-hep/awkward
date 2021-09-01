@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import numpy as np
+import ctypes
 
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
@@ -461,4 +462,80 @@ class RegularArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        raise NotImplementedError
+        if n < 1:
+            raise ValueError("in combinations, 'n' must be at least 1")
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        elif posaxis == depth + 1:
+            # TODO: string and bytestring check
+            size = self._size
+            if replacement:
+                size = size + (n - 1)
+            thisn = n
+            if thisn > size:
+                combinationslen = 0
+            elif thisn == size:
+                combinationslen = 1
+            else:
+                if thisn * 2 > size:
+                    thisn = size - thisn
+                combinationslen = size
+                for j in range(2, thisn + 1):
+                    combinationslen = combinationslen * (size - j + 1)
+                    combinationslen = combinationslen / j
+
+            totallen = combinationslen * len(self)
+            nplike_tocarryraw = self.nplike.empty(n, dtype=np.int64)
+            tocarry = []
+            for i in range(n):
+                tocarry.append(
+                    ak._v2.index.Index64(self.nplike.empty(totallen, dtype=np.int64))
+                )
+                nplike_tocarryraw[i] = ak.nplike.NumpyKernel._cast(
+                    tocarry[i].to(self.nplike), ctypes.POINTER(ctypes.c_int64)
+                )
+            tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
+            toindex = ak._v2.index.Index64.empty(len(size), dtype=np.int64)
+            fromindex = ak._v2.index.Index64.empty(len(size), dtype=np.int64)
+
+            if self._size != 0:
+                self._handle_error(
+                    self.nplike[
+                        "awkward_RegularArray_combinations_64",
+                        tocarryraw.to(self.nplike).dtype.type,
+                        toindex.to(self.nplike).dtype.type,
+                        fromindex.to(self.nplike).dtype.type,
+                    ](
+                        tocarryraw.to(self.nplike),
+                        toindex.to(self.nplike),
+                        fromindex.to(self.nplike),
+                        n,
+                        replacement,
+                        self._size,
+                        len(self),
+                    )
+                )
+
+            contents = []
+            for ptr in tocarry:
+                contents.append(self._content._carry(ptr, True, NestedIndexError))
+            recordarray = ak._v2.contents.recordarray.RecordArray(
+                contents, recordlookup, parameters=parameters
+            )
+            return ak._v2.contents.regulararray.RegularArray(
+                recordarray,
+                combinationslen,
+                len(self),
+                self._identifier,
+                self._parameters,
+            )
+        else:
+            next = self._content._getitem_range(
+                slice(0, len(self) * self._size)
+            )._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth + 1
+            )
+            return ak._v2.contents.regulararray.RegularArray(
+                next, self._size, len(self), self._identifier, self._parameters
+            )

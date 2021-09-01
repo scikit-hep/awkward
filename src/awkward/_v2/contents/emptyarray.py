@@ -104,4 +104,6 @@ class EmptyArray(Content):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        raise NotImplementedError
+        if n < 1:
+            raise ValueError("in combinations, 'n' must be at least 1")
+        return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)
