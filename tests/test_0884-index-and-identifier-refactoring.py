@@ -7,7 +7,9 @@ import numpy as np
 
 import awkward as ak
 
-pytestmark = pytest.mark.skipif(ak._util.py27, reason="No Python 2.7 support in Awkward 2.x")
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
 
 
 def test_index32():
