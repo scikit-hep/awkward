@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import numpy as np
-import ctypes
 
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
@@ -483,31 +482,29 @@ class RegularArray(Content):
                 combinationslen = size
                 for j in range(2, thisn + 1):
                     combinationslen = combinationslen * (size - j + 1)
-                    combinationslen = combinationslen / j
+                    combinationslen = combinationslen // j
 
             totallen = combinationslen * len(self)
             nplike_tocarryraw = self.nplike.empty(n, dtype=np.int64)
             tocarry = []
             for i in range(n):
-                tocarry.append(
-                    ak._v2.index.Index64(self.nplike.empty(totallen, dtype=np.int64))
-                )
-                nplike_tocarryraw[i] = ak.nplike.NumpyKernel._cast(
-                    tocarry[i].to(self.nplike), ctypes.POINTER(ctypes.c_int64)
-                )
+                ptr = ak._v2.index.Index64.empty(totallen, self.nplike, dtype=np.int64)
+                tocarry.append(ptr)
+                nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data
+
             tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
-            toindex = ak._v2.index.Index64.empty(len(size), dtype=np.int64)
-            fromindex = ak._v2.index.Index64.empty(len(size), dtype=np.int64)
+            toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+            fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
 
             if self._size != 0:
                 self._handle_error(
                     self.nplike[
                         "awkward_RegularArray_combinations_64",
-                        tocarryraw.to(self.nplike).dtype.type,
+                        tocarryraw.dtype.type,
                         toindex.to(self.nplike).dtype.type,
                         fromindex.to(self.nplike).dtype.type,
                     ](
-                        tocarryraw.to(self.nplike),
+                        tocarryraw.data,
                         toindex.to(self.nplike),
                         fromindex.to(self.nplike),
                         n,

@@ -256,8 +256,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
-            numnull = ak._v2.index.Index64.empty(1, dtype=np.int64)
-            nextcarry, outindex = self.nextcarry_outindex(numnull)
+            _, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth

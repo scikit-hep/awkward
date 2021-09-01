@@ -262,7 +262,7 @@ class NumpyArray(Content):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
-        elif len(self.shape()) <= 1:
+        elif len(self.shape) <= 1:
             import numpy
 
             raise numpy.AxisError("'axis' out of range for combinations")

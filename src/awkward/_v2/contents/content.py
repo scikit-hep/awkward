@@ -1,8 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from __future__ import absolute_import
-import ctypes
-from awkward.nplike import NumpyKernel
 
 try:
     from collections.abc import Iterable
@@ -11,8 +9,6 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
-
-from functools import reduce
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -511,10 +507,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def _combinations_axis0(self, n, replacement, recordlookup, parameters):
         size = len(self)
         if replacement:
-            size += n - 1
+            size = size + (n - 1)
         thisn = n
         combinationslen = 0
-        if thisn < size:
+        if thisn > size:
             combinationslen = 0
         elif thisn == size:
             combinationslen = 1
@@ -522,38 +518,29 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             if thisn * 2 > size:
                 thisn = size - thisn
             combinationslen = size
-            loopenumerator = range(2, thisn)
-            combinationslen = reduce(
-                lambda x, y: x * y, loopenumerator, combinationslen
-            )
-            combinationslen = reduce(
-                lambda x, y: x / y, loopenumerator, combinationslen
-            )
+            for j in range(2, thisn + 1):
+                combinationslen = combinationslen * (size - j + 1)
+                combinationslen = combinationslen // j
 
-        tocarryraw = ak._v2.contents.numpyarray.NumpyArray(
-            ak._v2.index.Index64.empty(n)
-        )
         nplike_tocarryraw = self.nplike.empty(n, dtype=np.int64)
         tocarry = []
         for i in range(n):
-            tocarry.append(
-                ak._v2.index.Index64(self.nplike.empty(combinationslen, dtype=np.int64))
+            ptr = ak._v2.index.Index64.empty(
+                combinationslen, self.nplike, dtype=np.int64
             )
-            nplike_tocarryraw[i] = NumpyKernel._cast(
-                tocarry[i].to(self.nplike), ctypes.POINTER(ctypes.c_int64)
-            )
+            tocarry.append(ptr)
+            nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data
         tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
-
-        toindex = ak._v2.index.Index64.empty(n, dtype=np.int64)
-        fromindex = ak._v2.index.Index64.empty(n, dtype=np.int64)
+        toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+        fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
         self._handle_error(
             self.nplike[
                 "awkward_RegularArray_combinations_64",
-                tocarryraw.to(self.nplike).dtype.type,
+                tocarryraw.dtype.type,
                 toindex.to(self.nplike).dtype.type,
                 fromindex.to(self.nplike).dtype.type,
             ](
-                tocarryraw.to(self.nplike),
+                tocarryraw.data,
                 toindex.to(self.nplike),
                 fromindex.to(self.nplike),
                 n,
@@ -563,16 +550,17 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
         )
         contents = []
+        print(tocarry)
         for ptr in tocarry:
             contents.append(ak._v2.contents.IndexedArray(ptr, self))
         return ak._v2.contents.recordarray.RecordArray(
             contents, recordlookup, parameters=parameters
         )
 
-    def combinations(self, n, replacement, keys, parameters, axis):
-        recordlookup = []
+    def combinations(self, n, replacement=False, axis=1, keys=None, parameters=None):
+        recordlookup = None
         if keys is not None:
-            recordlookup.append(keys)
+            recordlookup = keys
             if len(recordlookup) != n:
                 raise ValueError("if provided, the length of 'keys' must be 'n'")
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
