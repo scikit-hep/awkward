@@ -212,6 +212,7 @@ class ListArray(Content):
             next_content = asListOffsetArray64._content
 
             sliceoffsets = ak._v2.index.Index64(slicecontent._offsets)
+
             outcontent = next_content._getitem_next_jagged(
                 sliceoffsets[:-1], sliceoffsets[1:], slicecontent._content, tail
             )
@@ -296,7 +297,7 @@ class ListArray(Content):
                 )
             )
 
-            nextcarry = ak._v2.index.Index64(numvalid._data)
+            nextcarry = ak._v2.index.Index64.empty(numvalid._data, nplike)
             smalloffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
             largeoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
 
@@ -306,7 +307,7 @@ class ListArray(Content):
                     nextcarry.dtype.type,
                     smalloffsets.dtype.type,
                     largeoffsets.dtype.type,
-                    slicestops.dtype.type,
+                    slicestarts.dtype.type,
                     slicestops.dtype.type,
                     missing.dtype.type,
                 ](
