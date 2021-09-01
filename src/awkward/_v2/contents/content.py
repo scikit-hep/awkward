@@ -507,15 +507,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return item.data
 
         elif isinstance(item, ak._v2.contents.Content):
-            out = self._prepare_tuple_bool_to_int(self._prepare_tuple_nested(item))
-
-            print(out)
-            print(ak.to_list(out))
-            print()
-
-            raise Exception
-
-            return out
+            return self._prepare_tuple_bool_to_int(self._prepare_tuple_nested(item))
 
         elif isinstance(item, Iterable) and all(ak._util.isstr(x) for x in item):
             return list(item)
@@ -555,7 +547,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def _prepare_tuple_nested(self, item):
         if isinstance(item, ak._v2.contents.EmptyArray):
-            return self._prepare_tuple_nested(item._toNumpyArray())
+            return self._prepare_tuple_nested(item._toNumpyArray(np.int64))
 
         elif isinstance(item, ak._v2.contents.NumpyArray) and issubclass(
             item.dtype.type, (bool, np.bool_, np.integer)
@@ -573,10 +565,13 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             next = self._prepare_tuple_RegularArray_toListOffsetArray64(next)
             return next
 
-        elif isinstance(
-            item,
-            ak._v2.contents.ListOffsetArray,
-        ) and issubclass(item.offsets.dtype.type, np.int64):
+        elif (
+            isinstance(
+                item,
+                ak._v2.contents.ListOffsetArray,
+            )
+            and issubclass(item.offsets.dtype.type, np.int64)
+        ):
             return ak._v2.contents.ListOffsetArray(
                 item.offsets,
                 self._prepare_tuple_nested(item.content),
@@ -602,10 +597,13 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             next = item.project()
             return self._prepare_tuple_nested(next)
 
-        elif isinstance(
-            item,
-            ak._v2.contents.IndexedOptionArray,
-        ) and issubclass(item.index.dtype.type, np.int64):
+        elif (
+            isinstance(
+                item,
+                ak._v2.contents.IndexedOptionArray,
+            )
+            and issubclass(item.index.dtype.type, np.int64)
+        ):
             return ak._v2.contents.IndexedOptionArray(
                 item.index,
                 self._prepare_tuple_nested(item.content),
@@ -635,9 +633,11 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
 
     def _prepare_tuple_bool_to_int(self, item):
-        if isinstance(item, ak._v2.contents.ListOffsetArray) and isinstance(
-            item.content, ak._v2.contents.NumpyArray
-        ) and issubclass(item.content.dtype.type, (bool, np.bool_)):
+        if (
+            isinstance(item, ak._v2.contents.ListOffsetArray)
+            and isinstance(item.content, ak._v2.contents.NumpyArray)
+            and issubclass(item.content.dtype.type, (bool, np.bool_))
+        ):
             localindex = item.localindex(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
@@ -651,45 +651,40 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
             )
 
-        elif isinstance(item, ak._v2.contents.ListOffsetArray) and isinstance(
-            item.content, ak._v2.contents.IndexedOptionArray
-        ) and isinstance(item.content.content, ak._v2.contents.NumpyArray) and issubclass(
-            item.content.content.dtype.type, (bool, np.bool_)
+        elif (
+            isinstance(item, ak._v2.contents.ListOffsetArray)
+            and isinstance(item.content, ak._v2.contents.IndexedOptionArray)
+            and isinstance(item.content.content, ak._v2.contents.NumpyArray)
+            and issubclass(item.content.content.dtype.type, (bool, np.bool_))
         ):
-            numnull, nextcarry, outindex = item.content.nextcarry_outindex(item.content.nplike)
-
-            print(item)
-
-            print(f"{numnull = }")
-            print(f"{nextcarry = }")
-            print(f"{outindex = }")
-
-            print(f"{item.content.content = }")
-            print(f"{item.content.content._carry(nextcarry, False, NestedIndexError) = }")
-
+            safeindex = item.content.index.data.copy()
+            isnegative = safeindex < 0
+            safeindex[isnegative] = -1
+            if len(item.content.content.data) > 0:
+                expanded = item.content.content.data[safeindex]
+                expanded[isnegative] = True
+            else:
+                expanded = item.content.content.data.nplike.ones(
+                    len(safeindex), np.bool_
+                )
 
             localindex = item.localindex(axis=1)
-            nextcontent = localindex.content.data[
-                item.content.content._carry(nextcarry, False, NestedIndexError).data
-            ]
+            nextcontent = localindex.content.data[expanded]
 
-            # cumsum = item.nplike.empty(len(item.content.data) + 1, np.int64)
-            # cumsum[0] = 0
-            # cumsum[1:] = item.nplike.cumsum(item.content.data)
-            # nextoffsets = cumsum[item.offsets]
+            cumsum = item.nplike.empty(len(expanded) + 1, np.int64)
+            cumsum[0] = 0
+            cumsum[1:] = item.nplike.cumsum(expanded)
+            nextoffsets = cumsum[item.offsets]
 
-
-            print(f"{localindex = }")
-            print(f"{nextcontent = }")
-            # print(f"{cumsum = }")
-            # print(f"{nextoffsets = }")
-
-            raise Exception("STOP")
-
+            mask = isnegative[expanded]
 
             return ak._v2.contents.ListOffsetArray(
                 ak._v2.index.Index64(nextoffsets),
-                ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
+                ak._v2.contents.ByteMaskedArray(
+                    ak._v2.index.Index8(mask),
+                    ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
+                    valid_when=False,
+                ).toIndexedOptionArray64(),
             )
 
         elif isinstance(item, ak._v2.contents.ListOffsetArray):
@@ -710,6 +705,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
         elif isinstance(item, ak._v2.contents.NumpyArray):
             assert item.shape == (len(item),)
+            return item
 
         else:
             raise AssertionError(type(item))
