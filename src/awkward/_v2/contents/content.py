@@ -573,10 +573,13 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             next = self._prepare_tuple_RegularArray_toListOffsetArray64(next)
             return next
 
-        elif isinstance(
-            item,
-            ak._v2.contents.ListOffsetArray,
-        ) and issubclass(item.offsets.dtype.type, np.int64):
+        elif (
+            isinstance(
+                item,
+                ak._v2.contents.ListOffsetArray,
+            )
+            and issubclass(item.offsets.dtype.type, np.int64)
+        ):
             return ak._v2.contents.ListOffsetArray(
                 item.offsets,
                 self._prepare_tuple_nested(item.content),
@@ -602,10 +605,13 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             next = item.project()
             return self._prepare_tuple_nested(next)
 
-        elif isinstance(
-            item,
-            ak._v2.contents.IndexedOptionArray,
-        ) and issubclass(item.index.dtype.type, np.int64):
+        elif (
+            isinstance(
+                item,
+                ak._v2.contents.IndexedOptionArray,
+            )
+            and issubclass(item.index.dtype.type, np.int64)
+        ):
             return ak._v2.contents.IndexedOptionArray(
                 item.index,
                 self._prepare_tuple_nested(item.content),
@@ -635,9 +641,11 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
 
     def _prepare_tuple_bool_to_int(self, item):
-        if isinstance(item, ak._v2.contents.ListOffsetArray) and isinstance(
-            item.content, ak._v2.contents.NumpyArray
-        ) and issubclass(item.content.dtype.type, (bool, np.bool_)):
+        if (
+            isinstance(item, ak._v2.contents.ListOffsetArray)
+            and isinstance(item.content, ak._v2.contents.NumpyArray)
+            and issubclass(item.content.dtype.type, (bool, np.bool_))
+        ):
             localindex = item.localindex(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
@@ -651,12 +659,15 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
             )
 
-        elif isinstance(item, ak._v2.contents.ListOffsetArray) and isinstance(
-            item.content, ak._v2.contents.IndexedOptionArray
-        ) and isinstance(item.content.content, ak._v2.contents.NumpyArray) and issubclass(
-            item.content.content.dtype.type, (bool, np.bool_)
+        elif (
+            isinstance(item, ak._v2.contents.ListOffsetArray)
+            and isinstance(item.content, ak._v2.contents.IndexedOptionArray)
+            and isinstance(item.content.content, ak._v2.contents.NumpyArray)
+            and issubclass(item.content.content.dtype.type, (bool, np.bool_))
         ):
-            numnull, nextcarry, outindex = item.content.nextcarry_outindex(item.content.nplike)
+            numnull, nextcarry, outindex = item.content.nextcarry_outindex(
+                item.content.nplike
+            )
 
             print(item)
 
@@ -665,8 +676,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             print(f"{outindex = }")
 
             print(f"{item.content.content = }")
-            print(f"{item.content.content._carry(nextcarry, False, NestedIndexError) = }")
-
+            print(
+                f"{item.content.content._carry(nextcarry, False, NestedIndexError) = }"
+            )
 
             localindex = item.localindex(axis=1)
             nextcontent = localindex.content.data[
@@ -678,14 +690,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             # cumsum[1:] = item.nplike.cumsum(item.content.data)
             # nextoffsets = cumsum[item.offsets]
 
-
             print(f"{localindex = }")
             print(f"{nextcontent = }")
             # print(f"{cumsum = }")
             # print(f"{nextoffsets = }")
 
             raise Exception("STOP")
-
 
             return ak._v2.contents.ListOffsetArray(
                 ak._v2.index.Index64(nextoffsets),
