@@ -550,7 +550,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
         )
         contents = []
-        print(tocarry)
         for ptr in tocarry:
             contents.append(ak._v2.contents.IndexedArray(ptr, self))
         return ak._v2.contents.recordarray.RecordArray(
