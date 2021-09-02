@@ -13,7 +13,7 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.contents.content import Content
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, parameters_update
 from awkward._v2.forms.virtualform import VirtualForm
 from awkward._v2.tmp_for_testing import v1_to_v2
 
@@ -299,31 +299,62 @@ class VirtualArray(Content):
         if length is None:
             return self.array._getitem_range(where)
 
+        form = None
+        parameters = {}
+        if self._generator.form is not None:
+            form = self._generator.form._getitem_range()
+            parameters_update(parameters, form.parameters)
+        parameters_update(parameters, self.parameters)
+
         start, stop, _ = where.indices(length)
         return VirtualArray(
-            SliceGenerator(stop - start, self._generator.form, self, where),
+            SliceGenerator(stop - start, form, self, where),
             cache=self._cache,
             cache_key=None,
             identifier=None,
-            parameters=self._parameters,
+            parameters=parameters,
         )
 
+    def _getitem_field(self, where, only_fields=()):
+        length = self._generator.length
+        if length is None:
+            return self.array._getitem_field(where, only_fields)
 
-#     def _getitem_field(self, where, only_fields=()):
-#         return IndexedArray(
-#             self._index,
-#             self._content._getitem_field(where, only_fields),
-#             self._field_identifier(where),
-#             None,
-#         )
+        form = None
+        parameters = {}
+        if self._generator.form is not None:
+            form = self._generator.form._getitem_field(where, only_fields)
+            parameters_update(parameters, form.parameters)
+        parameters_update(parameters, self.parameters)
 
-#     def _getitem_fields(self, where, only_fields=()):
-#         return IndexedArray(
-#             self._index,
-#             self._content._getitem_fields(where, only_fields),
-#             self._fields_identifier(where),
-#             None,
-#         )
+        return VirtualArray(
+            SliceGenerator(length, form, self, where),
+            cache=self._cache,
+            cache_key=None,
+            identifier=None,
+            parameters=parameters,
+        )
+
+    def _getitem_fields(self, where, only_fields=()):
+        length = self._generator.length
+        if length is None:
+            return self.array._getitem_fields(where, only_fields)
+
+        form = None
+        parameters = {}
+        if self._generator.form is not None:
+            form = self._generator.form._getitem_fields(where, only_fields)
+            parameters_update(parameters, form.parameters)
+        parameters_update(parameters, self.parameters)
+
+        return VirtualArray(
+            SliceGenerator(length, form, self, where),
+            cache=self._cache,
+            cache_key=None,
+            identifier=None,
+            parameters=parameters,
+        )
+
 
 #     def _carry(self, carry, allow_lazy, exception):
 #         assert isinstance(carry, ak._v2.index.Index)

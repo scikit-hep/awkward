@@ -93,7 +93,7 @@ class BitMaskedForm(Form):
                 self._mask == layout.mask.form
                 and self._valid_when == layout.valid_when
                 and self._lsb_order == layout.lsb_order
-                and parameters_equal(self._parameters, layout.parameters)
+                and parameters_equal(self.parameters, layout.parameters)
                 and self._content.generated_compatibility(layout.content)
             )
         else:

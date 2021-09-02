@@ -55,7 +55,7 @@ class RegularForm(Form):
         if isinstance(layout, RegularArray):
             return (
                 self._size == layout.size
-                and parameters_equal(self._parameters, layout.parameters)
+                and parameters_equal(self.parameters, layout.parameters)
                 and self._content.generated_compatibility(layout.content)
             )
         else:

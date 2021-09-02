@@ -143,9 +143,7 @@ class RecordForm(Form):
                 self_keys = set(self.keys)
                 layout_keys = set(layout.keys)
                 if self_keys == layout_keys:
-                    return parameters_equal(
-                        self._parameters, layout.parameters
-                    ) and all(
+                    return parameters_equal(self.parameters, layout.parameters) and all(
                         self.content(x).generated_compatibility(layout.content(x))
                         for x in self_keys
                     )

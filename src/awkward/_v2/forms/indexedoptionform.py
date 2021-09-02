@@ -60,7 +60,7 @@ class IndexedOptionForm(Form):
         if isinstance(layout, IndexedOptionArray):
             return (
                 self._index == layout.index.form
-                and parameters_equal(self._parameters, layout.parameters)
+                and parameters_equal(self.parameters, layout.parameters)
                 and self._content.generated_compatibility(layout.content)
             )
         else:

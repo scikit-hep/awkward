@@ -57,19 +57,15 @@ class VirtualForm(Form):
 
         if isinstance(layout, VirtualArray):
             if self._form is None or layout.form is None:
-                return parameters_equal(self._parameters, layout.parameters)
+                return parameters_equal(self.parameters, layout.parameters)
             else:
                 self_parameters = {}
-                if self._form.parameters is not None:
-                    self_parameters.update(self._form.parameters)
-                if self._parameters is not None:
-                    self_parameters.update(self._parameters)
+                self_parameters.update(self._form.parameters)
+                self_parameters.update(self.parameters)
 
                 layout_parameters = {}
-                if layout.form.parameters is not None:
-                    layout_parameters.update(layout.form.parameters)
-                if layout.parameters is not None:
-                    layout_parameters.update(layout.parameters)
+                layout_parameters.update(layout.form.parameters)
+                layout_parameters.update(layout.parameters)
 
                 return parameters_equal(
                     self_parameters, layout_parameters

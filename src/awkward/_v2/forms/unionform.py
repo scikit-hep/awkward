@@ -94,7 +94,7 @@ class UnionForm(Form):
 
         if isinstance(layout, UnionArray):
             if len(self._contents) == len(layout.contents):
-                return parameters_equal(self._parameters, layout.parameters) and all(
+                return parameters_equal(self.parameters, layout.parameters) and all(
                     x.generated_compatibility(y)
                     for x, y in zip(self._contents, layout.contents)
                 )

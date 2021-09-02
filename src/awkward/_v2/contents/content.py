@@ -15,9 +15,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class Content(object):
     def _init(self, identifier, parameters):
-        if parameters is None:
-            parameters = {}
-
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
         ):
@@ -26,10 +23,10 @@ class Content(object):
                     type(self).__name__, repr(identifier)
                 )
             )
-        if not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be a dict or None, not {1}".format(
-                    type(self).__name__, repr(identifier)
+                    type(self).__name__, repr(parameters)
                 )
             )
 
@@ -42,6 +39,8 @@ class Content(object):
 
     @property
     def parameters(self):
+        if self._parameters is None:
+            self._parameters = {}
         return self._parameters
 
     def parameter(self, key):

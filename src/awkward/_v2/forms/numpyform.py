@@ -99,7 +99,7 @@ class NumpyForm(Form):
             and not toplevel
             and len(self._inner_shape) == 0
             and not self._has_identifier
-            and len(self._parameters) == 0
+            and (self._parameters is None or len(self._parameters) == 0)
             and self._form_key is None
         ):
             return self._primitive
@@ -120,7 +120,7 @@ class NumpyForm(Form):
             return (
                 self._primitive == layout.primitive
                 and self._inner_shape == layout.shape[1:]
-                and parameters_equal(self._parameters, layout.parameters)
+                and parameters_equal(self.parameters, layout.parameters)
             )
         else:
             return False

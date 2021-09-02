@@ -288,5 +288,5 @@ class UnionArray(Content):
             for content in self._contents:
                 contents.append(content._localindex(posaxis, depth))
             return UnionArray(
-                self._tags, self._index, contents, self._identifier, self.parameters
+                self._tags, self._index, contents, self._identifier, self._parameters
             )

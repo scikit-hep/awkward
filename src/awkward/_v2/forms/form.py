@@ -14,7 +14,7 @@ def from_iter(input):
         return ak._v2.forms.numpyform.NumpyForm(primitive=input)
     assert isinstance(input, dict)
     has_identifier = input.get("has_identifier", input.get("has_identities", False))
-    parameters = input.get("parameters", {})
+    parameters = input.get("parameters", None)
     form_key = input.get("form_key", None)
 
     if input["class"] == "NumpyArray":
@@ -177,18 +177,21 @@ def parameters_equal(one, two):
         return True
 
 
+def parameters_update(one, two):
+    for k, v in two.items():
+        if v is not None:
+            one[k] = v
+
+
 class Form(object):
     def _init(self, has_identifier, parameters, form_key):
-        if parameters is None:
-            parameters = {}
-
         if not isinstance(has_identifier, bool):
             raise TypeError(
                 "{0} 'has_identifier' must be of type bool, not {1}".format(
                     type(self).__name__, repr(has_identifier)
                 )
             )
-        if not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be of type dict or None, not {1}".format(
                     type(self).__name__, repr(parameters)
@@ -211,6 +214,8 @@ class Form(object):
 
     @property
     def parameters(self):
+        if self._parameters is None:
+            self._parameters = {}
         return self._parameters
 
     def parameter(self, key):
@@ -232,8 +237,8 @@ class Form(object):
     def _tolist_extra(self, out, verbose):
         if verbose or self._has_identifier:
             out["has_identifier"] = self._has_identifier
-        if verbose or self._parameters is not None and len(self._parameters) > 0:
-            out["parameters"] = {} if self._parameters is None else self._parameters
+        if verbose or (self._parameters is not None and len(self._parameters) > 0):
+            out["parameters"] = self.parameters
         if verbose or self._form_key is not None:
             out["form_key"] = self._form_key
         return out
