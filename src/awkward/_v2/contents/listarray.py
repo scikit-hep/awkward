@@ -456,7 +456,7 @@ class ListArray(Content):
                 )
             )
 
-            nplike_tocarryraw = self.nplike.empty(n, dtype=np.int64)
+            nplike_tocarryraw = self.nplike.empty(n, dtype=np.intp)
             tocarry = []
             for i in range(n):
                 ptr = ak._v2.index.Index64.empty(
@@ -472,7 +472,7 @@ class ListArray(Content):
             self._handle_error(
                 self.nplike[
                     "awkward_ListArray_combinations",
-                    tocarryraw.dtype.type,
+                    np.int64,
                     toindex.to(self.nplike).dtype.type,
                     fromindex.to(self.nplike).dtype.type,
                     self._starts.to(self.nplike).dtype.type,
