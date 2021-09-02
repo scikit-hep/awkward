@@ -1003,3 +1003,8 @@ def test_BitMaskedArray():
         (None, None, 5.5),
         (3.3, None, 5.5),
     ]
+
+def test_EmptyArray():
+    v2_array = ak._v2.contents.emptyarray.EmptyArray()
+
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=0))) == []

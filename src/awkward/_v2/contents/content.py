@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from __future__ import absolute_import
+from awkward import nplike
 
 try:
     from collections.abc import Iterable
@@ -9,6 +10,7 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
+import ctypes
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -530,17 +532,18 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
             tocarry.append(ptr)
             nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data
-        tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
+        nplike_tocarryraw = nplike_tocarryraw.ctypes.data_as(ctypes.POINTER(ctypes.c_int64))
+        tocarryraw = ak.nplike.NumpyKernel._cast(nplike_tocarryraw, ctypes.POINTER(ctypes.POINTER(ctypes.c_int64)))
         toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
         fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
         self._handle_error(
             self.nplike[
                 "awkward_RegularArray_combinations_64",
-                tocarryraw.dtype.type,
+                np.int64,
                 toindex.to(self.nplike).dtype.type,
                 fromindex.to(self.nplike).dtype.type,
             ](
-                tocarryraw.data,
+                tocarryraw,
                 toindex.to(self.nplike),
                 fromindex.to(self.nplike),
                 n,
