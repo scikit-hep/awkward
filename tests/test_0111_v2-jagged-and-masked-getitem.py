@@ -15,7 +15,6 @@ pytestmark = pytest.mark.skipif(
 slice_with_unionarray = False
 bigger_than_len_index = False
 fixed_value_error = False  # ValueError: in IndexedOptionArray64 attempting to get 3, index[i] >= len(content)
-fixed_empty_array = False
 simplifyuniontype_implemented = False
 fixed_shifted_array_on_booleans = False
 
@@ -746,10 +745,10 @@ def test_emptyarray():
     assert ak.to_list(listoffsetarray) == [[], [], [], []]
 
     assert ak.to_list(listoffsetarray[array1]) == [[], [], [], []]
-    if fixed_empty_array:
-        assert ak.to_list(listoffsetarray[array2]) == [[], [None], [], []]
-        assert ak.to_list(listoffsetarray[array3]) == [[], [], None, []]
-        assert ak.to_list(listoffsetarray[array4]) == [[], [None], None, []]
+    
+    assert ak.to_list(listoffsetarray[array2]) == [[], [None], [], []]
+    assert ak.to_list(listoffsetarray[array3]) == [[], [], None, []]
+    assert ak.to_list(listoffsetarray[array4]) == [[], [None], None, []]
 
     with pytest.raises(ValueError):
         listoffsetarray[array5]
