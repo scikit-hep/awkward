@@ -366,8 +366,6 @@ class NumpyKernel(object):
         if issubclass(t, ctypes._Pointer):
             if isinstance(x, numpy.ndarray):
                 return ctypes.cast(x.ctypes.data, t)
-            elif isinstance(x, t):
-                return x
             else:
                 return ctypes.cast(x, t)
         else:

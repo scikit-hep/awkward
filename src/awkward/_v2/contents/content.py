@@ -531,25 +531,26 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen, self.nplike, dtype=np.int64
             )
             tocarry.append(ptr)
-            nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data #GPU?
-        nplike_tocarryraw = nplike_tocarryraw.ctypes.data_as(ctypes.POINTER(ctypes.c_int64)) #GPU?
-        tocarryraw = ak.nplike.NumpyKernel._cast(nplike_tocarryraw, ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))) #GPU?
+            nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data
+
+        tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
         toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
         fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+
         self._handle_error(
             self.nplike[
                 "awkward_RegularArray_combinations_64",
-                np.int64,
+                tocarryraw.dtype.type,
                 toindex.to(self.nplike).dtype.type,
                 fromindex.to(self.nplike).dtype.type,
             ](
-                tocarryraw,
+                tocarryraw.data,
                 toindex.to(self.nplike),
                 fromindex.to(self.nplike),
-                n,
-                replacement,
-                len(self),
-                1,
+                ctypes.c_int64(n),
+                ctypes.c_int64(replacement),
+                ctypes.c_int64(len(self)),
+                ctypes.c_int64(1),
             )
         )
         contents = []
