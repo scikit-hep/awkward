@@ -1004,6 +1004,7 @@ def test_BitMaskedArray():
         (3.3, None, 5.5),
     ]
 
+
 def test_EmptyArray():
     v2_array = ak._v2.contents.emptyarray.EmptyArray()
 
