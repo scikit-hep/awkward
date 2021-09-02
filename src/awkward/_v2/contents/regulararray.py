@@ -69,14 +69,15 @@ class RegularArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<RegularArray len="]
-        out.append(repr(str(len(self))))
-        out.append(" size=")
+        out = [indent, pre, "<RegularArray size="]
         out.append(repr(str(self._size)))
-        out.append(">\n")
+        out.append(" len=")
+        out.append(repr(str(len(self))))
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</RegularArray>")
+        out.append(indent + "</RegularArray>")
         out.append(post)
         return "".join(out)
 

@@ -224,7 +224,7 @@ class Form(object):
         return self._form_key
 
     def __str__(self):
-        return json.dumps(self.tolist(verbose=False), indent="    ")
+        return json.dumps(self.tolist(verbose=False), indent=4)
 
     def tolist(self, verbose=True):
         return self._tolist_part(verbose, toplevel=True)

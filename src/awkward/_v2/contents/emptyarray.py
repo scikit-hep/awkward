@@ -17,7 +17,15 @@ class EmptyArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        return indent + pre + "<EmptyArray len='0'/>" + post
+        extra = self._repr_extra(indent + "    ")
+        if len(extra) == 0:
+            return indent + pre + "<EmptyArray len='0'/>" + post
+        else:
+            out = [indent, pre, "<EmptyArray len='0'>"]
+            out.extend(extra)
+            out.append("\n" + indent + "</EmptyArray>")
+            out.append(post)
+            return "".join(out)
 
     Form = EmptyForm
 

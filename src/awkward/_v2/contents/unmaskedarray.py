@@ -49,10 +49,11 @@ class UnmaskedArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnmaskedArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</UnmaskedArray>")
+        out.append(indent + "</UnmaskedArray>")
         out.append(post)
         return "".join(out)
 

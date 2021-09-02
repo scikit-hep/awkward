@@ -21,13 +21,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class ArrayGenerator(object):
-    def __init__(self, function, length=None, form=None, args=None, kwargs=None):
-        if not isinstance(function, callable):
-            raise TypeError(
-                "{0} 'function' must be callable, not {1}".format(
-                    type(self).__name__, repr(function)
-                )
-            )
+    def __init__(self, length, form):
         if length is not None and not isinstance(length, numbers.Integral):
             raise TypeError(
                 "{0} 'length' must be None or an integer, not {1}".format(
@@ -38,6 +32,63 @@ class ArrayGenerator(object):
             raise TypeError(
                 "{0} 'form' must be None or a Form, not {1}".format(
                     type(self).__name__, repr(form)
+                )
+            )
+        self._length = length
+        self._form = form
+
+    @property
+    def length(self):
+        return self._length
+
+    @property
+    def form(self):
+        return self._form
+
+    def generate(self):
+        raise AssertionError()
+
+    def generate_and_check(self):
+        out = self.generate()
+        if self._length is not None and self._length > len(out):
+            raise ValueError(
+                "generated array does not have sufficient length: expected {0} but generated {1}".format(
+                    self._length, len(out)
+                )
+            )
+        if self._form is not None and not self._form.generated_compatibility(out):
+            generated_form = out.form
+            if generated_form is None:
+                generated_str = "null"
+            else:
+                generated_str = json.dumps(generated_form.tolist(False), indent=4)
+            expected_str = json.dumps(self._form.tolist(False), indent=4)
+            generated_strs = [x.ljust(38)[:38] for x in generated_str.split("\n")]
+            expected_strs = expected_str.split("\n")
+            if len(generated_strs) < len(expected_strs):
+                generated_strs.extend([""] * (len(expected_strs) - len(generated_strs)))
+            if len(expected_strs) < len(generated_strs):
+                expected_strs.extend([""] * (len(generated_strs) - len(expected_strs)))
+            two_column = [
+                x + ("   " if x.strip() == y.strip() else " | ") + y
+                for x, y in zip(generated_strs, expected_strs)
+            ]
+            header1 = "generated                                expected"
+            header2 = "-" * 79
+            raise ValueError(
+                "generated array does not conform to expected Form\n\n{0}\n{1}\n{2}".format(
+                    header1, header2, "\n".join(two_column)
+                )
+            )
+
+
+class FunctionGenerator(ArrayGenerator):
+    def __init__(self, length, form, function, args=None, kwargs=None):
+        super(FunctionGenerator, self).__init__(length, form)
+        if not isinstance(function, callable):
+            raise TypeError(
+                "{0} 'function' must be callable, not {1}".format(
+                    type(self).__name__, repr(function)
                 )
             )
         if args is not None and not isinstance(args, tuple):
@@ -57,22 +108,12 @@ class ArrayGenerator(object):
         if kwargs is None:
             kwargs = {}
         self._function = function
-        self._length = length
-        self._form = form
         self._args = args
         self._kwargs = kwargs
 
     @property
     def function(self):
         return self._function
-
-    @property
-    def length(self):
-        return self._length
-
-    @property
-    def form(self):
-        return self._form
 
     @property
     def args(self):
@@ -82,42 +123,62 @@ class ArrayGenerator(object):
     def kwargs(self):
         return self._kwargs
 
+    def __repr__(self):
+        return self._repr("", "", "")
+
+    def _repr(self, indent, pre, post):
+        out = [indent, pre, "<FunctionGenerator"]
+        if len(self._args) != 0:
+            out.append(" args=")
+            out.append(repr(self._args))
+        if len(self._kwargs) != 0:
+            out.append(" kwargs=")
+            out.append(repr(self._kwargs))
+        out.append(">\n" + indent + "    ")
+        out.append(repr(self._function))
+        out.append("\n" + indent + "</FunctionGenerator>")
+        return "".join(out)
+
     def generate(self):
         out = self._function(self._args, self._kwargs)
         return v1_to_v2(ak.to_layout(out, False, False))
 
-    def generate_and_check(self):
-        out = self.generate()
-        if self._length is not None and self._length > len(out):
-            raise ValueError(
-                "generated array does not have sufficient length: expected {0} but generated {1}".format(
-                    self._length, len(out)
+
+class SliceGenerator(ArrayGenerator):
+    def __init__(self, length, form, virtualarray, slice):
+        super(SliceGenerator, self).__init__(length, form)
+        if not isinstance(virtualarray, VirtualArray):
+            raise TypeError(
+                "{0} 'virtualarray' must be a VirtualArray, not {1}".format(
+                    type(self).__name__, repr(virtualarray)
                 )
             )
-        if self._form is not None and not self._form.generated_compatibility(out):
-            generated_form = out.form
-            if generated_form is None:
-                generated_str = "null"
-            else:
-                generated_str = json.dumps(generated_form.tolist(False), indent="  ")
-            expected_str = json.dumps(self._form.tolist(False), indent="  ")
-            generated_strs = [x.ljust(38)[:38] for x in generated_str.split("\n")]
-            expected_strs = expected_str.split("\n")
-            if len(generated_strs) < len(expected_strs):
-                generated_strs.extend([""] * (len(expected_strs) - len(generated_strs)))
-            if len(expected_strs) < len(generated_strs):
-                expected_strs.extend([""] * (len(generated_strs) - len(expected_strs)))
-            two_column = [
-                x + ("   " if x.strip() == y.strip() else " | ") + y
-                for x, y in zip(generated_strs, expected_strs)
-            ]
-            header1 = "generated                                expected"
-            header2 = "-" * 79
-            raise ValueError(
-                "generated array does not conform to expected Form\n\n{0}\n{1}\n{2}".format(
-                    header1, header2, "\n".join(two_column)
-                )
-            )
+        self._virtualarray = virtualarray
+        self._slice = slice
+
+    @property
+    def virtualarray(self):
+        return self._virtualarray
+
+    @property
+    def slice(self):
+        return self._slice
+
+    def __repr__(self):
+        return self._repr("", "", "")
+
+    def _repr(self, indent, pre, post):
+        out = [indent, pre, "<SliceGenerator>\n"]
+        out.append(indent + "    <slice>")
+        out.append(str(self._slice).replace("\n", "\n" + indent + "        "))
+        out.append("</slice>\n")
+        out.append(indent + "    ")
+        out.append(self._virtualarray._repr(indent + "        ", "", ""))
+        out.append("\n" + indent + "</SliceGenerator>")
+        return "".join(out)
+
+    def generate(self):
+        return self._virtualarray.array[self._slice]
 
 
 class VirtualArray(Content):
@@ -190,22 +251,24 @@ class VirtualArray(Content):
         else:
             return out
 
-    #     def __len__(self):
-    #         return len(self._index)
+    def __repr__(self):
+        return self._repr("", "", "")
 
-    #     def __repr__(self):
-    #         return self._repr("", "", "")
-
-    #     def _repr(self, indent, pre, post):
-    #         out = [indent, pre, "<IndexedArray len="]
-    #         out.append(repr(str(len(self))))
-    #         out.append(">\n")
-    #         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
-    #         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-    #         out.append(indent)
-    #         out.append("</IndexedArray>")
-    #         out.append(post)
-    #         return "".join(out)
+    def _repr(self, indent, pre, post):
+        out = [indent, pre, "<VirtualArray cache_key="]
+        out.append(repr(self._cache_key))
+        out.append(" len=")
+        out.append(repr(json.dumps(self._generator.length)))
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
+        out.append(self._generator._repr(indent + "    ", "", ""))
+        out.append(indent + "    <form>")
+        out.append(str(self._generator.form).replace("\n", "\n" + indent + "        "))
+        out.append("</form>\n")
+        out.append(indent + "</VirtualArray>")
+        out.append(post)
+        return "".join(out)
 
     @property
     def peek_array(self):
@@ -223,26 +286,28 @@ class VirtualArray(Content):
             out = self._generator.generate_and_check()
         return out
 
+    def _getitem_nothing(self):
+        return self.array._getitem_nothing()
 
-#     def _getitem_nothing(self):
-#         return self._content._getitem_range(slice(0, 0))
+    def _getitem_at(self, where):
+        return self.array._getitem_at(where)
 
-#     def _getitem_at(self, where):
-#         if where < 0:
-#             where += len(self)
-#         if not (0 <= where < len(self)):
-#             raise NestedIndexError(self, where)
-#         return self._content._getitem_at(self._index[where])
+    def _getitem_range(self, where):
+        assert where.step is None or where.step == 1
 
-#     def _getitem_range(self, where):
-#         start, stop, step = where.indices(len(self))
-#         assert step == 1
-#         return IndexedArray(
-#             self._index[start:stop],
-#             self._content,
-#             self._range_identifier(start, stop),
-#             self._parameters,
-#         )
+        length = self._generator.length
+        if length is None:
+            return self.array._getitem_range(where)
+
+        start, stop, _ = where.indices(length)
+        return VirtualArray(
+            SliceGenerator(stop - start, self._generator.form, self, where),
+            cache=self._cache,
+            cache_key=None,
+            identifier=None,
+            parameters=self._parameters,
+        )
+
 
 #     def _getitem_field(self, where, only_fields=()):
 #         return IndexedArray(

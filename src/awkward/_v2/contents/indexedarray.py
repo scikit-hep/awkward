@@ -69,11 +69,12 @@ class IndexedArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</IndexedArray>")
+        out.append(indent + "</IndexedArray>")
         out.append(post)
         return "".join(out)
 

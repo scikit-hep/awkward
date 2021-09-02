@@ -50,6 +50,19 @@ class Content(object):
         else:
             return self._parameters.get(key)
 
+    def _repr_extra(self, indent):
+        out = []
+        if self._parameters is not None:
+            for k, v in self._parameters.items():
+                out.append(
+                    "\n{0}<parameter name={1}>{2}</parameter>".format(
+                        indent, repr(k), repr(v)
+                    )
+                )
+        if self._identifier is not None:
+            out.append(self._identifier._repr("\n" + indent, "", ""))
+        return out
+
     def _simplify_optiontype(self):
         return self
 

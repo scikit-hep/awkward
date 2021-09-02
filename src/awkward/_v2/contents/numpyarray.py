@@ -88,21 +88,22 @@ class NumpyArray(Content):
             out.append(" shape=")
             out.append(repr(str(self._data.shape)))
 
+        extra = self._repr_extra(indent + "    ")
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
             "\n"
         )
-        if len(arraystr_lines) > 1:  # if or this array has an Identifier
+        if len(extra) != 0 or len(arraystr_lines) > 1:
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
                 arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
-            out.append(">\n" + indent + "    ")
+            out.append(">")
+            out.extend(extra)
+            out.append("\n" + indent + "    ")
             out.append(("\n" + indent + "    ").join(arraystr_lines))
             out.append("\n" + indent + "</NumpyArray>")
         else:
-            if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
             out.append(">")
             out.append(arraystr_lines[0])
             out.append("</NumpyArray>")

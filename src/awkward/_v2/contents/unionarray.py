@@ -103,15 +103,18 @@ class UnionArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnionArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._tags._repr(indent + "    ", "<tags>", "</tags>\n"))
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
+
         for i, x in enumerate(self._contents):
             out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
             out.append(x._repr(indent + "        ", "", "\n"))
             out.append("{0}    </content>\n".format(indent))
-        out.append(indent)
-        out.append("</UnionArray>")
+
+        out.append(indent + "</UnionArray>")
         out.append(post)
         return "".join(out)
 

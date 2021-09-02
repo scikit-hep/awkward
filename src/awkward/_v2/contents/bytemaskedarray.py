@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
@@ -78,15 +80,16 @@ class ByteMaskedArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<ByteMaskedArray len="]
+        out = [indent, pre, "<ByteMaskedArray valid_when="]
+        out.append(repr(json.dumps(self._valid_when)))
+        out.append(" len=")
         out.append(repr(str(len(self))))
-        out.append(" valid_when=")
-        out.append(repr(str(self._valid_when)))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._mask._repr(indent + "    ", "<mask>", "</mask>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</ByteMaskedArray>")
+        out.append(indent + "</ByteMaskedArray>")
         out.append(post)
         return "".join(out)
 

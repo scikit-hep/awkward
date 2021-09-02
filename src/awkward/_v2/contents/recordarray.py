@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -132,16 +134,19 @@ class RecordArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<RecordArray len="]
+        out = [indent, pre, "<RecordArray is_tuple="]
+        out.append(repr(json.dumps(self.is_tuple)))
+        out.append(" len=")
         out.append(repr(str(len(self))))
-        out.append(" is_tuple=")
-        out.append(repr(str(self.is_tuple)))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
+
         if self._keys is None:
             for i, x in enumerate(self._contents):
                 out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
                 out.append(x._repr(indent + "        ", "", "\n"))
-                out.append("{0}    </content>\n".format(indent))
+                out.append(indent + "    </content>\n")
         else:
             for i, x in enumerate(self._contents):
                 out.append(
@@ -150,9 +155,9 @@ class RecordArray(Content):
                     )
                 )
                 out.append(x._repr(indent + "        ", "", "\n"))
-                out.append("{0}    </content>\n".format(indent))
-        out.append(indent)
-        out.append("</RecordArray>")
+                out.append(indent + "    </content>\n")
+
+        out.append(indent + "</RecordArray>")
         out.append(post)
         return "".join(out)
 
