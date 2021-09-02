@@ -154,7 +154,7 @@ class ListArray(Content):
 
     def _compact_offsets64(self, start_at_zero):
         starts_len = len(self._starts)
-        out = ak._v2.index.Index64.empty(starts_len + 1, self.nplike)
+        out = ak._v2.index.Index64.zeros(starts_len + 1, self.nplike)
         self._handle_error(
             self.nplike[
                 "awkward_ListArray_compact_offsets",
@@ -402,6 +402,7 @@ class ListArray(Content):
             return self._localindex_axis0()
         elif posaxis == depth + 1:
             offsets = self._compact_offsets64(True)
+            # FIXME: why the last one is uninitialised?
             innerlength = offsets[len(offsets) - 1]
             localindex = ak._v2.index.Index64.empty(innerlength, self.nplike)
             self._handle_error(
@@ -426,46 +427,50 @@ class ListArray(Content):
                 self._parameters,
             )
 
-    def _sort(self, axis, kind, order):
-        if isinstance(self._content, ak._v2.contents.NumpyArray):
-            nplike = self.nplike
-
-            nextcarry = ak._v2.index.Index64.zeros(len(self._content), nplike)
-
-            self._handle_error(
-                nplike[
-                    "awkward_ListArray_argsort",
-                    np.int64,
-                    self._content._data.dtype.type,
-                    np.int64,
-                    np.int64,
-                ](
-                    nextcarry.to(nplike),
-                    self._content._data,
-                    len(self._content),
-                    self._starts.to(nplike),
-                    self._stops.to(nplike),
-                    len(self._starts),
-                    True,  # ascending
-                    True,  # stable
-                )
+    def _broadcast_tooffsets64(self, offsets):
+        if len(offsets) == 0 or offsets[0] != 0:
+            raise ValueError(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0"
             )
-
-            return ak._v2.contents.ListArray(
-                self._starts,
-                self._stops,
-                ak._v2.contents.NumpyArray(self._content._data[nextcarry]),
-                self._identifier,
-                self._parameters,
+        if len(offsets) - 1 > len(self._starts):
+            raise ValueError(
+                "cannot broadcast ListArray of length "
+                + len(self._starts)
+                + " to length "
+                + len(offsets)
+                - 1
             )
-        else:
-            # FIXME: convert it to ListOffsetArray???
-            return ak._v2.contents.ListArray(
-                self._starts,
-                self._stops,
-                self._content._sort(axis, kind, order),
-                self._identifier,
-                self._parameters,
+        carrylen = offsets[len(offsets) - 1]
+        nextcarry = ak._v2.index.Index64.zeros(carrylen, self.nplike)
+        self._handle_error(
+            self.nplike[
+                "awkward_ListArray_broadcast_tooffsets",
+                nextcarry.dtype.type,
+                offsets.dtype.type,
+                self._starts.dtype.type,
+                self._stops.dtype.type,
+            ](
+                nextcarry.to(self.nplike),
+                offsets.to(self.nplike),
+                len(offsets),
+                self._starts.to(self.nplike),
+                self._stops.to(self.nplike),
+                len(self._content),
             )
+        )
+        nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
 
-        raise NotImplementedError
+        return ak._v2.contents.ListOffsetArray(
+            offsets,
+            nextcontent,
+            self._identifier,
+            self._parameters,
+        )
+
+    def _toListOffsetArray64(self, start_at_zero):
+        offsets = self._compact_offsets64(start_at_zero)
+        return self._broadcast_tooffsets64(offsets)
+
+    def _sort(self, axis, ascending, stable):
+        out = self._toListOffsetArray64(True)
+        return out._sort(axis, ascending, stable)

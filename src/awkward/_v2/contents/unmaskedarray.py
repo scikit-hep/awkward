@@ -137,8 +137,8 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
-    def _sort(self, axis, kind, order):
-        out = self._content._sort(axis, kind, order)
+    def _sort(self, axis, ascending, stable):
+        out = self._content._sort(axis, ascending, stable)
 
         if isinstance(out, ak._v2.contents.RegularArray):
             tmp = ak._v2.contents.UnmaskedArray(

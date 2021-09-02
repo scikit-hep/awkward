@@ -249,14 +249,14 @@ class IndexedOptionArray(Content):
             )
             return out2
 
-    def _sort(self, axis, kind, order):
+    def _sort(self, axis, ascending, stable):
         numnull, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
 
         next = self._content._carry(nextcarry, False, NestedIndexError)
 
         return ak._v2.contents.IndexedOptionArray(
             outindex,
-            next._sort(axis, kind, order),
+            next._sort(axis, ascending, stable),
             self._identifier,
             self._parameters,
         )

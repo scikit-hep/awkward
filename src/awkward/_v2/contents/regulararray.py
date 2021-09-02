@@ -460,7 +460,7 @@ class RegularArray(Content):
                 self._parameters,
             )
 
-    def _sort(self, axis, kind, order):
+    def _sort(self, axis, ascending, stable):
         if isinstance(self._content, ak._v2.contents.NumpyArray):
             nplike = self.nplike
 
@@ -487,8 +487,8 @@ class RegularArray(Content):
                     len(self._content),
                     offsets.to(nplike),
                     len(offsets),
-                    True,  # ascending
-                    True,  # stable
+                    ascending,
+                    stable,
                 )
             )
 
@@ -501,7 +501,7 @@ class RegularArray(Content):
             )
         else:
             return ak._v2.contents.RegularArray(
-                self._content._sort(axis, kind, order),
+                self._content._sort(axis, ascending, stable),
                 self._size,
                 self._length,
                 self._identifier,

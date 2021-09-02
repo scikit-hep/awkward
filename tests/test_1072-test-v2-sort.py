@@ -22,48 +22,6 @@ def test_numpy_array_iscontiguous():
     v2_array = ak._v2.contents.NumpyArray(matrix2[:, 0])
     assert not v2_array.iscontiguous()
 
-    # sorting non contiguous array
-    # numpy sort vs std::sort
-    # In [1]: import awkward as ak
-    #
-    # In [2]: import numpy as np
-    #
-    # In [3]: matrix = np.arange(64).reshape(8, -1)
-    #
-    # In [4]: v2_array = ak._v2.contents.NumpyArray(matrix[:, 0])
-    #
-    # In [5]: nparray = matrix[:, 0]
-    #
-    # In [6]: nparray
-    # Out[6]: array([ 0,  8, 16, 24, 32, 40, 48, 56])
-    #
-    # In [7]: nparray.strides
-    # Out[7]: (64,)
-    #
-    # In [8]: nparray.shape
-    # Out[8]: (8,)
-    #
-    # In [9]: %timeit v2_array.sort()
-    # 1.04 ms ± 3.55 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
-    #
-    # In [10]: %timeit v2_array.sort()
-    # 1.04 ms ± 5.25 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
-    #
-    # In [11]: %timeit v2_array.sort()
-    # 1.05 ms ± 10.4 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
-    #
-    # In [12]: %timeit nparray.sort()
-    # 249 ns ± 1.56 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
-    #
-    # In [13]: %timeit nparray.sort()
-    # 254 ns ± 4.9 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
-    #
-    # In [14]: %timeit nparray.sort()
-    # 248 ns ± 2.52 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
-    #
-    # In [15]: %timeit nparray.sort()
-    # 249 ns ± 8.19 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
-    #
     assert ak.to_list(v2_array.sort()) == [0, 8, 16, 24, 32, 40, 48, 56]
 
 
@@ -126,7 +84,22 @@ def test_listarray_sort():
         [],
         [{"nest": 4.4}, {"nest": 5.5}],
     ]
-    # FIXME: assert ak.to_list(v2_to_v1(v2_array.sort())) == [[{'nest': 1.1}, {'nest': 2.2}, {'nest': 3.3}], [], [{'nest': 4.4}, {'nest': 5.5}]]
+    assert ak.to_list(v2_to_v1(v2_array._localindex(-1, 0))) == [[0, 1, 2], [], [0, 1]]
+
+    assert ak.to_list(
+        v2_to_v1(ak._v2.contents.NumpyArray(v2_array._compact_offsets64(True)))
+    ) == [0, 3, 3, 5]
+
+    assert ak.to_list(v2_to_v1(v2_array._toListOffsetArray64(True))) == [
+        [{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}],
+        [],
+        [{"nest": 4.4}, {"nest": 5.5}],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+        [{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}],
+        [],
+        [{"nest": 4.4}, {"nest": 5.5}],
+    ]
 
     v2_array = ak._v2.contents.listarray.ListArray(  # noqa: F841
         ak._v2.index.Index(np.array([4, 100, 1])),
