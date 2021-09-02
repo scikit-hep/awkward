@@ -531,9 +531,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen, self.nplike, dtype=np.int64
             )
             tocarry.append(ptr)
-            nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data
-        nplike_tocarryraw = nplike_tocarryraw.ctypes.data_as(ctypes.POINTER(ctypes.c_int64))
-        tocarryraw = ak.nplike.NumpyKernel._cast(nplike_tocarryraw, ctypes.POINTER(ctypes.POINTER(ctypes.c_int64)))
+            nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data #GPU?
+        nplike_tocarryraw = nplike_tocarryraw.ctypes.data_as(ctypes.POINTER(ctypes.c_int64)) #GPU?
+        tocarryraw = ak.nplike.NumpyKernel._cast(nplike_tocarryraw, ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))) #GPU?
         toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
         fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
         self._handle_error(
