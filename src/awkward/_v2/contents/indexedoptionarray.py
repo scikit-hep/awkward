@@ -256,6 +256,8 @@ class IndexedOptionArray(Content):
         nplike = self.nplike
 
         numnull, next_carry, out_index = self.nextcarry_outindex(nplike)
+        # print("next_carry", next_carry)
+
         nextlength = len(self._index) - numnull
         # FIXME: don't duplicate
         nextparents = ak._v2.index.Index64.zeros(nextlength, nplike)
@@ -279,8 +281,12 @@ class IndexedOptionArray(Content):
                 len(self._index),
             )
         )
+        # print("nextcarry", nextcarry)
+
         next = self._content._carry(nextcarry, False, NestedIndexError)
+        # print(next)
         out = next._sort_next(self, negaxis, starts, parents, ascending, stable)
+        # print(out)
 
         nextoutindex = ak._v2.index.Index64.zeros(nextlength, nplike)
         self._handle_error(

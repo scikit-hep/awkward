@@ -151,11 +151,6 @@ def test_listarray_sort():
         v2_to_v1(ak._v2.contents.NumpyArray(v2_array._compact_offsets64(True)))
     ) == [0, 3, 3, 5]
 
-    assert ak.to_list(v2_to_v1(v2_array._toListOffsetArray64(True))) == [
-        [{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}],
-        [],
-        [{"nest": 4.4}, {"nest": 5.5}],
-    ]
     assert ak.to_list(v2_to_v1(v2_array.sort())) == [
         [{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}],
         [],
@@ -518,7 +513,7 @@ def test_indexedoptionarray_sort():
         [1, 2, None, 3, 0, None],
         [1, 2, None, 3, 0, None],
     ]
-    # print(v2_array)
+    print(v2_array)
     # assert ak.to_list(v2_to_v1(v2_array.sort())) == [
     #     [0, 1, 2, 3, None, None],
     #     [0, 1, 2, 3, None, None],
