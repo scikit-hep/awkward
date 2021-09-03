@@ -1009,3 +1009,214 @@ def test_EmptyArray():
     v2_array = ak._v2.contents.emptyarray.EmptyArray()
 
     assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=0))) == []
+
+
+def test_RecordArray():
+    v2_array = ak._v2.contents.listarray.ListArray(  # noqa: F841
+        ak._v2.index.Index(np.array([4, 100, 1])),
+        ak._v2.index.Index(np.array([7, 100, 3, 200])),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
+                )
+            ],
+            ["nest"],
+        ),
+    )
+
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=0))) == [
+        ([{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}], []),
+        ([{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}], [{"nest": 4.4}, {"nest": 5.5}]),
+        ([], [{"nest": 4.4}, {"nest": 5.5}]),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=1))) == [
+        [
+            ({"nest": 1.1}, {"nest": 2.2}),
+            ({"nest": 1.1}, {"nest": 3.3}),
+            ({"nest": 2.2}, {"nest": 3.3}),
+        ],
+        [],
+        [({"nest": 4.4}, {"nest": 5.5})],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(3, axis=1))) == [
+        [({"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3})],
+        [],
+        [],
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(4, axis=1))) == [[], [], []]
+
+
+def test_UnionArray():
+    v2_array = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
+        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
+        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+        [
+            ak._v2.contents.recordarray.RecordArray(
+                [ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3]))], ["nest"]
+            ),
+            ak._v2.contents.recordarray.RecordArray(
+                [
+                    ak._v2.contents.numpyarray.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5])
+                    )
+                ],
+                ["nest"],
+            ),
+        ],
+    )
+
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=0))) == [
+        ({"nest": 5.5}, {"nest": 4.4}),
+        ({"nest": 5.5}, {"nest": 1}),
+        ({"nest": 5.5}, {"nest": 2}),
+        ({"nest": 5.5}, {"nest": 3.3}),
+        ({"nest": 5.5}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 1}),
+        ({"nest": 4.4}, {"nest": 2}),
+        ({"nest": 4.4}, {"nest": 3.3}),
+        ({"nest": 4.4}, {"nest": 3}),
+        ({"nest": 4.4}, {"nest": 5.5}),
+        ({"nest": 1}, {"nest": 2}),
+        ({"nest": 1}, {"nest": 3.3}),
+        ({"nest": 1}, {"nest": 3}),
+        ({"nest": 1}, {"nest": 5.5}),
+        ({"nest": 2}, {"nest": 3.3}),
+        ({"nest": 2}, {"nest": 3}),
+        ({"nest": 2}, {"nest": 5.5}),
+        ({"nest": 3.3}, {"nest": 3}),
+        ({"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 3}, {"nest": 5.5}),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(3, axis=0))) == [
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 2}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 3.3}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 2}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 3.3}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 2}, {"nest": 3.3}),
+        ({"nest": 5.5}, {"nest": 2}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 2}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 2}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 3.3}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 3}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 2}, {"nest": 3.3}),
+        ({"nest": 4.4}, {"nest": 2}, {"nest": 3}),
+        ({"nest": 4.4}, {"nest": 2}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 4.4}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 1}, {"nest": 2}, {"nest": 3.3}),
+        ({"nest": 1}, {"nest": 2}, {"nest": 3}),
+        ({"nest": 1}, {"nest": 2}, {"nest": 5.5}),
+        ({"nest": 1}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 1}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 1}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 2}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 2}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 2}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 3.3}, {"nest": 3}, {"nest": 5.5}),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(4, axis=0))) == [
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}, {"nest": 2}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}, {"nest": 3.3}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 2}, {"nest": 3.3}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 2}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 2}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 4.4}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 2}, {"nest": 3.3}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 2}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 2}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 1}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 2}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 2}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 2}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 5.5}, {"nest": 3.3}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 2}, {"nest": 3.3}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 2}, {"nest": 3}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 2}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 1}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 2}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 4.4}, {"nest": 2}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 2}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 3.3}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 1}, {"nest": 2}, {"nest": 3.3}, {"nest": 3}),
+        ({"nest": 1}, {"nest": 2}, {"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 1}, {"nest": 2}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 1}, {"nest": 3.3}, {"nest": 3}, {"nest": 5.5}),
+        ({"nest": 2}, {"nest": 3.3}, {"nest": 3}, {"nest": 5.5}),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=-1))) == [
+        ({"nest": 5.5}, {"nest": 4.4}),
+        ({"nest": 5.5}, {"nest": 1}),
+        ({"nest": 5.5}, {"nest": 2}),
+        ({"nest": 5.5}, {"nest": 3.3}),
+        ({"nest": 5.5}, {"nest": 3}),
+        ({"nest": 5.5}, {"nest": 5.5}),
+        ({"nest": 4.4}, {"nest": 1}),
+        ({"nest": 4.4}, {"nest": 2}),
+        ({"nest": 4.4}, {"nest": 3.3}),
+        ({"nest": 4.4}, {"nest": 3}),
+        ({"nest": 4.4}, {"nest": 5.5}),
+        ({"nest": 1}, {"nest": 2}),
+        ({"nest": 1}, {"nest": 3.3}),
+        ({"nest": 1}, {"nest": 3}),
+        ({"nest": 1}, {"nest": 5.5}),
+        ({"nest": 2}, {"nest": 3.3}),
+        ({"nest": 2}, {"nest": 3}),
+        ({"nest": 2}, {"nest": 5.5}),
+        ({"nest": 3.3}, {"nest": 3}),
+        ({"nest": 3.3}, {"nest": 5.5}),
+        ({"nest": 3}, {"nest": 5.5}),
+    ]
+
+
+def test_UnmaskedArray():
+    v2_array = ak._v2.contents.unmaskedarray.UnmaskedArray(
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
+        )
+    )
+
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=0))) == [
+        (0.0, 1.1),
+        (0.0, 2.2),
+        (0.0, 3.3),
+        (1.1, 2.2),
+        (1.1, 3.3),
+        (2.2, 3.3),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(3, axis=0))) == [
+        (0.0, 1.1, 2.2),
+        (0.0, 1.1, 3.3),
+        (0.0, 2.2, 3.3),
+        (1.1, 2.2, 3.3),
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(4, axis=0))) == [
+        (0.0, 1.1, 2.2, 3.3)
+    ]
+    assert ak.to_list(v2_to_v1(v2_array.combinations(2, axis=-1))) == [
+        (0.0, 1.1),
+        (0.0, 2.2),
+        (0.0, 3.3),
+        (1.1, 2.2),
+        (1.1, 3.3),
+        (2.2, 3.3),
+    ]
