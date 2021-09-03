@@ -214,7 +214,7 @@ class RecordArray(Content):
 
         else:
             nexthead, nexttail = self._headtail(only_fields)
-            if ak.util.isstr(nexthead):
+            if ak._util.isstr(nexthead):
                 return self.content(where)._getitem_field(nexthead, nexttail)
             else:
                 return self.content(where)._getitem_fields(nexthead, nexttail)

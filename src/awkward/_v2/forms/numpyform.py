@@ -7,6 +7,7 @@ try:
 except ImportError:
     from collections import Iterable
 
+from awkward._v2.contents.content import NestedIndexError
 from awkward._v2.forms.form import Form, parameters_equal
 
 import awkward as ak
@@ -141,6 +142,30 @@ class NumpyForm(Form):
             )
         else:
             return False
+
+    def _getitem_range(self):
+        return NumpyForm(
+            self._primitive,
+            inner_shape=self._inner_shape,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        raise NestedIndexError(self, where, "not an array of records")
+
+    def _getitem_fields(self, where, only_fields=()):
+        raise NestedIndexError(self, where, "not an array of records")
+
+    def _carry(self, allow_lazy):
+        return NumpyForm(
+            self._primitive,
+            inner_shape=self._inner_shape,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     @property
     def purelist_isregular(self):

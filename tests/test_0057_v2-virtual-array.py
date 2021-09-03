@@ -582,78 +582,78 @@ def test_fields():
     assert isinstance(sliced[1], ak._v2.record.Record)
 
 
-@pytest.mark.skip(reason="TODO: test VirtualArray in v2")
 def test_single_level():
-    template = ak.Array(
-        [
-            [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-            [],
-            [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}],
-        ]
+    template = v1_to_v2(
+        ak.Array(
+            [
+                [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+                [],
+                [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}],
+            ]
+        ).layout
     )
-    generator = ak.layout.ArrayGenerator(
-        lambda: template, form=template.layout.form, length=3
-    )
-    d = ak._util.MappingProxy({})
-    cache = ak.layout.ArrayCache(d)
-    virtualarray = ak.layout.VirtualArray(generator, cache)
+    generator = ak._v2.contents.FunctionGenerator(3, template.form, lambda: template)
+    cache = {}
+    virtualarray = ak._v2.contents.VirtualArray(generator, cache)
 
     a = virtualarray[2]
-    assert isinstance(a, ak.layout.RecordArray)
-    assert len(d) == 1
+    assert isinstance(a, ak._v2.contents.RecordArray)
+    assert len(cache) == 1
     assert ak.to_list(a) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
-    d.clear()
+    cache.clear()
 
     a = virtualarray[1:]
-    assert isinstance(a, ak.layout.VirtualArray)
-    assert len(d) == 0
+    assert isinstance(a, ak._v2.contents.VirtualArray)
+    assert len(cache) == 0
     b = a[1]
-    assert isinstance(b, ak.layout.RecordArray)
-    assert len(d) >= 1
+    assert isinstance(b, ak._v2.contents.RecordArray)
+    assert len(cache) >= 1
     assert ak.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
-    d.clear()
+    cache.clear()
 
     a = virtualarray[[0, 2, 1, 0]]
-    assert isinstance(a, ak.layout.VirtualArray)
-    assert len(d) == 0
+    assert isinstance(a, ak._v2.contents.VirtualArray)
+    assert len(cache) == 0
     b = a[1]
-    assert isinstance(b, ak.layout.RecordArray)
-    assert len(d) >= 1
+    assert isinstance(b, ak._v2.contents.RecordArray)
+    assert len(cache) >= 1
     assert ak.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
-    d.clear()
+    cache.clear()
 
-    a = virtualarray[[False, True, True]]
-    assert isinstance(a, ak.layout.VirtualArray)
-    assert len(d) == 0
-    b = a[1]
-    assert isinstance(b, ak.layout.RecordArray)
-    assert len(d) >= 1
-    assert ak.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
-    d.clear()
+    pytest.skip()
 
-    a = virtualarray["x"]
-    assert isinstance(a, ak.layout.VirtualArray)
-    assert len(d) == 0
-    b = a[2]
-    assert isinstance(b, ak.layout.NumpyArray)
-    assert len(d) >= 1
-    assert ak.to_list(b) == [3.3, 4.4]
-    d.clear()
+    # a = virtualarray[[False, True, True]]
+    # assert isinstance(a, ak.layout.VirtualArray)
+    # assert len(d) == 0
+    # b = a[1]
+    # assert isinstance(b, ak.layout.RecordArray)
+    # assert len(d) >= 1
+    # assert ak.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+    # d.clear()
 
-    a = virtualarray["y"]
-    assert isinstance(a, ak.layout.VirtualArray)
-    assert len(d) == 0
-    b = a[2]
-    assert isinstance(b, (ak.layout.ListArray64, ak.layout.ListOffsetArray64))
-    assert len(d) >= 1
-    assert ak.to_list(b) == [[3, 3, 3], [4, 4, 4, 4]]
-    d.clear()
+    # a = virtualarray["x"]
+    # assert isinstance(a, ak.layout.VirtualArray)
+    # assert len(d) == 0
+    # b = a[2]
+    # assert isinstance(b, ak.layout.NumpyArray)
+    # assert len(d) >= 1
+    # assert ak.to_list(b) == [3.3, 4.4]
+    # d.clear()
 
-    a = virtualarray[::2, 1]
-    assert isinstance(a, (ak.layout.RecordArray, ak.layout.IndexedArray64))
-    assert len(d) >= 1
-    assert ak.to_list(a) == [{"x": 1.1, "y": [1]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
-    d.clear()
+    # a = virtualarray["y"]
+    # assert isinstance(a, ak.layout.VirtualArray)
+    # assert len(d) == 0
+    # b = a[2]
+    # assert isinstance(b, (ak.layout.ListArray64, ak.layout.ListOffsetArray64))
+    # assert len(d) >= 1
+    # assert ak.to_list(b) == [[3, 3, 3], [4, 4, 4, 4]]
+    # d.clear()
+
+    # a = virtualarray[::2, 1]
+    # assert isinstance(a, (ak.layout.RecordArray, ak.layout.IndexedArray64))
+    # assert len(d) >= 1
+    # assert ak.to_list(a) == [{"x": 1.1, "y": [1]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+    # d.clear()
 
 
 @pytest.mark.skip(reason="TODO: test VirtualArray in v2")

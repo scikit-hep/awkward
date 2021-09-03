@@ -12,7 +12,7 @@ except ImportError:
     from collections import MutableMapping
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.form import Form, parameters_update
 from awkward._v2.forms.virtualform import VirtualForm
 
@@ -320,6 +320,8 @@ class VirtualArray(Content):
         if length is None:
             return self.array._getitem_range(where)
 
+        start, stop, _ = where.indices(length)
+
         form = None
         parameters = {}
         if self._generator.form is not None:
@@ -332,7 +334,7 @@ class VirtualArray(Content):
             SliceGenerator(stop - start, form, self, where),
             cache=self._cache,
             cache_key=None,
-            identifier=None,
+            identifier=self._range_identifier(start, stop),
             parameters=parameters,
         )
 
@@ -352,7 +354,7 @@ class VirtualArray(Content):
             SliceGenerator(self._generator.length, form, self, where),
             cache=self._cache,
             cache_key=None,
-            identifier=None,
+            identifier=self._field_identifier(where),
             parameters=parameters,
         )
 
@@ -372,12 +374,31 @@ class VirtualArray(Content):
             SliceGenerator(self._generator.length, form, self, where),
             cache=self._cache,
             cache_key=None,
-            identifier=None,
+            identifier=self._field_identifier(where),
             parameters=parameters,
         )
 
     def _carry(self, carry, allow_lazy, exception):
-        return self.array._carry(carry, allow_lazy, exception)
+        assert isinstance(carry, ak._v2.index.Index)
+
+        peek = self.peek_array
+        if peek is not None:
+            return peek
+
+        form = None
+        parameters = {}
+        if self._generator.form is not None:
+            form = self._generator.form._carry(allow_lazy)
+            parameters_update(parameters, form.parameters)
+        parameters_update(parameters, self.parameters)
+
+        return VirtualArray(
+            SliceGenerator(len(carry), form, self, carry.data),
+            cache=self._cache,
+            cache_key=None,
+            identifier=self._carry_identifier(carry, NestedIndexError),
+            parameters=parameters,
+        )
 
     def _getitem_next(self, head, tail, advanced):
         return self.array._getitem_next(head, tail, advanced)

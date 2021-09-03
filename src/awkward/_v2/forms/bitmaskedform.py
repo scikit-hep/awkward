@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
 
 class BitMaskedForm(Form):
@@ -112,6 +113,48 @@ class BitMaskedForm(Form):
             )
         else:
             return False
+
+    def _getitem_range(self):
+        return ByteMaskedForm(
+            "i8",
+            self._content._getitem_range(),
+            self._valid_when,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        return BitMaskedForm(
+            self._mask,
+            self._content._getitem_field(where, only_fields),
+            self._valid_when,
+            self._lsb_order,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _getitem_fields(self, where, only_fields=()):
+        return BitMaskedForm(
+            self._mask,
+            self._content._getitem_fields(where, only_fields),
+            self._valid_when,
+            self._lsb_order,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _carry(self, allow_lazy):
+        return ByteMaskedForm(
+            "i8",
+            self._content._carry(allow_lazy),
+            self._valid_when,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     @property
     def purelist_isregular(self):

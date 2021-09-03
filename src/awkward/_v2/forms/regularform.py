@@ -73,6 +73,42 @@ class RegularForm(Form):
         else:
             return False
 
+    def _getitem_range(self):
+        return RegularForm(
+            self._content._getitem_range(),
+            self._size,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        return RegularForm(
+            self._content._getitem_field(where, only_fields),
+            self._size,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _getitem_fields(self, where, only_fields=()):
+        return RegularForm(
+            self._content._getitem_fields(where, only_fields),
+            self._size,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _carry(self, allow_lazy):
+        return RegularForm(
+            self._content._carry(allow_lazy),
+            self._size,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
     @property
     def purelist_isregular(self):
         return self._content.purelist_isregular

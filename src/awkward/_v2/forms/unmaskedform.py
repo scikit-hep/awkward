@@ -61,6 +61,38 @@ class UnmaskedForm(Form):
         else:
             return False
 
+    def _getitem_range(self):
+        return UnmaskedForm(
+            self._content._getitem_range(),
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        return UnmaskedForm(
+            self._content._getitem_field(where, only_fields),
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _getitem_fields(self, where, only_fields=()):
+        return UnmaskedForm(
+            self._content._getitem_fields(where, only_fields),
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _carry(self, allow_lazy):
+        return UnmaskedForm(
+            self._content._carry(allow_lazy),
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
     @property
     def purelist_isregular(self):
         return self._content.purelist_isregular

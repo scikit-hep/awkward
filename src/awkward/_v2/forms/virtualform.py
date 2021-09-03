@@ -67,6 +67,10 @@ class VirtualForm(Form):
         from awkward._v2.contents.virtualarray import VirtualArray
 
         if isinstance(layout, VirtualArray):
+            # FIXME: generated_compatibility should have been at the level of Forms
+            # because the compatibility of a VirtualForm and a VirtualForm should
+            # unwrap both as much as possible and compare the non-virtual parts
+
             if self._form is None or layout.form is None:
                 return parameters_equal(self._parameters, layout._parameters)
             else:
@@ -84,6 +88,46 @@ class VirtualForm(Form):
 
         else:
             return False
+
+    def _getitem_range(self):
+        return VirtualForm(
+            None if self._form is None else self._form._getitem_range(),
+            True,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        return VirtualForm(
+            None
+            if self._form is None
+            else self._form._getitem_field(where, only_fields),
+            self._has_length,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _getitem_fields(self, where, only_fields=()):
+        return VirtualForm(
+            None
+            if self._form is None
+            else self._form._getitem_fields(where, only_fields),
+            self._has_length,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _carry(self, allow_lazy):
+        return VirtualForm(
+            None if self._form is None else self._form._getitem_range(),
+            True,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     @property
     def purelist_isregular(self):

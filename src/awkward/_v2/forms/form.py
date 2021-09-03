@@ -263,3 +263,9 @@ class Form(object):
         if self._form_key is not None:
             out.append("form_key=" + repr(self._form_key))
         return out
+
+    def simplify_optiontype(self):
+        return self
+
+    def simplify_uniontype(self):
+        return self
