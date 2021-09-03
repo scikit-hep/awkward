@@ -486,9 +486,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def _axis_wrap_if_negative(self, axis):
         if axis >= 0:
             return axis
-        minmax = self.minmax_depth
-        mindepth = minmax[0]
-        maxdepth = minmax[1]
+        mindepth, maxdepth = self.minmax_depth
         depth = self.purelist_depth
         if mindepth == depth and maxdepth == depth:
             posaxis = depth + axis

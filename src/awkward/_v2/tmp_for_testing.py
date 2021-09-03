@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import re
+
 import awkward as ak
 import numpy as np
 
@@ -335,7 +337,49 @@ def v1_to_v2(v1):
         )
 
     elif isinstance(v1, ak.layout.VirtualArray):
-        raise NotImplementedError("VirtualArray")
+        form = v1.generator.form
+        if form is not None:
+            form = ak._v2.forms.from_json(form.tojson())
+
+        cache = v1.cache
+        if cache is not None:
+            cache = cache.mutablemapping
+
+        if isinstance(v1.generator, ak.layout.SliceGenerator):
+            # cheesy way to get the slice
+            repr_gen = repr(v1.generator)
+            range_slice = re.search(
+                r"<slice>\[(-?[0-9]+):(-?[0-9]+)\]</slice>", repr_gen
+            )
+            field_slice = re.search(r"<slice>\[(.*)\]</slice>", repr_gen)
+            if range_slice is not None:
+                slc = slice(int(range_slice.group(1)), int(range_slice.group(2)))
+            else:
+                slc = eval(field_slice.group(1))
+
+            generator = ak._v2.contents.virtualarray.SliceGenerator(
+                v1.generator.length,
+                form,
+                v1_to_v2(v1.generator.content),
+                slc,
+            )
+
+        else:
+            generator = ak._v2.contents.virtualarray.FunctionGenerator(
+                v1.generator.length,
+                form,
+                v1.generator.callable,
+                v1.generator.args,
+                v1.generator.kwargs,
+            )
+
+        return ak._v2.contents.VirtualArray(
+            generator,
+            cache=cache,
+            cache_key=v1.cache_key,
+            identifier=v1_to_v2_id(v1.identities),
+            parameters=v1.parameters,
+        )
 
     else:
         raise AssertionError(type(v1))

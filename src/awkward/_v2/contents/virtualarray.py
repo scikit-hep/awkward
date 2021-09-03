@@ -85,7 +85,7 @@ class ArrayGenerator(object):
 class FunctionGenerator(ArrayGenerator):
     def __init__(self, length, form, function, args=None, kwargs=None):
         super(FunctionGenerator, self).__init__(length, form)
-        if not isinstance(function, callable):
+        if not callable(function):
             raise TypeError(
                 "{0} 'function' must be callable, not {1}".format(
                     type(self).__name__, repr(function)
@@ -134,9 +134,9 @@ class FunctionGenerator(ArrayGenerator):
         if len(self._kwargs) != 0:
             out.append(" kwargs=")
             out.append(repr(self._kwargs))
-        out.append(">\n" + indent + "    ")
+        out.append("><![CDATA[\n" + indent + "    ")
         out.append(repr(self._function))
-        out.append("\n" + indent + "</FunctionGenerator>")
+        out.append("\n" + indent + "]]></FunctionGenerator>")
         return "".join(out)
 
     def generate(self):
@@ -172,8 +172,7 @@ class SliceGenerator(ArrayGenerator):
         out.append(indent + "    <slice>")
         out.append(str(self._slice).replace("\n", "\n" + indent + "        "))
         out.append("</slice>\n")
-        out.append(indent + "    ")
-        out.append(self._virtualarray._repr(indent + "        ", "", ""))
+        out.append(self._virtualarray._repr(indent + "    ", "", "", detailed=False))
         out.append("\n" + indent + "</SliceGenerator>")
         return "".join(out)
 
@@ -254,7 +253,7 @@ class VirtualArray(Content):
     def __repr__(self):
         return self._repr("", "", "")
 
-    def _repr(self, indent, pre, post):
+    def _repr(self, indent, pre, post, detailed=True):
         out = [indent, pre, "<VirtualArray cache_key="]
         out.append(repr(self._cache_key))
         out.append(" len=")
@@ -263,9 +262,26 @@ class VirtualArray(Content):
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
         out.append(self._generator._repr(indent + "    ", "", ""))
-        out.append(indent + "    <form>")
-        out.append(str(self._generator.form).replace("\n", "\n" + indent + "        "))
-        out.append("</form>\n")
+        if detailed:
+            out.append("\n" + indent + "    <form>\n" + indent + "        ")
+            out.append(
+                str(self._generator.form).replace("\n", "\n" + indent + "        ")
+            )
+            out.append("\n" + indent + "    </form>\n")
+            out.append(indent + "    <cache><![CDATA[\n")
+            cache_repr = repr(self._cache)
+            max_length = max(80 - len(indent) - 8 - 5, 40)
+            if len(cache_repr) > max_length:
+                half_length = max_length // 2
+                cache_repr = (
+                    cache_repr[: max_length - half_length]
+                    + " ... "
+                    + cache_repr[-half_length:]
+                )
+            out.append(indent + "        " + cache_repr)
+            out.append("\n" + indent + "    ]]></cache>\n")
+        else:
+            out.append("\n")
         out.append(indent + "</VirtualArray>")
         out.append(post)
         return "".join(out)
@@ -355,91 +371,24 @@ class VirtualArray(Content):
             parameters=parameters,
         )
 
+    def _carry(self, carry, allow_lazy, exception):
+        return self.array._carry(carry, allow_lazy, exception)
 
-#     def _carry(self, carry, allow_lazy, exception):
-#         assert isinstance(carry, ak._v2.index.Index)
+    def _getitem_next(self, head, tail, advanced):
+        return self.array._getitem_next(head, tail, advanced)
 
-#         try:
-#             nextindex = self._index[carry.data]
-#         except IndexError as err:
-#             if issubclass(exception, NestedIndexError):
-#                 raise exception(self, carry.data, str(err))
-#             else:
-#                 raise exception(str(err))
+    def _localindex(self, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        else:
+            return self.array._localindex(posaxis, depth)
 
-#         return IndexedArray(
-#             nextindex,
-#             self._content,
-#             self._carry_identifier(carry, exception),
-#             self._parameters,
-#         )
-
-#     def _getitem_next(self, head, tail, advanced):
-#         nplike = self.nplike  # noqa: F841
-
-#         if head == ():
-#             return self
-
-#         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-#             nexthead, nexttail = self._headtail(tail)
-
-#             nextcarry = ak._v2.index.Index64.empty(len(self._index), nplike)
-#             self._handle_error(
-#                 nplike[
-#                     "awkward_IndexedArray_getitem_nextcarry",
-#                     nextcarry.dtype.type,
-#                     self._index.dtype.type,
-#                 ](
-#                     nextcarry.to(nplike),
-#                     self._index.to(nplike),
-#                     len(self._index),
-#                     len(self._content),
-#                 )
-#             )
-
-#             next = self._content._carry(nextcarry, False, NestedIndexError)
-#             return next._getitem_next(head, tail, advanced)
-
-#         elif ak._util.isstr(head):
-#             return self._getitem_next_field(head, tail, advanced)
-
-#         elif isinstance(head, list):
-#             return self._getitem_next_fields(head, tail, advanced)
-
-#         elif head is np.newaxis:
-#             return self._getitem_next_newaxis(tail, advanced)
-
-#         elif head is Ellipsis:
-#             return self._getitem_next_ellipsis(tail, advanced)
-
-#         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-#             raise NotImplementedError
-
-#         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-#             raise NotImplementedError
-
-#         else:
-#             raise AssertionError(repr(head))
-
-#     def project(self):
-#         nextcarry = ak._v2.index.Index64.empty(len(self), self.nplike)
-#         self._handle_error(
-#             self.nplike[
-#                 "awkward_IndexedArray_getitem_nextcarry",
-#                 nextcarry.dtype.type,
-#                 self._index.dtype.type,
-#             ](
-#                 nextcarry.to(self.nplike),
-#                 self._index.to(self.nplike),
-#                 len(self._index),
-#                 len(self._content),
-#             )
-#         )
-#         return self._content._carry(nextcarry, False, NestedIndexError)
-
-#     def _localindex(self, axis, depth):
-#         posaxis = self._axis_wrap_if_negative(axis)
-#         if posaxis == depth:
-#             return self._localindex_axis0()
-#         else:
-#             return self.project()._localindex(posaxis, depth)
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            return self.array._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )
