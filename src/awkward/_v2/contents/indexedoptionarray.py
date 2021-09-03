@@ -249,14 +249,93 @@ class IndexedOptionArray(Content):
             )
             return out2
 
-    def _sort(self, axis, ascending, stable):
-        numnull, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
+    def _sort_next(self, parent, negaxis, starts, parents, ascending, stable):
+        if len(self._index) == 0:
+            return self
 
+        nplike = self.nplike
+
+        numnull, nextcarry, outindex = self.nextcarry_outindex(nplike)
+        nextlength = len(self._index) - numnull
+        # FIXME: don't duplicate
+        nextparents = ak._v2.index.Index64.zeros(nextlength, nplike)
+        nextcarry = ak._v2.index.Index64.zeros(nextlength, nplike)
+        outindex = ak._v2.index.Index64.zeros(nextlength, nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_reduce_next_64",
+                np.int64,
+                np.int64,
+                np.int64,
+                self._index._data.dtype.type,
+                np.int64,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._index._data,
+                parents.to(nplike),
+                len(self._index),
+            )
+        )
         next = self._content._carry(nextcarry, False, NestedIndexError)
+        out = next._sort_next(self, negaxis, starts, parents, ascending, stable)
+
+        nextoutindex = ak._v2.index.Index64.zeros(nextlength, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_local_preparenext_64",
+                np.int64,
+                np.int64,
+                np.int64,
+                self._index._data.dtype.type,
+            ](
+                nextoutindex.to(nplike),
+                starts.to(nplike),
+                parents.to(nplike),
+                len(parents),
+                self._index._data,
+                nextparents.to(nplike),
+                nextlength,
+            )
+        )
+
+        out = ak._v2.contents.IndexedOptionArray(
+            nextoutindex,
+            out,
+            self._identifier,
+            self._parameters,
+        ).simplify_optiontype()
+
+        branch, depth = self.branch_depth
+        if not branch and negaxis != depth:
+            out = ak._v2.contents.RegularArray(
+                out,
+                len(parents),
+                0,
+                self._identifier,
+                self._parameters,
+            )
+
+        if not branch and negaxis == depth:
+            return out
+        # else:
+
+        out = next._sort_next(self, negaxis, starts, nextparents, ascending, stable)
+
+        nextoutindex = ak._v2.index.Index64.zeros(len(self._index), nplike)
 
         return ak._v2.contents.IndexedOptionArray(
             outindex,
-            next._sort(axis, ascending, stable),
+            out,
+            self._identifier,
+            self._parameters,
+        )
+
+        return ak._v2.contents.IndexedOptionArray(
+            outindex,
+            out,
             self._identifier,
             self._parameters,
         )

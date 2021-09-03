@@ -260,7 +260,7 @@ class NumpyArray(Content):
     def iscontiguous(self):
         x = self._data.itemsize
 
-        for i in range(len(self.shape), 0, -1):
+        for i in range(len(self.shape), 0, -1):  # FIXME: more Pythonic way to do it?
             if x != self.strides[i - 1]:
                 return False
             else:
@@ -268,16 +268,18 @@ class NumpyArray(Content):
 
         return True
 
-    def _sort(self, axis, ascending, stable):
+    def _sort_next(self, parent, negaxis, starts, parents, ascending, stable):
         if len(self.shape) == 0:
             raise TypeError(
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
         elif len(self.shape) != 1 or not self.iscontiguous():
             contiguous_self = ak._v2.contents.NumpyArray(
-                self._data[self.localindex(axis)]
+                self._data[self.localindex(-1)]
             )
-            return contiguous_self.toRegularArray()._sort(axis, ascending, stable)
+            return contiguous_self.toRegularArray()._sort_next(
+                self, negaxis, starts, parents, ascending, stable
+            )
         else:
             nplike = self.nplike
 

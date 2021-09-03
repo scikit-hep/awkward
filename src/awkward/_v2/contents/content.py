@@ -505,7 +505,38 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return self._localindex(axis, 0)
 
     def sort(self, axis=-1, ascending=True, stable=False):
-        return self._sort(axis, ascending, stable)
+        negaxis = -axis
+        branch, depth = self.branch_depth
+        if branch:
+            if negaxis <= 0:
+                raise ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves "
+                    "of the tree; non-negative from the root)"
+                )
+            if negaxis > depth:
+                raise ValueError(
+                    "cannot use axis="
+                    + str(axis)
+                    + " on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth="
+                    + str(depth)
+                    + " from the leaves"
+                )
+        else:
+            if negaxis <= 0:
+                negaxis = negaxis + depth
+            if not (0 < negaxis and negaxis <= depth):
+                raise ValueError(
+                    "axis="
+                    + str(axis)
+                    + " exceeds the depth of the nested list structure "
+                    "(which is " + str(depth) + ")"
+                )
+
+        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        return self._sort_next(self, negaxis, starts, parents, ascending, stable)
 
     @property
     def purelist_isregular(self):

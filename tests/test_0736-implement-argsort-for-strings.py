@@ -9,6 +9,21 @@ import awkward as ak  # noqa: F401
 
 def test_but_first_fix_sort():
     assert ak.is_valid(ak.sort(ak.Array(["one", "two", "three"]), axis=-1))
+    assert ak.is_valid(
+        ak.sort(ak.Array([["one", "two", "three"], ["one", "two", "three"]]), axis=-1)
+    )
+    assert ak.is_valid(
+        ak.sort(
+            ak.Array(
+                [
+                    [["one", "two", "three"]],
+                    [["one", "two", "three"]],
+                    [["one", "two", "three"]],
+                ]
+            ),
+            axis=-1,
+        )
+    )
 
 
 def test_argsort():

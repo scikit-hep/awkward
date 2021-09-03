@@ -402,7 +402,6 @@ class ListArray(Content):
             return self._localindex_axis0()
         elif posaxis == depth + 1:
             offsets = self._compact_offsets64(True)
-            # FIXME: why the last one is uninitialised?
             innerlength = offsets[len(offsets) - 1]
             localindex = ak._v2.index.Index64.empty(innerlength, self.nplike)
             self._handle_error(
@@ -463,7 +462,7 @@ class ListArray(Content):
         return ak._v2.contents.ListOffsetArray(
             offsets,
             nextcontent,
-            self._identifier,
+            self._identifier,  # FIXME:?
             self._parameters,
         )
 
@@ -471,6 +470,6 @@ class ListArray(Content):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
-    def _sort(self, axis, ascending, stable):
+    def _sort_next(self, parent, negaxis, starts, parents, ascending, stable):
         out = self._toListOffsetArray64(True)
-        return out._sort(axis, ascending, stable)
+        return out._sort_next(out, negaxis, starts, parents, ascending, stable)

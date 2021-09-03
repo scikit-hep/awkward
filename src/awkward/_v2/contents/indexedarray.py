@@ -201,6 +201,9 @@ class IndexedArray(Content):
         else:
             return self.project()._localindex(posaxis, depth)
 
-    def _sort(self, axis, ascending, stable):
+    def _sort_next(self, parent, negaxis, starts, parents, ascending, stable):
+        if len(self._index) == 0:
+            return self
+
         next = self._content._carry(self._index, False, NestedIndexError)
-        return next._sort(axis, ascending, stable)
+        return next._sort_next(self, negaxis, starts, parents, ascending, stable)
