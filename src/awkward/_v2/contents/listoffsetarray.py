@@ -573,7 +573,7 @@ class ListOffsetArray(Content):
                 ](
                     maxcount.to(nplike),
                     offsetscopy.to(nplike),
-                    self._offsets._data,
+                    self._offsets.to(self.nplike),
                     len(self._offsets) - 1,
                 )
             )
@@ -603,7 +603,7 @@ class ListOffsetArray(Content):
                     distincts,
                     maxcount * outlength,
                     offsetscopy,
-                    self._offsets._data,
+                    self._offsets.to(self.nplike),
                     len(self._offsets) - 1,
                     parents.to(nplike),
                     maxcount,
@@ -662,13 +662,13 @@ class ListOffsetArray(Content):
             )
 
             self._handle_error(
-                nplike[
+                self.nplike[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     np.int64,
                     np.int64,
                 ](
-                    nextparents.to(nplike),
-                    self._offsets._data,
+                    nextparents.to(self.nplike),
+                    self._offsets.to(self.nplike),
                     len(self._offsets) - 1,
                 )
             )
