@@ -496,7 +496,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nplike_tocarryraw = self.nplike.empty(n, dtype=np.intp)
+            tocarryraw = self.nplike.empty(n, dtype=np.intp)
             tocarry = []
 
             for i in range(n):
@@ -504,9 +504,8 @@ class ListOffsetArray(Content):
                     totallen[0], self.nplike, dtype=np.int64
                 )
                 tocarry.append(ptr)
-                nplike_tocarryraw[i] = ptr.ptr
+                tocarryraw[i] = ptr.ptr
 
-            tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
             toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
             fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
             self._handle_error(
@@ -518,7 +517,7 @@ class ListOffsetArray(Content):
                     starts.to(self.nplike).dtype.type,
                     stops.to(self.nplike).dtype.type,
                 ](
-                    tocarryraw.data,
+                    tocarryraw,
                     toindex.to(self.nplike),
                     fromindex.to(self.nplike),
                     n,

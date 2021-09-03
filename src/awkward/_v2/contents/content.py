@@ -522,16 +522,15 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        nplike_tocarryraw = self.nplike.empty(n, dtype=np.intp)
+        tocarryraw = self.nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
             ptr = ak._v2.index.Index64.empty(
                 combinationslen, self.nplike, dtype=np.int64
             )
             tocarry.append(ptr)
-            nplike_tocarryraw[i] = ptr.ptr
+            tocarryraw[i] = ptr.ptr
 
-        tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
         toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
         fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
 
@@ -542,7 +541,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 toindex.to(self.nplike).dtype.type,
                 fromindex.to(self.nplike).dtype.type,
             ](
-                tocarryraw.data,
+                tocarryraw,
                 toindex.to(self.nplike),
                 fromindex.to(self.nplike),
                 n,
