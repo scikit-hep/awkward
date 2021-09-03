@@ -86,6 +86,10 @@ class NumpyForm(Form):
     def inner_shape(self):
         return self._inner_shape
 
+    @property
+    def itemsize(self):
+        return ak._v2.types.numpytype._primitive_to_dtype[self._primitive].itemsize
+
     def __repr__(self):
         args = [repr(self._primitive)]
         if len(self._inner_shape) > 0:
@@ -113,12 +117,25 @@ class NumpyForm(Form):
                 out["inner_shape"] = list(self._inner_shape)
             return self._tolist_extra(out, verbose)
 
+    def __eq__(self, other):
+        if isinstance(other, NumpyForm):
+            return (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self._primitive == other._primitive
+                and self._inner_shape == other._inner_shape
+                and parameters_equal(self._parameters, other._parameters)
+            )
+        else:
+            return False
+
     def generated_compatibility(self, layout):
         from awkward._v2.contents.numpyarray import NumpyArray
 
         if isinstance(layout, NumpyArray):
             return (
-                self._primitive == layout.primitive
+                ak._v2.types.numpytype._primitive_to_dtype[self._primitive]
+                == layout.dtype
                 and self._inner_shape == layout.shape[1:]
                 and parameters_equal(self._parameters, layout._parameters)
             )

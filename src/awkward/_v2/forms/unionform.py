@@ -89,6 +89,26 @@ class UnionForm(Form):
             verbose,
         )
 
+    def __eq__(self, other):
+        if isinstance(other, UnionForm):
+            if (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self._tags == other._tags
+                and self._index == other._index
+                and len(self._contents) == len(other._contents)
+                and parameters_equal(self._parameters, other._parameters)
+            ):
+                for i in range(len(self._contents)):
+                    if self._contents[i] != other._contents[i]:
+                        return False
+                else:
+                    return True
+            else:
+                return False
+        else:
+            return False
+
     def generated_compatibility(self, layout):
         from awkward._v2.contents.unionarray import UnionArray
 

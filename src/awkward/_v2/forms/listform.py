@@ -71,6 +71,19 @@ class ListForm(Form):
             verbose,
         )
 
+    def __eq__(self, other):
+        if isinstance(other, ListForm):
+            return (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self._starts == other._starts
+                and self._stops == other._stops
+                and parameters_equal(self._parameters, other._parameters)
+                and self._content == other._content
+            )
+        else:
+            return False
+
     def generated_compatibility(self, layout):
         from awkward._v2.contents.listarray import ListArray
 

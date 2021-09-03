@@ -135,6 +135,35 @@ class RecordForm(Form):
 
         return self._tolist_extra(out, verbose)
 
+    def __eq__(self, other):
+        if isinstance(other, RecordForm):
+            if (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self.is_tuple == other.is_tuple
+                and len(self._contents) == len(other._contents)
+                and parameters_equal(self._parameters, other._parameters)
+            ):
+                if self.is_tuple:
+                    for i in range(len(self._contents)):
+                        if self._contents[i] != other._contents[i]:
+                            return False
+                    else:
+                        return True
+                else:
+                    if set(self._keys) != set(other._keys):
+                        return False
+                    else:
+                        for key, content in zip(self._keys, self._contents):
+                            if content != other.content(key):
+                                return False
+                        else:
+                            return True
+            else:
+                return False
+        else:
+            return False
+
     def generated_compatibility(self, layout):
         from awkward._v2.contents.recordarray import RecordArray
 

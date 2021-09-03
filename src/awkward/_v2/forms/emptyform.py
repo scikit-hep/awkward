@@ -16,6 +16,13 @@ class EmptyForm(Form):
     def _tolist_part(self, verbose, toplevel):
         return self._tolist_extra({"class": "EmptyArray"}, verbose)
 
+    def __eq__(self, other):
+        return (
+            isinstance(other, EmptyForm)
+            and self._has_identifier == other._has_identifier
+            and self._form_key == other._form_key
+        )
+
     def generated_compatibility(self, layout):
         from awkward._v2.contents.emptyarray import EmptyArray
 

@@ -54,6 +54,18 @@ class IndexedOptionForm(Form):
             verbose,
         )
 
+    def __eq__(self, other):
+        if isinstance(other, IndexedOptionForm):
+            return (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self._index == other._index
+                and parameters_equal(self._parameters, other._parameters)
+                and self._content == other._content
+            )
+        else:
+            return False
+
     def generated_compatibility(self, layout):
         from awkward._v2.contents.indexedoptionarray import IndexedOptionArray
 

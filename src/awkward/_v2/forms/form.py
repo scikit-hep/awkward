@@ -151,7 +151,7 @@ def from_iter(input):
 
     elif input["class"] == "VirtualArray":
         return ak._v2.forms.virtualform.VirtualForm(
-            form=input["form"],
+            form=from_iter(input["form"]),
             has_length=input["has_length"],
             has_identifier=has_identifier,
             parameters=parameters,

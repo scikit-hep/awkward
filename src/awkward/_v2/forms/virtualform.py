@@ -16,7 +16,7 @@ class VirtualForm(Form):
     ):
         if form is not None and not isinstance(form, Form):
             raise TypeError(
-                "{0} all 'form' must be Form subclasses, not {1}".format(
+                "{0} 'form' must be a Form instance, not {1}".format(
                     type(self).__name__, repr(form)
                 )
             )
@@ -51,6 +51,17 @@ class VirtualForm(Form):
             out["form"] = self._form._tolist_part(verbose, toplevel=False)
         out["has_length"] = self._has_length
         return self._tolist_extra(out, verbose)
+
+    def __eq__(self, other):
+        if isinstance(other, VirtualForm):
+            return (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and parameters_equal(self._parameters, other._parameters)
+                and self._form == other._form
+            )
+        else:
+            return False
 
     def generated_compatibility(self, layout):
         from awkward._v2.contents.virtualarray import VirtualArray

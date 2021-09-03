@@ -88,7 +88,9 @@ class BitMaskedForm(Form):
     def __eq__(self, other):
         if isinstance(other, BitMaskedForm):
             return (
-                self._mask == other._mask
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self._mask == other._mask
                 and self._valid_when == other._valid_when
                 and self._lsb_order == other._lsb_order
                 and parameters_equal(self._parameters, other._parameters)

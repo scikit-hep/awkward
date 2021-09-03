@@ -15,7 +15,6 @@ import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.form import Form, parameters_update
 from awkward._v2.forms.virtualform import VirtualForm
-from awkward._v2.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -80,6 +79,7 @@ class ArrayGenerator(object):
                     header1, header2, "\n".join(two_column)
                 )
             )
+        return out
 
 
 class FunctionGenerator(ArrayGenerator):
@@ -140,8 +140,7 @@ class FunctionGenerator(ArrayGenerator):
         return "".join(out)
 
     def generate(self):
-        out = self._function(self._args, self._kwargs)
-        return v1_to_v2(ak.to_layout(out, False, False))
+        return self._function(*self._args, **self._kwargs)
 
 
 class SliceGenerator(ArrayGenerator):
@@ -186,7 +185,7 @@ class VirtualArray(Content):
 
     @staticmethod
     def new_key():
-        with VirtualArray._newkey_lock:
+        with VirtualArray._new_key_lock:
             out = VirtualArray._new_key_number
             VirtualArray._new_key_number += 1
         return "ak" + str(out)
@@ -300,6 +299,8 @@ class VirtualArray(Content):
             out = self._cache.get(self._cache_key)
         if out is None:
             out = self._generator.generate_and_check()
+            if self._cache is not None:
+                self._cache[self._cache_key] = out
         return out
 
     def _getitem_nothing(self):
@@ -310,6 +311,10 @@ class VirtualArray(Content):
 
     def _getitem_range(self, where):
         assert where.step is None or where.step == 1
+
+        peek = self.peek_array
+        if peek is not None:
+            return peek
 
         length = self._generator.length
         if length is None:
@@ -332,9 +337,9 @@ class VirtualArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        length = self._generator.length
-        if length is None:
-            return self.array._getitem_field(where, only_fields)
+        peek = self.peek_array
+        if peek is not None:
+            return peek
 
         form = None
         parameters = {}
@@ -344,7 +349,7 @@ class VirtualArray(Content):
         parameters_update(parameters, self.parameters)
 
         return VirtualArray(
-            SliceGenerator(length, form, self, where),
+            SliceGenerator(self._generator.length, form, self, where),
             cache=self._cache,
             cache_key=None,
             identifier=None,
@@ -352,9 +357,9 @@ class VirtualArray(Content):
         )
 
     def _getitem_fields(self, where, only_fields=()):
-        length = self._generator.length
-        if length is None:
-            return self.array._getitem_fields(where, only_fields)
+        peek = self.peek_array
+        if peek is not None:
+            return peek
 
         form = None
         parameters = {}
@@ -364,7 +369,7 @@ class VirtualArray(Content):
         parameters_update(parameters, self.parameters)
 
         return VirtualArray(
-            SliceGenerator(length, form, self, where),
+            SliceGenerator(self._generator.length, form, self, where),
             cache=self._cache,
             cache_key=None,
             identifier=None,
