@@ -665,7 +665,7 @@ class ListOffsetArray(Content):
                 nplike[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     np.int64,
-                    np.int64,
+                    self._offsets._data.dtype.type,
                 ](
                     nextparents.to(nplike),
                     self._offsets._data,
