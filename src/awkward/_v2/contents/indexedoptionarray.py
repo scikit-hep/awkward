@@ -255,7 +255,7 @@ class IndexedOptionArray(Content):
 
         nplike = self.nplike
 
-        numnull, nextcarry, outindex = self.nextcarry_outindex(nplike)
+        numnull, next_carry, out_index = self.nextcarry_outindex(nplike)
         nextlength = len(self._index) - numnull
         # FIXME: don't duplicate
         nextparents = ak._v2.index.Index64.zeros(nextlength, nplike)

@@ -489,37 +489,37 @@ def test_regulararray_sort():
 #     assert ak.to_list(v2_to_v1(v2_array.sort())) == [1.1, 2.2, 3.3, 3.3, 5.5, 5.5, 6.6]
 #
 #
-# def test_indexedoptionarray_sort():
-#     # v2_array = ak._v2.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
-#     #     ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
-#     #     ak._v2.contents.recordarray.RecordArray(
-#     #         [
-#     #             ak._v2.contents.numpyarray.NumpyArray(
-#     #                 np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#     #             )
-#     #         ],
-#     #         ["nest"],
-#     #     ),
-#     # )
-#     # assert ak.to_list(v2_to_v1(v2_array.sort())) == [
-#     #     {"nest": 2.2},
-#     #     {"nest": 3.3},
-#     #     None,
-#     #     {"nest": 3.3},
-#     #     None,
-#     #     {"nest": 5.5},
-#     #     {"nest": 6.6},
-#     # ]
-#     #
-#
-#     v1_array = ak.Array([[1, 2, None, 3, 0, None], [1, 2, None, 3, 0, None]])
-#     v2_array = v1_to_v2(v1_array.layout)
-#     assert ak.to_list(v2_to_v1(v2_array)) == [
-#         [1, 2, None, 3, 0, None],
-#         [1, 2, None, 3, 0, None],
-#     ]
-#     # print(v2_array)
-#     # assert ak.to_list(v2_to_v1(v2_array.sort())) == [
-#     #     [0, 1, 2, 3, None, None],
-#     #     [0, 1, 2, 3, None, None],
-#     # ]
+def test_indexedoptionarray_sort():
+    # v2_array = ak._v2.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
+    #     ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
+    #     ak._v2.contents.recordarray.RecordArray(
+    #         [
+    #             ak._v2.contents.numpyarray.NumpyArray(
+    #                 np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+    #             )
+    #         ],
+    #         ["nest"],
+    #     ),
+    # )
+    # assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+    #     {"nest": 2.2},
+    #     {"nest": 3.3},
+    #     None,
+    #     {"nest": 3.3},
+    #     None,
+    #     {"nest": 5.5},
+    #     {"nest": 6.6},
+    # ]
+    #
+
+    v1_array = ak.Array([[1, 2, None, 3, 0, None], [1, 2, None, 3, 0, None]])
+    v2_array = v1_to_v2(v1_array.layout)
+    assert ak.to_list(v2_to_v1(v2_array)) == [
+        [1, 2, None, 3, 0, None],
+        [1, 2, None, 3, 0, None],
+    ]
+    # print(v2_array)
+    # assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+    #     [0, 1, 2, 3, None, None],
+    #     [0, 1, 2, 3, None, None],
+    # ]
