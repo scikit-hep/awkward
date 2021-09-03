@@ -169,6 +169,12 @@ def from_json(input):
 
 
 def parameters_equal(one, two):
+    if one is None and two is None:
+        return True
+    if one is None:
+        one = {}
+    if two is None:
+        two = {}
     keys = set(one.keys()).union(two.keys())
     for key in keys:
         if one.get(key) != two.get(key):

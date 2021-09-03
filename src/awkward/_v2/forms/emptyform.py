@@ -20,7 +20,7 @@ class EmptyForm(Form):
         from awkward._v2.contents.emptyarray import EmptyArray
 
         if isinstance(layout, EmptyArray):
-            return parameters_equal(self.parameters, layout.parameters)
+            return parameters_equal(self._parameters, layout._parameters)
         else:
             return False
 

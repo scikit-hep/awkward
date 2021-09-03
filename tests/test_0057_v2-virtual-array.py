@@ -18,9 +18,11 @@ import awkward as ak  # noqa: F401
 from awkward._v2.tmp_for_testing import v1_to_v2  # noqa: F401
 
 
-@pytest.mark.skip(reason="TODO: test VirtualArray in v2")
 def test_forms():
-    form = ak.forms.NumpyForm([], 8, "d")
+    form = ak._v2.forms.NumpyForm("float64")
+
+    pytest.skip("TODO: test VirtualArray in v2")
+
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
     assert ak.forms.Form.fromjson(form.tojson(False, False)) == form

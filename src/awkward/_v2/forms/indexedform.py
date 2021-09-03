@@ -60,7 +60,7 @@ class IndexedForm(Form):
         if isinstance(layout, IndexedArray):
             return (
                 self._index == layout.index.form
-                and parameters_equal(self.parameters, layout.parameters)
+                and parameters_equal(self._parameters, layout._parameters)
                 and self._content.generated_compatibility(layout.content)
             )
         else:

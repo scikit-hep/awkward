@@ -120,7 +120,7 @@ class NumpyForm(Form):
             return (
                 self._primitive == layout.primitive
                 and self._inner_shape == layout.shape[1:]
-                and parameters_equal(self.parameters, layout.parameters)
+                and parameters_equal(self._parameters, layout._parameters)
             )
         else:
             return False

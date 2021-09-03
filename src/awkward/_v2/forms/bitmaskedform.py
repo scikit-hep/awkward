@@ -85,6 +85,18 @@ class BitMaskedForm(Form):
             verbose,
         )
 
+    def __eq__(self, other):
+        if isinstance(other, BitMaskedForm):
+            return (
+                self._mask == other._mask
+                and self._valid_when == other._valid_when
+                and self._lsb_order == other._lsb_order
+                and parameters_equal(self._parameters, other._parameters)
+                and self._content == other._content
+            )
+        else:
+            return False
+
     def generated_compatibility(self, layout):
         from awkward._v2.contents.bitmaskedarray import BitMaskedArray
 
@@ -93,7 +105,7 @@ class BitMaskedForm(Form):
                 self._mask == layout.mask.form
                 and self._valid_when == layout.valid_when
                 and self._lsb_order == layout.lsb_order
-                and parameters_equal(self.parameters, layout.parameters)
+                and parameters_equal(self._parameters, layout._parameters)
                 and self._content.generated_compatibility(layout.content)
             )
         else:

@@ -45,7 +45,7 @@ class UnmaskedForm(Form):
 
         if isinstance(layout, UnmaskedArray):
             return parameters_equal(
-                self.parameters, layout.parameters
+                self._parameters, layout._parameters
             ) and self._content.generated_compatibility(layout.content)
         else:
             return False
