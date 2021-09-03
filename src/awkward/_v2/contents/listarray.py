@@ -426,46 +426,6 @@ class ListArray(Content):
                 self._parameters,
             )
 
-    def _broadcast_tooffsets64(self, offsets):
-        if len(offsets) == 0 or offsets[0] != 0:
-            raise ValueError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0"
-            )
-        if len(offsets) - 1 > len(self._starts):
-            raise ValueError(
-                "cannot broadcast ListArray of length "
-                + len(self._starts)
-                + " to length "
-                + len(offsets)
-                - 1
-            )
-        carrylen = offsets[len(offsets) - 1]
-        nextcarry = ak._v2.index.Index64.zeros(carrylen, self.nplike)
-        self._handle_error(
-            self.nplike[
-                "awkward_ListArray_broadcast_tooffsets",
-                nextcarry.dtype.type,
-                offsets.dtype.type,
-                self._starts.dtype.type,
-                self._stops.dtype.type,
-            ](
-                nextcarry.to(self.nplike),
-                offsets.to(self.nplike),
-                len(offsets),
-                self._starts.to(self.nplike),
-                self._stops.to(self.nplike),
-                len(self._content),
-            )
-        )
-        nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
-
-        return ak._v2.contents.ListOffsetArray(
-            offsets,
-            nextcontent,
-            self._identifier,  # FIXME:?
-            self._parameters,
-        )
-
     def _toListOffsetArray64(self, start_at_zero):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
