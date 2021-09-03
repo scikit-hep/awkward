@@ -248,3 +248,8 @@ class BitMaskedArray(Content):
 
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        return self.toByteMaskedArray()._combinations(
+            n, replacement, recordlookup, parameters, axis, depth
+        )

@@ -7,7 +7,6 @@ from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.listoffsetform import ListOffsetForm
 
-
 np = ak.nplike.NumpyMetadata.instance()
 
 
@@ -457,4 +456,93 @@ class ListOffsetArray(Content):
                 self._content._localindex(posaxis, depth + 1),
                 self._identifier,
                 self._parameters,
+            )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        elif posaxis == depth + 1:
+            if (
+                self.parameter("__array__") == '"string"'
+                or self.parameter("__array__") == '"bytestring"'
+            ):
+                raise ValueError(
+                    "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
+                )
+
+            starts = self.starts
+            stops = self.stops
+
+            totallen = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
+            offsets = ak._v2.index.Index64.empty(
+                len(self) + 1, self.nplike, dtype=np.int64
+            )
+            self._handle_error(
+                self.nplike[
+                    "awkward_ListArray_combinations_length",
+                    totallen.to(self.nplike).dtype.type,
+                    offsets.to(self.nplike).dtype.type,
+                    starts.to(self.nplike).dtype.type,
+                    stops.to(self.nplike).dtype.type,
+                ](
+                    totallen.to(self.nplike),
+                    offsets.to(self.nplike),
+                    n,
+                    replacement,
+                    starts.to(self.nplike),
+                    stops.to(self.nplike),
+                    len(self),
+                )
+            )
+
+            tocarryraw = self.nplike.empty(n, dtype=np.intp)
+            tocarry = []
+
+            for i in range(n):
+                ptr = ak._v2.index.Index64.empty(
+                    totallen[0], self.nplike, dtype=np.int64
+                )
+                tocarry.append(ptr)
+                tocarryraw[i] = ptr.ptr
+
+            toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+            fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+            self._handle_error(
+                self.nplike[
+                    "awkward_ListArray_combinations",
+                    np.int64,
+                    toindex.to(self.nplike).dtype.type,
+                    fromindex.to(self.nplike).dtype.type,
+                    starts.to(self.nplike).dtype.type,
+                    stops.to(self.nplike).dtype.type,
+                ](
+                    tocarryraw,
+                    toindex.to(self.nplike),
+                    fromindex.to(self.nplike),
+                    n,
+                    replacement,
+                    starts.to(self.nplike),
+                    stops.to(self.nplike),
+                    len(self),
+                )
+            )
+            contents = []
+
+            for ptr in tocarry:
+                contents.append(self._content._carry(ptr, True, NestedIndexError))
+
+            recordarray = ak._v2.contents.recordarray.RecordArray(
+                contents, recordlookup, parameters=parameters
+            )
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                offsets, recordarray, self._identifier, self._parameters
+            )
+        else:
+            compact = self.toListOffsetArray64(True)
+            next = compact._content._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth + 1
+            )
+            return ak._v2.contents.listoffsetarray.ListOffsetArray(
+                compact.offsets, next, self._identifier, self._parameters
             )

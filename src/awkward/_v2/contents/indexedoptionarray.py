@@ -248,3 +248,18 @@ class IndexedOptionArray(Content):
                 self._parameters,
             )
             return out2
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            _, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
+            next = self._content._carry(nextcarry, True, NestedIndexError)
+            out = next._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                outindex, out, parameters=parameters
+            )
+            return out2._simplify_optiontype()

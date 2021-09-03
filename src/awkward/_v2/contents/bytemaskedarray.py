@@ -242,3 +242,22 @@ class ByteMaskedArray(Content):
                 self._parameters,
             )
             return out2._simplify_optiontype()
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        if n < 1:
+            raise ValueError("in combinations, 'n' must be at least 1")
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
+            nextcarry, outindex = self.nextcarry_outindex(numnull)
+
+            next = self._content._carry(nextcarry, True, NestedIndexError)
+            out = next._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                outindex, out, parameters=parameters
+            )
+            return out2._simplify_optiontype()

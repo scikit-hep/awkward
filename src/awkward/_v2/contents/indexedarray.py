@@ -200,3 +200,12 @@ class IndexedArray(Content):
             return self._localindex_axis0()
         else:
             return self.project()._localindex(posaxis, depth)
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            return self.project()._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )
