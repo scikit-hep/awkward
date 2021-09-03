@@ -158,7 +158,6 @@ class ListOffsetArray(Content):
         )
         return out
 
-    @staticmethod
     def _broadcast_tooffsets64(self, offsets):
         nplike = self.nplike
         if len(offsets) == 0 or offsets[0] != 0:
@@ -460,8 +459,6 @@ class ListOffsetArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        if n < 1:
-            raise ValueError("in combinations, 'n' must be at least 1")
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)

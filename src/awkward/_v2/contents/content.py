@@ -559,6 +559,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
 
     def combinations(self, n, replacement=False, axis=1, keys=None, parameters=None):
+        if n < 1:
+            raise ValueError("in combinations, 'n' must be at least 1")
+
         recordlookup = None
         if keys is not None:
             recordlookup = keys

@@ -202,8 +202,6 @@ class IndexedArray(Content):
             return self.project()._localindex(posaxis, depth)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        if n < 1:
-            raise ValueError("in combinations, 'n' must be at least 1")
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
