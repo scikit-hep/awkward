@@ -467,7 +467,14 @@ class RegularArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis == depth + 1:
-            # TODO: string and bytestring check
+            if (
+                self.parameter("__array__") == '"string"'
+                or self.parameter("__array__") == '"bytestring"'
+            ):
+                raise ValueError(
+                    "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
+                )
+
             size = self._size
             if replacement:
                 size = size + (n - 1)
@@ -490,7 +497,7 @@ class RegularArray(Content):
             for i in range(n):
                 ptr = ak._v2.index.Index64.empty(totallen, self.nplike, dtype=np.int64)
                 tocarry.append(ptr)
-                nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data
+                nplike_tocarryraw[i] = ptr.ptr
 
             tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
             toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)

@@ -60,6 +60,10 @@ class NumpyArray(Content):
     def nplike(self):
         return self._nplike
 
+    @property
+    def ptr(self):
+        return self._data.ctypes.data
+
     Form = NumpyForm
 
     @property

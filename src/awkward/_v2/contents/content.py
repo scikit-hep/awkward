@@ -529,7 +529,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen, self.nplike, dtype=np.int64
             )
             tocarry.append(ptr)
-            nplike_tocarryraw[i] = ptr.to(self.nplike).ctypes.data
+            nplike_tocarryraw[i] = ptr.ptr
 
         tocarryraw = ak._v2.contents.numpyarray.NumpyArray(nplike_tocarryraw)
         toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
