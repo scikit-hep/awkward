@@ -143,20 +143,6 @@ class Index(object):
     def __copy__(self):
         return Index(self._data.copy())
 
-    def convert_to(self, nplike):
-        return Index(nplike.asarray(self._data))
-
-    def _getitem_range_nowrap(self, start, stop):
-        if (
-            not (0 <= start and start < len(self) and 0 <= stop and stop <= len(self))
-            and start != stop
-        ):
-            raise ValueError(
-                "Index::getitem_range_nowrap with illegal start:stop for this length"
-            )
-
-        return Index(self._data[start:stop])
-
 
 class Index8(Index):
     _expected_dtype = np.dtype(np.int8)

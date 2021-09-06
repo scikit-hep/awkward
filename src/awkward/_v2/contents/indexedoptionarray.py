@@ -257,7 +257,7 @@ class IndexedOptionArray(Content):
             ](numnull.to(self.nplike), self._index.to(self.nplike), len(self._index))
         )
 
-        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value, self.nplike)
+        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull[0], self.nplike)
 
         self._handle_error(
             self.nplike[

@@ -279,18 +279,15 @@ class Content(object):
     def _getitem_next_missing(self, head, tail, advanced):
         if advanced is not None:
             raise ValueError(
-                "cannot mix missing values in slice with NumPy-style "
-                "advanced indexing"
+                "cannot mix missing values in slice with NumPy-style advanced indexing"
             )
 
         if isinstance(head.content, ak._v2.contents.listoffsetarray.ListOffsetArray):
             if len(self) != 1:
-                raise ValueError("reached a not-well-considered code pathg")
+                raise NotImplementedError("reached a not-well-considered code path")
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
         if isinstance(head.content, ak._v2.contents.numpyarray.NumpyArray):
-            if head.content.data.dtype == bool:
-                head = self._prepare_tuple_bool_to_int(self._prepare_tuple_nested(head))
             headcontent = ak._v2.index.Index64(head.content.data)
             nextcontent = self._getitem_next(headcontent, tail, advanced)
 
@@ -658,34 +655,47 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             and isinstance(item.content.content, ak._v2.contents.NumpyArray)
             and issubclass(item.content.content.dtype.type, (bool, np.bool_))
         ):
-            safeindex = item.content.index.data.copy()
-            isnegative = safeindex < 0
-            safeindex[isnegative] = -1
+            # missing values as any integer other than -1 are extremely rare
+            isnegative = item.content.index.data < 0
+            if item.nplike.any(item.content.index.data < -1):
+                safeindex = item.content.index.data.copy()
+                safeindex[isnegative] = -1
+            else:
+                safeindex = item.content.index.data
+
+            # expanded is a new buffer (can be modified in-place)
             if len(item.content.content.data) > 0:
                 expanded = item.content.content.data[safeindex]
-                expanded[isnegative] = True
             else:
                 expanded = item.content.content.data.nplike.ones(
                     len(safeindex), np.bool_
                 )
 
             localindex = item.localindex(axis=1)
+
+            # nextcontent does not include missing values
+            expanded[isnegative] = False
             nextcontent = localindex.content.data[expanded]
 
+            # list offsets do include missing values
+            expanded[isnegative] = True
             cumsum = item.nplike.empty(len(expanded) + 1, np.int64)
             cumsum[0] = 0
             cumsum[1:] = item.nplike.cumsum(expanded)
             nextoffsets = cumsum[item.offsets]
 
-            mask = isnegative[expanded]
+            # outindex fits into the lists; non-missing are sequential
+            outindex = item.nplike.full(nextoffsets[-1], -1, np.int64)
+            outindex[~isnegative[expanded]] = item.nplike.arange(
+                len(nextcontent), dtype=np.int64
+            )
 
             return ak._v2.contents.ListOffsetArray(
                 ak._v2.index.Index64(nextoffsets),
-                ak._v2.contents.ByteMaskedArray(
-                    ak._v2.index.Index8(mask),
+                ak._v2.contents.IndexedOptionArray(
+                    ak._v2.index.Index(outindex),
                     ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
-                    valid_when=False,
-                ).toIndexedOptionArray64(),
+                ),
             )
 
         elif isinstance(item, ak._v2.contents.ListOffsetArray):
@@ -709,32 +719,38 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             if isinstance(item.content, ak._v2.contents.NumpyArray) and issubclass(
                 item.content.dtype.type, (bool, np.bool_)
             ):
+                # missing values as any integer other than -1 are extremely rare
+                isnegative = item.index.data < 0
+                if item.nplike.any(item.index.data < -1):
+                    safeindex = item.index.data.copy()
+                    safeindex[isnegative] = -1
+                else:
+                    safeindex = item.index.data
 
-                safeindex = item.index.data.copy()
-                isnegative = safeindex < 0
-                safeindex[isnegative] = -1
+                # expanded is a new buffer (can be modified in-place)
                 if len(item.content.data) > 0:
                     expanded = item.content.data[safeindex]
-                    expanded[isnegative] = True
                 else:
                     expanded = item.content.data.nplike.ones(len(safeindex), np.bool_)
 
-                localindex = item.localindex(axis=0)
+                # nextcontent does not include missing values
+                expanded[isnegative] = False
+                nextcontent = item.nplike.nonzero(expanded)[0]
 
-                nextcontent = localindex.data[expanded]
-                cumsum = item.nplike.empty(len(expanded) + 1, np.int64)
-                cumsum[0] = 0
-                cumsum[1:] = item.nplike.cumsum(expanded)
+                # outindex does include missing values
+                expanded[isnegative] = True
+                lenoutindex = item.nplike.count_nonzero(expanded)
 
-                nextoffsets = cumsum[item.index]
+                # non-missing are sequential
+                outindex = item.nplike.full(lenoutindex, -1, np.int64)
+                outindex[~isnegative[expanded]] = item.nplike.arange(
+                    len(nextcontent), dtype=np.int64
+                )
 
-                mask = isnegative[expanded]
-
-                return ak._v2.contents.ByteMaskedArray(
-                    ak._v2.index.Index8(mask),
+                return ak._v2.contents.IndexedOptionArray(
+                    ak._v2.index.Index(outindex),
                     ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
-                    valid_when=False,
-                ).toIndexedOptionArray64()
+                )
 
             else:
                 return ak._v2.contents.IndexedOptionArray(

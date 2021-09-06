@@ -430,8 +430,12 @@ class RegularArray(Content):
                     "cannot mix jagged slice with NumPy-style advanced indexing"
                 )
 
-            # if len(head) != self._size:
-            #     raise ValueError("cannot fit jagged slice with length {0} into {1} of size {2}".format(len(head), type(self).__name__, self._size))
+            if len(head) != self._size:
+                raise ValueError(
+                    "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                        len(head), type(self).__name__, self._size
+                    )
+                )
 
             regularlength = self._length
             singleoffsets = head._offsets
