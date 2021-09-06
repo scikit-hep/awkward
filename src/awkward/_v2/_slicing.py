@@ -207,19 +207,28 @@ def prepare_tuple_nested(item):
             item,
             ak._v2.contents.IndexedOptionArray,
         )
-        and issubclass(item.index.dtype.type, np.int64)
     ):
+        nextindex = item.index.data.astype(np.int64)  # this ALWAYS copies
+        nonnull = nextindex >= 0
+
+        nextcontent = prepare_tuple_nested(item.content)
+        projected = nextcontent._carry(
+            ak._v2.index.Index64(nextindex[nonnull]), False, NestedIndexError
+        )
+
+        # content has been projected; index must agree
+        nextindex[nonnull] = item.nplike.arange(len(projected), dtype=np.int64)
+
         return ak._v2.contents.IndexedOptionArray(
-            item.index,
-            prepare_tuple_nested(item.content),
+            ak._v2.index.Index64(nextindex),
+            projected,
             identifier=item.identifier,
             parameters=item.parameters,
-        )._simplify_optiontype()
+        )
 
     elif isinstance(
         item,
         (
-            ak._v2.contents.IndexedOptionArray,
             ak._v2.contents.ByteMaskedArray,
             ak._v2.contents.BitMaskedArray,
             ak._v2.contents.UnmaskedArray,

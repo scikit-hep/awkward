@@ -14,7 +14,7 @@ pytestmark = pytest.mark.skipif(
 
 # not implemented
 slice_with_unionarray = False
-bigger_than_len_index = False
+bigger_than_len_index = True
 simplifyuniontype_implemented = False
 
 
@@ -275,6 +275,7 @@ def test_missing():
             [6.6, 5.5, 5.5, None, 7.7],
             [10.0, 9.9, 9.9, None, 11.1],
         ]
+
         assert (
             ak.to_list(
                 regulararray[
@@ -1190,3 +1191,96 @@ def test_jagged_missing_mask():
             [None],
             [5.5],
         ]
+
+
+def test_array_boolean_to_int():
+    a = v1_to_v2(
+        ak.from_iter(
+            [[True, True, True], [], [True, True], [True], [True, True, True, True]],
+            highlevel=False,
+        )
+    )
+    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    assert ak.to_list(b) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
+
+    a = v1_to_v2(
+        ak.from_iter(
+            [
+                [True, True, False],
+                [],
+                [True, False],
+                [False],
+                [True, True, True, False],
+            ],
+            highlevel=False,
+        )
+    )
+    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    assert ak.to_list(b) == [[0, 1], [], [0], [], [0, 1, 2]]
+
+    a = v1_to_v2(
+        ak.from_iter(
+            [
+                [False, True, True],
+                [],
+                [False, True],
+                [False],
+                [False, True, True, True],
+            ],
+            highlevel=False,
+        )
+    )
+    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    assert ak.to_list(b) == [[1, 2], [], [1], [], [1, 2, 3]]
+
+    a = v1_to_v2(
+        ak.from_iter(
+            [[True, True, None], [], [True, None], [None], [True, True, True, None]],
+            highlevel=False,
+        )
+    )
+    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    assert ak.to_list(b) == [[0, 1, None], [], [0, None], [None], [0, 1, 2, None]]
+    assert (
+        b.content.index.data[b.content.index.data >= 0].tolist()
+        == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
+    )
+
+    a = v1_to_v2(
+        ak.from_iter(
+            [[None, True, True], [], [None, True], [None], [None, True, True, True]],
+            highlevel=False,
+        )
+    )
+    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    assert ak.to_list(b) == [[None, 1, 2], [], [None, 1], [None], [None, 1, 2, 3]]
+    assert (
+        b.content.index.data[b.content.index.data >= 0].tolist()
+        == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
+    )
+
+    a = v1_to_v2(
+        ak.from_iter(
+            [[False, True, None], [], [False, None], [None], [False, True, True, None]],
+            highlevel=False,
+        )
+    )
+    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    assert ak.to_list(b) == [[1, None], [], [None], [None], [1, 2, None]]
+    assert (
+        b.content.index.data[b.content.index.data >= 0].tolist()
+        == np.arange(3).tolist()  # kernels expect nonnegative entries to be arange
+    )
+
+    a = v1_to_v2(
+        ak.from_iter(
+            [[None, True, False], [], [None, False], [None], [None, True, True, False]],
+            highlevel=False,
+        )
+    )
+    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    assert ak.to_list(b) == [[None, 1], [], [None], [None], [None, 1, 2]]
+    assert (
+        b.content.index.data[b.content.index.data >= 0].tolist()
+        == np.arange(3).tolist()  # kernels expect nonnegative entries to be arange
+    )

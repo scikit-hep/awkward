@@ -327,7 +327,7 @@ class ListArray(Content):
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
             ):
                 nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
-                next = ak._v2.contents.listoffsetarray.ListOffsetArra(
+                next = ak._v2.contents.listoffsetarray.ListOffsetArray(
                     smalloffsets, nextcontent, None, self._parameters
                 )
                 out = next._getitem_next_jagged(

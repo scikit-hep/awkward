@@ -213,6 +213,8 @@ class Content(object):
         )
 
     def _getitem_next_missing(self, head, tail, advanced):
+        assert isinstance(head, ak._v2.contents.IndexedOptionArray)
+
         if advanced is not None:
             raise ValueError(
                 "cannot mix missing values in slice with NumPy-style advanced indexing"
