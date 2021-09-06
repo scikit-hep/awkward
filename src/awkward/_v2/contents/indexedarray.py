@@ -78,6 +78,11 @@ class IndexedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toIndexedOptionArray64(self):
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            self._index, self._content, self._identifier, self._parameters
+        )
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -233,11 +238,6 @@ class IndexedArray(Content):
         else:
             return self.project()._localindex(posaxis, depth)
 
-    def toIndexedOptionArray64(self):
-        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            self._index, self._content, self._identifier, self._parameters
-        )
-
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -246,4 +246,3 @@ class IndexedArray(Content):
             return self.project()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
-

@@ -94,6 +94,10 @@ class ListArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toListOffsetArray64(self, start_at_zero=False):
+        offsets = self._compact_offsets64(start_at_zero)
+        return self._broadcast_tooffsets64(offsets)
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -174,10 +178,6 @@ class ListArray(Content):
 
     def _broadcast_tooffsets64(self, offsets):
         return ListOffsetArray._broadcast_tooffsets64(self, offsets)
-
-    def toListOffsetArray64(self, start_at_zero=False):
-        offsets = self._compact_offsets64(start_at_zero)
-        return self._broadcast_tooffsets64(offsets)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike

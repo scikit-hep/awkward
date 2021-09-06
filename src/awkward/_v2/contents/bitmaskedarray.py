@@ -128,24 +128,6 @@ class BitMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def bytemask(self):
-        nplike = self._mask.nplike
-        bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
-        self._handle_error(
-            nplike[
-                "awkward_BitMaskedArray_to_ByteMaskedArray",
-                bytemask.dtype.type,
-                self._mask.dtype.type,
-            ](
-                bytemask.to(nplike),
-                self._mask.to(nplike),
-                len(self._mask),
-                self._valid_when,
-                self._lsb_order,
-            )
-        )
-        return bytemask.data[: self._length]
-
     def toByteMaskedArray(self):
         nplike = self._mask.nplike
         bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
@@ -169,6 +151,24 @@ class BitMaskedArray(Content):
             self._identifier,
             self._parameters,
         )
+
+    def bytemask(self):
+        nplike = self._mask.nplike
+        bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_BitMaskedArray_to_ByteMaskedArray",
+                bytemask.dtype.type,
+                self._mask.dtype.type,
+            ](
+                bytemask.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+                self._lsb_order,
+            )
+        )
+        return bytemask.data[: self._length]
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -276,6 +276,7 @@ class BitMaskedArray(Content):
             self._content,
             self._identifier,
             self._parameters,
+        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return self.toByteMaskedArray()._combinations(

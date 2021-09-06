@@ -88,6 +88,25 @@ class ListOffsetArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toListOffsetArray64(self, start_at_zero=False):
+        if issubclass(self._offsets.dtype.type, np.int64):
+            if not start_at_zero or self._offsets[0] == 0:
+                return self
+
+            if start_at_zero:
+                offsets = ak._v2.index.Index64(
+                    self._offsets.to(self._offsets.nplike) - self._offsets[0]
+                )
+                content = self._content[self._offsets[0] :]
+            else:
+                offsets, content = self._offsets, self._content
+
+            return ListOffsetArray(offsets, content, self._identifier, self._parameters)
+
+        else:
+            offsets = self._compact_offsets64(start_at_zero)
+            return self._broadcast_tooffsets64(offsets)
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -201,25 +220,6 @@ class ListOffsetArray(Content):
         nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
 
         return ListOffsetArray(offsets, nextcontent, identifier, self._parameters)
-
-    def toListOffsetArray64(self, start_at_zero=False):
-        if issubclass(self._offsets.dtype.type, np.int64):
-            if not start_at_zero or self._offsets[0] == 0:
-                return self
-
-            if start_at_zero:
-                offsets = ak._v2.index.Index64(
-                    self._offsets.to(self._offsets.nplike) - self._offsets[0]
-                )
-                content = self._content[self._offsets[0] :]
-            else:
-                offsets, content = self._offsets, self._content
-
-            return ListOffsetArray(offsets, content, self._identifier, self._parameters)
-
-        else:
-            offsets = self._compact_offsets64(start_at_zero)
-            return self._broadcast_tooffsets64(offsets)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         out = ak._v2.contents.listarray.ListArray(

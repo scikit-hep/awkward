@@ -15,12 +15,6 @@ class EmptyArray(Content):
     def __init__(self, identifier=None, parameters=None):
         self._init(identifier, parameters)
 
-    def __repr__(self):
-        return self._repr("", "", "")
-
-    def _repr(self, indent, pre, post):
-        return indent + pre + "<EmptyArray len='0'/>" + post
-
     Form = EmptyForm
 
     @property
@@ -37,6 +31,17 @@ class EmptyArray(Content):
 
     def __len__(self):
         return 0
+
+    def __repr__(self):
+        return self._repr("", "", "")
+
+    def _repr(self, indent, pre, post):
+        return indent + pre + "<EmptyArray len='0'/>" + post
+
+    def toNumpyArray(self, dtype):
+        return ak._v2.contents.numpyarray.NumpyArray(
+            numpy.empty(0, dtype), self._identifier, self._parameters
+        )
 
     def _getitem_nothing(self):
         return self
@@ -104,11 +109,6 @@ class EmptyArray(Content):
 
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
-
-    def toNumpyArray(self, dtype):
-        return ak._v2.contents.numpyarray.NumpyArray(
-            numpy.empty(0, dtype), self._identifier, self._parameters
-        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)

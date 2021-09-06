@@ -56,6 +56,15 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toIndexedOptionArray64(self):
+        arange = self._content.nplike.arange(len(self._content), dtype=np.int64)
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            ak._v2.index.Index64(arange),
+            self._content,
+            self._identifier,
+            self._parameters,
+        )
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 

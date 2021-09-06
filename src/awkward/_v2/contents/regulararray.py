@@ -81,6 +81,10 @@ class RegularArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toListOffsetArray64(self, start_at_zero=False):
+        offsets = self._compact_offsets64(start_at_zero)
+        return self._broadcast_tooffsets64(offsets)
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -228,10 +232,6 @@ class RegularArray(Content):
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 offsets, self._content, self._identifier, self._parameters
             )
-
-    def toListOffsetArray64(self, start_at_zero=False):
-        offsets = self._compact_offsets64(start_at_zero)
-        return self._broadcast_tooffsets64(offsets)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         out = self.toListOffsetArray64(True)
