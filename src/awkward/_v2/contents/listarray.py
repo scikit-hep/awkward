@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
 
@@ -264,7 +265,7 @@ class ListArray(Content):
             )
 
             nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
 
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
@@ -375,7 +376,7 @@ class ListArray(Content):
 
         elif isinstance(head, int):
             assert advanced is None
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             lenstarts = len(self._starts)
             nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
             self._handle_error(
@@ -398,7 +399,7 @@ class ListArray(Content):
         elif isinstance(head, slice):
             lenstarts = len(self._starts)
 
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
             start, stop, step = head.start, head.stop, head.step
 
@@ -509,7 +510,7 @@ class ListArray(Content):
         elif isinstance(head, ak._v2.index.Index64):
             lenstarts = len(self._starts)
 
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
             regular_flathead = ak._v2.index.Index64(flathead)
             if advanced is None or len(advanced) == 0:
@@ -543,7 +544,7 @@ class ListArray(Content):
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
-                    return self._getitem_next_array_wrap(
+                    return ak._v2._slicing.getitem_next_array_wrap(
                         out, head.metadata.get("shape", (len(head),))
                     )
                 else:

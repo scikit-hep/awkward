@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.indexedform import IndexedForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -169,7 +170,7 @@ class IndexedArray(Content):
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
             nextcarry = ak._v2.index.Index64.empty(len(self._index), nplike)
             self._handle_error(

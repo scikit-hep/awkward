@@ -5,7 +5,8 @@ from __future__ import absolute_import
 import numpy as np
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.regularform import RegularForm
 
 
@@ -250,7 +251,7 @@ class RegularArray(Content):
             return self
 
         elif isinstance(head, int):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
             self._handle_error(
                 nplike["awkward_RegularArray_getitem_next_at", nextcarry.dtype.type](
@@ -265,7 +266,7 @@ class RegularArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             start, stop, step = head.indices(self._size)
 
             nextsize = 0
@@ -343,7 +344,7 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
 
             regular_flathead = ak._v2.index.Index64.empty(len(flathead), nplike)
@@ -388,7 +389,7 @@ class RegularArray(Content):
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
-                    return self._getitem_next_array_wrap(
+                    return ak._v2._slicing.getitem_next_array_wrap(
                         out, head.metadata.get("shape", (len(head),))
                     )
                 else:

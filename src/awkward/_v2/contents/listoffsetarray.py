@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.listoffsetform import ListOffsetForm
 
 
@@ -235,7 +236,7 @@ class ListOffsetArray(Content):
         elif isinstance(head, int):
             assert advanced is not None
             lenstarts = len(self._offsets) - 1
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
             self._handle_error(
                 nplike["ListArray_getitem_next_at", nextcarry.dtype.type](
@@ -250,7 +251,7 @@ class ListOffsetArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             lenstarts = len(self._offsets) - 1
             start, stop, step = head.start, head.stop, head.step
 
@@ -360,7 +361,7 @@ class ListOffsetArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
             lenstarts = len(self.starts)
             regular_flathead = ak._v2.index.Index64(flathead)
@@ -393,7 +394,7 @@ class ListOffsetArray(Content):
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
-                    return self._getitem_next_array_wrap(
+                    return ak._v2._slicing.getitem_next_array_wrap(
                         out, head.metadata.get("shape", (len(head),))
                     )
                 else:

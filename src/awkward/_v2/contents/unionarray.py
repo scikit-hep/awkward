@@ -9,7 +9,8 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.unionform import UnionForm
 
 np = ak.nplike.NumpyMetadata.instance()

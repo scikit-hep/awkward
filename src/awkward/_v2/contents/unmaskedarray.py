@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError  # noqa: F401
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.unmaskedform import UnmaskedForm
 
 np = ak.nplike.NumpyMetadata.instance()

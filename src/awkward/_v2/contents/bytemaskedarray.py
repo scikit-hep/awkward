@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -236,7 +237,7 @@ class ByteMaskedArray(Content):
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             numnull = ak._v2.index.Index64.empty(1, nplike)
             nextcarry, outindex = self.nextcarry_outindex(numnull)
 
