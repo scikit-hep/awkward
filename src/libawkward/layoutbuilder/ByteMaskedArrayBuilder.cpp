@@ -10,11 +10,12 @@ namespace awkward {
   /// @class ByteMaskedArrayBuilder
   ///
   /// @brief ByteMaskedArray builder from a Byte Masked Json Form
-  ByteMaskedArrayBuilder::ByteMaskedArrayBuilder(FormBuilderPtr content,
-                                                 const util::Parameters& parameters,
-                                                 const std::string& form_key,
-                                                 const std::string attribute,
-                                                 const std::string partition)
+  template <typename T, typename I>
+  ByteMaskedArrayBuilder<T, I>::ByteMaskedArrayBuilder(FormBuilderPtr<T, I> content,
+                                                       const util::Parameters& parameters,
+                                                       const std::string& form_key,
+                                                       const std::string attribute,
+                                                       const std::string partition)
     : content_(content),
       parameters_(parameters) {
     vm_func_name_ = std::string(form_key).append("-").append(attribute);
@@ -23,92 +24,111 @@ namespace awkward {
 
     vm_func_.append(content_.get()->vm_func())
       .append(": ")
-      .append(vm_func_name_).append("\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append(";").append("\n");
+      .append(vm_func_name_).append(" ")
+      .append(content_.get()->vm_func_name())
+      .append(" ; ");
 
     vm_output_ = content_.get()->vm_output();
     vm_error_ = content_.get()->vm_error();
   }
 
+  template <typename T, typename I>
   const std::string
-  ByteMaskedArrayBuilder::classname() const {
+  ByteMaskedArrayBuilder<T, I>::classname() const {
     return "ByteMaskedArrayBuilder";
   }
 
+  template <typename T, typename I>
   const std::string
-  ByteMaskedArrayBuilder::vm_output() const {
+  ByteMaskedArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ByteMaskedArrayBuilder::vm_output_data() const {
+  ByteMaskedArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ByteMaskedArrayBuilder::vm_func() const {
+  ByteMaskedArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ByteMaskedArrayBuilder::vm_func_name() const {
+  ByteMaskedArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ByteMaskedArrayBuilder::vm_func_type() const {
+  ByteMaskedArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ByteMaskedArrayBuilder::vm_from_stack() const {
+  ByteMaskedArrayBuilder<T, I>::vm_from_stack() const {
     return vm_data_from_stack_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ByteMaskedArrayBuilder::vm_error() const {
+  ByteMaskedArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  ByteMaskedArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->boolean(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  ByteMaskedArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->int64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  ByteMaskedArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->float64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  ByteMaskedArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->complex(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  ByteMaskedArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->bytestring(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  ByteMaskedArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->string(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder::begin_list(LayoutBuilder* builder) {
+  ByteMaskedArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     content_.get()->begin_list(builder);
   }
 
+  template <typename T, typename I>
   void
-  ByteMaskedArrayBuilder::end_list(LayoutBuilder* builder) {
+  ByteMaskedArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     content_.get()->end_list(builder);
   }
+
+  template class EXPORT_TEMPLATE_INST ByteMaskedArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST ByteMaskedArrayBuilder<int64_t, int32_t>;
 
 }

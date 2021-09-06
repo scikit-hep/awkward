@@ -115,6 +115,10 @@ jobs:
         displayName: "Test specification"
 
       - script: |
+          python -m pytest -vv -rs tests-spec-explicit
+        displayName: "Test specification with explicitly defined values"
+
+      - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
 
@@ -190,6 +194,10 @@ jobs:
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
+
+      - script: |
+          python -m pytest -vv -rs tests-spec-explicit
+        displayName: "Test specification with explicitly defined values"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
@@ -279,6 +287,10 @@ jobs:
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
+
+      - script: |
+          python -m pytest -vv -rs tests-spec-explicit
+        displayName: "Test specification with explicitly defined values"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels

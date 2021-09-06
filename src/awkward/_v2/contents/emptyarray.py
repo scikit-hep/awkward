@@ -109,3 +109,6 @@ class EmptyArray(Content):
         return ak._v2.contents.numpyarray.NumpyArray(
             numpy.empty(0, dtype), self._identifier, self._parameters
         )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)

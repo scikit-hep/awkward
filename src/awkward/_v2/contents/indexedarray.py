@@ -237,3 +237,13 @@ class IndexedArray(Content):
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             self._index, self._content, self._identifier, self._parameters
         )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            return self.project()._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )
+

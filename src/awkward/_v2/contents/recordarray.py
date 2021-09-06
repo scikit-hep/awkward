@@ -372,3 +372,19 @@ class RecordArray(Content):
             return RecordArray(
                 contents, self._keys, len(self), self._identifier, self._parameters
             )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(
+                    content._combinations(
+                        n, replacement, recordlookup, parameters, posaxis, depth
+                    )
+                )
+            return ak._v2.contents.recordarray.RecordArray(
+                contents, recordlookup, len(self), self._identifier, self._parameters
+            )

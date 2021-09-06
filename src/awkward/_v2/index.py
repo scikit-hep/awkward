@@ -79,6 +79,10 @@ class Index(object):
             self._metadata = {}
         return self._metadata
 
+    @property
+    def ptr(self):
+        return self._data.ctypes.data
+
     def __len__(self):
         return len(self._data)
 

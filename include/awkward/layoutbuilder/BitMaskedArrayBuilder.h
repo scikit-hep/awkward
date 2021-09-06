@@ -7,15 +7,14 @@
 
 namespace awkward {
 
-  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
-
   /// @class BitMaskedArrayBuilder
   ///
   /// @brief BitMaskedArray builder from a Bit Masked JSON Form
-  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArrayBuilder : public FormBuilder {
+  template <typename T, typename I>
+  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArrayBuilder : public FormBuilder<T, I> {
   public:
     /// @brief Creates a BitMaskedArrayBuilder from a full set of parameters.
-    BitMaskedArrayBuilder(const FormBuilderPtr content,
+    BitMaskedArrayBuilder(const FormBuilderPtr<T, I> content,
                           const util::Parameters& parameters,
                           const std::string& form_key,
                           const std::string attribute = "mask",
@@ -56,41 +55,41 @@ namespace awkward {
 
     /// @brief Adds a boolean value `x` to the accumulated data.
     void
-      boolean(bool x, LayoutBuilder* builder) override;
+      boolean(bool x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an integer value `x` to the accumulated data.
     void
-      int64(int64_t x, LayoutBuilder* builder) override;
+      int64(int64_t x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
-      float64(double x, LayoutBuilder* builder) override;
+      float64(double x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a complex value `x` to the accumulated data.
     void
-      complex(std::complex<double> x, LayoutBuilder* builder) override;
+      complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an unencoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      bytestring(const std::string& x, LayoutBuilder* builder) override;
+      bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      string(const std::string& x, LayoutBuilder* builder) override;
+      string(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Begins building a nested list.
     void
-      begin_list(LayoutBuilder* builder) override;
+      begin_list(LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Ends a nested list.
     void
-      end_list(LayoutBuilder* builder) override;
+      end_list(LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Returns this Form content builder.
     const
-      FormBuilderPtr content() const { return content_; }
+      FormBuilderPtr<T, I> content() const { return content_; }
 
     /// @brief String-to-JSON map that augments the meaning of this
     /// builder Form.
@@ -103,7 +102,7 @@ namespace awkward {
 
   private:
     /// @brief This Form content builder
-    const FormBuilderPtr content_;
+    const FormBuilderPtr<T, I> content_;
 
     /// @brief This Form parameters
     const util::Parameters parameters_;

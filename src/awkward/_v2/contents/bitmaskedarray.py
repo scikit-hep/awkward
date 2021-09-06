@@ -276,4 +276,8 @@ class BitMaskedArray(Content):
             self._content,
             self._identifier,
             self._parameters,
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        return self.toByteMaskedArray()._combinations(
+            n, replacement, recordlookup, parameters, axis, depth
         )

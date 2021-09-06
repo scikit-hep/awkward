@@ -61,6 +61,10 @@ class NumpyArray(Content):
     def nplike(self):
         return self._nplike
 
+    @property
+    def ptr(self):
+        return self._data.ctypes.data
+
     Form = NumpyForm
 
     @property
@@ -272,5 +276,15 @@ class NumpyArray(Content):
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
 
-    def isscalar(self):
-        return self._data.ndim == 0
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        elif len(self.shape) <= 1:
+            import numpy
+
+            raise numpy.AxisError("'axis' out of range for combinations")
+        else:
+            return self.toRegularArray()._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )

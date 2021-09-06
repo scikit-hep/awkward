@@ -7,12 +7,11 @@
 
 namespace awkward {
 
-  using NumpyFormPtr = std::shared_ptr<NumpyForm>;
-
   /// @class NumpyArrayBuilder
   ///
   /// @brief
-  class LIBAWKWARD_EXPORT_SYMBOL NumpyArrayBuilder : public FormBuilder {
+  template <typename T, typename I>
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyArrayBuilder : public FormBuilder<T, I> {
   public:
     /// @brief Creates a NumpyArrayBuilder from a full set of parameters.
     NumpyArrayBuilder(const util::Parameters& parameters,
@@ -58,37 +57,37 @@ namespace awkward {
 
     /// @brief Adds a boolean value `x` to the accumulated data.
     void
-      boolean(bool x, LayoutBuilder* builder) override;
+      boolean(bool x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an integer value `x` to the accumulated data.
     void
-      int64(int64_t x, LayoutBuilder* builder) override;
+      int64(int64_t x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
-      float64(double x, LayoutBuilder* builder) override;
+      float64(double x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a complex value `x` to the accumulated data.
     void
-      complex(std::complex<double> x, LayoutBuilder* builder) override;
+      complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an unencoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      bytestring(const std::string& x, LayoutBuilder* builder) override;
+      bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      string(const std::string& x, LayoutBuilder* builder) override;
+      string(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Begins building a nested list.
     void
-      begin_list(LayoutBuilder* builder) override;
+      begin_list(LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Ends a nested list.
     void
-      end_list(LayoutBuilder* builder) override;
+      end_list(LayoutBuilderPtr<T, I> builder) override;
 
     const util::Parameters&
       form_parameters() const { return parameters_; }

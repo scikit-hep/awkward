@@ -493,6 +493,70 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def localindex(self, axis):
         return self._localindex(axis, 0)
 
+    def _combinations_axis0(self, n, replacement, recordlookup, parameters):
+        size = len(self)
+        if replacement:
+            size = size + (n - 1)
+        thisn = n
+        combinationslen = 0
+        if thisn > size:
+            combinationslen = 0
+        elif thisn == size:
+            combinationslen = 1
+        else:
+            if thisn * 2 > size:
+                thisn = size - thisn
+            combinationslen = size
+            for j in range(2, thisn + 1):
+                combinationslen = combinationslen * (size - j + 1)
+                combinationslen = combinationslen // j
+
+        tocarryraw = self.nplike.empty(n, dtype=np.intp)
+        tocarry = []
+        for i in range(n):
+            ptr = ak._v2.index.Index64.empty(
+                combinationslen, self.nplike, dtype=np.int64
+            )
+            tocarry.append(ptr)
+            tocarryraw[i] = ptr.ptr
+
+        toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+        fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+
+        self._handle_error(
+            self.nplike[
+                "awkward_RegularArray_combinations_64",
+                np.int64,
+                toindex.to(self.nplike).dtype.type,
+                fromindex.to(self.nplike).dtype.type,
+            ](
+                tocarryraw,
+                toindex.to(self.nplike),
+                fromindex.to(self.nplike),
+                n,
+                replacement,
+                len(self),
+                1,
+            )
+        )
+        contents = []
+        for ptr in tocarry:
+            contents.append(ak._v2.contents.IndexedArray(ptr, self))
+        return ak._v2.contents.recordarray.RecordArray(
+            contents, recordlookup, parameters=parameters
+        )
+
+    def combinations(self, n, replacement=False, axis=1, keys=None, parameters=None):
+        if n < 1:
+            raise ValueError("in combinations, 'n' must be at least 1")
+
+        recordlookup = None
+        if keys is not None:
+            recordlookup = keys
+            if len(recordlookup) != n:
+                raise ValueError("if provided, the length of 'keys' must be 'n'")
+        return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
+
     @property
     def purelist_isregular(self):
         return self.Form.purelist_isregular.__get__(self)
