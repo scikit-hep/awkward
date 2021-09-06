@@ -12,12 +12,6 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
-# not implemented
-slice_with_unionarray = False
-bigger_than_len_index = True
-simplifyuniontype_implemented = False
-
-
 # value error
 fixed_value_error = False
 
@@ -100,8 +94,6 @@ def test_array_slice():
     unionarray = ak.layout.UnionArray8_64(tags, index2, [content0, content1])
 
     unionarray = v1_to_v2(unionarray)
-    if slice_with_unionarray:
-        assert ak.to_list(array[unionarray]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert ak.to_list(array[ak.Array(unionarray, check_valid=True)]) == [
         5.5,
         2.2,
@@ -155,6 +147,23 @@ def test_array_slice():
         {"y": 4.4, "x": 4},
         {"y": 5.5, "x": 5},
     ]
+
+
+@pytest.mark.skip(reason="FIXME: UnionArray as a slice has not been implemented")
+def test_array_slice_2():
+    array = ak.Array(
+        [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
+    )
+    array = v1_to_v2(array.layout)
+
+    content0 = ak.layout.NumpyArray(np.array([5, 2, 2]))
+    content1 = ak.layout.NumpyArray(np.array([3, 9, 0, 1]))
+    tags = ak.layout.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
+    index2 = ak.layout.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
+    unionarray = ak.layout.UnionArray8_64(tags, index2, [content0, content1])
+
+    unionarray = v1_to_v2(unionarray)
+    assert ak.to_list(array[unionarray]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
 
 
 def test_new_slices():
@@ -253,7 +262,7 @@ def test_missing():
 
     assert ak.to_list(
         regulararray[
-            np.ma.MaskedArray([2, 1, 1, 2, -1], [False, False, False, True, False])
+            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])
         ]
     ) == [
         [8.8, 9.9, 10.0, 11.1],
@@ -262,31 +271,28 @@ def test_missing():
         None,
         [8.8, 9.9, 10.0, 11.1],
     ]
-    if bigger_than_len_index:
-        assert ak.to_list(
+    assert ak.to_list(
+        regulararray[
+            :,
+            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
+        ]
+    ) == [
+        [2.2, 1.1, 1.1, None, 3.3],
+        [6.6, 5.5, 5.5, None, 7.7],
+        [10.0, 9.9, 9.9, None, 11.1],
+    ]
+
+    assert (
+        ak.to_list(
             regulararray[
-                :,
+                1:,
                 np.ma.MaskedArray(
                     [2, 1, 1, 999, -1], [False, False, False, True, False]
                 ),
             ]
-        ) == [
-            [2.2, 1.1, 1.1, None, 3.3],
-            [6.6, 5.5, 5.5, None, 7.7],
-            [10.0, 9.9, 9.9, None, 11.1],
-        ]
-
-        assert (
-            ak.to_list(
-                regulararray[
-                    1:,
-                    np.ma.MaskedArray(
-                        [2, 1, 1, 2, -1], [False, False, False, True, False]
-                    ),
-                ]
-            )
-            == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
         )
+        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    )
 
     content = ak.layout.NumpyArray(
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]])
@@ -309,43 +315,38 @@ def test_missing():
         [10.0, 9.9, 9.9, None, 11.1],
     ]
 
-    if bigger_than_len_index:
-        assert ak.to_list(
-            content[
-                np.ma.MaskedArray(
-                    [2, 1, 1, 999, -1], [False, False, False, True, False]
-                )
-            ]
-        ) == [
-            [8.8, 9.9, 10.0, 11.1],
-            [4.4, 5.5, 6.6, 7.7],
-            [4.4, 5.5, 6.6, 7.7],
-            None,
-            [8.8, 9.9, 10.0, 11.1],
+    assert ak.to_list(
+        content[
+            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False])
         ]
-        assert ak.to_list(
+    ) == [
+        [8.8, 9.9, 10.0, 11.1],
+        [4.4, 5.5, 6.6, 7.7],
+        [4.4, 5.5, 6.6, 7.7],
+        None,
+        [8.8, 9.9, 10.0, 11.1],
+    ]
+    assert ak.to_list(
+        content[
+            :,
+            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
+        ]
+    ) == [
+        [2.2, 1.1, 1.1, None, 3.3],
+        [6.6, 5.5, 5.5, None, 7.7],
+        [10.0, 9.9, 9.9, None, 11.1],
+    ]
+    assert (
+        ak.to_list(
             content[
-                :,
+                1:,
                 np.ma.MaskedArray(
                     [2, 1, 1, 999, -1], [False, False, False, True, False]
                 ),
             ]
-        ) == [
-            [2.2, 1.1, 1.1, None, 3.3],
-            [6.6, 5.5, 5.5, None, 7.7],
-            [10.0, 9.9, 9.9, None, 11.1],
-        ]
-        assert (
-            ak.to_list(
-                content[
-                    1:,
-                    np.ma.MaskedArray(
-                        [2, 1, 1, 999, -1], [False, False, False, True, False]
-                    ),
-                ]
-            )
-            == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
         )
+        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    )
 
     content = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
@@ -369,30 +370,27 @@ def test_missing():
         [10.0, 9.9, 9.9, None, 11.1],
     ]
 
-    if bigger_than_len_index:
-        assert ak.to_list(
+    assert ak.to_list(
+        listoffsetarray[
+            :,
+            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
+        ]
+    ) == [
+        [2.2, 1.1, 1.1, None, 3.3],
+        [6.6, 5.5, 5.5, None, 7.7],
+        [10.0, 9.9, 9.9, None, 11.1],
+    ]
+    assert (
+        ak.to_list(
             listoffsetarray[
-                :,
+                1:,
                 np.ma.MaskedArray(
                     [2, 1, 1, 999, -1], [False, False, False, True, False]
                 ),
             ]
-        ) == [
-            [2.2, 1.1, 1.1, None, 3.3],
-            [6.6, 5.5, 5.5, None, 7.7],
-            [10.0, 9.9, 9.9, None, 11.1],
-        ]
-        assert (
-            ak.to_list(
-                listoffsetarray[
-                    1:,
-                    np.ma.MaskedArray(
-                        [2, 1, 1, 999, -1], [False, False, False, True, False]
-                    ),
-                ]
-            )
-            == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
         )
+        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    )
 
 
 def test_bool_missing():
@@ -1100,16 +1098,30 @@ def test_union():
         [],
         [9.9, 10.0, 11.1, 12.2],
     ]
-    if simplifyuniontype_implemented:
-        assert ak.to_list(unionarray[array]) == [
-            [1.1, 3.3],
-            [],
-            [5.5, 5.5],
-            [],
-            [8.8],
-            [],
-            [10.0, 11.1, 12.2],
-        ]
+
+
+@pytest.mark.skip(reason="FIXME: simplify_uniontype needs to be implemented")
+def test_union_2():
+    one = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
+    two = ak.from_iter(
+        [[6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]], highlevel=False
+    )
+    tags = ak.layout.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
+    index = ak.layout.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
+    unionarray = ak.layout.UnionArray8_64(tags, index, [one, two])
+    array = ak.Array([[0, -1], [], [1, 1], [], [-1], [], [1, -2, -1]], check_valid=True)
+
+    unionarray = v1_to_v2(unionarray)
+    array = v1_to_v2(array.layout)
+    assert ak.to_list(unionarray[array]) == [
+        [1.1, 3.3],
+        [],
+        [5.5, 5.5],
+        [],
+        [8.8],
+        [],
+        [10.0, 11.1, 12.2],
+    ]
 
 
 def test_jagged_mask():

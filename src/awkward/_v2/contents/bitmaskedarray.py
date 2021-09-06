@@ -152,7 +152,32 @@ class BitMaskedArray(Content):
             self._parameters,
         )
 
-    def bytemask(self):
+    def toIndexedOptionArray64(self):
+        nplike = self._mask.nplike
+        index = ak._v2.index.Index64.empty(len(self._mask) * 8, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_BitMaskedArray_to_IndexedOptionArray",
+                index.dtype.type,
+                self._mask.dtype.type,
+            ](
+                index.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+                self._lsb_order,
+            ),
+        )
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            index[0 : self._length],
+            self._content,
+            self._identifier,
+            self._parameters,
+        )
+
+    def mask_as_bool(self, valid_when=None):
+        if valid_when is None:
+            valid_when = self._valid_when
         nplike = self._mask.nplike
         bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
         self._handle_error(
@@ -164,11 +189,11 @@ class BitMaskedArray(Content):
                 bytemask.to(nplike),
                 self._mask.to(nplike),
                 len(self._mask),
-                self._valid_when,
+                0 if valid_when else 1,
                 self._lsb_order,
             )
         )
-        return bytemask.data[: self._length]
+        return bytemask.data[: self._length].view(np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -253,30 +278,6 @@ class BitMaskedArray(Content):
 
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
-
-    def toIndexedOptionArray64(self):
-        nplike = self._mask.nplike
-        index = ak._v2.index.Index64.empty(len(self._mask) * 8, nplike)
-        self._handle_error(
-            nplike[
-                "awkward_BitMaskedArray_to_IndexedOptionArray64",
-                index.dtype.type,
-                self._mask.dtype.type,
-            ](
-                index.to(nplike),
-                self._mask.to(nplike),
-                len(self._mask),
-                self._valid_when,
-                self._lsb_order,
-            ),
-        )
-
-        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            index._getitem_range(0, self, self._length),
-            self._content,
-            self._identifier,
-            self._parameters,
-        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return self.toByteMaskedArray()._combinations(

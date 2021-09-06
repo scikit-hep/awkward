@@ -77,6 +77,25 @@ class IndexedOptionArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toIndexedOptionArray64(self):
+        if self._index.dtype == np.dtype(np.int64):
+            return self
+        else:
+            return IndexedOptionArray(
+                self._index.astype(np.int64),
+                self._content,
+                identifier=self._identifier,
+                parameters=self._parameters,
+            )
+
+    def mask_as_bool(self, valid_when=None):
+        if valid_when is None:
+            valid_when = self._valid_when
+        if valid_when:
+            return self._index.data >= 0
+        else:
+            return self._index.data < 0
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 

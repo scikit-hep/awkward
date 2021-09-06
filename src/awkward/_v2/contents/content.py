@@ -228,9 +228,8 @@ class Content(object):
         if isinstance(head.content, ak._v2.contents.numpyarray.NumpyArray):
             headcontent = ak._v2.index.Index64(head.content.data)
             nextcontent = self._getitem_next(headcontent, tail, advanced)
-
         else:
-            nextcontent = self._getitem_next_missing(head.content, tail, advanced)
+            nextcontent = self._getitem_next(head.content, tail, advanced)
 
         if isinstance(nextcontent, ak._v2.contents.regulararray.RegularArray):
             return self._getitem_next_regular_missing(

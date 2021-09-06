@@ -111,6 +111,14 @@ class ByteMaskedArray(Content):
             index, self._content, self._identifier, self._parameters
         )
 
+    def mask_as_bool(self, valid_when=None):
+        if valid_when is None:
+            valid_when = self._valid_when
+        if valid_when == self._valid_when:
+            return self._mask.data != 0
+        else:
+            return self._mask.data != 1
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 

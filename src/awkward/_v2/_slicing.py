@@ -197,22 +197,41 @@ def prepare_tuple_nested(item):
 
     elif isinstance(
         item,
+        (
+            ak._v2.contents.IndexedArray,
+            ak._v2.contents.IndexedOptionArray,
+            ak._v2.contents.ByteMaskedArray,
+            ak._v2.contents.BitMaskedArray,
+            ak._v2.contents.UnmaskedArray,
+        ),
+    ) and isinstance(
+        item.content,
+        (
+            ak._v2.contents.IndexedArray,
+            ak._v2.contents.IndexedOptionArray,
+            ak._v2.contents.ByteMaskedArray,
+            ak._v2.contents.BitMaskedArray,
+            ak._v2.contents.UnmaskedArray,
+        ),
+    ):
+        # FIXME: might infinite-loop before simplify_optiontype is implemented
+        return prepare_tuple_nested(next.simplify_optiontype())
+
+    elif isinstance(
+        item,
         ak._v2.contents.IndexedArray,
     ):
         next = item.project()
         return prepare_tuple_nested(next)
 
-    elif (
-        isinstance(
-            item,
-            ak._v2.contents.IndexedOptionArray,
-        )
+    elif isinstance(
+        item,
+        ak._v2.contents.IndexedOptionArray,
     ):
         nextindex = item.index.data.astype(np.int64)  # this ALWAYS copies
         nonnull = nextindex >= 0
 
-        nextcontent = prepare_tuple_nested(item.content)
-        projected = nextcontent._carry(
+        projected = item.content._carry(
             ak._v2.index.Index64(nextindex[nonnull]), False, NestedIndexError
         )
 
@@ -221,7 +240,7 @@ def prepare_tuple_nested(item):
 
         return ak._v2.contents.IndexedOptionArray(
             ak._v2.index.Index64(nextindex),
-            projected,
+            prepare_tuple_nested(projected),
             identifier=item.identifier,
             parameters=item.parameters,
         )
@@ -234,8 +253,28 @@ def prepare_tuple_nested(item):
             ak._v2.contents.UnmaskedArray,
         ),
     ):
-        next = item.toIndexedOptionArray64()
-        return prepare_tuple_nested(next)
+        is_valid = item.mask_as_bool(valid_when=True)
+        positions_where_valid = item.nplike.nonzero(is_valid)[0]
+
+        nextcontent = prepare_tuple_nested(item.content)._carry(
+            ak._v2.index.Index64(positions_where_valid), False, NestedIndexError
+        )
+
+        nextindex = item.nplike.full(len(is_valid), -1, np.int64)
+        nextindex[positions_where_valid] = item.nplike.arange(
+            len(positions_where_valid), dtype=np.int64
+        )
+
+        return ak._v2.contents.IndexedOptionArray(
+            ak._v2.index.Index64(nextindex),
+            nextcontent,
+            identifier=item.identifier,
+            parameters=item.parameters,
+        )
+
+    elif isinstance(item, ak._v2.contents.UnionArray):
+        # needs simplify_uniontype
+        raise NotImplementedError("FIXME: need to implement UnionArray as a slice")
 
     else:
         raise TypeError(

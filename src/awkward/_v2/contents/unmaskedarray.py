@@ -65,6 +65,14 @@ class UnmaskedArray(Content):
             self._parameters,
         )
 
+    def mask_as_bool(self, valid_when=None):
+        if valid_when is None:
+            valid_when = self._valid_when
+        if valid_when:
+            return self._content.nplike.ones(len(self._content), dtype=np.bool_)
+        else:
+            return self._content.nplike.zeros(len(self._content), dtype=np.bool_)
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
