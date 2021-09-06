@@ -12,9 +12,6 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
-# value error
-fixed_value_error = False
-
 
 def test_array_slice():
     array = ak.Array(
@@ -466,44 +463,33 @@ def test_bool_missing2():
         [8.8, 9.9, 10.0, 11.1],
     ]
 
-    array1 = ak.Array(
-        [
-            [
-                [True, True, False, True],
-                [True, True, False, True],
-                [True, True, False, True],
-            ]
-        ],
-        check_valid=True,
-    )
-
     regulararray = v1_to_v2(regulararray)
-    array1 = v1_to_v2(array1.layout)
 
-    if fixed_value_error:
-        assert ak.to_list(regulararray[:, array1]) == [
-            [0.0, None, 3.3],
-            [4.4, None, 7.7],
-            [8.8, None, 11.1],
-        ]
-        assert ak.to_list(regulararray[1:, array1]) == [
-            [4.4, None, 7.7],
-            [8.8, None, 11.1],
-        ]
+    array1 = v1_to_v2(ak.from_iter([True, None, False, True], highlevel=False))
+
+    assert ak.to_list(regulararray[:, array1]) == [
+        [0.0, None, 3.3],
+        [4.4, None, 7.7],
+        [8.8, None, 11.1],
+    ]
+
+    assert ak.to_list(regulararray[1:, array1]) == [
+        [4.4, None, 7.7],
+        [8.8, None, 11.1],
+    ]
 
     content = ak.layout.NumpyArray(
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]])
     )
     content = v1_to_v2(content)
 
-    if fixed_value_error:
-        assert ak.to_list(content[:, array1]) == [
-            [0.0, None, 3.3],
-            [4.4, None, 7.7],
-            [8.8, None, 11.1],
-        ]
+    assert ak.to_list(content[:, array1]) == [
+        [0.0, None, 3.3],
+        [4.4, None, 7.7],
+        [8.8, None, 11.1],
+    ]
 
-        assert ak.to_list(content[1:, array1]) == [[4.4, None, 7.7], [8.8, None, 11.1]]
+    assert ak.to_list(content[1:, array1]) == [[4.4, None, 7.7], [8.8, None, 11.1]]
 
     content = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
@@ -513,16 +499,16 @@ def test_bool_missing2():
 
     listoffsetarray = v1_to_v2(listoffsetarray)
 
-    if fixed_value_error:
-        assert ak.to_list(listoffsetarray[:, array1]) == [
-            [0.0, None, 3.3],
-            [4.4, None, 7.7],
-            [8.8, None, 11.1],
-        ]
-        assert ak.to_list(listoffsetarray[1:, array1]) == [
-            [4.4, None, 7.7],
-            [8.8, None, 11.1],
-        ]
+    assert ak.to_list(listoffsetarray[:, array1]) == [
+        [0.0, None, 3.3],
+        [4.4, None, 7.7],
+        [8.8, None, 11.1],
+    ]
+
+    assert ak.to_list(listoffsetarray[1:, array1]) == [
+        [4.4, None, 7.7],
+        [8.8, None, 11.1],
+    ]
 
 
 def test_records_missing():
@@ -728,16 +714,15 @@ def test_masked_of_jagged_of_whatever():
     array1 = v1_to_v2(array1.layout)
     array2 = v1_to_v2(array2.layout)
 
-    if fixed_value_error:
-        assert ak.to_list(regulararray2[array1]) == [
-            [[2], None, [14, 12, 10]],
-            [[17], None, [25, 27, 29]],
-        ]
+    assert ak.to_list(regulararray2[array1]) == [
+        [[2], None, [14, 12, 10]],
+        [[17], None, [25, 27, 29]],
+    ]
 
-        assert ak.to_list(regulararray2[array2]) == [
-            [[2], None, [14, None, 10]],
-            [[17], None, [25, None, 29]],
-        ]
+    assert ak.to_list(regulararray2[array2]) == [
+        [[2], None, [14, None, 10]],
+        [[17], None, [25, None, 29]],
+    ]
 
 
 def test_emptyarray():
@@ -882,8 +867,7 @@ def test_indexedarray():
     array1 = ak.Array([[0, -1], [0], None, []], check_valid=True)
     array1 = v1_to_v2(array1.layout)
 
-    if fixed_value_error:
-        assert ak.to_list(indexedarray[array]) == [[6.6, 9.9], [5.5], None, []]
+    assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, []]
 
     array1 = ak.Array([[0, -1], [0], None, [1, None, 1]], check_valid=True)
     array1 = v1_to_v2(array1.layout)
@@ -1171,38 +1155,37 @@ def test_jagged_missing_mask():
         [4.4, None],
     ]
 
-    if fixed_value_error:
-        assert ak.to_list(array[[[True, None, True], [], [True, True]]]) == [
-            [1.1, None, 3.3],
-            [],
-            [4.4, 5.5],
-        ]
-        assert ak.to_list(array[[[True, None, False], [], [True, True]]]) == [
-            [1.1, None],
-            [],
-            [4.4, 5.5],
-        ]
+    assert ak.to_list(array[[[True, None, True], [], [True, True]]]) == [
+        [1.1, None, 3.3],
+        [],
+        [4.4, 5.5],
+    ]
+    assert ak.to_list(array[[[True, None, False], [], [True, True]]]) == [
+        [1.1, None],
+        [],
+        [4.4, 5.5],
+    ]
 
-        assert ak.to_list(array[[[False, None, False], [], [True, True]]]) == [
-            [None],
-            [],
-            [4.4, 5.5],
-        ]
-        assert ak.to_list(array[[[True, True, False], [], [False, True]]]) == [
-            [1.1, 2.2],
-            [],
-            [5.5],
-        ]
-        assert ak.to_list(array[[[True, True, None], [], [False, True]]]) == [
-            [1.1, 2.2, None],
-            [],
-            [5.5],
-        ]
-        assert ak.to_list(array[[[True, True, False], [None], [False, True]]]) == [
-            [1.1, 2.2],
-            [None],
-            [5.5],
-        ]
+    assert ak.to_list(array[[[False, None, False], [], [True, True]]]) == [
+        [None],
+        [],
+        [4.4, 5.5],
+    ]
+    assert ak.to_list(array[[[True, True, False], [], [False, True]]]) == [
+        [1.1, 2.2],
+        [],
+        [5.5],
+    ]
+    assert ak.to_list(array[[[True, True, None], [], [False, True]]]) == [
+        [1.1, 2.2, None],
+        [],
+        [5.5],
+    ]
+    assert ak.to_list(array[[[True, True, False], [None], [False, True]]]) == [
+        [1.1, 2.2],
+        [None],
+        [5.5],
+    ]
 
 
 def test_array_boolean_to_int():

@@ -190,7 +190,6 @@ class ListArray(Content):
 
         if isinstance(slicecontent, ak._v2.contents.listoffsetarray.ListOffsetArray):
             outoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
-
             self._handle_error(
                 nplike[
                     "awkward_ListArray_getitem_jagged_descend",
@@ -298,7 +297,7 @@ class ListArray(Content):
                 )
             )
 
-            nextcarry = ak._v2.index.Index64.empty(numvalid._data, nplike)
+            nextcarry = ak._v2.index.Index64.empty(numvalid[0], nplike)
             smalloffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
             largeoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
 
@@ -324,7 +323,7 @@ class ListArray(Content):
 
             if isinstance(
                 slicecontent._content,
-                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.listoffsetarray.ListOffsetArray,
             ):
                 nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
                 next = ak._v2.contents.listoffsetarray.ListOffsetArray(
