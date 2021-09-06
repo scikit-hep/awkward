@@ -12,11 +12,14 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
+# not implemented
 slice_with_unionarray = False
 bigger_than_len_index = False
-fixed_value_error = False  # ValueError: in IndexedOptionArray64 attempting to get 3, index[i] >= len(content)
 simplifyuniontype_implemented = False
-fixed_shifted_array_on_booleans = False
+
+
+# value error
+fixed_value_error = False
 
 
 def test_array_slice():
@@ -414,21 +417,20 @@ def test_bool_missing():
     array2 = ak.Array(mask, check_valid=True)
     array2 = v1_to_v2(array2.layout)
 
-    if fixed_value_error:
-        for x1 in [True, False, None]:
-            for x2 in [True, False, None]:
-                for x3 in [True, False, None]:
-                    for x4 in [True, False, None]:
-                        for x5 in [True, False, None]:
-                            mask = [x1, x2, x3, x4, x5]
-                            expected = [
-                                m if m is None else x
-                                for x, m in zip(data, mask)
-                                if m is not False
-                            ]
-                            array2 = ak.Array(mask, check_valid=True)
-                            array2 = v1_to_v2(array2.layout)
-                            assert ak.to_list(array[array2]) == expected
+    for x1 in [True, False, None]:
+        for x2 in [True, False, None]:
+            for x3 in [True, False, None]:
+                for x4 in [True, False, None]:
+                    for x5 in [True, False, None]:
+                        mask = [x1, x2, x3, x4, x5]
+                        expected = [
+                            m if m is None else x
+                            for x, m in zip(data, mask)
+                            if m is not False
+                        ]
+                        array2 = ak.Array(mask, check_valid=True)
+                        array2 = v1_to_v2(array2.layout)
+                        assert ak.to_list(array[array2]) == expected
 
 
 def test_bool_missing2():
@@ -449,12 +451,15 @@ def test_bool_missing2():
         6.6,
     ]
 
+    array = ak.from_iter(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
+    )
+    array1 = v1_to_v2(array)
+
     content = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
     )
     regulararray = ak.layout.RegularArray(content, 4, zeros_length=0)
-
-    regulararray = v1_to_v2(regulararray)
 
     assert ak.to_list(regulararray) == [
         [0.0, 1.1, 2.2, 3.3],
@@ -462,7 +467,18 @@ def test_bool_missing2():
         [8.8, 9.9, 10.0, 11.1],
     ]
 
-    array1 = ak.Array([True, None, False, True], check_valid=True)
+    array1 = ak.Array(
+        [
+            [
+                [True, True, False, True],
+                [True, True, False, True],
+                [True, True, False, True],
+            ]
+        ],
+        check_valid=True,
+    )
+
+    regulararray = v1_to_v2(regulararray)
     array1 = v1_to_v2(array1.layout)
 
     if fixed_value_error:
@@ -471,7 +487,6 @@ def test_bool_missing2():
             [4.4, None, 7.7],
             [8.8, None, 11.1],
         ]
-
         assert ak.to_list(regulararray[1:, array1]) == [
             [4.4, None, 7.7],
             [8.8, None, 11.1],
@@ -488,6 +503,7 @@ def test_bool_missing2():
             [4.4, None, 7.7],
             [8.8, None, 11.1],
         ]
+
         assert ak.to_list(content[1:, array1]) == [[4.4, None, 7.7], [8.8, None, 11.1]]
 
     content = ak.layout.NumpyArray(
@@ -745,7 +761,7 @@ def test_emptyarray():
     assert ak.to_list(listoffsetarray) == [[], [], [], []]
 
     assert ak.to_list(listoffsetarray[array1]) == [[], [], [], []]
-    
+
     assert ak.to_list(listoffsetarray[array2]) == [[], [None], [], []]
     assert ak.to_list(listoffsetarray[array3]) == [[], [], None, []]
     assert ak.to_list(listoffsetarray[array4]) == [[], [None], None, []]
@@ -1100,39 +1116,49 @@ def test_jagged_mask():
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True
     )
     array = v1_to_v2(array.layout)
-    if fixed_value_error:
-        assert ak.to_list(
-            array[[[True, True, True], [], [True, True], [True], [True, True, True]]]
-        ) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
-        assert ak.to_list(
-            array[[[False, True, True], [], [True, True], [True], [True, True, True]]]
-        ) == [[2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
-        assert ak.to_list(
-            array[[[True, False, True], [], [True, True], [True], [True, True, True]]]
-        ) == [[1.1, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
-        assert ak.to_list(
-            array[[[True, True, True], [], [False, True], [True], [True, True, True]]]
-        ) == [[1.1, 2.2, 3.3], [], [5.5], [6.6], [7.7, 8.8, 9.9]]
-        assert ak.to_list(
-            array[[[True, True, True], [], [False, False], [True], [True, True, True]]]
-        ) == [[1.1, 2.2, 3.3], [], [], [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(
+        array[[[True, True, True], [], [True, True], [True], [True, True, True]]]
+    ) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(
+        array[[[False, True, True], [], [True, True], [True], [True, True, True]]]
+    ) == [[2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(
+        array[[[True, False, True], [], [True, True], [True], [True, True, True]]]
+    ) == [[1.1, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(
+        array[[[True, True, True], [], [False, True], [True], [True, True, True]]]
+    ) == [[1.1, 2.2, 3.3], [], [5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(
+        array[[[True, True, True], [], [False, False], [True], [True, True, True]]]
+    ) == [[1.1, 2.2, 3.3], [], [], [6.6], [7.7, 8.8, 9.9]]
 
 
 def test_jagged_missing_mask():
     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
     array = v1_to_v2(array.layout)
 
-    if fixed_shifted_array_on_booleans:
-        assert ak.to_list(array[[[True, True, True], [], [True, True]]]) == [
-            [1.1, 2.2, 3.3],
-            [],
-            [4.4, 5.5],
-        ]
-        assert ak.to_list(array[[[True, False, True], [], [True, True]]]) == [
-            [1.1, 3.3],
-            [],
-            [4.4, 5.5],
-        ]
+    assert ak.to_list(array[[[True, True, True], [], [True, True]]]) == [
+        [1.1, 2.2, 3.3],
+        [],
+        [4.4, 5.5],
+    ]
+    assert ak.to_list(array[[[True, False, True], [], [True, True]]]) == [
+        [1.1, 3.3],
+        [],
+        [4.4, 5.5],
+    ]
+    assert ak.to_list(array[[[True, True, False], [], [False, None]]]) == [
+        [1.1, 2.2],
+        [],
+        [None],
+    ]
+    assert ak.to_list(array[[[True, True, False], [], [True, None]]]) == [
+        [1.1, 2.2],
+        [],
+        [4.4, None],
+    ]
+
+    if fixed_value_error:
         assert ak.to_list(array[[[True, None, True], [], [True, True]]]) == [
             [1.1, None, 3.3],
             [],
@@ -1143,11 +1169,7 @@ def test_jagged_missing_mask():
             [],
             [4.4, 5.5],
         ]
-        assert ak.to_list(array[[[False, None, True], [], [True, True]]]) == [
-            [None, 3.3],
-            [],
-            [4.4, 5.5],
-        ]
+
         assert ak.to_list(array[[[False, None, False], [], [True, True]]]) == [
             [None],
             [],
@@ -1167,19 +1189,4 @@ def test_jagged_missing_mask():
             [1.1, 2.2],
             [None],
             [5.5],
-        ]
-        assert ak.to_list(array[[[True, True, False], [], [None, True]]]) == [
-            [1.1, 2.2],
-            [],
-            [None, 5.5],
-        ]
-        assert ak.to_list(array[[[True, True, False], [], [True, None]]]) == [
-            [1.1, 2.2],
-            [],
-            [4.4, None],
-        ]
-        assert ak.to_list(array[[[True, True, False], [], [False, None]]]) == [
-            [1.1, 2.2],
-            [],
-            [None],
         ]

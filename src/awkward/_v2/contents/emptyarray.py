@@ -104,7 +104,7 @@ class EmptyArray(Content):
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 
-    def _toNumpyArray(self, dtype):
+    def toNumpyArray(self, dtype):
         return ak._v2.contents.numpyarray.NumpyArray(
             numpy.empty(0, dtype), self._identifier, self._parameters
         )

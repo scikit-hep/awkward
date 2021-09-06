@@ -195,7 +195,7 @@ class NumpyArray(Content):
         if self._data.ndim == 1:
             raise ValueError("too many jagged slice dimensions for array")
         else:
-            next = self._toRegularArray()
+            next = self.toRegularArray()
             return next._getitem_next_jagged(
                 slicestarts, slicestops, slicecontent, tail
             )

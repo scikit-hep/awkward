@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+fixed_value_error = False
+
 pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
@@ -40,6 +42,7 @@ def test_boolindex_null():
     c = ak.Array([[False, True, False], [False, True], [True, False]])
     d = ak.Array([[False, True, False], None, [True, False]])
     e = ak.Array([[False, True, False], None, None])
+    b2 = b.mask[[True, False, True]]
 
     a = v1_to_v2(a.layout)
     b = v1_to_v2(b.layout)
@@ -47,18 +50,18 @@ def test_boolindex_null():
     d = v1_to_v2(d.layout)
     e = v1_to_v2(e.layout)
 
-    # FIXME
-    # assert ak.to_list(a[c]) == [[1], None, [5]]
-    # assert ak.to_list(a[d]) == [[1], None, [5]]
-    # assert ak.to_list(a[e]) == [[1], None, None]
-    # assert ak.to_list(b[c]) == [[1], [4], [5]]
-    # assert ak.to_list(b[d]) == [[1], None, [5]]
-    # assert ak.to_list(b[e]) == [[1], None, None]
+    assert ak.to_list(a[c]) == [[1], None, [5]]
+    assert ak.to_list(a[d]) == [[1], None, [5]]
+    assert ak.to_list(a[e]) == [[1], None, None]
+    assert ak.to_list(b[c]) == [[1], [4], [5]]
+    assert ak.to_list(b[d]) == [[1], None, [5]]
+    assert ak.to_list(b[e]) == [[1], None, None]
 
-    # b2 = b.mask[[True, False, True]]
-    # assert ak.to_list(b2[c]) == [[1], None, [5]]
-    # assert ak.to_list(b2[d]) == [[1], None, [5]]
-    # assert ak.to_list(b2[e]) == [[1], None, None]
+    b2 = v1_to_v2(b2.layout)
+
+    assert ak.to_list(b2[c]) == [[1], None, [5]]
+    assert ak.to_list(b2[d]) == [[1], None, [5]]
+    assert ak.to_list(b2[e]) == [[1], None, None]
 
 
 def test_integerindex_null_more():
@@ -73,9 +76,8 @@ def test_integerindex_null_more():
     g3 = v1_to_v2(g3.layout)
 
     assert ak.to_list(f[g1]) == [[None, 2, None], None, [], [None]]
-    # FIXME
-    # assert ak.to_list(f[g2]) == [[], None, None, []]
-    # assert ak.to_list(f[g3]) == [[], None, [], []]
+    assert ak.to_list(f[g2]) == [[], None, None, []]
+    assert ak.to_list(f[g3]) == [[], None, [], []]
 
     a = ak.Array([[0, 1, 2, None], None])
     b = ak.Array([[2, 1, None, 3], None])
@@ -109,9 +111,14 @@ def test_integerindex_null_more():
     b = v1_to_v2(b.layout)
     c = v1_to_v2(c.layout)
 
-    # FIXME
-    # assert ak.to_list(a[b]) == [[[2, 1, None, None], None], [[3], None], None, [None]]
-    # assert ak.to_list(a[c]) == [[[1, None], None], [[4], None], None, [None]]
+    if fixed_value_error:
+        assert ak.to_list(a[b]) == [
+            [[2, 1, None, None], None],
+            [[3], None],
+            None,
+            [None],
+        ]
+        assert ak.to_list(a[c]) == [[[1, None], None], [[4], None], None, [None]]
 
 
 def test_silly_stuff():

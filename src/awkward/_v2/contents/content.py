@@ -221,7 +221,7 @@ class Content(object):
         )
 
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            outindex, raw._content, None, self._parameters
+            outindex, raw.content, None, self._parameters
         )
 
         return ak._v2.contents.regulararray.RegularArray(
@@ -230,7 +230,7 @@ class Content(object):
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
         nplike = self.nplike
-        jagged = head._content.toListOffsetArray64()
+        jagged = head.content.toListOffsetArray64()
         if not jagged:
             raise ValueError(
                 "logic error: calling getitem_next_missing_jagged with bad slice type"
@@ -267,7 +267,7 @@ class Content(object):
             )
         )
 
-        tmp = content._getitem_next_jagged(starts, stops, jagged._content, tail)
+        tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             outputmask, tmp, None, self._parameters
         )
@@ -283,35 +283,36 @@ class Content(object):
                 "advanced indexing"
             )
 
-        if isinstance(head._content, ak._v2.contents.listoffsetarray.ListOffsetArray):
+        if isinstance(head.content, ak._v2.contents.listoffsetarray.ListOffsetArray):
             if len(self) != 1:
                 raise ValueError("reached a not-well-considered code pathg")
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
-        if isinstance(head._content, ak._v2.contents.numpyarray.NumpyArray):
-            if head._content._data.dtype == bool:
-                data = [i for i in range(len(head)) if head[i]]
-                headcontent = ak._v2.index.Index64(data)
-            else:
-                headcontent = ak._v2.index.Index64(head._content._data)
+        if isinstance(head.content, ak._v2.contents.numpyarray.NumpyArray):
+            if head.content.data.dtype == bool:
+                head = self._prepare_tuple_bool_to_int(self._prepare_tuple_nested(head))
+            headcontent = ak._v2.index.Index64(head.content.data)
+            nextcontent = self._getitem_next(headcontent, tail, advanced)
+
         else:
-            headcontent = head._content
-        nextcontent = self._getitem_next(headcontent, tail, advanced)
+            nextcontent = self._getitem_next_missing(head.content, tail, advanced)
+
         if isinstance(nextcontent, ak._v2.contents.regulararray.RegularArray):
             return self._getitem_next_regular_missing(
-                head, tail, advanced, nextcontent, nextcontent._length
+                head, tail, advanced, nextcontent, len(nextcontent)
             )
+
         elif isinstance(nextcontent, ak._v2.contents.recordarray.RecordArray):
             if len(nextcontent._keys) == 0:
                 return nextcontent
 
             contents = []
 
-            for content in nextcontent._contents:
+            for content in nextcontent.contents:
                 if isinstance(content, ak._v2.contents.regulararray.RegularArray):
                     contents.append(
                         self._getitem_next_regular_missing(
-                            head, tail, advanced, content, content._length
+                            head, tail, advanced, content, len(content)
                         )
                     )
                 else:
@@ -360,7 +361,6 @@ class Content(object):
                 )
 
                 next = ak._v2.contents.RegularArray(self, len(self), 1, None, None)
-
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
                 if len(out) == 0:
                     return out._getitem_nothing()
@@ -374,7 +374,7 @@ class Content(object):
                 return self.__getitem__(v1_to_v2(where))
 
             elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
-                return where._toNumpyArray(np.int64)
+                return where.toNumpyArray(np.int64)
 
             elif isinstance(where, ak._v2.contents.numpyarray.NumpyArray):
                 if issubclass(where.dtype.type, np.int64):
@@ -501,7 +501,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return self._prepare_tuple_item(v1_to_v2(item))
 
         elif isinstance(item, ak._v2.contents.EmptyArray):
-            return self._prepare_tuple_item(item._toNumpyArray(np.int64))
+            return self._prepare_tuple_item(item.toNumpyArray(np.int64))
 
         elif isinstance(item, ak._v2.contents.NumpyArray):
             return item.data
@@ -531,6 +531,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def _prepare_tuple_RegularArray_toListOffsetArray64(self, item):
         if isinstance(item, ak._v2.contents.RegularArray):
+
             next = item.toListOffsetArray64()
             return ak._v2.contents.ListOffsetArray(
                 next.offsets,
@@ -547,7 +548,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def _prepare_tuple_nested(self, item):
         if isinstance(item, ak._v2.contents.EmptyArray):
-            return self._prepare_tuple_nested(item._toNumpyArray(np.int64))
+            return self._prepare_tuple_nested(item.toNumpyArray(np.int64))
 
         elif isinstance(item, ak._v2.contents.NumpyArray) and issubclass(
             item.dtype.type, (bool, np.bool_, np.integer)
@@ -696,12 +697,52 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             )
 
         elif isinstance(item, ak._v2.contents.IndexedOptionArray):
-            return ak._v2.contents.IndexedOptionArray(
-                item.index,
-                item.content,
-                identifier=item.identifier,
-                parameters=item.parameters,
-            )
+            if isinstance(item.content, ak._v2.contents.ListOffsetArray):
+                content = self._prepare_tuple_bool_to_int(item.content)
+                return ak._v2.contents.IndexedOptionArray(
+                    item.index,
+                    content,
+                    identifier=item.identifier,
+                    parameters=item.parameters,
+                )
+
+            if isinstance(item.content, ak._v2.contents.NumpyArray) and issubclass(
+                item.content.dtype.type, (bool, np.bool_)
+            ):
+
+                safeindex = item.index.data.copy()
+                isnegative = safeindex < 0
+                safeindex[isnegative] = -1
+                if len(item.content.data) > 0:
+                    expanded = item.content.data[safeindex]
+                    expanded[isnegative] = True
+                else:
+                    expanded = item.content.data.nplike.ones(len(safeindex), np.bool_)
+
+                localindex = item.localindex(axis=0)
+
+                nextcontent = localindex.data[expanded]
+                cumsum = item.nplike.empty(len(expanded) + 1, np.int64)
+                cumsum[0] = 0
+                cumsum[1:] = item.nplike.cumsum(expanded)
+
+                nextoffsets = cumsum[item.index]
+
+                mask = isnegative[expanded]
+
+                return ak._v2.contents.ByteMaskedArray(
+                    ak._v2.index.Index8(mask),
+                    ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
+                    valid_when=False,
+                ).toIndexedOptionArray64()
+
+            else:
+                return ak._v2.contents.IndexedOptionArray(
+                    item.index,
+                    item.content,
+                    identifier=item.identifier,
+                    parameters=item.parameters,
+                )
 
         elif isinstance(item, ak._v2.contents.NumpyArray):
             assert item.shape == (len(item),)

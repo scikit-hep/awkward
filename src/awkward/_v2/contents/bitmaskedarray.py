@@ -213,8 +213,12 @@ class BitMaskedArray(Content):
 
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
-
         return self.toByteMaskedArray()._carry(carry, allow_lazy, exception)
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self.toByteMaskedArray()._getitem_next_jagged(
+            slicestarts, slicestops, slicecontent, tail
+        )
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841

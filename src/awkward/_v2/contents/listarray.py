@@ -179,11 +179,10 @@ class ListArray(Content):
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
-
         if len(slicestarts) != len(self):
             raise ValueError(
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
-                    len(slicestarts), type(self).__name_, len(self)
+                    len(slicestarts), type(self).__name__, len(self)
                 )
             )
 
@@ -587,11 +586,12 @@ class ListArray(Content):
                 raise ValueError(
                     "cannot mix jagged slice with NumPy-style advanced indexing"
                 )
-            length = len(self._starts)
-            singleoffsets = head._offsets
+            length = len(self)
+            singleoffsets = ak._v2.index.Index64(head.offsets.data)
             multistarts = ak._v2.index.Index64.empty(len(head) * length, nplike)
             multistops = ak._v2.index.Index64.empty(len(head) * length, nplike)
             nextcarry = ak._v2.index.Index64.empty(len(head) * length, nplike)
+
             self._handle_error(
                 nplike[
                     "awkward_ListArray_getitem_jagged_expand",
@@ -599,6 +599,8 @@ class ListArray(Content):
                     multistops.dtype.type,
                     singleoffsets.dtype.type,
                     nextcarry.dtype.type,
+                    self._starts.dtype.type,
+                    self._stops.dtype.type,
                 ](
                     multistarts.to(nplike),
                     multistops.to(nplike),
@@ -606,7 +608,7 @@ class ListArray(Content):
                     nextcarry.to(nplike),
                     self._starts.to(nplike),
                     self._stops.to(nplike),
-                    head.to(nplike),
+                    len(head),
                     length,
                 ),
             )
