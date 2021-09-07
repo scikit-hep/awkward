@@ -3,7 +3,8 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.numpyform import NumpyForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -59,6 +60,10 @@ class NumpyArray(Content):
     @property
     def nplike(self):
         return self._nplike
+
+    @property
+    def ptr(self):
+        return self._data.ctypes.data
 
     Form = NumpyForm
 
@@ -177,7 +182,6 @@ class NumpyArray(Content):
 
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
-
         try:
             nextdata = self._data[carry.data]
         except IndexError as err:
@@ -192,6 +196,19 @@ class NumpyArray(Content):
             self._parameters,
             nplike=self._nplike,
         )
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        if self._data.ndim == 1:
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                "too many jagged slice dimensions for array",
+            )
+        else:
+            next = self.toRegularArray()
+            return next._getitem_next_jagged(
+                slicestarts, slicestops, slicecontent, tail
+            )
 
     def _getitem_next(self, head, tail, advanced):
         nplike = self._nplike
@@ -240,10 +257,17 @@ class NumpyArray(Content):
             return NumpyArray(out, None, self._parameters, nplike=nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            where = (slice(None), head) + tail
+            try:
+                out = self._data[where]
+            except IndexError as err:
+                raise NestedIndexError(self, (head,) + tail, str(err))
+            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
+            return out2
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            next = self.toRegularArray()
+            return next._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))
@@ -253,6 +277,17 @@ class NumpyArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         elif len(self.shape) <= 1:
-            raise IndexError(self, "'axis' out of range for localindex")
+            raise np.AxisError(self, "'axis' out of range for localindex")
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        elif len(self.shape) <= 1:
+            raise np.AxisError("'axis' out of range for combinations")
+        else:
+            return self.toRegularArray()._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )

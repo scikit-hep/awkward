@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.indexedform import IndexedForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -78,6 +79,11 @@ class IndexedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toIndexedOptionArray64(self):
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            self._index, self._content, self._identifier, self._parameters
+        )
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -132,6 +138,39 @@ class IndexedArray(Content):
             self._parameters,
         )
 
+    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+        nplike = self.nplike
+        if len(slicestarts) != len(self):
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                    len(slicestarts), type(self).__name__, len(self)
+                ),
+            )
+
+        nextcarry = ak._v2.index.Index64.zeros(len(self), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_getitem_nextcarry",
+                nextcarry.dtype.type,
+                self._index.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                self._index.to(nplike),
+                len(self._index),
+                len(self._content),
+            )
+        )
+        # an eager carry (allow_lazy = false) to avoid infinite loop (unproven)
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        return next._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -139,7 +178,7 @@ class IndexedArray(Content):
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
             nextcarry = ak._v2.index.Index64.empty(len(self._index), nplike)
             self._handle_error(
@@ -174,7 +213,7 @@ class IndexedArray(Content):
             raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))
@@ -201,3 +240,12 @@ class IndexedArray(Content):
             return self._localindex_axis0()
         else:
             return self.project()._localindex(posaxis, depth)
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            return self.project()._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )

@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError  # noqa: F401
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.unmaskedform import UnmaskedForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -56,6 +56,23 @@ class UnmaskedArray(Content):
         out.append(indent + "</UnmaskedArray>")
         out.append(post)
         return "".join(out)
+
+    def toIndexedOptionArray64(self):
+        arange = self._content.nplike.arange(len(self._content), dtype=np.int64)
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            ak._v2.index.Index64(arange),
+            self._content,
+            self._identifier,
+            self._parameters,
+        )
+
+    def mask_as_bool(self, valid_when=None):
+        if valid_when is None:
+            valid_when = self._valid_when
+        if valid_when:
+            return self._content.nplike.ones(len(self._content), dtype=np.bool_)
+        else:
+            return self._content.nplike.zeros(len(self._content), dtype=np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -134,6 +151,19 @@ class UnmaskedArray(Content):
         else:
             return UnmaskedArray(
                 self._content._localindex(posaxis, depth),
+                self._identifier,
+                self._parameters,
+            )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                self._content._combinations(
+                    n, replacement, recordlookup, parameters, posaxis, depth
+                ),
                 self._identifier,
                 self._parameters,
             )

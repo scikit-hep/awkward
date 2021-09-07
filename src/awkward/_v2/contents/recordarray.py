@@ -13,7 +13,8 @@ import numpy as np
 
 import awkward as ak
 from awkward._v2.record import Record
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.recordform import RecordForm
 
 
@@ -213,7 +214,7 @@ class RecordArray(Content):
             return self.content(where)
 
         else:
-            nexthead, nexttail = self._headtail(only_fields)
+            nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
             if ak._util.isstr(nexthead):
                 return self.content(where)._getitem_field(nexthead, nexttail)
             else:
@@ -229,7 +230,7 @@ class RecordArray(Content):
         if len(only_fields) == 0:
             contents = [self.content(i) for i in indexes]
         else:
-            nexthead, nexttail = self._headtail(only_fields)
+            nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
             if ak._util.isstr(nexthead):
                 contents = [
                     self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
@@ -303,10 +304,10 @@ class RecordArray(Content):
             return self._getitem_next_fields(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
             contents = []
             for i in range(len(self._contents)):
@@ -339,4 +340,20 @@ class RecordArray(Content):
                 contents.append(content._localindex(posaxis, depth))
             return RecordArray(
                 contents, self._keys, len(self), self._identifier, self._parameters
+            )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(
+                    content._combinations(
+                        n, replacement, recordlookup, parameters, posaxis, depth
+                    )
+                )
+            return ak._v2.contents.recordarray.RecordArray(
+                contents, recordlookup, len(self), self._identifier, self._parameters
             )

@@ -3,10 +3,12 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.emptyform import EmptyForm
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class EmptyArray(Content):
@@ -43,6 +45,17 @@ class EmptyArray(Content):
 
     def __len__(self):
         return 0
+
+    def __repr__(self):
+        return self._repr("", "", "")
+
+    def _repr(self, indent, pre, post):
+        return indent + pre + "<EmptyArray len='0'/>" + post
+
+    def toNumpyArray(self, dtype):
+        return ak._v2.contents.numpyarray.NumpyArray(
+            numpy.empty(0, dtype), self._identifier, self._parameters
+        )
 
     def _getitem_nothing(self):
         return self
@@ -100,13 +113,16 @@ class EmptyArray(Content):
             raise NestedIndexError(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         else:
             raise AssertionError(repr(head))
 
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)
