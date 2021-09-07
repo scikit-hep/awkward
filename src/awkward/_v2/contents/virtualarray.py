@@ -56,6 +56,11 @@ class ArrayGenerator(object):
                 )
             )
         if self._form is not None and not self._form.generated_compatibility(out):
+            print("self._form")
+            print(self._form)
+            print("out")
+            print(out)
+
             generated_form = out.form
             if generated_form is None:
                 generated_str = "null"
@@ -247,7 +252,7 @@ class VirtualArray(Content):
             self._generator.length is not None,
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=self._form_key,
+            form_key=self._cache_key,
         )
 
     def __len__(self):

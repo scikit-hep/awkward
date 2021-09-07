@@ -664,31 +664,27 @@ def test_single_level():
     cache.clear()
 
 
-@pytest.mark.skip(reason="TODO: test VirtualArray in v2")
 def test_iter():
-    generator = ak.layout.ArrayGenerator(
-        fcn, form=ak.forms.NumpyForm([], 8, "d"), length=5
+    generator = ak._v2.contents.FunctionGenerator(
+        5, ak._v2.forms.NumpyForm("float64"), fcn
     )
-    d = ak._util.MappingProxy({})
-    cache = ak.layout.ArrayCache(d)
-    virtualarray = ak.layout.VirtualArray(generator, cache)
+    cache = {}
+    virtualarray = ak._v2.contents.VirtualArray(generator, cache)
 
-    assert len(d) == 0
+    assert len(cache) == 0
     it = iter(virtualarray)
-    assert len(d) == 1
-    d.clear()
-    assert len(d) == 0
+    assert len(cache) == 0
     assert next(it) == 1.1
-    assert len(d) == 0
+    assert len(cache) == 1
     assert list(it) == [2.2, 3.3, 4.4, 5.5]
-    assert len(d) == 0
+    assert len(cache) == 1
 
 
-@pytest.mark.skip(reason="TODO: test VirtualArray in v2")
+@pytest.mark.skip("FIXME")
 def test_nested_virtualness():
     counter = [0, 0]
 
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
 
@@ -696,58 +692,29 @@ def test_nested_virtualness():
         counter[1] += 1
         return content
 
-    generator1 = ak.layout.ArrayGenerator(
-        materialize1, form=content.form, length=len(content)
+    generator1 = ak._v2.contents.FunctionGenerator(
+        len(content), content.form, materialize1
     )
-    virtual1 = ak.layout.VirtualArray(generator1)
+    virtual1 = ak._v2.contents.VirtualArray(generator1)
 
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64))
-    listarray = ak.layout.ListOffsetArray64(offsets, virtual1)
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64))
+    listarray = ak._v2.contents.ListOffsetArray(offsets, virtual1)
 
     def materialize2():
         counter[0] += 1
         return listarray
 
-    generator2 = ak.layout.ArrayGenerator(
-        materialize2, form=listarray.form, length=len(listarray)
+    generator2 = ak._v2.contents.FunctionGenerator(
+        len(listarray), listarray.form, materialize2
     )
-    virtual2 = ak.layout.VirtualArray(generator2)
+    virtual2 = ak._v2.contents.VirtualArray(generator2)
 
     assert counter == [0, 0]
 
     tmp1 = virtual2[2]
-    assert isinstance(tmp1, ak.layout.VirtualArray)
+    assert isinstance(tmp1, ak._v2.contents.VirtualArray)
     assert counter == [1, 0]
 
     tmp2 = tmp1[1]
     assert tmp2 == 4.4
     assert counter == [1, 1]
-
-
-@pytest.mark.skip(reason="TODO: test VirtualArray in v2")
-def test_highlevel():
-    array = ak.virtual(lambda: [[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    assert isinstance(array.layout, ak.layout.VirtualArray)
-    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-
-    counter = [0]
-
-    def generate():
-        counter[0] += 1
-        return [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-
-    array = ak.virtual(
-        generate,
-        length=3,
-        form={"class": "ListOffsetArray64", "offsets": "i64", "content": "float64"},
-    )
-    assert counter[0] == 0
-
-    assert len(array) == 3
-    assert counter[0] == 0
-
-    assert str(ak.type(array)) == "3 * var * float64"
-    assert counter[0] == 0
-
-    assert ak.to_list(array[2]) == [4.4, 5.5]
-    assert counter[0] == 1

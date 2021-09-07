@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import re
+import json
 
 import awkward as ak
 import numpy as np
@@ -539,7 +540,25 @@ def v2_to_v1(v2):
         )
 
     elif isinstance(v2, ak._v2.contents.VirtualArray):
-        raise NotImplementedError("VirtualArray")
+        if v2.generator.form is None:
+            form = None
+        else:
+            form = ak.forms.Form.fromjson(json.dumps(v2.generator.form.tolist()))
+
+        def function(v2generator):
+            array = v2generator.generate()
+            if isinstance(array, (ak._v2.contents.Content, ak._v2.record.Record)):
+                return v2_to_v1(array)
+            else:
+                return array
+
+        generator = ak.layout.ArrayGenerator(
+            function, (v2.generator,), {}, form=form, length=v2.generator.length
+        )
+
+        return ak.layout.VirtualArray(
+            generator, None, cache_key=v2.cache_key, parameters=v2.parameters
+        )
 
     else:
         raise AssertionError(type(v2))
