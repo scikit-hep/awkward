@@ -10,7 +10,7 @@ except ImportError:
 import awkward as ak
 from awkward._v2.tmp_for_testing import v1_to_v2
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
 
 
 def headtail(oldtail):

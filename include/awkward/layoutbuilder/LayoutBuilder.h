@@ -206,7 +206,7 @@ namespace awkward {
         return false;
       }
 
-    /// @brief Adds a bolean value `x` to the accumulated data.
+    /// @brief Adds a boolean value `x` to the accumulated data.
     void
       add_bool(bool x);
 
