@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -11,7 +13,8 @@ import numpy as np
 
 import awkward as ak
 from awkward._v2.record import Record
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.recordform import RecordForm
 
 
@@ -82,27 +85,50 @@ class RecordArray(Content):
         self._init(identifier, parameters)
 
     @property
-    def numcontents(self):
-        return len(self._contents)
-
-    @property
     def contents(self):
         return self._contents
 
     @property
     def keys(self):
-        return self._keys
+        if self._keys is None:
+            return [str(i) for i in range(len(self._contents))]
+        else:
+            return self._keys
 
     @property
     def is_tuple(self):
         return self._keys is None
 
     @property
+    def as_tuple(self):
+        return RecordArray(
+            self._contents,
+            None,
+            length=self._length,
+            identifier=None,
+            parameters=None,
+        )
+
+    @property
     def nplike(self):
-        if len(self._contents) == 0:
-            return ak.nplike.Numpy.instance()
+        for content in self._contents:
+            nplike = content.nonvirtual_nplike
+            if nplike is not None:
+                return nplike
         else:
-            return self._contents[0].nplike
+            for content in self._contents:
+                return content.nplike
+            else:
+                return ak.nplike.Numpy.instance()
+
+    @property
+    def nonvirtual_nplike(self):
+        for content in self._contents:
+            nplike = content.nonvirtual_nplike
+            if nplike is not None:
+                return nplike
+        else:
+            return None
 
     Form = RecordForm
 
@@ -123,16 +149,19 @@ class RecordArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<RecordArray len="]
+        out = [indent, pre, "<RecordArray is_tuple="]
+        out.append(repr(json.dumps(self.is_tuple)))
+        out.append(" len=")
         out.append(repr(str(len(self))))
-        out.append(" is_tuple=")
-        out.append(repr(str(self.is_tuple)))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
+
         if self._keys is None:
             for i, x in enumerate(self._contents):
                 out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
                 out.append(x._repr(indent + "        ", "", "\n"))
-                out.append("{0}    </content>\n".format(indent))
+                out.append(indent + "    </content>\n")
         else:
             for i, x in enumerate(self._contents):
                 out.append(
@@ -141,55 +170,23 @@ class RecordArray(Content):
                     )
                 )
                 out.append(x._repr(indent + "        ", "", "\n"))
-                out.append("{0}    </content>\n".format(indent))
-        out.append(indent)
-        out.append("</RecordArray>")
+                out.append(indent + "    </content>\n")
+
+        out.append(indent + "</RecordArray>")
         out.append(post)
         return "".join(out)
 
     def index_to_key(self, index):
-        if 0 <= index < self.numcontents:
-            if self._keys is None:
-                return str(index)
-            else:
-                return self._keys[index]
-        else:
-            raise IndexError(
-                "no index {0} in record with {1} fields".format(index, self.numcontents)
-            )
+        return self.Form.index_to_key(self, index)
 
     def key_to_index(self, key):
-        if self._keys is None:
-            try:
-                i = int(key)
-            except ValueError:
-                pass
-            else:
-                if 0 <= i < self.numcontents:
-                    return i
-        else:
-            try:
-                i = self._keys.index(key)
-            except ValueError:
-                pass
-            else:
-                return i
-        raise IndexError(
-            "no field {0} in record with {1} fields".format(repr(key), self.numcontents)
-        )
+        return self.Form.key_to_index(self, key)
+
+    def haskey(self, key):
+        return self.Form.haskey(self, key)
 
     def content(self, index_or_key):
-        if ak._util.isint(index_or_key):
-            index = index_or_key
-        elif ak._util.isstr(index_or_key):
-            index = self.key_to_index(index_or_key)
-        else:
-            raise TypeError(
-                "index_or_key must be an integer (index) or string (key), not {0}".format(
-                    repr(index_or_key)
-                )
-            )
-        return self._contents[index][: self._length]
+        return self.Form.content(self, index_or_key)[: self._length]
 
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
@@ -204,7 +201,7 @@ class RecordArray(Content):
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
         assert step == 1
-        if self.numcontents == 0:
+        if len(self._contents) == 0:
             start = min(max(start, 0), self._length)
             stop = min(max(stop, 0), self._length)
             if stop < start:
@@ -231,8 +228,8 @@ class RecordArray(Content):
             return self.content(where)
 
         else:
-            nexthead, nexttail = self._headtail(only_fields)
-            if ak.util.isstr(nexthead):
+            nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
+            if ak._util.isstr(nexthead):
                 return self.content(where)._getitem_field(nexthead, nexttail)
             else:
                 return self.content(where)._getitem_fields(nexthead, nexttail)
@@ -247,7 +244,7 @@ class RecordArray(Content):
         if len(only_fields) == 0:
             contents = [self.content(i) for i in indexes]
         else:
-            nexthead, nexttail = self._headtail(only_fields)
+            nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
             if ak._util.isstr(nexthead):
                 contents = [
                     self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
@@ -294,7 +291,7 @@ class RecordArray(Content):
         else:
             contents = [
                 self.content(i)._carry(carry, allow_lazy, exception)
-                for i in range(self.numcontents)
+                for i in range(len(self._contents))
             ]
             if issubclass(carry.dtype.type, np.integer):
                 length = len(carry)
@@ -309,8 +306,6 @@ class RecordArray(Content):
             )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
@@ -321,10 +316,10 @@ class RecordArray(Content):
             return self._getitem_next_fields(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
             contents = []
             for i in range(len(self._contents)):
@@ -346,3 +341,31 @@ class RecordArray(Content):
                 parameters = self._parameters
             next = RecordArray(contents, self._keys, None, self._identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)
+
+    def _localindex(self, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._localindex_axis0()
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content._localindex(posaxis, depth))
+            return RecordArray(
+                contents, self._keys, len(self), self._identifier, self._parameters
+            )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(
+                    content._combinations(
+                        n, replacement, recordlookup, parameters, posaxis, depth
+                    )
+                )
+            return ak._v2.contents.recordarray.RecordArray(
+                contents, recordlookup, len(self), self._identifier, self._parameters
+            )

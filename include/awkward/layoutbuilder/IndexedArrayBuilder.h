@@ -9,31 +9,24 @@
 
 namespace awkward {
 
-  class IndexedForm;
-  using IndexedFormPtr = std::shared_ptr<IndexedForm>;
-  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
-
   /// @class IndexedArrayBuilder
   ///
   /// @brief
-  class LIBAWKWARD_EXPORT_SYMBOL IndexedArrayBuilder : public FormBuilder {
+  template <typename T, typename I>
+  class LIBAWKWARD_EXPORT_SYMBOL IndexedArrayBuilder : public FormBuilder<T, I> {
   public:
     /// @brief Creates an IndexedArrayBuilder from a full set of parameters.
-    IndexedArrayBuilder(const IndexedFormPtr& form,
+    IndexedArrayBuilder(const FormBuilderPtr<T, I> content,
+                        const util::Parameters& parameters,
+                        const std::string& json_form_key,
+                        const std::string& json_form_index,
+                        bool is_categorical,
                         const std::string attribute = "index",
                         const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -66,56 +59,64 @@ namespace awkward {
 
     /// @brief Adds a boolean value `x` to the accumulated data.
     void
-      boolean(bool x, LayoutBuilder* builder) override;
+      boolean(bool x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an integer value `x` to the accumulated data.
     void
-      int64(int64_t x, LayoutBuilder* builder) override;
+      int64(int64_t x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
-      float64(double x, LayoutBuilder* builder) override;
+      float64(double x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a complex value `x` to the accumulated data.
     void
-      complex(std::complex<double> x, LayoutBuilder* builder) override;
+      complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an unencoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      bytestring(const std::string& x, LayoutBuilder* builder) override;
+      bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      string(const std::string& x, LayoutBuilder* builder) override;
+      string(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Begins building a nested list.
     void
-      begin_list(LayoutBuilder* builder) override;
+      begin_list(LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Ends a nested list.
     void
-      end_list(LayoutBuilder* builder) override;
+      end_list(LayoutBuilderPtr<T, I> builder) override;
+
+    const
+      FormBuilderPtr<T, I> content() const { return content_; }
+
+    const std::string&
+      form_index() const { return form_index_; }
+
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
 
   private:
-    /// @brief This builder Form
-    const IndexedFormPtr form_;
+    /// @brief This Json Form content builder
+    const FormBuilderPtr<T, I> content_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
 
     /// @brief If 'true', this array type is categorical.
     bool is_categorical_;
 
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
-
-    /// @brief This Form content builder
-    FormBuilderPtr content_;
+    const std::string form_index_;
 
     /// @brief AwkwardForth virtual machine instructions
-    /// generated from the Form
+    /// generated from the Json Form.
+    ///
+    /// An output buffer name is
+    /// "part{partition}-{form_key}-{attribute}"
     std::string vm_output_data_;
     std::string vm_output_;
     std::string vm_func_name_;

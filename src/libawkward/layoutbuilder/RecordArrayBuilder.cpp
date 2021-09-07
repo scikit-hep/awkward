@@ -4,154 +4,153 @@
 
 #include "awkward/layoutbuilder/RecordArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/RecordArray.h"
 
 namespace awkward {
 
   ///
-  RecordArrayBuilder::RecordArrayBuilder(const RecordFormPtr& form,
-                                         const std::string attribute,
-                                         const std::string partition)
-    : form_(form),
+  template <typename T, typename I>
+  RecordArrayBuilder<T, I>::RecordArrayBuilder(const std::vector<FormBuilderPtr<T, I>>& contents,
+                                               const util::RecordLookupPtr recordlookup,
+                                               const util::Parameters& parameters,
+                                               const std::string& form_key,
+                                               const std::string attribute,
+                                               const std::string partition)
+    : form_recordlookup_(recordlookup),
+      parameters_(parameters),
       field_index_(0),
-      contents_size_((int64_t)form.get()->contents().size()),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition) {
-    for (auto const& content : form.get()->contents()) {
-      contents_.push_back(LayoutBuilder::formBuilderFromA(content));
+      contents_size_((int64_t) contents.size()) {
+    for (auto const& content : contents) {
+      contents_.push_back(content);
       vm_output_.append(contents_.back().get()->vm_output());
       vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
       vm_func_.append(contents_.back().get()->vm_func());
       vm_error_.append(contents_.back().get()->vm_error());
     }
 
-    vm_func_name_ = std::string(*form_key_).append(attribute_);
+    vm_func_name_ = std::string(form_key).append(attribute);
 
     vm_func_.append(": ")
       .append(vm_func_name_);
 
     for (auto const& content : contents_) {
-      vm_func_.append("\n    ").append(content.get()->vm_func_name())
+      vm_func_.append(" ").append(content.get()->vm_func_name())
         .append(" pause");
     }
     // Remove the last pause
     vm_func_.erase(vm_func_.end() - 6, vm_func_.end());
-    vm_func_.append("\n;\n\n");
+    vm_func_.append(" ; ");
   }
 
+  template <typename T, typename I>
   const std::string
-  RecordArrayBuilder::classname() const {
+  RecordArrayBuilder<T, I>::classname() const {
     return "RecordArrayBuilder";
   }
 
-  const ContentPtr
-  RecordArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    ContentPtrVec contents;
-    for (size_t i = 0;  i < contents_.size();  i++) {
-      contents.push_back(contents_[i].get()->snapshot(outputs));
-    }
-    return std::make_shared<RecordArray>(Identities::none(),
-                                         form_.get()->parameters(),
-                                         contents,
-                                         form_.get()->recordlookup());
-  }
-
-  const FormPtr
-  RecordArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
+  template <typename T, typename I>
   const std::string
-  RecordArrayBuilder::vm_output() const {
+  RecordArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RecordArrayBuilder::vm_output_data() const {
+  RecordArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RecordArrayBuilder::vm_func() const {
+  RecordArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RecordArrayBuilder::vm_func_name() const {
+  RecordArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RecordArrayBuilder::vm_func_type() const {
+  RecordArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RecordArrayBuilder::vm_from_stack() const {
+  RecordArrayBuilder<T, I>::vm_from_stack() const {
     return vm_data_from_stack_;
   }
 
+  template <typename T, typename I>
   const std::string
-  RecordArrayBuilder::vm_error() const {
+  RecordArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   int64_t
-  RecordArrayBuilder::field_index() {
+  RecordArrayBuilder<T, I>::field_index() {
     return (field_index_ < contents_size_ - 1) ?
       field_index_++ : (field_index_ = 0);
   }
 
+  template <typename T, typename I>
   void
-  RecordArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  RecordArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->boolean(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RecordArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  RecordArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->int64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RecordArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  RecordArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->float64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RecordArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  RecordArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->complex(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RecordArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  RecordArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->bytestring(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RecordArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  RecordArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->string(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  RecordArrayBuilder::begin_list(LayoutBuilder* builder) {
+  RecordArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     list_field_index_.emplace_back(field_index_);
     contents_[(size_t)field_index_].get()->begin_list(builder);
   }
 
+  template <typename T, typename I>
   void
-  RecordArrayBuilder::end_list(LayoutBuilder* builder) {
+  RecordArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     field_index_ = list_field_index_.back();
     contents_[(size_t)field_index_].get()->end_list(builder);
     list_field_index_.pop_back();
     field_index();
   }
 
+  template <typename T, typename I>
   bool
-  RecordArrayBuilder::active() {
+  RecordArrayBuilder<T, I>::active() {
     if (!list_field_index_.empty()) {
       return contents_[(size_t)list_field_index_.back()].get()->active();
     }
@@ -164,5 +163,8 @@ namespace awkward {
     }
     return false;
   }
+
+  template class EXPORT_TEMPLATE_INST RecordArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST RecordArrayBuilder<int64_t, int32_t>;
 
 }

@@ -10,7 +10,6 @@ except ImportError:
 import awkward as ak
 from awkward._v2.contents.content import Content
 
-
 np = ak.nplike.NumPyMetadata.instance()
 
 
@@ -41,6 +40,28 @@ class Record(object):
     @property
     def at(self):
         return self._at
+
+    @property
+    def keys(self):
+        return self._array.keys
+
+    @property
+    def is_tuple(self):
+        return self._array.keys is None
+
+    @property
+    def as_tuple(self):
+        return Record(self._array.as_tuple, self._at)
+
+    @property
+    def contents(self):
+        out = []
+        for key in self._array.keys:
+            out.append(self._array[key][self._at])
+        return out
+
+    def content(self, index_or_key):
+        return self._array.content(index_or_key)[self._at]
 
     def __repr__(self):
         return self._repr("", "", "")

@@ -380,9 +380,7 @@ def test_numbers_and_records_concatenate():
 
     with pytest.raises(ValueError) as err:
         ak.to_list(ak.concatenate([numbers, records], axis=1))
-    assert str(err.value).startswith(
-        'scalar Record can only be sliced by field name (string); try "0"'
-    )
+    assert str(err.value).startswith("cannot broadcast")
 
 
 def test_broadcast_and_apply_levels():

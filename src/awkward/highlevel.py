@@ -1731,6 +1731,10 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
     def _ipython_key_completions_(self):
         return ak.operations.describe.fields(self)
 
+    def __iter__(self):
+        for x in self.fields:
+            yield x
+
     @property
     def type(self):
         """

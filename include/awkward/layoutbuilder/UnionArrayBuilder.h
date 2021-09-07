@@ -7,31 +7,24 @@
 
 namespace awkward {
 
-  class UnionForm;
-  using UnionFormPtr = std::shared_ptr<UnionForm>;
-  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
-
   /// @class UnionArrayBuilder
   ///
   /// @brief
-  class LIBAWKWARD_EXPORT_SYMBOL UnionArrayBuilder : public FormBuilder {
+  template <typename T, typename I>
+  class LIBAWKWARD_EXPORT_SYMBOL UnionArrayBuilder : public FormBuilder<T, I> {
   public:
     /// @brief Creates a UnionArrayBuilder from a full set of parameters.
-    UnionArrayBuilder(const UnionFormPtr& form,
+    UnionArrayBuilder(const std::vector<FormBuilderPtr<T, I>>& contents,
+                      const util::Parameters& parameters,
+                      const std::string& form_key,
+                      const std::string& form_tags,
+                      const std::string& form_index,
                       const std::string attribute = "union",
                       const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -68,52 +61,61 @@ namespace awkward {
 
     /// @brief Adds a boolean value `x` to the accumulated data.
     void
-      boolean(bool x, LayoutBuilder* builder) override;
+      boolean(bool x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an integer value `x` to the accumulated data.
     void
-      int64(int64_t x, LayoutBuilder* builder) override;
+      int64(int64_t x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
-      float64(double x, LayoutBuilder* builder) override;
+      float64(double x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a complex value `x` to the accumulated data.
     void
-      complex(std::complex<double> x, LayoutBuilder* builder) override;
+      complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an unencoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      bytestring(const std::string& x, LayoutBuilder* builder) override;
+      bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      string(const std::string& x, LayoutBuilder* builder) override;
+      string(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Begins building a nested list.
     void
-      begin_list(LayoutBuilder* builder) override;
+      begin_list(LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Ends a nested list.
     void
-      end_list(LayoutBuilder* builder) override;
+      end_list(LayoutBuilderPtr<T, I> builder) override;
+
+    const std::vector<FormBuilderPtr<T, I>>&
+      contents() const { return contents_; }
+
+    const std::string&
+      vm_output_tags() const { return vm_output_tags_; }
+
+    const std::string&
+      form_index() const { return form_index_; }
+
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
 
   private:
-    /// @brief This builder Form
-    const UnionFormPtr form_;
+    /// @brief This Form content builders
+    std::vector<FormBuilderPtr<T, I>> contents_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+
     /// @brief UnionArray tag
     int8_t tag_;
 
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
-
-    /// @brief This Form content builders
-    std::vector<FormBuilderPtr> contents_;
+    const std::string form_index_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

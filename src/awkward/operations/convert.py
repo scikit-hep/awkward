@@ -347,8 +347,21 @@ def to_numpy(array, allow_missing=True):
             len(contents[0]),
             dtype=[(str(n), x.dtype) for n, x in zip(array.keys(), contents)],
         )
+
+        mask = None
         for n, x in zip(array.keys(), contents):
+            if isinstance(x, numpy.ma.MaskedArray):
+                if mask is None:
+                    mask = numpy.ma.zeros(
+                        len(array), [(n, np.bool_) for n in array.keys()]
+                    )
+                if x.mask is not None:
+                    mask[n] |= x.mask
             out[n] = x
+
+        if mask is not None:
+            out = numpy.ma.MaskedArray(out, mask)
+
         return out
 
     elif isinstance(array, ak.layout.NumpyArray):
@@ -1204,6 +1217,9 @@ def to_json(
 
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         out = array
+
+    elif isinstance(array, ak._v2.contents.Content):
+        out = ak._v2.tmp_for_testing.v2_to_v1(array)
 
     else:
         raise TypeError(

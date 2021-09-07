@@ -104,6 +104,8 @@ class NumPyMetadata(Singleton):
     datetime_data = numpy.datetime_data
     issubdtype = numpy.issubdtype
 
+    AxisError = numpy.AxisError
+
 
 if hasattr(numpy, "float16"):
     NumPyMetadata.float16 = numpy.float16
@@ -260,6 +262,10 @@ class NumPyLike(Singleton):
     def append(self, *args, **kwargs):
         # array, element
         return self._module.append(*args, **kwargs)
+
+    def where(self, *args, **kwargs):
+        # array, element
+        return self._module.where(*args, **kwargs)
 
     ############################ ufuncs
 
@@ -474,6 +480,9 @@ or
                 return out
         else:
             return self._module.ascontiguousarray(array, dtype=dtype)
+
+    def zeros(self, *args, **kwargs):
+        return self._module.zeros(*args, **kwargs)
 
     def frombuffer(self, *args, **kwargs):
         np_array = numpy.frombuffer(*args, **kwargs)

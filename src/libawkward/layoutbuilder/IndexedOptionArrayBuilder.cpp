@@ -4,65 +4,66 @@
 
 #include "awkward/layoutbuilder/IndexedOptionArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/IndexedArray.h"
 
 namespace awkward {
 
   ///
-  IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form,
-                                                       const std::string attribute,
-                                                       const std::string partition)
-    : form_(form),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
+  template <typename T, typename I>
+  IndexedOptionArrayBuilder<T, I>::IndexedOptionArrayBuilder(FormBuilderPtr<T, I> content,
+                                                             const util::Parameters& parameters,
+                                                             const std::string& form_key,
+                                                             const std::string& form_index,
+                                                             bool is_categorical,
+                                                             const std::string attribute,
+                                                             const std::string partition)
+    : content_(content),
+      parameters_(parameters),
+      is_categorical_(is_categorical),
+      form_index_(form_index) {
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_func_type_ = content_.get()->vm_func_type();
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(index_form_to_name(form_.get()->index()))
-      .append("\n")
+      .append(form_index)
+      .append(" ")
       .append(content_.get()->vm_output());
 
     vm_func_.append(content_.get()->vm_func())
-      .append(": ").append(vm_func_name()).append("\n")
-      .append("dup ").append(std::to_string(static_cast<utype>(state::null)))
-      .append(" = if").append("\n")
-      .append("drop\n")
-      .append("variable null    -1 null !").append("\n")
+      .append(": ").append(vm_func_name())
+      .append(" dup ").append(std::to_string(static_cast<utype>(state::null)))
+      .append(" = if ")
+      .append("drop ")
+      .append("variable null    -1 null ! ")
       .append("null @ ")
-      .append(vm_output_data_).append(" <- stack").append("\n")
-      .append("exit\n")
-      .append("else\n")
-      .append("variable index    1 index +!").append("\n")
+      .append(vm_output_data_).append(" <- stack ")
+      .append("exit ")
+      .append("else ")
+      .append("variable index    1 index +! ")
       .append("index @ 1- ")
-      .append(vm_output_data_).append(" <- stack").append("\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append("then\n")
-      .append(";").append("\n");
+      .append(vm_output_data_).append(" <- stack ")
+      .append(content_.get()->vm_func_name())
+      .append(" then ")
+      .append("; ");
 
     vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
-      .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
+      .append("0 ").append(vm_output_data_).append(" <- stack ");
 
     vm_error_ = content_.get()->vm_error();
     validate();
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::validate() const {
-    if (form_.get()->parameter_equals("__array__", "\"categorical\"")) {
+  IndexedOptionArrayBuilder<T, I>::validate() const {
+    if (is_categorical_) {
       throw std::invalid_argument(
         std::string("categorical form of a ") + classname()
         + std::string(" is not supported yet ")
@@ -70,123 +71,103 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder::classname() const {
+  IndexedOptionArrayBuilder<T, I>::classname() const {
     return "IndexedOptionArrayBuilder";
   }
 
-  const ContentPtr
-  IndexedOptionArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      switch (form_.get()->index()) {
-       // case Index::Form::i8:
-          case Index::Form::i32:
-            return std::make_shared<IndexedOptionArray32>(
-              Identities::none(),
-              form_.get()->parameters(),
-              Index32(std::static_pointer_cast<int32_t>(search->second.get()->ptr()),
-                      1,
-                      search->second.get()->len() - 1,
-                      kernel::lib::cpu),
-              content_.get()->snapshot(outputs));
-          case Index::Form::i64:
-            return std::make_shared<IndexedOptionArray64>(
-              Identities::none(),
-              form_.get()->parameters(),
-              Index64(std::static_pointer_cast<int64_t>(search->second.get()->ptr()),
-                      1,
-                      search->second.get()->len() - 1,
-                      kernel::lib::cpu),
-              content_.get()->snapshot(outputs));
-        default:
-          break;
-      };
-    }
-    throw std::invalid_argument(
-      std::string("Snapshot of a ") + classname()
-      + std::string(" needs an index ")
-      + FILENAME(__LINE__));
-  }
-
-  const FormPtr
-  IndexedOptionArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
+  template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder::vm_output() const {
+  IndexedOptionArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder::vm_output_data() const {
+  IndexedOptionArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
 
+  template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder::vm_func() const {
+  IndexedOptionArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder::vm_func_name() const {
+  IndexedOptionArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder::vm_func_type() const {
+  IndexedOptionArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder::vm_from_stack() const {
+  IndexedOptionArrayBuilder<T, I>::vm_from_stack() const {
     return vm_data_from_stack_;
   }
 
+  template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder::vm_error() const {
+  IndexedOptionArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  IndexedOptionArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->boolean(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  IndexedOptionArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->int64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  IndexedOptionArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->float64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  IndexedOptionArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->complex(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  IndexedOptionArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->bytestring(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  IndexedOptionArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->string(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::begin_list(LayoutBuilder* builder) {
+  IndexedOptionArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     content_.get()->begin_list(builder);
   }
 
+  template <typename T, typename I>
   void
-  IndexedOptionArrayBuilder::end_list(LayoutBuilder* builder) {
+  IndexedOptionArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     content_.get()->end_list(builder);
   }
+
+  template class EXPORT_TEMPLATE_INST IndexedOptionArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST IndexedOptionArrayBuilder<int64_t, int32_t>;
 
 }

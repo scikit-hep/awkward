@@ -4,125 +4,129 @@
 
 #include "awkward/layoutbuilder/UnmaskedArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/UnmaskedArray.h"
 
 namespace awkward {
 
   ///
-  UnmaskedArrayBuilder::UnmaskedArrayBuilder(const UnmaskedFormPtr& form,
-                                             const std::string attribute,
-                                             const std::string partition)
-    : form_(form),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+  template <typename T, typename I>
+  UnmaskedArrayBuilder<T, I>::UnmaskedArrayBuilder(FormBuilderPtr<T, I> content,
+                                                   const util::Parameters& parameters,
+                                                   const std::string& form_key,
+                                                   const std::string attribute,
+                                                   const std::string partition)
+    : content_(content),
+      parameters_(parameters) {
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_func_type_ = content_.get()->vm_func_type();
 
     vm_func_.append(content_.get()->vm_func())
       .append(": ")
-      .append(vm_func_name_).append("\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append(";").append("\n");
+      .append(vm_func_name_).append(" ")
+      .append(content_.get()->vm_func_name())
+      .append(" ; ");
 
     vm_output_ = content_.get()->vm_output();
     vm_error_.append(content_.get()->vm_error());
   }
 
+  template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder::classname() const {
+  UnmaskedArrayBuilder<T, I>::classname() const {
     return "UnmaskedArrayBuilder";
   }
 
-  const ContentPtr
-  UnmaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    // FIXME: how to define a mask? is it needed?
-    return content_.get()->snapshot(outputs);
-  }
-
-  const FormPtr
-  UnmaskedArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
+  template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder::vm_output() const {
+  UnmaskedArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder::vm_output_data() const {
+  UnmaskedArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder::vm_func() const {
+  UnmaskedArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder::vm_func_name() const {
+  UnmaskedArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder::vm_func_type() const {
+  UnmaskedArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder::vm_from_stack() const {
+  UnmaskedArrayBuilder<T, I>::vm_from_stack() const {
     return vm_data_from_stack_;
   }
 
+  template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder::vm_error() const {
+  UnmaskedArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  UnmaskedArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  UnmaskedArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->boolean(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnmaskedArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  UnmaskedArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->int64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnmaskedArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  UnmaskedArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->float64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnmaskedArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  UnmaskedArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->complex(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnmaskedArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  UnmaskedArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->bytestring(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnmaskedArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  UnmaskedArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->string(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  UnmaskedArrayBuilder::begin_list(LayoutBuilder* builder) {
+  UnmaskedArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     content_.get()->begin_list(builder);
   }
 
+  template <typename T, typename I>
   void
-  UnmaskedArrayBuilder::end_list(LayoutBuilder* builder) {
+  UnmaskedArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     content_.get()->end_list(builder);
   }
+
+  template class EXPORT_TEMPLATE_INST UnmaskedArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST UnmaskedArrayBuilder<int64_t, int32_t>;
 
 }

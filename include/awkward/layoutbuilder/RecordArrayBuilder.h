@@ -7,31 +7,23 @@
 
 namespace awkward {
 
-  class RecordForm;
-  using RecordFormPtr = std::shared_ptr<RecordForm>;
-  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
-
   /// @class RecordArrayBuilder
   ///
   /// @brief
-  class LIBAWKWARD_EXPORT_SYMBOL RecordArrayBuilder : public FormBuilder {
+  template <typename T, typename I>
+  class LIBAWKWARD_EXPORT_SYMBOL RecordArrayBuilder : public FormBuilder<T, I> {
   public:
     /// @brief Creates a RecordArrayBuilder from a full set of parameters.
-    RecordArrayBuilder(const RecordFormPtr& form,
+    RecordArrayBuilder(const std::vector<FormBuilderPtr<T, I>>& contents,
+                       const util::RecordLookupPtr recordlookup,
+                       const util::Parameters& parameters,
+                       const std::string& form_key,
                        const std::string attribute = "record",
                        const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -64,58 +56,66 @@ namespace awkward {
 
     /// @brief Adds a boolean value `x` to the accumulated data.
     void
-      boolean(bool x, LayoutBuilder* builder) override;
+      boolean(bool x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an integer value `x` to the accumulated data.
     void
-      int64(int64_t x, LayoutBuilder* builder) override;
+      int64(int64_t x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
-      float64(double x, LayoutBuilder* builder) override;
+      float64(double x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a complex value `x` to the accumulated data.
     void
-      complex(std::complex<double> x, LayoutBuilder* builder) override;
+      complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an unencoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      bytestring(const std::string& x, LayoutBuilder* builder) override;
+      bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      string(const std::string& x, LayoutBuilder* builder) override;
+      string(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Begins building a nested list.
     void
-      begin_list(LayoutBuilder* builder) override;
+      begin_list(LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Ends a nested list.
     void
-      end_list(LayoutBuilder* builder) override;
+      end_list(LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief If `true`, this node's content has started but has not finished a
     /// multi-step command (e.g. `begin_list ... end_list`).
     bool
       active() override;
 
+    const std::vector<FormBuilderPtr<T, I>>& contents() const { return contents_; }
+
+    const util::RecordLookupPtr& form_recordlookup() const { return form_recordlookup_; }
+
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
+
   private:
     /// @brief Keeps track of a field index.
     int64_t field_index();
 
+    /// @brief This Form content builders
+    std::vector<FormBuilderPtr<T, I>> contents_;
+    const util::RecordLookupPtr form_recordlookup_;
+
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
+
     /// @brief This builder Form
-    const RecordFormPtr form_;
+    const std::string form_;
     int64_t field_index_;
     int64_t contents_size_;
     std::vector<int64_t> list_field_index_;
-
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-    const std::string attribute_;
-    const std::string partition_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form
@@ -126,9 +126,6 @@ namespace awkward {
     std::string vm_func_type_;
     std::string vm_data_from_stack_;
     std::string vm_error_;
-
-    /// @brief This Form content builders
-    std::vector<FormBuilderPtr> contents_;
   };
 
 }

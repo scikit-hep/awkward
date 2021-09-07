@@ -12,28 +12,18 @@
 
 namespace awkward {
 
-  class EmptyForm;
-  using EmptyFormPtr = std::shared_ptr<EmptyForm>;
-
   /// @class EmptyArrayBuilder
   ///
   /// @brief
-  class LIBAWKWARD_EXPORT_SYMBOL EmptyArrayBuilder : public FormBuilder {
+  template <typename T, typename I>
+  class LIBAWKWARD_EXPORT_SYMBOL EmptyArrayBuilder : public FormBuilder<T, I> {
   public:
     /// @brief Creates an EmptyArrayBuilder from a full set of parameters.
-    EmptyArrayBuilder(const EmptyFormPtr& form);
+    EmptyArrayBuilder(const util::Parameters& parameters);
 
     /// @brief User-friendly name of this class.
     const std::string
       classname() const override;
-
-    /// @brief Turns the accumulated data into a Content array.
-    const ContentPtr
-      snapshot(const ForthOutputBufferMap& outputs) const override;
-
-    /// @brief The Form describing the array.
-    const FormPtr
-      form() const override;
 
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
@@ -66,45 +56,50 @@ namespace awkward {
 
     /// @brief Adds a boolean value `x` to the accumulated data.
     void
-      boolean(bool x, LayoutBuilder* builder) override;
+      boolean(bool x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an integer value `x` to the accumulated data.
     void
-      int64(int64_t x, LayoutBuilder* builder) override;
+      int64(int64_t x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
-      float64(double x, LayoutBuilder* builder) override;
+      float64(double x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a complex value `x` to the accumulated data.
     void
-      complex(std::complex<double> x, LayoutBuilder* builder) override;
+      complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds an unencoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      bytestring(const std::string& x, LayoutBuilder* builder) override;
+      bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
     void
-      string(const std::string& x, LayoutBuilder* builder) override;
+      string(const std::string& x, LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Begins building a nested list.
     void
-      begin_list(LayoutBuilder* builder) override;
+      begin_list(LayoutBuilderPtr<T, I> builder) override;
 
     /// @brief Ends a nested list.
     void
-      end_list(LayoutBuilder* builder) override;
+      end_list(LayoutBuilderPtr<T, I> builder) override;
+
+    /// @brief String-to-JSON map that augments the meaning of this
+    /// builder Form.
+    ///
+    /// Keys are simple strings, but values are JSON-encoded strings.
+    /// For this reason, values that represent single strings are
+    /// double-quoted: e.g. `"\"actual_value\""`.
+    const util::Parameters&
+      form_parameters() const { return parameters_; }
 
   private:
-    /// @brief EmptyForm that defines the EmptyArray.
-    const EmptyFormPtr form_;
-    /// @brief an output buffer name is
-    /// "part{partition}-{form_key}-{attribute}"
-    const FormKey form_key_;
-
+    /// @brief This Form parameters
+    const util::Parameters parameters_;
     /// @brief An empty command.
     std::string vm_empty_command_;
     /// @brief An error message.

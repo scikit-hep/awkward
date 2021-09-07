@@ -4,186 +4,155 @@
 
 #include "awkward/layoutbuilder/ListOffsetArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/array/ListOffsetArray.h"
 
 namespace awkward {
 
   ///
-  ListOffsetArrayBuilder::ListOffsetArrayBuilder(const ListOffsetFormPtr& form,
-                                                 const std::string attribute,
-                                                 const std::string partition)
-    : form_(form),
-      is_string_builder_(form.get()->parameter_equals("__array__", "\"string\"")
-        ||  form.get()->parameter_equals("__array__", "\"bytestring\"")),
-      begun_(false),
-      form_key_(!form.get()->form_key() ?
-        std::make_shared<std::string>(std::string("node-id")
-        + std::to_string(LayoutBuilder::next_id()))
-        : form.get()->form_key()),
-      attribute_(attribute),
-      partition_(partition),
-      content_(LayoutBuilder::formBuilderFromA(form.get()->content())) {
+  template <typename T, typename I>
+  ListOffsetArrayBuilder<T, I>::ListOffsetArrayBuilder(FormBuilderPtr<T, I> content,
+                                                       const util::Parameters& parameters,
+                                                       const std::string& form_key,
+                                                       const std::string& form_offsets,
+                                                       bool is_string_builder,
+                                                       const std::string attribute,
+                                                       const std::string partition)
+    : content_(content),
+      parameters_(parameters),
+      is_string_builder_(is_string_builder),
+      form_offsets_(form_offsets),
+      begun_(false) {
     vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      .append(partition).append("-")
+      .append(form_key).append("-")
+      .append(attribute);
 
-    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+    vm_func_name_ = std::string(form_key).append("-").append(attribute);
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(index_form_to_name(form_.get()->offsets()))
-      .append("\n")
+      .append(form_offsets)
+      .append(" ")
       .append(content_.get()->vm_output());
 
     vm_func_.append(content_.get()->vm_func())
-      .append(": ").append(vm_func_name()).append("\n")
+      .append(": ").append(vm_func_name()).append(" ")
       .append(std::to_string(static_cast<utype>(state::begin_list)))
-      .append(" <> if").append("\n")
-      .append(std::to_string(LayoutBuilder::next_error_id())).append(" err ! err @ halt").append("\n")
-      .append("then").append("\n")
-      .append("\n")
-      .append("0").append("\n")
-      .append("begin").append("\n")
-      .append("pause").append("\n")
-      .append("dup ")
+      .append(" <> if ")
+      .append(std::to_string(LayoutBuilder<T, I>::next_error_id()))
+      .append(" err ! err @ halt then 0 begin pause dup ")
       .append(std::to_string(static_cast<utype>(state::end_list)))
-      .append(" = if").append("\n")
-      .append("drop").append("\n")
-      .append(vm_output_data_).append(" +<- stack").append("\n")
-      .append("exit").append("\n")
-      .append("else").append("\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append("1+").append("\n")
-      .append("then").append("\n")
-      .append("again").append("\n")
-      .append(";").append("\n");
+      .append(" = if drop ")
+      .append(vm_output_data_).append(" +<- stack exit else ")
+      .append(content_.get()->vm_func_name())
+      .append(" 1+ then again ; ");
 
     vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
-      .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
+      .append("0 ").append(vm_output_data_).append(" <- stack ");
 
     vm_error_.append(content_.get()->vm_error());
     vm_error_.append("s\" ListOffsetArray Builder ")
       .append(vm_func_name_)
-      .append(" needs begin_list\"").append("\n");
+      .append(" needs begin_list\" ");
   }
 
+  template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder::classname() const {
+  ListOffsetArrayBuilder<T, I>::classname() const {
     return std::string("ListOffsetArrayBuilder ") + vm_func_name();
   }
 
-  const ContentPtr
-  ListOffsetArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      if (form_.get()->offsets() == Index::Form::i32) {
-        return std::make_shared<ListOffsetArray32>(Identities::none(),
-                                                   form_.get()->parameters(),
-                                                   search->second.get()->toIndex32(),
-                                                   content_.get()->snapshot(outputs));
-      }
-      else if (form_.get()->offsets() == Index::Form::u32) {
-        return std::make_shared<ListOffsetArrayU32>(Identities::none(),
-                                                   form_.get()->parameters(),
-                                                   search->second.get()->toIndexU32(),
-                                                   content_.get()->snapshot(outputs));
-      }
-      else if (form_.get()->offsets() == Index::Form::i64) {
-        return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                   form_.get()->parameters(),
-                                                   search->second.get()->toIndex64(),
-                                                   content_.get()->snapshot(outputs));
-      }
-    }
-    throw std::invalid_argument(
-        std::string("Snapshot of a ") + classname()
-        + std::string(" needs offsets")
-        + FILENAME(__LINE__));
-  }
-
-  const FormPtr
-  ListOffsetArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
+  template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder::vm_output() const {
+  ListOffsetArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder::vm_output_data() const {
+  ListOffsetArrayBuilder<T, I>::vm_output_data() const {
     return vm_output_data_;
   }
+
+  template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder::vm_func() const {
+  ListOffsetArrayBuilder<T, I>::vm_func() const {
     return vm_func_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder::vm_func_name() const {
+  ListOffsetArrayBuilder<T, I>::vm_func_name() const {
     return vm_func_name_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder::vm_func_type() const {
+  ListOffsetArrayBuilder<T, I>::vm_func_type() const {
     return vm_func_type_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder::vm_from_stack() const {
+  ListOffsetArrayBuilder<T, I>::vm_from_stack() const {
     return vm_data_from_stack_;
   }
 
+  template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder::vm_error() const {
+  ListOffsetArrayBuilder<T, I>::vm_error() const {
     return vm_error_;
   }
 
+  template <typename T, typename I>
   void
-  ListOffsetArrayBuilder::boolean(bool x, LayoutBuilder* builder) {
+  ListOffsetArrayBuilder<T, I>::boolean(bool x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->boolean(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListOffsetArrayBuilder::int64(int64_t x, LayoutBuilder* builder) {
+  ListOffsetArrayBuilder<T, I>::int64(int64_t x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->int64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListOffsetArrayBuilder::float64(double x, LayoutBuilder* builder) {
+  ListOffsetArrayBuilder<T, I>::float64(double x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->float64(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListOffsetArrayBuilder::complex(std::complex<double> x, LayoutBuilder* builder) {
+  ListOffsetArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     content_.get()->complex(x, builder);
   }
 
+  template <typename T, typename I>
   void
-  ListOffsetArrayBuilder::bytestring(const std::string& x, LayoutBuilder* builder) {
+  ListOffsetArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     if (is_string_builder_) {
-      builder->add<const std::string&>(x);
+      builder->add_string(x);
     }
     else {
       content_.get()->bytestring(x, builder);
     }
   }
 
+  template <typename T, typename I>
   void
-  ListOffsetArrayBuilder::string(const std::string& x, LayoutBuilder* builder) {
+  ListOffsetArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     if (is_string_builder_) {
-      builder->add<const std::string&>(x);
+      builder->add_string(x);
     }
     else {
       content_.get()->string(x, builder);
     }
   }
 
+  template <typename T, typename I>
   void
-  ListOffsetArrayBuilder::begin_list(LayoutBuilder* builder) {
+  ListOffsetArrayBuilder<T, I>::begin_list(LayoutBuilderPtr<T, I> builder) {
     if (!begun_) {
       begun_ = true;
       builder->add_begin_list();
@@ -193,8 +162,9 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   void
-  ListOffsetArrayBuilder::end_list(LayoutBuilder* builder) {
+  ListOffsetArrayBuilder<T, I>::end_list(LayoutBuilderPtr<T, I> builder) {
     if (!begun_) {
       throw std::invalid_argument(
         std::string("called 'end_list' without 'begin_list' at the same level before it")
@@ -209,9 +179,13 @@ namespace awkward {
     }
   }
 
+  template <typename T, typename I>
   bool
-  ListOffsetArrayBuilder::active() {
+  ListOffsetArrayBuilder<T, I>::active() {
     return begun_;
   }
+
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayBuilder<int32_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayBuilder<int64_t, int32_t>;
 
 }

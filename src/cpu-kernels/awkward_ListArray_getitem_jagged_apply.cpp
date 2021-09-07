@@ -38,19 +38,19 @@ ERROR awkward_ListArray_getitem_jagged_apply(
       }
       int64_t count = stop - start;
       for (int64_t j = slicestart;  j < slicestop;  j++) {
-        int64_t index = (int64_t)sliceindex[j];
+        int64_t index = (int64_t) sliceindex[j];
+        if (index < -count || index >= count) {
+          return failure("index out of range", i, index, FILENAME(__LINE__));
+        }
         if (index < 0) {
           index += count;
-        }
-        if (!(0 <= index  &&  index < count)) {
-          return failure("index out of range", i, (int64_t)sliceindex[j], FILENAME(__LINE__));
         }
         tocarry[k] = start + index;
         k++;
       }
     }
-    tooffsets[i + 1] = (T)k;
   }
+  tooffsets[sliceouterlen] = (T)k;
   return success();
 }
 ERROR awkward_ListArray32_getitem_jagged_apply_64(

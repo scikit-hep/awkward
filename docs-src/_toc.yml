@@ -42,7 +42,7 @@ sections:
       - file: how-to-create-arraybuilder
         title: "ArrayBuilder (easy & general)"
       - file: how-to-create-layoutbuilder
-        title: "LayoutBuilder (more control) [todo]"
+        title: "LayoutBuilder (more control)"
       - file: how-to-create-constructors
         title: "Direct constructors (fastest)"
 

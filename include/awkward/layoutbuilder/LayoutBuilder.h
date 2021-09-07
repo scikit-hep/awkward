@@ -13,25 +13,13 @@
 namespace awkward {
   class ArrayBuilderOptions;
 
-  class Content;
-  using ContentPtr = std::shared_ptr<Content>;
-  class Slice;
-  class Type;
-  using TypePtr = std::shared_ptr<Type>;
-
-  class Form;
-  using FormPtr = std::shared_ptr<Form>;
-
-  using ForthOtputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
-
-  class FormBuilder;
-  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
+  using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
   const std::string
-    index_form_to_name(Index::Form form);
+    index_form_to_name(const std::string& form_index);
 
   const std::string
-    index_form_to_vm_format(Index::Form form);
+    index_form_to_vm_format(const std::string& form_index);
 
   enum class state : std::int32_t {
     int64 = 0,
@@ -54,21 +42,24 @@ namespace awkward {
     complex256 = 17,
     null = 18,
     index = 19,
-    tag = 20
+    tag = 20,
+    datetime64 = 21,
+    timedelta64 = 22
   };
   using utype = std::underlying_type<state>::type;
 
   const std::string
-    dtype_to_state(util::dtype dt);
+    primitive_to_state(const std::string& name);
 
   const std::string
-    dtype_to_vm_format(util::dtype dt);
+    primitive_to_vm_format(const std::string& name);
 
   /// @class LayoutBuilder
   ///
   /// @brief User interface to the FormBuilder system: the LayoutBuilder is a
   /// fixed reference while the FormBuilder subclass instances change in
   /// response to accumulating data.
+  template <typename T, typename I>
   class LIBAWKWARD_EXPORT_SYMBOL LayoutBuilder {
   public:
     /// @brief Creates an LayoutBuilder from a full set of parameters.
@@ -78,84 +69,34 @@ namespace awkward {
     /// @param vm_init If 'true' the Virtual Machine is instantiated on
     /// construction. If 'false' an external Virtial Machine must be connected
     /// to the builder. The flag is used for debugging.
-    LayoutBuilder(const FormPtr& form,
-                      const ArrayBuilderOptions& options,
-                      bool vm_init = true);
+    LayoutBuilder(const std::string& json_form,
+                  const ArrayBuilderOptions& options,
+                  bool vm_init = true);
 
     /// @brief Connects a Virtual Machine if it was not initialized before.
     void
-      connect(const std::shared_ptr<ForthMachine32>& vm);
+      connect(const std::shared_ptr<ForthMachineOf<T, I>>& vm);
 
     /// @brief Prints debug information from the Virtual Machine stack.
     void
       debug_step() const;
-
-    /// @brief Returns the Form used to build the Array.
-    const FormPtr
-      form() const;
 
     /// @brief Returns an AwkwardForth source code generated from the 'Form' and
     /// passed to the 'ForthMachine' virtual machine.
     const std::string
       vm_source() const;
 
-    /// @brief Returns a string representation of this array (single-line XML
-    /// indicating the length and type).
-    const std::string
-      tostring() const;
+    /// @brief
+    const std::shared_ptr<ForthMachineOf<T, I>>
+      vm() const;
 
     /// @brief Current length of the accumulated array.
     int64_t
       length() const;
 
-    /// @brief Current high level Type of the accumulated array.
-    ///
-    /// @param typestrs A mapping from `"__record__"` parameters to string
-    /// representations of those types, to override the derived strings.
-    const TypePtr
-      type(const util::TypeStrs& typestrs) const;
-
-    /// @brief Turns the accumulated data into a Content array.
-    ///
-    /// This operation only converts FormBuilder nodes into Content nodes; the
-    /// buffers holding array data are shared between the FormBuilder and the
-    /// Content. Hence, taking a snapshot is a constant-time operation.
-    const ContentPtr
-      snapshot() const;
-
-    /// @brief Returns the element at a given position in the array, handling
-    /// negative indexing and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    const ContentPtr
-      getitem_at(int64_t at) const;
-
-    /// @brief Subinterval of this array, handling negative indexing
-    /// and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    ///
-    /// Ranges beyond the array are not an error; they are trimmed to
-    /// `start = 0` on the left and `stop = length() - 1` on the right.
-    const ContentPtr
-      getitem_range(int64_t start, int64_t stop) const;
-
-    /// @brief This array with the first nested RecordArray replaced by
-    /// the field at `key`.
-    const ContentPtr
-      getitem_field(const std::string& key) const;
-
-    /// @brief This array with the first nested RecordArray replaced by
-    /// a RecordArray of a given subset of `keys`.
-    const ContentPtr
-      getitem_fields(const std::vector<std::string>& keys) const;
-
-    /// @brief Entry point for general slicing: Slice represents a tuple of
-    /// SliceItem nodes applying to each level of nested lists.
-    const ContentPtr
-      getitem(const Slice& where) const;
+    /// @brief
+    void
+      pre_snapshot() const;
 
     /// @brief Adds a `null` value to the accumulated data.
     void
@@ -247,13 +188,13 @@ namespace awkward {
 
     /// @brief Finds an index of a data in a VM output buffer.
     /// This is used to build a 'categorical' array.
-    template <typename T>
+    template <typename D>
     bool
-      find_index_of(T x, const std::string& vm_output_data) {
+      find_index_of(D x, const std::string& vm_output_data) {
         auto const& outputs = vm_.get()->outputs();
         auto search = outputs.find(vm_output_data);
         if (search != outputs.end()) {
-          auto data = std::static_pointer_cast<T>(search->second.get()->ptr());
+          auto data = std::static_pointer_cast<D>(search->second.get()->ptr());
           auto size = search->second.get()->len();
           for (int64_t i = 0; i < size; i++) {
             if (data.get()[i] == x) {
@@ -265,14 +206,25 @@ namespace awkward {
         return false;
       }
 
-    /// @brief Adds an integer value `x` to the accumulated data.
-    template <typename T>
+    /// @brief Adds a bolean value `x` to the accumulated data.
     void
-      add(T x);
+      add_bool(bool x);
 
-    /// @brief Generates an Array builder from a Form
-    static FormBuilderPtr
-      formBuilderFromA(const FormPtr& form);
+    /// @brief Adds an int64_t value `x` to the accumulated data.
+    void
+      add_int64(int64_t x);
+
+    /// @brief Adds a double value `x` to the accumulated data.
+    void
+      add_double(double x);
+
+    /// @brief Adds a complex value `x` to the accumulated data.
+    void
+      add_complex(std::complex<double> x);
+
+    /// @brief Adds a string value `x` to the accumulated data.
+    void
+      add_string(const std::string& x);
 
     /// @brief Generates next unique ID
     static int64_t
@@ -286,9 +238,8 @@ namespace awkward {
     void
       resume() const;
 
-    // FIXME: refactor
     // @brief Root node of the FormBuilder tree.
-    const FormBuilder& builder() const { return *builder_; }
+    const FormBuilderPtr<T, I> builder() const { return builder_; }
 
   protected:
     /// @brief A unique ID to use when Form nodes do not have Form key
@@ -301,14 +252,27 @@ namespace awkward {
       error_id;
 
   private:
+    /// @brief Generates an Array builder from a Form.
+    FormBuilderPtr<T, I>
+      form_builder_from_json(const std::string& json_form);
+
+    /// @brief
+    template <typename JSON>
+    FormBuilderPtr<T, I>
+      from_json(const JSON& json_doc);
+
+    /// @ brief Initialise Layout Builder from a JSON Form.
+    void
+      initialise_builder(const std::string& json_form);
+
     /// @ brief Initialise Virtual machine.
     void
       initialise();
 
     /// @brief Place data of a type 'T' to the VM output buffer.
-    template <typename T>
+    template <typename D>
     void
-      set_data(T x);
+      set_data(D x);
 
     /// See #initial.
     int64_t initial_;
@@ -317,10 +281,10 @@ namespace awkward {
     int64_t length_;
 
     /// @brief Root node of the FormBuilder tree.
-    FormBuilderPtr builder_;
+    FormBuilderPtr<T, I> builder_;
 
     /// @brief Virtual machine.
-    std::shared_ptr<ForthMachine32> vm_;
+    std::shared_ptr<ForthMachineOf<T, I>> vm_;
 
     /// @brief Virtual machine input buffers.
     std::map<std::string, std::shared_ptr<ForthInputBuffer>> vm_inputs_map_;
@@ -334,7 +298,13 @@ namespace awkward {
     /// @brief Virtual machine errors to ignore.
     std::set<util::ForthError> ignore_;
 
+    /// @brief Virtual machine output buffers.
+    ForthOutputBufferMap vm_outputs_map_;
+
   };
+
+  using LayoutBuilder32 = LayoutBuilder<int32_t, int32_t>;
+  using LayoutBuilder64 = LayoutBuilder<int64_t, int32_t>;
 
 }
 
