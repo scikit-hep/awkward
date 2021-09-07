@@ -11,7 +11,7 @@ from awkward._v2.contents.content import Content
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
 from awkward._v2.forms.bitmaskedform import BitMaskedForm
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
 
 
 class BitMaskedArray(Content):

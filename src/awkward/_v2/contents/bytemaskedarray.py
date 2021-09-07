@@ -10,7 +10,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
 
 
 class ByteMaskedArray(Content):
