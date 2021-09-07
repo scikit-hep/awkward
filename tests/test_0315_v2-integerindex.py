@@ -127,7 +127,7 @@ def test_silly_stuff():
 
     a = v1_to_v2(a.layout)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         a[b]
 
     a = ak.Array([[0, 1, 2], [3, 4], [5, 6], [7]])
@@ -141,5 +141,5 @@ def test_silly_stuff():
     b = ak.Array([[0, 2], None, None, None, None, None])
     b = v1_to_v2(b.layout)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         a[b]

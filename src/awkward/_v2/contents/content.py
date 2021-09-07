@@ -167,18 +167,16 @@ class Content(object):
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
         nplike = self.nplike
         jagged = head.content.toListOffsetArray64()
-        if not jagged:
-            raise ValueError(
-                "logic error: calling getitem_next_missing_jagged with bad slice type"
-            )
 
         index = ak._v2.index.Index64(head._index)
         content = that._getitem_at(0)
         if len(content) < len(index):
-            raise ValueError(
+            raise NestedIndexError(
+                self,
+                head,
                 "cannot fit masked jagged slice with length {0} into {1} of size {2}".format(
                     len(index), type(that).__name__, len(content)
-                )
+                ),
             )
 
         outputmask = ak._v2.index.Index64.empty(len(index), nplike)
@@ -216,8 +214,10 @@ class Content(object):
         assert isinstance(head, ak._v2.contents.IndexedOptionArray)
 
         if advanced is not None:
-            raise ValueError(
-                "cannot mix missing values in slice with NumPy-style advanced indexing"
+            raise NestedIndexError(
+                self,
+                head,
+                "cannot mix missing values in slice with NumPy-style advanced indexing",
             )
 
         if isinstance(head.content, ak._v2.contents.listoffsetarray.ListOffsetArray):
@@ -250,7 +250,7 @@ class Content(object):
                         )
                     )
                 else:
-                    raise ValueError(
+                    raise NotImplementedError(
                         "FIXME: unhandled case of SliceMissing with RecordArray containing {0}".format(
                             content
                         )
@@ -261,7 +261,7 @@ class Content(object):
             )
 
         else:
-            raise ValueError(
+            raise NotImplementedError(
                 "FIXME: unhandled case of SliceMissing with {0}".format(nextcontent)
             )
 

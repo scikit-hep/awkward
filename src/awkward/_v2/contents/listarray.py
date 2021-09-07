@@ -182,10 +182,12 @@ class ListArray(Content):
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
         if len(slicestarts) != len(self):
-            raise ValueError(
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                     len(slicestarts), type(self).__name__, len(self)
-                )
+                ),
             )
 
         if isinstance(slicecontent, ak._v2.contents.listoffsetarray.ListOffsetArray):
@@ -276,7 +278,11 @@ class ListArray(Content):
             slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray
         ):
             if len(self._starts) < len(slicestarts):
-                raise ValueError("jagged slice length differs from array length")
+                raise NestedIndexError(
+                    self,
+                    ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                    "jagged slice length differs from array length",
+                )
 
             missing = ak._v2.index.Index64(slicecontent._index)
             numvalid = ak._v2.index.Index64.empty(1, nplike)
@@ -353,18 +359,19 @@ class ListArray(Content):
                     self._parameters,
                 )
             else:
-                raise ValueError(
-                    "expected ListOffsetArray from {0}"
-                    "ListArray::getitem_next_jagged, got ".format(type(self).__name__)
+                raise AssertionError(
+                    "expected ListOffsetArray from ListArray._getitem_next_jagged, got {0}".format(
+                        type(out).__name__
+                    )
                 )
 
         elif isinstance(slicecontent, ak._v2.contents.emptyarray.EmptyArray):
             return self
 
         else:
-            raise ValueError(
-                "expected Index/IndexedOptionArray/ListOffsetArray from ListArray::getitem_next_jagged, got {0}".format(
-                    type(self).__name__
+            raise AssertionError(
+                "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {0}".format(
+                    type(slicecontent).__name__
                 )
             )
 
@@ -580,8 +587,10 @@ class ListArray(Content):
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             if advanced is not None:
-                raise ValueError(
-                    "cannot mix jagged slice with NumPy-style advanced indexing"
+                raise NestedIndexError(
+                    self,
+                    head,
+                    "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
             length = len(self)
             singleoffsets = ak._v2.index.Index64(head.offsets.data)

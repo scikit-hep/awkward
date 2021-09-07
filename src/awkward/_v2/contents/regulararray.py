@@ -186,12 +186,14 @@ class RegularArray(Content):
     def _broadcast_tooffsets64(self, offsets):
         nplike = self.nplike
         if len(offsets) == 0 or offsets[0] != 0:
-            raise ValueError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0"
+            raise AssertionError(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {0}".format(
+                    "(empty)" if len(offsets) == 0 else str(offsets[0])
+                )
             )
 
         if len(offsets) - 1 != self._length:
-            raise ValueError(
+            raise AssertionError(
                 "cannot broadcast RegularArray of length {0} to length {1}".format(
                     self._length, len(offsets) - 1
                 )
@@ -427,15 +429,19 @@ class RegularArray(Content):
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             if advanced is not None:
-                raise ValueError(
-                    "cannot mix jagged slice with NumPy-style advanced indexing"
+                raise NestedIndexError(
+                    self,
+                    head,
+                    "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
             if len(head) != self._size:
-                raise ValueError(
+                raise NestedIndexError(
+                    self,
+                    head,
                     "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                         len(head), type(self).__name__, self._size
-                    )
+                    ),
                 )
 
             regularlength = self._length

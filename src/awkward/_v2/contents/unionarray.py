@@ -241,7 +241,11 @@ class UnionArray(Content):
             or simplified.index.dtype == np.dtype(np.uint32)
             or simplified.index.dtype == np.dtype(np.int64)
         ):
-            raise ValueError("cannot apply jagged slices to irreducible union arrays")
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                "cannot apply jagged slices to irreducible union arrays",
+            )
         return simplified._getitem_next_jagged(
             slicestarts, slicestops, slicecontent, tail
         )

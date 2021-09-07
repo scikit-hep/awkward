@@ -198,7 +198,11 @@ class NumpyArray(Content):
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         if self._data.ndim == 1:
-            raise ValueError("too many jagged slice dimensions for array")
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                "too many jagged slice dimensions for array",
+            )
         else:
             next = self.toRegularArray()
             return next._getitem_next_jagged(
@@ -272,7 +276,7 @@ class NumpyArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         elif len(self.shape) <= 1:
-            raise IndexError(self, "'axis' out of range for localindex")
+            raise np.AxisError(self, "'axis' out of range for localindex")
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
 
@@ -281,9 +285,7 @@ class NumpyArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:
-            import numpy
-
-            raise numpy.AxisError("'axis' out of range for combinations")
+            raise np.AxisError("'axis' out of range for combinations")
         else:
             return self.toRegularArray()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth

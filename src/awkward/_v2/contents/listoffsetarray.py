@@ -181,12 +181,14 @@ class ListOffsetArray(Content):
     def _broadcast_tooffsets64(self, offsets):
         nplike = self.nplike
         if len(offsets) == 0 or offsets[0] != 0:
-            raise ValueError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0"
+            raise AssertionError(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {0}".format(
+                    "(empty)" if len(offsets) == 0 else str(offsets[0])
+                )
             )
 
         if len(offsets) - 1 != len(self):
-            raise ValueError(
+            raise AssertionError(
                 "cannot broadcast {0} of length {1} to length {2}".format(
                     type(self).__name__, len(self), len(offsets) - 1
                 )

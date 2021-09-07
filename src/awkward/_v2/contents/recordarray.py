@@ -335,7 +335,7 @@ class RecordArray(Content):
             return self._getitem_next_fields(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise self._getitem_next_missing(head, tail, advanced)
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             nexthead, nexttail = ak._v2._slicing.headtail(tail)

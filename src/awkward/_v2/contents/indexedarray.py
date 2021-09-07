@@ -140,10 +140,12 @@ class IndexedArray(Content):
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
         if len(slicestarts) != len(self):
-            raise ValueError(
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                     len(slicestarts), type(self).__name__, len(self)
-                )
+                ),
             )
 
         nextcarry = ak._v2.index.Index64.zeros(len(self), nplike)

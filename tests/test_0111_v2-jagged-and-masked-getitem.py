@@ -760,7 +760,7 @@ def test_numpyarray():
 
     array = v1_to_v2(array.layout)
     array2 = v1_to_v2(array2.layout)
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[array2]
 
 
@@ -1040,7 +1040,7 @@ def test_indexedarray3():
         None,
         [5.5],
     ]
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[array6]
 
 
