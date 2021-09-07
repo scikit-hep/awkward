@@ -16,9 +16,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class Content(object):
     def _init(self, identifier, parameters):
-        if parameters is None:
-            parameters = {}
-
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
         ):
@@ -27,10 +24,10 @@ class Content(object):
                     type(self).__name__, repr(identifier)
                 )
             )
-        if not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be a dict or None, not {1}".format(
-                    type(self).__name__, repr(identifier)
+                    type(self).__name__, repr(parameters)
                 )
             )
 
@@ -43,6 +40,8 @@ class Content(object):
 
     @property
     def parameters(self):
+        if self._parameters is None:
+            self._parameters = {}
         return self._parameters
 
     def parameter(self, key):
@@ -51,10 +50,23 @@ class Content(object):
         else:
             return self._parameters.get(key)
 
-    def _simplify_uniontype(self):
-        return self
+    def _repr_extra(self, indent):
+        out = []
+        if self._parameters is not None:
+            for k, v in self._parameters.items():
+                out.append(
+                    "\n{0}<parameter name={1}>{2}</parameter>".format(
+                        indent, repr(k), repr(v)
+                    )
+                )
+        if self._identifier is not None:
+            out.append(self._identifier._repr("\n" + indent, "", ""))
+        return out
 
     def _simplify_optiontype(self):
+        return self
+
+    def _simplify_uniontype(self):
         return self
 
     def maybe_to_nplike(self, nplike):
@@ -141,9 +153,9 @@ class Content(object):
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        nplike = self.nplike
+        nplike = head.nplike
 
-        index = ak._v2.index.Index64(head._index)
+        index = ak._v2.index.Index64(head.index)
         outindex = ak._v2.index.Index64.empty(len(index) * length, nplike)
 
         self._handle_error(
@@ -165,7 +177,7 @@ class Content(object):
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
-        nplike = self.nplike
+        nplike = head.nplike
         jagged = head.content.toListOffsetArray64()
 
         index = ak._v2.index.Index64(head._index)
@@ -289,9 +301,9 @@ class Content(object):
                 if len(where) == 0:
                     return self
 
+                items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
                 nextwhere = ak._v2._slicing.getitem_broadcast(
-                    [ak._v2._slicing.prepare_tuple_item(x) for x in where],
-                    self.nplike,
+                    items, ak.nplike.of(*items)
                 )
 
                 next = ak._v2.contents.RegularArray(self, len(self), 1, None, None)
@@ -321,11 +333,11 @@ class Content(object):
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 elif issubclass(where.dtype.type, (np.bool_, bool)):
                     if len(where.data.shape) == 1:
-                        where = self.nplike.nonzero(where.data)[0]
+                        where = where.nplike.nonzero(where.data)[0]
                         carry = ak._v2.index.Index64(where)
                         allow_lazy = "copied"  # True, but also can be modified in-place
                     else:
-                        wheres = self.nplike.nonzero(where.data)
+                        wheres = where.nplike.nonzero(where.data)
                         return self.__getitem__(wheres)
                 else:
                     raise TypeError(
@@ -464,9 +476,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def _axis_wrap_if_negative(self, axis):
         if axis >= 0:
             return axis
-        minmax = self.minmax_depth
-        mindepth = minmax[0]
-        maxdepth = minmax[1]
+        mindepth, maxdepth = self.minmax_depth
         depth = self.purelist_depth
         if mindepth == depth and maxdepth == depth:
             posaxis = depth + axis
@@ -512,28 +522,27 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        tocarryraw = self.nplike.empty(n, dtype=np.intp)
+        nplike = self.nplike
+        tocarryraw = nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
-            ptr = ak._v2.index.Index64.empty(
-                combinationslen, self.nplike, dtype=np.int64
-            )
+            ptr = ak._v2.index.Index64.empty(combinationslen, nplike, dtype=np.int64)
             tocarry.append(ptr)
             tocarryraw[i] = ptr.ptr
 
-        toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
-        fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+        toindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
+        fromindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
 
         self._handle_error(
-            self.nplike[
+            nplike[
                 "awkward_RegularArray_combinations_64",
                 np.int64,
-                toindex.to(self.nplike).dtype.type,
-                fromindex.to(self.nplike).dtype.type,
+                toindex.to(nplike).dtype.type,
+                fromindex.to(nplike).dtype.type,
             ](
                 tocarryraw,
-                toindex.to(self.nplike),
-                fromindex.to(self.nplike),
+                toindex.to(nplike),
+                fromindex.to(nplike),
                 n,
                 replacement,
                 len(self),

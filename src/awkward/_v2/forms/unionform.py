@@ -8,7 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class UnionForm(Form):
@@ -64,6 +64,9 @@ class UnionForm(Form):
     def contents(self):
         return self._contents
 
+    def content(self, index):
+        return self._contents[index]
+
     def __repr__(self):
         args = [
             repr(self._tags),
@@ -84,6 +87,84 @@ class UnionForm(Form):
                 ],
             },
             verbose,
+        )
+
+    def __eq__(self, other):
+        if isinstance(other, UnionForm):
+            if (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self._tags == other._tags
+                and self._index == other._index
+                and len(self._contents) == len(other._contents)
+                and _parameters_equal(self._parameters, other._parameters)
+            ):
+                for i in range(len(self._contents)):
+                    if self._contents[i] != other._contents[i]:
+                        return False
+                else:
+                    return True
+            else:
+                return False
+        else:
+            return False
+
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
+
+        if other is None:
+            return True
+
+        elif isinstance(other, UnionForm):
+            if len(self._contents) == len(other._contents):
+                return _parameters_equal(self._parameters, other._parameters) and all(
+                    x.generated_compatibility(y)
+                    for x, y in zip(self._contents, other._contents)
+                )
+            else:
+                return False
+
+        else:
+            return False
+
+    def _getitem_range(self):
+        return UnionForm(
+            self._tags,
+            self._index,
+            self._contents,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        return UnionForm(
+            self._tags,
+            self._index,
+            self._content._getitem_field(where, only_fields),
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _getitem_fields(self, where, only_fields=()):
+        return UnionForm(
+            self._tags,
+            self._index,
+            self._content._getitem_fields(where, only_fields),
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _carry(self, allow_lazy):
+        return UnionForm(
+            self._tags,
+            self._index,
+            self._contents,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
         )
 
     @property

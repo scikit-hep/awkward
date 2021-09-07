@@ -51,6 +51,10 @@ class RegularArray(Content):
     def nplike(self):
         return self._content.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._content.nonvirtual_nplike
+
     Form = RegularForm
 
     @property
@@ -70,20 +74,24 @@ class RegularArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<RegularArray len="]
-        out.append(repr(str(len(self))))
-        out.append(" size=")
+        out = [indent, pre, "<RegularArray size="]
         out.append(repr(str(self._size)))
-        out.append(">\n")
+        out.append(" len=")
+        out.append(repr(str(len(self))))
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</RegularArray>")
+        out.append(indent + "</RegularArray>")
         out.append(post)
         return "".join(out)
 
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
+
+    def toRegularArray(self):
+        return self
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -247,17 +255,17 @@ class RegularArray(Content):
             return out.reshape((len(self), -1) + out.shape[1:])
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike
-
         if head == ():
             return self
 
         elif isinstance(head, int):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
+            nextcarry = ak._v2.index.Index64.empty(self._length, self.nplike)
             self._handle_error(
-                nplike["awkward_RegularArray_getitem_next_at", nextcarry.dtype.type](
-                    nextcarry.to(nplike),
+                self.nplike[
+                    "awkward_RegularArray_getitem_next_at", nextcarry.dtype.type
+                ](
+                    nextcarry.to(self.nplike),
                     head,
                     self._length,
                     self._size,
@@ -283,13 +291,13 @@ class RegularArray(Content):
                 if diff % step != 0:
                     nextsize += 1
 
-            nextcarry = ak._v2.index.Index64.empty(self._length * nextsize, nplike)
+            nextcarry = ak._v2.index.Index64.empty(self._length * nextsize, self.nplike)
             self._handle_error(
-                nplike[
+                self.nplike[
                     "awkward_RegularArray_getitem_next_range",
                     nextcarry.dtype.type,
                 ](
-                    nextcarry.to(nplike),
+                    nextcarry.to(self.nplike),
                     start,
                     step,
                     self._length,
@@ -298,6 +306,7 @@ class RegularArray(Content):
                 ),
                 head,
             )
+
             nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
 
             if advanced is None or len(advanced) == 0:
@@ -309,6 +318,7 @@ class RegularArray(Content):
                     self._parameters,
                 )
             else:
+                nplike = ak.nplike.of(advanced)
                 nextadvanced = ak._v2.index.Index64.empty(
                     self._length * nextsize, nplike
                 )
@@ -346,6 +356,8 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
+            nplike = head.nplike
+
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
 
@@ -428,6 +440,8 @@ class RegularArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            nplike = head.nplike
+
             if advanced is not None:
                 raise NestedIndexError(
                     self,

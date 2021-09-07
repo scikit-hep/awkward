@@ -48,6 +48,10 @@ class IndexedOptionArray(Content):
     def nplike(self):
         return self._index.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._index.nplike
+
     Form = IndexedOptionForm
 
     @property
@@ -69,11 +73,12 @@ class IndexedOptionArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedOptionArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</IndexedOptionArray>")
+        out.append(indent + "</IndexedOptionArray>")
         out.append(post)
         return "".join(out)
 
@@ -88,9 +93,7 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def mask_as_bool(self, valid_when=None):
-        if valid_when is None:
-            valid_when = self._valid_when
+    def mask_as_bool(self, valid_when=True):
         if valid_when:
             return self._index.data >= 0
         else:
@@ -153,7 +156,7 @@ class IndexedOptionArray(Content):
             self._parameters,
         )
 
-    def nextcarry_outindex(self, nplike):
+    def _nextcarry_outindex(self, nplike):
         numnull = ak._v2.index.Index64.empty(1, nplike)
 
         self._handle_error(
@@ -198,7 +201,7 @@ class IndexedOptionArray(Content):
                 ),
             )
 
-        numnull, nextcarry, outindex = self.nextcarry_outindex(nplike)
+        numnull, nextcarry, outindex = self._nextcarry_outindex(nplike)
 
         reducedstarts = ak._v2.index.Index64.empty(len(self) - numnull, nplike)
         reducedstops = ak._v2.index.Index64.empty(len(self) - numnull, nplike)
@@ -232,15 +235,13 @@ class IndexedOptionArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
-            numnull, nextcarry, outindex = self.nextcarry_outindex(nplike)
+            numnull, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._getitem_next(head, tail, advanced)
@@ -301,7 +302,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         else:
-            _, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
 
             next = self._content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
@@ -318,7 +319,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
-            _, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth

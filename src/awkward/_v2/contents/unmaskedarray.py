@@ -29,6 +29,10 @@ class UnmaskedArray(Content):
     def nplike(self):
         return self._content.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._content.nonvirtual_nplike
+
     Form = UnmaskedForm
 
     @property
@@ -49,12 +53,22 @@ class UnmaskedArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnmaskedArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</UnmaskedArray>")
+        out.append(indent + "</UnmaskedArray>")
         out.append(post)
         return "".join(out)
+
+    def toByteMaskedArray(self):
+        return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+            ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
+            self._content,
+            valid_when=True,
+            identifier=self._identifier,
+            parameters=self._parameters,
+        )
 
     def toIndexedOptionArray64(self):
         arange = self._content.nplike.arange(len(self._content), dtype=np.int64)
@@ -65,9 +79,7 @@ class UnmaskedArray(Content):
             self._parameters,
         )
 
-    def mask_as_bool(self, valid_when=None):
-        if valid_when is None:
-            valid_when = self._valid_when
+    def mask_as_bool(self, valid_when=True):
         if valid_when:
             return self._content.nplike.ones(len(self._content), dtype=np.bool_)
         else:
@@ -110,8 +122,6 @@ class UnmaskedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 

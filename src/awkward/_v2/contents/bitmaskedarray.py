@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -93,6 +95,10 @@ class BitMaskedArray(Content):
     def nplike(self):
         return self._mask.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._mask.nplike
+
     Form = BitMaskedForm
 
     @property
@@ -114,17 +120,18 @@ class BitMaskedArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<BitMaskedArray len="]
-        out.append(repr(str(len(self))))
-        out.append(" valid_when=")
-        out.append(repr(str(self._valid_when)))
+        out = [indent, pre, "<BitMaskedArray valid_when="]
+        out.append(repr(json.dumps(self._valid_when)))
         out.append(" lsb_order=")
-        out.append(repr(str(self._lsb_order)))
-        out.append(">\n")
+        out.append(repr(json.dumps(self._lsb_order)))
+        out.append(" len=")
+        out.append(repr(str(len(self))))
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._mask._repr(indent + "    ", "<mask>", "</mask>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</BitMaskedArray>")
+        out.append(indent + "</BitMaskedArray>")
         out.append(post)
         return "".join(out)
 
@@ -247,8 +254,6 @@ class BitMaskedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 

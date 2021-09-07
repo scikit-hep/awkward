@@ -59,6 +59,10 @@ class ListOffsetArray(Content):
     def nplike(self):
         return self._offsets.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._offsets.nplike
+
     Form = ListOffsetForm
 
     @property
@@ -80,11 +84,12 @@ class ListOffsetArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListOffsetArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._offsets._repr(indent + "    ", "<offsets>", "</offsets>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</ListOffsetArray>")
+        out.append(indent + "</ListOffsetArray>")
         out.append(post)
         return "".join(out)
 
@@ -95,7 +100,7 @@ class ListOffsetArray(Content):
 
             if start_at_zero:
                 offsets = ak._v2.index.Index64(
-                    self._offsets.to(self._offsets.nplike) - self._offsets[0]
+                    self._offsets.to(self.nplike) - self._offsets[0]
                 )
                 content = self._content[self._offsets[0] :]
             else:
@@ -122,7 +127,7 @@ class ListOffsetArray(Content):
         start, stop, step = where.indices(len(self))
         offsets = self._offsets[start : stop + 1]
         if len(offsets) == 0:
-            offsets = Index(self._offsets.nplike.array([0], dtype=self._offsets.dtype))
+            offsets = Index(self.nplike.array([0], dtype=self._offsets.dtype))
         return ListOffsetArray(
             offsets,
             self._content,
@@ -230,20 +235,28 @@ class ListOffsetArray(Content):
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
+        nplike = self.nplike
+
         if head == ():
             return self
 
         elif isinstance(head, int):
-            assert advanced is not None
+            assert advanced is None
             lenstarts = len(self._offsets) - 1
+            starts, stops = self.starts, self.stops
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             nextcarry = ak._v2.index.Index64.empty(lenstarts, nplike)
+
             self._handle_error(
-                nplike["ListArray_getitem_next_at", nextcarry.dtype.type](
+                nplike[
+                    "awkward_ListArray_getitem_next_at",
+                    nextcarry.dtype.type,
+                    starts.dtype.type,
+                    stops.dtype.type,
+                ](
                     nextcarry.to(nplike),
-                    self.starts.to(nplike),
-                    self.stops.to(nplike),
+                    starts.to(nplike),
+                    stops.to(nplike),
                     lenstarts,
                     head,
                 )
@@ -314,6 +327,7 @@ class ListOffsetArray(Content):
                     self._identifier,
                     self._parameters,
                 )
+
             else:
                 total = ak._v2.index.Index64.empty(1, nplike)
                 self._handle_error(
@@ -342,6 +356,7 @@ class ListOffsetArray(Content):
                         lenstarts,
                     )
                 )
+
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
                     nextoffsets,
                     nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
@@ -490,56 +505,53 @@ class ListOffsetArray(Content):
             starts = self.starts
             stops = self.stops
 
-            totallen = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
-            offsets = ak._v2.index.Index64.empty(
-                len(self) + 1, self.nplike, dtype=np.int64
-            )
+            nplike = self.nplike
+            totallen = ak._v2.index.Index64.empty(1, nplike, dtype=np.int64)
+            offsets = ak._v2.index.Index64.empty(len(self) + 1, nplike, dtype=np.int64)
             self._handle_error(
-                self.nplike[
+                nplike[
                     "awkward_ListArray_combinations_length",
-                    totallen.to(self.nplike).dtype.type,
-                    offsets.to(self.nplike).dtype.type,
-                    starts.to(self.nplike).dtype.type,
-                    stops.to(self.nplike).dtype.type,
+                    totallen.to(nplike).dtype.type,
+                    offsets.to(nplike).dtype.type,
+                    starts.to(nplike).dtype.type,
+                    stops.to(nplike).dtype.type,
                 ](
-                    totallen.to(self.nplike),
-                    offsets.to(self.nplike),
+                    totallen.to(nplike),
+                    offsets.to(nplike),
                     n,
                     replacement,
-                    starts.to(self.nplike),
-                    stops.to(self.nplike),
+                    starts.to(nplike),
+                    stops.to(nplike),
                     len(self),
                 )
             )
 
-            tocarryraw = self.nplike.empty(n, dtype=np.intp)
+            tocarryraw = nplike.empty(n, dtype=np.intp)
             tocarry = []
 
             for i in range(n):
-                ptr = ak._v2.index.Index64.empty(
-                    totallen[0], self.nplike, dtype=np.int64
-                )
+                ptr = ak._v2.index.Index64.empty(totallen[0], nplike, dtype=np.int64)
                 tocarry.append(ptr)
                 tocarryraw[i] = ptr.ptr
 
-            toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
-            fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+            toindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
+            fromindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
             self._handle_error(
-                self.nplike[
+                nplike[
                     "awkward_ListArray_combinations",
                     np.int64,
-                    toindex.to(self.nplike).dtype.type,
-                    fromindex.to(self.nplike).dtype.type,
-                    starts.to(self.nplike).dtype.type,
-                    stops.to(self.nplike).dtype.type,
+                    toindex.to(nplike).dtype.type,
+                    fromindex.to(nplike).dtype.type,
+                    starts.to(nplike).dtype.type,
+                    stops.to(nplike).dtype.type,
                 ](
                     tocarryraw,
-                    toindex.to(self.nplike),
-                    fromindex.to(self.nplike),
+                    toindex.to(nplike),
+                    fromindex.to(nplike),
                     n,
                     replacement,
-                    starts.to(self.nplike),
-                    stops.to(self.nplike),
+                    starts.to(nplike),
+                    stops.to(nplike),
                     len(self),
                 )
             )

@@ -63,6 +63,10 @@ class ListArray(Content):
     def nplike(self):
         return self._starts.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._starts.nplike
+
     Form = ListForm
 
     @property
@@ -85,12 +89,13 @@ class ListArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._starts._repr(indent + "    ", "<starts>", "</starts>\n"))
         out.append(self._stops._repr(indent + "    ", "<stops>", "</stops>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</ListArray>")
+        out.append(indent + "</ListArray>")
         out.append(post)
         return "".join(out)
 
@@ -376,7 +381,7 @@ class ListArray(Content):
             )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
+        nplike = self.nplike
 
         if head == ():
             return self
