@@ -6,7 +6,6 @@ import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.listoffsetform import ListOffsetForm
-import numpy
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -473,14 +472,6 @@ class ListOffsetArray(Content):
             if branch or (negaxis != depth):
                 raise ValueError("array with strings can only be sorted with axis=-1")
 
-            # if isinstance(parent, ak._v2.contents.ListOffsetArray):
-            #     print("string parent is ListOffsetArray", parent.offsets)
-            #     print("string parents", parents)
-            #     parentstarts, parentstops = parent._offsets[:-1], parent._offsets[1:]
-            #     print("parentstarts, parentstops", parentstarts, parentstops)
-            # else:
-            #     print("parent", parent, "?????????")
-
             if isinstance(self._content, ak._v2.contents.NumpyArray):
                 nextcarry = ak._v2.index.Index64.zeros(len(self._offsets) - 1, nplike)
 
@@ -488,9 +479,9 @@ class ListOffsetArray(Content):
                 self._handle_error(
                     nplike[
                         "awkward_ListOffsetArray_argsort_strings",
+                        nextcarry.dtype.type,
                         np.int64,
-                        np.int64,
-                        self._content._data.dtype.type,
+                        self._content.dtype.type,
                         np.int64,
                         np.int64,
                     ](
@@ -506,8 +497,6 @@ class ListOffsetArray(Content):
                     )
                 )
                 return self._carry(nextcarry, False, NestedIndexError)
-            # else:
-            #     print("self._content", self._content, "???????????????????")
 
         if isinstance(self._content, ak._v2.contents.NumpyArray):
             nextcarry = ak._v2.index.Index64.zeros(len(self._content), nplike)
@@ -520,9 +509,9 @@ class ListOffsetArray(Content):
             self._handle_error(
                 nplike[
                     "awkward_ListArray_argsort",
-                    numpy.int64,
-                    self._content._data.dtype.type,
-                    numpy.int64,
+                    np.int64,
+                    self._content.dtype.type,
+                    np.int64,
                     np.int64,
                 ](
                     nextcarry.to(nplike),
@@ -542,12 +531,7 @@ class ListOffsetArray(Content):
                 self._parameters,
             )
 
-        # if isinstance(parent, ak._v2.contents.ListOffsetArray):
-        #     print("parent is ListOffsetArray", parent.offsets)
-        #     print("parents", parents)
-
         if not branch and (negaxis == depth):
-            # print("not branch and (negaxis == depth)")
             # FIXME:
             outlength = len(parents)
             if (
@@ -568,7 +552,7 @@ class ListOffsetArray(Content):
                     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
                     np.int64,
                     np.int64,
-                    self._offsets._data.dtype.type,
+                    self._offsets.dtype.type,
                     np.int64,
                 ](
                     maxcount.to(nplike),
@@ -656,7 +640,6 @@ class ListOffsetArray(Content):
                 self._parameters,
             )
         else:
-            # print("all the rest!")
             nextparents = ak._v2.index.Index64.zeros(
                 self._offsets[-1] - self._offsets[0], nplike
             )

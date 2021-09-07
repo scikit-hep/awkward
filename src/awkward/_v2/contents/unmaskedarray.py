@@ -137,8 +137,10 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
-    def _sort_next(self, negaxis, starts, parents, ascending, stable):
-        out = self._content._sort_next(negaxis, starts, parents, ascending, stable)
+    def _sort_next(self, parent, negaxis, starts, parents, ascending, stable):
+        out = self._content._sort_next(
+            self, negaxis, starts, parents, ascending, stable
+        )
 
         if isinstance(out, ak._v2.contents.RegularArray):
             tmp = ak._v2.contents.UnmaskedArray(

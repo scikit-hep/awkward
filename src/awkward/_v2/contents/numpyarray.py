@@ -283,7 +283,33 @@ class NumpyArray(Content):
         else:
             nplike = self.nplike
 
-            offsets = ak._v2.index.Index64([0, self.shape[0]])
+            offsets_length = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges_length",
+                    offsets_length.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets_length.to(nplike),
+                    parents.to(nplike),
+                    len(parents),
+                )
+            )
+
+            offsets = ak._v2.index.Index64.zeros(offsets_length, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges",
+                    offsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets.to(nplike),
+                    offsets_length[0],
+                    parents.to(nplike),
+                    len(parents),
+                )
+            )
+
             nextcarry = ak._v2.index.Index64.zeros(self.shape[0], nplike)
 
             self._handle_error(
