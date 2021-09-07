@@ -82,6 +82,10 @@ class UnionArray(Content):
     def nplike(self):
         return self._tags.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._tags.nplike
+
     Form = UnionForm
 
     @property
@@ -259,8 +263,6 @@ class UnionArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 

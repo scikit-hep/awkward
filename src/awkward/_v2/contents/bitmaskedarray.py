@@ -95,6 +95,10 @@ class BitMaskedArray(Content):
     def nplike(self):
         return self._mask.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._mask.nplike
+
     Form = BitMaskedForm
 
     @property
@@ -250,8 +254,6 @@ class BitMaskedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 

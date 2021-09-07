@@ -111,10 +111,24 @@ class RecordArray(Content):
 
     @property
     def nplike(self):
-        if len(self._contents) == 0:
-            return ak.nplike.Numpy.instance()
+        for content in self._contents:
+            nplike = content.nonvirtual_nplike
+            if nplike is not None:
+                return nplike
         else:
-            return self._contents[0].nplike
+            for content in self._contents:
+                return content.nplike
+            else:
+                return ak.nplike.Numpy.instance()
+
+    @property
+    def nonvirtual_nplike(self):
+        for content in self._contents:
+            nplike = content.nonvirtual_nplike
+            if nplike is not None:
+                return nplike
+        else:
+            return None
 
     Form = RecordForm
 
@@ -292,8 +306,6 @@ class RecordArray(Content):
             )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 

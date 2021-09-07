@@ -153,9 +153,9 @@ class Content(object):
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        nplike = self.nplike
+        nplike = head.nplike
 
-        index = ak._v2.index.Index64(head._index)
+        index = ak._v2.index.Index64(head.index)
         outindex = ak._v2.index.Index64.empty(len(index) * length, nplike)
 
         self._handle_error(
@@ -177,7 +177,7 @@ class Content(object):
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
-        nplike = self.nplike
+        nplike = head.nplike
         jagged = head.content.toListOffsetArray64()
 
         index = ak._v2.index.Index64(head._index)
@@ -301,9 +301,9 @@ class Content(object):
                 if len(where) == 0:
                     return self
 
+                items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
                 nextwhere = ak._v2._slicing.getitem_broadcast(
-                    [ak._v2._slicing.prepare_tuple_item(x) for x in where],
-                    self.nplike,
+                    items, ak.nplike.of(*items)
                 )
 
                 next = ak._v2.contents.RegularArray(self, len(self), 1, None, None)
@@ -333,11 +333,11 @@ class Content(object):
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 elif issubclass(where.dtype.type, (np.bool_, bool)):
                     if len(where.data.shape) == 1:
-                        where = self.nplike.nonzero(where.data)[0]
+                        where = where.nplike.nonzero(where.data)[0]
                         carry = ak._v2.index.Index64(where)
                         allow_lazy = "copied"  # True, but also can be modified in-place
                     else:
-                        wheres = self.nplike.nonzero(where.data)
+                        wheres = where.nplike.nonzero(where.data)
                         return self.__getitem__(wheres)
                 else:
                     raise TypeError(
@@ -522,28 +522,27 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        tocarryraw = self.nplike.empty(n, dtype=np.intp)
+        nplike = self.nplike
+        tocarryraw = nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
-            ptr = ak._v2.index.Index64.empty(
-                combinationslen, self.nplike, dtype=np.int64
-            )
+            ptr = ak._v2.index.Index64.empty(combinationslen, nplike, dtype=np.int64)
             tocarry.append(ptr)
             tocarryraw[i] = ptr.ptr
 
-        toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
-        fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+        toindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
+        fromindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
 
         self._handle_error(
-            self.nplike[
+            nplike[
                 "awkward_RegularArray_combinations_64",
                 np.int64,
-                toindex.to(self.nplike).dtype.type,
-                fromindex.to(self.nplike).dtype.type,
+                toindex.to(nplike).dtype.type,
+                fromindex.to(nplike).dtype.type,
             ](
                 tocarryraw,
-                toindex.to(self.nplike),
-                fromindex.to(self.nplike),
+                toindex.to(nplike),
+                fromindex.to(nplike),
                 n,
                 replacement,
                 len(self),

@@ -63,6 +63,10 @@ class ListArray(Content):
     def nplike(self):
         return self._starts.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._starts.nplike
+
     Form = ListForm
 
     @property
@@ -377,7 +381,7 @@ class ListArray(Content):
             )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
+        nplike = self.nplike
 
         if head == ():
             return self

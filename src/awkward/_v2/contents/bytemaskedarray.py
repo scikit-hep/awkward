@@ -61,6 +61,10 @@ class ByteMaskedArray(Content):
     def nplike(self):
         return self._mask.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._mask.nplike
+
     Form = ByteMaskedForm
 
     @property
@@ -183,7 +187,7 @@ class ByteMaskedArray(Content):
             self._parameters,
         )
 
-    def nextcarry_outindex(self, numnull):
+    def _nextcarry_outindex(self, numnull):
         nplike = self.nplike
         self._handle_error(
             nplike[
@@ -227,7 +231,7 @@ class ByteMaskedArray(Content):
             )
 
         numnull = ak._v2.index.Index64.empty(1, nplike)
-        nextcarry, outindex = self.nextcarry_outindex(numnull)
+        nextcarry, outindex = self._nextcarry_outindex(numnull)
 
         reducedstarts = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
         reducedstops = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
@@ -264,15 +268,13 @@ class ByteMaskedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            numnull = ak._v2.index.Index64.empty(1, nplike)
-            nextcarry, outindex = self.nextcarry_outindex(numnull)
+            numnull = ak._v2.index.Index64.empty(1, self.nplike)
+            nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._getitem_next(head, tail, advanced)
@@ -311,7 +313,7 @@ class ByteMaskedArray(Content):
             return self._localindex_axis0()
         else:
             numnull = ak._v2.index.Index64.empty(1, self.nplike)
-            nextcarry, outindex = self.nextcarry_outindex(numnull)
+            nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self.content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
@@ -331,7 +333,7 @@ class ByteMaskedArray(Content):
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
-            nextcarry, outindex = self.nextcarry_outindex(numnull)
+            nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._combinations(

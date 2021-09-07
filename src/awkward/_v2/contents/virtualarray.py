@@ -233,6 +233,14 @@ class VirtualArray(Content):
         return self._cache_key
 
     @property
+    def nplike(self):
+        return self.array.nplike
+
+    @property
+    def nonvirtual_nplike(self):
+        return None
+
+    @property
     def form(self):
         return self.Form(
             self._generator.form,
@@ -383,7 +391,7 @@ class VirtualArray(Content):
 
         peek = self.peek_array
         if peek is not None:
-            return peek
+            return peek._carry(carry, allow_lazy, exception)
 
         form = None
         parameters = {}

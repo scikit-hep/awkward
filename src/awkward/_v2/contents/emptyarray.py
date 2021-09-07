@@ -43,6 +43,10 @@ class EmptyArray(Content):
     def nplike(self):
         return ak.nplike.Numpy.instance()
 
+    @property
+    def nonvirtual_nplike(self):
+        return None
+
     def __len__(self):
         return 0
 
@@ -80,8 +84,6 @@ class EmptyArray(Content):
                 raise exception("array is empty")
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 

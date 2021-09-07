@@ -29,6 +29,10 @@ class UnmaskedArray(Content):
     def nplike(self):
         return self._content.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._content.nonvirtual_nplike
+
     Form = UnmaskedForm
 
     @property
@@ -118,8 +122,6 @@ class UnmaskedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 

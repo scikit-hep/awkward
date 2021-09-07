@@ -62,6 +62,10 @@ class NumpyArray(Content):
         return self._nplike
 
     @property
+    def nonvirtual_nplike(self):
+        return self._nplike
+
+    @property
     def ptr(self):
         return self._data.ctypes.data
 
