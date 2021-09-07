@@ -89,9 +89,7 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def mask_as_bool(self, valid_when=None):
-        if valid_when is None:
-            valid_when = self._valid_when
+    def mask_as_bool(self, valid_when=True):
         if valid_when:
             return self._index.data >= 0
         else:

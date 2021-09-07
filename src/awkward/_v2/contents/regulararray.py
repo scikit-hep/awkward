@@ -86,6 +86,9 @@ class RegularArray(Content):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
+    def toRegularArray(self):
+        return self
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
