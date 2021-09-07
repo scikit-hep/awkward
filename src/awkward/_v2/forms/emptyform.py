@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 from awkward._v2.contents.content import NestedIndexError
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class EmptyForm(Form):
@@ -24,11 +24,15 @@ class EmptyForm(Form):
             and self._form_key == other._form_key
         )
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.emptyarray import EmptyArray
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
 
-        if isinstance(layout, EmptyArray):
-            return parameters_equal(self._parameters, layout._parameters)
+        if other is None:
+            return True
+
+        elif isinstance(other, EmptyForm):
+            return _parameters_equal(self._parameters, other._parameters)
+
         else:
             return False
 

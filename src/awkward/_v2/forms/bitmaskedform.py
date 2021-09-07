@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
 
@@ -94,23 +94,27 @@ class BitMaskedForm(Form):
                 and self._mask == other._mask
                 and self._valid_when == other._valid_when
                 and self._lsb_order == other._lsb_order
-                and parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:
             return False
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.bitmaskedarray import BitMaskedArray
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
 
-        if isinstance(layout, BitMaskedArray):
+        if other is None:
+            return True
+
+        elif isinstance(other, BitMaskedForm):
             return (
-                self._mask == layout.mask.form
-                and self._valid_when == layout.valid_when
-                and self._lsb_order == layout.lsb_order
-                and parameters_equal(self._parameters, layout._parameters)
-                and self._content.generated_compatibility(layout.content)
+                self._mask == other._mask
+                and self._valid_when == other._valid_when
+                and self._lsb_order == other._lsb_order
+                and _parameters_equal(self._parameters, other._parameters)
+                and self._content.generated_compatibility(other._content)
             )
+
         else:
             return False
 

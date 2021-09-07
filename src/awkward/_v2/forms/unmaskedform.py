@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class UnmaskedForm(Form):
@@ -45,19 +45,23 @@ class UnmaskedForm(Form):
             return (
                 self._has_identifier == other._has_identifier
                 and self._form_key == other._form_key
-                and parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:
             return False
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.unmaskedarray import UnmaskedArray
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
 
-        if isinstance(layout, UnmaskedArray):
-            return parameters_equal(
-                self._parameters, layout._parameters
-            ) and self._content.generated_compatibility(layout.content)
+        if other is None:
+            return True
+
+        elif isinstance(other, UnmaskedForm):
+            return _parameters_equal(
+                self._parameters, other._parameters
+            ) and self._content.generated_compatibility(other._content)
+
         else:
             return False
 

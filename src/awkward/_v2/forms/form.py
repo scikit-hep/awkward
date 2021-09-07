@@ -172,25 +172,42 @@ def from_json(input):
     return from_iter(json.loads(input))
 
 
-def parameters_equal(one, two):
+def _parameters_equal(one, two):
     if one is None and two is None:
         return True
-    if one is None:
-        one = {}
-    if two is None:
-        two = {}
-    keys = set(one.keys()).union(two.keys())
-    for key in keys:
-        if one.get(key) != two.get(key):
-            return False
+    elif one is None:
+        for value in two.values():
+            if value is not None:
+                return False
+        else:
+            return True
+    elif two is None:
+        for value in one.values():
+            if value is not None:
+                return False
+        else:
+            return True
     else:
-        return True
+        keys = set(one.keys()).union(two.keys())
+        for key in keys:
+            if one.get(key) != two.get(key):
+                return False
+        else:
+            return True
 
 
-def parameters_update(one, two):
+def _parameters_update(one, two):
     for k, v in two.items():
         if v is not None:
             one[k] = v
+
+
+def nonvirtual(form):
+    if isinstance(form, ak._v2.forms.virtualform.VirtualForm):
+        return form.form
+
+    else:
+        return form
 
 
 class Form(object):

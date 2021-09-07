@@ -8,7 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 from awkward._v2.forms.indexedform import IndexedForm
 
 
@@ -143,7 +143,7 @@ class RecordForm(Form):
                 and self._form_key == other._form_key
                 and self.is_tuple == other.is_tuple
                 and len(self._contents) == len(other._contents)
-                and parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(self._parameters, other._parameters)
             ):
                 if self.is_tuple:
                     for i in range(len(self._contents)):
@@ -165,24 +165,28 @@ class RecordForm(Form):
         else:
             return False
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.recordarray import RecordArray
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
 
-        if isinstance(layout, RecordArray):
-            if self.is_tuple == layout.is_tuple:
+        if other is None:
+            return True
+
+        elif isinstance(other, RecordForm):
+            if self.is_tuple == other.is_tuple:
                 self_keys = set(self.keys)
-                layout_keys = set(layout.keys)
-                if self_keys == layout_keys:
-                    return parameters_equal(
-                        self._parameters, layout._parameters
+                other_keys = set(other.keys)
+                if self_keys == other_keys:
+                    return _parameters_equal(
+                        self._parameters, other._parameters
                     ) and all(
-                        self.content(x).generated_compatibility(layout.content(x))
+                        self.content(x).generated_compatibility(other.content(x))
                         for x in self_keys
                     )
                 else:
                     return False
             else:
                 return False
+
         else:
             return False
 

@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class ListForm(Form):
@@ -78,22 +78,26 @@ class ListForm(Form):
                 and self._form_key == other._form_key
                 and self._starts == other._starts
                 and self._stops == other._stops
-                and parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:
             return False
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.listarray import ListArray
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
 
-        if isinstance(layout, ListArray):
+        if other is None:
+            return True
+
+        elif isinstance(other, ListForm):
             return (
-                self._starts == layout.starts.form
-                and self._stops == layout.stops.form
-                and parameters_equal(self._parameters, layout._parameters)
-                and self._content.generated_compatibility(layout.content)
+                self._starts == other._starts
+                and self._stops == other._stops
+                and _parameters_equal(self._parameters, other._parameters)
+                and self._content.generated_compatibility(other._content)
             )
+
         else:
             return False
 

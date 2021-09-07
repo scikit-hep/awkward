@@ -13,7 +13,7 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
-from awkward._v2.forms.form import Form, parameters_update
+from awkward._v2.forms.form import Form, _parameters_update
 from awkward._v2.forms.virtualform import VirtualForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -49,19 +49,22 @@ class ArrayGenerator(object):
 
     def generate_and_check(self):
         out = self.generate()
-        if self._length is not None and self._length > len(out):
-            raise ValueError(
-                "generated array does not have sufficient length: expected {0} but generated {1}".format(
-                    self._length, len(out)
-                )
-            )
-        if self._form is not None and not self._form.generated_compatibility(out):
-            print("self._form")
-            print(self._form)
-            print("out")
-            print(out)
+        # FIXME: do to_layout here
 
-            generated_form = out.form
+        if self._length is not None:
+            if self._length > len(out):
+                raise ValueError(
+                    "generated array does not have sufficient length: expected {0} but generated {1}".format(
+                        self._length, len(out)
+                    )
+                )
+            elif self._length < len(out):
+                out = out[: self._length]
+
+        generated_form = out.form
+        if self._form is not None and not self._form.generated_compatibility(
+            generated_form
+        ):
             if generated_form is None:
                 generated_str = "null"
             else:
@@ -84,6 +87,7 @@ class ArrayGenerator(object):
                     header1, header2, "\n".join(two_column)
                 )
             )
+
         return out
 
 
@@ -184,6 +188,27 @@ class SliceGenerator(ArrayGenerator):
         return self._virtualarray.array[self._slice]
 
 
+def _parameters_nonvirtual(form):
+    if form is None:
+        return None
+
+    elif isinstance(form, ak._v2.forms.virtualform.VirtualForm):
+        p = _parameters_nonvirtual(form.form)
+        if p is None and form._parameters is None:
+            return None
+        elif p is None:
+            return form._parameters
+        elif form._parameters is None:
+            return p
+        else:
+            p2 = p.copy()
+            _parameters_update(p2, form._parameters)
+            return p2
+
+    else:
+        return form._parameters
+
+
 class VirtualArray(Content):
     _new_key_lock = threading.Lock()
     _new_key_number = 0
@@ -221,7 +246,18 @@ class VirtualArray(Content):
         self._generator = generator
         self._cache = cache
         self._cache_key = cache_key
-        self._init(identifier, parameters)
+
+        p = _parameters_nonvirtual(generator.form)
+        if p is None and parameters is None:
+            self._init(identifier, None)
+        elif p is None:
+            self._init(identifier, parameters)
+        elif parameters is None:
+            self._init(identifier, p)
+        else:
+            p2 = p.copy()
+            _parameters_update(p2, parameters)
+            self._init(identifier, p2)
 
     Form = VirtualForm
 
@@ -327,7 +363,7 @@ class VirtualArray(Content):
 
         peek = self.peek_array
         if peek is not None:
-            return peek
+            return peek._getitem_range(where)
 
         length = self._generator.length
         if length is None:
@@ -335,12 +371,10 @@ class VirtualArray(Content):
 
         start, stop, _ = where.indices(length)
 
-        form = None
-        parameters = {}
-        if self._generator.form is not None:
+        if self._generator.form is None:
+            form = None
+        else:
             form = self._generator.form._getitem_range()
-            parameters_update(parameters, form.parameters)
-        parameters_update(parameters, self.parameters)
 
         start, stop, _ = where.indices(length)
         return VirtualArray(
@@ -348,47 +382,43 @@ class VirtualArray(Content):
             cache=self._cache,
             cache_key=None,
             identifier=self._range_identifier(start, stop),
-            parameters=parameters,
+            parameters=self._parameters,
         )
 
     def _getitem_field(self, where, only_fields=()):
         peek = self.peek_array
         if peek is not None:
-            return peek
+            return peek._getitem_field(where, only_fields)
 
-        form = None
-        parameters = {}
-        if self._generator.form is not None:
+        if self._generator.form is None:
+            form = None
+        else:
             form = self._generator.form._getitem_field(where, only_fields)
-            parameters_update(parameters, form.parameters)
-        parameters_update(parameters, self.parameters)
 
         return VirtualArray(
             SliceGenerator(self._generator.length, form, self, where),
             cache=self._cache,
             cache_key=None,
             identifier=self._field_identifier(where),
-            parameters=parameters,
+            parameters=self._parameters,
         )
 
     def _getitem_fields(self, where, only_fields=()):
         peek = self.peek_array
         if peek is not None:
-            return peek
+            return peek._getitem_fields(where, only_fields)
 
-        form = None
-        parameters = {}
-        if self._generator.form is not None:
+        if self._generator.form is None:
+            form = None
+        else:
             form = self._generator.form._getitem_fields(where, only_fields)
-            parameters_update(parameters, form.parameters)
-        parameters_update(parameters, self.parameters)
 
         return VirtualArray(
             SliceGenerator(self._generator.length, form, self, where),
             cache=self._cache,
             cache_key=None,
             identifier=self._field_identifier(where),
-            parameters=parameters,
+            parameters=self._parameters,
         )
 
     def _carry(self, carry, allow_lazy, exception):
@@ -398,19 +428,17 @@ class VirtualArray(Content):
         if peek is not None:
             return peek._carry(carry, allow_lazy, exception)
 
-        form = None
-        parameters = {}
-        if self._generator.form is not None:
+        if self._generator.form is None:
+            form = None
+        else:
             form = self._generator.form._carry(allow_lazy)
-            parameters_update(parameters, form.parameters)
-        parameters_update(parameters, self.parameters)
 
         return VirtualArray(
             SliceGenerator(len(carry), form, self, carry.data),
             cache=self._cache,
             cache_key=None,
             identifier=self._carry_identifier(carry, NestedIndexError),
-            parameters=parameters,
+            parameters=self._parameters,
         )
 
     def _getitem_next(self, head, tail, advanced):

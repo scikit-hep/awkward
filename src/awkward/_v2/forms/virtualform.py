@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class VirtualForm(Form):
@@ -57,37 +57,28 @@ class VirtualForm(Form):
             return (
                 self._has_identifier == other._has_identifier
                 and self._form_key == other._form_key
-                and parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(self._parameters, other._parameters)
                 and self._form == other._form
             )
         else:
             return False
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.virtualarray import VirtualArray
-
-        if isinstance(layout, VirtualArray):
-            # FIXME: generated_compatibility should have been at the level of Forms
-            # because the compatibility of a VirtualForm and a VirtualForm should
-            # unwrap both as much as possible and compare the non-virtual parts
-
-            if self._form is None or layout.form is None:
-                return parameters_equal(self._parameters, layout._parameters)
-            else:
-                self_parameters = {}
-                self_parameters.update(self._form.parameters)
-                self_parameters.update(self.parameters)
-
-                layout_parameters = {}
-                layout_parameters.update(layout.form.parameters)
-                layout_parameters.update(layout.parameters)
-
-                return parameters_equal(
-                    self_parameters, layout_parameters
-                ) and self._form.generated_compatibility(layout.form)
-
+    def generated_compatibility(self, other):
+        if other is None:
+            other_parameters = None
         else:
+            other_parameters = other._parameters
+
+        if not _parameters_equal(self._parameters, other_parameters):
             return False
+
+        nonvirtual_self = nonvirtual(self)
+        nonvirtual_other = nonvirtual(other)
+
+        if nonvirtual_self is None or nonvirtual_other is None:
+            return True
+        else:
+            return nonvirtual_self.generated_compatibility(nonvirtual_other)
 
     def _getitem_range(self):
         return VirtualForm(

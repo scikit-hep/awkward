@@ -680,7 +680,6 @@ def test_iter():
     assert len(cache) == 1
 
 
-@pytest.mark.skip("FIXME")
 def test_nested_virtualness():
     counter = [0, 0]
 

@@ -8,7 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class UnionForm(Form):
@@ -97,7 +97,7 @@ class UnionForm(Form):
                 and self._tags == other._tags
                 and self._index == other._index
                 and len(self._contents) == len(other._contents)
-                and parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(self._parameters, other._parameters)
             ):
                 for i in range(len(self._contents)):
                     if self._contents[i] != other._contents[i]:
@@ -109,17 +109,21 @@ class UnionForm(Form):
         else:
             return False
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.unionarray import UnionArray
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
 
-        if isinstance(layout, UnionArray):
-            if len(self._contents) == len(layout.contents):
-                return parameters_equal(self._parameters, layout._parameters) and all(
+        if other is None:
+            return True
+
+        elif isinstance(other, UnionForm):
+            if len(self._contents) == len(other._contents):
+                return _parameters_equal(self._parameters, other._parameters) and all(
                     x.generated_compatibility(y)
-                    for x, y in zip(self._contents, layout.contents)
+                    for x, y in zip(self._contents, other._contents)
                 )
             else:
                 return False
+
         else:
             return False
 

@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class IndexedOptionForm(Form):
@@ -60,21 +60,25 @@ class IndexedOptionForm(Form):
                 self._has_identifier == other._has_identifier
                 and self._form_key == other._form_key
                 and self._index == other._index
-                and parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(self._parameters, other._parameters)
                 and self._content == other._content
             )
         else:
             return False
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.indexedoptionarray import IndexedOptionArray
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
 
-        if isinstance(layout, IndexedOptionArray):
+        if other is None:
+            return True
+
+        elif isinstance(other, IndexedOptionForm):
             return (
-                self._index == layout.index.form
-                and parameters_equal(self._parameters, layout._parameters)
-                and self._content.generated_compatibility(layout.content)
+                self._index == other._index
+                and _parameters_equal(self._parameters, other._parameters)
+                and self._content.generated_compatibility(other._content)
             )
+
         else:
             return False
 

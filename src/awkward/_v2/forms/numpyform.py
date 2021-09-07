@@ -8,7 +8,7 @@ except ImportError:
     from collections import Iterable
 
 from awkward._v2.contents.content import NestedIndexError
-from awkward._v2.forms.form import Form, parameters_equal
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 import awkward as ak
 
@@ -125,21 +125,25 @@ class NumpyForm(Form):
                 and self._form_key == other._form_key
                 and self._primitive == other._primitive
                 and self._inner_shape == other._inner_shape
-                and parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(self._parameters, other._parameters)
             )
         else:
             return False
 
-    def generated_compatibility(self, layout):
-        from awkward._v2.contents.numpyarray import NumpyArray
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
 
-        if isinstance(layout, NumpyArray):
+        if other is None:
+            return True
+
+        elif isinstance(other, NumpyForm):
             return (
                 ak._v2.types.numpytype._primitive_to_dtype[self._primitive]
-                == layout.dtype
-                and self._inner_shape == layout.shape[1:]
-                and parameters_equal(self._parameters, layout._parameters)
+                == ak._v2.types.numpytype._primitive_to_dtype[other._primitive]
+                and self._inner_shape == other._inner_shape
+                and _parameters_equal(self._parameters, other._parameters)
             )
+
         else:
             return False
 
