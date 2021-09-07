@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError  # noqa: F401
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.unmaskedform import UnmaskedForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -55,6 +55,23 @@ class UnmaskedArray(Content):
         out.append("</UnmaskedArray>")
         out.append(post)
         return "".join(out)
+
+    def toIndexedOptionArray64(self):
+        arange = self._content.nplike.arange(len(self._content), dtype=np.int64)
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            ak._v2.index.Index64(arange),
+            self._content,
+            self._identifier,
+            self._parameters,
+        )
+
+    def mask_as_bool(self, valid_when=None):
+        if valid_when is None:
+            valid_when = self._valid_when
+        if valid_when:
+            return self._content.nplike.ones(len(self._content), dtype=np.bool_)
+        else:
+            return self._content.nplike.zeros(len(self._content), dtype=np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))

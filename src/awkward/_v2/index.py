@@ -147,9 +147,6 @@ class Index(object):
     def __copy__(self):
         return Index(self._data.copy())
 
-    def convert_to(self, nplike):
-        return Index(nplike.asarray(self._data))
-
 
 class Index8(Index):
     _expected_dtype = np.dtype(np.int8)

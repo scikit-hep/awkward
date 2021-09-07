@@ -5,7 +5,8 @@ from __future__ import absolute_import
 import numpy as np
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.regularform import RegularForm
 
 
@@ -80,6 +81,10 @@ class RegularArray(Content):
         out.append(post)
         return "".join(out)
 
+    def toListOffsetArray64(self, start_at_zero=False):
+        offsets = self._compact_offsets64(start_at_zero)
+        return self._broadcast_tooffsets64(offsets)
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -143,6 +148,7 @@ class RegularArray(Content):
             raise NestedIndexError(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
+
         self._handle_error(
             nplike[
                 "awkward_RegularArray_getitem_carry",
@@ -180,12 +186,14 @@ class RegularArray(Content):
     def _broadcast_tooffsets64(self, offsets):
         nplike = self.nplike
         if len(offsets) == 0 or offsets[0] != 0:
-            raise ValueError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0"
+            raise AssertionError(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {0}".format(
+                    "(empty)" if len(offsets) == 0 else str(offsets[0])
+                )
             )
 
         if len(offsets) - 1 != self._length:
-            raise ValueError(
+            raise AssertionError(
                 "cannot broadcast RegularArray of length {0} to length {1}".format(
                     self._length, len(offsets) - 1
                 )
@@ -227,9 +235,9 @@ class RegularArray(Content):
                 offsets, self._content, self._identifier, self._parameters
             )
 
-    def toListOffsetArray64(self, start_at_zero=False):
-        offsets = self._compact_offsets64(start_at_zero)
-        return self._broadcast_tooffsets64(offsets)
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        out = self.toListOffsetArray64(True)
+        return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def maybe_to_nplike(self, nplike):
         out = self._content.maybe_to_nplike(nplike)
@@ -245,7 +253,7 @@ class RegularArray(Content):
             return self
 
         elif isinstance(head, int):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
             self._handle_error(
                 nplike["awkward_RegularArray_getitem_next_at", nextcarry.dtype.type](
@@ -260,7 +268,7 @@ class RegularArray(Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             start, stop, step = head.indices(self._size)
 
             nextsize = 0
@@ -338,7 +346,7 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
 
             regular_flathead = ak._v2.index.Index64.empty(len(flathead), nplike)
@@ -383,7 +391,7 @@ class RegularArray(Content):
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
-                    return self._getitem_next_array_wrap(
+                    return ak._v2._slicing.getitem_next_array_wrap(
                         out, head.metadata.get("shape", (len(head),))
                     )
                 else:
@@ -420,10 +428,49 @@ class RegularArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            if advanced is not None:
+                raise NestedIndexError(
+                    self,
+                    head,
+                    "cannot mix jagged slice with NumPy-style advanced indexing",
+                )
+
+            if len(head) != self._size:
+                raise NestedIndexError(
+                    self,
+                    head,
+                    "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                        len(head), type(self).__name__, self._size
+                    ),
+                )
+
+            regularlength = self._length
+            singleoffsets = head._offsets
+            multistarts = ak._v2.index.Index64.empty(len(head) * regularlength, nplike)
+            multistops = ak._v2.index.Index64.empty(len(head) * regularlength, nplike)
+
+            self._handle_error(
+                nplike[
+                    "awkward_RegularArray_getitem_jagged_expand",
+                    multistarts.dtype.type,
+                    multistops.dtype.type,
+                    singleoffsets.dtype.type,
+                ](
+                    multistarts.to(nplike),
+                    multistops.to(nplike),
+                    singleoffsets.to(nplike),
+                    len(head),
+                    regularlength,
+                ),
+            )
+            down = self._content._getitem_next_jagged(
+                multistarts, multistops, head._content, tail
+            )
+
+            return RegularArray(down, len(head), self._length, None, self._parameters)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))

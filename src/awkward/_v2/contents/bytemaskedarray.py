@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -89,6 +90,34 @@ class ByteMaskedArray(Content):
         out.append("</ByteMaskedArray>")
         out.append(post)
         return "".join(out)
+
+    def toIndexedOptionArray64(self):
+        nplike = self.nplike
+        index = ak._v2.index.Index64.empty(len(self._mask), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_toIndexedOptionArray",
+                index.dtype.type,
+                self._mask.dtype.type,
+            ](
+                index.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+            ),
+        )
+
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            index, self._content, self._identifier, self._parameters
+        )
+
+    def mask_as_bool(self, valid_when=None):
+        if valid_when is None:
+            valid_when = self._valid_when
+        if valid_when == self._valid_when:
+            return self._mask.data != 0
+        else:
+            return self._mask.data != 1
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -183,6 +212,54 @@ class ByteMaskedArray(Content):
         )
         return nextcarry, outindex
 
+    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+        nplike = self.nplike
+        if len(slicestarts) != len(self):
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                    len(slicestarts), type(self).__name__, len(self)
+                ),
+            )
+
+        numnull = ak._v2.index.Index64.empty(1, nplike)
+        nextcarry, outindex = self.nextcarry_outindex(numnull)
+
+        reducedstarts = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
+        reducedstops = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
+
+        self._handle_error(
+            nplike[
+                "awkward_MaskedArray_getitem_next_jagged_project",
+                outindex.dtype.type,
+                slicestarts.dtype.type,
+                slicestops.dtype.type,
+                reducedstarts.dtype.type,
+                reducedstops.dtype.type,
+            ](
+                outindex.to(nplike),
+                slicestarts.to(nplike),
+                slicestops.to(nplike),
+                reducedstarts.to(nplike),
+                reducedstops.to(nplike),
+                len(self),
+            )
+        )
+
+        next = self._content._carry(nextcarry, True, NestedIndexError)
+        out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
+
+        out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            outindex, out, self._identifier, self._parameters
+        )
+        return out2._simplify_optiontype()
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
@@ -190,7 +267,7 @@ class ByteMaskedArray(Content):
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
             numnull = ak._v2.index.Index64.empty(1, nplike)
             nextcarry, outindex = self.nextcarry_outindex(numnull)
 
@@ -217,10 +294,10 @@ class ByteMaskedArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            return self._getitem_next_jagged_generic(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))

@@ -9,7 +9,8 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.unionform import UnionForm
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -233,13 +234,36 @@ class UnionArray(Content):
         )
         return outindex
 
+    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+        simplified = self._simplify_uniontype()
+        if (
+            simplified.index.dtype == np.dtype(np.int32)
+            or simplified.index.dtype == np.dtype(np.uint32)
+            or simplified.index.dtype == np.dtype(np.int64)
+        ):
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                "cannot apply jagged slices to irreducible union arrays",
+            )
+        return simplified._getitem_next_jagged(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
     def _getitem_next(self, head, tail, advanced):
         nplike = self.nplike  # noqa: F841
 
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+        elif isinstance(
+            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+        ):
             outcontents = []
             for i in range(len(self._contents)):
                 projection = self._project(i)
@@ -267,11 +291,8 @@ class UnionArray(Content):
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
 
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
-
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))
