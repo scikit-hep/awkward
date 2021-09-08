@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import re
 import sys
 import os
+import os.path
 import warnings
 import itertools
 import numbers
@@ -39,6 +40,13 @@ kMaxUInt32 = 4294967295  # 2**32 - 1
 kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
+
+
+def is_file_path(x):
+    try:
+        return os.path.isfile(x)
+    except OSError:
+        return False
 
 
 def isint(x):
