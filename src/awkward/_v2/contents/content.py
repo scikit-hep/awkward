@@ -534,9 +534,11 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is " + str(depth) + ")"
                 )
 
-        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
         starts = ak._v2.index.Index64.zeros(1, self.nplike)
-        return self._sort_next(self, negaxis, starts, parents, ascending, stable)
+        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        return self._sort_next(
+            self, negaxis, starts, parents, 1, None, ascending, stable
+        )
 
     @property
     def purelist_isregular(self):

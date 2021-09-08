@@ -268,21 +268,24 @@ class NumpyArray(Content):
 
         return True
 
-    def _sort_next(self, parent, negaxis, starts, parents, ascending, stable):
+    def _sort_next(
+        self, parent, negaxis, starts, parents, outlength, shifts, ascending, stable
+    ):
         if len(self.shape) == 0:
             raise TypeError(
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
         elif len(self.shape) != 1 or not self.iscontiguous():
+            print(self.iscontiguous())
             contiguous_self = ak._v2.contents.NumpyArray(
                 self._data[self.localindex(-1)]
             )
+            print(contiguous_self)
             return contiguous_self.toRegularArray()._sort_next(
-                self, negaxis, starts, parents, ascending, stable
+                self, negaxis, starts, parents, outlength, shifts, ascending, stable
             )
         else:
             nplike = self.nplike
-
             offsets_length = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
                 nplike[
@@ -310,23 +313,78 @@ class NumpyArray(Content):
                 )
             )
 
-            nextcarry = ak._v2.index.Index64.zeros(self.shape[0], nplike)
-
+            contiguous_self = ak._v2.contents.NumpyArray(
+                self._data[self.localindex(-1)]
+            )
             self._handle_error(
                 nplike[
-                    "awkward_argsort",
-                    numpy.int64,
+                    "awkward_sort",
+                    contiguous_self._data.dtype.type,
                     self._data.dtype.type,
-                    numpy.int64,
+                    offsets.dtype.type,
                 ](
-                    nextcarry.to(nplike),
+                    contiguous_self._data,
                     self._data,
                     self.shape[0],
                     offsets.to(nplike),
                     len(offsets),
+                    len(parents),
                     ascending,
                     stable,
                 )
             )
-
-            return ak._v2.contents.NumpyArray(self._data[nextcarry])
+            return contiguous_self
+            # nextcarry = ak._v2.index.Index64.zeros(self.shape[0], nplike)
+            #
+            # self._handle_error(
+            #     nplike[
+            #         "awkward_argsort",
+            #         nextcarry.dtype.type,
+            #         self._data.dtype.type,
+            #         offsets.dtype.type,
+            #     ](
+            #         nextcarry.to(nplike),
+            #         self._data,
+            #         self.shape[0],
+            #         offsets.to(nplike),
+            #         len(offsets),
+            #         ascending,
+            #         stable,
+            #     )
+            # )
+            # print("parent", parent)
+            # print("parents", parents)
+            # print("starts", starts)
+            # print("offsets", offsets)
+            # print("shifts", shifts)
+            # print("nextcarry before", nextcarry)
+            #
+            # if shifts is not None:
+            #     print("parent", parent)
+            #     print("parents", parents)
+            #     print("starts", starts)
+            #     print("offsets", offsets)
+            #     print("shifts", shifts)
+            #     print("nextcarry before", nextcarry)
+            #     self._handle_error(
+            #         nplike[
+            #             "awkward_NumpyArray_rearrange_shifted",
+            #             nextcarry.dtype.type,
+            #             shifts.dtype.type,
+            #             offsets.dtype.type,
+            #             parents.dtype.type,
+            #             shifts.dtype.type,
+            #         ](
+            #             nextcarry.to(nplike),
+            #             shifts.to(nplike),
+            #             len(shifts),
+            #             offsets.to(nplike),
+            #             len(offsets),
+            #             parents.to(nplike),
+            #             len(parents),
+            #             starts.to(nplike),
+            #             len(starts),
+            #         )
+            #     )
+            # print(nextcarry)
+            # return ak._v2.contents.NumpyArray(self._data[nextcarry])

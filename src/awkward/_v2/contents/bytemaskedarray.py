@@ -265,6 +265,9 @@ class ByteMaskedArray(Content):
             self._parameters,
         )
 
-    def _sort_next(self, parent, negaxis, starts, parents, ascending, stable):
-        next = self.toIndexedOptionArray()
-        return next._sort_next(next, negaxis, starts, parents, ascending, stable)
+    def _sort_next(
+        self, parent, negaxis, starts, parents, outlength, shifts, ascending, stable
+    ):
+        return self.toIndexedOptionArray()._sort_next(
+            parent, negaxis, starts, parents, outlength, shifts, ascending, stable
+        )

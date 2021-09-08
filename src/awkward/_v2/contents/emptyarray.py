@@ -103,5 +103,10 @@ class EmptyArray(Content):
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 
-    def _sort_next(self, parent, negaxis, starts, parents, ascending, stable):
-        return self
+    def _sort_next(
+        self, parent, negaxis, starts, parents, outlength, shifts, ascending, stable
+    ):
+        as_numpy = ak._v2.contents.NumpyArray(self)
+        return as_numpy._sort_next(
+            parent, negaxis, starts, parents, outlength, shifts, ascending, stable
+        )
