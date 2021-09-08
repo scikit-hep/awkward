@@ -45,7 +45,7 @@ kMaxLevels = 48
 def is_file_path(x):
     try:
         return os.path.isfile(x)
-    except OSError:
+    except ValueError:
         return False
 
 
