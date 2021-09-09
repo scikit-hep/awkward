@@ -7,9 +7,9 @@ import urllib.request
 import urllib.error
 
 
-@pytest.mark.skipif(ak._util.win, reason="requires Windows")
+@pytest.mark.skipif(not ak._util.win, reason="requires Windows")
 def test():
-    url = "https://raw.githubusercontent.com/Chicago/osd-biske-routes/5f556dc/data/Bikeroutes.geojson"
+    url = "https://raw.githubusercontent.com/Chicago/osd-bike-routes/5f556dc/data/Bikeroutes.geojson"
     try:
         bikeroutes_json = urllib.request.urlopen(url).read()
     except urllib.error.URLError:
