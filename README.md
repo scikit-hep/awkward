@@ -206,11 +206,10 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 | [1.2.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.2.0) | 2021-04-01 | _(none)_ |
 | [1.3.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.3.0) | 2021-06-01 | _(none)_ |
 | [1.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.4.0) | 2021-07-02 | _(none)_ |
+| [1.5.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.5.0) | 2021-09-10 | _(none)_ |
 
 | Version number | Target date | Deprecated features to remove in this version |
 |:--------------:|:-----------:|:----------------------------------------------|
-| 1.5.0 | 2021-08-01 | |
-| 1.6.0 | 2021-09-01 | |
 | 1.7.0 | 2021-10-01 | [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) default `axis` will be `-1`. Until then, all uses without an explicit `axis` raise warnings. |
 | 1.8.0 | 2021-11-01 | |
 | 1.9.0 | 2021-12-01 | |
@@ -236,10 +235,11 @@ See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-
    * [Demo for Electron Ion Collider users](https://github.com/jpivarski/2020-04-08-eic-jlab#readme) ([video](https://www.youtube.com/watch?v=FoxNS6nlbD0)) on April 8, 2020.
    * [Presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) (video) on July 5, 2020.
    * [Tutorial at PyHEP 2020](https://youtu.be/ea-zYLQBS4U) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski/2020-07-13-pyhep2020-tutorial.git/1.1?urlpath=lab/tree/tutorial.ipynb)) on July 13, 2020.
+   * [Tutorial at PyHEP 2021](https://youtu.be/5aWAxvdrszw?t=9189) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski-talks/2021-07-06-pyhep-uproot-awkward-tutorial/v1.2?urlpath=lab/tree/uproot-awkward-tutorial.ipynb) on July 6, 2021.
 
 # Acknowledgements
 
-Support for this work was provided by NSF cooperative agreement OAC-1836650 (IRIS-HEP), grant OAC-1450377 (DIANA/HEP) and PHY-1520942 (US-CMS LHC Ops).
+Support for this work was provided by NSF cooperative agreement [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) (IRIS-HEP), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-1520942](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).
 
 We also thank [Erez Shinan](https://github.com/erezsh) and the developers of the [Lark standalone parser](https://github.com/lark-parser/lark), which is used to parse type strings as type objects.
 
