@@ -257,6 +257,15 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "bmwiedemann",
+      "name": "Bernhard M. Wiedemann",
+      "avatar_url": "https://avatars.githubusercontent.com/u/637990?v=4",
+      "profile": "http://lizards.opensuse.org/author/bmwiedemann/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
