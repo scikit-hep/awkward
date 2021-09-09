@@ -266,6 +266,15 @@
       "contributions": [
         "maintenance"
       ]
+    },
+    {
+      "login": "SantamRC",
+      "name": "Santam Roy Choudhury",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52635773?v=4",
+      "profile": "https://github.com/SantamRC",
+      "contributions": [
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
