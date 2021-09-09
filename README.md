@@ -283,6 +283,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <td align="center"><a href="https://github.com/HenryDayHall"><img src="https://avatars.githubusercontent.com/u/12996763?v=4?s=100" width="100px;" alt=""/><br /><sub><b>HenryDayHall</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=HenryDayHall" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/agoose77"><img src="https://avatars.githubusercontent.com/u/1248413?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Angus Hollands</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=agoose77" title="Tests">⚠️</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=agoose77" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ioanaif"><img src="https://avatars.githubusercontent.com/u/9751871?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ioanaif</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ioanaif" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ioanaif" title="Tests">⚠️</a></td>
+    <td align="center"><a href="http://lizards.opensuse.org/author/bmwiedemann/"><img src="https://avatars.githubusercontent.com/u/637990?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bernhard M. Wiedemann</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=bmwiedemann" title="Code">💻</a></td>
   </tr>
 </table>
 
