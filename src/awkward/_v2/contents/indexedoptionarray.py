@@ -4,10 +4,11 @@ from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.indexedoptionform import IndexedOptionForm
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
 
 
 class IndexedOptionArray(Content):
@@ -47,6 +48,10 @@ class IndexedOptionArray(Content):
     def nplike(self):
         return self._index.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._index.nplike
+
     Form = IndexedOptionForm
 
     @property
@@ -68,13 +73,31 @@ class IndexedOptionArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedOptionArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</IndexedOptionArray>")
+        out.append(indent + "</IndexedOptionArray>")
         out.append(post)
         return "".join(out)
+
+    def toIndexedOptionArray64(self):
+        if self._index.dtype == np.dtype(np.int64):
+            return self
+        else:
+            return IndexedOptionArray(
+                self._index.astype(np.int64),
+                self._content,
+                identifier=self._identifier,
+                parameters=self._parameters,
+            )
+
+    def mask_as_bool(self, valid_when=True):
+        if valid_when:
+            return self._index.data >= 0
+        else:
+            return self._index.data < 0
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -133,7 +156,7 @@ class IndexedOptionArray(Content):
             self._parameters,
         )
 
-    def nextcarry_outindex(self, nplike):
+    def _nextcarry_outindex(self, nplike):
         numnull = ak._v2.index.Index64.empty(1, nplike)
 
         self._handle_error(
@@ -167,16 +190,58 @@ class IndexedOptionArray(Content):
 
         return numnull[0], nextcarry, outindex
 
-    def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
+    def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+        nplike = self.nplike
+        if len(slicestarts) != len(self):
+            raise NestedIndexError(
+                self,
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                    len(slicestarts), type(self).__name__, len(self)
+                ),
+            )
 
+        numnull, nextcarry, outindex = self._nextcarry_outindex(nplike)
+
+        reducedstarts = ak._v2.index.Index64.empty(len(self) - numnull, nplike)
+        reducedstops = ak._v2.index.Index64.empty(len(self) - numnull, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_MaskedArray_getitem_next_jagged_project",
+                outindex.dtype.type,
+                slicestarts.dtype.type,
+                slicestops.dtype.type,
+                reducedstarts.dtype.type,
+                reducedstops.dtype.type,
+            ](
+                outindex.to(nplike),
+                slicestarts.to(nplike),
+                slicestops.to(nplike),
+                reducedstarts.to(nplike),
+                reducedstops.to(nplike),
+                len(self),
+            )
+        )
+        next = self._content._carry(nextcarry, True, NestedIndexError)
+        out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
+        out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            outindex, out, self._identifier, self._parameters
+        )
+        return out2._simplify_optiontype()
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return self._getitem_next_jagged_generic(
+            slicestarts, slicestops, slicecontent, tail
+        )
+
+    def _getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
-            nexthead, nexttail = self._headtail(tail)
+            nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
-            numnull, nextcarry, outindex = self.nextcarry_outindex(nplike)
+            numnull, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._getitem_next(head, tail, advanced)
@@ -199,7 +264,7 @@ class IndexedOptionArray(Content):
             raise NotImplementedError
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise AssertionError(repr(head))
@@ -215,7 +280,7 @@ class IndexedOptionArray(Content):
             ](numnull.to(self.nplike), self._index.to(self.nplike), len(self._index))
         )
 
-        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull.value, self.nplike)
+        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull[0], self.nplike)
 
         self._handle_error(
             self.nplike[
@@ -237,7 +302,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         else:
-            _, nextcarry, outindex = self.nextcarry_outindex(self.nplike)
+            _, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
 
             next = self._content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
@@ -397,3 +462,19 @@ class IndexedOptionArray(Content):
                     "IndexedOptionArray; "
                     "instead, it returned " + out
                 )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            _, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
+            next = self._content._carry(nextcarry, True, NestedIndexError)
+            out = next._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                outindex, out, parameters=parameters
+            )
+            return out2._simplify_optiontype()
+

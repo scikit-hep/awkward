@@ -9,6 +9,10 @@ import awkward as ak  # noqa: F401
 from awkward._v2.contents.content import NestedIndexError
 from awkward._v2.tmp_for_testing import v1v2_equal, v2_to_v1
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 
 def test_EmptyArray():
     v2a = ak._v2.contents.emptyarray.EmptyArray()

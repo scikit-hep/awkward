@@ -3,10 +3,10 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError  # noqa: F401
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.unmaskedform import UnmaskedForm
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
 
 
 class UnmaskedArray(Content):
@@ -29,6 +29,10 @@ class UnmaskedArray(Content):
     def nplike(self):
         return self._content.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._content.nonvirtual_nplike
+
     Form = UnmaskedForm
 
     @property
@@ -49,12 +53,37 @@ class UnmaskedArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnmaskedArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</UnmaskedArray>")
+        out.append(indent + "</UnmaskedArray>")
         out.append(post)
         return "".join(out)
+
+    def toByteMaskedArray(self):
+        return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+            ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
+            self._content,
+            valid_when=True,
+            identifier=self._identifier,
+            parameters=self._parameters,
+        )
+
+    def toIndexedOptionArray64(self):
+        arange = self._content.nplike.arange(len(self._content), dtype=np.int64)
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            ak._v2.index.Index64(arange),
+            self._content,
+            self._identifier,
+            self._parameters,
+        )
+
+    def mask_as_bool(self, valid_when=True):
+        if valid_when:
+            return self._content.nplike.ones(len(self._content), dtype=np.bool_)
+        else:
+            return self._content.nplike.zeros(len(self._content), dtype=np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -93,8 +122,6 @@ class UnmaskedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
@@ -168,3 +195,17 @@ class UnmaskedArray(Content):
 
         else:
             return out
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self._axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                self._content._combinations(
+                    n, replacement, recordlookup, parameters, posaxis, depth
+                ),
+                self._identifier,
+                self._parameters,
+            )
+

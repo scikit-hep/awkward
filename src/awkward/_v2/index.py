@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
 
 _dtype_to_form = {
     np.dtype(np.int8): "i8",
@@ -79,6 +79,10 @@ class Index(object):
             self._metadata = {}
         return self._metadata
 
+    @property
+    def ptr(self):
+        return self._data.ctypes.data
+
     def __len__(self):
         return len(self._data)
 
@@ -142,9 +146,6 @@ class Index(object):
 
     def __copy__(self):
         return Index(self._data.copy())
-
-    def convert_to(self, nplike):
-        return Index(nplike.asarray(self._data))
 
 
 class Index8(Index):

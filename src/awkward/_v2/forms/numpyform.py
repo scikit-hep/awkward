@@ -7,11 +7,12 @@ try:
 except ImportError:
     from collections import Iterable
 
-from awkward._v2.forms.form import Form
+from awkward._v2.contents.content import NestedIndexError
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
 
 
 def from_dtype(dtype, parameters=None):
@@ -86,6 +87,10 @@ class NumpyForm(Form):
     def inner_shape(self):
         return self._inner_shape
 
+    @property
+    def itemsize(self):
+        return ak._v2.types.numpytype._primitive_to_dtype[self._primitive].itemsize
+
     def __repr__(self):
         args = [repr(self._primitive)]
         if len(self._inner_shape) > 0:
@@ -99,7 +104,7 @@ class NumpyForm(Form):
             and not toplevel
             and len(self._inner_shape) == 0
             and not self._has_identifier
-            and len(self._parameters) == 0
+            and (self._parameters is None or len(self._parameters) == 0)
             and self._form_key is None
         ):
             return self._primitive
@@ -112,6 +117,59 @@ class NumpyForm(Form):
             if verbose or len(self._inner_shape) > 0:
                 out["inner_shape"] = list(self._inner_shape)
             return self._tolist_extra(out, verbose)
+
+    def __eq__(self, other):
+        if isinstance(other, NumpyForm):
+            return (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self._primitive == other._primitive
+                and self._inner_shape == other._inner_shape
+                and _parameters_equal(self._parameters, other._parameters)
+            )
+        else:
+            return False
+
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
+
+        if other is None:
+            return True
+
+        elif isinstance(other, NumpyForm):
+            return (
+                ak._v2.types.numpytype._primitive_to_dtype[self._primitive]
+                == ak._v2.types.numpytype._primitive_to_dtype[other._primitive]
+                and self._inner_shape == other._inner_shape
+                and _parameters_equal(self._parameters, other._parameters)
+            )
+
+        else:
+            return False
+
+    def _getitem_range(self):
+        return NumpyForm(
+            self._primitive,
+            inner_shape=self._inner_shape,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        raise NestedIndexError(self, where, "not an array of records")
+
+    def _getitem_fields(self, where, only_fields=()):
+        raise NestedIndexError(self, where, "not an array of records")
+
+    def _carry(self, allow_lazy):
+        return NumpyForm(
+            self._primitive,
+            inner_shape=self._inner_shape,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     @property
     def purelist_isregular(self):

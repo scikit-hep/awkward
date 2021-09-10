@@ -3,3 +3,4 @@ PyYAML
 black
 pycparser
 lark-parser
+sphinx-rtd-theme>=0.5,<1.0

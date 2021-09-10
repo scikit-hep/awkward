@@ -3,10 +3,12 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.content import Content, NestedIndexError
+from awkward._v2._slicing import NestedIndexError
+from awkward._v2.contents.content import Content
 from awkward._v2.forms.emptyform import EmptyForm
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumPyMetadata.instance()
+numpy = ak.nplike.NumPy.instance()
 
 
 class EmptyArray(Content):
@@ -17,7 +19,15 @@ class EmptyArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        return indent + pre + "<EmptyArray len='0'/>" + post
+        extra = self._repr_extra(indent + "    ")
+        if len(extra) == 0:
+            return indent + pre + "<EmptyArray len='0'/>" + post
+        else:
+            out = [indent, pre, "<EmptyArray len='0'>"]
+            out.extend(extra)
+            out.append("\n" + indent + "</EmptyArray>")
+            out.append(post)
+            return "".join(out)
 
     Form = EmptyForm
 
@@ -31,10 +41,19 @@ class EmptyArray(Content):
 
     @property
     def nplike(self):
-        return ak.nplike.Numpy.instance()
+        return ak.nplike.NumPy.instance()
+
+    @property
+    def nonvirtual_nplike(self):
+        return None
 
     def __len__(self):
         return 0
+
+    def toNumpyArray(self, dtype):
+        return ak._v2.contents.numpyarray.NumpyArray(
+            numpy.empty(0, dtype), self._identifier, self._parameters
+        )
 
     def _getitem_nothing(self):
         return self
@@ -65,8 +84,6 @@ class EmptyArray(Content):
                 raise exception("array is empty")
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
@@ -92,10 +109,10 @@ class EmptyArray(Content):
             raise NestedIndexError(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            raise NestedIndexError(self, head, "array is empty")
 
         else:
             raise AssertionError(repr(head))
@@ -117,3 +134,7 @@ class EmptyArray(Content):
             kind,
             order,
         )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)
+

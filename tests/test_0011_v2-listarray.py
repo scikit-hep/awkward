@@ -8,6 +8,10 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
 starts1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6]))
 stops1 = ak.layout.Index64(np.array([3, 3, 5, 6, 9]))
