@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import awkward as ak
-import numpy
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.numpyform import NumpyForm
 
@@ -334,57 +333,3 @@ class NumpyArray(Content):
                 )
             )
             return contiguous_self
-            # nextcarry = ak._v2.index.Index64.zeros(self.shape[0], nplike)
-            #
-            # self._handle_error(
-            #     nplike[
-            #         "awkward_argsort",
-            #         nextcarry.dtype.type,
-            #         self._data.dtype.type,
-            #         offsets.dtype.type,
-            #     ](
-            #         nextcarry.to(nplike),
-            #         self._data,
-            #         self.shape[0],
-            #         offsets.to(nplike),
-            #         len(offsets),
-            #         ascending,
-            #         stable,
-            #     )
-            # )
-            # print("parent", parent)
-            # print("parents", parents)
-            # print("starts", starts)
-            # print("offsets", offsets)
-            # print("shifts", shifts)
-            # print("nextcarry before", nextcarry)
-            #
-            # if shifts is not None:
-            #     print("parent", parent)
-            #     print("parents", parents)
-            #     print("starts", starts)
-            #     print("offsets", offsets)
-            #     print("shifts", shifts)
-            #     print("nextcarry before", nextcarry)
-            #     self._handle_error(
-            #         nplike[
-            #             "awkward_NumpyArray_rearrange_shifted",
-            #             nextcarry.dtype.type,
-            #             shifts.dtype.type,
-            #             offsets.dtype.type,
-            #             parents.dtype.type,
-            #             shifts.dtype.type,
-            #         ](
-            #             nextcarry.to(nplike),
-            #             shifts.to(nplike),
-            #             len(shifts),
-            #             offsets.to(nplike),
-            #             len(offsets),
-            #             parents.to(nplike),
-            #             len(parents),
-            #             starts.to(nplike),
-            #             len(starts),
-            #         )
-            #     )
-            # print(nextcarry)
-            # return ak._v2.contents.NumpyArray(self._data[nextcarry])

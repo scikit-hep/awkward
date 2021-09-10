@@ -2,11 +2,11 @@
 
 from __future__ import absolute_import
 
-import numpy as np
-
 import awkward as ak
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.regularform import RegularForm
+
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class RegularArray(Content):
@@ -468,7 +468,10 @@ class RegularArray(Content):
 
             offsets = ak._v2.index.Index64.zeros(self._length + 1, nplike)
             self._handle_error(
-                nplike["awkward_RegularArray_compact_offsets", np.int64,](  # noqa: E231
+                nplike[
+                    "awkward_RegularArray_compact_offsets",
+                    offsets.dtype.type,
+                ](  # noqa: E231
                     offsets.to(nplike),
                     self._length,
                     self._size,
@@ -480,9 +483,9 @@ class RegularArray(Content):
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_argsort",
-                    np.int64,
+                    nextcarry.dtype.type,
                     self._content._data.dtype.type,
-                    np.int64,
+                    offsets.dtype.type,
                 ](
                     nextcarry.to(nplike),
                     self._content._data,

@@ -7,12 +7,12 @@ try:
 except ImportError:
     from collections import Iterable
 
-import numpy as np
-
 import awkward as ak
 from awkward._v2.record import Record
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.recordform import RecordForm
+
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class RecordArray(Content):
