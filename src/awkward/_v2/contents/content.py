@@ -505,6 +505,36 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return self._localindex(axis, 0)
 
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+        """
+        Args:
+            axis (int): this argument defines an axis along
+                which to sort. The default is `-1`, which
+                sorts along the innermost axis. Axes are defined similar to
+                Numpy axes. `axis=0` is the "first" axis and `axis=-1` is
+                the "last" axis. Unlike other operations, sorting does not
+                support `axis=None`.
+            ascending (bool): if `True`, the elements are sorted in ascending
+                order.
+            stable (bool): if `True`, the order of equivalent elements is guaranteed
+                to be preserved.
+            kind ({‘quicksort’, ‘mergesort’, ‘heapsort’, ‘stable’}, optional):
+                an optional sorting algorithm. This is similar to NumPy
+                sort.
+            order (str or list of str, optional): similar to NumPy.
+
+        Puts Content elements in an ordered sequence: numeric or lexicographical,
+        ascending or descending.
+
+        The gaps and None values are not sorted, and if a None value occurs at
+        a higher axis than the one being sorted, it is kept as a placeholder
+        so that the outer list length does not change.
+
+        This function is similar to NumPy [sort](https://numpy.org/doc/stable/reference/generated/numpy.sort.html).
+        """
+
+        if kind is not None:
+            raise NotImplementedError
+
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:

@@ -654,7 +654,7 @@ def test_indexedoptionarray_sort():
             ["nest"],
         ),
     )
-    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+    assert ak.to_list(v2_to_v1(v2_array.sort(order="x"))) == [
         {"nest": 2.2},
         {"nest": 3.3},
         {"nest": 3.3},
@@ -778,3 +778,21 @@ def test_sort_zero_length_arrays():
     assert ak.to_list(array) == []
     assert ak.to_list(ak.sort(array)) == []
     assert ak.to_list(ak.argsort(array)) == []
+
+
+def test_recordarray_sort():
+    v2_array = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 33.33, 4.4, 5.5, -6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        3,
+    )
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
+        [{"nest": 0.0}, {"nest": 1.1}, {"nest": 2.2}],
+        [{"nest": 4.4}, {"nest": 5.5}, {"nest": 33.33}],
+    ]
