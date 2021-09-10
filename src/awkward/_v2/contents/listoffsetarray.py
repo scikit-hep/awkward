@@ -7,6 +7,7 @@ from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.listoffsetform import ListOffsetForm
 
+
 np = ak.nplike.NumpyMetadata.instance()
 
 
@@ -458,7 +459,9 @@ class ListOffsetArray(Content):
                 self._parameters,
             )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
         nplike = self.nplike
         if len(self._offsets) - 1 == 0:
             return self
@@ -578,6 +581,8 @@ class ListOffsetArray(Content):
                 maxnextparents[0] + 1,
                 ascending,
                 stable,
+                kind,
+                order,
             )
 
             outcarry = ak._v2.index.Index64.zeros(nextlen, nplike)
@@ -624,6 +629,8 @@ class ListOffsetArray(Content):
                 len(self._offsets) - 1,
                 ascending,
                 stable,
+                kind,
+                order,
             )
             outoffsets = self._compact_offsets64(True)
             return ak._v2.contents.ListOffsetArray(

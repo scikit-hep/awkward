@@ -249,7 +249,9 @@ class IndexedOptionArray(Content):
             )
             return out2
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
         if len(self._index) == 0:
             return self
 
@@ -300,7 +302,14 @@ class IndexedOptionArray(Content):
         inject_nones = True if not branch and negaxis != depth else False
 
         out = next._sort_next(
-            negaxis, starts, nextparents, outlength, ascending, stable
+            negaxis,
+            starts,
+            nextparents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
         )
 
         nextoutindex = ak._v2.index.Index64.zeros(parents_length, nplike)

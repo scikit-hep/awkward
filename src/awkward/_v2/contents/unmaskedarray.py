@@ -137,9 +137,18 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
         out = self._content._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
         )
 
         if isinstance(out, ak._v2.contents.RegularArray):

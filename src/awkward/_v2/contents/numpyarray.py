@@ -267,7 +267,9 @@ class NumpyArray(Content):
 
         return True
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
         if len(self.shape) == 0:
             raise TypeError(
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
@@ -277,7 +279,14 @@ class NumpyArray(Content):
                 self._data[self.localindex(-1)]
             )
             return contiguous_self.toRegularArray()._sort_next(
-                negaxis, starts, parents, outlength, ascending, stable
+                negaxis,
+                starts,
+                parents,
+                outlength,
+                ascending,
+                stable,
+                kind,
+                order,
             )
         else:
             nplike = self.nplike

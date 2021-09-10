@@ -460,12 +460,21 @@ class RegularArray(Content):
                 self._parameters,
             )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
         if self._length == 0:
             return self
 
         out = self.toListOffsetArray64(True)._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
         )
 
         # FIXME
