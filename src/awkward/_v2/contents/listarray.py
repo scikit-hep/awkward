@@ -430,9 +430,7 @@ class ListArray(Content):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
-    def _sort_next(
-        self, parent, negaxis, starts, parents, outlength, shifts, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         return self._toListOffsetArray64(True)._sort_next(
-            parent, negaxis, starts, parents, outlength, shifts, ascending, stable
+            negaxis, starts, parents, outlength, ascending, stable
         )

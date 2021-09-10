@@ -249,9 +249,7 @@ class IndexedOptionArray(Content):
             )
             return out2
 
-    def _sort_next(
-        self, parent, negaxis, starts, parents, outlength, shifts, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
         if len(self._index) == 0:
             return self
 
@@ -297,73 +295,13 @@ class IndexedOptionArray(Content):
             )
         )
 
-        # make_shifts = True if not branch and negaxis == depth else False
-        # shifts_length = index_length if make_shifts else 0
-        # nextshifts = ak._v2.index.Index64.zeros(shifts_length, nplike)
-
         next = self._content._carry(nextcarry, False, NestedIndexError)
-
-        # nextshifts = ak._v2.index.Index64.empty(next_length, nplike)
-        # if make_shifts:
-        #     if shifts is None:
-        #         self._handle_error(
-        #             nplike[
-        #                 "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
-        #                 nextshifts.dtype.type,
-        #                 self._index.dtype.type,
-        #             ](
-        #                 nextshifts.to(nplike),
-        #                 self._index.to(nplike),
-        #                 index_length,
-        #             )
-        #         )
-        #     else:
-        #         self._handle_error(
-        #             nplike[
-        #                 "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
-        #                 nextshifts.dtype.type,
-        #                 self._index.dtype.type,
-        #                 shifts.dtype.type,
-        #             ](
-        #                 nextshifts.to(nplike),
-        #                 self._index.to(nplike),
-        #                 index_length,
-        #                 shifts.to(nplike),
-        #             )
-        #         )
 
         inject_nones = True if not branch and negaxis != depth else False
 
         out = next._sort_next(
-            self, negaxis, starts, nextparents, outlength, shifts, ascending, stable
+            negaxis, starts, nextparents, outlength, ascending, stable
         )
-
-        # # FIXME: parents to starts
-        # offsets_length = ak._v2.index.Index64.empty(1, nplike)
-        # self._handle_error(
-        #     nplike[
-        #         "awkward_sorting_ranges_length",
-        #         offsets_length.dtype.type,
-        #         parents.dtype.type,
-        #     ](
-        #         offsets_length.to(nplike),
-        #         parents.to(nplike),
-        #         len(parents),
-        #     )
-        # )
-        # offsets = ak._v2.index.Index64.zeros(offsets_length, nplike)
-        # self._handle_error(
-        #     nplike[
-        #         "awkward_sorting_ranges",
-        #         offsets.dtype.type,
-        #         nextparents.dtype.type,
-        #     ](
-        #         offsets.to(nplike),
-        #         offsets_length[0],
-        #         nextparents.to(nplike),
-        #         len(parents),
-        #     )
-        # )
 
         nextoutindex = ak._v2.index.Index64.zeros(parents_length, nplike)
         self._handle_error(
