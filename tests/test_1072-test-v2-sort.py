@@ -12,6 +12,7 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
+
 def test_keep_None_in_place_test():
     v1_array = ak.Array([[3, 2, 1], [], None, [4, 5]])
 
