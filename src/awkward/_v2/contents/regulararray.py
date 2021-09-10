@@ -2,12 +2,12 @@
 
 from __future__ import absolute_import
 
+import numpy as np
+
 import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.regularform import RegularForm
-
-np = ak.nplike.NumpyMetadata.instance()
 
 
 class RegularArray(Content):
