@@ -654,7 +654,7 @@ def test_indexedoptionarray_sort():
             ["nest"],
         ),
     )
-    assert ak.to_list(v2_to_v1(v2_array.sort(order="x"))) == [
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [
         {"nest": 2.2},
         {"nest": 3.3},
         {"nest": 3.3},
