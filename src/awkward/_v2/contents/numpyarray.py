@@ -275,16 +275,15 @@ class NumpyArray(Content):
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
         elif len(self.shape) != 1 or not self.iscontiguous():
-            print(self.iscontiguous())
             contiguous_self = ak._v2.contents.NumpyArray(
                 self._data[self.localindex(-1)]
             )
-            print(contiguous_self)
             return contiguous_self.toRegularArray()._sort_next(
                 self, negaxis, starts, parents, outlength, shifts, ascending, stable
             )
         else:
             nplike = self.nplike
+
             offsets_length = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
                 nplike[

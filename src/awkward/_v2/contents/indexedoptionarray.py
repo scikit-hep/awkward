@@ -252,10 +252,9 @@ class IndexedOptionArray(Content):
     def _sort_next(
         self, parent, negaxis, starts, parents, outlength, shifts, ascending, stable
     ):
-        print("parent", parent)
-        print("starts", starts)
         if len(self._index) == 0:
             return self
+
         nplike = self.nplike
         branch, depth = self.branch_depth
 
@@ -298,46 +297,45 @@ class IndexedOptionArray(Content):
             )
         )
 
-        make_shifts = True if not branch and negaxis == depth else False
-        shifts_length = index_length if make_shifts else 0
-        nextshifts = ak._v2.index.Index64.zeros(shifts_length, nplike)
+        # make_shifts = True if not branch and negaxis == depth else False
+        # shifts_length = index_length if make_shifts else 0
+        # nextshifts = ak._v2.index.Index64.zeros(shifts_length, nplike)
 
         next = self._content._carry(nextcarry, False, NestedIndexError)
 
-        nextshifts = ak._v2.index.Index64.empty(next_length, nplike)
-        if make_shifts:
-            if shifts is None:
-                self._handle_error(
-                    nplike[
-                        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
-                        nextshifts.dtype.type,
-                        self._index.dtype.type,
-                    ](
-                        nextshifts.to(nplike),
-                        self._index.to(nplike),
-                        index_length,
-                    )
-                )
-            else:
-                self._handle_error(
-                    nplike[
-                        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
-                        nextshifts.dtype.type,
-                        self._index.dtype.type,
-                        np.int64,
-                        shifts.dtype.type,
-                    ](
-                        nextshifts.to(nplike),
-                        self._index.to(nplike),
-                        index_length,
-                        shifts.to(nplike),
-                    )
-                )
-        # inject_nones = True if not branch and negaxis != depth else False
-        print(next)
-        print(starts)
+        # nextshifts = ak._v2.index.Index64.empty(next_length, nplike)
+        # if make_shifts:
+        #     if shifts is None:
+        #         self._handle_error(
+        #             nplike[
+        #                 "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+        #                 nextshifts.dtype.type,
+        #                 self._index.dtype.type,
+        #             ](
+        #                 nextshifts.to(nplike),
+        #                 self._index.to(nplike),
+        #                 index_length,
+        #             )
+        #         )
+        #     else:
+        #         self._handle_error(
+        #             nplike[
+        #                 "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+        #                 nextshifts.dtype.type,
+        #                 self._index.dtype.type,
+        #                 shifts.dtype.type,
+        #             ](
+        #                 nextshifts.to(nplike),
+        #                 self._index.to(nplike),
+        #                 index_length,
+        #                 shifts.to(nplike),
+        #             )
+        #         )
+
+        inject_nones = True if not branch and negaxis != depth else False
+
         out = next._sort_next(
-            self, negaxis, starts, nextparents, outlength, nextshifts, ascending, stable
+            self, negaxis, starts, nextparents, outlength, shifts, ascending, stable
         )
 
         # # FIXME: parents to starts
@@ -388,33 +386,67 @@ class IndexedOptionArray(Content):
         out = ak._v2.contents.IndexedOptionArray(
             nextoutindex,
             out,
-            self._identifier,  # FIXME
+            None,
             self._parameters,
         )._simplify_optiontype()
 
-        if not branch and negaxis != depth:
-            # out = ak._v2.contents.RegularArray(
-            #     out,
-            #     parents_length,
-            #     0,
-            #     self._identifier,
-            #     self._parameters,
-            # )
-            return out
+        if inject_nones:
+            out = ak._v2.contents.RegularArray(
+                out,
+                parents_length,
+                0,
+                None,
+                self._parameters,
+            )
 
         if not branch and negaxis == depth:
             return out
         else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
+            if isinstance(out, ak._v2.contents.ListOffsetArray):
+                if len(starts) > 0 and starts[0] != 0:
+                    raise RuntimeError(
+                        "sort_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray64 whose offsets start at zero"
+                    )
+                outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        starts_length,
+                        len(outindex),
+                    )
+                )
 
-            out = next._sort_next(
-                self, negaxis, starts, nextparents, outlength, shifts, ascending, stable
-            )
+                tmp = ak._v2.contents.IndexedOptionArray(
+                    outindex,
+                    out._content,
+                    None,
+                    self._parameters,
+                )._simplify_optiontype()
 
-            # nextoutindex = ak._v2.index.Index64.zeros(len(self._index), nplike)
+                if inject_nones:
+                    return tmp
 
-            return ak._v2.contents.IndexedOptionArray(
-                outindex,
-                out,
-                self._identifier,
-                self._parameters,
-            )
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    self._parameters,
+                )
+
+            if isinstance(out, ak._v2.contents.IndexedOptionArray):
+                return out
+            else:
+                raise RuntimeError(
+                    "sort_next with unbranching depth > negaxis is only "
+                    "expected to return RegularArray or ListOffsetArray or "
+                    "IndexedOptionArray; "
+                    "instead, it returned " + out
+                )

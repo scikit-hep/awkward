@@ -384,7 +384,7 @@ class Numpy(NumpyLike):
 
     def __getitem__(self, args):
         # for key in ak._cpu_kernels.kernel.keys():
-        #     if "IndexedArray_local_preparenext" in key[0]:
+        #     if "IndexedArray_reduce_next_fix_offsets" in key[0]:
         #         print(key)
         return NumpyKernel(ak._cpu_kernels.kernel[args], args)
 

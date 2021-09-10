@@ -375,8 +375,6 @@ class RecordArray(Content):
     def _sort_next(
         self, parent, negaxis, starts, parents, outlength, shifts, ascending, stable
     ):
-        print("parent", parent)
-        print("starts", starts)
         contents = []
         for content in self._contents:
             contents.append(
@@ -384,6 +382,4 @@ class RecordArray(Content):
                     self, negaxis, starts, parents, outlength, shifts, ascending, stable
                 )
             )
-        return RecordArray(
-            contents, self._keys, len(self), self._identifier, self._parameters
-        )
+        return RecordArray(contents, self._keys, len(self), None, self._parameters)

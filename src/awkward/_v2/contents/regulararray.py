@@ -463,54 +463,74 @@ class RegularArray(Content):
     def _sort_next(
         self, parent, negaxis, starts, parents, outlength, shifts, ascending, stable
     ):
-        if isinstance(self._content, ak._v2.contents.NumpyArray):
-            nplike = self.nplike
+        if self._length == 0:
+            return self
 
-            offsets = ak._v2.index.Index64.zeros(self._length + 1, nplike)
-            self._handle_error(
-                nplike[
-                    "awkward_RegularArray_compact_offsets",
-                    offsets.dtype.type,
-                ](  # noqa: E231
-                    offsets.to(nplike),
-                    self._length,
-                    self._size,
-                )
-            )
+        out = self.toListOffsetArray64(True)._sort_next(
+            parent, negaxis, starts, parents, outlength, shifts, ascending, stable
+        )
 
-            nextcarry = ak._v2.index.Index64.zeros(len(self._content), nplike)
+        # FIXME
+        # if isinstance(out, ak._v2.contents.RegularArray):
+        #     if isinstance(out._content, ak._v2.contents.ListOffsetArray):
+        #         return ak._v2.contents.RegularArray(
+        #             out._content.toRegularArray(),
+        #             out._size,
+        #             out._length,
+        #             None,
+        #             out._parameters,
+        #         )
 
-            self._handle_error(
-                nplike[
-                    "awkward_ListOffsetArray_argsort",
-                    nextcarry.dtype.type,
-                    self._content._data.dtype.type,
-                    offsets.dtype.type,
-                ](
-                    nextcarry.to(nplike),
-                    self._content._data,
-                    len(self._content),
-                    offsets.to(nplike),
-                    len(offsets),
-                    ascending,
-                    stable,
-                )
-            )
+        return out
 
-            return ak._v2.contents.RegularArray(
-                self._content._carry(nextcarry, True, NestedIndexError),
-                self._size,
-                self._length,
-                self._identifier,
-                self._parameters,
-            )
-        else:
-            return ak._v2.contents.RegularArray(
-                self._content._sort_next(
-                    self, negaxis, starts, parents, outlength, shifts, ascending, stable
-                ),
-                self._size,
-                self._length,
-                self._identifier,
-                self._parameters,
-            )
+        # if isinstance(self._content, ak._v2.contents.NumpyArray):
+        #     nplike = self.nplike
+        #
+        #     offsets = ak._v2.index.Index64.zeros(self._length + 1, nplike)
+        #     self._handle_error(
+        #         nplike[
+        #             "awkward_RegularArray_compact_offsets",
+        #             offsets.dtype.type,
+        #         ](  # noqa: E231
+        #             offsets.to(nplike),
+        #             self._length,
+        #             self._size,
+        #         )
+        #     )
+        #
+        #     nextcarry = ak._v2.index.Index64.zeros(len(self._content), nplike)
+        #
+        #     self._handle_error(
+        #         nplike[
+        #             "awkward_ListOffsetArray_argsort",
+        #             nextcarry.dtype.type,
+        #             self._content._data.dtype.type,
+        #             offsets.dtype.type,
+        #         ](
+        #             nextcarry.to(nplike),
+        #             self._content._data,
+        #             len(self._content),
+        #             offsets.to(nplike),
+        #             len(offsets),
+        #             ascending,
+        #             stable,
+        #         )
+        #     )
+        #
+        #     return ak._v2.contents.RegularArray(
+        #         self._content._carry(nextcarry, True, NestedIndexError),
+        #         self._size,
+        #         self._length,
+        #         self._identifier,
+        #         self._parameters,
+        #     )
+        # else:
+        #     return ak._v2.contents.RegularArray(
+        #         self._content._sort_next(
+        #             self, negaxis, starts, parents, outlength, shifts, ascending, stable
+        #         ),
+        #         self._size,
+        #         self._length,
+        #         self._identifier,
+        #         self._parameters,
+        #     )
