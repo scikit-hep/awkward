@@ -667,14 +667,10 @@ class ListArray(Content):
                 self._parameters,
             )
 
-    def _toListOffsetArray64(self, start_at_zero):
-        offsets = self._compact_offsets64(start_at_zero)
-        return self._broadcast_tooffsets64(offsets)
-
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        return self._toListOffsetArray64(True)._sort_next(
+        return self.toListOffsetArray64(True)._sort_next(
             negaxis,
             starts,
             parents,
