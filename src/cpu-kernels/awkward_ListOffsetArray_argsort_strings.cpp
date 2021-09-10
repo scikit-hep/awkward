@@ -17,6 +17,7 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
   const char* stringdata,
   const int64_t* stringstarts,
   const int64_t* stringstops) {
+
   auto sorter =
         [&stringdata, &stringstarts, &stringstops](int left, int right) -> bool {
           size_t left_n = stringstops[left] - stringstarts[left];

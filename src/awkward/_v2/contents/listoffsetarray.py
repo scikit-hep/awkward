@@ -570,33 +570,6 @@ class ListOffsetArray(Content):
                 )
             )
 
-            # nextshifts = ak._v2.index.Index64.zeros(nextlen, nplike)
-            # nummissing = ak._v2.index.Index64.zeros(maxcount, nplike)
-            # missing = ak._v2.index.Index64.zeros(self._offsets[-1], nplike)
-            # self._handle_error(
-            #     nplike[
-            #         "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
-            #         nummissing.dtype.type,
-            #         missing.dtype.type,
-            #         nextshifts.dtype.type,
-            #         self._offsets.dtype.type,
-            #         starts.dtype.type,
-            #         parents.dtype.type,
-            #         nextcarry.dtype.type,
-            #     ](
-            #         nummissing.to(nplike),
-            #         missing.to(nplike),
-            #         nextshifts.to(nplike),
-            #         self._offsets.to(nplike),
-            #         len(self._offsets) - 1,
-            #         starts.to(nplike),
-            #         parents.to(nplike),
-            #         maxcount[0],
-            #         nextlen,
-            #         nextcarry.to(nplike),
-            #     )
-            # )
-
             nextcontent = self._content._carry(nextcarry, False, NestedIndexError)
             outcontent = nextcontent._sort_next(
                 negaxis - 1,

@@ -154,7 +154,7 @@ class ListArray(Content):
 
     def _compact_offsets64(self, start_at_zero):
         starts_len = len(self._starts)
-        out = ak._v2.index.Index64.zeros(starts_len + 1, self.nplike)
+        out = ak._v2.index.Index64.empty(starts_len + 1, self.nplike)
         self._handle_error(
             self.nplike[
                 "awkward_ListArray_compact_offsets",
