@@ -279,4 +279,3 @@ class IndexedArray(Content):
             return self.project()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
-

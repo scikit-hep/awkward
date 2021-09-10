@@ -208,4 +208,3 @@ class UnmaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
-
