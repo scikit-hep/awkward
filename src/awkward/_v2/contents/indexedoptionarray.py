@@ -328,3 +328,6 @@ class IndexedOptionArray(Content):
                 outindex, out, parameters=parameters
             )
             return out2._simplify_optiontype()
+
+    def _validityerror(self, path):
+        return NotImplementedError

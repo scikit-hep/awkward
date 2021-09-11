@@ -253,3 +253,6 @@ class IndexedArray(Content):
             return self.project()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _validityerror(self, path):
+        return NotImplementedError

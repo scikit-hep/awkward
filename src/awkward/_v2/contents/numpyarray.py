@@ -295,3 +295,6 @@ class NumpyArray(Content):
             return self.toRegularArray()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _validityerror(self, path):
+        return NotImplementedError

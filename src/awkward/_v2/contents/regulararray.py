@@ -601,3 +601,6 @@ class RegularArray(Content):
             return ak._v2.contents.regulararray.RegularArray(
                 next, self._size, len(self), self._identifier, self._parameters
             )
+
+    def _validityerror(self, path):
+        return NotImplementedError

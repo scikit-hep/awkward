@@ -574,3 +574,6 @@ class ListOffsetArray(Content):
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 compact.offsets, next, self._identifier, self._parameters
             )
+
+    def _validityerror(self, path):
+        return NotImplementedError

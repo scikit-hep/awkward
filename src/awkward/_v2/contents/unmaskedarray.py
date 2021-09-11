@@ -176,3 +176,6 @@ class UnmaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def _validityerror(self, path):
+        return NotImplementedError

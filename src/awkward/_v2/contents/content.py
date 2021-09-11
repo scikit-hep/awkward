@@ -567,6 +567,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 raise ValueError("if provided, the length of 'keys' must be 'n'")
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
+    def validityerror(self):
+        return self._validityerror("layout")
+
     @property
     def purelist_isregular(self):
         return self.Form.purelist_isregular.__get__(self)

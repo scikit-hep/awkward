@@ -369,3 +369,6 @@ class RecordArray(Content):
             return ak._v2.contents.recordarray.RecordArray(
                 contents, recordlookup, len(self), self._identifier, self._parameters
             )
+
+    def _validityerror(self, path):
+        return NotImplementedError

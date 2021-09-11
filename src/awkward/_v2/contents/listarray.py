@@ -671,3 +671,6 @@ class ListArray(Content):
         return ListOffsetArray._combinations(
             self, n, replacement, recordlookup, parameters, axis, depth
         )
+
+    def _validityerror(self, path):
+        return NotImplementedError

@@ -329,3 +329,6 @@ class UnionArray(Content):
             return ak._v2.unionarray.UnionArray(
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
+
+    def _validityerror(self, path):
+        return NotImplementedError

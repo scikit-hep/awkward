@@ -288,3 +288,6 @@ class BitMaskedArray(Content):
         return self.toByteMaskedArray()._combinations(
             n, replacement, recordlookup, parameters, axis, depth
         )
+
+    def _validityerror(self, path):
+        return NotImplementedError
