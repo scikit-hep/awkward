@@ -119,7 +119,7 @@ class RecordArray(Content):
             for content in self._contents:
                 return content.nplike
             else:
-                return ak.nplike.NumPy.instance()
+                return ak.nplike.Numpy.instance()
 
     @property
     def nonvirtual_nplike(self):

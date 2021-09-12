@@ -7,8 +7,8 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.emptyform import EmptyForm
 
-np = ak.nplike.NumPyMetadata.instance()
-numpy = ak.nplike.NumPy.instance()
+np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class EmptyArray(Content):
@@ -41,7 +41,7 @@ class EmptyArray(Content):
 
     @property
     def nplike(self):
-        return ak.nplike.NumPy.instance()
+        return ak.nplike.Numpy.instance()
 
     @property
     def nonvirtual_nplike(self):

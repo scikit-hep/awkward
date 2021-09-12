@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import awkward as ak
 
-np = ak.nplike.NumPyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class Identifier(object):

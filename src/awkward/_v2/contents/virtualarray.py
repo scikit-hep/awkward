@@ -16,7 +16,7 @@ from awkward._v2.contents.content import Content, NestedIndexError
 from awkward._v2.forms.form import Form, _parameters_update
 from awkward._v2.forms.virtualform import VirtualForm
 
-np = ak.nplike.NumPyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class ArrayGenerator(object):
