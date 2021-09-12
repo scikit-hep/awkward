@@ -206,7 +206,7 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 | [1.2.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.2.0) | 2021-04-01 | _(none)_ |
 | [1.3.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.3.0) | 2021-06-01 | _(none)_ |
 | [1.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.4.0) | 2021-07-02 | _(none)_ |
-| [1.5.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.5.0) | 2021-09-10 | _(none)_ |
+| [1.5.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.5.0) | 2021-09-12 | _(none)_ |
 
 | Version number | Target date | Deprecated features to remove in this version |
 |:--------------:|:-----------:|:----------------------------------------------|
