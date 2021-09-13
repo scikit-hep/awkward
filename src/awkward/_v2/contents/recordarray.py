@@ -354,6 +354,28 @@ class RecordArray(Content):
                 contents, self._keys, len(self), self._identifier, self._parameters
             )
 
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if len(self._keys) > 1:
+            raise NotImplementedError
+
+        contents = []
+        for content in self._contents:
+            contents.append(
+                content._sort_next(
+                    negaxis,
+                    starts,
+                    parents,
+                    outlength,
+                    ascending,
+                    stable,
+                    kind,
+                    order,
+                )
+            )
+        return RecordArray(contents, self._keys, len(self), None, self._parameters)
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:

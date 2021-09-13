@@ -164,6 +164,38 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        out = self._content._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+        if isinstance(out, ak._v2.contents.RegularArray):
+            tmp = ak._v2.contents.UnmaskedArray(
+                out._content,
+                self._identifier,
+                self._parameters,
+            )._simplify_optiontype()
+
+            return ak._v2.contents.RegularArray(
+                tmp,
+                out._size,
+                out._length,
+                self._identifier,
+                self._parameters,
+            )
+
+        else:
+            return out
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:

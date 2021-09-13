@@ -245,6 +245,32 @@ class IndexedArray(Content):
         else:
             return self.project()._localindex(posaxis, depth)
 
+    def _sort_next(
+        self,
+        negaxis,
+        starts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._index) == 0:
+            return self
+
+        next = self._content._carry(self._index, False, NestedIndexError)
+        return next._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:

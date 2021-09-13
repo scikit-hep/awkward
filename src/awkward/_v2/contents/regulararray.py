@@ -521,6 +521,36 @@ class RegularArray(Content):
                 self._parameters,
             )
 
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if self._length == 0:
+            return self
+
+        out = self.toListOffsetArray64(True)._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+        # FIXME
+        # if isinstance(out, ak._v2.contents.RegularArray):
+        #     if isinstance(out._content, ak._v2.contents.ListOffsetArray):
+        #         return ak._v2.contents.RegularArray(
+        #             out._content.toRegularArray(),
+        #             out._size,
+        #             out._length,
+        #             None,
+        #             out._parameters,
+        #         )
+
+        return out
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:

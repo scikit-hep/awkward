@@ -284,6 +284,20 @@ class BitMaskedArray(Content):
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
 
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        return self.toByteMaskedArray()._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return self.toByteMaskedArray()._combinations(
             n, replacement, recordlookup, parameters, axis, depth

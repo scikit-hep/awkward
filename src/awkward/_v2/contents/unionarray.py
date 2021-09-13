@@ -329,3 +329,14 @@ class UnionArray(Content):
             return ak._v2.unionarray.UnionArray(
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        out = self._simplify_uniontype()
+
+        if isinstance(out, ak._v2.contents.UnionArray):
+            raise ValueError("cannot sort unsimplified {0}".format(type(self).__name__))
+        return out._sort_next(
+            negaxis, starts, parents, outlength, ascending, stable, kind, order
+        )
