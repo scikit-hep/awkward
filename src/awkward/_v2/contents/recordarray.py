@@ -9,13 +9,13 @@ try:
 except ImportError:
     from collections import Iterable
 
-import numpy as np
-
 import awkward as ak
 from awkward._v2.record import Record
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.recordform import RecordForm
+
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class RecordArray(Content):
@@ -293,10 +293,14 @@ class RecordArray(Content):
                 self.content(i)._carry(carry, allow_lazy, exception)
                 for i in range(len(self._contents))
             ]
-            if issubclass(carry.dtype.type, np.integer):
-                length = len(carry)
-            else:
-                length = len(self)
+
+            # if issubclass(carry.dtype.type, np.integer):
+            #     length = len(carry)
+            # else:
+            #     length = len(self)
+            assert issubclass(carry.dtype.type, np.integer)
+            length = len(carry)
+
             return RecordArray(
                 contents,
                 self._keys,

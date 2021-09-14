@@ -84,6 +84,8 @@ class NumpyMetadata(Singleton):
 
     intp = numpy.intp
     integer = numpy.integer
+    signedinteger = numpy.signedinteger
+    unsignedinteger = numpy.unsignedinteger
     floating = numpy.floating
     number = numpy.number
     object_ = numpy.object_
