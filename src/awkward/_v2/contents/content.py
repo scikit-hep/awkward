@@ -73,7 +73,10 @@ class Content(object):
         return None
 
     def _handle_error(self, error, slicer=None):
-        if error.str is not None:
+        if not isinstance(error, ak._kernel_signatures.ERROR):
+            error.handle_error(lambda err: self._handle_error(err, slicer=slicer))
+
+        elif error.str is not None:
             if error.filename is None:
                 filename = ""
             else:
