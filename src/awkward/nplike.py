@@ -12,7 +12,10 @@ import awkward as ak
 def of(*arrays):
     libs = set()
     for array in arrays:
-        if isinstance(array, numpy.ndarray):
+        nplike = getattr(array, "nplike", None)
+        if isinstance(nplike, NumpyLike):
+            libs.add(nplike)
+        elif isinstance(array, numpy.ndarray):
             ptr_lib = "cpu"
         elif (
             type(array).__module__.startswith("cupy.")
@@ -42,6 +45,8 @@ to obtain an unmixed array in main memory or the GPU(s)."""
         return Numpy.instance()
     elif libs == set(["cuda"]):
         return Cupy.instance()
+    elif len(libs) == 1:
+        return next(iter(libs))
     else:
         raise ValueError(
             """attempting to use both a 'cpu' array and a 'cuda' array in the """
@@ -388,8 +393,8 @@ class Numpy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_numpy(array, *args, **kwargs)
 
-    def __getitem__(self, args):
-        return NumpyKernel(ak._cpu_kernels.kernel[args], args)
+    def __getitem__(self, name_and_types):
+        return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
         self._module = numpy
@@ -411,7 +416,7 @@ class Cupy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
-    def __getitem__(self, args):
+    def __getitem__(self, name_and_types):
         raise NotImplementedError("no CUDA in v2 yet")
 
     def __init__(self):
