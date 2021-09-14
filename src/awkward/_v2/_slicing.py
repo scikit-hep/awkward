@@ -215,7 +215,8 @@ def prepare_tuple_nested(item):
         ),
     ):
         # FIXME: might infinite-loop before simplify_optiontype is implemented
-        return prepare_tuple_nested(next.simplify_optiontype())
+        next = item.simplify_optiontype()
+        return prepare_tuple_nested(next)
 
     elif isinstance(
         item,
