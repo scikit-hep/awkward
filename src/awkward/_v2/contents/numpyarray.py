@@ -161,14 +161,14 @@ class NumpyArray(Content):
         except IndexError as err:
             raise NestedIndexError(self, where, str(err))
 
-        if hasattr(out, "shape") and len(out.shape) != 0:
+        if hasattr(out, "ndim") and out.ndim != 0:
             return NumpyArray(out, None, None, nplike=self._nplike)
         else:
             return out
 
     def _getitem_range(self, where):
-        start, stop, step = where.indices(len(self))
-        assert step == 1
+        # start, stop, step = where.indices(len(self))
+        # assert step == 1
 
         try:
             out = self._data[where]
@@ -177,7 +177,7 @@ class NumpyArray(Content):
 
         return NumpyArray(
             out,
-            self._range_identifier(start, stop),
+            None,  # self._range_identifier(start, stop),
             self._parameters,
             nplike=self._nplike,
         )

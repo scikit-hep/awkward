@@ -39,7 +39,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-        offsets.nplike.prohibit(predicate_1, consequence_1, offsets)
+        offsets.nplike.prohibit(predicate_1, consequence_1, offsets.data)
 
         self._offsets = offsets
         self._content = content
@@ -125,12 +125,18 @@ class ListOffsetArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if where < 0:
-            where += len(self)
-        if not (0 <= where < len(self)):
-            raise NestedIndexError(self, where)
+        def postpone_1(x, lenoffsets):
+            lenself = lenoffsets - 1
+            if x < 0:
+                x += lenself
+            if not (0 <= x < lenself):
+                raise NestedIndexError(self, x)
+            return x
+
+        where = self.nplike.postpone(postpone_1, where, self._offsets.data.shape[0])
+
         start, stop = self._offsets[where], self._offsets[where + 1]
-        return self._content._getitem_range(slice(start, stop))
+        return self._content._getitem_range(self.nplike.slice(start, stop, None))
 
     def _getitem_range(self, where):
         start, stop, step = where.indices(len(self))
