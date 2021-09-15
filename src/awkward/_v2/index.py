@@ -23,7 +23,7 @@ class Index(object):
         self._metadata = metadata
 
         self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
-        if len(self._data.shape) != 1:
+        if self._data.ndim != 1:
             raise TypeError("Index data must be one-dimensional")
 
         if self._expected_dtype is None:
