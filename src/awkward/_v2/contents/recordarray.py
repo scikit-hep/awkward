@@ -152,7 +152,10 @@ class RecordArray(Content):
         out = [indent, pre, "<RecordArray is_tuple="]
         out.append(repr(json.dumps(self.is_tuple)))
         out.append(" len=")
-        out.append(repr(str(len(self))))
+        try:
+            out.append(repr(str(len(self))))
+        except TypeError:
+            out.append('"?"')
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

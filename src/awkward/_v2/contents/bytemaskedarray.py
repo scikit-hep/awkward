@@ -88,7 +88,10 @@ class ByteMaskedArray(Content):
         out = [indent, pre, "<ByteMaskedArray valid_when="]
         out.append(repr(json.dumps(self._valid_when)))
         out.append(" len=")
-        out.append(repr(str(len(self))))
+        try:
+            out.append(repr(str(len(self))))
+        except TypeError:
+            out.append('"?"')
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

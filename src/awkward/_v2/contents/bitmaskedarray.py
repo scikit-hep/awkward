@@ -125,7 +125,10 @@ class BitMaskedArray(Content):
         out.append(" lsb_order=")
         out.append(repr(json.dumps(self._lsb_order)))
         out.append(" len=")
-        out.append(repr(str(len(self))))
+        try:
+            out.append(repr(str(len(self))))
+        except TypeError:
+            out.append('"?"')
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

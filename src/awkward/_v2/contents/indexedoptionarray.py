@@ -72,7 +72,10 @@ class IndexedOptionArray(Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedOptionArray len="]
-        out.append(repr(str(len(self))))
+        try:
+            out.append(repr(str(len(self))))
+        except TypeError:
+            out.append('"?"')
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

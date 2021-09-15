@@ -90,12 +90,18 @@ class NumpyArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<NumpyArray dtype="]
         out.append(repr(str(self.dtype)))
-        if len(self._data.shape) == 1:
+        if self._data.ndim == 1:
             out.append(" len=")
-            out.append(repr(str(len(self))))
+            try:
+                out.append(repr(str(len(self))))
+            except TypeError:
+                out.append('"?"')
         else:
             out.append(" shape=")
-            out.append(repr(str(self._data.shape)))
+            try:
+                out.append(repr(str(self._data.shape)))
+            except TypeError:
+                out.append('"?"')
 
         extra = self._repr_extra(indent + "    ")
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
