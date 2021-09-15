@@ -28,12 +28,18 @@ class ListOffsetArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if not len(offsets) >= 1:
+
+        def predicate_1(offsets):
+            return not len(offsets) >= 1
+
+        def consequence_1():
             raise ValueError(
                 "{0} len(offsets) ({1}) must be >= 1".format(
                     type(self).__name__, len(offsets)
                 )
             )
+
+        offsets.nplike.prohibit(predicate_1, consequence_1, offsets)
 
         self._offsets = offsets
         self._content = content

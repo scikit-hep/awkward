@@ -395,6 +395,10 @@ class NumpyKernel(object):
 
 
 class Numpy(NumpyLike):
+    def prohibit(self, predicate, consequence, *args):
+        if predicate(*args):
+            consequence()
+
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_numpy(array, *args, **kwargs)
 
@@ -418,6 +422,10 @@ class Numpy(NumpyLike):
 
 
 class Cupy(NumpyLike):
+    def prohibit(self, predicate, consequence, *args):
+        if predicate(*args):
+            consequence()
+
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 

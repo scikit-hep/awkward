@@ -28,7 +28,7 @@ class NumpyArray(Content):
                     ),
                 )
             )
-        if len(self._data.shape) == 0:
+        if self._data.ndim == 0:
             raise TypeError(
                 "{0} 'data' must be an array, not {1}".format(
                     type(self).__name__, repr(data)
