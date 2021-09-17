@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.numpyform import NumpyForm
+from awkward._v2.contents.reducer import Reducer
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -379,3 +380,20 @@ class NumpyArray(Content):
             return self.toRegularArray()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        return Reducer(reducer)._apply(
+            self,
+            parents,
+            outlength,
+        )
