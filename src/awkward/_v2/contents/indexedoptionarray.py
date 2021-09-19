@@ -330,4 +330,31 @@ class IndexedOptionArray(Content):
             return out2._simplify_optiontype()
 
     def _validityerror(self, path):
-        return NotImplementedError
+        error = self.nplike["awkward_IndexedArray_validity", self.index.dtype.type](
+            self.index.to(self.nplike), len(self.index), len(self.content), True
+        )
+        if error.str is not None:
+            if error.filename is None:
+                filename = ""
+            else:
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
+            message = error.str.decode(errors="surrogateescape")
+            return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+                path, type(self), message, error.id, filename
+            )
+
+        elif isinstance(
+            self.content,
+            (
+                ak._v2.content.bitmaskedarray.BitMaskedArray,
+                ak._v2.content.bytemaskedarray.ByteMaskedArray,
+                ak._v2.content.indexedarray.IndexedArray,
+                ak._v2.content.indexedoptionarray.IndexedOptionArray,
+                ak._v2.content.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
+        else:
+            return self.content.validityerror(path + ".content")

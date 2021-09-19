@@ -660,13 +660,14 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 return 'at {0} ("{1}"): __array__ = "string" only allowed for IndexedArray and IndexedOptionArray'.format(
                     path, type(self)
                 )
-
-            return NotImplementedError
-
+            return NotImplementedError("TODO: Implement is_unique")
         return ""
 
-    def validityerror(self):
-        return self._validityerror("layout")
+    def validityerror(self, path="layout"):
+        paramcheck = self.validityerror_parameters(path)
+        if paramcheck != "":
+            return paramcheck
+        return self._validityerror(path)
 
     @property
     def purelist_isregular(self):

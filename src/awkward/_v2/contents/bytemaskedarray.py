@@ -345,4 +345,18 @@ class ByteMaskedArray(Content):
             return out2._simplify_optiontype()
 
     def _validityerror(self, path):
-        return NotImplementedError
+        if len(self.content) < len(self.mask):
+            return 'at {0} ("{1}"): len(content) < len(mask)'.format(path, type(self))
+        elif isinstance(
+            self.content,
+            (
+                ak._v2.content.bitmaskedarray.BitMaskedArray,
+                ak._v2.content.bytemaskedarray.ByteMaskedArray,
+                ak._v2.content.indexedarray.IndexedArray,
+                ak._v2.content.indexedoptionarray.IndexedOptionArray,
+                ak._v2.content.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
+        else:
+            return self.content.validityerror(path + ".content")

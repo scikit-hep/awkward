@@ -124,4 +124,4 @@ class EmptyArray(Content):
         return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)
 
     def _validityerror(self, path):
-        return NotImplementedError
+        return ""
