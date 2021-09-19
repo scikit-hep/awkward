@@ -603,4 +603,12 @@ class RegularArray(Content):
             )
 
     def _validityerror(self, path):
-        return NotImplementedError
+        if self.size < 0:
+            return 'at {0} ("{1}"): size < 0'.format(path, type(self))
+        if (
+            self.parameter("__array__") == '"string"'
+            or self.parameter("__array__") == '"bytestring"'
+        ):
+            return ""
+        else:
+            return self.content.validityerror(path + ".content")

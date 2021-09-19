@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
+from awkward._v2.contents.listarray import ListArray
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
@@ -576,4 +577,6 @@ class ListOffsetArray(Content):
             )
 
     def _validityerror(self, path):
-        return NotImplementedError
+        if len(self.offsets) < 1:
+            return 'at {0} ("{1}"): len(offsets) < 1'.format(path, type(self))
+        return ListArray.validityerror(path)
