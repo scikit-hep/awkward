@@ -567,6 +567,104 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 raise ValueError("if provided, the length of 'keys' must be 'n'")
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
+    def validityerror_parameters(self, path):
+        if self.parameter("__array__") == '"string"':
+            content = None
+            if isinstance(
+                self,
+                (
+                    ak._v2.content.listarray.ListArray,
+                    ak._v2.content.listoffsetarray.ListOffsetArray,
+                    ak._v2.content.regulararray.RegularArray,
+                ),
+            ):
+                content = self.content
+            else:
+                return 'at {0} ("{1}"): __array__ = "string" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
+                    path, type(self)
+                )
+            if content.parameter("__array__") != '"char"':
+                return 'at {0} ("{1}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
+                    path, type(self)
+                )
+            if isinstance(content, ak._v2.content.numpyarray.NumpyArray):
+                if content.dtype == np.uint8:
+                    return 'at {0} ("{1}"): __array__ = "char" requires dtype == uint8'.format(
+                        path, type(self)
+                    )
+                if len(content.shape) != 1:
+                    return 'at {0} ("{1}"): __array__ = "char" must be one-dimensional'.format(
+                        path, type(self)
+                    )
+            else:
+                return 'at {0} ("{1}"): __array__ = "char" only allowed for NumpyArray'.format(
+                    path, type(self)
+                )
+            return ""
+
+        if self.parameter("__array__") == '"bytestring"':
+            content = None
+            if isinstance(
+                self,
+                (
+                    ak._v2.content.listarray.ListArray,
+                    ak._v2.content.listoffsetarray.ListOffsetArray,
+                    ak._v2.content.regulararray.RegularArray,
+                ),
+            ):
+                content = self.content
+            else:
+                return 'at {0} ("{1}"): __array__ = "bytestring" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
+                    path, type(self)
+                )
+            if content.parameter("__array__") != '"byte"':
+                return 'at {0} ("{1}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
+                    path, type(self)
+                )
+            if isinstance(content, ak._v2.content.numpyarray.NumpyArray):
+                if content.dtype == np.uint8:
+                    return 'at {0} ("{1}"): __array__ = "byte" requires dtype == uint8'.format(
+                        path, type(self)
+                    )
+                if len(content.shape) != 1:
+                    return 'at {0} ("{1}"): __array__ = "byte" must be one-dimensional'.format(
+                        path, type(self)
+                    )
+            else:
+                return 'at {0} ("{1}"): __array__ = "byte" only allowed for NumpyArray'.format(
+                    path, type(self)
+                )
+            return ""
+
+        if self.parameter("__array__") == '"char"':
+            return 'at {0} ("{1}"): __array__ = "char" must be directly inside __array__ = "string"'.format(
+                path, type(self)
+            )
+
+        if self.parameter("__array__") == '"byte"':
+            return 'at {0} ("{1}"): __array__ = "byte" must be directly inside __array__ = "bytestring"'.format(
+                path, type(self)
+            )
+
+        if self.parameter("__array__") == '"categorical"':
+            content = None
+            if isinstance(
+                self,
+                (
+                    ak._v2.content.indexedarray.IndexedArray,
+                    ak._v2.content.indexedoptionarray.IndexedOptionArray,
+                ),
+            ):
+                content = self.content
+            else:
+                return 'at {0} ("{1}"): __array__ = "string" only allowed for IndexedArray and IndexedOptionArray'.format(
+                    path, type(self)
+                )
+
+            return NotImplementedError
+
+        return ""
+
     def validityerror(self):
         return self._validityerror("layout")
 
