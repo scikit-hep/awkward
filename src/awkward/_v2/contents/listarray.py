@@ -673,7 +673,7 @@ class ListArray(Content):
         )
 
     def _validityerror(self, path):
-        if len(self.starts) < len(self.stops):
+        if len(self.stops) < len(self.starts):
             return 'at {0} ("{1}"): len(stops) < len(starts)'.format(path, type(self))
         error = self.nplike[
             "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type

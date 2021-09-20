@@ -332,7 +332,7 @@ class UnionArray(Content):
 
     def _validityerror(self, path):
         for i in range(len(self.contents)):
-            if isinstance(self.contents[i], ak._v2.content.uniontype.UnionType):
+            if isinstance(self.contents[i], ak._v2.contents.unionarray.UnionArray):
                 return "{0} contains {1}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
                     type(self), type(self.contents[i])
                 )
@@ -351,6 +351,7 @@ class UnionArray(Content):
                 self.index.to(self.nplike),
                 len(self.tags),
                 len(self.contents),
+                lencontents
             )
             if error.str is not None:
                 if error.filename is None:

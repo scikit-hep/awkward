@@ -573,9 +573,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             if isinstance(
                 self,
                 (
-                    ak._v2.content.listarray.ListArray,
-                    ak._v2.content.listoffsetarray.ListOffsetArray,
-                    ak._v2.content.regulararray.RegularArray,
+                    ak._v2.contents.listarray.ListArray,
+                    ak._v2.contents.listoffsetarray.ListOffsetArray,
+                    ak._v2.contents.regulararray.RegularArray,
                 ),
             ):
                 content = self.content
@@ -587,7 +587,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 return 'at {0} ("{1}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
                     path, type(self)
                 )
-            if isinstance(content, ak._v2.content.numpyarray.NumpyArray):
+            if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
                 if content.dtype == np.uint8:
                     return 'at {0} ("{1}"): __array__ = "char" requires dtype == uint8'.format(
                         path, type(self)
@@ -607,9 +607,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             if isinstance(
                 self,
                 (
-                    ak._v2.content.listarray.ListArray,
-                    ak._v2.content.listoffsetarray.ListOffsetArray,
-                    ak._v2.content.regulararray.RegularArray,
+                    ak._v2.contents.listarray.ListArray,
+                    ak._v2.contents.listoffsetarray.ListOffsetArray,
+                    ak._v2.contents.regulararray.RegularArray,
                 ),
             ):
                 content = self.content
@@ -621,7 +621,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 return 'at {0} ("{1}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
                     path, type(self)
                 )
-            if isinstance(content, ak._v2.content.numpyarray.NumpyArray):
+            if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
                 if content.dtype == np.uint8:
                     return 'at {0} ("{1}"): __array__ = "byte" requires dtype == uint8'.format(
                         path, type(self)
@@ -651,8 +651,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             if isinstance(
                 self,
                 (
-                    ak._v2.content.indexedarray.IndexedArray,
-                    ak._v2.content.indexedoptionarray.IndexedOptionArray,
+                    ak._v2.contents.indexedarray.IndexedArray,
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
                 ),
             ):
                 content = self.content

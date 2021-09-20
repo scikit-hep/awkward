@@ -181,11 +181,11 @@ class UnmaskedArray(Content):
         if isinstance(
             self.content,
             (
-                ak._v2.content.bitmaskedarray.BitMaskedArray,
-                ak._v2.content.bytemaskedarray.ByteMaskedArray,
-                ak._v2.content.indexedarray.IndexedArray,
-                ak._v2.content.indexedoptionarray.IndexedOptionArray,
-                ak._v2.content.unmaskedarray.UnmaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"

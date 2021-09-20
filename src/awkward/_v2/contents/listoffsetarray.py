@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.contents.listarray import ListArray
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
@@ -579,4 +578,30 @@ class ListOffsetArray(Content):
     def _validityerror(self, path):
         if len(self.offsets) < 1:
             return 'at {0} ("{1}"): len(offsets) < 1'.format(path, type(self))
-        return ListArray.validityerror(path)
+        error = self.nplike[
+            "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
+        ](
+            self.starts.to(self.nplike),
+            self.stops.to(self.nplike),
+            len(self.starts),
+            len(self.content),
+        )
+        if error.str is not None:
+            if error.filename is None:
+                filename = ""
+            else:
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
+            message = error.str.decode(errors="surrogateescape")
+            return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+                path, type(self), message, error.id, filename
+            )
+        else:
+            if (
+                self.parameter("__array__") == '"string"'
+                or self.parameter("__array__") == '"bytestring"'
+            ):
+                return ""
+            else:
+                return self.content.validityerror(path + ".content")
