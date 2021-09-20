@@ -351,7 +351,7 @@ class UnionArray(Content):
                 self.index.to(self.nplike),
                 len(self.tags),
                 len(self.contents),
-                lencontents
+                lencontents,
             )
             if error.str is not None:
                 if error.filename is None:

@@ -11,6 +11,7 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
+
 def test_ListOffsetArray():
     array = ak.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
@@ -30,17 +31,20 @@ def test_ListOffsetArray():
 
     assert v2_array.validityerror() == ""
 
+
 def test_RegularArray():
     array = ak.Array(np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]]))
     v2_array = v1_to_v2(array.layout)
 
     assert v2_array.validityerror() == ""
 
+
 def test_NumpyArray():
     array = ak.Array([0.0, 1.1, 2.2, 3.3])
     v2_array = v1_to_v2(array.layout)
 
     assert v2_array.validityerror() == ""
+
 
 def test_IndexedArray():
     array = ak.Array(
@@ -58,6 +62,7 @@ def test_IndexedArray():
 
     assert v2_array.validityerror() == ""
 
+
 def test_ByteMaskedArray():
     content = ak.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
@@ -69,6 +74,7 @@ def test_ByteMaskedArray():
 
     assert v2_array.validityerror() == ""
 
+
 def test_IndexedOptionArray():
     content = ak.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
@@ -79,6 +85,7 @@ def test_IndexedOptionArray():
     v2_array = v1_to_v2(array.layout)
 
     assert v2_array.validityerror() == ""
+
 
 def test_BitMaskedArray():
     v2_array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
@@ -116,10 +123,12 @@ def test_BitMaskedArray():
 
     assert v2_array.validityerror() == ""
 
+
 def test_EmptyArray():
     v2_array = ak._v2.contents.emptyarray.EmptyArray()
 
     assert v2_array.validityerror() == ""
+
 
 def test_RecordArray():
     v2_array = ak._v2.contents.listarray.ListArray(  # noqa: F841
@@ -136,6 +145,7 @@ def test_RecordArray():
     )
 
     assert v2_array.validityerror() == ""
+
 
 def test_UnionArray():
     v2_array = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
@@ -157,6 +167,7 @@ def test_UnionArray():
     )
 
     assert v2_array.validityerror() == ""
+
 
 def test_UnmaskedArray():
     v2_array = ak._v2.contents.unmaskedarray.UnmaskedArray(
