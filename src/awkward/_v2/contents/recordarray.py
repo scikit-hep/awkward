@@ -9,13 +9,13 @@ try:
 except ImportError:
     from collections import Iterable
 
-import numpy as np
-
 import awkward as ak
 from awkward._v2.record import Record
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.recordform import RecordForm
+
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class RecordArray(Content):
@@ -119,7 +119,7 @@ class RecordArray(Content):
             for content in self._contents:
                 return content.nplike
             else:
-                return ak.nplike.NumPy.instance()
+                return ak.nplike.Numpy.instance()
 
     @property
     def nonvirtual_nplike(self):
@@ -293,10 +293,14 @@ class RecordArray(Content):
                 self.content(i)._carry(carry, allow_lazy, exception)
                 for i in range(len(self._contents))
             ]
-            if issubclass(carry.dtype.type, np.integer):
-                length = len(carry)
-            else:
-                length = len(self)
+
+            # if issubclass(carry.dtype.type, np.integer):
+            #     length = len(carry)
+            # else:
+            #     length = len(self)
+            assert issubclass(carry.dtype.type, np.integer)
+            length = len(carry)
+
             return RecordArray(
                 contents,
                 self._keys,
@@ -353,6 +357,28 @@ class RecordArray(Content):
             return RecordArray(
                 contents, self._keys, len(self), self._identifier, self._parameters
             )
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if len(self._keys) > 1:
+            raise NotImplementedError
+
+        contents = []
+        for content in self._contents:
+            contents.append(
+                content._sort_next(
+                    negaxis,
+                    starts,
+                    parents,
+                    outlength,
+                    ascending,
+                    stable,
+                    kind,
+                    order,
+                )
+            )
+        return RecordArray(contents, self._keys, len(self), None, self._parameters)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)

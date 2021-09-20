@@ -10,7 +10,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
-np = ak.nplike.NumPyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class ByteMaskedArray(Content):
@@ -324,6 +324,42 @@ class ByteMaskedArray(Content):
                 self._parameters,
             )
             return out2._simplify_optiontype()
+
+    def toIndexedOptionArray(self):
+        nplike = self._mask.nplike
+        index = ak._v2.index.Index64.empty(len(self._mask), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_toIndexedOptionArray",
+                index.dtype.type,
+                self._mask.dtype.type,
+            ](
+                index.to(nplike),
+                self._mask.to(nplike),
+                len(self._mask),
+                self._valid_when,
+            )
+        )
+        return ak._v2.contents.IndexedOptionArray(
+            index,
+            self._content,
+            self._identifier,
+            self._parameters,
+        )
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        return self.toIndexedOptionArray()._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         if n < 1:

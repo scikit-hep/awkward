@@ -11,7 +11,7 @@ from awkward._v2.contents.content import Content
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
 from awkward._v2.forms.bitmaskedform import BitMaskedForm
 
-np = ak.nplike.NumPyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class BitMaskedArray(Content):
@@ -283,6 +283,20 @@ class BitMaskedArray(Content):
 
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        return self.toByteMaskedArray()._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return self.toByteMaskedArray()._combinations(

@@ -14,8 +14,8 @@ except ImportError:
 
 import awkward as ak
 
-np = ak.nplike.NumPyMetadata.instance()
-numpy = ak.nplike.NumPy.instance()
+np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 

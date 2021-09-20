@@ -8,7 +8,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.listoffsetform import ListOffsetForm
 
-np = ak.nplike.NumPyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class ListOffsetArray(Content):
@@ -486,6 +486,187 @@ class ListOffsetArray(Content):
                 self._offsets,
                 self._content._localindex(posaxis, depth + 1),
                 self._identifier,
+                self._parameters,
+            )
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        nplike = self.nplike
+        if len(self._offsets) - 1 == 0:
+            return self
+
+        branch, depth = self.branch_depth
+
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            if branch or (negaxis != depth):
+                raise ValueError("array with strings can only be sorted with axis=-1")
+
+            # FIXME: check validity error
+
+            if isinstance(self._content, ak._v2.contents.NumpyArray):
+                nextcarry = ak._v2.index.Index64.zeros(len(self._offsets) - 1, nplike)
+
+                starts, stops = self._offsets[:-1], self._offsets[1:]
+                self._handle_error(
+                    nplike[
+                        "awkward_ListOffsetArray_argsort_strings",
+                        nextcarry.dtype.type,
+                        parents.dtype.type,
+                        self._content.dtype.type,
+                        starts.dtype.type,
+                        stops.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        parents.to(nplike),
+                        len(parents),
+                        self._content._data,
+                        starts.to(nplike),
+                        stops.to(nplike),
+                        stable,
+                        ascending,
+                        False,
+                    )
+                )
+                return self._carry(nextcarry, False, NestedIndexError)
+
+        if not branch and (negaxis == depth):
+            if (
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
+            ):
+                raise ValueError("array with strings can only be sorted with axis=-1")
+            if len(self._offsets) - 1 != len(parents):
+                raise ValueError(
+                    "length of self._offsets_ - 1 is not equal to parents length"
+                )
+
+            nextlen = self._offsets[-1] - self._offsets[0]
+            maxcount = ak._v2.index.Index64.empty(1, nplike)
+            offsetscopy = ak._v2.index.Index64.zeros(len(self._offsets), nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+                    maxcount.dtype.type,
+                    offsetscopy.dtype.type,
+                    self._offsets.dtype.type,
+                ](
+                    maxcount.to(nplike),
+                    offsetscopy.to(nplike),
+                    self._offsets.to(nplike),
+                    len(self._offsets) - 1,
+                )
+            )
+
+            nextcarry = ak._v2.index.Index64.zeros(nextlen, nplike)
+            nextparents = ak._v2.index.Index64.zeros(nextlen, nplike)
+            maxnextparents = ak._v2.index.Index64.empty(1, nplike)
+            distincts = ak._v2.index.Index64.zeros(maxcount[0] * outlength, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
+                    nextcarry.dtype.type,
+                    nextparents.dtype.type,
+                    maxnextparents.dtype.type,
+                    distincts.dtype.type,
+                    self._offsets.dtype.type,
+                    offsetscopy.dtype.type,
+                    parents.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    nextparents.to(nplike),
+                    nextlen,
+                    maxnextparents.to(nplike),
+                    distincts.to(nplike),
+                    maxcount[0] * outlength,
+                    offsetscopy.to(nplike),
+                    self._offsets.to(nplike),
+                    len(self._offsets) - 1,
+                    parents.to(nplike),
+                    maxcount[0],
+                )
+            )
+
+            nextstarts = ak._v2.index.Index64.zeros(maxnextparents[0] + 1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+                    nextstarts.dtype.type,
+                    nextparents.dtype.type,
+                ](
+                    nextstarts.to(nplike),
+                    nextparents.to(nplike),
+                    nextlen,
+                )
+            )
+
+            nextcontent = self._content._carry(nextcarry, False, NestedIndexError)
+            outcontent = nextcontent._sort_next(
+                negaxis - 1,
+                nextstarts,
+                nextparents,
+                maxnextparents[0] + 1,
+                ascending,
+                stable,
+                kind,
+                order,
+            )
+
+            outcarry = ak._v2.index.Index64.zeros(nextlen, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_local_preparenext_64",
+                    outcarry.dtype.type,
+                    nextcarry.dtype.type,
+                ](
+                    outcarry.to(nplike),
+                    nextcarry.to(nplike),
+                    nextlen,
+                )
+            )
+
+            return ak._v2.contents.ListOffsetArray(
+                self._compact_offsets64(True),
+                outcontent._carry(outcarry, False, NestedIndexError),
+                None,
+                self._parameters,
+            )
+        else:
+            nextparents = ak._v2.index.Index64.zeros(
+                self._offsets[-1] - self._offsets[0], nplike
+            )
+
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_local_nextparents_64",
+                    nextparents.dtype.type,
+                    self._offsets.dtype.type,
+                ](
+                    nextparents.to(nplike),
+                    self._offsets.to(nplike),
+                    len(self._offsets) - 1,
+                )
+            )
+
+            trimmed = self._content[self._offsets[0] : self._offsets[-1]]
+            outcontent = trimmed._sort_next(
+                negaxis,
+                self._offsets[:-1],
+                nextparents,
+                len(self._offsets) - 1,
+                ascending,
+                stable,
+                kind,
+                order,
+            )
+            outoffsets = self._compact_offsets64(True)
+            return ak._v2.contents.ListOffsetArray(
+                outoffsets,
+                outcontent,
+                None,
                 self._parameters,
             )
 

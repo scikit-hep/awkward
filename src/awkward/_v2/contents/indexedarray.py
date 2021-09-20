@@ -8,7 +8,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.indexedform import IndexedForm
 
-np = ak.nplike.NumPyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class IndexedArray(Content):
@@ -244,6 +244,32 @@ class IndexedArray(Content):
             return self._localindex_axis0()
         else:
             return self.project()._localindex(posaxis, depth)
+
+    def _sort_next(
+        self,
+        negaxis,
+        starts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._index) == 0:
+            return self
+
+        next = self._content._carry(self._index, False, NestedIndexError)
+        return next._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)

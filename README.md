@@ -206,7 +206,7 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 | [1.2.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.2.0) | 2021-04-01 | _(none)_ |
 | [1.3.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.3.0) | 2021-06-01 | _(none)_ |
 | [1.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.4.0) | 2021-07-02 | _(none)_ |
-| [1.5.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.5.0) | 2021-09-10 | _(none)_ |
+| [1.5.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.5.0) | 2021-09-12 | _(none)_ |
 
 | Version number | Target date | Deprecated features to remove in this version |
 |:--------------:|:-----------:|:----------------------------------------------|
@@ -236,6 +236,7 @@ See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-
    * [Presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) (video) on July 5, 2020.
    * [Tutorial at PyHEP 2020](https://youtu.be/ea-zYLQBS4U) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski/2020-07-13-pyhep2020-tutorial.git/1.1?urlpath=lab/tree/tutorial.ipynb)) on July 13, 2020.
    * [Tutorial at PyHEP 2021](https://youtu.be/5aWAxvdrszw?t=9189) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski-talks/2021-07-06-pyhep-uproot-awkward-tutorial/v1.2?urlpath=lab/tree/uproot-awkward-tutorial.ipynb) on July 6, 2021.
+   * [Tutorial for STAR collaboration meeting](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme) on September 13, 2021. This is the first tutorial with extensive exercises to test your understanding.
 
 # Acknowledgements
 

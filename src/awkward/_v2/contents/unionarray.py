@@ -13,7 +13,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.unionform import UnionForm
 
-np = ak.nplike.NumPyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
 class UnionArray(Content):
@@ -369,3 +369,14 @@ class UnionArray(Content):
                 if sub != "":
                     return sub
             return ""
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        out = self._simplify_uniontype()
+
+        if isinstance(out, ak._v2.contents.UnionArray):
+            raise ValueError("cannot sort unsimplified {0}".format(type(self).__name__))
+        return out._sort_next(
+            negaxis, starts, parents, outlength, ascending, stable, kind, order
+        )

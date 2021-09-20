@@ -10,7 +10,7 @@ except ImportError:
 import awkward as ak
 from awkward._v2.tmp_for_testing import v1_to_v2
 
-np = ak.nplike.NumPyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
 def headtail(oldtail):
@@ -215,7 +215,8 @@ def prepare_tuple_nested(item):
         ),
     ):
         # FIXME: might infinite-loop before simplify_optiontype is implemented
-        return prepare_tuple_nested(next.simplify_optiontype())
+        next = item.simplify_optiontype()
+        return prepare_tuple_nested(next)
 
     elif isinstance(
         item,
