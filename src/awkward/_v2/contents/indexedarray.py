@@ -279,3 +279,94 @@ class IndexedArray(Content):
             return self.project()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        nplike = self.nplike
+
+        nextparents = ak._v2.index.Index64.zeros(len(self._index), nplike)
+        nextcarry = ak._v2.index.Index64.zeros(len(self._index), nplike)
+        outindex = ak._v2.index.Index64.zeros(len(self._index), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._index.to(nplike),
+                parents.to(nplike),
+                len(self._index),
+            )
+        )
+
+        out = self.content._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            None,
+            nextparents,
+            outlength,
+            mask,
+            keepdims,
+        )
+        branch, depth = self.branch_depth
+        if not branch and negaxis == depth:
+            return out
+        else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
+            if isinstance(out, ak._v2.contents.ListOffsetArray):
+                if starts is not None and len(starts) > 0 and starts[0] != 0:
+                    raise ValueError(
+                        "reduce_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray64 whose offsets start at zero "
+                    )
+
+                outoffsets = ak._v2.index.Index64.empty(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        len(starts),
+                        len(self._index),
+                    )
+                )
+
+                tmp = ak._v2.contents.IndexedOptionArray(
+                    outindex,
+                    out._content,
+                    None,
+                    None,
+                )._simplify_optiontype()
+
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    None,
+                )
+            else:
+                raise ValueError(
+                    "reduce_next with unbranching depth > negaxis is only "
+                    "expected to return RegularArray or ListOffsetArray64; "
+                    "instead, it returned "  # FIXME + out.classname
+                )

@@ -477,3 +477,74 @@ class IndexedOptionArray(Content):
                 outindex, out, parameters=parameters
             )
             return out2._simplify_optiontype()
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        nplike = self.nplike
+        branch, depth = self.branch_depth
+
+        index_length = len(self._index)
+        # FIXME parents_length = len(parents)
+
+        # FIXME: starts_length = len(starts)
+        numnull = ak._v2.index.Index64.zeros(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_numnull",
+                numnull.dtype.type,
+                self._index.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._index.to(nplike),
+                index_length,
+            )
+        )
+
+        next_length = index_length - numnull[0]
+        nextparents = ak._v2.index.Index64.zeros(next_length, nplike)
+        nextcarry = ak._v2.index.Index64.zeros(next_length, nplike)
+        outindex = ak._v2.index.Index64.zeros(index_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._index.to(nplike),
+                parents.to(nplike),
+                index_length,
+            )
+        )
+
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+
+        # FIXME inject_nones = True if not branch and negaxis != depth else False
+
+        out = next._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            nextparents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+        # FIXME ...
+        return out

@@ -3185,6 +3185,7 @@ namespace awkward {
         std::string("attempting to reduce a scalar") + FILENAME(__LINE__));
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
+      std::cout << "to RegularArray\n";
       return toRegularArray().get()->reduce_next(reducer,
                                                  negaxis,
                                                  starts,
@@ -3195,6 +3196,10 @@ namespace awkward {
                                                  keepdims);
     }
     else {
+      std::cout << "\nv1 parents: " << parents.tostring() << "\n";
+      std::cout << "v1 outlength: " << outlength << "\n";
+
+
       std::shared_ptr<void> ptr;
       switch (dtype_) {
       case util::dtype::boolean:

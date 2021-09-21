@@ -504,7 +504,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def localindex(self, axis):
         return self._localindex(axis, 0)
 
-    def _reduce(self, reducer, axis=-1, mask=True, keepdims=True):
+    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
         if axis is None:
             raise NotImplementedError
 
@@ -550,36 +550,40 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             mask,
             keepdims,
         )
-        return next
 
-    def argmin(self, axis=-1, mask=True, keepdims=True):
+        if isinstance(next, ak._v2.contents.NumpyArray) and len(next) == 1:
+            return next
+
+        return next[0]
+
+    def argmin(self, axis=-1, mask=True, keepdims=False):
         return self._reduce("argmin", axis, mask, keepdims)
 
-    def argmax(self, axis=-1, mask=True, keepdims=True):
+    def argmax(self, axis=-1, mask=True, keepdims=False):
         return self._reduce("argmax", axis, mask, keepdims)
 
-    def count(self, axis=-1, mask=True, keepdims=True):
+    def count(self, axis=-1, mask=False, keepdims=False):
         return self._reduce("count", axis, mask, keepdims)
 
-    def count_nonzero(self, axis=-1, mask=True, keepdims=True):
+    def count_nonzero(self, axis=-1, mask=False, keepdims=False):
         return self._reduce("count_nonzero", axis, mask, keepdims)
 
-    def sum(self, axis=-1, mask=True, keepdims=True):
+    def sum(self, axis=-1, mask=False, keepdims=False):
         return self._reduce("sum", axis, mask, keepdims)
 
-    def prod(self, axis=-1, mask=True, keepdims=True):
+    def prod(self, axis=-1, mask=False, keepdims=False):
         return self._reduce("prod", axis, mask, keepdims)
 
-    def any(self, axis=-1, mask=True, keepdims=True):
+    def any(self, axis=-1, mask=False, keepdims=False):
         return self._reduce("any", axis, mask, keepdims)
 
-    def all(self, axis=-1, mask=True, keepdims=True):
+    def all(self, axis=-1, mask=False, keepdims=False):
         return self._reduce("all", axis, mask, keepdims)
 
-    def min(self, axis=-1, mask=True, keepdims=True):
+    def min(self, axis=-1, mask=True, keepdims=False):
         return self._reduce("min", axis, mask, keepdims)
 
-    def max(self, axis=-1, mask=True, keepdims=True):
+    def max(self, axis=-1, mask=True, keepdims=False):
         return self._reduce("max", axis, mask, keepdims)
 
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):

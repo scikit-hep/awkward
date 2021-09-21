@@ -392,8 +392,77 @@ class NumpyArray(Content):
         mask,
         keepdims,
     ):
-        return Reducer(reducer)._apply(
+        nplike = self.nplike
+
+        reducer = Reducer(reducer, nplike)
+        out = reducer._apply(
             self,
             parents,
             outlength,
         )
+
+        if reducer.__name__ == "argmin" or reducer.__name__ == "argmax":
+            if shifts is None or len(shifts) == 0:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_reduce_adjust_starts_64",
+                        out.data.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        parents.to(nplike),
+                        starts.to(nplike),
+                    )
+                )
+            else:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                        out.data.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        parents.to(nplike),
+                        starts.to(nplike),
+                        shifts.to(nplike),
+                    )
+                )
+
+        if mask:
+            outmask = ak._v2.index.Index8.zeros(outlength, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+                    outmask.dtype.type,
+                    parents.dtype.type,
+                ](
+                    outmask.to(nplike),
+                    parents.to(nplike),
+                    len(parents),
+                    outlength,
+                )
+            )
+
+            out = ak._v2.contents.ByteMaskedArray(
+                outmask,
+                out,
+                False,
+                None,
+                None,
+            )
+
+        if keepdims:
+            out = ak._v2.contents.RegularArray(
+                out,
+                1,
+                len(self),
+                None,
+                None,
+            )
+
+        return out
