@@ -3185,7 +3185,6 @@ namespace awkward {
         std::string("attempting to reduce a scalar") + FILENAME(__LINE__));
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
-      std::cout << "to RegularArray\n";
       return toRegularArray().get()->reduce_next(reducer,
                                                  negaxis,
                                                  starts,
@@ -3196,9 +3195,6 @@ namespace awkward {
                                                  keepdims);
     }
     else {
-      std::cout << "\nv1 parents: " << parents.tostring() << "\n";
-      std::cout << "v1 outlength: " << outlength << "\n";
-
 
       std::shared_ptr<void> ptr;
       switch (dtype_) {
@@ -3293,7 +3289,6 @@ namespace awkward {
           std::string("cannot apply reducers to NumpyArray with format \"")
           + format_ + std::string("\"") + FILENAME(__LINE__));
       }
-
       if (reducer.returns_positions()) {
         struct Error err3;
         if (shifts.length() == 0) {
@@ -5367,12 +5362,6 @@ namespace awkward {
     if (length == 0) {
       return ptr;
     }
-
-    // int64_t num_nullls = 0;
-    // for(int64_t i = 0; i < shifts.length(); i++) {
-    //   shifts.data()[i] > num_nullls ? num_nullls = shifts.data()[i] : num_nullls;
-    // }
-    // std::cout << "Num nulls " << num_nullls << "\n";
 
     int64_t offsets_length = 0;
     struct Error err1 = kernel::sorting_ranges_length(

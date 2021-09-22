@@ -292,10 +292,13 @@ class IndexedArray(Content):
         keepdims,
     ):
         nplike = self.nplike
+        branch, depth = self.branch_depth
 
-        nextparents = ak._v2.index.Index64.zeros(len(self._index), nplike)
-        nextcarry = ak._v2.index.Index64.zeros(len(self._index), nplike)
-        outindex = ak._v2.index.Index64.zeros(len(self._index), nplike)
+        index_length = len(self._index)
+
+        nextcarry = ak._v2.index.Index64.zeros(index_length, nplike)
+        nextparents = ak._v2.index.Index64.zeros(index_length, nplike)
+        outindex = ak._v2.index.Index64.zeros(index_length, nplike)
         self._handle_error(
             nplike[
                 "awkward_IndexedArray_reduce_next_64",
@@ -310,21 +313,22 @@ class IndexedArray(Content):
                 outindex.to(nplike),
                 self._index.to(nplike),
                 parents.to(nplike),
-                len(self._index),
+                index_length,
             )
         )
-
-        out = self.content._reduce_next(
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        nextshifts = ak._v2.index.Index64([])
+        out = next._reduce_next(
             reducer,
             negaxis,
             starts,
-            None,
+            nextshifts,
             nextparents,
             outlength,
             mask,
             keepdims,
         )
-        branch, depth = self.branch_depth
+
         if not branch and negaxis == depth:
             return out
         else:

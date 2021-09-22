@@ -87,29 +87,30 @@ def test_jagged():
     v2_array = v1_to_v2(array)
     assert ak.to_list(v2_array.argmin(axis=1)) == [1, None, 0, 0, 2]
 
-    # index2 = ak.layout.Index64(np.array([4, 3, 2, 1, 0], dtype=np.int64))
-    # array2 = ak.layout.IndexedArray64(index2, array)
-    # v2_array2 = v1_to_v2(array2)
-    # assert ak.to_list(v2_array2.argmin(axis=1)) == [2, 0, 0, None, 1]
-    #
-    # index3 = ak.layout.Index64(np.array([4, 3, -1, 4, 0], dtype=np.int64))
-    # array2 = ak.layout.IndexedArray64(index3, array)
-    # v2_array2 = v1_to_v2(array2)
-    # assert ak.to_list(v2_array2.argmin(axis=1)) == [2, 0, None, 2, 1]
-    # assert ak.to_list(v2_array2.argmin(axis=-1)) == [2, 0, None, 2, 1]
-    #
-    #
+    index2 = ak.layout.Index64(np.array([4, 3, 2, 1, 0], dtype=np.int64))
+    array2 = ak.layout.IndexedArray64(index2, array)
+    assert ak.to_list(array2.argmin(axis=1)) == [2, 0, 0, None, 1]
+    v2_array2 = v1_to_v2(array2)
+    assert ak.to_list(v2_array2.argmin(axis=1)) == [2, 0, 0, None, 1]
+
+    index3 = ak.layout.Index64(np.array([4, 3, -1, 4, 0], dtype=np.int64))
+    array2 = ak.layout.IndexedArray64(index3, array)
+    v2_array2 = v1_to_v2(array2)
+    assert ak.to_list(v2_array2.argmin(axis=1)) == [2, 0, None, 2, 1]
+    assert ak.to_list(v2_array2.argmin(axis=-1)) == [2, 0, None, 2, 1]
 
 
-# def test_missing():
-#     array = ak.from_iter(
-#         [[[2.2, 1.1, 3.3]], [[]], [None, None, None], [[-4.4, -5.5, -6.6]]],
-#         highlevel=False,
-#     )
-#     array = v1_to_v2(array)
-#     assert ak.to_list(array.argmin(axis=2)) == [[1], [None], [None, None, None], [2]]
-#
-#
+def test_missing():
+    array = ak.from_iter(
+        [[[2.2, 1.1, 3.3]], [[]], [None, None, None], [[-4.4, -5.5, -6.6]]],
+        highlevel=False,
+    )
+    assert ak.to_list(array.argmin(axis=2)) == [[1], [None], [None, None, None], [2]]
+
+    array = v1_to_v2(array)
+    assert ak.to_list(array.argmin(axis=2)) == [[1], [None], [None, None, None], [2]]
+
+
 # def test_highlevel():
 #     array = ak.Array(
 #         [[3.3, 1.1, 5.5, 1.1, 4.4], [4.4, 2.2, 1.1, 6.6], [2.2, 3.3, -1.1]]

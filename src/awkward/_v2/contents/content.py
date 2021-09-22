@@ -540,11 +540,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
         starts = ak._v2.index.Index64.zeros(1, self.nplike)
         parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        shifts = ak._v2.index.Index64([])
         next = self._reduce_next(
             reducer,
             negaxis,
             starts,
-            None,
+            shifts,
             parents,
             1,
             mask,
@@ -557,7 +558,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return next[0]
 
     def argmin(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce("argmin", axis, mask, keepdims)
+        return self._reduce("argmin", axis=axis, mask=mask, keepdims=keepdims)
 
     def argmax(self, axis=-1, mask=True, keepdims=False):
         return self._reduce("argmax", axis, mask, keepdims)

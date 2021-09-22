@@ -8,90 +8,81 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Reducer:
-    def __init__(self, reducername, nplike, *args, **params):
-        self.__name__ = reducername
-        self._nplike = nplike
+    def __init__(self, name: str, *args, **params):
+        self.__name__ = name
 
-    def _apply(self, array, parents, outlength):
-        reducer_name = self.__name__
-        reducer = getattr(self, reducer_name, None)
-        return reducer(array, parents, outlength)
-
-    def argmin(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.index.Index64.zeros(outlength, nplike)
+    def _argmin(self, array, parents, outlength):
+        result = ak._v2.index.Index64.empty(outlength, array.nplike, dtype=np.int64)
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_argmin",
                 result.dtype.type,
                 array.data.dtype.type,
                 parents.dtype.type,
             ](
-                result.to(nplike),
+                result.to(array.nplike),
                 array.data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
             )
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def argmax(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.index.Index64.zeros(outlength, nplike)
+    def _argmax(self, array, parents, outlength):
+        result = ak._v2.index.Index64.empty(outlength, array.nplike)
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_argmax",
                 result.dtype.type,
                 array._data.dtype.type,
                 parents.dtype.type,
             ](
-                result.to(nplike),
+                result.to(array.nplike),
                 array._data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
             )
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def count(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.index.Index64.zeros(outlength, nplike)
+    def _count(self, array, parents, outlength):
+        result = ak._v2.index.Index64.empty(outlength, array.nplike)
         array._handle_error(
-            nplike["awkward_reduce_count_64", result.dtype.type, parents.dtype.type](
-                result.to(nplike),
-                parents.to(nplike),
+            array.nplike[
+                "awkward_reduce_count_64", result.dtype.type, parents.dtype.type
+            ](
+                result.to(array.nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
             )
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def count_nonzero(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.index.Index64.zeros(outlength, nplike)
+    def _count_nonzero(self, array, parents, outlength):
+        result = ak._v2.index.Index64.empty(outlength, array.nplike)
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_countnonzero",
                 result.dtype.type,
                 array._data.dtype.type,
                 parents.dtype.type,
             ](
-                result.to(nplike),
+                result.to(array.nplike),
                 array._data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
             )
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def sum(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.contents.NumpyArray(nplike.zeros(outlength))
+    def _sum(self, array, parents, outlength):
+        result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength))
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_sum",
                 result.dtype.type,
                 array.dtype.type,
@@ -99,18 +90,19 @@ class Reducer:
             ](
                 result._data,
                 array._data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
             )
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def prod(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.contents.NumpyArray(nplike.zeros(outlength))
+    def _prod(self, array, parents, outlength):
+        result = ak._v2.contents.NumpyArray(
+            array.nplike.empty(outlength, dtype=array.dtype)
+        )
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_prod",
                 result.dtype.type,
                 array._data.dtype.type,
@@ -118,18 +110,17 @@ class Reducer:
             ](
                 result._data,
                 array._data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
             )
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def any(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.contents.NumpyArray(nplike.zeros(outlength, dtype=bool))
+    def _any(self, array, parents, outlength):
+        result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype=bool))
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_sum_bool",
                 result.dtype.type,
                 array._data.dtype.type,
@@ -137,18 +128,19 @@ class Reducer:
             ](
                 result._data,
                 array._data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
             )
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def all(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.contents.NumpyArray(nplike.zeros(outlength, dtype=np.bool_))
+    def _all(self, array, parents, outlength):
+        result = ak._v2.contents.NumpyArray(
+            array.nplike.empty(outlength, dtype=np.bool_)
+        )
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_prod_bool",
                 result.dtype.type,
                 array._data.dtype.type,
@@ -156,18 +148,19 @@ class Reducer:
             ](
                 result._data,
                 array._data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
             )
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def min(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.contents.NumpyArray(nplike.zeros(outlength, dtype=array.dtype))
+    def _min(self, array, parents, outlength):
+        result = ak._v2.contents.NumpyArray(
+            array.nplike.empty(outlength, dtype=array.dtype)
+        )
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_min",
                 result.dtype.type,
                 array.dtype.type,
@@ -175,7 +168,7 @@ class Reducer:
             ](
                 result._data,
                 array._data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
                 True,
@@ -183,11 +176,12 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def max(self, array, parents, outlength):
-        nplike = self._nplike
-        result = ak._v2.contents.NumpyArray(nplike.zeros(outlength, dtype=array.dtype))
+    def _max(self, array, parents, outlength):
+        result = ak._v2.contents.NumpyArray(
+            array.nplike.empty(outlength, dtype=array.dtype)
+        )
         array._handle_error(
-            nplike[
+            array.nplike[
                 "awkward_reduce_max",
                 result.dtype.type,
                 array.dtype.type,
@@ -195,10 +189,15 @@ class Reducer:
             ](
                 result._data,
                 array._data,
-                parents.to(nplike),
+                parents.to(array.nplike),
                 len(parents),
                 outlength,
                 True,
             )
         )
         return ak._v2.contents.NumpyArray(result)
+
+    def _apply(self, array, parents, outlength):
+        do = f"_{self.__name__}"
+        if hasattr(self, do) and callable(func := getattr(self, do)):
+            return func(array, parents, outlength)

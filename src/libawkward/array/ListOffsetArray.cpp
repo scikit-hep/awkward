@@ -1376,7 +1376,6 @@ namespace awkward {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-      std::cout << "\nv1 not branch and negaxis == depth\n";
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
           std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
@@ -1472,10 +1471,6 @@ namespace awkward {
       }
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
-      std::cout << "v1 nextcontent: " << nextcontent->tostring() << "\n";
-      std::cout << "v1 nextstarts: " << nextstarts.tostring() << "\n";
-      std::cout << "v1 nextshifts: " << nextshifts.tostring() << "\n";
-      std::cout << "v1 nextparents: " << nextparents.tostring() << "\n";
 
       ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
                                                              negaxis - 1,
@@ -1485,14 +1480,12 @@ namespace awkward {
                                                              maxnextparents + 1,
                                                              mask,
                                                              false);
-      std::cout << "v1 outcontent: " << outcontent->tostring() << "\n";
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
                                                      util::Parameters(),
                                                      outstarts,
                                                      outstops,
                                                      outcontent);
 
-      std::cout << "v1 out: " << out->tostring() << "\n";
       if (keepdims) {
         out = RegularArray(Identities::none(),
                            util::Parameters(),
@@ -1501,14 +1494,11 @@ namespace awkward {
                            length()
               ).toListOffsetArray64(false).get()->shallow_copy();
       }
-      std::cout << "v1 out (again): " << out->tostring() << "\n";
-
 
       return out;
     }
 
     else {
-      std::cout << "\nv1 else\n";
 
       int64_t globalstart;
       int64_t globalstop;

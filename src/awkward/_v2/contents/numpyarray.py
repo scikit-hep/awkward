@@ -394,13 +394,12 @@ class NumpyArray(Content):
     ):
         nplike = self.nplike
 
-        reducer = Reducer(reducer, nplike)
+        reducer = Reducer(reducer)
         out = reducer._apply(
             self,
             parents,
             outlength,
         )
-
         if reducer.__name__ == "argmin" or reducer.__name__ == "argmax":
             if shifts is None or len(shifts) == 0:
                 self._handle_error(
