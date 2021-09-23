@@ -621,7 +621,7 @@ def test_unionarray_sort():
 
     with pytest.raises(ValueError) as err:
         v2_array.sort()
-    assert str(err.value).startswith("cannot sort unsimplified UnionArray")
+    assert str(err.value).startswith("cannot sort an irreducible UnionArray")
 
     v2_array = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
