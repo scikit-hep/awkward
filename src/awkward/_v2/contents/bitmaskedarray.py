@@ -302,3 +302,22 @@ class BitMaskedArray(Content):
         return self.toByteMaskedArray()._combinations(
             n, replacement, recordlookup, parameters, axis, depth
         )
+
+    def _validityerror(self, path):
+        if len(self.mask) * 8 < len(self):
+            return 'at {0} ("{1}"): len(mask) * 8 < length'.format(path, type(self))
+        elif len(self.content) < len(self):
+            return 'at {0} ("{1}"): len(content) < length'.format(path, type(self))
+        elif isinstance(
+            self.content,
+            (
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
+        else:
+            return self.content.validityerror(path + ".content")

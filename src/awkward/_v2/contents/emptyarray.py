@@ -160,3 +160,6 @@ class EmptyArray(Content):
             mask,
             keepdims,
         )
+
+    def _validityerror(self, path):
+        return ""

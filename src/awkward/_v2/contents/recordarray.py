@@ -429,3 +429,15 @@ class RecordArray(Content):
             None,
             None,
         )
+
+    def _validityerror(self, path):
+        for i in range(len(self.contents)):
+            if len(self.contents[i]) < len(self):
+                return 'at {0} ("{1}"): len(field({2})) < len(recordarray)'.format(
+                    path, type(self), i
+                )
+        for i in range(len(self.contents)):
+            sub = self.contents[i].validityerror(path + ".field({0})".format(i))
+            if sub != "":
+                return sub
+        return ""
