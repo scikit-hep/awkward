@@ -374,7 +374,7 @@ class IndexedArray(Content):
                     "expected to return RegularArray or ListOffsetArray64; "
                     "instead, it returned "  # FIXME + out.classname
                 )
-                
+
     def _validityerror(self, path):
         error = self.nplike["awkward_IndexedArray_validity", self.index.dtype.type](
             self.index.to(self.nplike), len(self.index), len(self.content), False
