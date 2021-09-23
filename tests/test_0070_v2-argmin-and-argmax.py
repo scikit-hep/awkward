@@ -27,7 +27,7 @@ def test_1d():
     assert ak.to_list(array.prod(axis=0)) == [193.26120000000003]
     assert ak.to_list(array.any(axis=0)) == [True]
     assert ak.to_list(array.all(axis=0)) == [True]
-    assert ak.to_list(array.min(axis=0)) == [1.0]
+    assert ak.to_list(array.min(axis=0)) == [1.1]
     assert ak.to_list(array.max(axis=0)) == [5.5]
 
 

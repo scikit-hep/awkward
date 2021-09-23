@@ -149,7 +149,7 @@ class EmptyArray(Content):
         mask,
         keepdims,
     ):
-        as_numpy = ak._v2.contents.NumpyArray(self)
+        as_numpy = ak._v2.contents.NumpyArray(self)  # FIXME: reducer.preferred_dtype?
         return as_numpy._reduce_next(
             reducer,
             negaxis,

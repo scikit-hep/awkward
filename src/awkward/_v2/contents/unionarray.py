@@ -340,3 +340,29 @@ class UnionArray(Content):
         return out._sort_next(
             negaxis, starts, parents, outlength, ascending, stable, kind, order
         )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        raise NotImplementedError
+
+        # FIXME: !!! Recursion detected (same locals & position)
+        simplified = self._simplify_uniontype()
+        return simplified._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )

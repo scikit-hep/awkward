@@ -395,3 +395,37 @@ class RecordArray(Content):
             return ak._v2.contents.recordarray.RecordArray(
                 contents, recordlookup, len(self), self._identifier, self._parameters
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        contents = []
+        for content in self._contents:
+            contents.append(
+                content._reduce_next(
+                    reducer,
+                    negaxis,
+                    starts,
+                    shifts,
+                    parents,
+                    outlength,
+                    mask,
+                    keepdims,
+                )
+            )
+
+        return ak._v2.contents.RecordArray(
+            contents,
+            self._keys,
+            outlength,
+            None,
+            None,
+        )
