@@ -676,8 +676,8 @@ class ListOffsetArray(Content):
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis == depth + 1:
             if (
-                self.parameter("__array__") == '"string"'
-                or self.parameter("__array__") == '"bytestring"'
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
             ):
                 raise ValueError(
                     "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
@@ -780,8 +780,8 @@ class ListOffsetArray(Content):
             )
         else:
             if (
-                self.parameter("__array__") == '"string"'
-                or self.parameter("__array__") == '"bytestring"'
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
             ):
                 return ""
             else:

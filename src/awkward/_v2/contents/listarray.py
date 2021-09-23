@@ -710,8 +710,8 @@ class ListArray(Content):
             )
         else:
             if (
-                self.parameter("__array__") == '"string"'
-                or self.parameter("__array__") == '"bytestring"'
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
             ):
                 return ""
             else:

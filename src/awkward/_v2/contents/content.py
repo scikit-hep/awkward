@@ -641,7 +641,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
     def validityerror_parameters(self, path):
-        if self.parameter("__array__") == '"string"':
+        if self.parameter("__array__") == "string":
             content = None
             if isinstance(
                 self,
@@ -656,7 +656,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 return 'at {0} ("{1}"): __array__ = "string" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
                     path, type(self)
                 )
-            if content.parameter("__array__") != '"char"':
+            if content.parameter("__array__") != "char":
                 return 'at {0} ("{1}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
                     path, type(self)
                 )
@@ -675,7 +675,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 )
             return ""
 
-        if self.parameter("__array__") == '"bytestring"':
+        if self.parameter("__array__") == "bytestring":
             content = None
             if isinstance(
                 self,
@@ -690,7 +690,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 return 'at {0} ("{1}"): __array__ = "bytestring" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
                     path, type(self)
                 )
-            if content.parameter("__array__") != '"byte"':
+            if content.parameter("__array__") != "byte":
                 return 'at {0} ("{1}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
                     path, type(self)
                 )
@@ -709,17 +709,17 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 )
             return ""
 
-        if self.parameter("__array__") == '"char"':
+        if self.parameter("__array__") == "char":
             return 'at {0} ("{1}"): __array__ = "char" must be directly inside __array__ = "string"'.format(
                 path, type(self)
             )
 
-        if self.parameter("__array__") == '"byte"':
+        if self.parameter("__array__") == "byte":
             return 'at {0} ("{1}"): __array__ = "byte" must be directly inside __array__ = "bytestring"'.format(
                 path, type(self)
             )
 
-        if self.parameter("__array__") == '"categorical"':
+        if self.parameter("__array__") == "categorical":
             content = None
             if isinstance(
                 self,
@@ -734,6 +734,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     path, type(self)
                 )
             return NotImplementedError("TODO: Implement is_unique")
+
         return ""
 
     def validityerror(self, path="layout"):
