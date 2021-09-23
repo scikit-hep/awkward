@@ -459,3 +459,6 @@ class VirtualArray(Content):
             return self.array._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _validityerror(self, path):
+        return NotImplementedError

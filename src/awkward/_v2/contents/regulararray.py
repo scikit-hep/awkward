@@ -557,8 +557,8 @@ class RegularArray(Content):
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis == depth + 1:
             if (
-                self.parameter("__array__") == '"string"'
-                or self.parameter("__array__") == '"bytestring"'
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
             ):
                 raise ValueError(
                     "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
@@ -631,3 +631,14 @@ class RegularArray(Content):
             return ak._v2.contents.regulararray.RegularArray(
                 next, self._size, len(self), self._identifier, self._parameters
             )
+
+    def _validityerror(self, path):
+        if self.size < 0:
+            return 'at {0} ("{1}"): size < 0'.format(path, type(self))
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            return ""
+        else:
+            return self.content.validityerror(path + ".content")

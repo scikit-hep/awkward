@@ -137,3 +137,6 @@ class EmptyArray(Content):
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)
+
+    def _validityerror(self, path):
+        return ""

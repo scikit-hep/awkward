@@ -685,3 +685,34 @@ class ListArray(Content):
         return ListOffsetArray._combinations(
             self, n, replacement, recordlookup, parameters, axis, depth
         )
+
+    def _validityerror(self, path):
+        if len(self.stops) < len(self.starts):
+            return 'at {0} ("{1}"): len(stops) < len(starts)'.format(path, type(self))
+        error = self.nplike[
+            "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
+        ](
+            self.starts.to(self.nplike),
+            self.stops.to(self.nplike),
+            len(self.starts),
+            len(self.content),
+        )
+        if error.str is not None:
+            if error.filename is None:
+                filename = ""
+            else:
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
+            message = error.str.decode(errors="surrogateescape")
+            return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+                path, type(self), message, error.id, filename
+            )
+        else:
+            if (
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
+            ):
+                return ""
+            else:
+                return self.content.validityerror(path + ".content")

@@ -330,6 +330,46 @@ class UnionArray(Content):
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
 
+    def _validityerror(self, path):
+        for i in range(len(self.contents)):
+            if isinstance(self.contents[i], ak._v2.contents.unionarray.UnionArray):
+                return "{0} contains {1}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
+                    type(self), type(self.contents[i])
+                )
+            if len(self.index) < len(self.tags):
+                return 'at {0} ("{1}"): len(index) < len(tags)'.format(path, type(self))
+            lencontents = self.nplike.empty(len(self.contents), dtype=np.int64)
+            for i in range(len(self.contents)):
+                lencontents[i] = len(self.contents[i])
+            error = self.nplike[
+                "awkward_UnionArray_validity",
+                self.tags.dtype.type,
+                self.index.dtype.type,
+                np.int64,
+            ](
+                self.tags.to(self.nplike),
+                self.index.to(self.nplike),
+                len(self.tags),
+                len(self.contents),
+                lencontents,
+            )
+            if error.str is not None:
+                if error.filename is None:
+                    filename = ""
+                else:
+                    filename = " (in compiled code: " + error.filename.decode(
+                        errors="surrogateescape"
+                    ).lstrip("\n").lstrip("(")
+                message = error.str.decode(errors="surrogateescape")
+                return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+                    path, type(self), message, error.id, filename
+                )
+            for i in range(len(self.contents)):
+                sub = self.contents[i].validityerror(path + ".content({0})".format(i))
+                if sub != "":
+                    return sub
+            return ""
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
