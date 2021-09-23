@@ -539,9 +539,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is " + str(depth) + ")"
                 )
 
-        starts = ak._v2.index.Index64.zeros(1, self.nplike)
         parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
-        shifts = ak._v2.index.Index64([])
+        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        shifts = None
         next = self._reduce_next(
             reducer,
             negaxis,

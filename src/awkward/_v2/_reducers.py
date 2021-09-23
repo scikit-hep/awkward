@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Reducer(object):
-    needs_shifts = False
+    needs_position = False
 
     @classmethod
     def return_dtype(cls, given_dtype):
@@ -32,7 +32,7 @@ class Reducer(object):
 
 
 class ArgMin(Reducer):
-    needs_shifts = True
+    needs_position = True
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -55,7 +55,7 @@ class ArgMin(Reducer):
 
 
 class ArgMax(Reducer):
-    needs_shifts = True
+    needs_position = True
 
     @classmethod
     def apply(cls, array, parents, outlength):

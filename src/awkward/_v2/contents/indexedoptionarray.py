@@ -529,11 +529,9 @@ class IndexedOptionArray(Content):
             )
         )
 
-        make_shifts = reducer.needs_shifts and (not branch and negaxis == depth)
-        nextshifts = ak._v2.index.Index64([])
-        if make_shifts:
+        if reducer.needs_position and (not branch and negaxis == depth):
             nextshifts = ak._v2.index.Index64.zeros(next_length, nplike)
-            if len(shifts) == 0:
+            if shifts is None:
                 self._handle_error(
                     nplike[
                         "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
@@ -559,6 +557,9 @@ class IndexedOptionArray(Content):
                         shifts.to(nplike),
                     )
                 )
+        else:
+            nextshifts = None
+
         next = self._content._carry(nextcarry, False, NestedIndexError)
         if isinstance(next, ak._v2.contents.RegularArray):
             next = next.toListOffsetArray64(True)

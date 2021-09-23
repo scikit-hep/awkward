@@ -317,7 +317,7 @@ class IndexedArray(Content):
             )
         )
         next = self._content._carry(nextcarry, False, NestedIndexError)
-        nextshifts = ak._v2.index.Index64([])
+        nextshifts = None
         out = next._reduce_next(
             reducer,
             negaxis,

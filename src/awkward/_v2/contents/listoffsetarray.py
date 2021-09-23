@@ -789,7 +789,6 @@ class ListOffsetArray(Content):
         nextlen = self._offsets[-1] - self._offsets[0]
 
         if not branch and negaxis == depth:
-
             maxcount = ak._v2.index.Index64.zeros(1, nplike)
             offsetscopy = ak._v2.index.Index64.zeros(len(self.offsets), nplike)
             self._handle_error(
@@ -881,9 +880,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nextshifts = ak._v2.index.Index64([])
-
-            if reducer.needs_shifts:
+            if reducer.needs_position:
                 nextshifts = ak._v2.index.Index64.zeros(nextlen, nplike)
                 nummissing = ak._v2.index.Index64.zeros(maxcount[0], nplike)
                 missing = ak._v2.index.Index64.zeros(self._offsets[-1], nplike)
@@ -910,6 +907,9 @@ class ListOffsetArray(Content):
                         nextcarry.to(nplike),
                     )
                 )
+            else:
+                nextshifts = None
+
             nextcontent = self._content._carry(nextcarry, False, NestedIndexError)
             outcontent = nextcontent._reduce_next(
                 reducer,
@@ -942,7 +942,6 @@ class ListOffsetArray(Content):
             return out
 
         else:
-
             nextparents = ak._v2.index.Index64.zeros(nextlen, nplike)
 
             self._handle_error(

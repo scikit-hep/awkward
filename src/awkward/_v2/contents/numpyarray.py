@@ -394,8 +394,9 @@ class NumpyArray(Content):
         nplike = self.nplike
 
         out = reducer.apply(self, parents, outlength)
-        if reducer.needs_shifts:
-            if shifts is None or len(shifts) == 0:
+
+        if reducer.needs_position:
+            if shifts is None:
                 self._handle_error(
                     nplike[
                         "awkward_NumpyArray_reduce_adjust_starts_64",
