@@ -582,35 +582,32 @@ class IndexedOptionArray(Content):
                 out = out.toListOffsetArray64(True)
 
             if isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts is None:
-                    raise NotImplementedError
-                else:
-                    outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
-                    self._handle_error(
-                        nplike[
-                            "awkward_IndexedArray_reduce_next_fix_offsets_64",
-                            outoffsets.dtype.type,
-                            starts.dtype.type,
-                        ](
-                            outoffsets.to(nplike),
-                            starts.to(nplike),
-                            len(starts),
-                            len(outindex),
-                        )
+                outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        len(starts),
+                        len(outindex),
                     )
+                )
 
-                    tmp = ak._v2.contents.IndexedOptionArray(
-                        outindex,
-                        out.content,
-                        None,
-                        None,
-                    )._simplify_optiontype()
+                tmp = ak._v2.contents.IndexedOptionArray(
+                    outindex,
+                    out.content,
+                    None,
+                    None,
+                )._simplify_optiontype()
 
-                    return ak._v2.contents.ListOffsetArray(
-                        outoffsets,
-                        tmp,
-                        None,
-                        None,
-                    )
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    None,
+                )
 
         return out

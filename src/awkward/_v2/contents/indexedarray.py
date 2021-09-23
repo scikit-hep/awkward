@@ -334,11 +334,12 @@ class IndexedArray(Content):
         else:
             if isinstance(out, ak._v2.contents.RegularArray):
                 out = out.toListOffsetArray64(True)
-            if isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts is not None and len(starts) > 0 and starts[0] != 0:
-                    raise ValueError(
+
+            elif isinstance(out, ak._v2.contents.ListOffsetArray):
+                if len(starts) > 0 and starts[0] != 0:
+                    raise AssertionError(
                         "reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray64 whose offsets start at zero "
+                        "ListOffsetArray64 whose offsets start at zero ({0})".format(starts[0])
                     )
 
                 outoffsets = ak._v2.index.Index64.empty(len(starts) + 1, nplike)
@@ -368,9 +369,10 @@ class IndexedArray(Content):
                     None,
                     None,
                 )
+
             else:
-                raise ValueError(
+                raise AssertionError(
                     "reduce_next with unbranching depth > negaxis is only "
                     "expected to return RegularArray or ListOffsetArray64; "
-                    "instead, it returned "  # FIXME + out.classname
+                    "instead, it returned " + out.classname
                 )
