@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Reducer:
-    def __init__(self, name: str, *args, **params):
+    def __init__(self, name, *args, **params):
         self.__name__ = name
 
     def _return_dtype(self, given_dtype):
@@ -260,5 +260,7 @@ class Reducer:
 
     def _apply(self, array, parents, outlength):
         do = f"_{self.__name__}"
-        if hasattr(self, do) and callable(func := getattr(self, do)):
-            return func(array, parents, outlength)
+        if hasattr(self, do):
+            func = getattr(self, do)
+            if callable(func):
+                return func(array, parents, outlength)
