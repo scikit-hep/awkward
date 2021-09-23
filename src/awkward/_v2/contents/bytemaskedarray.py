@@ -379,3 +379,128 @@ class ByteMaskedArray(Content):
                 outindex, out, parameters=parameters
             )
             return out2._simplify_optiontype()
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        raise NotImplementedError
+
+    ### FIXME: implementation should look like this:
+
+    # int64_t numnull;
+    # struct Error err1 = kernel::ByteMaskedArray_numnull(
+    #   kernel::lib::cpu,   // DERIVE
+    #   &numnull,
+    #   mask_.data(),
+    #   mask_.length(),
+    #   valid_when_);
+    # util::handle_error(err1, classname(), identities_.get());
+
+    # Index64 nextparents(mask_.length() - numnull);
+    # Index64 nextcarry(mask_.length() - numnull);
+    # Index64 outindex(mask_.length());
+    # struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
+    #   kernel::lib::cpu,   // DERIVE
+    #   nextcarry.data(),
+    #   nextparents.data(),
+    #   outindex.data(),
+    #   mask_.data(),
+    #   parents.data(),
+    #   mask_.length(),
+    #   valid_when_);
+    # util::handle_error(err2, classname(), identities_.get());
+
+    # std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    # bool make_shifts = (reducer.returns_positions()  &&
+    #                     !branchdepth.first  && negaxis == branchdepth.second);
+
+    # Index64 nextshifts(make_shifts ? mask_.length() - numnull : 0);
+    # if (make_shifts) {
+    #   if (shifts.length() == 0) {
+    #     struct Error err3 =
+    #         kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+    #       kernel::lib::cpu,   // DERIVE
+    #       nextshifts.data(),
+    #       mask_.data(),
+    #       mask_.length(),
+    #       valid_when_);
+    #     util::handle_error(err3, classname(), identities_.get());
+    #   }
+    #   else {
+    #     struct Error err3 =
+    #         kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+    #       kernel::lib::cpu,   // DERIVE
+    #       nextshifts.data(),
+    #       mask_.data(),
+    #       mask_.length(),
+    #       valid_when_,
+    #       shifts.data());
+    #     util::handle_error(err3, classname(), identities_.get());
+    #   }
+    # }
+
+    # ContentPtr next = content_.get()->carry(nextcarry, false);
+    # if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+    #   next = raw->toListOffsetArray64(true);
+    # }
+
+    # ContentPtr out = next.get()->reduce_next(reducer,
+    #                                          negaxis,
+    #                                          starts,
+    #                                          nextshifts,
+    #                                          nextparents,
+    #                                          outlength,
+    #                                          mask,
+    #                                          keepdims);
+
+    # if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+    #   return out;
+    # }
+    # else {
+    #   if (RegularArray* raw =
+    #       dynamic_cast<RegularArray*>(out.get())) {
+    #     out = raw->toListOffsetArray64(true);
+    #   }
+    #   if (ListOffsetArray64* raw =
+    #       dynamic_cast<ListOffsetArray64*>(out.get())) {
+    #     Index64 outoffsets(starts.length() + 1);
+    #     if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
+    #       throw std::runtime_error(
+    #         std::string("reduce_next with unbranching depth > negaxis expects "
+    #                     "a ListOffsetArray64 whose offsets start at zero")
+    #         + FILENAME(__LINE__));
+    #     }
+    #     struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+    #       kernel::lib::cpu,   // DERIVE
+    #       outoffsets.data(),
+    #       starts.data(),
+    #       starts.length(),
+    #       outindex.length());
+    #     util::handle_error(err4, classname(), identities_.get());
+
+    #     return std::make_shared<ListOffsetArray64>(
+    #       raw->identities(),
+    #       raw->parameters(),
+    #       outoffsets,
+    #       IndexedOptionArray64(Identities::none(),
+    #                            util::Parameters(),
+    #                            outindex,
+    #                            raw->content()).simplify_optiontype());
+    #   }
+    #   else {
+    #     throw std::runtime_error(
+    #       std::string("reduce_next with unbranching depth > negaxis is only "
+    #                   "expected to return RegularArray or ListOffsetArray64; "
+    #                   "instead, it returned ")
+    #       + out.get()->classname() + FILENAME(__LINE__));
+    #   }
+    # }

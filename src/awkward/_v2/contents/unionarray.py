@@ -352,10 +352,12 @@ class UnionArray(Content):
         mask,
         keepdims,
     ):
-        raise NotImplementedError
-
-        # FIXME: !!! Recursion detected (same locals & position)
         simplified = self._simplify_uniontype()
+        if isinstance(simplified, UnionArray):
+            raise ValueError(
+                "cannot call ak.{0} on an irreducible UnionArray".format(reducer.name)
+            )
+
         return simplified._reduce_next(
             reducer,
             negaxis,

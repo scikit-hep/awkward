@@ -631,3 +631,82 @@ class RegularArray(Content):
             return ak._v2.contents.regulararray.RegularArray(
                 next, self._size, len(self), self._identifier, self._parameters
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        out = self.toListOffsetArray64(True)._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+        ### FIXME: need to turn some variable-length dimensions into regular-length dimensions
+
+        # if (!content_.get()->dimension_optiontype()) {
+        #   std::pair<bool, int64_t> branchdepth = branch_depth();
+
+        #   bool convert_shallow = (negaxis == branchdepth.second);
+        #   bool convert_deep = (negaxis + 2 == branchdepth.second);
+        #   if (keepdims) {
+        #     convert_shallow = false;
+        #     convert_deep = true;
+        #   }
+
+        #   if (convert_deep) {
+        #     if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
+        #       if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+        #         out = std::make_shared<ListOffsetArray64>(raw1->identities(),
+        #                                                   raw1->parameters(),
+        #                                                   raw1->offsets(),
+        #                                                   raw2->toRegularArray());
+        #       }
+        #       else if (ListArray64* raw2 = dynamic_cast<ListArray64*>(raw1->content().get())) {
+        #         out = std::make_shared<ListOffsetArray64>(raw1->identities(),
+        #                                                   raw1->parameters(),
+        #                                                   raw1->offsets(),
+        #                                                   raw2->toRegularArray());
+        #       }
+        #     }
+        #     else if (ListArray64* raw1 = dynamic_cast<ListArray64*>(out.get())) {
+        #       if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+        #         out = std::make_shared<ListArray64>(raw1->identities(),
+        #                                             raw1->parameters(),
+        #                                             raw1->starts(),
+        #                                             raw1->stops(),
+        #                                             raw2->toRegularArray());
+        #       }
+        #       else if (ListArray64* raw2 = dynamic_cast<ListArray64*>(raw1->content().get())) {
+        #         out = std::make_shared<ListArray64>(raw1->identities(),
+        #                                             raw1->parameters(),
+        #                                             raw1->starts(),
+        #                                             raw1->stops(),
+        #                                             raw2->toRegularArray());
+        #       }
+        #     }
+        #   }
+
+        #   if (convert_shallow) {
+        #     if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
+        #       out = raw1->toRegularArray();
+        #     }
+        #     else if (ListArray64* raw1 = dynamic_cast<ListArray64*>(out.get())) {
+        #       out = raw1->toRegularArray();
+        #     }
+        #   }
+        # }
+
+        return out

@@ -459,3 +459,25 @@ class VirtualArray(Content):
             return self.array._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        return self.array._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )

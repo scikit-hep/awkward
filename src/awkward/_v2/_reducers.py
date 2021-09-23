@@ -32,6 +32,8 @@ class Reducer(object):
 
 
 class ArgMin(Reducer):
+    name = "argmin"
+
     needs_position = True
 
     @classmethod
@@ -55,6 +57,8 @@ class ArgMin(Reducer):
 
 
 class ArgMax(Reducer):
+    name = "argmax"
+
     needs_position = True
 
     @classmethod
@@ -78,6 +82,8 @@ class ArgMax(Reducer):
 
 
 class Count(Reducer):
+    name = "count"
+
     @classmethod
     def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is float64
@@ -96,6 +102,8 @@ class Count(Reducer):
 
 
 class CountNonzero(Reducer):
+    name = "count_nonzero"
+
     @classmethod
     def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is float64
@@ -118,6 +126,8 @@ class CountNonzero(Reducer):
 
 
 class Sum(Reducer):
+    name = "sum"
+
     @classmethod
     def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is float64
@@ -146,6 +156,8 @@ class Sum(Reducer):
 
 
 class Prod(Reducer):
+    name = "prod"
+
     @classmethod
     def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is int64
@@ -173,6 +185,8 @@ class Prod(Reducer):
 
 
 class Any(Reducer):
+    name = "any"
+
     @classmethod
     def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is boolean
@@ -197,6 +211,8 @@ class Any(Reducer):
 
 
 class All(Reducer):
+    name = "all"
+
     @classmethod
     def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is boolean
@@ -221,6 +237,8 @@ class All(Reducer):
 
 
 class Min(Reducer):
+    name = "min"
+
     @classmethod
     def apply(cls, array, parents, outlength):
         dtype = array.dtype
@@ -261,6 +279,8 @@ class Min(Reducer):
 
 
 class Max(Reducer):
+    name = "max"
+
     @classmethod
     def apply(cls, array, parents, outlength):
         dtype = array.dtype

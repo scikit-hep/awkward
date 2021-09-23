@@ -208,3 +208,32 @@ class UnmaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        ### FIXME: why does the C++ code avoid RegularArray's variable-length/regular-length correction?
+
+        # ContentPtr next = content_;
+        # if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+        #   next = raw->toListOffsetArray64(true);
+        # }
+
+        return self._content._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )

@@ -410,7 +410,7 @@ class RecordArray(Content):
         contents = []
         for content in self._contents:
             contents.append(
-                content._reduce_next(
+                content[: self._length]._reduce_next(
                     reducer,
                     negaxis,
                     starts,
