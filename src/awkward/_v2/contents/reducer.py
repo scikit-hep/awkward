@@ -12,16 +12,21 @@ class Reducer:
         self.__name__ = name
 
     def _return_dtype(self, given_dtype):
-        # FIXME: if defined _MSC_VER || defined __i386__
         if given_dtype == np.int8 or given_dtype == np.int16 or given_dtype == np.int32:
-            return np.int64
+            if ak._util.win or ak._util.bits32:
+                return np.int32
+            else:
+                return np.int64
 
         if (
             given_dtype == np.uint8
             or given_dtype == np.uint16
             or given_dtype == np.uint32
         ):
-            return np.uint64
+            if ak._util.win or ak._util.bits32:
+                return np.uint32
+            else:
+                return np.uint64
 
         return given_dtype
 
