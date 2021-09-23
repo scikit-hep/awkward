@@ -109,16 +109,3 @@ def test_missing():
 
     array = v1_to_v2(array)
     assert ak.to_list(array.argmin(axis=2)) == [[1], [None], [None, None, None], [2]]
-
-
-# def test_highlevel():
-#     array = ak.Array(
-#         [[3.3, 1.1, 5.5, 1.1, 4.4], [4.4, 2.2, 1.1, 6.6], [2.2, 3.3, -1.1]]
-#     )
-#     array = v1_to_v2(array)
-#     assert ak.argmin(array) == 11
-#     assert ak.argmax(array) == 8
-#     assert ak.to_list(ak.argmin(array, axis=0)) == [2, 0, 2, 0, 0]
-#     assert ak.to_list(ak.argmax(array, axis=0)) == [1, 2, 0, 1, 0]
-#     assert ak.to_list(ak.argmin(array, axis=1)) == [1, 2, 2]
-#     assert ak.to_list(ak.argmax(array, axis=1)) == [2, 3, 1]

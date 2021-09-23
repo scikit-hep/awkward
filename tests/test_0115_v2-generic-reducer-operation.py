@@ -943,105 +943,106 @@ def test_IndexedOptionArray():
     ]
 
 
-# def test_UnionArray():
-#     content1 = ak.from_iter(
-#         [[[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]]],
-#         highlevel=False,
-#     )
-#     content2 = ak.from_iter(
-#         [[[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]]],
-#         highlevel=False,
-#     )
-#
-#     tags = ak.layout.Index8(np.array([0, 1], dtype=np.int8))
-#     index = ak.layout.Index64(np.array([0, 0], dtype=np.int64))
-#     depth2 = ak.layout.UnionArray8_64(tags, index, [content1, content2])
-#     depth2 = v1_to_v2(depth2)
-#
-#     assert ak.to_list(depth2) == [
-#         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
-#         [[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]],
-#     ]
-#
-#     assert ak.to_list(depth2.prod(axis=-1)) == [
-#         [2 * 3 * 5 * 7 * 11, 13 * 17 * 19 * 23 * 29, 31 * 37 * 41 * 43 * 47],
-#         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
-#     ]
-#     assert ak.to_list(depth2.prod(axis=2)) == [
-#         [2 * 3 * 5 * 7 * 11, 13 * 17 * 19 * 23 * 29, 31 * 37 * 41 * 43 * 47],
-#         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
-#     ]
-#
-#     assert ak.to_list(depth2.prod(axis=-2)) == [
-#         [2 * 13 * 31, 3 * 17 * 37, 5 * 19 * 41, 7 * 23 * 43, 11 * 29 * 47],
-#         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
-#     ]
-#     assert ak.to_list(depth2.prod(axis=1)) == [
-#         [2 * 13 * 31, 3 * 17 * 37, 5 * 19 * 41, 7 * 23 * 43, 11 * 29 * 47],
-#         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
-#     ]
-#
-#     assert ak.to_list(depth2.prod(axis=-3)) == [
-#         [2 * 53, 3 * 59, 5 * 61, 7 * 67, 11 * 71],
-#         [13 * 73, 17 * 79, 19 * 83, 23 * 89, 29 * 97],
-#         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
-#     ]
-#     assert ak.to_list(depth2.prod(axis=0)) == [
-#         [2 * 53, 3 * 59, 5 * 61, 7 * 67, 11 * 71],
-#         [13 * 73, 17 * 79, 19 * 83, 23 * 89, 29 * 97],
-#         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
-#     ]
-#
-#     content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-#     offsets1a = ak.layout.Index64(np.array([0, 5, 10, 15], dtype=np.int64))
-#     offsets1b = ak.layout.Index64(np.array([15, 20, 25, 30], dtype=np.int64))
-#     tags = ak.layout.Index8(np.array([0, 0, 0, 1, 1, 1], dtype=np.int8))
-#     index = ak.layout.Index64(np.array([0, 1, 2, 0, 1, 2], dtype=np.int64))
-#     unionarray = ak.layout.UnionArray8_64(
-#         tags,
-#         index,
-#         [
-#             ak.layout.ListOffsetArray64(offsets1a, content1),
-#             ak.layout.ListOffsetArray64(offsets1b, content1),
-#         ],
-#     )
-#     offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-#     depth2 = ak.layout.ListOffsetArray64(offsets2, unionarray)
-#     depth2 = v1_to_v2(depth2)
-#
-#     assert ak.to_list(depth2) == [
-#         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
-#         [[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]],
-#     ]
-#
-#     assert ak.to_list(depth2.prod(axis=-1)) == [
-#         [2 * 3 * 5 * 7 * 11, 13 * 17 * 19 * 23 * 29, 31 * 37 * 41 * 43 * 47],
-#         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
-#     ]
-#     assert ak.to_list(depth2.prod(axis=2)) == [
-#         [2 * 3 * 5 * 7 * 11, 13 * 17 * 19 * 23 * 29, 31 * 37 * 41 * 43 * 47],
-#         [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
-#     ]
-#
-#     assert ak.to_list(depth2.prod(axis=-2)) == [
-#         [2 * 13 * 31, 3 * 17 * 37, 5 * 19 * 41, 7 * 23 * 43, 11 * 29 * 47],
-#         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
-#     ]
-#     assert ak.to_list(depth2.prod(axis=1)) == [
-#         [2 * 13 * 31, 3 * 17 * 37, 5 * 19 * 41, 7 * 23 * 43, 11 * 29 * 47],
-#         [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
-#     ]
-#
-#     assert ak.to_list(depth2.prod(axis=-3)) == [
-#         [2 * 53, 3 * 59, 5 * 61, 7 * 67, 11 * 71],
-#         [13 * 73, 17 * 79, 19 * 83, 23 * 89, 29 * 97],
-#         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
-#     ]
-#     assert ak.to_list(depth2.prod(axis=0)) == [
-#         [2 * 53, 3 * 59, 5 * 61, 7 * 67, 11 * 71],
-#         [13 * 73, 17 * 79, 19 * 83, 23 * 89, 29 * 97],
-#         [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
-#     ]
+@pytest.mark.skip(reason="FIXME: UnionArray _reduce_next is not implemented yet")
+def test_UnionArray():
+    content1 = ak.from_iter(
+        [[[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]]],
+        highlevel=False,
+    )
+    content2 = ak.from_iter(
+        [[[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]]],
+        highlevel=False,
+    )
+
+    tags = ak.layout.Index8(np.array([0, 1], dtype=np.int8))
+    index = ak.layout.Index64(np.array([0, 0], dtype=np.int64))
+    depth2 = ak.layout.UnionArray8_64(tags, index, [content1, content2])
+    depth2 = v1_to_v2(depth2)
+
+    assert ak.to_list(depth2) == [
+        [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
+        [[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]],
+    ]
+
+    assert ak.to_list(depth2.prod(axis=-1)) == [
+        [2 * 3 * 5 * 7 * 11, 13 * 17 * 19 * 23 * 29, 31 * 37 * 41 * 43 * 47],
+        [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
+    ]
+    assert ak.to_list(depth2.prod(axis=2)) == [
+        [2 * 3 * 5 * 7 * 11, 13 * 17 * 19 * 23 * 29, 31 * 37 * 41 * 43 * 47],
+        [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
+    ]
+
+    assert ak.to_list(depth2.prod(axis=-2)) == [
+        [2 * 13 * 31, 3 * 17 * 37, 5 * 19 * 41, 7 * 23 * 43, 11 * 29 * 47],
+        [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
+    ]
+    assert ak.to_list(depth2.prod(axis=1)) == [
+        [2 * 13 * 31, 3 * 17 * 37, 5 * 19 * 41, 7 * 23 * 43, 11 * 29 * 47],
+        [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
+    ]
+
+    assert ak.to_list(depth2.prod(axis=-3)) == [
+        [2 * 53, 3 * 59, 5 * 61, 7 * 67, 11 * 71],
+        [13 * 73, 17 * 79, 19 * 83, 23 * 89, 29 * 97],
+        [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
+    ]
+    assert ak.to_list(depth2.prod(axis=0)) == [
+        [2 * 53, 3 * 59, 5 * 61, 7 * 67, 11 * 71],
+        [13 * 73, 17 * 79, 19 * 83, 23 * 89, 29 * 97],
+        [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
+    ]
+
+    content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1a = ak.layout.Index64(np.array([0, 5, 10, 15], dtype=np.int64))
+    offsets1b = ak.layout.Index64(np.array([15, 20, 25, 30], dtype=np.int64))
+    tags = ak.layout.Index8(np.array([0, 0, 0, 1, 1, 1], dtype=np.int8))
+    index = ak.layout.Index64(np.array([0, 1, 2, 0, 1, 2], dtype=np.int64))
+    unionarray = ak.layout.UnionArray8_64(
+        tags,
+        index,
+        [
+            ak.layout.ListOffsetArray64(offsets1a, content1),
+            ak.layout.ListOffsetArray64(offsets1b, content1),
+        ],
+    )
+    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak.layout.ListOffsetArray64(offsets2, unionarray)
+    depth2 = v1_to_v2(depth2)
+
+    assert ak.to_list(depth2) == [
+        [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
+        [[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]],
+    ]
+
+    assert ak.to_list(depth2.prod(axis=-1)) == [
+        [2 * 3 * 5 * 7 * 11, 13 * 17 * 19 * 23 * 29, 31 * 37 * 41 * 43 * 47],
+        [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
+    ]
+    assert ak.to_list(depth2.prod(axis=2)) == [
+        [2 * 3 * 5 * 7 * 11, 13 * 17 * 19 * 23 * 29, 31 * 37 * 41 * 43 * 47],
+        [53 * 59 * 61 * 67 * 71, 73 * 79 * 83 * 89 * 97, 101 * 103 * 107 * 109 * 113],
+    ]
+
+    assert ak.to_list(depth2.prod(axis=-2)) == [
+        [2 * 13 * 31, 3 * 17 * 37, 5 * 19 * 41, 7 * 23 * 43, 11 * 29 * 47],
+        [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
+    ]
+    assert ak.to_list(depth2.prod(axis=1)) == [
+        [2 * 13 * 31, 3 * 17 * 37, 5 * 19 * 41, 7 * 23 * 43, 11 * 29 * 47],
+        [53 * 73 * 101, 59 * 79 * 103, 61 * 83 * 107, 67 * 89 * 109, 71 * 97 * 113],
+    ]
+
+    assert ak.to_list(depth2.prod(axis=-3)) == [
+        [2 * 53, 3 * 59, 5 * 61, 7 * 67, 11 * 71],
+        [13 * 73, 17 * 79, 19 * 83, 23 * 89, 29 * 97],
+        [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
+    ]
+    assert ak.to_list(depth2.prod(axis=0)) == [
+        [2 * 53, 3 * 59, 5 * 61, 7 * 67, 11 * 71],
+        [13 * 73, 17 * 79, 19 * 83, 23 * 89, 29 * 97],
+        [31 * 101, 37 * 103, 41 * 107, 43 * 109, 47 * 113],
+    ]
 
 
 def test_sum():
@@ -1077,6 +1078,18 @@ def test_sum():
     ]
 
 
+@pytest.mark.skip(reason="FIXME: sum and prod convert booleans into numbers")
+def test_sumprod_types_FIXME():
+    array = np.array([[True, False, False], [True, False, False]])
+    content2 = ak.layout.NumpyArray(array.reshape(-1))
+    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
+    depth1 = v1_to_v2(depth1)
+
+    assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
+    assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
+
+
 def test_sumprod_types():
     def prod(xs):
         out = 1
@@ -1090,9 +1103,6 @@ def test_sumprod_types():
     depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
     depth1 = v1_to_v2(depth1)
 
-    # FIXME: assert dtype('int64') == dtype('bool')
-    # assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
-    # assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
     assert sum(ak.to_list(np.sum(array, axis=-1))) == sum(
         ak.to_list(depth1.sum(axis=-1))
     )
@@ -1413,6 +1423,7 @@ def test_mask():
     ]
 
 
+@pytest.mark.skip(reason="FIXME: keepdims is not implemented")
 def test_keepdims():
     nparray = np.array(primes[: 2 * 3 * 5], dtype=np.int64).reshape(2, 3, 5)
     content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
@@ -1421,6 +1432,8 @@ def test_keepdims():
     depth2 = ak.layout.ListOffsetArray64(
         offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
     )
+    depth2 = v1_to_v2(depth2)
+
     assert ak.to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
         [[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]],
@@ -1445,179 +1458,3 @@ def test_keepdims():
     assert ak.to_list(depth2.prod(axis=-3, keepdims=True)) == ak.to_list(
         nparray.prod(axis=-3, keepdims=True)
     )
-
-
-def test_highlevel():
-    array = ak.Array(
-        [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]], check_valid=True
-    )
-
-    assert ak.count(array) == 9
-    assert ak.to_list(ak.count(array, axis=-1)) == [[3, 0, 2, 1], [], [2, 1]]
-    assert ak.to_list(ak.count(array, axis=2)) == [[3, 0, 2, 1], [], [2, 1]]
-    assert ak.to_list(ak.count(array, axis=-1, keepdims=True)) == [
-        [[3], [0], [2], [1]],
-        [],
-        [[2], [1]],
-    ]
-    assert ak.to_list(ak.count(array, axis=-2)) == [[3, 2, 1], [], [2, 1]]
-    assert ak.to_list(ak.count(array, axis=1)) == [[3, 2, 1], [], [2, 1]]
-    assert ak.to_list(ak.count(array, axis=-2, keepdims=True)) == [
-        [[3, 2, 1]],
-        [[]],
-        [[2, 1]],
-    ]
-
-    assert ak.count_nonzero(array) == 9
-    assert ak.to_list(ak.count_nonzero(array, axis=-1)) == [[3, 0, 2, 1], [], [2, 1]]
-    assert ak.to_list(ak.count_nonzero(array, axis=-2)) == [[3, 2, 1], [], [2, 1]]
-
-    assert ak.sum(array) == 2 + 3 + 5 + 7 + 11 + 13 + 17 + 19 + 23
-    assert ak.to_list(ak.sum(array, axis=-1)) == [
-        [2 + 3 + 5, 0, 7 + 11, 13],
-        [],
-        [17 + 19, 23],
-    ]
-    assert ak.to_list(ak.sum(array, axis=-2)) == [
-        [2 + 7 + 13, 3 + 11, 5],
-        [],
-        [17 + 23, 19],
-    ]
-
-    assert ak.prod(array) == 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23
-    assert ak.to_list(ak.prod(array, axis=-1)) == [
-        [2 * 3 * 5, 1, 7 * 11, 13],
-        [],
-        [17 * 19, 23],
-    ]
-    assert ak.to_list(ak.prod(array, axis=-2)) == [
-        [2 * 7 * 13, 3 * 11, 5],
-        [],
-        [17 * 23, 19],
-    ]
-
-    assert ak.min(array) == 2
-    assert ak.to_list(ak.min(array, axis=-1)) == [[2, None, 7, 13], [], [17, 23]]
-    assert ak.to_list(ak.min(array, axis=-2)) == [[2, 3, 5], [], [17, 19]]
-
-    assert ak.max(array) == 23
-    assert ak.to_list(ak.max(array, axis=-1)) == [[5, None, 11, 13], [], [19, 23]]
-    assert ak.to_list(ak.max(array, axis=-2)) == [[13, 11, 5], [], [23, 19]]
-
-    array = ak.Array(
-        [
-            [[True, False, True], [], [False, False], [True]],
-            [],
-            [[False, True], [True]],
-        ],
-        check_valid=True,
-    )
-
-    assert ak.any(array) is np.bool_(True)
-    assert ak.to_list(ak.any(array, axis=-1)) == [
-        [True, False, False, True],
-        [],
-        [True, True],
-    ]
-    assert ak.to_list(ak.any(array, axis=-2)) == [[True, False, True], [], [True, True]]
-
-    assert ak.all(array) is np.bool_(False)
-    assert ak.to_list(ak.all(array, axis=-1)) == [
-        [False, True, False, True],
-        [],
-        [False, True],
-    ]
-    assert ak.to_list(ak.all(array, axis=-2)) == [
-        [False, False, True],
-        [],
-        [False, True],
-    ]
-
-
-def test_nonreducers():
-    x = ak.Array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]], check_valid=True)
-    y = ak.Array(
-        [[1.1, 2.2, 2.9, 4.0, 5.1], [0.9, 2.1, 3.2, 4.1, 4.9]], check_valid=True
-    )
-
-    assert ak.mean(y) == np.mean(ak.to_numpy(y))
-    assert ak.var(y) == np.var(ak.to_numpy(y))
-    assert ak.var(y, ddof=1) == np.var(ak.to_numpy(y), ddof=1)
-    assert ak.std(y) == np.std(ak.to_numpy(y))
-    assert ak.std(y, ddof=1) == np.std(ak.to_numpy(y), ddof=1)
-
-    assert ak.moment(y, 1) == np.mean(ak.to_numpy(y))
-    assert ak.moment(y - ak.mean(y), 2) == np.var(ak.to_numpy(y))
-    assert ak.covar(y, y) == np.var(ak.to_numpy(y))
-    assert ak.corr(y, y) == 1.0
-
-    assert ak.corr(x, y) == pytest.approx(0.9968772535047296)
-    fit = ak.linear_fit(x, y)
-    assert ak.to_list(fit) == pytest.approx(
-        {
-            "intercept": 0.07999999999999773,
-            "slope": 0.99,
-            "intercept_error": 0.7416198487095663,
-            "slope_error": 0.22360679774997896,
-        }
-    )
-
-    assert ak.to_list(ak.mean(y, axis=-1)) == pytest.approx(
-        ak.to_list(np.mean(ak.to_numpy(y), axis=-1))
-    )
-    assert ak.to_list(ak.var(y, axis=-1)) == pytest.approx(
-        ak.to_list(np.var(ak.to_numpy(y), axis=-1))
-    )
-    assert ak.to_list(ak.var(y, axis=-1, ddof=1)) == pytest.approx(
-        ak.to_list(np.var(ak.to_numpy(y), axis=-1, ddof=1))
-    )
-    assert ak.to_list(ak.std(y, axis=-1)) == pytest.approx(
-        ak.to_list(np.std(ak.to_numpy(y), axis=-1))
-    )
-    assert ak.to_list(ak.std(y, axis=-1, ddof=1)) == pytest.approx(
-        ak.to_list(np.std(ak.to_numpy(y), axis=-1, ddof=1))
-    )
-
-    assert ak.to_list(ak.moment(y, 1, axis=-1)) == pytest.approx(
-        ak.to_list(np.mean(ak.to_numpy(y), axis=-1))
-    )
-    assert ak.to_list(ak.moment(y - ak.mean(y, axis=-1), 2, axis=-1)) == pytest.approx(
-        ak.to_list(np.var(ak.to_numpy(y), axis=-1))
-    )
-    assert ak.to_list(ak.covar(y, y, axis=-1)) == pytest.approx(
-        ak.to_list(np.var(ak.to_numpy(y), axis=-1))
-    )
-    assert ak.to_list(ak.corr(y, y, axis=-1)) == pytest.approx([1.0, 1.0])
-
-    assert ak.to_list(ak.corr(x, y, axis=-1)) == pytest.approx(
-        [0.9975103695813371, 0.9964193240901015]
-    )
-    fit = ak.linear_fit(x, y, axis=-1)
-    assert ak.to_list(fit[0]) == pytest.approx(
-        {
-            "intercept": 0.11999999999999772,
-            "slope": 0.9800000000000005,
-            "intercept_error": 1.0488088481701516,
-            "slope_error": 0.31622776601683794,
-        }
-    )
-    assert ak.to_list(fit[1]) == pytest.approx(
-        {
-            "intercept": 0.04000000000000228,
-            "slope": 0.9999999999999994,
-            "intercept_error": 1.0488088481701516,
-            "slope_error": 0.31622776601683794,
-        }
-    )
-
-
-def test_softmax():
-    array = ak.Array(
-        [[np.log(2), np.log(2), np.log(4)], [], [np.log(5), np.log(5)]],
-        check_valid=True,
-    )
-    assert ak.to_list(ak.softmax(array, axis=-1)) == [
-        pytest.approx([0.25, 0.25, 0.5]),
-        [],
-        pytest.approx([0.5, 0.5]),
-    ]
