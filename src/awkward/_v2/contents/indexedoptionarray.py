@@ -529,12 +529,7 @@ class IndexedOptionArray(Content):
             )
         )
 
-        make_shifts = (
-            True
-            if (reducer == "argmin" or reducer == "argmax")
-            and (not branch and negaxis == depth)
-            else False
-        )
+        make_shifts = reducer.needs_shifts and (not branch and negaxis == depth)
         nextshifts = ak._v2.index.Index64([])
         if make_shifts:
             nextshifts = ak._v2.index.Index64.zeros(next_length, nplike)

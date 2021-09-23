@@ -6,7 +6,6 @@ import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.numpyform import NumpyForm
-from awkward._v2.contents.reducer import Reducer
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -394,13 +393,8 @@ class NumpyArray(Content):
     ):
         nplike = self.nplike
 
-        reducer = Reducer(reducer)
-        out = reducer._apply(
-            self,
-            parents,
-            outlength,
-        )
-        if reducer.__name__ == "argmin" or reducer.__name__ == "argmax":
+        out = reducer.apply(self, parents, outlength)
+        if reducer.needs_shifts:
             if shifts is None or len(shifts) == 0:
                 self._handle_error(
                     nplike[

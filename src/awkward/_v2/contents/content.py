@@ -8,6 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
+import awkward._v2._reducers
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
 
@@ -558,34 +559,34 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return next[0]
 
     def argmin(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce("argmin", axis=axis, mask=mask, keepdims=keepdims)
+        return self._reduce(awkward._v2._reducers.ArgMin, axis, mask, keepdims)
 
     def argmax(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce("argmax", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.ArgMax, axis, mask, keepdims)
 
     def count(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce("count", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.Count, axis, mask, keepdims)
 
     def count_nonzero(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce("count_nonzero", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.CountNonzero, axis, mask, keepdims)
 
     def sum(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce("sum", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.Sum, axis, mask, keepdims)
 
     def prod(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce("prod", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims)
 
     def any(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce("any", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.Any, axis, mask, keepdims)
 
     def all(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce("all", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims)
 
     def min(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce("min", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.Min, axis, mask, keepdims)
 
     def max(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce("max", axis, mask, keepdims)
+        return self._reduce(awkward._v2._reducers.Max, axis, mask, keepdims)
 
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         """

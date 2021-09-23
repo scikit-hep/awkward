@@ -7,11 +7,11 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-class Reducer:
-    def __init__(self, name, *args, **params):
-        self.__name__ = name
+class Reducer(object):
+    needs_shifts = False
 
-    def _return_dtype(self, given_dtype):
+    @classmethod
+    def return_dtype(cls, given_dtype):
         if given_dtype == np.int8 or given_dtype == np.int16 or given_dtype == np.int32:
             if ak._util.win or ak._util.bits32:
                 return np.int32
@@ -30,7 +30,12 @@ class Reducer:
 
         return given_dtype
 
-    def _argmin(self, array, parents, outlength):
+
+class ArgMin(Reducer):
+    needs_shifts = True
+
+    @classmethod
+    def apply(cls, array, parents, outlength):
         result = ak._v2.index.Index64.empty(outlength, array.nplike, dtype=np.int64)
         array._handle_error(
             array.nplike[
@@ -48,7 +53,12 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def _argmax(self, array, parents, outlength):
+
+class ArgMax(Reducer):
+    needs_shifts = True
+
+    @classmethod
+    def apply(cls, array, parents, outlength):
         result = ak._v2.index.Index64.empty(outlength, array.nplike, dtype=np.int64)
         array._handle_error(
             array.nplike[
@@ -66,7 +76,10 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def _count(self, array, parents, outlength):
+
+class Count(Reducer):
+    @classmethod
+    def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is float64
         result = ak._v2.index.Index64.empty(outlength, array.nplike)
         array._handle_error(
@@ -81,7 +94,10 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def _count_nonzero(self, array, parents, outlength):
+
+class CountNonzero(Reducer):
+    @classmethod
+    def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is float64
         result = ak._v2.index.Index64.empty(outlength, array.nplike)
         array._handle_error(
@@ -100,14 +116,17 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def _sum(self, array, parents, outlength):
+
+class Sum(Reducer):
+    @classmethod
+    def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is float64
         dtype = array.dtype
         kernel_name = "awkward_reduce_sum"
         if dtype == np.bool_:
             kernel_name = kernel_name + "_bool"
         result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=self._return_dtype(array.dtype))
+            array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
         )
         array._handle_error(
             array.nplike[
@@ -125,10 +144,13 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def _prod(self, array, parents, outlength):
+
+class Prod(Reducer):
+    @classmethod
+    def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is int64
         result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=self._return_dtype(array.dtype))
+            array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
         )
         kernel_name = "awkward_reduce_prod"
         if array.dtype == np.bool_:
@@ -149,9 +171,14 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def _any(self, array, parents, outlength):
+
+class Any(Reducer):
+    @classmethod
+    def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is boolean
-        result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype=bool))
+        result = ak._v2.contents.NumpyArray(
+            array.nplike.empty(outlength, dtype=np.bool_)
+        )
         array._handle_error(
             array.nplike[
                 "awkward_reduce_sum_bool",
@@ -168,7 +195,10 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def _all(self, array, parents, outlength):
+
+class All(Reducer):
+    @classmethod
+    def apply(cls, array, parents, outlength):
         # reducer.preferred_dtype is boolean
         result = ak._v2.contents.NumpyArray(
             array.nplike.empty(outlength, dtype=np.bool_)
@@ -189,7 +219,10 @@ class Reducer:
         )
         return ak._v2.contents.NumpyArray(result)
 
-    def _min(self, array, parents, outlength):
+
+class Min(Reducer):
+    @classmethod
+    def apply(cls, array, parents, outlength):
         dtype = array.dtype
         result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype))
 
@@ -226,7 +259,10 @@ class Reducer:
             )
         return ak._v2.contents.NumpyArray(result)
 
-    def _max(self, array, parents, outlength):
+
+class Max(Reducer):
+    @classmethod
+    def apply(cls, array, parents, outlength):
         dtype = array.dtype
         result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype))
 
@@ -262,10 +298,3 @@ class Reducer:
                 )
             )
         return ak._v2.contents.NumpyArray(result)
-
-    def _apply(self, array, parents, outlength):
-        do = "_" + self.__name__  # f"_{self.__name__}"
-        if hasattr(self, do):
-            func = getattr(self, do)
-            if callable(func):
-                return func(array, parents, outlength)

@@ -883,7 +883,7 @@ class ListOffsetArray(Content):
 
             nextshifts = ak._v2.index.Index64([])
 
-            if reducer == "argmin" or reducer == "argmax":
+            if reducer.needs_shifts:
                 nextshifts = ak._v2.index.Index64.zeros(nextlen, nplike)
                 nummissing = ak._v2.index.Index64.zeros(maxcount[0], nplike)
                 missing = ak._v2.index.Index64.zeros(self._offsets[-1], nplike)
