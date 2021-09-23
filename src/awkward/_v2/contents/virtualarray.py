@@ -481,3 +481,6 @@ class VirtualArray(Content):
             mask,
             keepdims,
         )
+
+    def _validityerror(self, path):
+        return NotImplementedError

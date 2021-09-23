@@ -460,3 +460,16 @@ class NumpyArray(Content):
             )
 
         return out
+
+    def _validityerror(self, path):
+        if len(self.shape) == 0:
+            return 'at {0} ("{1}"): shape is zero-dimensional'.format(path, type(self))
+        for i in range(len(self.shape)):
+            if self.shape[i] < 0:
+                return 'at {0} ("{1}"): shape[{2}] < 0'.format(path, type(self), i)
+        for i in range(len(self.strides)):
+            if self.strides[i] % self.dtype.itemsize != 0:
+                return 'at {0} ("{1}"): shape[{2}] % itemsize != 0'.format(
+                    path, type(self), i
+                )
+        return ""
