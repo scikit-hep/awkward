@@ -259,7 +259,7 @@ class Reducer:
         return ak._v2.contents.NumpyArray(result)
 
     def _apply(self, array, parents, outlength):
-        do = f"_{self.__name__}"
+        do = "_" + self.__name__  # f"_{self.__name__}"
         if hasattr(self, do):
             func = getattr(self, do)
             if callable(func):
