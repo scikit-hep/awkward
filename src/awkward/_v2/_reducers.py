@@ -146,20 +146,38 @@ class Sum(Reducer):
             array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
         )
         if array.dtype == np.bool_:
-            array._handle_error(
-                array.nplike[
-                    "awkward_reduce_sum_int64_bool_64",
-                    result.dtype.type,
-                    array.dtype.type,
-                    parents.dtype.type,
-                ](
-                    result._data,
-                    array._data,
-                    parents.to(array.nplike),
-                    len(parents),
-                    outlength,
+            if result.dtype == np.int64 or result.dtype == np.uint64:
+                array._handle_error(
+                    array.nplike[
+                        "awkward_reduce_sum_int64_bool_64",
+                        np.int64,
+                        array.dtype.type,
+                        parents.dtype.type,
+                    ](
+                        result._data,
+                        array._data,
+                        parents.to(array.nplike),
+                        len(parents),
+                        outlength,
+                    )
                 )
-            )
+            elif result.dtype == np.int32 or result.dtype == np.uint32:
+                array._handle_error(
+                    array.nplike[
+                        "awkward_reduce_sum_int32_bool_64",
+                        np.int32,
+                        array.dtype.type,
+                        parents.dtype.type,
+                    ](
+                        result._data,
+                        array._data,
+                        parents.to(array.nplike),
+                        len(parents),
+                        outlength,
+                    )
+                )
+            else:
+                raise NotImplementedError
         else:
             array._handle_error(
                 array.nplike[
