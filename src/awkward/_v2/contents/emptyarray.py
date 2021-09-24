@@ -149,10 +149,6 @@ class EmptyArray(Content):
         mask,
         keepdims,
     ):
-        raise NotImplementedError
-
-        ### FIXME: reducers need to state their preferred_dtype so that EmptyArray can adopt it
-
         as_numpy = self.toNumpyArray(reducer.preferred_dtype)
         return as_numpy._reduce_next(
             reducer,

@@ -35,10 +35,13 @@ class ArgMin(Reducer):
     name = "argmin"
 
     needs_position = True
+    preferred_dtype = np.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.index.Index64.empty(outlength, array.nplike, dtype=np.int64)
+        result = ak._v2.index.Index64.empty(
+            outlength, array.nplike, dtype=cls.preferred_dtype
+        )
         array._handle_error(
             array.nplike[
                 "awkward_reduce_argmin",
@@ -60,10 +63,13 @@ class ArgMax(Reducer):
     name = "argmax"
 
     needs_position = True
+    preferred_dtype = np.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.index.Index64.empty(outlength, array.nplike, dtype=np.int64)
+        result = ak._v2.index.Index64.empty(
+            outlength, array.nplike, dtype=cls.preferred_dtype
+        )
         array._handle_error(
             array.nplike[
                 "awkward_reduce_argmax",
@@ -83,10 +89,10 @@ class ArgMax(Reducer):
 
 class Count(Reducer):
     name = "count"
+    preferred_dtype = np.float64
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        # reducer.preferred_dtype is float64
         result = ak._v2.index.Index64.empty(outlength, array.nplike)
         array._handle_error(
             array.nplike[
@@ -103,10 +109,10 @@ class Count(Reducer):
 
 class CountNonzero(Reducer):
     name = "count_nonzero"
+    preferred_dtype = np.float64
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        # reducer.preferred_dtype is float64
         result = ak._v2.index.Index64.empty(outlength, array.nplike)
         array._handle_error(
             array.nplike[
@@ -127,10 +133,10 @@ class CountNonzero(Reducer):
 
 class Sum(Reducer):
     name = "sum"
+    preferred_dtype = np.float64
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        # reducer.preferred_dtype is float64
         dtype = array.dtype
         kernel_name = "awkward_reduce_sum"
         if dtype == np.bool_:
@@ -157,10 +163,10 @@ class Sum(Reducer):
 
 class Prod(Reducer):
     name = "prod"
+    preferred_dtype = np.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        # reducer.preferred_dtype is int64
         result = ak._v2.contents.NumpyArray(
             array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
         )
@@ -186,12 +192,12 @@ class Prod(Reducer):
 
 class Any(Reducer):
     name = "any"
+    preferred_dtype = np.bool_
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        # reducer.preferred_dtype is boolean
         result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=np.bool_)
+            array.nplike.empty(outlength, dtype=cls.preferred_dtype)
         )
         array._handle_error(
             array.nplike[
@@ -212,12 +218,12 @@ class Any(Reducer):
 
 class All(Reducer):
     name = "all"
+    preferred_dtype = np.bool_
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        # reducer.preferred_dtype is boolean
         result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=np.bool_)
+            array.nplike.empty(outlength, dtype=cls.preferred_dtype)
         )
         array._handle_error(
             array.nplike[
@@ -238,6 +244,7 @@ class All(Reducer):
 
 class Min(Reducer):
     name = "min"
+    preferred_dtype = np.float64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -280,6 +287,7 @@ class Min(Reducer):
 
 class Max(Reducer):
     name = "max"
+    preferred_dtype = np.float64
 
     @classmethod
     def apply(cls, array, parents, outlength):
