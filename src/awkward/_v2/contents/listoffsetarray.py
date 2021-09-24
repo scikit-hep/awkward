@@ -937,7 +937,7 @@ class ListOffsetArray(Content):
                     len(self),
                     None,
                     None,
-                )
+                ).toListOffsetArray64(False)
 
             return out
 
@@ -966,7 +966,7 @@ class ListOffsetArray(Content):
                 nextparents,
                 globalstarts_length,
                 mask,
-                False,
+                keepdims,
             )
             outoffsets = ak._v2.index.Index64.zeros(outlength + 1, nplike)
             self._handle_error(
@@ -982,7 +982,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            if keepdims is True:  # FIXME not self._represents_regular or
+            if keepdims:  # FIXME not self._represents_regular or
                 if isinstance(self._content, ak._v2.contents.IndexedOptionArray):
                     outcontent = self.toListOffsetArray64(False)
 

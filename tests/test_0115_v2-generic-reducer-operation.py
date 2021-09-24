@@ -1454,7 +1454,6 @@ def test_ByteMaskedArray():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: keepdims is not implemented")
 def test_keepdims():
     nparray = np.array(primes[: 2 * 3 * 5], dtype=np.int64).reshape(2, 3, 5)
     content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
