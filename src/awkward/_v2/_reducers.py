@@ -12,7 +12,12 @@ class Reducer(object):
 
     @classmethod
     def return_dtype(cls, given_dtype):
-        if given_dtype == np.int8 or given_dtype == np.int16 or given_dtype == np.int32:
+        if (
+            given_dtype == np.bool_
+            or given_dtype == np.int8
+            or given_dtype == np.int16
+            or given_dtype == np.int32
+        ):
             if ak._util.win or ak._util.bits32:
                 return np.int32
             else:
@@ -137,27 +142,39 @@ class Sum(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        dtype = array.dtype
-        kernel_name = "awkward_reduce_sum"
-        if dtype == np.bool_:
-            kernel_name = kernel_name + "_bool"
         result = ak._v2.contents.NumpyArray(
             array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
         )
-        array._handle_error(
-            array.nplike[
-                kernel_name,
-                result.dtype.type,
-                array.dtype.type,
-                parents.dtype.type,
-            ](
-                result._data,
-                array._data,
-                parents.to(array.nplike),
-                len(parents),
-                outlength,
+        if array.dtype == np.bool_:
+            array._handle_error(
+                array.nplike[
+                    "awkward_reduce_sum_int64_bool_64",
+                    result.dtype.type,
+                    array.dtype.type,
+                    parents.dtype.type,
+                ](
+                    result._data,
+                    array._data,
+                    parents.to(array.nplike),
+                    len(parents),
+                    outlength,
+                )
             )
-        )
+        else:
+            array._handle_error(
+                array.nplike[
+                    "awkward_reduce_sum",
+                    result.dtype.type,
+                    array.dtype.type,
+                    parents.dtype.type,
+                ](
+                    result._data,
+                    array._data,
+                    parents.to(array.nplike),
+                    len(parents),
+                    outlength,
+                )
+            )
         return ak._v2.contents.NumpyArray(result)
 
 
@@ -170,23 +187,36 @@ class Prod(Reducer):
         result = ak._v2.contents.NumpyArray(
             array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
         )
-        kernel_name = "awkward_reduce_prod"
         if array.dtype == np.bool_:
-            kernel_name = kernel_name + "_bool"
-        array._handle_error(
-            array.nplike[
-                kernel_name,
-                result.dtype.type,
-                array._data.dtype.type,
-                parents.dtype.type,
-            ](
-                result._data,
-                array._data,
-                parents.to(array.nplike),
-                len(parents),
-                outlength,
+            array._handle_error(
+                array.nplike[
+                    "awkward_reduce_prod_bool",
+                    array.dtype.type,
+                    array.dtype.type,
+                    parents.dtype.type,
+                ](
+                    result._data,
+                    array._data,
+                    parents.to(array.nplike),
+                    len(parents),
+                    outlength,
+                )
             )
-        )
+        else:
+            array._handle_error(
+                array.nplike[
+                    "awkward_reduce_prod",
+                    result.dtype.type,
+                    array.dtype.type,
+                    parents.dtype.type,
+                ](
+                    result._data,
+                    array._data,
+                    parents.to(array.nplike),
+                    len(parents),
+                    outlength,
+                )
+            )
         return ak._v2.contents.NumpyArray(result)
 
 

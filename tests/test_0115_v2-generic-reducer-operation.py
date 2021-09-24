@@ -1078,14 +1078,14 @@ def test_sum():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: sum and prod convert booleans into numbers")
 def test_sumprod_types_FIXME():
     array = np.array([[True, False, False], [True, False, False]])
     content2 = ak.layout.NumpyArray(array.reshape(-1))
     offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
     depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
+    print(ak.sum(depth1, axis=-1))
     depth1 = v1_to_v2(depth1)
-
+    print(depth1.sum(axis=-1))
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
 
