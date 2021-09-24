@@ -1424,6 +1424,37 @@ def test_mask():
     ]
 
 
+def test_ByteMaskedArray():
+    content = ak.from_iter(
+        [
+            [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
+            [],
+            [[5.5]],
+            [[6.6, 9.9, 8.8, 7.7]],
+            [[], [12.2, 11.1, 10.0]],
+        ],
+        highlevel=False,
+    )
+    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    v1_array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
+    v2_array = v1_to_v2(v1_array)
+
+    assert ak.to_list(v2_array) == [
+        [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
+        [],
+        None,
+        None,
+        [[], [12.2, 11.1, 10.0]],
+    ]
+    assert ak.to_list(v2_array.argmin(axis=-1)) == [
+        [1, None, 0],
+        [],
+        None,
+        None,
+        [None, 2],
+    ]
+
+
 @pytest.mark.skip(reason="FIXME: keepdims is not implemented")
 def test_keepdims():
     nparray = np.array(primes[: 2 * 3 * 5], dtype=np.int64).reshape(2, 3, 5)

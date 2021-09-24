@@ -391,119 +391,138 @@ class ByteMaskedArray(Content):
         mask,
         keepdims,
     ):
-        raise NotImplementedError
+        nplike = self.nplike
 
-    ### FIXME: implementation should look like this:
+        mask_length = len(self._mask)
 
-    # int64_t numnull;
-    # struct Error err1 = kernel::ByteMaskedArray_numnull(
-    #   kernel::lib::cpu,   // DERIVE
-    #   &numnull,
-    #   mask_.data(),
-    #   mask_.length(),
-    #   valid_when_);
-    # util::handle_error(err1, classname(), identities_.get());
+        numnull = ak._v2.index.Index64.zeros(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_numnull",
+                numnull.dtype.type,
+                self._mask.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._mask.to(nplike),
+                mask_length,
+                self._valid_when,
+            )
+        )
 
-    # Index64 nextparents(mask_.length() - numnull);
-    # Index64 nextcarry(mask_.length() - numnull);
-    # Index64 outindex(mask_.length());
-    # struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
-    #   kernel::lib::cpu,   // DERIVE
-    #   nextcarry.data(),
-    #   nextparents.data(),
-    #   outindex.data(),
-    #   mask_.data(),
-    #   parents.data(),
-    #   mask_.length(),
-    #   valid_when_);
-    # util::handle_error(err2, classname(), identities_.get());
+        next_length = mask_length - numnull[0]
+        nextcarry = ak._v2.index.Index64.zeros(next_length, nplike)
+        nextparents = ak._v2.index.Index64.zeros(next_length, nplike)
+        outindex = ak._v2.index.Index64.zeros(mask_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._mask.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._mask.to(nplike),
+                parents.to(nplike),
+                mask_length,
+                self._valid_when,
+            )
+        )
 
-    # std::pair<bool, int64_t> branchdepth = branch_depth();
+        branch, depth = self.branch_depth
 
-    # bool make_shifts = (reducer.returns_positions()  &&
-    #                     !branchdepth.first  && negaxis == branchdepth.second);
+        if reducer.needs_position and (not branch and negaxis == depth):
+            nextshifts = ak._v2.index.Index64.zeros(next_length, nplike)
+            if shifts is None:
+                self._handle_error(
+                    nplike[
+                        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+                        nextshifts.dtype.type,
+                        self._mask.dtype.type,
+                    ](
+                        nextshifts.to(nplike),
+                        self._mask.to(nplike),
+                        mask_length,
+                        self._valid_when,
+                    )
+                )
+            else:
+                self._handle_error(
+                    nplike[
+                        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+                        nextshifts.dtype.type,
+                        self._mask.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        nextshifts.to(nplike),
+                        self._mask.to(nplike),
+                        mask_length,
+                        self._valid_when,
+                        shifts.to(nplike),
+                    )
+                )
+        else:
+            nextshifts = None
 
-    # Index64 nextshifts(make_shifts ? mask_.length() - numnull : 0);
-    # if (make_shifts) {
-    #   if (shifts.length() == 0) {
-    #     struct Error err3 =
-    #         kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
-    #       kernel::lib::cpu,   // DERIVE
-    #       nextshifts.data(),
-    #       mask_.data(),
-    #       mask_.length(),
-    #       valid_when_);
-    #     util::handle_error(err3, classname(), identities_.get());
-    #   }
-    #   else {
-    #     struct Error err3 =
-    #         kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
-    #       kernel::lib::cpu,   // DERIVE
-    #       nextshifts.data(),
-    #       mask_.data(),
-    #       mask_.length(),
-    #       valid_when_,
-    #       shifts.data());
-    #     util::handle_error(err3, classname(), identities_.get());
-    #   }
-    # }
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        if isinstance(next, ak._v2.contents.RegularArray):
+            next = next.toListOffsetArray64(True)
 
-    # ContentPtr next = content_.get()->carry(nextcarry, false);
-    # if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
-    #   next = raw->toListOffsetArray64(true);
-    # }
+        out = next._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            nextshifts,
+            nextparents,
+            outlength,
+            mask,
+            keepdims,
+        )
 
-    # ContentPtr out = next.get()->reduce_next(reducer,
-    #                                          negaxis,
-    #                                          starts,
-    #                                          nextshifts,
-    #                                          nextparents,
-    #                                          outlength,
-    #                                          mask,
-    #                                          keepdims);
+        if not branch and negaxis == depth:
+            return out
+        else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
 
-    # if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-    #   return out;
-    # }
-    # else {
-    #   if (RegularArray* raw =
-    #       dynamic_cast<RegularArray*>(out.get())) {
-    #     out = raw->toListOffsetArray64(true);
-    #   }
-    #   if (ListOffsetArray64* raw =
-    #       dynamic_cast<ListOffsetArray64*>(out.get())) {
-    #     Index64 outoffsets(starts.length() + 1);
-    #     if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
-    #       throw std::runtime_error(
-    #         std::string("reduce_next with unbranching depth > negaxis expects "
-    #                     "a ListOffsetArray64 whose offsets start at zero")
-    #         + FILENAME(__LINE__));
-    #     }
-    #     struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
-    #       kernel::lib::cpu,   // DERIVE
-    #       outoffsets.data(),
-    #       starts.data(),
-    #       starts.length(),
-    #       outindex.length());
-    #     util::handle_error(err4, classname(), identities_.get());
+            if isinstance(out, ak._v2.contents.ListOffsetArray):
+                outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        len(starts),
+                        len(outindex),
+                    )
+                )
 
-    #     return std::make_shared<ListOffsetArray64>(
-    #       raw->identities(),
-    #       raw->parameters(),
-    #       outoffsets,
-    #       IndexedOptionArray64(Identities::none(),
-    #                            util::Parameters(),
-    #                            outindex,
-    #                            raw->content()).simplify_optiontype());
-    #   }
-    #   else {
-    #     throw std::runtime_error(
-    #       std::string("reduce_next with unbranching depth > negaxis is only "
-    #                   "expected to return RegularArray or ListOffsetArray64; "
-    #                   "instead, it returned ")
-    #       + out.get()->classname() + FILENAME(__LINE__));
-    #   }
-    # }
+                tmp = ak._v2.contents.IndexedOptionArray(
+                    outindex,
+                    out.content,
+                    None,
+                    None,
+                )._simplify_optiontype()
+
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    None,
+                )
+
+            else:
+                raise ValueError(
+                    "reduce_next with unbranching depth > negaxis is only "
+                    "expected to return RegularArray or ListOffsetArray64; "
+                    "instead, it returned " + out
+                )
 
     def _validityerror(self, path):
         if len(self.content) < len(self.mask):
