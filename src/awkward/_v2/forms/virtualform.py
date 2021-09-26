@@ -164,3 +164,12 @@ class VirtualForm(Form):
             )
         else:
             return self._form.keys
+
+    @property
+    def dimension_optiontype(self):
+        if self._form is None:
+            raise ValueError(
+                "cannot determine the type of a virtual array without a Form"
+            )
+        else:
+            return self._form.dimension_optiontype

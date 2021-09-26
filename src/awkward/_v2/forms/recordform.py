@@ -290,3 +290,7 @@ class RecordForm(Form):
             if mindepth > depth:
                 mindepth = depth
         return (anybranch, mindepth)
+
+    @property
+    def dimension_optiontype(self):
+        return False

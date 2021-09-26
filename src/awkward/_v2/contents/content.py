@@ -846,3 +846,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     @property
     def keys(self):
         return self.Form.keys.__get__(self)
+
+    @property
+    def dimension_optiontype(self):
+        return self.Form.dimension_optiontype.__get__(self)
