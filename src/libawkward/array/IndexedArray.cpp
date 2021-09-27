@@ -2266,10 +2266,17 @@ namespace awkward {
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          IndexedOptionArray64(Identities::none(),
-                               util::Parameters(),
-                               outindex,
-                               raw->content()).simplify_optiontype());
+          ISOPTION ?
+            IndexedOptionArray64(Identities::none(),
+                                 util::Parameters(),
+                                 outindex,
+                                 raw->content()).simplify_optiontype()
+          :
+            IndexedArray64(Identities::none(),
+                           util::Parameters(),
+                           outindex,
+                           raw->content()).simplify_optiontype()
+          );
       }
       else {
         throw std::runtime_error(
