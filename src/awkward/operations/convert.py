@@ -1075,7 +1075,7 @@ def from_json(
 
     is_path, source = ak._util.regularize_path(source)
 
-    if os.path.isfile(source):
+    if ak._util.is_file_path(source):
         layout = ak._ext.fromjsonfile(
             source,
             nan_string=nan_string,
