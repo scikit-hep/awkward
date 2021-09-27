@@ -1,9 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import absolute_import
 
-import urllib.request
-import urllib.error
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -13,6 +10,8 @@ import awkward as ak  # noqa: F401
 def test():
     if not ak._util.py27:
         # Python 2.7 has differently named urllib libraries
+        import urllib.request
+        import urllib.error
 
         url = "https://raw.githubusercontent.com/Chicago/osd-bike-routes/5f556dc/data/Bikeroutes.geojson"
         try:
