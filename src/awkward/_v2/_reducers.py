@@ -293,6 +293,32 @@ class All(Reducer):
 class Min(Reducer):
     name = "min"
     preferred_dtype = np.float64
+    initial = None
+
+    def __init__(self, initial):
+        type(self).initial = initial
+
+    def __del__(self):
+        type(self).initial = None
+
+    @staticmethod
+    def _min_initial(initial, type):
+        if initial is None:
+            if (
+                type == np.int8
+                or type == np.int16
+                or type == np.int32
+                or type == np.int64
+                or type == np.uint8
+                or type == np.uint16
+                or type == np.uint32
+                or type == np.uint64
+            ):
+                return np.iinfo(type).max
+            else:
+                return np.inf
+
+        return initial
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -327,15 +353,42 @@ class Min(Reducer):
                     parents.to(array.nplike),
                     len(parents),
                     outlength,
-                    np.inf,  # FIXME: set initial
+                    cls._min_initial(cls.initial, dtype.type),
                 )
             )
+
         return ak._v2.contents.NumpyArray(result)
 
 
 class Max(Reducer):
     name = "max"
     preferred_dtype = np.float64
+    initial = None
+
+    def __init__(self, initial):
+        type(self).initial = initial
+
+    def __del__(self):
+        type(self).initial = None
+
+    @staticmethod
+    def _max_initial(initial, type):
+        if initial is None:
+            if (
+                type == np.int8
+                or type == np.int16
+                or type == np.int32
+                or type == np.int64
+                or type == np.uint8
+                or type == np.uint16
+                or type == np.uint32
+                or type == np.uint64
+            ):
+                return np.iinfo(type).min
+            else:
+                return -np.inf
+
+        return initial
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -370,7 +423,7 @@ class Max(Reducer):
                     parents.to(array.nplike),
                     len(parents),
                     outlength,
-                    -np.inf,  # FIXME: set initial
+                    cls._max_initial(cls.initial, dtype.type),
                 )
             )
         return ak._v2.contents.NumpyArray(result)

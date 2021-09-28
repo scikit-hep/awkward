@@ -582,11 +582,11 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def all(self, axis=-1, mask=False, keepdims=False):
         return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims)
 
-    def min(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Min, axis, mask, keepdims)
+    def min(self, axis=-1, mask=True, keepdims=False, initial=None):
+        return self._reduce(awkward._v2._reducers.Min(initial), axis, mask, keepdims)
 
-    def max(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Max, axis, mask, keepdims)
+    def max(self, axis=-1, mask=True, keepdims=False, initial=None):
+        return self._reduce(awkward._v2._reducers.Max(initial), axis, mask, keepdims)
 
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         """
