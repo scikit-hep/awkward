@@ -94,7 +94,7 @@ def test_jagged():
     assert ak.to_list(v2_array2.argmin(axis=1)) == [2, 0, 0, None, 1]
 
     index3 = ak.layout.Index64(np.array([4, 3, -1, 4, 0], dtype=np.int64))
-    array2 = ak.layout.IndexedArray64(index3, array)
+    array2 = ak.layout.IndexedOptionArray64(index3, array)
     v2_array2 = v1_to_v2(array2)
     assert ak.to_list(v2_array2.argmin(axis=1)) == [2, 0, None, 2, 1]
     assert ak.to_list(v2_array2.argmin(axis=-1)) == [2, 0, None, 2, 1]

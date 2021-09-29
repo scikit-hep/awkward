@@ -358,12 +358,12 @@ class IndexedArray(Content):
                     )
                 )
 
-                tmp = ak._v2.contents.IndexedOptionArray(
+                tmp = ak._v2.contents.IndexedArray(
                     outindex,
                     out._content,
                     None,
                     None,
-                )._simplify_optiontype()
+                )
 
                 return ak._v2.contents.ListOffsetArray(
                     outoffsets,
