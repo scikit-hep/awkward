@@ -15,7 +15,36 @@ pytestmark = pytest.mark.skipif(
 primes = [x for x in range(2, 1000) if all(x % n != 0 for n in range(2, x))]
 
 
+def test_ListOffsetArray_to_RegularArray():
+    content = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
+    listoffsetarray = v1_to_v2(listoffsetarray)
+    regulararray = listoffsetarray.toRegularArray()
+    assert ak.to_list(listoffsetarray) == ak.to_list(regulararray)
+
+
 def test_dimension_optiontype():
+    content = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
+    index = ak.layout.Index64(np.array([5, -1, 3, 2, -1, 0], dtype=np.int64))
+    indexedarray = ak.layout.IndexedOptionArray64(index, listoffsetarray)
+    depth2 = ak.layout.RegularArray(indexedarray, 3)
+    depth2 = v1_to_v2(depth2)
+    assert ak.to_list(depth2) == [
+        [[101, 103, 107, 109, 113], None, [53, 59, 61, 67, 71]],
+        [[31, 37, 41, 43, 47], None, [2, 3, 5, 7, 11]],
+    ]
+    assert ak.to_list(depth2.prod(axis=-1, keepdims=False)) == [
+        [101 * 103 * 107 * 109 * 113, None, 53 * 59 * 61 * 67 * 71],
+        [31 * 37 * 41 * 43 * 47, None, 2 * 3 * 5 * 7 * 11],
+    ]
+    assert ak.to_list(depth2.prod(axis=-1, keepdims=True)) == [
+        [[101 * 103 * 107 * 109 * 113], None, [53 * 59 * 61 * 67 * 71]],
+        [[31 * 37 * 41 * 43 * 47], None, [2 * 3 * 5 * 7 * 11]],
+    ]
+
     content = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
     offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
@@ -31,26 +60,13 @@ def test_dimension_optiontype():
         [101 * 103 * 107 * 109 * 113, 73 * 79 * 83 * 89 * 97, 53 * 59 * 61 * 67 * 71],
         [31 * 37 * 41 * 43 * 47, 13 * 17 * 19 * 23 * 29, 2 * 3 * 5 * 7 * 11],
     ]
-
-
-@pytest.mark.skip(
-    reason="FIXME: ListOffsetArray object has no attribute toRegularArray"
-)
-def test_dimension_optiontype_FIXME():
-    content = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
-    index = ak.layout.Index64(np.array([5, -1, 3, 2, -1, 0], dtype=np.int64))
-    indexedarray = ak.layout.IndexedOptionArray64(index, listoffsetarray)
-    depth2 = ak.layout.RegularArray(indexedarray, 3)
-    depth2 = v1_to_v2(depth2)
-    assert ak.to_list(depth2) == [
-        [[101, 103, 107, 109, 113], None, [53, 59, 61, 67, 71]],
-        [[31, 37, 41, 43, 47], None, [2, 3, 5, 7, 11]],
-    ]
     assert ak.to_list(depth2.prod(axis=-1, keepdims=True)) == [
-        [101 * 103 * 107 * 109 * 113, None, 53 * 59 * 61 * 67 * 71],
-        [31 * 37 * 41 * 43 * 47, None, 2 * 3 * 5 * 7 * 11],
+        [
+            [101 * 103 * 107 * 109 * 113],
+            [73 * 79 * 83 * 89 * 97],
+            [53 * 59 * 61 * 67 * 71],
+        ],
+        [[31 * 37 * 41 * 43 * 47], [13 * 17 * 19 * 23 * 29], [2 * 3 * 5 * 7 * 11]],
     ]
 
 

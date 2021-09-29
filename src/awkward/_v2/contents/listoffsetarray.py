@@ -112,6 +112,32 @@ class ListOffsetArray(Content):
             offsets = self._compact_offsets64(start_at_zero)
             return self._broadcast_tooffsets64(offsets)
 
+    def toRegularArray(self):
+        nplike = self.nplike
+
+        start, stop = self._offsets[0], self._offsets[len(self._offsets) - 1]
+        content = self._content._getitem_range(slice(start, stop))
+        size = ak._v2.index.Index64.zeros(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ListOffsetArray_toRegularArray",
+                size.dtype.type,
+                self._offsets.dtype.type,
+            ](
+                size.to(nplike),
+                self._offsets.to(nplike),
+                len(self._offsets),
+            )
+        )
+
+        return ak._v2.contents.RegularArray(
+            content,
+            size[0],
+            len(self._offsets),
+            self._identifier,
+            self._parameters,
+        )
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -982,9 +1008,11 @@ class ListOffsetArray(Content):
                 )
             )
 
-            if keepdims:  # FIXME not self._represents_regular or
-                if isinstance(self._content, ak._v2.contents.IndexedOptionArray):
-                    outcontent = self.toListOffsetArray64(False)
+            if (
+                keepdims and self._content.dimension_optiontype
+            ):  # FIXME not self._represents_regular
+                if isinstance(outcontent, ak._v2.contents.RegularArray):
+                    outcontent = outcontent.toListOffsetArray64(False)
 
             return ak._v2.contents.ListOffsetArray(
                 outoffsets,

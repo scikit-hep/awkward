@@ -654,7 +654,7 @@ class RegularArray(Content):
             keepdims,
         )
 
-        if self.content.dimension_optiontype:
+        if not self._content.dimension_optiontype:
             branch, depth = self._content.branch_depth
             convert_shallow = negaxis == depth
             convert_deep = negaxis + 2 == depth
