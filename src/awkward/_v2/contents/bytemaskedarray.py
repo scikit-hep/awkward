@@ -325,32 +325,37 @@ class ByteMaskedArray(Content):
             )
             return out2._simplify_optiontype()
 
-    def toIndexedOptionArray(self):
-        nplike = self._mask.nplike
-        index = ak._v2.index.Index64.empty(len(self._mask), nplike)
-        self._handle_error(
-            nplike[
-                "awkward_ByteMaskedArray_toIndexedOptionArray",
-                index.dtype.type,
-                self._mask.dtype.type,
-            ](
-                index.to(nplike),
-                self._mask.to(nplike),
-                len(self._mask),
-                self._valid_when,
-            )
-        )
-        return ak._v2.contents.IndexedOptionArray(
-            index,
-            self._content,
-            self._identifier,
-            self._parameters,
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        return self.toIndexedOptionArray64()._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
         )
 
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        return self.toIndexedOptionArray()._sort_next(
+        if len(self._mask) == 0:
+            return self
+
+        return self.toIndexedOptionArray64()._sort_next(
             negaxis,
             starts,
             parents,

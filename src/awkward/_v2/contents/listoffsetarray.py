@@ -7,10 +7,6 @@ from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.listoffsetform import ListOffsetForm
-<<<<<<< HEAD
-=======
-import numpy
->>>>>>> using numpy sort to sort the arrays - let's see how it performs. I'll replace it with kernel function calls later.
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -121,7 +117,7 @@ class ListOffsetArray(Content):
 
         start, stop = self._offsets[0], self._offsets[len(self._offsets) - 1]
         content = self._content._getitem_range(slice(start, stop))
-        size = ak._v2.index.Index64.zeros(1, nplike)
+        size = ak._v2.index.Index64.empty(1, nplike)
         self._handle_error(
             nplike[
                 "awkward_ListOffsetArray_toRegularArray",
@@ -519,6 +515,232 @@ class ListOffsetArray(Content):
                 self._parameters,
             )
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        nplike = self.nplike
+
+        if len(self._offsets) - 1 == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        branch, depth = self.branch_depth
+
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            if branch or (negaxis != depth):
+                raise ValueError("array with strings can only be sorted with axis=-1")
+
+            # FIXME: check validity error
+
+            if isinstance(self._content, ak._v2.contents.NumpyArray):
+                nextcarry = ak._v2.index.Index64.empty(len(self._offsets) - 1, nplike)
+
+                self_starts, self_stops = self._offsets[:-1], self._offsets[1:]
+                self._handle_error(
+                    nplike[
+                        "awkward_ListOffsetArray_argsort_strings",
+                        nextcarry.dtype.type,
+                        parents.dtype.type,
+                        self._content.dtype.type,
+                        self_starts.dtype.type,
+                        self_stops.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        parents.to(nplike),
+                        len(parents),
+                        self._content._data,
+                        self_starts.to(nplike),
+                        self_stops.to(nplike),
+                        stable,
+                        ascending,
+                        False,
+                    )
+                )
+                return ak._v2.contents.NumpyArray(nextcarry)
+
+        if not branch and (negaxis == depth):
+            if (
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
+            ):
+                raise ValueError("array with strings can only be sorted with axis=-1")
+            if len(self._offsets) - 1 != len(parents):
+                raise ValueError(
+                    "length of self._offsets_ - 1 is not equal to parents length"
+                )
+
+            maxcount = ak._v2.index.Index64.empty(1, nplike)
+            offsetscopy = ak._v2.index.Index64.empty(len(self._offsets), nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+                    maxcount.dtype.type,
+                    offsetscopy.dtype.type,
+                    self._offsets.dtype.type,
+                ](
+                    maxcount.to(nplike),
+                    offsetscopy.to(nplike),
+                    self._offsets.to(nplike),
+                    len(self._offsets) - 1,
+                )
+            )
+
+            maxcount = maxcount[0]
+            nextlen = self._offsets[-1] - self._offsets[0]
+
+            nextcarry = ak._v2.index.Index64.empty(nextlen, nplike)
+            nextparents = ak._v2.index.Index64.empty(nextlen, nplike)
+            maxnextparents = ak._v2.index.Index64.empty(1, nplike)
+            distincts = ak._v2.index.Index64.empty(maxcount * outlength, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
+                    nextcarry.dtype.type,
+                    nextparents.dtype.type,
+                    maxnextparents.dtype.type,
+                    distincts.dtype.type,
+                    self._offsets.dtype.type,
+                    offsetscopy.dtype.type,
+                    parents.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    nextparents.to(nplike),
+                    nextlen,
+                    maxnextparents.to(nplike),
+                    distincts.to(nplike),
+                    maxcount * outlength,
+                    offsetscopy.to(nplike),
+                    self._offsets.to(nplike),
+                    len(self._offsets) - 1,
+                    parents.to(nplike),
+                    maxcount,
+                )
+            )
+
+            nextstarts_length = maxnextparents[0] + 1
+            nextstarts = ak._v2.index.Index64.empty(nextstarts_length, nplike, np.int64)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+                    nextstarts.dtype.type,
+                    nextparents.dtype.type,
+                ](
+                    nextstarts.to(nplike),
+                    nextparents.to(nplike),
+                    nextlen,
+                )
+            )
+            next_nextcarry = nextcarry
+
+            nummissing = ak._v2.index.Index64.empty(maxcount, nplike)
+            missing = ak._v2.index.Index64.empty(len(self._offsets) - 1, nplike)
+            nextshifts = ak._v2.index.Index64.empty(nextlen, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
+                    nummissing.dtype.type,
+                    missing.dtype.type,
+                    nextshifts.dtype.type,
+                    self._offsets.dtype.type,
+                    starts.dtype.type,
+                    parents.dtype.type,
+                    next_nextcarry.dtype.type,
+                ](
+                    nummissing.to(nplike),
+                    missing.to(nplike),
+                    nextshifts.to(nplike),
+                    self._offsets.to(nplike),
+                    len(self._offsets) - 1,
+                    starts.to(nplike),
+                    parents.to(nplike),
+                    maxcount,
+                    nextlen,
+                    next_nextcarry.to(nplike),
+                )
+            )
+
+            nextcontent = self._content._carry(nextcarry, False, NestedIndexError)
+            outcontent = nextcontent._argsort_next(
+                negaxis - 1,
+                nextstarts,
+                nextshifts,
+                nextparents,
+                nextstarts_length,
+                ascending,
+                stable,
+                kind,
+                order,
+            )
+
+            outcarry = ak._v2.index.Index64.empty(nextlen, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_local_preparenext_64",
+                    outcarry.dtype.type,
+                    nextcarry.dtype.type,
+                ](
+                    outcarry.to(nplike),
+                    nextcarry.to(nplike),
+                    nextlen,
+                )
+            )
+
+            out_offsets = self._compact_offsets64(True)
+            out = outcontent._carry(outcarry, False, NestedIndexError)
+            return ak._v2.contents.ListOffsetArray(
+                out_offsets,
+                out,
+                None,
+                self._parameters,
+            )
+        else:
+            nextparents = ak._v2.index.Index64.empty(
+                self._offsets[-1] - self._offsets[0], nplike
+            )
+
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_local_nextparents_64",
+                    nextparents.dtype.type,
+                    self._offsets.dtype.type,
+                ](
+                    nextparents.to(nplike),
+                    self._offsets.to(nplike),
+                    len(self._offsets) - 1,
+                )
+            )
+
+            trimmed = self._content[self._offsets[0] : self._offsets[-1]]
+            outcontent = trimmed._argsort_next(
+                negaxis,
+                self._offsets[:-1],
+                shifts,
+                nextparents,
+                len(self._offsets) - 1,
+                ascending,
+                stable,
+                kind,
+                order,
+            )
+            outoffsets = self._compact_offsets64(True)
+            return ak._v2.contents.ListOffsetArray(
+                outoffsets,
+                outcontent,
+                None,
+                self._parameters,
+            )
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
@@ -538,7 +760,7 @@ class ListOffsetArray(Content):
             # FIXME: check validity error
 
             if isinstance(self._content, ak._v2.contents.NumpyArray):
-                nextcarry = ak._v2.index.Index64.zeros(len(self._offsets) - 1, nplike)
+                nextcarry = ak._v2.index.Index64.empty(len(self._offsets) - 1, nplike)
 
                 starts, stops = self._offsets[:-1], self._offsets[1:]
                 self._handle_error(
@@ -576,7 +798,7 @@ class ListOffsetArray(Content):
 
             nextlen = self._offsets[-1] - self._offsets[0]
             maxcount = ak._v2.index.Index64.empty(1, nplike)
-            offsetscopy = ak._v2.index.Index64.zeros(len(self._offsets), nplike)
+            offsetscopy = ak._v2.index.Index64.empty(len(self._offsets), nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
@@ -592,10 +814,10 @@ class ListOffsetArray(Content):
             )
 
             distincts_length = outlength * maxcount[0]
-            nextcarry = ak._v2.index.Index64.zeros(nextlen, nplike)
-            nextparents = ak._v2.index.Index64.zeros(nextlen, nplike)
+            nextcarry = ak._v2.index.Index64.empty(nextlen, nplike)
+            nextparents = ak._v2.index.Index64.empty(nextlen, nplike)
             maxnextparents = ak._v2.index.Index64.empty(1, nplike)
-            distincts = ak._v2.index.Index64.zeros(distincts_length, nplike)
+            distincts = ak._v2.index.Index64.empty(distincts_length, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
@@ -621,7 +843,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nextstarts = ak._v2.index.Index64.zeros(maxnextparents[0] + 1, nplike)
+            nextstarts = ak._v2.index.Index64.empty(maxnextparents[0] + 1, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
@@ -646,7 +868,7 @@ class ListOffsetArray(Content):
                 order,
             )
 
-            outcarry = ak._v2.index.Index64.zeros(nextlen, nplike)
+            outcarry = ak._v2.index.Index64.empty(nextlen, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_local_preparenext_64",
@@ -666,7 +888,7 @@ class ListOffsetArray(Content):
                 self._parameters,
             )
         else:
-            nextparents = ak._v2.index.Index64.zeros(
+            nextparents = ak._v2.index.Index64.empty(
                 self._offsets[-1] - self._offsets[0], nplike
             )
 
@@ -819,8 +1041,8 @@ class ListOffsetArray(Content):
         nextlen = self._offsets[-1] - self._offsets[0]
 
         if not branch and negaxis == depth:
-            maxcount = ak._v2.index.Index64.zeros(1, nplike)
-            offsetscopy = ak._v2.index.Index64.zeros(len(self.offsets), nplike)
+            maxcount = ak._v2.index.Index64.empty(1, nplike)
+            offsetscopy = ak._v2.index.Index64.empty(len(self.offsets), nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
@@ -836,10 +1058,10 @@ class ListOffsetArray(Content):
             )
 
             distincts_length = outlength * maxcount[0]
-            nextcarry = ak._v2.index.Index64.zeros(nextlen, nplike)
-            nextparents = ak._v2.index.Index64.zeros(nextlen, nplike)
-            maxnextparents = ak._v2.index.Index64.zeros(1, nplike)
-            distincts = ak._v2.index.Index64.zeros(distincts_length, nplike)
+            nextcarry = ak._v2.index.Index64.empty(nextlen, nplike)
+            nextparents = ak._v2.index.Index64.empty(nextlen, nplike)
+            maxnextparents = ak._v2.index.Index64.empty(1, nplike)
+            distincts = ak._v2.index.Index64.empty(distincts_length, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
@@ -865,7 +1087,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nextstarts = ak._v2.index.Index64.zeros(maxnextparents[0] + 1, nplike)
+            nextstarts = ak._v2.index.Index64.empty(maxnextparents[0] + 1, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
@@ -878,7 +1100,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            gaps = ak._v2.index.Index64.zeros(outlength, nplike)
+            gaps = ak._v2.index.Index64.empty(outlength, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_findgaps_64",
@@ -891,8 +1113,8 @@ class ListOffsetArray(Content):
                 )
             )
 
-            outstarts = ak._v2.index.Index64.zeros(outlength, nplike)
-            outstops = ak._v2.index.Index64.zeros(outlength, nplike)
+            outstarts = ak._v2.index.Index64.empty(outlength, nplike)
+            outstops = ak._v2.index.Index64.empty(outlength, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
@@ -911,9 +1133,9 @@ class ListOffsetArray(Content):
             )
 
             if reducer.needs_position:
-                nextshifts = ak._v2.index.Index64.zeros(nextlen, nplike)
-                nummissing = ak._v2.index.Index64.zeros(maxcount[0], nplike)
-                missing = ak._v2.index.Index64.zeros(self._offsets[-1], nplike)
+                nextshifts = ak._v2.index.Index64.empty(nextlen, nplike)
+                nummissing = ak._v2.index.Index64.empty(maxcount[0], nplike)
+                missing = ak._v2.index.Index64.empty(self._offsets[-1], nplike)
                 self._handle_error(
                     nplike[
                         "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
@@ -972,7 +1194,7 @@ class ListOffsetArray(Content):
             return out
 
         else:
-            nextparents = ak._v2.index.Index64.zeros(nextlen, nplike)
+            nextparents = ak._v2.index.Index64.empty(nextlen, nplike)
 
             self._handle_error(
                 nplike[
@@ -998,7 +1220,7 @@ class ListOffsetArray(Content):
                 mask,
                 keepdims,
             )
-            outoffsets = ak._v2.index.Index64.zeros(outlength + 1, nplike)
+            outoffsets = ak._v2.index.Index64.empty(outlength + 1, nplike)
             self._handle_error(
                 nplike[
                     "awkward_ListOffsetArray_reduce_local_outoffsets_64",

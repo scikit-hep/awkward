@@ -245,6 +245,34 @@ class IndexedArray(Content):
         else:
             return self.project()._localindex(posaxis, depth)
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._index) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        next = self._content._carry(self._index, False, NestedIndexError)
+        return next._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _sort_next(
         self,
         negaxis,
@@ -257,7 +285,7 @@ class IndexedArray(Content):
         order,
     ):
         if len(self._index) == 0:
-            return self
+            ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
 
         next = self._content._carry(self._index, False, NestedIndexError)
         return next._sort_next(
