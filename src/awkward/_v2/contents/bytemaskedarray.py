@@ -380,6 +380,150 @@ class ByteMaskedArray(Content):
             )
             return out2._simplify_optiontype()
 
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        nplike = self.nplike
+
+        mask_length = len(self._mask)
+
+        numnull = ak._v2.index.Index64.zeros(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_numnull",
+                numnull.dtype.type,
+                self._mask.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._mask.to(nplike),
+                mask_length,
+                self._valid_when,
+            )
+        )
+
+        next_length = mask_length - numnull[0]
+        nextcarry = ak._v2.index.Index64.zeros(next_length, nplike)
+        nextparents = ak._v2.index.Index64.zeros(next_length, nplike)
+        outindex = ak._v2.index.Index64.zeros(mask_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._mask.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._mask.to(nplike),
+                parents.to(nplike),
+                mask_length,
+                self._valid_when,
+            )
+        )
+
+        branch, depth = self.branch_depth
+
+        if reducer.needs_position and (not branch and negaxis == depth):
+            nextshifts = ak._v2.index.Index64.zeros(next_length, nplike)
+            if shifts is None:
+                self._handle_error(
+                    nplike[
+                        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+                        nextshifts.dtype.type,
+                        self._mask.dtype.type,
+                    ](
+                        nextshifts.to(nplike),
+                        self._mask.to(nplike),
+                        mask_length,
+                        self._valid_when,
+                    )
+                )
+            else:
+                self._handle_error(
+                    nplike[
+                        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+                        nextshifts.dtype.type,
+                        self._mask.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        nextshifts.to(nplike),
+                        self._mask.to(nplike),
+                        mask_length,
+                        self._valid_when,
+                        shifts.to(nplike),
+                    )
+                )
+        else:
+            nextshifts = None
+
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        if isinstance(next, ak._v2.contents.RegularArray):
+            next = next.toListOffsetArray64(True)
+
+        out = next._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            nextshifts,
+            nextparents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+        if not branch and negaxis == depth:
+            return out
+        else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
+
+            if isinstance(out, ak._v2.contents.ListOffsetArray):
+                outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        len(starts),
+                        len(outindex),
+                    )
+                )
+
+                tmp = ak._v2.contents.IndexedOptionArray(
+                    outindex,
+                    out.content,
+                    None,
+                    None,
+                )._simplify_optiontype()
+
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    None,
+                )
+
+            else:
+                raise ValueError(
+                    "reduce_next with unbranching depth > negaxis is only "
+                    "expected to return RegularArray or ListOffsetArray64; "
+                    "instead, it returned " + out
+                )
+
     def _validityerror(self, path):
         if len(self.content) < len(self.mask):
             return 'at {0} ("{1}"): len(content) < len(mask)'.format(path, type(self))

@@ -102,6 +102,10 @@ class ListArray(Content):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
+    def toRegularArray(self):
+        offsets = self._compact_offsets64(True)
+        return self._broadcast_tooffsets64(offsets).toRegularArray()
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -684,6 +688,28 @@ class ListArray(Content):
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ListOffsetArray._combinations(
             self, n, replacement, recordlookup, parameters, axis, depth
+        )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        return self.toListOffsetArray64(True)._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
         )
 
     def _validityerror(self, path):

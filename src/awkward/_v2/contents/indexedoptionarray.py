@@ -478,6 +478,140 @@ class IndexedOptionArray(Content):
             )
             return out2._simplify_optiontype()
 
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        nplike = self.nplike
+        branch, depth = self.branch_depth
+
+        index_length = len(self._index)
+
+        numnull = ak._v2.index.Index64.zeros(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_numnull",
+                numnull.dtype.type,
+                self._index.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._index.to(nplike),
+                index_length,
+            )
+        )
+
+        next_length = index_length - numnull[0]
+        nextcarry = ak._v2.index.Index64.zeros(next_length, nplike)
+        nextparents = ak._v2.index.Index64.zeros(next_length, nplike)
+        outindex = ak._v2.index.Index64.zeros(index_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._index.to(nplike),
+                parents.to(nplike),
+                index_length,
+            )
+        )
+
+        if reducer.needs_position and (not branch and negaxis == depth):
+            nextshifts = ak._v2.index.Index64.zeros(next_length, nplike)
+            if shifts is None:
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+                        nextshifts.dtype.type,
+                        self.index.dtype.type,
+                    ](
+                        nextshifts.to(nplike),
+                        self.index.to(nplike),
+                        len(self.index),
+                    )
+                )
+            else:
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+                        nextshifts.dtype.type,
+                        self.index.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        nextshifts.to(nplike),
+                        self.index.to(nplike),
+                        len(self.index),
+                        shifts.to(nplike),
+                    )
+                )
+        else:
+            nextshifts = None
+
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        if isinstance(next, ak._v2.contents.RegularArray):
+            next = next.toListOffsetArray64(True)
+
+        out = next._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            nextshifts,
+            nextparents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+        if not branch and negaxis == depth:
+            return out
+        else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
+
+            if isinstance(out, ak._v2.contents.ListOffsetArray):
+                outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        len(starts),
+                        len(outindex),
+                    )
+                )
+
+                tmp = ak._v2.contents.IndexedOptionArray(
+                    outindex,
+                    out.content,
+                    None,
+                    None,
+                )._simplify_optiontype()
+
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    None,
+                )
+
+        return out
+
     def _validityerror(self, path):
         error = self.nplike["awkward_IndexedArray_validity", self.index.dtype.type](
             self.index.to(self.nplike), len(self.index), len(self.content), True

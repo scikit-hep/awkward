@@ -209,6 +209,32 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        next = self._content
+        if isinstance(next, ak._v2_contents.RegularArray):
+            next = next.toListOffsetArray64(True)
+
+        return next._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
     def _validityerror(self, path):
         if isinstance(
             self.content,

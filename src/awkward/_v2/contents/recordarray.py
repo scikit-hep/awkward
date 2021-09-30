@@ -396,6 +396,40 @@ class RecordArray(Content):
                 contents, recordlookup, len(self), self._identifier, self._parameters
             )
 
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        contents = []
+        for content in self._contents:
+            contents.append(
+                content[: self._length]._reduce_next(
+                    reducer,
+                    negaxis,
+                    starts,
+                    shifts,
+                    parents,
+                    outlength,
+                    mask,
+                    keepdims,
+                )
+            )
+
+        return ak._v2.contents.RecordArray(
+            contents,
+            self._keys,
+            outlength,
+            None,
+            None,
+        )
+
     def _validityerror(self, path):
         for i in range(len(self.contents)):
             if len(self.contents[i]) < len(self):

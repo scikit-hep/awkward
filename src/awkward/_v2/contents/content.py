@@ -8,6 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
+import awkward._v2._reducers
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
 
@@ -504,6 +505,89 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def localindex(self, axis):
         return self._localindex(axis, 0)
 
+    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
+        if axis is None:
+            raise NotImplementedError
+
+        negaxis = -axis
+        branch, depth = self.branch_depth
+
+        if branch:
+            if negaxis <= 0:
+                raise ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves "
+                    "of the tree; non-negative from the root)"
+                )
+            if negaxis > depth:
+                raise ValueError(
+                    "cannot use axis="
+                    + str(axis)
+                    + " on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth="
+                    + str(depth)
+                    + " from the leaves"
+                )
+        else:
+            if negaxis <= 0:
+                negaxis += depth
+            if not (0 < negaxis and negaxis <= depth):
+                raise ValueError(
+                    "axis="
+                    + str(axis)
+                    + " exceeds the depth of the nested list structure "
+                    "(which is " + str(depth) + ")"
+                )
+
+        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        shifts = None
+        next = self._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            1,
+            mask,
+            keepdims,
+        )
+
+        if isinstance(next, ak._v2.contents.NumpyArray) and len(next) == 1:
+            return next
+
+        return next[0]
+
+    def argmin(self, axis=-1, mask=True, keepdims=False):
+        return self._reduce(awkward._v2._reducers.ArgMin, axis, mask, keepdims)
+
+    def argmax(self, axis=-1, mask=True, keepdims=False):
+        return self._reduce(awkward._v2._reducers.ArgMax, axis, mask, keepdims)
+
+    def count(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.Count, axis, mask, keepdims)
+
+    def count_nonzero(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.CountNonzero, axis, mask, keepdims)
+
+    def sum(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.Sum, axis, mask, keepdims)
+
+    def prod(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims)
+
+    def any(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.Any, axis, mask, keepdims)
+
+    def all(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims)
+
+    def min(self, axis=-1, mask=True, keepdims=False, initial=None):
+        return self._reduce(awkward._v2._reducers.Min(initial), axis, mask, keepdims)
+
+    def max(self, axis=-1, mask=True, keepdims=False, initial=None):
+        return self._reduce(awkward._v2._reducers.Max(initial), axis, mask, keepdims)
+
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         """
         Args:
@@ -762,3 +846,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     @property
     def keys(self):
         return self.Form.keys.__get__(self)
+
+    @property
+    def dimension_optiontype(self):
+        return self.Form.dimension_optiontype.__get__(self)

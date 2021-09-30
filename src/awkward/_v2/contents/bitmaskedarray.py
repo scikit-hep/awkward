@@ -303,6 +303,28 @@ class BitMaskedArray(Content):
             n, replacement, recordlookup, parameters, axis, depth
         )
 
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        return self.toByteMaskedArray()._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
     def _validityerror(self, path):
         if len(self.mask) * 8 < len(self):
             return 'at {0} ("{1}"): len(mask) * 8 < length'.format(path, type(self))

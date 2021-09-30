@@ -460,5 +460,27 @@ class VirtualArray(Content):
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
 
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        return self.array._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
     def _validityerror(self, path):
         return NotImplementedError

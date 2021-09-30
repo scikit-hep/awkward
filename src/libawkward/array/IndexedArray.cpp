@@ -2220,8 +2220,8 @@ namespace awkward {
         util::handle_error(err3, classname(), identities_.get());
       }
     }
-
     ContentPtr next = content_.get()->carry(nextcarry, false);
+
     if (ISOPTION) {
       if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
         next = raw->toListOffsetArray64(true);

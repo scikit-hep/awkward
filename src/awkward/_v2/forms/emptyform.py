@@ -75,3 +75,7 @@ class EmptyForm(Form):
     @property
     def keys(self):
         return []
+
+    @property
+    def dimension_optiontype(self):
+        return False

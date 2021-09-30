@@ -380,6 +380,87 @@ class NumpyArray(Content):
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
 
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        nplike = self.nplike
+
+        out = reducer.apply(self, parents, outlength)
+
+        if reducer.needs_position:
+            if shifts is None:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_reduce_adjust_starts_64",
+                        out.data.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        parents.to(nplike),
+                        starts.to(nplike),
+                    )
+                )
+            else:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                        out.data.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        parents.to(nplike),
+                        starts.to(nplike),
+                        shifts.to(nplike),
+                    )
+                )
+
+        if mask:
+            outmask = ak._v2.index.Index8.zeros(outlength, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+                    outmask.dtype.type,
+                    parents.dtype.type,
+                ](
+                    outmask.to(nplike),
+                    parents.to(nplike),
+                    len(parents),
+                    outlength,
+                )
+            )
+
+            out = ak._v2.contents.ByteMaskedArray(
+                outmask,
+                out,
+                False,
+                None,
+                None,
+            )
+
+        if keepdims:
+            out = ak._v2.contents.RegularArray(
+                out,
+                1,
+                len(self),
+                None,
+                None,
+            )
+
+        return out
+
     def _validityerror(self, path):
         if len(self.shape) == 0:
             return 'at {0} ("{1}"): shape is zero-dimensional'.format(path, type(self))

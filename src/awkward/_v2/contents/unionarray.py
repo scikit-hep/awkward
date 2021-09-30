@@ -330,6 +330,45 @@ class UnionArray(Content):
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
 
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        simplified = self._simplify_uniontype()
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ValueError("cannot sort an irreducible UnionArray")
+
+        return simplified._sort_next(
+            negaxis, starts, parents, outlength, ascending, stable, kind, order
+        )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        simplified = self._simplify_uniontype()
+        if isinstance(simplified, UnionArray):
+            raise ValueError(
+                "cannot call ak.{0} on an irreducible UnionArray".format(reducer.name)
+            )
+
+        return simplified._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
     def _validityerror(self, path):
         for i in range(len(self.contents)):
             if isinstance(self.contents[i], ak._v2.contents.unionarray.UnionArray):
@@ -369,14 +408,3 @@ class UnionArray(Content):
                 if sub != "":
                     return sub
             return ""
-
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
-        out = self._simplify_uniontype()
-
-        if isinstance(out, ak._v2.contents.UnionArray):
-            raise ValueError("cannot sort unsimplified {0}".format(type(self).__name__))
-        return out._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable, kind, order
-        )

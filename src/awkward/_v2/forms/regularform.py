@@ -143,3 +143,7 @@ class RegularForm(Form):
     @property
     def keys(self):
         return self._content.keys
+
+    @property
+    def dimension_optiontype(self):
+        return False

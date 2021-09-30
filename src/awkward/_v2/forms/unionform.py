@@ -219,3 +219,10 @@ class UnionForm(Form):
         for i in range(len(self._contents)):
             keyslists.append(self._contents[i].keys)
         return list(set.intersection(*[set(x) for x in keyslists]))
+
+    @property
+    def dimension_optiontype(self):
+        for content in self._contents:
+            if content.dimension_optiontype:
+                return True
+        return False

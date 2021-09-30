@@ -632,6 +632,77 @@ class RegularArray(Content):
                 next, self._size, len(self), self._identifier, self._parameters
             )
 
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        out = self.toListOffsetArray64(True)._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+        if not self._content.dimension_optiontype:
+            branch, depth = self._content.branch_depth
+            convert_shallow = negaxis == depth
+            convert_deep = negaxis + 2 == depth
+
+            if keepdims:
+                convert_shallow = False
+                convert_deep = True
+
+            if convert_deep:
+                if isinstance(out, ak._v2.contents.ListOffsetArray):
+                    if isinstance(out.content, ak._v2.contents.ListOffsetArray):
+                        out = ak._v2.contents.ListOffsetArray(
+                            out.offsets,
+                            out.content.toRegularArray(),
+                            out.identifier,
+                            out.parameters,
+                        )
+                    elif isinstance(out.content, ak._v2.contents.ListArray):
+                        out = ak._v2.contents.ListOffsetArray(
+                            out.offsets,
+                            out.content.toRegularArray(),
+                            out.identifier,
+                            out.parameters,
+                        )
+                elif isinstance(out, ak._v2.contents.ListArray):
+                    if isinstance(out.content, ak._v2.contents.ListOffsetArray):
+                        out = ak._v2.contents.ListOffsetArray(
+                            out.offsets,
+                            out.content.toRegularArray(),
+                            out.identifier,
+                            out.parameters,
+                        )
+                    elif isinstance(out.content, ak._v2.contents.ListArray):
+                        out = ak._v2.contents.ListOffsetArray(
+                            out.offsets,
+                            out.content.toRegularArray(),
+                            out.identifier,
+                            out.parameters,
+                        )
+
+            if convert_shallow:
+                if isinstance(out, ak._v2.contents.ListOffsetArray):
+                    out = out.toRegularArray()
+                elif isinstance(out, ak._v2.contents.ListArray):
+                    out = out.toRegularArray()
+
+        return out
+
     def _validityerror(self, path):
         if self.size < 0:
             return 'at {0} ("{1}"): size < 0'.format(path, type(self))
