@@ -35,8 +35,10 @@ def test_keep_None_in_place_test():
     )
 
     v2_array = v1_to_v2(v1_array.layout)
-    #assert ak.to_list(v2_array.sort(axis=1)) == ak.to_list(ak.sort(v1_array, axis=1))
-    assert ak.to_list(v2_array.argsort(axis=1)) == ak.to_list(ak.argsort(v1_array, axis=1))
+    # assert ak.to_list(v2_array.sort(axis=1)) == ak.to_list(ak.sort(v1_array, axis=1))
+    assert ak.to_list(v2_array.argsort(axis=1)) == ak.to_list(
+        ak.argsort(v1_array, axis=1)
+    )
 
 
 def test_empty_slice():
@@ -71,8 +73,8 @@ def test_masked():
     ]
 
     assert ak.argsort(v1_array.mask[is_valid]).tolist() == [
-        [0, 1, 2, None],
-        [1, 2, None, None, None],
+        [0, 1, 2, 3],
+        [4, 3, 0, 1, 2],
     ]
 
     # FIXME: AttributeError: 'ListOffsetArray' object has no attribute 'mask'
