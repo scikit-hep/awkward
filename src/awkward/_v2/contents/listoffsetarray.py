@@ -527,10 +527,10 @@ class ListOffsetArray(Content):
         kind,
         order,
     ):
-        nplike = self.nplike
-
         if len(self._offsets) - 1 == 0:
             return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        nplike = self.nplike
 
         branch, depth = self.branch_depth
 

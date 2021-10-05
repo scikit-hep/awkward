@@ -314,8 +314,8 @@ class NumpyArray(Content):
         kind,
         order,
     ):
-        if len(self) == 0:
-            return self
+        if self.shape[0] == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
 
         if len(self.shape) == 0:
             raise TypeError(

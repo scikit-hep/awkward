@@ -683,6 +683,9 @@ class ListArray(Content):
         kind,
         order,
     ):
+        if len(self._starts) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
         next = self.toListOffsetArray64(True)
         out = next._argsort_next(
             negaxis,
@@ -700,7 +703,7 @@ class ListArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self) == 0:
+        if len(self._starts) == 0:
             return self
 
         return self.toListOffsetArray64(True)._sort_next(
