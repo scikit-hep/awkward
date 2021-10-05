@@ -589,9 +589,28 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return self._reduce(awkward._v2._reducers.Max(initial), axis, mask, keepdims)
 
     def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
-        if kind is not None:
-            raise NotImplementedError
+        """
+        Args:
+            axis (int): this argument defines an axis along
+                which to sort indices. The default is `-1`, which
+                sorts indices along the innermost axis. Axes are defined similar to
+                Numpy axes. `axis=0` is the "first" axis and `axis=-1` is
+                the "last" axis. Unlike other operations, sorting does not
+                support `axis=None`.
+            ascending (bool): if `True`, the elements are sorted in ascending
+                order.
+            stable (bool): if `True`, the order of equivalent elements is guaranteed
+                to be preserved.
+            kind ({‘quicksort’, ‘mergesort’, ‘heapsort’, ‘stable’}, optional):
+                an optional sorting algorithm. This is similar to NumPy
+                sort.
+            order (str or list of str, optional): similar to NumPy.
 
+        Puts indices of Content elements in an ordered sequence: numeric or lexicographical,
+        ascending or descending.
+
+        This function is similar to NumPy [sort](https://numpy.org/doc/stable/reference/generated/numpy.argsort.html).
+        """
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:
@@ -662,10 +681,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
         This function is similar to NumPy [sort](https://numpy.org/doc/stable/reference/generated/numpy.sort.html).
         """
-
-        if kind is not None:
-            raise NotImplementedError
-
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:

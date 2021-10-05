@@ -35,29 +35,34 @@ def test_keep_None_in_place_test():
     )
 
     v2_array = v1_to_v2(v1_array.layout)
-    # assert ak.to_list(v2_array.sort(axis=1)) == ak.to_list(ak.sort(v1_array, axis=1))
+    assert ak.to_list(v2_array.sort(axis=1)) == ak.to_list(ak.sort(v1_array, axis=1))
     assert ak.to_list(v2_array.argsort(axis=1)) == ak.to_list(
         ak.argsort(v1_array, axis=1)
     )
 
 
+@pytest.mark.skip(
+    reason="FIXME: AttributeError: 'ListOffsetArray' object has no attribute 'pt'"
+)
 def test_empty_slice():
     # muon = ak.Array([[{"pt": 1.0}], []], with_name="muon")
     electron = ak.Array([[], [{"pt": 1.0}]], with_name="electron")
 
     electron = electron[electron.pt > 5]
-    # FIXME: AttributeError: 'ListOffsetArray' object has no attribute 'pt'
-    # v2_electron = v1_to_v2(electron.layout)
-    # v2_electron = v2_electron[v2_electron.pt > 5]
+    v2_electron = v1_to_v2(electron.layout)
+    v2_electron = v2_electron[v2_electron.pt > 5]
 
     assert ak.to_list(electron) == [[], []]
-    # assert ak.to_list(v2_electron) == [[], []]
+    assert ak.to_list(v2_electron) == [[], []]
 
     id = ak.argsort(electron, axis=1)
 
     assert ak.to_list(electron[id]) == [[], []]
 
 
+@pytest.mark.skip(
+    reason="FIXME: AttributeError: 'ListOffsetArray' object has no attribute 'mask'"
+)
 def test_masked():
     v1_array = ak.Array([[0, 1, 2, 3], [3, 3, 3, 2, 1]])
     is_valid = v1_array != 3
@@ -77,14 +82,16 @@ def test_masked():
         [4, 3, 0, 1, 2],
     ]
 
-    # FIXME: AttributeError: 'ListOffsetArray' object has no attribute 'mask'
-    # v2_array = v1_to_v2(v1_array.layout)
-    # assert v2_array.mask[is_valid].tolist() == [[0, 1, 2, None], [None, None, None, 2, 1]]
-    #
-    # assert ak.to_list(v2_array.mask[is_valid]) == [
-    #     [0, 1, 2, None],
-    #     [1, 2, None, None, None],
-    # ]
+    v2_array = v1_to_v2(v1_array.layout)
+    assert v2_array.mask[is_valid].tolist() == [
+        [0, 1, 2, None],
+        [None, None, None, 2, 1],
+    ]
+
+    assert ak.to_list(v2_array.mask[is_valid]) == [
+        [0, 1, 2, None],
+        [1, 2, None, None, None],
+    ]
 
 
 def test_v1_argsort_and_v2_sort():
@@ -482,7 +489,6 @@ def test_bytemaskedarray_sort():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    # FIXME
     assert ak.to_list(v2_to_v1(v2_array.sort())) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
@@ -632,6 +638,9 @@ def test_unionarray_sort():
         v2_array.sort()
     assert str(err.value).startswith("cannot sort an irreducible UnionArray")
 
+
+@pytest.mark.skip(reason="FIXME: cannot sort an irreducible UnionArray")
+def test_unionarray_sort_FIXME():
     v2_array = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
@@ -642,8 +651,7 @@ def test_unionarray_sort():
     )
 
     assert ak.to_list(v2_to_v1(v2_array)) == [5, 4, 1, 2, 3, 3, 5]
-    # FIXME: _simplify_uniontype() does not simplify them yet
-    # assert ak.to_list(v2_to_v1(v2_array.sort())) == [5, 4, 1, 2, 3, 3, 5]
+    assert ak.to_list(v2_to_v1(v2_array.sort())) == [5, 4, 1, 2, 3, 3, 5]
 
 
 def test_indexedarray_sort():
