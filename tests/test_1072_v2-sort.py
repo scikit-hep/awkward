@@ -101,6 +101,7 @@ def test_v1_argsort_and_v2_sort():
 
     v2_array = v1_to_v2(v1_array.layout)
     assert ak.to_list(v2_array.sort()) == ak.sort(v1_array).tolist()
+    assert ak.to_list(v2_array.argsort()) == ak.argsort(v1_array).tolist()
 
 
 def test_v1_argsort_2d_and_v2_sort():

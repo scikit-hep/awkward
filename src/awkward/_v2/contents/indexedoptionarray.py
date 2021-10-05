@@ -375,8 +375,7 @@ class IndexedOptionArray(Content):
 
         inject_nones = True if not branch and negaxis != depth else False
 
-        nextshifts = None
-        if not branch and negaxis == depth:
+        if (not branch) and negaxis == depth:
             nextshifts = ak._v2.index.Index64.empty(
                 next_length,
                 nplike,
@@ -407,6 +406,12 @@ class IndexedOptionArray(Content):
                         shifts.to(nplike),
                     )
                 )
+        else:
+            nextshifts = None
+
+        inject_nones = (
+            True if (numnull[0] > 0 and not branch and negaxis != depth) else False
+        )
 
         out = next._argsort_next(
             negaxis,
@@ -420,56 +425,55 @@ class IndexedOptionArray(Content):
             order,
         )
 
-        # # FIXME: nulls_merged = False
-        # nulls_index = ak._v2.index.Index64.empty(numnull, nplike)
-        # self._handle_error(
-        #     nplike[
-        #         "awkward_IndexedArray_index_of_nulls",
-        #         nulls_index.dtype.type,
-        #         self._index.dtype.type,
-        #         parents.dtype.type,
-        #         starts.dtype.type,
-        #     ](
-        #         nulls_index.to(nplike),
-        #         self._index.to(nplike),
-        #         len(self._index),
-        #         parents.to(nplike),
-        #         starts.to(nplike),
-        #     )
-        # )
+        nulls_merged = False
+        nulls_index = ak._v2.index.Index64.empty(numnull[0], nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_index_of_nulls",
+                nulls_index.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+                starts.dtype.type,
+            ](
+                nulls_index.to(nplike),
+                self._index.to(nplike),
+                len(self._index),
+                parents.to(nplike),
+                starts.to(nplike),
+            )
+        )
 
-        # # FIXME:
-        # ind = ak._v2.contents.NumpyArray(nulls_index)
-        #
+        ind = ak._v2.contents.NumpyArray(nulls_index)
+
         # # FIXME: work around for if mergeable: test it on two 1D arrays
-        # if isinstance(out, ak._v2.contents.NumpyArray):
-        #     full_index = ak._v2.index.Index64.empty(len(out) + len(ind), nplike)
-        #     self._handle_error(
-        #         nplike[
-        #             "awkward_NumpyArray_fill",
-        #             full_index.dtype.type,
-        #             out._data.dtype.type,
-        #         ](
-        #             full_index.to(nplike),
-        #             0,
-        #             out._data,
-        #             len(out),
-        #         )
-        #     )
-        #     self._handle_error(
-        #         nplike[
-        #             "awkward_NumpyArray_fill",
-        #             full_index.dtype.type,
-        #             ind._data.dtype.type,
-        #         ](
-        #             full_index.to(nplike),
-        #             len(out),
-        #             ind._data,
-        #             len(ind),
-        #         )
-        #     )
-        #     nulls_merged = True
-        #     out = ak._v2.contents.NumpyArray(full_index, nplike=self.nplike)
+        if isinstance(out, ak._v2.contents.NumpyArray):
+            full_index = ak._v2.index.Index64.empty(len(out) + len(ind), nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_NumpyArray_fill",
+                    full_index.dtype.type,
+                    out._data.dtype.type,
+                ](
+                    full_index.to(nplike),
+                    0,
+                    out._data,
+                    len(out),
+                )
+            )
+            self._handle_error(
+                nplike[
+                    "awkward_NumpyArray_fill",
+                    full_index.dtype.type,
+                    ind._data.dtype.type,
+                ](
+                    full_index.to(nplike),
+                    len(out),
+                    ind._data,
+                    len(ind),
+                )
+            )
+            nulls_merged = True
+            out = ak._v2.contents.NumpyArray(full_index, nplike=self.nplike)
         #
         # # if self._mergeable(ind, True):
         # #     out.merge(ind)
@@ -492,22 +496,15 @@ class IndexedOptionArray(Content):
                 next_length,
             )
         )
-        # toindex = ak._v2.index.Index64.empty(len(nextoutindex), nplike)
-        # if nulls_merged:
-        #     self._handle_error(
-        #         nplike[
-        #             "awkward_Index_nones_to_index_64",
-        #             toindex.dtype.type,
-        #             nextoutindex.dtype.type,
-        #         ](
-        #             toindex.to(nplike),
-        #             nextoutindex.to(nplike),
-        #             len(toindex),
-        #         )
-        #     )
-        # else:
-        #     toindex = nextoutindex
-        #
+
+        if nulls_merged:
+            self._handle_error(
+                nplike["awkward_Index_nones_as_index", nextoutindex.dtype.type](
+                    nextoutindex.to(nplike),
+                    len(nextoutindex),
+                )
+            )
+
         out = ak._v2.contents.IndexedOptionArray(
             nextoutindex,
             out,
@@ -524,7 +521,7 @@ class IndexedOptionArray(Content):
                 self._parameters,
             )
 
-        if not branch and negaxis == depth:
+        if (not branch) and negaxis == depth:
             return out
         else:
             if isinstance(out, ak._v2.contents.RegularArray):
@@ -575,6 +572,8 @@ class IndexedOptionArray(Content):
                     "IndexedOptionArray; "
                     "instead, it returned " + out
                 )
+
+        return out
 
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order

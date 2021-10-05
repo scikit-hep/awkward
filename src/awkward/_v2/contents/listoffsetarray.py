@@ -641,10 +641,9 @@ class ListOffsetArray(Content):
                     nextlen,
                 )
             )
-            next_nextcarry = nextcarry
 
             nummissing = ak._v2.index.Index64.empty(maxcount, nplike)
-            missing = ak._v2.index.Index64.empty(len(self._offsets) - 1, nplike)
+            missing = ak._v2.index.Index64.empty(self._offsets[-1], nplike)
             nextshifts = ak._v2.index.Index64.empty(nextlen, nplike)
             self._handle_error(
                 nplike[
@@ -655,7 +654,7 @@ class ListOffsetArray(Content):
                     self._offsets.dtype.type,
                     starts.dtype.type,
                     parents.dtype.type,
-                    next_nextcarry.dtype.type,
+                    nextcarry.dtype.type,
                 ](
                     nummissing.to(nplike),
                     missing.to(nplike),
@@ -666,7 +665,7 @@ class ListOffsetArray(Content):
                     parents.to(nplike),
                     maxcount,
                     nextlen,
-                    next_nextcarry.to(nplike),
+                    nextcarry.to(nplike),
                 )
             )
 

@@ -335,76 +335,79 @@ class NumpyArray(Content):
                 order,
             )
 
-        parents_length = len(parents)
-        offsets_length = ak._v2.index.Index64.empty(1, self.nplike)
-        self._handle_error(
-            self.nplike[
-                "awkward_sorting_ranges_length",
-                offsets_length.dtype.type,
-                parents.dtype.type,
-            ](
-                offsets_length.to(self.nplike),
-                parents.to(self.nplike),
-                parents_length,
-            )
-        )
-        offsets_length = offsets_length[0]
+        else:
+            nplike = self.nplike
 
-        offsets = ak._v2.index.Index64.empty(offsets_length, self.nplike)
-        self._handle_error(
-            self.nplike[
-                "awkward_sorting_ranges",
-                offsets.dtype.type,
-                parents.dtype.type,
-            ](
-                offsets.to(self.nplike),
-                offsets_length,
-                parents.to(self.nplike),
-                parents_length,
-            )
-        )
-
-        nextcarry = ak._v2.index.Index64.empty(self.shape[0], self.nplike)
-        self._handle_error(
-            self.nplike[
-                "awkward_argsort",
-                nextcarry.dtype.type,
-                self._data.dtype.type,
-                offsets.dtype.type,
-            ](
-                nextcarry.to(self.nplike),
-                self._data,
-                self.shape[0],
-                offsets.to(self.nplike),
-                offsets_length,
-                ascending,
-                stable,
-            )
-        )
-
-        if shifts is not None:
+            parents_length = len(parents)
+            offsets_length = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
-                self.nplike[
-                    "awkward_NumpyArray_rearrange_shifted",
-                    nextcarry.dtype.type,
-                    shifts.dtype.type,
-                    offsets.dtype.type,
+                nplike[
+                    "awkward_sorting_ranges_length",
+                    offsets_length.dtype.type,
                     parents.dtype.type,
-                    starts.dtype.type,
                 ](
-                    nextcarry.to(self.nplike),
-                    shifts.to(self.nplike),
-                    len(shifts),
-                    offsets.to(self.nplike),
-                    offsets_length,
-                    parents.to(self.nplike),
+                    offsets_length.to(nplike),
+                    parents.to(nplike),
                     parents_length,
-                    starts.to(self.nplike),
-                    len(self._data),
                 )
             )
-        out = NumpyArray(nextcarry)
-        return out
+            offsets_length = offsets_length[0]
+
+            offsets = ak._v2.index.Index64.empty(offsets_length, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges",
+                    offsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets.to(nplike),
+                    offsets_length,
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
+
+            nextcarry = ak._v2.index.Index64.empty(self.__len__(), nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_argsort",
+                    nextcarry.dtype.type,
+                    self._data.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    self._data,
+                    self.__len__(),
+                    offsets.to(nplike),
+                    offsets_length,
+                    ascending,
+                    stable,
+                )
+            )
+
+            if shifts is not None:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_rearrange_shifted",
+                        nextcarry.dtype.type,
+                        shifts.dtype.type,
+                        offsets.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        shifts.to(nplike),
+                        len(shifts),
+                        offsets.to(nplike),
+                        offsets_length,
+                        parents.to(nplike),
+                        parents_length,
+                        starts.to(nplike),
+                        len(starts),
+                    )
+                )
+            out = NumpyArray(nextcarry)
+            return out
 
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
@@ -431,6 +434,7 @@ class NumpyArray(Content):
         else:
             nplike = self.nplike
 
+            parents_length = len(parents)
             offsets_length = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
                 nplike[
@@ -440,7 +444,7 @@ class NumpyArray(Content):
                 ](
                     offsets_length.to(nplike),
                     parents.to(nplike),
-                    len(parents),
+                    parents_length,
                 )
             )
 
@@ -454,13 +458,11 @@ class NumpyArray(Content):
                     offsets.to(nplike),
                     offsets_length[0],
                     parents.to(nplike),
-                    len(parents),
+                    parents_length,
                 )
             )
 
-            out = ak._v2.contents.NumpyArray(
-                self.nplike.empty(len(self._data), self.dtype)
-            )
+            out = ak._v2.contents.NumpyArray(nplike.empty(len(self._data), self.dtype))
             self._handle_error(
                 nplike[
                     "awkward_sort",
@@ -472,8 +474,8 @@ class NumpyArray(Content):
                     self._data,
                     self.shape[0],
                     offsets.to(nplike),
-                    len(offsets),
-                    len(parents),
+                    offsets_length[0],
+                    parents_length,
                     ascending,
                     stable,
                 )
