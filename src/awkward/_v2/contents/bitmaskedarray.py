@@ -113,6 +113,18 @@ class BitMaskedArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return BitMaskedArray(
+            ak._v2.index.Index(self._mask.to(ak._v2._typetracer.instance())),
+            self._content.typetracer,
+            self._valid_when,
+            self._length,
+            self._lsb_order,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return self._length
 

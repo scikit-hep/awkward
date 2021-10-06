@@ -142,6 +142,16 @@ class RecordArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return RecordArray(
+            [x.typetracer for x in self._contents],
+            self._keys,
+            self._length,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return self._length
 

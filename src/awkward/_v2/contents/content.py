@@ -450,6 +450,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         else:
             return None
 
+    def _typetracer_identifier(self):
+        if self._identifier is None:
+            return None
+        else:
+            raise NotImplementedError
+
     def _range_identifier(self, start, stop):
         if self._identifier is None:
             return None

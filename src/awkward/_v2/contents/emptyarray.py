@@ -40,6 +40,10 @@ class EmptyArray(Content):
         )
 
     @property
+    def typetracer(self):
+        return EmptyArray(self._typetracer_identifier(), self._parameters)
+
+    @property
     def nplike(self):
         return ak.nplike.Numpy.instance()
 

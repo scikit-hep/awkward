@@ -67,6 +67,16 @@ class RegularArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return RegularArray(
+            self._content.typetracer,
+            self._size,
+            self._zeros_length,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return self._length
 

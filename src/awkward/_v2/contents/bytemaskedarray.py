@@ -78,6 +78,16 @@ class ByteMaskedArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return ByteMaskedArray(
+            ak._v2.index.Index(self._mask.to(ak._v2._typetracer.instance())),
+            self._content.typetracer,
+            self._valid_when,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._mask)
 

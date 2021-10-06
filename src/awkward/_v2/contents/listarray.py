@@ -79,6 +79,16 @@ class ListArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return ListArray(
+            ak._v2.index.Index(self._starts.to(ak._v2._typetracer.instance())),
+            ak._v2.index.Index(self._stops.to(ak._v2._typetracer.instance())),
+            self._content.typetracer,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._starts)
 

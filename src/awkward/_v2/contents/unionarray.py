@@ -99,6 +99,16 @@ class UnionArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return UnionArray(
+            ak._v2.index.Index(self._tags.to(ak._v2._typetracer.instance())),
+            ak._v2.index.Index(self._index.to(ak._v2._typetracer.instance())),
+            [x.typetracer for x in self._contents],
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._tags)
 

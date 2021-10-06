@@ -44,6 +44,14 @@ class UnmaskedArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return UnmaskedArray(
+            self._content.typetracer,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._content)
 

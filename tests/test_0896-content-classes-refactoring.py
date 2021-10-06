@@ -13,10 +13,12 @@ pytestmark = pytest.mark.skipif(
 
 def test_EmptyArray():
     a = ak._v2.contents.emptyarray.EmptyArray()
+    assert a.typetracer.form == a.form
     assert len(a) == 0
     with pytest.raises(IndexError):
         a[0]
     assert isinstance(a[10:20], ak._v2.contents.emptyarray.EmptyArray)
+    assert a.typetracer[10:20].form == a[10:20].form
     assert len(a[10:20]) == 0
     with pytest.raises(IndexError):
         a["bad"]
