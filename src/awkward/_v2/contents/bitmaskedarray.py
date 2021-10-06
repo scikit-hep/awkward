@@ -276,6 +276,14 @@ class BitMaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def shallow_copy(self):
+        return self
+
+    def _mergemany(self, others):
+        if others.empty():
+            return self.shallow_copy()
+        return self.toIndexedOptionArray64()._mergemany(others)
+
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
 

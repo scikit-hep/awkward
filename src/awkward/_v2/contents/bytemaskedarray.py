@@ -302,6 +302,14 @@ class ByteMaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def shallow_copy(self):
+        return self
+
+    def _mergemany(self, others):
+        if others.empty():
+            return self.shallow_copy()
+        return self.toIndexedOptionArray64()._mergemany(others)
+
     def _localindex(self, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:

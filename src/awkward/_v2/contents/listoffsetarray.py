@@ -445,6 +445,14 @@ class ListOffsetArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def _mergemany(self, others):
+        if len(others) == 0:
+            return self.shallow_copy()
+        listarray = ak._v2.contents.listarray.ListArray(
+            self.starts, self.stops, self.content, None, self.parameters
+        )
+        return listarray._mergemany(others)
+
     def _localindex(self, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:

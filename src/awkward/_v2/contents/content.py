@@ -491,6 +491,39 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
         return ak._v2.contents.NumpyArray(localindex)
 
+    # FIXME for indexedarray
+    def _merging_strategy(self, others):
+        if len(others) == 0:
+            raise ValueError(
+                "to merge this array with 'others', at least one other must be provided"
+            )
+
+        head = [self.shallow_copy()]
+        tail = []
+
+        for i in range(len(others)):
+            other = others[i]
+            if isinstance(
+                other,
+                (
+                    ak._v2.contents.indexedarray.IndexedArray,
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                    ak._v2.contents.unmaskedarray.UnmaskedArray,
+                    ak._v2.contents.unionarray.UnionArray,
+                ),
+            ):
+                break
+            # elif isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            #     head.append(other.array)
+            else:
+                head.append(other)
+
+        tail.extend(others)
+
+        return (head, tail)
+
     def localindex(self, axis):
         return self._localindex(axis, 0)
 
