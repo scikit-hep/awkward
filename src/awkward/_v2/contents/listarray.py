@@ -81,9 +81,10 @@ class ListArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return ListArray(
-            ak._v2.index.Index(self._starts.to(ak._v2._typetracer.instance())),
-            ak._v2.index.Index(self._stops.to(ak._v2._typetracer.instance())),
+            ak._v2.index.Index(self._starts.to(tt)),
+            ak._v2.index.Index(self._stops.to(tt)),
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,

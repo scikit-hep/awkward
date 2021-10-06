@@ -84,10 +84,10 @@ class NumpyArray(Content):
     @property
     def typetracer(self):
         return NumpyArray(
-            self._data.to(ak._v2._typetracer.instance()),
+            self.to(ak._v2._typetracer.TypeTracer.instance()),
             self._typetracer_identifier(),
             self._parameters,
-            nplike=ak._v2._typetracer.instance(),
+            nplike=ak._v2._typetracer.TypeTracer.instance(),
         )
 
     def __len__(self):

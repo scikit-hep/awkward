@@ -66,8 +66,9 @@ class IndexedOptionArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return IndexedOptionArray(
-            ak._v2.index.Index(self._index.to(ak._v2._typetracer.instance())),
+            ak._v2.index.Index(self._index.to(tt)),
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,

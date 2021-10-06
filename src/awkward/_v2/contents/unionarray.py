@@ -101,9 +101,10 @@ class UnionArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return UnionArray(
-            ak._v2.index.Index(self._tags.to(ak._v2._typetracer.instance())),
-            ak._v2.index.Index(self._index.to(ak._v2._typetracer.instance())),
+            ak._v2.index.Index(self._tags.to(tt)),
+            ak._v2.index.Index(self._index.to(tt)),
             [x.typetracer for x in self._contents],
             self._typetracer_identifier(),
             self._parameters,

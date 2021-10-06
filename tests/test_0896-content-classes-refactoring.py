@@ -30,6 +30,7 @@ def test_NumpyArray():
     a = ak._v2.contents.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
     )
+    assert a.typetracer.form == a.form
     assert len(a) == 4
     assert a[2] == 2.2
     assert a[-2] == 2.2

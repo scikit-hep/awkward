@@ -77,8 +77,9 @@ class ListOffsetArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return ListOffsetArray(
-            ak._v2.index.Index(self._offsets.to(ak._v2._typetracer.instance())),
+            ak._v2.index.Index(self._offsets.to(tt)),
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,

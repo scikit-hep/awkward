@@ -81,7 +81,7 @@ class ByteMaskedArray(Content):
     @property
     def typetracer(self):
         return ByteMaskedArray(
-            ak._v2.index.Index(self._mask.to(ak._v2._typetracer.instance())),
+            ak._v2.index.Index(self._mask.to(ak._v2._typetracer.TypeTracer.instance())),
             self._content.typetracer,
             self._valid_when,
             self._typetracer_identifier(),
