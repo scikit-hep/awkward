@@ -171,7 +171,9 @@ class TypeTracerArray(object):
                 length2 = max(0, stop - start)
             else:
                 if where.start is not None and where.stop is not None:
-                    start, stop, _ = where.indices(max(abs(where.start), abs(where.stop)))
+                    start, stop, _ = where.indices(
+                        max(abs(where.start), abs(where.stop))
+                    )
                     length2 = max(0, stop - start)
                 elif where.stop is not None:
                     start, stop, _ = where.indices(abs(where.stop))
