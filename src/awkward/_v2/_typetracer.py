@@ -110,10 +110,18 @@ class TypeTracerArray(object):
     def __init__(self, dtype, shape=None, fill=0):
         if shape is None:
             shape = (Interval.unknown(),)
-        elif isinstance(shape, (numbers.Integral, Interval)):
+        elif isinstance(shape, Interval):
             shape = (shape,)
-        elif not isinstance(shape, tuple):
-            shape = tuple(shape)
+        elif isinstance(shape, numbers.Integral):
+            shape = (Interval.exact(shape),)
+        else:
+            if len(shape) == 0:
+                shape = ()
+            elif isinstance(shape[0], Interval):
+                if not isinstance(shape, tuple):
+                    shape = tuple(shape)
+            elif isinstance(shape[0], numbers.Integral):
+                shape = (Interval.exact(shape[0]),) + tuple(shape[1:])
 
         self._dtype = np.dtype(dtype)
         self._shape = shape
@@ -246,9 +254,9 @@ class TypeTracer(ak.nplike.NumpyLike):
         # shape/len[, dtype=]
         raise NotImplementedError
 
-    def empty(self, *args, **kwargs):
+    def empty(self, shape, dtype=np.float64, **kwargs):
         # shape/len[, dtype=]
-        raise NotImplementedError
+        return TypeTracerArray(dtype, shape)
 
     def full(self, *args, **kwargs):
         # shape/len, value[, dtype=]

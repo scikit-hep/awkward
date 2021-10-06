@@ -303,6 +303,8 @@ def test_IndexedArray_NumpyArray():
         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
+    assert a.typetracer.form == a.form
+    assert a.typetracer.form.type == a.form.type
     assert len(a) == 7
     assert a[0] == 3.3
     assert a[1] == 3.3
@@ -323,6 +325,7 @@ def test_IndexedArray_NumpyArray():
     with pytest.raises(IndexError):
         a[-8]
     assert isinstance(a[3:], ak._v2.contents.indexedarray.IndexedArray)
+    assert a.typetracer[3:].form == a[3:].form
     assert len(a[3:]) == 4
     assert len(a[-4:]) == 4
     assert len(a[3:100]) == 4
@@ -341,6 +344,8 @@ def test_IndexedOptionArray_NumpyArray():
         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
+    assert a.typetracer.form == a.form
+    assert a.typetracer.form.type == a.form.type
     assert len(a) == 7
     assert a[0] == 3.3
     assert a[1] == 3.3
@@ -361,6 +366,7 @@ def test_IndexedOptionArray_NumpyArray():
     with pytest.raises(IndexError):
         a[-8]
     assert isinstance(a[3:], ak._v2.contents.indexedoptionarray.IndexedOptionArray)
+    assert a.typetracer[3:].form == a[3:].form
     assert len(a[3:]) == 4
     assert len(a[-4:]) == 4
     assert len(a[3:100]) == 4
@@ -382,6 +388,8 @@ def test_ByteMaskedArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
+    assert a.typetracer.form == a.form
+    assert a.typetracer.form.type == a.form.type
     assert len(a) == 5
     with pytest.raises(IndexError):
         a[5]
@@ -398,6 +406,7 @@ def test_ByteMaskedArray_NumpyArray():
     assert a[-2] is None
     assert a[-1] == 5.5
     assert isinstance(a[2:], ak._v2.contents.bytemaskedarray.ByteMaskedArray)
+    assert a.typetracer[2:].form == a[2:].form
     assert len(a[2:]) == 3
     assert len(a[-3:]) == 3
     assert len(a[2:100]) == 3
@@ -417,6 +426,8 @@ def test_ByteMaskedArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
+    assert b.typetracer.form == b.form
+    assert b.typetracer.form.type == b.form.type
     assert len(b) == 5
     with pytest.raises(IndexError):
         b[5]
@@ -433,6 +444,7 @@ def test_ByteMaskedArray_NumpyArray():
     assert b[-2] is None
     assert b[-1] == 5.5
     assert isinstance(b[2:], ak._v2.contents.bytemaskedarray.ByteMaskedArray)
+    assert b.typetracer[2:].form == b[2:].form
     assert len(b[2:]) == 3
     assert len(b[-3:]) == 3
     assert len(b[2:100]) == 3
@@ -481,6 +493,8 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
+    assert a.typetracer.form == a.form
+    assert a.typetracer.form.type == a.form.type
     assert len(a) == 13
     with pytest.raises(IndexError):
         a[13]
@@ -513,6 +527,7 @@ def test_BitMaskedArray_NumpyArray():
     assert a[-2] is None
     assert a[-1] == 5.5
     assert isinstance(a[5:], ak._v2.contents.bytemaskedarray.ByteMaskedArray)
+    assert a.typetracer[5:].form == a[5:].form
     assert len(a[5:]) == 8
     assert len(a[-8:]) == 8
     assert len(a[5:100]) == 8
@@ -557,6 +572,8 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
+    assert b.typetracer.form == b.form
+    assert b.typetracer.form.type == b.form.type
     assert len(b) == 13
     with pytest.raises(IndexError):
         b[13]
@@ -589,6 +606,7 @@ def test_BitMaskedArray_NumpyArray():
     assert b[-2] is None
     assert b[-1] == 5.5
     assert isinstance(b[5:], ak._v2.contents.bytemaskedarray.ByteMaskedArray)
+    assert b.typetracer[5:].form == b[5:].form
     assert len(b[5:]) == 8
     assert len(b[-8:]) == 8
     assert len(b[5:100]) == 8
@@ -636,6 +654,8 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
+    assert c.typetracer.form == c.form
+    assert c.typetracer.form.type == c.form.type
     assert len(c) == 13
     with pytest.raises(IndexError):
         c[13]
@@ -668,6 +688,7 @@ def test_BitMaskedArray_NumpyArray():
     assert c[-2] is None
     assert c[-1] == 5.5
     assert isinstance(c[5:], ak._v2.contents.bytemaskedarray.ByteMaskedArray)
+    assert c.typetracer[5:].form == c[5:].form
     assert len(c[5:]) == 8
     assert len(c[-8:]) == 8
     assert len(c[5:100]) == 8
@@ -715,6 +736,8 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
+    assert d.typetracer.form == d.form
+    assert d.typetracer.form.type == d.form.type
     assert len(d) == 13
     with pytest.raises(IndexError):
         d[13]
@@ -747,6 +770,7 @@ def test_BitMaskedArray_NumpyArray():
     assert d[-2] is None
     assert d[-1] == 5.5
     assert isinstance(d[5:], ak._v2.contents.bytemaskedarray.ByteMaskedArray)
+    assert d.typetracer[5:].form == d[5:].form
     assert len(d[5:]) == 8
     assert len(d[-8:]) == 8
     assert len(d[5:100]) == 8
