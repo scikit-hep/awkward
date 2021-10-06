@@ -35,11 +35,13 @@ def test_NumpyArray():
     assert a[2] == 2.2
     assert a[-2] == 2.2
     assert type(a[2]) is np.float64
+    assert type(a.typetracer[2]) is np.float64
     with pytest.raises(IndexError):
         a[4]
     with pytest.raises(IndexError):
         a[-5]
     assert isinstance(a[2:], ak._v2.contents.numpyarray.NumpyArray)
+    assert a.typetracer[2:].form == a[2:].form
     assert a[2:][0] == 2.2
     assert len(a[2:]) == 2
     with pytest.raises(IndexError):

@@ -110,7 +110,7 @@ class TypeTracerArray(object):
     def __init__(self, dtype, shape=None, fill=0):
         if shape is None:
             shape = (Interval.unknown(),)
-        elif isinstance(shape, numbers.Integral):
+        elif isinstance(shape, (numbers.Integral, Interval)):
             shape = (shape,)
         elif not isinstance(shape, tuple):
             shape = tuple(shape)
@@ -156,10 +156,35 @@ class TypeTracerArray(object):
         return self._shape[0]
 
     def __getitem__(self, where):
-        if len(self._shape) == 1:
-            return self._dtype.type(self._fill)
+        if isinstance(where, numbers.Integral):
+            if len(self._shape) == 1:
+                return self._dtype.type(self._fill)
+            else:
+                return numpy.full(self._shape[1:], self._fill, dtype=self._dtype)
+
+        elif isinstance(where, slice) and (where.step is None or where.step == 1):
+            start, stop, _ = where.indices(self._shape[0].min)
+            length1 = max(0, stop - start)
+
+            if self._shape[0].max is not None:
+                start, stop, _ = where.indices(self._shape[0].max)
+                length2 = max(0, stop - start)
+            else:
+                if where.start is not None and where.stop is not None:
+                    start, stop, _ = where.indices(max(abs(where.start), abs(where.stop)))
+                    length2 = max(0, stop - start)
+                elif where.stop is not None:
+                    start, stop, _ = where.indices(abs(where.stop))
+                    length2 = max(0, stop - start)
+                else:
+                    length2 = None
+
+            shape = (Interval(length1, length2),) + self._shape[1:]
+
+            return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
+
         else:
-            return numpy.full(self._shape[1:], self._fill, dtype=self._dtype)
+            raise NotImplementedError(repr(where))
 
 
 unset = object()
