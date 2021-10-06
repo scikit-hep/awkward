@@ -126,7 +126,7 @@ class RecordType(Type):
                 if set(self._keys) != set(other._keys):
                     return False
                 for key in self._keys:
-                    if self._contents[key] != other._contents[key]:
+                    if self.content(key) != other.content(key):
                         return False
                 else:
                     return True
@@ -136,3 +136,15 @@ class RecordType(Type):
 
         else:
             return False
+
+    def index_to_key(self, index):
+        return ak._v2.forms.recordform.RecordForm.index_to_key(self, index)
+
+    def key_to_index(self, key):
+        return ak._v2.forms.recordform.RecordForm.key_to_index(self, key)
+
+    def haskey(self, key):
+        return ak._v2.forms.recordform.RecordForm.haskey(self, key)
+
+    def content(self, index_or_key):
+        return ak._v2.forms.recordform.RecordForm.content(self, index_or_key)

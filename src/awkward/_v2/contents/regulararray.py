@@ -72,7 +72,7 @@ class RegularArray(Content):
         return RegularArray(
             self._content.typetracer,
             self._size,
-            self._zeros_length,
+            self._length,
             self._typetracer_identifier(),
             self._parameters,
         )
