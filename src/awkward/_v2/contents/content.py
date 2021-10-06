@@ -1150,8 +1150,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return ak._v2.contents.unionarray.UnionArray(
                 tags, index, contents, self._identifier, self._contents
             )
-          
+
     @property
     def dimension_optiontype(self):
         return self.Form.dimension_optiontype.__get__(self)
-
