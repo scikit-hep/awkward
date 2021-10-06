@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 from awkward._v2.contents.content import NestedIndexError
 from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
@@ -16,6 +17,12 @@ class EmptyForm(Form):
 
     def _tolist_part(self, verbose, toplevel):
         return self._tolist_extra({"class": "EmptyArray"}, verbose)
+
+    def _type(self, typestrs):
+        return ak._v2.types.unknowntype.UnknownType(
+            self._parameters,
+            ak._util.gettypestr(self._parameters, typestrs),
+        )
 
     def __eq__(self, other):
         return (

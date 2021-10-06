@@ -86,6 +86,13 @@ class BitMaskedForm(Form):
             verbose,
         )
 
+    def _type(self, typestrs):
+        return ak._v2.types.optiontype.OptionType(
+            self._content._type(typestrs),
+            self._parameters,
+            ak._util.gettypestr(self._parameters, typestrs),
+        )
+
     def __eq__(self, other):
         if isinstance(other, BitMaskedForm):
             return (

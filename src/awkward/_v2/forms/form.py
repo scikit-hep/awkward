@@ -285,6 +285,10 @@ class Form(object):
             out.append("form_key=" + repr(self._form_key))
         return out
 
+    @property
+    def type(self):
+        return self._type({})
+
     def simplify_optiontype(self):
         return self
 

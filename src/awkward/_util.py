@@ -348,6 +348,21 @@ def typestrs(behavior):
     return out
 
 
+def gettypestr(parameters, typestrs):
+    if parameters is not None:
+        record = parameters.get("__record__")
+        if record is not None:
+            typestr = typestrs.get(record)
+            if typestr is not None:
+                return typestr
+        array = parameters.get("__array__")
+        if array is not None:
+            typestr = typestrs.get(array)
+            if typestr is not None:
+                return typestr
+    return None
+
+
 def numba_record_typer(layouttype, behavior):
     behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")

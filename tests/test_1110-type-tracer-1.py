@@ -19,3 +19,9 @@ def test_getitem_at():
     assert abstract[0].shape == (Interval.exact(3), 5)
     assert abstract[0][0].shape == (Interval.exact(5),)
     assert abstract[0][0][0] == 0
+
+    assert abstract.form == concrete.form
+    assert abstract.form.type == concrete.form.type
+
+    assert abstract[0].form == concrete[0].form
+    assert abstract[0].form.type == concrete[0].form.type
