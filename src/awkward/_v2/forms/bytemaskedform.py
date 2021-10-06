@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class ByteMaskedForm(Form):
@@ -71,6 +71,76 @@ class ByteMaskedForm(Form):
             verbose,
         )
 
+    def __eq__(self, other):
+        if isinstance(other, ByteMaskedForm):
+            return (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and self._mask == other._mask
+                and self._valid_when == other._valid_when
+                and _parameters_equal(self._parameters, other._parameters)
+                and self._content == other._content
+            )
+        else:
+            return False
+
+    def generated_compatibility(self, other):
+        other = nonvirtual(other)
+
+        if other is None:
+            return True
+
+        elif isinstance(other, ByteMaskedForm):
+            return (
+                self._mask == other._mask
+                and self._valid_when == other._valid_when
+                and _parameters_equal(self._parameters, other._parameters)
+                and self._content.generated_compatibility(other._content)
+            )
+
+        else:
+            return False
+
+    def _getitem_range(self):
+        return ByteMaskedForm(
+            self._mask,
+            self._content._getitem_range(),
+            self._valid_when,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        return ByteMaskedForm(
+            self._mask,
+            self._content._getitem_field(where, only_fields),
+            self._valid_when,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _getitem_fields(self, where, only_fields=()):
+        return ByteMaskedForm(
+            self._mask,
+            self._content._getitem_fields(where, only_fields),
+            self._valid_when,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _carry(self, allow_lazy):
+        return ByteMaskedForm(
+            self._mask,
+            self._content._carry(allow_lazy),
+            self._valid_when,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
     @property
     def purelist_isregular(self):
         return self._content.purelist_isregular
@@ -90,3 +160,7 @@ class ByteMaskedForm(Form):
     @property
     def keys(self):
         return self._content.keys
+
+    @property
+    def dimension_optiontype(self):
+        return True

@@ -188,14 +188,19 @@ def by_signature(lib):
                 arglist = [
                     type_to_pytype(x["type"], special) for x in childfunc["args"]
                 ]
+                dirlist = [repr(x["dir"]) for x in childfunc["args"]]
                 file.write(
                     """
     f = lib.{0}
     f.argtypes = [{1}]
     f.restype = ERROR
-    out[{2}] = f
+    f.dir = [{2}]
+    out[{3}] = f
 """.format(
-                        childfunc["name"], ", ".join(arglist), ", ".join(special)
+                        childfunc["name"],
+                        ", ".join(arglist),
+                        ", ".join(dirlist),
+                        ", ".join(special),
                     )
                 )
 

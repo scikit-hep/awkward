@@ -9,7 +9,6 @@ from awkward._v2.contents.content import Content
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
 
-
 np = ak.nplike.NumpyMetadata.instance()
 
 
@@ -63,6 +62,10 @@ class ListArray(Content):
     def nplike(self):
         return self._starts.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._starts.nplike
+
     Form = ListForm
 
     @property
@@ -85,18 +88,23 @@ class ListArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._starts._repr(indent + "    ", "<starts>", "</starts>\n"))
         out.append(self._stops._repr(indent + "    ", "<stops>", "</stops>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</ListArray>")
+        out.append(indent + "</ListArray>")
         out.append(post)
         return "".join(out)
 
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
+
+    def toRegularArray(self):
+        offsets = self._compact_offsets64(True)
+        return self._broadcast_tooffsets64(offsets).toRegularArray()
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -376,7 +384,7 @@ class ListArray(Content):
             )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
+        nplike = self.nplike
 
         if head == ():
             return self
@@ -786,7 +794,106 @@ class ListArray(Content):
                 self._parameters,
             )
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._starts) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        next = self.toListOffsetArray64(True)
+        out = next._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+        return out
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if len(self._starts) == 0:
+            return self
+
+        return self.toListOffsetArray64(True)._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ListOffsetArray._combinations(
             self, n, replacement, recordlookup, parameters, axis, depth
         )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        return self.toListOffsetArray64(True)._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+    def _validityerror(self, path):
+        if len(self.stops) < len(self.starts):
+            return 'at {0} ("{1}"): len(stops) < len(starts)'.format(path, type(self))
+        error = self.nplike[
+            "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
+        ](
+            self.starts.to(self.nplike),
+            self.stops.to(self.nplike),
+            len(self.starts),
+            len(self.content),
+        )
+        if error.str is not None:
+            if error.filename is None:
+                filename = ""
+            else:
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
+            message = error.str.decode(errors="surrogateescape")
+            return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+                path, type(self), message, error.id, filename
+            )
+        else:
+            if (
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
+            ):
+                return ""
+            else:
+                return self.content.validityerror(path + ".content")

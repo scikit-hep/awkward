@@ -51,6 +51,10 @@ class RegularArray(Content):
     def nplike(self):
         return self._content.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._content.nonvirtual_nplike
+
     Form = RegularForm
 
     @property
@@ -70,20 +74,24 @@ class RegularArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<RegularArray len="]
-        out.append(repr(str(len(self))))
-        out.append(" size=")
+        out = [indent, pre, "<RegularArray size="]
         out.append(repr(str(self._size)))
-        out.append(">\n")
+        out.append(" len=")
+        out.append(repr(str(len(self))))
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</RegularArray>")
+        out.append(indent + "</RegularArray>")
         out.append(post)
         return "".join(out)
 
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
+
+    def toRegularArray(self):
+        return self
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -247,17 +255,17 @@ class RegularArray(Content):
             return out.reshape((len(self), -1) + out.shape[1:])
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike
-
         if head == ():
             return self
 
         elif isinstance(head, int):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            nextcarry = ak._v2.index.Index64.empty(self._length, nplike)
+            nextcarry = ak._v2.index.Index64.empty(self._length, self.nplike)
             self._handle_error(
-                nplike["awkward_RegularArray_getitem_next_at", nextcarry.dtype.type](
-                    nextcarry.to(nplike),
+                self.nplike[
+                    "awkward_RegularArray_getitem_next_at", nextcarry.dtype.type
+                ](
+                    nextcarry.to(self.nplike),
                     head,
                     self._length,
                     self._size,
@@ -283,13 +291,13 @@ class RegularArray(Content):
                 if diff % step != 0:
                     nextsize += 1
 
-            nextcarry = ak._v2.index.Index64.empty(self._length * nextsize, nplike)
+            nextcarry = ak._v2.index.Index64.empty(self._length * nextsize, self.nplike)
             self._handle_error(
-                nplike[
+                self.nplike[
                     "awkward_RegularArray_getitem_next_range",
                     nextcarry.dtype.type,
                 ](
-                    nextcarry.to(nplike),
+                    nextcarry.to(self.nplike),
                     start,
                     step,
                     self._length,
@@ -298,6 +306,7 @@ class RegularArray(Content):
                 ),
                 head,
             )
+
             nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
 
             if advanced is None or len(advanced) == 0:
@@ -309,6 +318,7 @@ class RegularArray(Content):
                     self._parameters,
                 )
             else:
+                nplike = ak.nplike.of(advanced)
                 nextadvanced = ak._v2.index.Index64.empty(
                     self._length * nextsize, nplike
                 )
@@ -346,6 +356,8 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
+            nplike = head.nplike
+
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
 
@@ -428,6 +440,8 @@ class RegularArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            nplike = head.nplike
+
             if advanced is not None:
                 raise NestedIndexError(
                     self,
@@ -512,14 +526,84 @@ class RegularArray(Content):
                 self._parameters,
             )
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if self._length == 0:
+            return ak._v2.contents.NumpyArray(np.empty(0, np.int64))
+
+        next = self.toListOffsetArray64(True)
+        out = next._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+        if isinstance(out, ak._v2.contents.RegularArray):
+            if isinstance(out._content, ak._v2.contents.ListOffsetArray):
+                return ak._v2.contents.RegularArray(
+                    out._content.toRegularArray(),
+                    out._size,
+                    out._length,
+                    None,
+                    out._parameters,
+                )
+
+        return out
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if self._length == 0:
+            return self
+
+        out = self.toListOffsetArray64(True)._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+        # FIXME
+        # if isinstance(out, ak._v2.contents.RegularArray):
+        #     if isinstance(out._content, ak._v2.contents.ListOffsetArray):
+        #         return ak._v2.contents.RegularArray(
+        #             out._content.toRegularArray(),
+        #             out._size,
+        #             out._length,
+        #             None,
+        #             out._parameters,
+        #         )
+
+        return out
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis == depth + 1:
             if (
-                self.parameter("__array__") == '"string"'
-                or self.parameter("__array__") == '"bytestring"'
+                self.parameter("__array__") == "string"
+                or self.parameter("__array__") == "bytestring"
             ):
                 raise ValueError(
                     "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
@@ -592,3 +676,85 @@ class RegularArray(Content):
             return ak._v2.contents.regulararray.RegularArray(
                 next, self._size, len(self), self._identifier, self._parameters
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        out = self.toListOffsetArray64(True)._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+        if not self._content.dimension_optiontype:
+            branch, depth = self._content.branch_depth
+            convert_shallow = negaxis == depth
+            convert_deep = negaxis + 2 == depth
+
+            if keepdims:
+                convert_shallow = False
+                convert_deep = True
+
+            if convert_deep:
+                if isinstance(out, ak._v2.contents.ListOffsetArray):
+                    if isinstance(out.content, ak._v2.contents.ListOffsetArray):
+                        out = ak._v2.contents.ListOffsetArray(
+                            out.offsets,
+                            out.content.toRegularArray(),
+                            out.identifier,
+                            out.parameters,
+                        )
+                    elif isinstance(out.content, ak._v2.contents.ListArray):
+                        out = ak._v2.contents.ListOffsetArray(
+                            out.offsets,
+                            out.content.toRegularArray(),
+                            out.identifier,
+                            out.parameters,
+                        )
+                elif isinstance(out, ak._v2.contents.ListArray):
+                    if isinstance(out.content, ak._v2.contents.ListOffsetArray):
+                        out = ak._v2.contents.ListOffsetArray(
+                            out.offsets,
+                            out.content.toRegularArray(),
+                            out.identifier,
+                            out.parameters,
+                        )
+                    elif isinstance(out.content, ak._v2.contents.ListArray):
+                        out = ak._v2.contents.ListOffsetArray(
+                            out.offsets,
+                            out.content.toRegularArray(),
+                            out.identifier,
+                            out.parameters,
+                        )
+
+            if convert_shallow:
+                if isinstance(out, ak._v2.contents.ListOffsetArray):
+                    out = out.toRegularArray()
+                elif isinstance(out, ak._v2.contents.ListArray):
+                    out = out.toRegularArray()
+
+        return out
+
+    def _validityerror(self, path):
+        if self.size < 0:
+            return 'at {0} ("{1}"): size < 0'.format(path, type(self))
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            return ""
+        else:
+            return self.content.validityerror(path + ".content")

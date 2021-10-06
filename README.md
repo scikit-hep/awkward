@@ -206,11 +206,10 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 | [1.2.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.2.0) | 2021-04-01 | _(none)_ |
 | [1.3.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.3.0) | 2021-06-01 | _(none)_ |
 | [1.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.4.0) | 2021-07-02 | _(none)_ |
+| [1.5.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.5.0) | 2021-09-12 | _(none)_ |
 
 | Version number | Target date | Deprecated features to remove in this version |
 |:--------------:|:-----------:|:----------------------------------------------|
-| 1.5.0 | 2021-08-01 | |
-| 1.6.0 | 2021-09-01 | |
 | 1.7.0 | 2021-10-01 | [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) default `axis` will be `-1`. Until then, all uses without an explicit `axis` raise warnings. |
 | 1.8.0 | 2021-11-01 | |
 | 1.9.0 | 2021-12-01 | |
@@ -236,10 +235,12 @@ See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-
    * [Demo for Electron Ion Collider users](https://github.com/jpivarski/2020-04-08-eic-jlab#readme) ([video](https://www.youtube.com/watch?v=FoxNS6nlbD0)) on April 8, 2020.
    * [Presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) (video) on July 5, 2020.
    * [Tutorial at PyHEP 2020](https://youtu.be/ea-zYLQBS4U) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski/2020-07-13-pyhep2020-tutorial.git/1.1?urlpath=lab/tree/tutorial.ipynb)) on July 13, 2020.
+   * [Tutorial at PyHEP 2021](https://youtu.be/5aWAxvdrszw?t=9189) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski-talks/2021-07-06-pyhep-uproot-awkward-tutorial/v1.2?urlpath=lab/tree/uproot-awkward-tutorial.ipynb) on July 6, 2021.
+   * [Tutorial for STAR collaboration meeting](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme) on September 13, 2021. This is the first tutorial with extensive exercises to test your understanding.
 
 # Acknowledgements
 
-Support for this work was provided by NSF cooperative agreement OAC-1836650 (IRIS-HEP), grant OAC-1450377 (DIANA/HEP) and PHY-1520942 (US-CMS LHC Ops).
+Support for this work was provided by NSF cooperative agreement [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) (IRIS-HEP), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-1520942](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).
 
 We also thank [Erez Shinan](https://github.com/erezsh) and the developers of the [Lark standalone parser](https://github.com/lark-parser/lark), which is used to parse type strings as type objects.
 
@@ -283,6 +284,11 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <td align="center"><a href="https://github.com/HenryDayHall"><img src="https://avatars.githubusercontent.com/u/12996763?v=4?s=100" width="100px;" alt=""/><br /><sub><b>HenryDayHall</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=HenryDayHall" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/agoose77"><img src="https://avatars.githubusercontent.com/u/1248413?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Angus Hollands</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=agoose77" title="Tests">⚠️</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=agoose77" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ioanaif"><img src="https://avatars.githubusercontent.com/u/9751871?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ioanaif</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ioanaif" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=ioanaif" title="Tests">⚠️</a></td>
+    <td align="center"><a href="http://lizards.opensuse.org/author/bmwiedemann/"><img src="https://avatars.githubusercontent.com/u/637990?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bernhard M. Wiedemann</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=bmwiedemann" title="Maintenance">🚧</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="http://www.matthewfeickert.com/"><img src="https://avatars.githubusercontent.com/u/5142394?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matthew Feickert</b></sub></a><br /><a href="#maintenance-matthewfeickert" title="Maintenance">🚧</a></td>
+    <td align="center"><a href="https://github.com/SantamRC"><img src="https://avatars.githubusercontent.com/u/52635773?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Santam Roy Choudhury</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=SantamRC" title="Tests">⚠️</a></td>
   </tr>
 </table>
 
@@ -291,4 +297,4 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-💻: code, 📖: documentation, 🚇: infrastructure, 🚧: maintainance, ⚠: tests and feedback, 🤔: foundational ideas.
+💻: code, 📖: documentation, 🚇: infrastructure, 🚧: maintenance, ⚠: tests and feedback, 🤔: foundational ideas.

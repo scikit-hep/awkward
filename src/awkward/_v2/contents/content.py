@@ -8,6 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
+import awkward._v2._reducers
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
 
@@ -16,9 +17,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class Content(object):
     def _init(self, identifier, parameters):
-        if parameters is None:
-            parameters = {}
-
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
         ):
@@ -27,10 +25,10 @@ class Content(object):
                     type(self).__name__, repr(identifier)
                 )
             )
-        if not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be a dict or None, not {1}".format(
-                    type(self).__name__, repr(identifier)
+                    type(self).__name__, repr(parameters)
                 )
             )
 
@@ -43,6 +41,8 @@ class Content(object):
 
     @property
     def parameters(self):
+        if self._parameters is None:
+            self._parameters = {}
         return self._parameters
 
     def parameter(self, key):
@@ -51,10 +51,23 @@ class Content(object):
         else:
             return self._parameters.get(key)
 
-    def _simplify_uniontype(self):
-        return self
+    def _repr_extra(self, indent):
+        out = []
+        if self._parameters is not None:
+            for k, v in self._parameters.items():
+                out.append(
+                    "\n{0}<parameter name={1}>{2}</parameter>".format(
+                        indent, repr(k), repr(v)
+                    )
+                )
+        if self._identifier is not None:
+            out.append(self._identifier._repr("\n" + indent, "", ""))
+        return out
 
     def _simplify_optiontype(self):
+        return self
+
+    def _simplify_uniontype(self):
         return self
 
     def maybe_to_nplike(self, nplike):
@@ -141,9 +154,9 @@ class Content(object):
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        nplike = self.nplike
+        nplike = head.nplike
 
-        index = ak._v2.index.Index64(head._index)
+        index = ak._v2.index.Index64(head.index)
         outindex = ak._v2.index.Index64.empty(len(index) * length, nplike)
 
         self._handle_error(
@@ -165,7 +178,7 @@ class Content(object):
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
-        nplike = self.nplike
+        nplike = head.nplike
         jagged = head.content.toListOffsetArray64()
 
         index = ak._v2.index.Index64(head._index)
@@ -289,9 +302,9 @@ class Content(object):
                 if len(where) == 0:
                     return self
 
+                items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
                 nextwhere = ak._v2._slicing.getitem_broadcast(
-                    [ak._v2._slicing.prepare_tuple_item(x) for x in where],
-                    self.nplike,
+                    items, ak.nplike.of(*items)
                 )
 
                 next = ak._v2.contents.RegularArray(self, len(self), 1, None, None)
@@ -321,11 +334,11 @@ class Content(object):
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 elif issubclass(where.dtype.type, (np.bool_, bool)):
                     if len(where.data.shape) == 1:
-                        where = self.nplike.nonzero(where.data)[0]
+                        where = where.nplike.nonzero(where.data)[0]
                         carry = ak._v2.index.Index64(where)
                         allow_lazy = "copied"  # True, but also can be modified in-place
                     else:
-                        wheres = self.nplike.nonzero(where.data)
+                        wheres = where.nplike.nonzero(where.data)
                         return self.__getitem__(wheres)
                 else:
                     raise TypeError(
@@ -464,9 +477,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def _axis_wrap_if_negative(self, axis):
         if axis >= 0:
             return axis
-        minmax = self.minmax_depth
-        mindepth = minmax[0]
-        maxdepth = minmax[1]
+        mindepth, maxdepth = self.minmax_depth
         depth = self.purelist_depth
         if mindepth == depth and maxdepth == depth:
             posaxis = depth + axis
@@ -527,6 +538,163 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def localindex(self, axis):
         return self._localindex(axis, 0)
 
+    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
+        if axis is None:
+            raise NotImplementedError
+
+        negaxis = -axis
+        branch, depth = self.branch_depth
+
+        if branch:
+            if negaxis <= 0:
+                raise ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves of "
+                    "the tree; non-negative from the root)"
+                )
+            if negaxis > depth:
+                raise ValueError(
+                    "cannot use axis={0} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={1} "
+                    "from the leaves".format(axis, depth)
+                )
+        else:
+            if negaxis <= 0:
+                negaxis += depth
+            if not (0 < negaxis and negaxis <= depth):
+                raise ValueError(
+                    "axis={0} exceeds the depth of the nested list structure "
+                    "(which is {1})".format(axis, depth)
+                )
+
+        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        shifts = None
+        next = self._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            1,
+            mask,
+            keepdims,
+        )
+
+        if isinstance(next, ak._v2.contents.NumpyArray) and len(next) == 1:
+            return next
+
+        return next[0]
+
+    def argmin(self, axis=-1, mask=True, keepdims=False):
+        return self._reduce(awkward._v2._reducers.ArgMin, axis, mask, keepdims)
+
+    def argmax(self, axis=-1, mask=True, keepdims=False):
+        return self._reduce(awkward._v2._reducers.ArgMax, axis, mask, keepdims)
+
+    def count(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.Count, axis, mask, keepdims)
+
+    def count_nonzero(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.CountNonzero, axis, mask, keepdims)
+
+    def sum(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.Sum, axis, mask, keepdims)
+
+    def prod(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims)
+
+    def any(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.Any, axis, mask, keepdims)
+
+    def all(self, axis=-1, mask=False, keepdims=False):
+        return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims)
+
+    def min(self, axis=-1, mask=True, keepdims=False, initial=None):
+        return self._reduce(awkward._v2._reducers.Min(initial), axis, mask, keepdims)
+
+    def max(self, axis=-1, mask=True, keepdims=False, initial=None):
+        return self._reduce(awkward._v2._reducers.Max(initial), axis, mask, keepdims)
+
+    def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+        negaxis = -axis
+        branch, depth = self.branch_depth
+        if branch:
+            if negaxis <= 0:
+                raise ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves "
+                    "of the tree; non-negative from the root)"
+                )
+            if negaxis > depth:
+                raise ValueError(
+                    "cannot use axis={0} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={1} from the leaves".format(
+                        axis, depth
+                    )
+                )
+        else:
+            if negaxis <= 0:
+                negaxis = negaxis + depth
+            if not (0 < negaxis and negaxis <= depth):
+                raise ValueError(
+                    "axis={0} exceeds the depth of the nested list structure "
+                    "(which is {1})".format(axis, depth)
+                )
+
+        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        return self._argsort_next(
+            negaxis,
+            starts,
+            None,
+            parents,
+            1,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+    def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+        negaxis = -axis
+        branch, depth = self.branch_depth
+        if branch:
+            if negaxis <= 0:
+                raise ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves "
+                    "of the tree; non-negative from the root)"
+                )
+            if negaxis > depth:
+                raise ValueError(
+                    "cannot use axis={0} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={1} from the leaves".format(
+                        axis, depth
+                    )
+                )
+        else:
+            if negaxis <= 0:
+                negaxis = negaxis + depth
+            if not (0 < negaxis and negaxis <= depth):
+                raise ValueError(
+                    "axis={0} exceeds the depth of the nested list structure "
+                    "(which is {1})".format(axis, depth)
+                )
+
+        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        return self._sort_next(
+            negaxis,
+            starts,
+            parents,
+            1,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations_axis0(self, n, replacement, recordlookup, parameters):
         size = len(self)
         if replacement:
@@ -545,28 +713,27 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        tocarryraw = self.nplike.empty(n, dtype=np.intp)
+        nplike = self.nplike
+        tocarryraw = nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
-            ptr = ak._v2.index.Index64.empty(
-                combinationslen, self.nplike, dtype=np.int64
-            )
+            ptr = ak._v2.index.Index64.empty(combinationslen, nplike, dtype=np.int64)
             tocarry.append(ptr)
             tocarryraw[i] = ptr.ptr
 
-        toindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
-        fromindex = ak._v2.index.Index64.empty(n, self.nplike, dtype=np.int64)
+        toindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
+        fromindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
 
         self._handle_error(
-            self.nplike[
+            nplike[
                 "awkward_RegularArray_combinations_64",
                 np.int64,
-                toindex.to(self.nplike).dtype.type,
-                fromindex.to(self.nplike).dtype.type,
+                toindex.to(nplike).dtype.type,
+                fromindex.to(nplike).dtype.type,
             ](
                 tocarryraw,
-                toindex.to(self.nplike),
-                fromindex.to(self.nplike),
+                toindex.to(nplike),
+                fromindex.to(nplike),
                 n,
                 replacement,
                 len(self),
@@ -590,6 +757,109 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             if len(recordlookup) != n:
                 raise ValueError("if provided, the length of 'keys' must be 'n'")
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
+
+    def validityerror_parameters(self, path):
+        if self.parameter("__array__") == "string":
+            content = None
+            if isinstance(
+                self,
+                (
+                    ak._v2.contents.listarray.ListArray,
+                    ak._v2.contents.listoffsetarray.ListOffsetArray,
+                    ak._v2.contents.regulararray.RegularArray,
+                ),
+            ):
+                content = self.content
+            else:
+                return 'at {0} ("{1}"): __array__ = "string" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
+                    path, type(self)
+                )
+            if content.parameter("__array__") != "char":
+                return 'at {0} ("{1}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
+                    path, type(self)
+                )
+            if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
+                if content.dtype == np.uint8:
+                    return 'at {0} ("{1}"): __array__ = "char" requires dtype == uint8'.format(
+                        path, type(self)
+                    )
+                if len(content.shape) != 1:
+                    return 'at {0} ("{1}"): __array__ = "char" must be one-dimensional'.format(
+                        path, type(self)
+                    )
+            else:
+                return 'at {0} ("{1}"): __array__ = "char" only allowed for NumpyArray'.format(
+                    path, type(self)
+                )
+            return ""
+
+        if self.parameter("__array__") == "bytestring":
+            content = None
+            if isinstance(
+                self,
+                (
+                    ak._v2.contents.listarray.ListArray,
+                    ak._v2.contents.listoffsetarray.ListOffsetArray,
+                    ak._v2.contents.regulararray.RegularArray,
+                ),
+            ):
+                content = self.content
+            else:
+                return 'at {0} ("{1}"): __array__ = "bytestring" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
+                    path, type(self)
+                )
+            if content.parameter("__array__") != "byte":
+                return 'at {0} ("{1}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
+                    path, type(self)
+                )
+            if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
+                if content.dtype == np.uint8:
+                    return 'at {0} ("{1}"): __array__ = "byte" requires dtype == uint8'.format(
+                        path, type(self)
+                    )
+                if len(content.shape) != 1:
+                    return 'at {0} ("{1}"): __array__ = "byte" must be one-dimensional'.format(
+                        path, type(self)
+                    )
+            else:
+                return 'at {0} ("{1}"): __array__ = "byte" only allowed for NumpyArray'.format(
+                    path, type(self)
+                )
+            return ""
+
+        if self.parameter("__array__") == "char":
+            return 'at {0} ("{1}"): __array__ = "char" must be directly inside __array__ = "string"'.format(
+                path, type(self)
+            )
+
+        if self.parameter("__array__") == "byte":
+            return 'at {0} ("{1}"): __array__ = "byte" must be directly inside __array__ = "bytestring"'.format(
+                path, type(self)
+            )
+
+        if self.parameter("__array__") == "categorical":
+            content = None
+            if isinstance(
+                self,
+                (
+                    ak._v2.contents.indexedarray.IndexedArray,
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ),
+            ):
+                content = self.content
+            else:
+                return 'at {0} ("{1}"): __array__ = "string" only allowed for IndexedArray and IndexedOptionArray'.format(
+                    path, type(self)
+                )
+            return NotImplementedError("TODO: Implement is_unique")
+
+        return ""
+
+    def validityerror(self, path="layout"):
+        paramcheck = self.validityerror_parameters(path)
+        if paramcheck != "":
+            return paramcheck
+        return self._validityerror(path)
 
     @property
     def purelist_isregular(self):
@@ -880,3 +1150,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return ak._v2.contents.unionarray.UnionArray(
                 tags, index, contents, self._identifier, self._contents
             )
+          
+    @property
+    def dimension_optiontype(self):
+        return self.Form.dimension_optiontype.__get__(self)
+

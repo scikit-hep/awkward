@@ -10,6 +10,10 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 
 def test_basic():
     content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))

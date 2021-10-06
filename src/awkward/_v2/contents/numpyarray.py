@@ -62,6 +62,10 @@ class NumpyArray(Content):
         return self._nplike
 
     @property
+    def nonvirtual_nplike(self):
+        return self._nplike
+
+    @property
     def ptr(self):
         return self._data.ctypes.data
 
@@ -93,21 +97,22 @@ class NumpyArray(Content):
             out.append(" shape=")
             out.append(repr(str(self._data.shape)))
 
+        extra = self._repr_extra(indent + "    ")
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
             "\n"
         )
-        if len(arraystr_lines) > 1:  # if or this array has an Identifier
+        if len(extra) != 0 or len(arraystr_lines) > 1:
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
                 arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
-            out.append(">\n" + indent + "    ")
+            out.append(">")
+            out.extend(extra)
+            out.append("\n" + indent + "    ")
             out.append(("\n" + indent + "    ").join(arraystr_lines))
             out.append("\n" + indent + "</NumpyArray>")
         else:
-            if len(arraystr_lines) > 5:
-                arraystr_lines = arraystr_lines[:2] + [" ..."] + arraystr_lines[-2:]
             out.append(">")
             out.append(arraystr_lines[0])
             out.append("</NumpyArray>")
@@ -280,6 +285,203 @@ class NumpyArray(Content):
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
 
+    def contiguous(self):
+        if self._data.ndim >= 1:
+            return ak._v2.contents.NumpyArray(self.nplike.ascontiguousarray(self))
+        else:
+            return self
+
+    def iscontiguous(self):
+        x = self._data.itemsize
+
+        for i in range(len(self.shape), 0, -1):  # FIXME: more Pythonic way to do it?
+            if x != self.strides[i - 1]:
+                return False
+            else:
+                x = x * self.shape[i - 1]
+
+        return True
+
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if self.shape[0] == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        if len(self.shape) == 0:
+            raise TypeError(
+                "{0} attempting to argsort a scalar ".format(type(self).__name__)
+            )
+        elif len(self.shape) != 1 or not self.iscontiguous():
+            contiguous_self = self if self.iscontiguous() else self.contiguous()
+            return contiguous_self.toRegularArray()._argsort_next(
+                negaxis,
+                starts,
+                shifts,
+                parents,
+                outlength,
+                ascending,
+                stable,
+                kind,
+                order,
+            )
+
+        else:
+            nplike = self.nplike
+
+            parents_length = len(parents)
+            offsets_length = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges_length",
+                    offsets_length.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets_length.to(nplike),
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
+            offsets_length = offsets_length[0]
+
+            offsets = ak._v2.index.Index64.empty(offsets_length, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges",
+                    offsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets.to(nplike),
+                    offsets_length,
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
+
+            nextcarry = ak._v2.index.Index64.empty(self.__len__(), nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_argsort",
+                    nextcarry.dtype.type,
+                    self._data.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    self._data,
+                    self.__len__(),
+                    offsets.to(nplike),
+                    offsets_length,
+                    ascending,
+                    stable,
+                )
+            )
+
+            if shifts is not None:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_rearrange_shifted",
+                        nextcarry.dtype.type,
+                        shifts.dtype.type,
+                        offsets.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        shifts.to(nplike),
+                        len(shifts),
+                        offsets.to(nplike),
+                        offsets_length,
+                        parents.to(nplike),
+                        parents_length,
+                        starts.to(nplike),
+                        len(starts),
+                    )
+                )
+            out = NumpyArray(nextcarry)
+            return out
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if self.shape[0] == 0:
+            return self
+
+        if len(self.shape) == 0:
+            raise TypeError(
+                "{0} attempting to sort a scalar ".format(type(self).__name__)
+            )
+        elif len(self.shape) != 1 or not self.iscontiguous():
+            contiguous_self = self if self.iscontiguous() else self.contiguous()
+            return contiguous_self.toRegularArray()._sort_next(
+                negaxis,
+                starts,
+                parents,
+                outlength,
+                ascending,
+                stable,
+                kind,
+                order,
+            )
+        else:
+            nplike = self.nplike
+
+            parents_length = len(parents)
+            offsets_length = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges_length",
+                    offsets_length.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets_length.to(nplike),
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
+
+            offsets = ak._v2.index.Index64.zeros(offsets_length, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges",
+                    offsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets.to(nplike),
+                    offsets_length[0],
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
+
+            out = ak._v2.contents.NumpyArray(nplike.empty(len(self._data), self.dtype))
+            self._handle_error(
+                nplike[
+                    "awkward_sort",
+                    out._data.dtype.type,
+                    self._data.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    out._data,
+                    self._data,
+                    self.shape[0],
+                    offsets.to(nplike),
+                    offsets_length[0],
+                    parents_length,
+                    ascending,
+                    stable,
+                )
+            )
+            return out
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -290,3 +492,97 @@ class NumpyArray(Content):
             return self.toRegularArray()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        nplike = self.nplike
+
+        out = reducer.apply(self, parents, outlength)
+
+        if reducer.needs_position:
+            if shifts is None:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_reduce_adjust_starts_64",
+                        out.data.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        parents.to(nplike),
+                        starts.to(nplike),
+                    )
+                )
+            else:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                        out.data.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        parents.to(nplike),
+                        starts.to(nplike),
+                        shifts.to(nplike),
+                    )
+                )
+
+        if mask:
+            outmask = ak._v2.index.Index8.zeros(outlength, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+                    outmask.dtype.type,
+                    parents.dtype.type,
+                ](
+                    outmask.to(nplike),
+                    parents.to(nplike),
+                    len(parents),
+                    outlength,
+                )
+            )
+
+            out = ak._v2.contents.ByteMaskedArray(
+                outmask,
+                out,
+                False,
+                None,
+                None,
+            )
+
+        if keepdims:
+            out = ak._v2.contents.RegularArray(
+                out,
+                1,
+                len(self),
+                None,
+                None,
+            )
+
+        return out
+
+    def _validityerror(self, path):
+        if len(self.shape) == 0:
+            return 'at {0} ("{1}"): shape is zero-dimensional'.format(path, type(self))
+        for i in range(len(self.shape)):
+            if self.shape[i] < 0:
+                return 'at {0} ("{1}"): shape[{2}] < 0'.format(path, type(self), i)
+        for i in range(len(self.strides)):
+            if self.strides[i] % self.dtype.itemsize != 0:
+                return 'at {0} ("{1}"): shape[{2}] % itemsize != 0'.format(
+                    path, type(self), i
+                )
+        return ""

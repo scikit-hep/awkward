@@ -12,7 +12,10 @@ import awkward as ak
 def of(*arrays):
     libs = set()
     for array in arrays:
-        if isinstance(array, numpy.ndarray):
+        nplike = getattr(array, "nplike", None)
+        if isinstance(nplike, NumpyLike):
+            libs.add(nplike)
+        elif isinstance(array, numpy.ndarray):
             ptr_lib = "cpu"
         elif (
             type(array).__module__.startswith("cupy.")
@@ -42,6 +45,8 @@ to obtain an unmixed array in main memory or the GPU(s)."""
         return Numpy.instance()
     elif libs == set(["cuda"]):
         return Cupy.instance()
+    elif len(libs) == 1:
+        return next(iter(libs))
     else:
         raise ValueError(
             """attempting to use both a 'cpu' array and a 'cuda' array in the """
@@ -84,6 +89,8 @@ class NumpyMetadata(Singleton):
 
     intp = numpy.intp
     integer = numpy.integer
+    signedinteger = numpy.signedinteger
+    unsignedinteger = numpy.unsignedinteger
     floating = numpy.floating
     number = numpy.number
     object_ = numpy.object_
@@ -131,7 +138,7 @@ class NumpyLike(Singleton):
         return self._module.array(*args, **kwargs)
 
     def asarray(self, *args, **kwargs):
-        # array[, dtype=]
+        # array[, dtype=][, order=]
         return self._module.asarray(*args, **kwargs)
 
     def ascontiguousarray(self, *args, **kwargs):
@@ -161,10 +168,6 @@ class NumpyLike(Singleton):
         # shape/len, value[, dtype=]
         return self._module.full(*args, **kwargs)
 
-    def full_like(self, *args, **kwargs):
-        # array, fill_value
-        return self._module.full_like(*args, **kwargs)
-
     def zeros_like(self, *args, **kwargs):
         # array
         return self._module.zeros_like(*args, **kwargs)
@@ -172,6 +175,10 @@ class NumpyLike(Singleton):
     def ones_like(self, *args, **kwargs):
         # array
         return self._module.ones_like(*args, **kwargs)
+
+    def full_like(self, *args, **kwargs):
+        # array, fill_value
+        return self._module.full_like(*args, **kwargs)
 
     def arange(self, *args, **kwargs):
         # stop[, dtype=]
@@ -184,6 +191,10 @@ class NumpyLike(Singleton):
         return self._module.meshgrid(*args, **kwargs)
 
     ############################ testing
+
+    def shape(self, *args, **kwargs):
+        # array
+        return self._module.shape(*args, **kwargs)
 
     def array_equal(self, *args, **kwargs):
         # array1, array2
@@ -198,6 +209,7 @@ class NumpyLike(Singleton):
         return self._module.searchsorted(*args, **kwargs)
 
     def argsort(self, *args, **kwargs):
+        # array
         return self._module.argsort(*args, **kwargs)
 
     ############################ manipulation
@@ -386,8 +398,8 @@ class Numpy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_numpy(array, *args, **kwargs)
 
-    def __getitem__(self, args):
-        return NumpyKernel(ak._cpu_kernels.kernel[args], args)
+    def __getitem__(self, name_and_types):
+        return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
         self._module = numpy
@@ -409,7 +421,7 @@ class Cupy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
-    def __getitem__(self, args):
+    def __getitem__(self, name_and_types):
         raise NotImplementedError("no CUDA in v2 yet")
 
     def __init__(self):

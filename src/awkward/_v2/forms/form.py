@@ -10,11 +10,15 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def from_iter(input):
+    if input is None:
+        return None
+
     if ak._util.isstr(input):
         return ak._v2.forms.numpyform.NumpyForm(primitive=input)
+
     assert isinstance(input, dict)
     has_identifier = input.get("has_identifier", input.get("has_identities", False))
-    parameters = input.get("parameters", {})
+    parameters = input.get("parameters", None)
     form_key = input.get("form_key", None)
 
     if input["class"] == "NumpyArray":
@@ -151,7 +155,7 @@ def from_iter(input):
 
     elif input["class"] == "VirtualArray":
         return ak._v2.forms.virtualform.VirtualForm(
-            form=input["form"],
+            form=from_iter(input["form"]),
             has_length=input["has_length"],
             has_identifier=has_identifier,
             parameters=parameters,
@@ -168,18 +172,53 @@ def from_json(input):
     return from_iter(json.loads(input))
 
 
+def _parameters_equal(one, two):
+    if one is None and two is None:
+        return True
+    elif one is None:
+        for value in two.values():
+            if value is not None:
+                return False
+        else:
+            return True
+    elif two is None:
+        for value in one.values():
+            if value is not None:
+                return False
+        else:
+            return True
+    else:
+        keys = set(one.keys()).union(two.keys())
+        for key in keys:
+            if one.get(key) != two.get(key):
+                return False
+        else:
+            return True
+
+
+def _parameters_update(one, two):
+    for k, v in two.items():
+        if v is not None:
+            one[k] = v
+
+
+def nonvirtual(form):
+    if isinstance(form, ak._v2.forms.virtualform.VirtualForm):
+        return form.form
+
+    else:
+        return form
+
+
 class Form(object):
     def _init(self, has_identifier, parameters, form_key):
-        if parameters is None:
-            parameters = {}
-
         if not isinstance(has_identifier, bool):
             raise TypeError(
                 "{0} 'has_identifier' must be of type bool, not {1}".format(
                     type(self).__name__, repr(has_identifier)
                 )
             )
-        if not isinstance(parameters, dict):
+        if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be of type dict or None, not {1}".format(
                     type(self).__name__, repr(parameters)
@@ -202,6 +241,8 @@ class Form(object):
 
     @property
     def parameters(self):
+        if self._parameters is None:
+            self._parameters = {}
         return self._parameters
 
     def parameter(self, key):
@@ -215,7 +256,7 @@ class Form(object):
         return self._form_key
 
     def __str__(self):
-        return json.dumps(self.tolist(verbose=False), indent="    ")
+        return json.dumps(self.tolist(verbose=False), indent=4)
 
     def tolist(self, verbose=True):
         return self._tolist_part(verbose, toplevel=True)
@@ -223,8 +264,8 @@ class Form(object):
     def _tolist_extra(self, out, verbose):
         if verbose or self._has_identifier:
             out["has_identifier"] = self._has_identifier
-        if verbose or self._parameters is not None and len(self._parameters) > 0:
-            out["parameters"] = {} if self._parameters is None else self._parameters
+        if verbose or (self._parameters is not None and len(self._parameters) > 0):
+            out["parameters"] = self.parameters
         if verbose or self._form_key is not None:
             out["form_key"] = self._form_key
         return out
@@ -243,3 +284,9 @@ class Form(object):
         if self._form_key is not None:
             out.append("form_key=" + repr(self._form_key))
         return out
+
+    def simplify_optiontype(self):
+        return self
+
+    def simplify_uniontype(self):
+        return self

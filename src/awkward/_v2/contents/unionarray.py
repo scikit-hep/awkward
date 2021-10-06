@@ -82,6 +82,10 @@ class UnionArray(Content):
     def nplike(self):
         return self._tags.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._tags.nplike
+
     Form = UnionForm
 
     @property
@@ -104,15 +108,18 @@ class UnionArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnionArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._tags._repr(indent + "    ", "<tags>", "</tags>\n"))
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
+
         for i, x in enumerate(self._contents):
             out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
             out.append(x._repr(indent + "        ", "", "\n"))
             out.append("{0}    </content>\n".format(indent))
-        out.append(indent)
-        out.append("</UnionArray>")
+
+        out.append(indent + "</UnionArray>")
         out.append(post)
         return "".join(out)
 
@@ -256,8 +263,6 @@ class UnionArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
@@ -406,7 +411,7 @@ class UnionArray(Content):
             for content in self._contents:
                 contents.append(content._localindex(posaxis, depth))
             return UnionArray(
-                self._tags, self._index, contents, self._identifier, self.parameters
+                self._tags, self._index, contents, self._identifier, self._parameters
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -424,3 +429,102 @@ class UnionArray(Content):
             return ak._v2.unionarray.UnionArray(
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
+
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        simplified = self._simplify_uniontype()
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ValueError("cannot argsort an irreducible UnionArray")
+
+        return simplified._argsort_next(
+            negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order
+        )
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        simplified = self._simplify_uniontype()
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ValueError("cannot sort an irreducible UnionArray")
+
+        return simplified._sort_next(
+            negaxis, starts, parents, outlength, ascending, stable, kind, order
+        )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        simplified = self._simplify_uniontype()
+        if isinstance(simplified, UnionArray):
+            raise ValueError(
+                "cannot call ak.{0} on an irreducible UnionArray".format(reducer.name)
+            )
+
+        return simplified._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+    def _validityerror(self, path):
+        for i in range(len(self.contents)):
+            if isinstance(self.contents[i], ak._v2.contents.unionarray.UnionArray):
+                return "{0} contains {1}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
+                    type(self), type(self.contents[i])
+                )
+            if len(self.index) < len(self.tags):
+                return 'at {0} ("{1}"): len(index) < len(tags)'.format(path, type(self))
+            lencontents = self.nplike.empty(len(self.contents), dtype=np.int64)
+            for i in range(len(self.contents)):
+                lencontents[i] = len(self.contents[i])
+            error = self.nplike[
+                "awkward_UnionArray_validity",
+                self.tags.dtype.type,
+                self.index.dtype.type,
+                np.int64,
+            ](
+                self.tags.to(self.nplike),
+                self.index.to(self.nplike),
+                len(self.tags),
+                len(self.contents),
+                lencontents,
+            )
+            if error.str is not None:
+                if error.filename is None:
+                    filename = ""
+                else:
+                    filename = " (in compiled code: " + error.filename.decode(
+                        errors="surrogateescape"
+                    ).lstrip("\n").lstrip("(")
+                message = error.str.decode(errors="surrogateescape")
+                return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+                    path, type(self), message, error.id, filename
+                )
+            for i in range(len(self.contents)):
+                sub = self.contents[i].validityerror(path + ".content({0})".format(i))
+                if sub != "":
+                    return sub
+            return ""

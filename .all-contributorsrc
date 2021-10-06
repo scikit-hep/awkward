@@ -257,6 +257,33 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "bmwiedemann",
+      "name": "Bernhard M. Wiedemann",
+      "avatar_url": "https://avatars.githubusercontent.com/u/637990?v=4",
+      "profile": "http://lizards.opensuse.org/author/bmwiedemann/",
+      "contributions": [
+        "maintenance"
+       ]
+    },
+    {
+    "login": "matthewfeickert",
+      "name": "Matthew Feickert",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5142394?v=4",
+      "profile": "http://www.matthewfeickert.com/",
+      "contributions": [
+        "maintenance"
+      ]
+    },
+    {
+      "login": "SantamRC",
+      "name": "Santam Roy Choudhury",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52635773?v=4",
+      "profile": "https://github.com/SantamRC",
+      "contributions": [
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -49,6 +49,10 @@ class IndexedArray(Content):
     def nplike(self):
         return self._index.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._index.nplike
+
     Form = IndexedForm
 
     @property
@@ -70,11 +74,12 @@ class IndexedArray(Content):
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedArray len="]
         out.append(repr(str(len(self))))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</IndexedArray>")
+        out.append(indent + "</IndexedArray>")
         out.append(post)
         return "".join(out)
 
@@ -171,7 +176,7 @@ class IndexedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
+        nplike = self.nplike
 
         if head == ():
             return self
@@ -366,6 +371,60 @@ class IndexedArray(Content):
         else:
             return self.project()._localindex(posaxis, depth)
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._index) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        next = self._content._carry(self._index, False, NestedIndexError)
+        return next._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+    def _sort_next(
+        self,
+        negaxis,
+        starts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._index) == 0:
+            ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        next = self._content._carry(self._index, False, NestedIndexError)
+        return next._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -374,3 +433,132 @@ class IndexedArray(Content):
             return self.project()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        nplike = self.nplike
+        branch, depth = self.branch_depth
+
+        index_length = len(self._index)
+
+        nextcarry = ak._v2.index.Index64.zeros(index_length, nplike)
+        nextparents = ak._v2.index.Index64.zeros(index_length, nplike)
+        outindex = ak._v2.index.Index64.zeros(index_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._index.to(nplike),
+                parents.to(nplike),
+                index_length,
+            )
+        )
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        nextshifts = None
+        out = next._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            nextshifts,
+            nextparents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+        if not branch and negaxis == depth:
+            return out
+        else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
+
+            elif isinstance(out, ak._v2.contents.ListOffsetArray):
+                if len(starts) > 0 and starts[0] != 0:
+                    raise AssertionError(
+                        "reduce_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray64 whose offsets start at zero ({0})".format(
+                            starts[0]
+                        )
+                    )
+
+                outoffsets = ak._v2.index.Index64.empty(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        len(starts),
+                        len(self._index),
+                    )
+                )
+
+                tmp = ak._v2.contents.IndexedArray(
+                    outindex,
+                    out._content,
+                    None,
+                    None,
+                )
+
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    None,
+                )
+
+            else:
+                raise AssertionError(
+                    "reduce_next with unbranching depth > negaxis is only "
+                    "expected to return RegularArray or ListOffsetArray64; "
+                    "instead, it returned " + out.classname
+                )
+
+    def _validityerror(self, path):
+        error = self.nplike["awkward_IndexedArray_validity", self.index.dtype.type](
+            self.index.to(self.nplike), len(self.index), len(self.content), False
+        )
+        if error.str is not None:
+            if error.filename is None:
+                filename = ""
+            else:
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
+            message = error.str.decode(errors="surrogateescape")
+            return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+                path, type(self), message, error.id, filename
+            )
+
+        elif isinstance(
+            self.content,
+            (
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
+        else:
+            return self.content.validityerror(path + ".content")

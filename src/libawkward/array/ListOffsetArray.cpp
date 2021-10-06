@@ -1471,6 +1471,7 @@ namespace awkward {
       }
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+
       ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
                                                              negaxis - 1,
                                                              nextstarts,
@@ -1479,7 +1480,6 @@ namespace awkward {
                                                              maxnextparents + 1,
                                                              mask,
                                                              false);
-
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
                                                      util::Parameters(),
                                                      outstarts,
@@ -1499,6 +1499,7 @@ namespace awkward {
     }
 
     else {
+
       int64_t globalstart;
       int64_t globalstop;
       struct Error err1 = kernel::ListOffsetArray_reduce_global_startstop_64(

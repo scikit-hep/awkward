@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -59,6 +61,10 @@ class ByteMaskedArray(Content):
     def nplike(self):
         return self._mask.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._mask.nplike
+
     Form = ByteMaskedForm
 
     @property
@@ -79,15 +85,16 @@ class ByteMaskedArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<ByteMaskedArray len="]
+        out = [indent, pre, "<ByteMaskedArray valid_when="]
+        out.append(repr(json.dumps(self._valid_when)))
+        out.append(" len=")
         out.append(repr(str(len(self))))
-        out.append(" valid_when=")
-        out.append(repr(str(self._valid_when)))
-        out.append(">\n")
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._mask._repr(indent + "    ", "<mask>", "</mask>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</ByteMaskedArray>")
+        out.append(indent + "</ByteMaskedArray>")
         out.append(post)
         return "".join(out)
 
@@ -180,7 +187,7 @@ class ByteMaskedArray(Content):
             self._parameters,
         )
 
-    def nextcarry_outindex(self, numnull):
+    def _nextcarry_outindex(self, numnull):
         nplike = self.nplike
         self._handle_error(
             nplike[
@@ -224,7 +231,7 @@ class ByteMaskedArray(Content):
             )
 
         numnull = ak._v2.index.Index64.empty(1, nplike)
-        nextcarry, outindex = self.nextcarry_outindex(numnull)
+        nextcarry, outindex = self._nextcarry_outindex(numnull)
 
         reducedstarts = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
         reducedstops = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
@@ -261,15 +268,13 @@ class ByteMaskedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            numnull = ak._v2.index.Index64.empty(1, nplike)
-            nextcarry, outindex = self.nextcarry_outindex(numnull)
+            numnull = ak._v2.index.Index64.empty(1, self.nplike)
+            nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._getitem_next(head, tail, advanced)
@@ -316,7 +321,7 @@ class ByteMaskedArray(Content):
             return self._localindex_axis0()
         else:
             numnull = ak._v2.index.Index64.empty(1, self.nplike)
-            nextcarry, outindex = self.nextcarry_outindex(numnull)
+            nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self.content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
@@ -328,6 +333,50 @@ class ByteMaskedArray(Content):
             )
             return out2._simplify_optiontype()
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._mask) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        return self.toIndexedOptionArray64()._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if len(self._mask) == 0:
+            return self
+
+        return self.toIndexedOptionArray64()._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         if n < 1:
             raise ValueError("in combinations, 'n' must be at least 1")
@@ -336,7 +385,7 @@ class ByteMaskedArray(Content):
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
             numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
-            nextcarry, outindex = self.nextcarry_outindex(numnull)
+            nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._combinations(
@@ -346,3 +395,164 @@ class ByteMaskedArray(Content):
                 outindex, out, parameters=parameters
             )
             return out2._simplify_optiontype()
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        nplike = self.nplike
+
+        mask_length = len(self._mask)
+
+        numnull = ak._v2.index.Index64.zeros(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_numnull",
+                numnull.dtype.type,
+                self._mask.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._mask.to(nplike),
+                mask_length,
+                self._valid_when,
+            )
+        )
+
+        next_length = mask_length - numnull[0]
+        nextcarry = ak._v2.index.Index64.zeros(next_length, nplike)
+        nextparents = ak._v2.index.Index64.zeros(next_length, nplike)
+        outindex = ak._v2.index.Index64.zeros(mask_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_ByteMaskedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._mask.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._mask.to(nplike),
+                parents.to(nplike),
+                mask_length,
+                self._valid_when,
+            )
+        )
+
+        branch, depth = self.branch_depth
+
+        if reducer.needs_position and (not branch and negaxis == depth):
+            nextshifts = ak._v2.index.Index64.zeros(next_length, nplike)
+            if shifts is None:
+                self._handle_error(
+                    nplike[
+                        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+                        nextshifts.dtype.type,
+                        self._mask.dtype.type,
+                    ](
+                        nextshifts.to(nplike),
+                        self._mask.to(nplike),
+                        mask_length,
+                        self._valid_when,
+                    )
+                )
+            else:
+                self._handle_error(
+                    nplike[
+                        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+                        nextshifts.dtype.type,
+                        self._mask.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        nextshifts.to(nplike),
+                        self._mask.to(nplike),
+                        mask_length,
+                        self._valid_when,
+                        shifts.to(nplike),
+                    )
+                )
+        else:
+            nextshifts = None
+
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        if isinstance(next, ak._v2.contents.RegularArray):
+            next = next.toListOffsetArray64(True)
+
+        out = next._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            nextshifts,
+            nextparents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+        if not branch and negaxis == depth:
+            return out
+        else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
+
+            if isinstance(out, ak._v2.contents.ListOffsetArray):
+                outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        len(starts),
+                        len(outindex),
+                    )
+                )
+
+                tmp = ak._v2.contents.IndexedOptionArray(
+                    outindex,
+                    out.content,
+                    None,
+                    None,
+                )._simplify_optiontype()
+
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    None,
+                )
+
+            else:
+                raise ValueError(
+                    "reduce_next with unbranching depth > negaxis is only "
+                    "expected to return RegularArray or ListOffsetArray64; "
+                    "instead, it returned " + out
+                )
+
+    def _validityerror(self, path):
+        if len(self.content) < len(self.mask):
+            return 'at {0} ("{1}"): len(content) < len(mask)'.format(path, type(self))
+        elif isinstance(
+            self.content,
+            (
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
+        else:
+            return self.content.validityerror(path + ".content")

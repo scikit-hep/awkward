@@ -15,6 +15,20 @@ class EmptyArray(Content):
     def __init__(self, identifier=None, parameters=None):
         self._init(identifier, parameters)
 
+    def __repr__(self):
+        return self._repr("", "", "")
+
+    def _repr(self, indent, pre, post):
+        extra = self._repr_extra(indent + "    ")
+        if len(extra) == 0:
+            return indent + pre + "<EmptyArray len='0'/>" + post
+        else:
+            out = [indent, pre, "<EmptyArray len='0'>"]
+            out.extend(extra)
+            out.append("\n" + indent + "</EmptyArray>")
+            out.append(post)
+            return "".join(out)
+
     Form = EmptyForm
 
     @property
@@ -29,14 +43,12 @@ class EmptyArray(Content):
     def nplike(self):
         return ak.nplike.Numpy.instance()
 
+    @property
+    def nonvirtual_nplike(self):
+        return None
+
     def __len__(self):
         return 0
-
-    def __repr__(self):
-        return self._repr("", "", "")
-
-    def _repr(self, indent, pre, post):
-        return indent + pre + "<EmptyArray len='0'/>" + post
 
     def toNumpyArray(self, dtype):
         return ak._v2.contents.numpyarray.NumpyArray(
@@ -72,8 +84,6 @@ class EmptyArray(Content):
                 raise exception("array is empty")
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
@@ -124,5 +134,71 @@ class EmptyArray(Content):
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        as_numpy = ak._v2.contents.NumpyArray(self)
+        return as_numpy._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        as_numpy = ak._v2.contents.NumpyArray(self)
+        return as_numpy._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        as_numpy = self.toNumpyArray(reducer.preferred_dtype)
+        return as_numpy._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+    def _validityerror(self, path):
+        return ""

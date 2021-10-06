@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from awkward._v2.forms.form import Form
+from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
 class VirtualForm(Form):
@@ -16,7 +16,7 @@ class VirtualForm(Form):
     ):
         if form is not None and not isinstance(form, Form):
             raise TypeError(
-                "{0} all 'form' must be Form subclasses, not {1}".format(
+                "{0} 'form' must be a Form instance, not {1}".format(
                     type(self).__name__, repr(form)
                 )
             )
@@ -51,6 +51,74 @@ class VirtualForm(Form):
             out["form"] = self._form._tolist_part(verbose, toplevel=False)
         out["has_length"] = self._has_length
         return self._tolist_extra(out, verbose)
+
+    def __eq__(self, other):
+        if isinstance(other, VirtualForm):
+            return (
+                self._has_identifier == other._has_identifier
+                and self._form_key == other._form_key
+                and _parameters_equal(self._parameters, other._parameters)
+                and self._form == other._form
+            )
+        else:
+            return False
+
+    def generated_compatibility(self, other):
+        if other is None:
+            other_parameters = None
+        else:
+            other_parameters = other._parameters
+
+        if not _parameters_equal(self._parameters, other_parameters):
+            return False
+
+        nonvirtual_self = nonvirtual(self)
+        nonvirtual_other = nonvirtual(other)
+
+        if nonvirtual_self is None or nonvirtual_other is None:
+            return True
+        else:
+            return nonvirtual_self.generated_compatibility(nonvirtual_other)
+
+    def _getitem_range(self):
+        return VirtualForm(
+            None if self._form is None else self._form._getitem_range(),
+            True,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
+
+    def _getitem_field(self, where, only_fields=()):
+        return VirtualForm(
+            None
+            if self._form is None
+            else self._form._getitem_field(where, only_fields),
+            self._has_length,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _getitem_fields(self, where, only_fields=()):
+        return VirtualForm(
+            None
+            if self._form is None
+            else self._form._getitem_fields(where, only_fields),
+            self._has_length,
+            has_identifier=self._has_identifier,
+            parameters=None,
+            form_key=None,
+        )
+
+    def _carry(self, allow_lazy):
+        return VirtualForm(
+            None if self._form is None else self._form._getitem_range(),
+            True,
+            has_identifier=self._has_identifier,
+            parameters=self._parameters,
+            form_key=None,
+        )
 
     @property
     def purelist_isregular(self):
@@ -96,3 +164,12 @@ class VirtualForm(Form):
             )
         else:
             return self._form.keys
+
+    @property
+    def dimension_optiontype(self):
+        if self._form is None:
+            raise ValueError(
+                "cannot determine the type of a virtual array without a Form"
+            )
+        else:
+            return self._form.dimension_optiontype

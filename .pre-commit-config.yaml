@@ -22,7 +22,7 @@ repos:
 #  args: [--min-py3-version, "3.5"]
 
 - repo: https://github.com/psf/black
-  rev: 21.8b0
+  rev: 21.9b0
   hooks:
   - id: black
 
@@ -39,7 +39,21 @@ repos:
     additional_dependencies: [flake8-bugbear, flake8-print]
 
 - repo: https://github.com/mgedmin/check-manifest
-  rev: "0.46"
+  rev: "0.47"
   hooks:
   - id: check-manifest
     stages: [manual]
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.1.0
+  hooks:
+  - id: codespell
+    args: ["-L", "ue,subjet,parms,fo,numer,thre"]
+
+- repo: local
+  hooks:
+  - id: disallow-caps
+    name: Disallow improper capitalization
+    language: pygrep
+    entry: PyBind|Cmake|CCache|Github|PyTest
+    exclude: .pre-commit-config.yaml

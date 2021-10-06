@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -93,6 +95,10 @@ class BitMaskedArray(Content):
     def nplike(self):
         return self._mask.nplike
 
+    @property
+    def nonvirtual_nplike(self):
+        return self._mask.nplike
+
     Form = BitMaskedForm
 
     @property
@@ -114,17 +120,18 @@ class BitMaskedArray(Content):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
-        out = [indent, pre, "<BitMaskedArray len="]
-        out.append(repr(str(len(self))))
-        out.append(" valid_when=")
-        out.append(repr(str(self._valid_when)))
+        out = [indent, pre, "<BitMaskedArray valid_when="]
+        out.append(repr(json.dumps(self._valid_when)))
         out.append(" lsb_order=")
-        out.append(repr(str(self._lsb_order)))
-        out.append(">\n")
+        out.append(repr(json.dumps(self._lsb_order)))
+        out.append(" len=")
+        out.append(repr(str(len(self))))
+        out.append(">")
+        out.extend(self._repr_extra(indent + "    "))
+        out.append("\n")
         out.append(self._mask._repr(indent + "    ", "<mask>", "</mask>\n"))
         out.append(self._content._repr(indent + "    ", "<content>", "</content>\n"))
-        out.append(indent)
-        out.append("</BitMaskedArray>")
+        out.append(indent + "</BitMaskedArray>")
         out.append(post)
         return "".join(out)
 
@@ -247,8 +254,6 @@ class BitMaskedArray(Content):
         )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self.nplike  # noqa: F841
-
         if head == ():
             return self
 
@@ -287,7 +292,92 @@ class BitMaskedArray(Content):
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._mask) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        return self.toIndexedOptionArray64()._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+    def _sort_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if len(self._mask) == 0:
+            return self
+
+        return self.toIndexedOptionArray64()._sort_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return self.toByteMaskedArray()._combinations(
             n, replacement, recordlookup, parameters, axis, depth
         )
+
+    def _reduce_next(
+        self,
+        reducer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        mask,
+        keepdims,
+    ):
+        return self.toByteMaskedArray()._reduce_next(
+            reducer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            mask,
+            keepdims,
+        )
+
+    def _validityerror(self, path):
+        if len(self.mask) * 8 < len(self):
+            return 'at {0} ("{1}"): len(mask) * 8 < length'.format(path, type(self))
+        elif len(self.content) < len(self):
+            return 'at {0} ("{1}"): len(content) < length'.format(path, type(self))
+        elif isinstance(
+            self.content,
+            (
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
+        else:
+            return self.content.validityerror(path + ".content")

@@ -2220,8 +2220,8 @@ namespace awkward {
         util::handle_error(err3, classname(), identities_.get());
       }
     }
-
     ContentPtr next = content_.get()->carry(nextcarry, false);
+
     if (ISOPTION) {
       if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
         next = raw->toListOffsetArray64(true);
@@ -2266,10 +2266,17 @@ namespace awkward {
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          IndexedOptionArray64(Identities::none(),
-                               util::Parameters(),
-                               outindex,
-                               raw->content()).simplify_optiontype());
+          ISOPTION ?
+            IndexedOptionArray64(Identities::none(),
+                                 util::Parameters(),
+                                 outindex,
+                                 raw->content()).simplify_optiontype()
+          :
+            IndexedArray64(Identities::none(),
+                           util::Parameters(),
+                           outindex,
+                           raw->content()).simplify_optiontype()
+          );
       }
       else {
         throw std::runtime_error(
