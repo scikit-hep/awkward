@@ -84,6 +84,9 @@ class NumpyArray(Content):
     def __len__(self):
         return len(self._data)
 
+    def to(self, nplike):
+        return nplike.asarray(self._data)
+
     def __repr__(self):
         return self._repr("", "", "")
 
@@ -91,11 +94,11 @@ class NumpyArray(Content):
         out = [indent, pre, "<NumpyArray dtype="]
         out.append(repr(str(self.dtype)))
         if len(self._data.shape) == 1:
-            out.append(" len=")
-            out.append(repr(str(len(self))))
+            out.append(" len=" + repr(str(self._data.shape[0])))
         else:
-            out.append(" shape=")
-            out.append(repr(str(self._data.shape)))
+            out.append(
+                " shape='({0})'".format(", ".join(str(x) for x in self._data.shape))
+            )
 
         extra = self._repr_extra(indent + "    ")
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(

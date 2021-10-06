@@ -25,7 +25,6 @@ import awkward.partition
 
 # internal
 import awkward._v2
-import awkward._typetracer
 import awkward._cpu_kernels
 import awkward._libawkward
 import awkward._util
