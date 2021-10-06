@@ -516,27 +516,22 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             if negaxis <= 0:
                 raise ValueError(
                     "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves "
-                    "of the tree; non-negative from the root)"
+                    "of variable depth (negative axis counts from the leaves of "
+                    "the tree; non-negative from the root)"
                 )
             if negaxis > depth:
                 raise ValueError(
-                    "cannot use axis="
-                    + str(axis)
-                    + " on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth="
-                    + str(depth)
-                    + " from the leaves"
+                    "cannot use axis={0} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={1} "
+                    "from the leaves".format(axis, depth)
                 )
         else:
             if negaxis <= 0:
                 negaxis += depth
             if not (0 < negaxis and negaxis <= depth):
                 raise ValueError(
-                    "axis="
-                    + str(axis)
-                    + " exceeds the depth of the nested list structure "
-                    "(which is " + str(depth) + ")"
+                    "axis={0} exceeds the depth of the nested list structure "
+                    "(which is {1})".format(axis, depth)
                 )
 
         parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
@@ -588,37 +583,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def max(self, axis=-1, mask=True, keepdims=False, initial=None):
         return self._reduce(awkward._v2._reducers.Max(initial), axis, mask, keepdims)
 
-    def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
-        """
-        Args:
-            axis (int): this argument defines an axis along
-                which to sort. The default is `-1`, which
-                sorts along the innermost axis. Axes are defined similar to
-                Numpy axes. `axis=0` is the "first" axis and `axis=-1` is
-                the "last" axis. Unlike other operations, sorting does not
-                support `axis=None`.
-            ascending (bool): if `True`, the elements are sorted in ascending
-                order.
-            stable (bool): if `True`, the order of equivalent elements is guaranteed
-                to be preserved.
-            kind ({‘quicksort’, ‘mergesort’, ‘heapsort’, ‘stable’}, optional):
-                an optional sorting algorithm. This is similar to NumPy
-                sort.
-            order (str or list of str, optional): similar to NumPy.
-
-        Puts Content elements in an ordered sequence: numeric or lexicographical,
-        ascending or descending.
-
-        The gaps and None values are not sorted, and if a None value occurs at
-        a higher axis than the one being sorted, it is kept as a placeholder
-        so that the outer list length does not change.
-
-        This function is similar to NumPy [sort](https://numpy.org/doc/stable/reference/generated/numpy.sort.html).
-        """
-
-        if kind is not None:
-            raise NotImplementedError
-
+    def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:
@@ -630,22 +595,58 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 )
             if negaxis > depth:
                 raise ValueError(
-                    "cannot use axis="
-                    + str(axis)
-                    + " on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth="
-                    + str(depth)
-                    + " from the leaves"
+                    "cannot use axis={0} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={1} from the leaves".format(
+                        axis, depth
+                    )
                 )
         else:
             if negaxis <= 0:
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
                 raise ValueError(
-                    "axis="
-                    + str(axis)
-                    + " exceeds the depth of the nested list structure "
-                    "(which is " + str(depth) + ")"
+                    "axis={0} exceeds the depth of the nested list structure "
+                    "(which is {1})".format(axis, depth)
+                )
+
+        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        return self._argsort_next(
+            negaxis,
+            starts,
+            None,
+            parents,
+            1,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+    def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+        negaxis = -axis
+        branch, depth = self.branch_depth
+        if branch:
+            if negaxis <= 0:
+                raise ValueError(
+                    "cannot use non-negative axis on a nested list structure "
+                    "of variable depth (negative axis counts from the leaves "
+                    "of the tree; non-negative from the root)"
+                )
+            if negaxis > depth:
+                raise ValueError(
+                    "cannot use axis={0} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={1} from the leaves".format(
+                        axis, depth
+                    )
+                )
+        else:
+            if negaxis <= 0:
+                negaxis = negaxis + depth
+            if not (0 < negaxis and negaxis <= depth):
+                raise ValueError(
+                    "axis={0} exceeds the depth of the nested list structure "
+                    "(which is {1})".format(axis, depth)
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self.nplike)

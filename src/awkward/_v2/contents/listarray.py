@@ -671,9 +671,41 @@ class ListArray(Content):
                 self._parameters,
             )
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._starts) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        next = self.toListOffsetArray64(True)
+        out = next._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+        return out
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
+        if len(self._starts) == 0:
+            return self
+
         return self.toListOffsetArray64(True)._sort_next(
             negaxis,
             starts,

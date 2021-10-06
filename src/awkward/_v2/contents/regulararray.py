@@ -521,6 +521,46 @@ class RegularArray(Content):
                 self._parameters,
             )
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if self._length == 0:
+            return ak._v2.contents.NumpyArray(np.empty(0, np.int64))
+
+        next = self.toListOffsetArray64(True)
+        out = next._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+        if isinstance(out, ak._v2.contents.RegularArray):
+            if isinstance(out._content, ak._v2.contents.ListOffsetArray):
+                return ak._v2.contents.RegularArray(
+                    out._content.toRegularArray(),
+                    out._size,
+                    out._length,
+                    None,
+                    out._parameters,
+                )
+
+        return out
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
