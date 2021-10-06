@@ -395,6 +395,74 @@ class NumpyArray(Content):
 
         return True
 
+    def _is_unique(self, axis):
+        if len(self._data) == 0:
+            return True
+
+        out = self.unique(axis)
+        return len(out._data) == len(self._data)
+
+    def _unique(self, axis, starts, parents):
+        nplike = self.nplike
+
+        parents_length = len(parents)
+        offsets_length = ak._v2.index.Index64.empty(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_sorting_ranges_length",
+                offsets_length.dtype.type,
+                parents.dtype.type,
+            ](
+                offsets_length.to(nplike),
+                parents.to(nplike),
+                parents_length,
+            )
+        )
+
+        offsets = ak._v2.index.Index64.empty(offsets_length, nplike)
+        self._handle_error(
+            nplike[  # noqa: E231
+                "awkward_sorting_ranges",
+                offsets.dtype.type,
+                parents.dtype.type,
+            ](
+                offsets.to(nplike),
+                offsets_length[0],
+                parents.to(nplike),
+                parents_length,
+            )
+        )
+
+        out = ak._v2.contents.NumpyArray(nplike.empty(len(self._data), self.dtype))
+        self._handle_error(
+            nplike[
+                "awkward_sort",
+                out._data.dtype.type,
+                self._data.dtype.type,
+                offsets.dtype.type,
+            ](
+                out._data,
+                self._data,
+                self.shape[0],
+                offsets.to(nplike),
+                offsets_length[0],
+                parents_length,
+                True,
+                False,
+            )
+        )
+
+        nextoffsets = ak._v2.index.Index64.zeros(offsets_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_unique",
+                out._data.dtype.type,
+                nextoffsets.dtype.type,
+            ](out._data, len(out._data), nextoffsets.to(nplike))
+        )
+
+        return out[0 : nextoffsets[0]]
+
     def _argsort_next(
         self,
         negaxis,
