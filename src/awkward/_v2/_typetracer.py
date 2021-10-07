@@ -238,7 +238,9 @@ class TypeTracerArray(object):
                 if isinstance(wh, int):
                     shapes.append(numpy.array(0))
                 elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
-                    sh = [int(x) for x in wh.shape]
+                    sh = [
+                        x.min if isinstance(x, Interval) else int(x) for x in wh.shape
+                    ]
                     shapes.append(
                         numpy.lib.stride_tricks.as_strided(
                             numpy.array(0), shape=sh, strides=[0] * len(sh)
