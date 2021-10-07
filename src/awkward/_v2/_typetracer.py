@@ -193,6 +193,17 @@ class TypeTracerArray(object):
 
             return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
 
+        elif (
+            hasattr(where, "dtype")
+            and hasattr(where, "shape")
+            and issubclass(getattr(where, "dtype").type, np.integer)
+        ):
+            assert len(self._shape) != 0
+
+            return TypeTracerArray(
+                self._dtype, shape=where.shape + self._shape[1:], fill=self._fill
+            )
+
         else:
             raise NotImplementedError(repr(where))
 
