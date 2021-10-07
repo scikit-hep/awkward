@@ -156,13 +156,13 @@ class RegularArray(Content):
             copied = True
 
         negative = where < 0
-        if nplike.any(negative):
+        if nplike.any(negative, prefer=False):
             if not copied:
                 where = where.copy()
                 copied = True
             where[negative] += self._length
 
-        if nplike.any(where >= self._length):
+        if nplike.any(where >= self._length, prefer=False):
             raise NestedIndexError(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)

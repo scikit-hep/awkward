@@ -4,12 +4,13 @@ from __future__ import absolute_import
 
 import numbers
 
+import numpy
+
 import awkward.nplike
 import awkward._util
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
 
 
 class NoError(object):
@@ -36,8 +37,8 @@ class Interval(object):
 
     def __init__(self, min, max):
         assert max is None or min <= max
-        self._min = min
-        self._max = max
+        self._min = int(min)
+        self._max = None if max is None else int(max)
 
     def __str__(self):
         if self._max is None:
@@ -93,6 +94,27 @@ class Interval(object):
         if self._max is not None:
             self._max += other
         return self
+
+    def __ge__(self, other):
+        if isinstance(other, Interval):
+            return NotImplemented
+
+        elif isinstance(other, numbers.Integral):
+            return self._min >= other
+
+        else:
+            return NotImplemented
+
+
+def _length_after_slice(slice, original_length):
+    start, stop, step = slice.indices(original_length)
+    assert step != 0
+
+    if (step > 0 and stop - start > 0) or (step < 0 and stop - start < 0):
+        d, m = divmod(abs(start - stop), abs(step))
+        return d + (1 if m != 0 else 0)
+    else:
+        return 0
 
 
 class TypeTracerArray(object):
@@ -164,28 +186,34 @@ class TypeTracerArray(object):
         return self._shape[0]
 
     def __getitem__(self, where):
-        if isinstance(where, numbers.Integral):
+        if isinstance(where, tuple):
+            try:
+                i = where.index(...)
+            except ValueError:
+                pass
+            else:
+                before, after = where[:i], where[i + 1 :]
+                missing = max(0, len(self._shape) - (len(before) + len(after)))
+                where = before + (slice(None, None, None),) * missing + after
+
+        if isinstance(where, int):
             if len(self._shape) == 1:
                 return self._dtype.type(self._fill)
             else:
                 return numpy.full(self._shape[1:], self._fill, dtype=self._dtype)
 
-        elif isinstance(where, slice) and (where.step is None or where.step == 1):
-            start, stop, _ = where.indices(self._shape[0].min)
-            length1 = max(0, stop - start)
+        elif isinstance(where, slice):
+            length1 = _length_after_slice(where, self._shape[0].min)
 
             if self._shape[0].max is not None:
-                start, stop, _ = where.indices(self._shape[0].max)
-                length2 = max(0, stop - start)
+                length2 = _length_after_slice(where, self._shape[0].max)
             else:
                 if where.start is not None and where.stop is not None:
-                    start, stop, _ = where.indices(
-                        max(abs(where.start), abs(where.stop))
+                    length2 = _length_after_slice(
+                        where, max(abs(where.start), abs(where.stop))
                     )
-                    length2 = max(0, stop - start)
                 elif where.stop is not None:
-                    start, stop, _ = where.indices(abs(where.stop))
-                    length2 = max(0, stop - start)
+                    length2 = _length_after_slice(abs(where.stop))
                 else:
                     length2 = None
 
@@ -196,16 +224,113 @@ class TypeTracerArray(object):
         elif (
             hasattr(where, "dtype")
             and hasattr(where, "shape")
-            and issubclass(getattr(where, "dtype").type, np.integer)
+            and issubclass(where.dtype.type, np.integer)
         ):
             assert len(self._shape) != 0
+            shape = where.shape + self._shape[1:]
+            return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
 
-            return TypeTracerArray(
-                self._dtype, shape=where.shape + self._shape[1:], fill=self._fill
-            )
+        elif (
+            isinstance(where, tuple)
+            and len(where) > 0
+            and isinstance(where[0], (int, slice))
+        ):
+            head, tail = where[0], where[1:]
+            next = self.__getitem__(head)
+
+            inner_shape = next.shape[1:]
+            after_shape = []
+            for i, wh in enumerate(tail):
+                if isinstance(wh, int):
+                    pass
+                elif isinstance(wh, slice):
+                    after_shape.append(_length_after_slice(wh, inner_shape[i]))
+                else:
+                    raise NotImplementedError(repr(wh))
+
+            shape = (next._shape[0],) + tuple(after_shape)
+            return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
+
+        elif isinstance(where, tuple) and any(
+            hasattr(x, "dtype") and hasattr(x, "shape") for x in where
+        ):
+            shapes = []
+            for i, wh in enumerate(where):
+                if isinstance(wh, int):
+                    shapes.append(())
+                elif isinstance(wh, slice):
+                    shapes.append(_length_after_slice(wh, self._shape[i]))
+                elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
+                    shapes.append(wh.shape)
+                else:
+                    raise NotImplementedError(repr(wh))
+
+            slicer_shape = numpy.broadcast_shapes(*shapes)
+
+            shape = slicer_shape + self._shape[len(shapes) :]
+            return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
 
         else:
             raise NotImplementedError(repr(where))
+
+    def __lt__(self, other):
+        if isinstance(other, numbers.Real):
+            return TypeTracerArray(np.bool_, shape=self._shape, fill=False)
+        else:
+            return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, numbers.Real):
+            return TypeTracerArray(np.bool_, shape=self._shape, fill=False)
+        else:
+            return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, numbers.Real):
+            return TypeTracerArray(np.bool_, shape=self._shape, fill=False)
+        else:
+            return NotImplemented
+
+    def __ge__(self, other):
+        if isinstance(other, numbers.Real):
+            return TypeTracerArray(np.bool_, shape=self._shape, fill=False)
+        else:
+            return NotImplemented
+
+    def reshape(self, *args):
+        if len(args) == 1 and isinstance(args[0], tuple):
+            args = args[0]
+
+        assert len(args) != 0
+        assert all(isinstance(x, numbers.Integral) for x in args)
+        assert all(x >= 0 for x in args[1:])
+
+        if args[0] < 0:
+            minitems, maxitems = self._shape[0].min, self._shape[0].max
+            for x in self._shape[1:]:
+                minitems *= x
+                if maxitems is not None:
+                    maxitems *= x
+
+            divisor = 1
+            for x in args[1:]:
+                divisor *= x
+
+            minlength = minitems // divisor
+            if maxitems is None:
+                maxlength = None
+            else:
+                maxlength = maxitems // divisor
+
+            shape = (Interval(minlength, maxlength),) + args[1:]
+
+        else:
+            shape = (Interval.exact(args[0]),) + args[1:]
+
+        return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
+
+    def copy(self):
+        return self
 
 
 unset = object()
@@ -426,13 +551,13 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     ############################ reducers
 
-    def all(self, *args, **kwargs):
+    def all(self, array, prefer):
         # array
-        raise NotImplementedError
+        return prefer
 
-    def any(self, *args, **kwargs):
+    def any(self, array, prefer):
         # array
-        raise NotImplementedError
+        return prefer
 
     def count_nonzero(self, *args, **kwargs):
         # array

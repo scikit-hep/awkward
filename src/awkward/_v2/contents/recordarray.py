@@ -281,10 +281,10 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if nplike.any(negative):
+            if nplike.any(negative, prefer=False):
                 where[negative] += self._length
 
-            if nplike.any(where >= self._length):
+            if nplike.any(where >= self._length, prefer=False):
                 if issubclass(exception, NestedIndexError):
                     raise exception(self, where)
                 else:
