@@ -230,6 +230,33 @@ class TypeTracerArray(object):
             shape = where.shape + self._shape[1:]
             return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
 
+        elif isinstance(where, tuple) and any(
+            hasattr(x, "dtype") and hasattr(x, "shape") for x in where
+        ):
+            shapes = []
+            for wh in where:
+                if isinstance(wh, int):
+                    shapes.append(numpy.array(0))
+                elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
+                    sh = [int(x) for x in wh.shape]
+                    shapes.append(
+                        numpy.lib.stride_tricks.as_strided(
+                            numpy.array(0), shape=sh, strides=[0] * len(sh)
+                        )
+                    )
+                else:
+                    raise NotImplementedError(repr(wh))
+
+            slicer_shape = numpy.broadcast_arrays(*shapes)[0].shape
+
+            shape = slicer_shape + self._shape[len(shapes) :]
+            if len(shape) == 0:
+                fixed_shape = ()
+            else:
+                fixed_shape = (Interval.exact(shape[0]),) + shape[1:]
+
+            return TypeTracerArray(self._dtype, shape=fixed_shape, fill=self._fill)
+
         elif (
             isinstance(where, tuple)
             and len(where) > 0
@@ -249,25 +276,6 @@ class TypeTracerArray(object):
                     raise NotImplementedError(repr(wh))
 
             shape = (next._shape[0],) + tuple(after_shape)
-            return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
-
-        elif isinstance(where, tuple) and any(
-            hasattr(x, "dtype") and hasattr(x, "shape") for x in where
-        ):
-            shapes = []
-            for i, wh in enumerate(where):
-                if isinstance(wh, int):
-                    shapes.append(())
-                elif isinstance(wh, slice):
-                    shapes.append(_length_after_slice(wh, self._shape[i]))
-                elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
-                    shapes.append(wh.shape)
-                else:
-                    raise NotImplementedError(repr(wh))
-
-            slicer_shape = numpy.broadcast_shapes(*shapes)
-
-            shape = slicer_shape + self._shape[len(shapes) :]
             return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
 
         else:
