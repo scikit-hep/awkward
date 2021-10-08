@@ -133,7 +133,7 @@ class Index(object):
 
     def __getitem__(self, where):
         out = self._data[where]
-        if isinstance(out, type(self._data)):
+        if hasattr(out, "shape") and len(out.shape) != 0:
             return type(self)(out)
         else:
             return out

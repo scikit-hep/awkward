@@ -204,7 +204,7 @@ class TypeTracerArray(object):
                 missing = max(0, len(self._shape) - (len(before) + len(after)))
                 where = before + (slice(None, None, None),) * missing + after
 
-        if isinstance(where, int):
+        if isinstance(where, numbers.Integral):
             if len(self._shape) == 1:
                 return self._dtype.type(self._fill)
             else:
@@ -241,9 +241,20 @@ class TypeTracerArray(object):
         elif isinstance(where, tuple) and any(
             hasattr(x, "dtype") and hasattr(x, "shape") for x in where
         ):
+            for num_basic, wh in enumerate(where):  # noqa: B007
+                if not isinstance(wh, slice):
+                    break
+
+            if num_basic != 0:
+                tmp = self.__getitem__(where[:num_basic])
+                basic_shape = tmp._shape[:num_basic]
+            else:
+                basic_shape = ()
+
             shapes = []
-            for wh in where:
-                if isinstance(wh, int):
+            for j in range(num_basic, len(where)):
+                wh = where[j]
+                if isinstance(wh, numbers.Integral):
                     shapes.append(numpy.array(0))
                 elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
                     sh = [
@@ -259,9 +270,9 @@ class TypeTracerArray(object):
 
             slicer_shape = numpy.broadcast_arrays(*shapes)[0].shape
 
-            shape = slicer_shape + self._shape[len(shapes) :]
-            if len(shape) == 0:
-                fixed_shape = ()
+            shape = basic_shape + slicer_shape + self._shape[num_basic + len(shapes) :]
+            if len(shape) == 0 or isinstance(shape[0], Interval):
+                fixed_shape = shape
             else:
                 fixed_shape = (Interval.exact(shape[0]),) + shape[1:]
 
@@ -270,7 +281,7 @@ class TypeTracerArray(object):
         elif (
             isinstance(where, tuple)
             and len(where) > 0
-            and isinstance(where[0], (int, slice))
+            and isinstance(where[0], (numbers.Integral, slice))
         ):
             head, tail = where[0], where[1:]
             next = self.__getitem__(head)
