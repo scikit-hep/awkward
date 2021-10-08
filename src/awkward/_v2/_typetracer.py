@@ -188,7 +188,7 @@ class TypeTracerArray(object):
     def __getitem__(self, where):
         if isinstance(where, tuple):
             try:
-                i = where.index(...)
+                i = where.index(Ellipsis)
             except ValueError:
                 pass
             else:
