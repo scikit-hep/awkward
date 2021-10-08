@@ -366,7 +366,7 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            nplike = head.nplike
+            nplike = self._content.nplike
 
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))

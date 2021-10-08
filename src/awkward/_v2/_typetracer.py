@@ -182,6 +182,14 @@ class TypeTracerArray(object):
     def ndim(self):
         return len(self._shape)
 
+    def __iter__(self):
+        raise AssertionError(
+            "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
+        )
+
+    def __array__(self):
+        return self.__iter__()
+
     def __len__(self):
         return self._shape[0]
 
