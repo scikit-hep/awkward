@@ -204,7 +204,7 @@ class RecordArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         return Record(self, where)
 
@@ -318,6 +318,16 @@ class RecordArray(Content):
                 self._carry_identifier(carry, exception),
                 self._parameters,
             )
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        contents = []
+        for i in range(len(self._contents)):
+            contents.append(
+                self.content(i)._getitem_next_jagged(
+                    slicestarts, slicestops, slicecontent, tail
+                )
+            )
+        return RecordArray(contents, self._keys, self._length)
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():

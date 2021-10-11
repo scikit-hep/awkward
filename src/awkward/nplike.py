@@ -135,6 +135,9 @@ NumpyMetadata.all_complex = tuple(
 
 
 class NumpyLike(Singleton):
+    known_shape = True
+    known_dtype = True
+
     ############################ array creation
 
     def array(self, *args, **kwargs):

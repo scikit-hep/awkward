@@ -784,15 +784,22 @@ def test_double_jagged():
     array1 = v1_to_v2(array1.layout)
 
     assert ak.to_list(regulararray[:, array1]) == [[[2, 1, 0], [5]], [[8, 7, 6], [13]]]
+    assert regulararray.typetracer[:, array1].form == regulararray[:, array1].form
     assert ak.to_list(regulararray[1:, array1]) == [[[8, 7, 6], [13]]]
+    assert regulararray.typetracer[1:, array1].form == regulararray[1:, array1].form
 
     offsets = ak.layout.Index64(np.array([0, 2, 4], dtype=np.int64))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+    listoffsetarray = v1_to_v2(listoffsetarray)
     assert ak.to_list(listoffsetarray[:, array1]) == [
         [[2, 1, 0], [5]],
         [[8, 7, 6], [13]],
     ]
+    assert listoffsetarray.typetracer[:, array1].form == listoffsetarray[:, array1].form
     assert ak.to_list(listoffsetarray[1:, array1]) == [[[8, 7, 6], [13]]]
+    assert (
+        listoffsetarray.typetracer[1:, array1].form == listoffsetarray[1:, array1].form
+    )
 
 
 def test_masked_jagged():
@@ -805,6 +812,7 @@ def test_masked_jagged():
     array1 = v1_to_v2(array1.layout)
 
     assert ak.to_list(array[array1]) == [[3.3, 2.2], None, [], None, [8.8, 7.7]]
+    assert array.typetracer[array1].form == array[array1].form
 
 
 def test_jagged_masked():
@@ -817,6 +825,7 @@ def test_jagged_masked():
     array1 = v1_to_v2(array1.layout)
 
     assert ak.to_list(array[array1]) == [[3.3, None], [], [None, 4.4], [None], [8.8]]
+    assert array.typetracer[array1].form == array[array1].form
 
 
 def test_regular_regular():
@@ -840,11 +849,13 @@ def test_regular_regular():
         [[2], [6, 8], [14, 12, 10]],
         [[17], [21, 23], [25, 27, 29]],
     ]
+    assert regulararray2.typetracer[array1].form == regulararray2[array1].form
 
     assert ak.to_list(regulararray2[array2]) == [
         [[2], [6, 8], [14, None, 10]],
         [[17], [21, 23], [25, None, 29]],
     ]
+    assert regulararray2.typetracer[array2].form == regulararray2[array2].form
 
 
 def test_masked_of_jagged_of_whatever():
@@ -867,11 +878,13 @@ def test_masked_of_jagged_of_whatever():
         [[2], None, [14, 12, 10]],
         [[17], None, [25, 27, 29]],
     ]
+    assert regulararray2.typetracer[array1].form == regulararray2[array1].form
 
     assert ak.to_list(regulararray2[array2]) == [
         [[2], None, [14, None, 10]],
         [[17], None, [25, None, 29]],
     ]
+    assert regulararray2.typetracer[array2].form == regulararray2[array2].form
 
 
 def test_emptyarray():
@@ -894,10 +907,14 @@ def test_emptyarray():
     assert ak.to_list(listoffsetarray) == [[], [], [], []]
 
     assert ak.to_list(listoffsetarray[array1]) == [[], [], [], []]
+    assert listoffsetarray.typetracer[array1].form == listoffsetarray[array1].form
 
     assert ak.to_list(listoffsetarray[array2]) == [[], [None], [], []]
+    assert listoffsetarray.typetracer[array2].form == listoffsetarray[array2].form
     assert ak.to_list(listoffsetarray[array3]) == [[], [], None, []]
+    assert listoffsetarray.typetracer[array3].form == listoffsetarray[array3].form
     assert ak.to_list(listoffsetarray[array4]) == [[], [None], None, []]
+    assert listoffsetarray.typetracer[array4].form == listoffsetarray[array4].form
 
     with pytest.raises(ValueError):
         listoffsetarray[array5]
@@ -926,6 +943,7 @@ def test_record():
     array3 = ak.Array([[-1, 1], [0, 0, None, 1], [-1, -2]], check_valid=True)
     array4 = ak.Array([[-1, 1], None, [-1, -2]], check_valid=True)
 
+    array = v1_to_v2(array.layout)
     array2 = v1_to_v2(array2.layout)
     array3 = v1_to_v2(array3.layout)
     array4 = v1_to_v2(array4.layout)
@@ -935,16 +953,19 @@ def test_record():
         {"x": [3, 3, 4], "y": [4.4, 4.4, 5.5]},
         {"x": [8, 7], "y": [9.9, 8.8]},
     ]
+    assert array.typetracer[array2].form == array[array2].form
     assert ak.to_list(array[array3]) == [
         {"x": [2, 1], "y": [3.3, 1.1]},
         {"x": [3, 3, None, 4], "y": [4.4, 4.4, None, 5.5]},
         {"x": [8, 7], "y": [9.9, 8.8]},
     ]
+    assert array.typetracer[array3].form == array[array3].form
     assert ak.to_list(array[array4]) == [
         {"x": [2, 1], "y": [3.3, 1.1]},
         None,
         {"x": [8, 7], "y": [9.9, 8.8]},
     ]
+    assert array.typetracer[array4].form == array[array4].form
 
 
 def test_indexedarray():
@@ -966,6 +987,7 @@ def test_indexedarray():
     array1 = ak.Array([[0, -1], [0], [], [1, 1]], check_valid=True)
     array1 = v1_to_v2(array1.layout)
     assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
+    assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
     array1 = ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)
     array1 = v1_to_v2(array1.layout)
@@ -976,16 +998,19 @@ def test_indexedarray():
         [None],
         [1.1, None, 1.1],
     ]
+    assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
     array1 = ak.Array([[0, -1], [0], None, [1, 1]], check_valid=True)
     array1 = v1_to_v2(array1.layout)
 
     assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, [1.1, 1.1]]
+    assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
     array1 = ak.Array([[0, -1], [0], None, [None]], check_valid=True)
     array1 = v1_to_v2(array1.layout)
 
     assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, [None]]
+    assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
     index = ak.layout.Index64(np.array([3, 2, 1, 0], dtype=np.int64))
     indexedarray = ak.layout.IndexedOptionArray64(index, array)
@@ -1002,6 +1027,10 @@ def test_indexedarray():
     assert ak.to_list(
         indexedarray[ak.Array([[0, -1], [0], [], [1, 1]], check_valid=True)]
     ) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
+    assert (
+        indexedarray.typetracer[ak.Array([[0, -1], [0], [], [1, 1]])].form
+        == indexedarray[ak.Array([[0, -1], [0], [], [1, 1]])].form
+    )
 
     array1 = ak.Array([[0, -1], [0], [None], [1, None, 1]], check_valid=True)
     array1 = v1_to_v2(array1.layout)
@@ -1012,11 +1041,13 @@ def test_indexedarray():
         [None],
         [1.1, None, 1.1],
     ]
+    assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
     array1 = ak.Array([[0, -1], [0], None, []], check_valid=True)
     array1 = v1_to_v2(array1.layout)
 
     assert ak.to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, []]
+    assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
     array1 = ak.Array([[0, -1], [0], None, [1, None, 1]], check_valid=True)
     array1 = v1_to_v2(array1.layout)
@@ -1027,6 +1058,7 @@ def test_indexedarray():
         None,
         [1.1, None, 1.1],
     ]
+    assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
 
 def test_indexedarray2():
@@ -1052,6 +1084,7 @@ def test_indexedarray2():
         None,
         [1.1, 1.1],
     ]
+    assert indexedarray.typetracer[array].form == indexedarray[array].form
 
 
 def test_indexedarray2b():
@@ -1077,6 +1110,7 @@ def test_indexedarray2b():
         [5.5],
         [6.6, 9.9],
     ]
+    assert indexedarray.typetracer[array].form == indexedarray[array].form
 
 
 def test_bytemaskedarray2b():
@@ -1102,6 +1136,7 @@ def test_bytemaskedarray2b():
         [5.5],
         [6.6, 9.9],
     ]
+    assert maskedarray.typetracer[array].form == maskedarray[array].form
 
 
 def test_bitmaskedarray2b():
@@ -1128,6 +1163,7 @@ def test_bitmaskedarray2b():
         [5.5],
         [6.6, 9.9],
     ]
+    assert maskedarray.typetracer[array].form == maskedarray[array].form
 
 
 def test_indexedarray3():
@@ -1152,6 +1188,7 @@ def test_indexedarray3():
         [None, 4.4],
         [],
     ]
+    assert array.typetracer[array2].form == array[array2].form
 
     array = ak.Array([[0.0, 1.1, 2.2], [3.3, 4.4], None, [5.5]])
     array2 = ak.Array([3, 2, 1])
@@ -1168,6 +1205,7 @@ def test_indexedarray3():
     array6 = v1_to_v2(array6.layout)
 
     assert ak.to_list(array[array2]) == [[5.5], None, [3.3, 4.4]]
+    assert array.typetracer[array2].form == array[array2].form
     assert ak.to_list(array[array3]) == [
         [5.5],
         None,
@@ -1175,6 +1213,7 @@ def test_indexedarray3():
         None,
         [0.0, 1.1, 2.2],
     ]
+    assert array.typetracer[array3].form == array[array3].form
 
     assert (ak.to_list(array[array4])) == [
         [2.2, 1.1, 1.1, 0.0],
@@ -1182,6 +1221,7 @@ def test_indexedarray3():
         None,
         [5.5],
     ]
+    assert array.typetracer[array4].form == array[array4].form
 
     assert ak.to_list(array[array5]) == [
         [2.2, 1.1, 1.1, 0],
@@ -1189,6 +1229,7 @@ def test_indexedarray3():
         None,
         [5.5],
     ]
+    assert array.typetracer[array5].form == array[array5].form
     with pytest.raises(IndexError):
         array[array6]
 
@@ -1204,10 +1245,12 @@ def test_sequential():
         [[10, 11, 12, 13, 14], [5, 6, 7, 8, 9], [0, 1, 2, 3, 4]],
         [[25, 26, 27, 28, 29], [20, 21, 22, 23, 24], [15, 16, 17, 18, 19]],
     ]
+    assert array.typetracer[array2].form == array[array2].form
     assert ak.to_list(array[array2, :2]) == [
         [[10, 11], [5, 6], [0, 1]],
         [[25, 26], [20, 21], [15, 16]],
     ]
+    assert array.typetracer[array2, :2].form == array[array2, :2].form
 
 
 def test_union():
@@ -1255,6 +1298,7 @@ def test_union_2():
         [],
         [10.0, 11.1, 12.2],
     ]
+    assert unionarray.typetracer[array].form == unionarray[array].form
 
 
 def test_jagged_mask():
@@ -1265,18 +1309,58 @@ def test_jagged_mask():
     assert ak.to_list(
         array[[[True, True, True], [], [True, True], [True], [True, True, True]]]
     ) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert (
+        array.typetracer[
+            [[True, True, True], [], [True, True], [True], [True, True, True]]
+        ].form
+        == array[
+            [[True, True, True], [], [True, True], [True], [True, True, True]]
+        ].form
+    )
     assert ak.to_list(
         array[[[False, True, True], [], [True, True], [True], [True, True, True]]]
     ) == [[2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert (
+        array.typetracer[
+            [[False, True, True], [], [True, True], [True], [True, True, True]]
+        ].form
+        == array[
+            [[False, True, True], [], [True, True], [True], [True, True, True]]
+        ].form
+    )
     assert ak.to_list(
         array[[[True, False, True], [], [True, True], [True], [True, True, True]]]
     ) == [[1.1, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert (
+        array.typetracer[
+            [[True, False, True], [], [True, True], [True], [True, True, True]]
+        ].form
+        == array[
+            [[True, False, True], [], [True, True], [True], [True, True, True]]
+        ].form
+    )
     assert ak.to_list(
         array[[[True, True, True], [], [False, True], [True], [True, True, True]]]
     ) == [[1.1, 2.2, 3.3], [], [5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert (
+        array.typetracer[
+            [[True, True, True], [], [False, True], [True], [True, True, True]]
+        ].form
+        == array[
+            [[True, True, True], [], [False, True], [True], [True, True, True]]
+        ].form
+    )
     assert ak.to_list(
         array[[[True, True, True], [], [False, False], [True], [True, True, True]]]
     ) == [[1.1, 2.2, 3.3], [], [], [6.6], [7.7, 8.8, 9.9]]
+    assert (
+        array.typetracer[
+            [[True, True, True], [], [False, False], [True], [True, True, True]]
+        ].form
+        == array[
+            [[True, True, True], [], [False, False], [True], [True, True, True]]
+        ].form
+    )
 
 
 def test_jagged_missing_mask():
@@ -1288,53 +1372,93 @@ def test_jagged_missing_mask():
         [],
         [4.4, 5.5],
     ]
+    assert (
+        array.typetracer[[[True, True, True], [], [True, True]]].form
+        == array[[[True, True, True], [], [True, True]]].form
+    )
     assert ak.to_list(array[[[True, False, True], [], [True, True]]]) == [
         [1.1, 3.3],
         [],
         [4.4, 5.5],
     ]
+    assert (
+        array.typetracer[[[True, False, True], [], [True, True]]].form
+        == array[[[True, False, True], [], [True, True]]].form
+    )
     assert ak.to_list(array[[[True, True, False], [], [False, None]]]) == [
         [1.1, 2.2],
         [],
         [None],
     ]
+    assert (
+        array.typetracer[[[True, True, False], [], [False, None]]].form
+        == array[[[True, True, False], [], [False, None]]].form
+    )
     assert ak.to_list(array[[[True, True, False], [], [True, None]]]) == [
         [1.1, 2.2],
         [],
         [4.4, None],
     ]
+    assert (
+        array.typetracer[[[True, True, False], [], [True, None]]].form
+        == array[[[True, True, False], [], [True, None]]].form
+    )
 
     assert ak.to_list(array[[[True, None, True], [], [True, True]]]) == [
         [1.1, None, 3.3],
         [],
         [4.4, 5.5],
     ]
+    assert (
+        array.typetracer[[[True, None, True], [], [True, True]]].form
+        == array[[[True, None, True], [], [True, True]]].form
+    )
     assert ak.to_list(array[[[True, None, False], [], [True, True]]]) == [
         [1.1, None],
         [],
         [4.4, 5.5],
     ]
+    assert (
+        array.typetracer[[[True, None, False], [], [True, True]]].form
+        == array[[[True, None, False], [], [True, True]]].form
+    )
 
     assert ak.to_list(array[[[False, None, False], [], [True, True]]]) == [
         [None],
         [],
         [4.4, 5.5],
     ]
+    assert (
+        array.typetracer[[[False, None, False], [], [True, True]]].form
+        == array[[[False, None, False], [], [True, True]]].form
+    )
     assert ak.to_list(array[[[True, True, False], [], [False, True]]]) == [
         [1.1, 2.2],
         [],
         [5.5],
     ]
+    assert (
+        array.typetracer[[[True, True, False], [], [False, True]]].form
+        == array[[[True, True, False], [], [False, True]]].form
+    )
     assert ak.to_list(array[[[True, True, None], [], [False, True]]]) == [
         [1.1, 2.2, None],
         [],
         [5.5],
     ]
+    assert (
+        array.typetracer[[[True, True, None], [], [False, True]]].form
+        == array[[[True, True, None], [], [False, True]]].form
+    )
     assert ak.to_list(array[[[True, True, False], [None], [False, True]]]) == [
         [1.1, 2.2],
         [None],
         [5.5],
     ]
+    assert (
+        array.typetracer[[[True, True, False], [None], [False, True]]].form
+        == array[[[True, True, False], [None], [False, True]]].form
+    )
 
 
 def test_array_boolean_to_int():

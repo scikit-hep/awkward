@@ -109,7 +109,7 @@ class RegularArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))
@@ -165,7 +165,7 @@ class RegularArray(Content):
         if nplike.any(where >= self._length, prefer=False):
             raise NestedIndexError(self, where)
 
-        nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
+        nextcarry = ak._v2.index.Index64.empty(where.shape[0] * self._size, nplike)
 
         self._handle_error(
             nplike[
@@ -461,7 +461,7 @@ class RegularArray(Content):
                     "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
-            if len(head) != self._size:
+            if len(head) != self._size and nplike.known_shape:
                 raise NestedIndexError(
                     self,
                     head,

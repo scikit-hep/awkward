@@ -84,15 +84,64 @@ class Interval(object):
                 return Interval(self._min + other, self._max + other)
 
         else:
-            raise TypeError("cannot add Interval and {0}".format(type(other)))
+            return NotImplemented
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __iadd__(self, other):
-        self._min += other
-        if self._max is not None:
-            self._max += other
+        if isinstance(other, Interval):
+            self._min += other._min
+            if self._max is not None and other._max is not None:
+                self._max += other._max
+            else:
+                self._max = None
+
+        elif isinstance(other, numbers.Integral):
+            self._min += other
+            if self._max is not None:
+                self._max += other
+
+        else:
+            return NotImplemented
+
+        return self
+
+    def __mul__(self, other):
+        if isinstance(other, Interval):
+            if self._max is None or other._max is None:
+                return Interval(self._min * other._min, None)
+            else:
+                return Interval(self._min * other._min, self._max * other._max)
+
+        elif isinstance(other, numbers.Integral):
+            if self._max is None:
+                return Interval(self._min * other, None)
+            else:
+                return Interval(self._min * other, self._max * other)
+
+        else:
+            return NotImplemented
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __imul__(self, other):
+        if isinstance(other, Interval):
+            self._min *= other._min
+            if self._max is not None and other._max is not None:
+                self._max *= other._max
+            else:
+                self._max = None
+
+        elif isinstance(other, numbers.Integral):
+            self._min *= other
+            if self._max is not None:
+                self._max *= other
+
+        else:
+            return NotImplemented
+
         return self
 
     def __ge__(self, other):
@@ -133,23 +182,8 @@ class TypeTracerArray(object):
         return cls(dtype, shape=shape, fill_zero=fill_zero, fill_other=fill_other)
 
     def __init__(self, dtype, shape=None, fill_zero=0, fill_other=0):
-        if shape is None:
-            shape = (Interval.unknown(),)
-        elif isinstance(shape, Interval):
-            shape = (shape,)
-        elif isinstance(shape, numbers.Integral):
-            shape = (Interval.exact(shape),)
-        else:
-            if len(shape) == 0:
-                shape = ()
-            elif isinstance(shape[0], Interval):
-                if not isinstance(shape, tuple):
-                    shape = tuple(shape)
-            elif isinstance(shape[0], numbers.Integral):
-                shape = (Interval.exact(shape[0]),) + tuple(shape[1:])
-
         self._dtype = np.dtype(dtype)
-        self._shape = shape
+        self.shape = shape
         self._fill_zero = fill_zero
         self._fill_other = fill_other
 
@@ -174,6 +208,24 @@ class TypeTracerArray(object):
     @property
     def shape(self):
         return self._shape
+
+    @shape.setter
+    def shape(self, value):
+        if value is None:
+            value = (Interval.unknown(),)
+        elif isinstance(value, Interval):
+            value = (value,)
+        elif isinstance(value, numbers.Integral):
+            value = (Interval.exact(value),)
+        else:
+            if len(value) == 0:
+                value = ()
+            elif isinstance(value[0], Interval):
+                if not isinstance(value, tuple):
+                    value = tuple(value)
+            elif isinstance(value[0], numbers.Integral):
+                value = (Interval.exact(value[0]),) + tuple(value[1:])
+        self._shape = value
 
     @property
     def fill_zero(self):
@@ -396,6 +448,8 @@ unset = object()
 
 
 class TypeTracer(ak.nplike.NumpyLike):
+    known_shape = False
+
     def to_rectilinear(self, array, *args, **kwargs):
         raise NotImplementedError
 

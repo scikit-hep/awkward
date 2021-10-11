@@ -115,7 +115,7 @@ class IndexedOptionArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         if self._index[where] < 0:
             return None
@@ -202,7 +202,7 @@ class IndexedOptionArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
-        if len(slicestarts) != len(self):
+        if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),

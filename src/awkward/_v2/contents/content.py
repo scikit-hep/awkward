@@ -183,7 +183,7 @@ class Content(object):
 
         index = ak._v2.index.Index64(head._index)
         content = that._getitem_at(0)
-        if len(content) < len(index):
+        if len(content) < len(index) and nplike.known_shape:
             raise NestedIndexError(
                 self,
                 head,
