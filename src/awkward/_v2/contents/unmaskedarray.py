@@ -61,6 +61,21 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return self.content
+        else:
+            return self
+
     def toByteMaskedArray(self):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
             ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
@@ -130,7 +145,7 @@ class UnmaskedArray(Content):
                 self.content._getitem_next(head, tail, advanced),
                 self._identifier,
                 self._parameters,
-            )._simplify_optiontype()
+            ).simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -201,7 +216,7 @@ class UnmaskedArray(Content):
                 out._content,
                 None,
                 None,
-            )._simplify_optiontype()
+            ).simplify_optiontype()
 
             return ak._v2.contents.RegularArray(
                 tmp,
@@ -236,7 +251,7 @@ class UnmaskedArray(Content):
                 out._content,
                 self._identifier,
                 self._parameters,
-            )._simplify_optiontype()
+            ).simplify_optiontype()
 
             return ak._v2.contents.RegularArray(
                 tmp,

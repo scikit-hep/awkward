@@ -400,6 +400,74 @@ class IndexedArray(Content):
         )
         return out
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+
+            if isinstance(
+                self.content,
+                (
+                    ak._v2.contents.indexedarray.IndexedArray,
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ),
+            ):
+                inner = self.content.index
+                result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
+            elif isinstance(
+                self.content,
+                (
+                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                    ak._v2.contents.unmaskedarray.UnmaskedArray,
+                ),
+            ):
+                rawcontent = self.contents.toIndexedOptionArray64()
+                inner = rawcontent.index
+                result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
+
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedArray_simplify",
+                    result.dtype.type,
+                    self._index.dtype.type,
+                    inner.dtype.type,
+                ](
+                    result.to(self.nplike),
+                    self._index.to(self.nplike),
+                    len(self._index),
+                    inner.to(self.nplike),
+                    len(inner),
+                )
+            )
+            if isinstance(self.content, ak._v2.contents.indexedarray.IndexedArray):
+                return IndexedArray(
+                    result, self.content.content, self.identifier, self.parameters
+                )
+
+            if isinstance(
+                self.content,
+                (
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                    ak._v2.contents.unmaskedarray.UnmaskedArray,
+                ),
+            ):
+                return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                    result, self.content.content, self.identifier, self.parameters
+                )
+
+        else:
+            return self
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

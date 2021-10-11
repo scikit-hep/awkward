@@ -289,6 +289,21 @@ class BitMaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskeddarray.BitMaskedArray,
+                ak._v2.contents.unmaskeddarray.UnmaskedArray,
+            ),
+        ):
+            return self.toIndexedOptionArray64.simplify_optiontype
+        else:
+            return self
+
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
 

@@ -123,6 +123,152 @@ class UnionArray(Content):
         out.append(post)
         return "".join(out)
 
+    def simplify_uniontype(self, merge, mergebool):
+
+        tags = ak._v2.index.Index8.empty(len(self), self.nplike)
+        index = ak._v2.index.Index64.empty(len(self), self.nplike)
+        contents = []
+
+        for i in range(len(self.contents)):
+            if isinstance(self.content, ak._v2.contents.unionarray.UnionArray):
+                innertags = self.content.tags
+                innerindex = self.content.index
+                innercontents = self.content.contents
+                for j in range(len(innercontents)):
+                    unmerged = True
+                    for k in range(len(contents)):
+                        if merge and contents[k].mergeable(innercontents[j], mergebool):
+                            self._handle_error(
+                                self.nplike[
+                                    "awkward_UnionArray_simplify",
+                                    tags.dtype.type,
+                                    index.dtype.type,
+                                    self._tags.dtype.type,
+                                    self._index.dtype.type,
+                                    innertags.dtype.type,
+                                    innerindex.dtype.type,
+                                ](
+                                    tags.to(self.nplike),
+                                    index.to(self.nplike),
+                                    self._tags.to(self.nplike),
+                                    self._index.to(self.nplike),
+                                    len(self._index),
+                                    innertags.to(self.nplike),
+                                    innerindex.to(self.nplike),
+                                    k,
+                                    j,
+                                    i,
+                                    len(self),
+                                    len(contents[k]),
+                                )
+                            )
+                            contents[k] = contents[k].merge(innercontents[j])
+                            unmerged = False
+                            break
+
+                if unmerged:
+                    self._handle_error(
+                        self.nplike[
+                            "awkward_UnionArray_simplify",
+                            tags.dtype.type,
+                            index.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                            innertags.dtype.type,
+                            innerindex.dtype.type,
+                        ](
+                            tags.to(self.nplike),
+                            index.to(self.nplike),
+                            self._tags.to(self.nplike),
+                            self._index.to(self.nplike),
+                            innertags.to(self.nplike),
+                            innerindex.to(self.nplike),
+                            len(contents),
+                            j,
+                            i,
+                            len(self),
+                            0,
+                        )
+                    )
+
+                    contents.append(innercontents[j])
+            else:
+                unmerged = True
+                for k in range(len(contents)):
+                    if contents[k] == self.contents[i]:
+                        self._handle_error(
+                            self.nplike[
+                                "awkward_UnionArray_simplify_one",
+                                tags.dtype.type,
+                                index.dtype.type,
+                                self._tags.dtype.type,
+                                self._index.dtype.type,
+                            ](
+                                tags.to(self.nplike),
+                                index.to(self.nplike),
+                                self._tags.to(self.nplike),
+                                self._index.to(self.nplike),
+                                len(self),
+                                0,
+                            )
+                        )
+                        unmerged = False
+                        break
+
+                    elif merge and contents[k].mergeable(self.contents[i], mergebool):
+                        self._handle_error(
+                            self.nplike[
+                                "awkward_UnionArray_simplify_one",
+                                tags.dtype.type,
+                                index.dtype.type,
+                                self._tags.dtype.type,
+                                self._index.dtype.type,
+                            ](
+                                tags.to(self.nplike),
+                                index.to(self.nplike),
+                                self._tags.to(self.nplike),
+                                self._index.to(self.nplike),
+                                k,
+                                i,
+                                len(self),
+                                len(contents[k]),
+                            )
+                        )
+                        contents[k] = contents[k].merge(self.contents[i])
+                        unmerged = False
+                        break
+
+                if unmerged:
+                    self._handle_error(
+                        self.nplike[
+                            "awkward_UnionArray_simplify_one",
+                            tags.dtype.type,
+                            index.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                        ](
+                            tags.to(self.nplike),
+                            index.to(self.nplike),
+                            self._tags.to(self.nplike),
+                            self._index.to(self.nplike),
+                            len(contents),
+                            i,
+                            len(self),
+                            0,
+                        )
+                    )
+
+                    contents.append(self.contents[i])
+
+        if len(contents) > 2 ** 7:
+            raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
+
+        if len(contents) == 1:
+            return contents[0]._carry(index, True, NestedIndexError)
+
+        else:
+            return UnionArray(tags, index, contents, self.identifier, self.parameters)
+
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
 
@@ -242,7 +388,7 @@ class UnionArray(Content):
         return outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        simplified = self._simplify_uniontype()
+        simplified = self.simplify_uniontype(True, False)
         if (
             simplified.index.dtype == np.dtype(np.int32)
             or simplified.index.dtype == np.dtype(np.uint32)
@@ -282,7 +428,7 @@ class UnionArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out._simplify_uniontype()
+            return out.simplify_uniontype(True, False)
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -502,7 +648,7 @@ class UnionArray(Content):
         kind,
         order,
     ):
-        simplified = self._simplify_uniontype()
+        simplified = self.simplify_uniontype(True, True)
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
@@ -513,7 +659,7 @@ class UnionArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        simplified = self._simplify_uniontype()
+        simplified = self.simplify_uniontype(True, True)
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot sort an irreducible UnionArray")
 
@@ -532,7 +678,7 @@ class UnionArray(Content):
         mask,
         keepdims,
     ):
-        simplified = self._simplify_uniontype()
+        simplified = self.simplify_uniontype(True, True)
         if isinstance(simplified, UnionArray):
             raise ValueError(
                 "cannot call ak.{0} on an irreducible UnionArray".format(reducer.name)

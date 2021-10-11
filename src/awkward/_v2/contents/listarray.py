@@ -362,7 +362,7 @@ class ListArray(Content):
                 )
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
                     largeoffsets,
-                    indexedoptionarray._simplify_optiontype(),
+                    indexedoptionarray.simplify_optiontype(),
                     None,
                     self._parameters,
                 )

@@ -64,12 +64,6 @@ class Content(object):
             out.append(self._identifier._repr("\n" + indent, "", ""))
         return out
 
-    def _simplify_optiontype(self):
-        return self
-
-    def _simplify_uniontype(self):
-        return self
-
     def maybe_to_nplike(self, nplike):
         return None
 
@@ -174,7 +168,7 @@ class Content(object):
         )
 
         return ak._v2.contents.regulararray.RegularArray(
-            out._simplify_optiontype(), len(index), 1, None, self._parameters
+            out.simplify_optiontype(), len(index), 1, None, self._parameters
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
@@ -220,7 +214,7 @@ class Content(object):
         )
 
         return ak._v2.contents.regulararray.RegularArray(
-            out._simplify_optiontype(), len(index), 1, None, self._parameters
+            out.simplify_optiontype(), len(index), 1, None, self._parameters
         )
 
     def _getitem_next_missing(self, head, tail, advanced):

@@ -650,7 +650,6 @@ def test_bytemask():
     assert np.asarray(array2.bytemask()).tolist() == [0, 0, 0, 0, 0]
 
 
-@pytest.mark.skip(reason="Simplify Not Implemented")
 def test_indexedarray_simplify():
     array = ak.from_iter(
         ["one", "two", None, "three", None, None, "four", "five"], highlevel=False
@@ -661,13 +660,13 @@ def test_indexedarray_simplify():
     array = v1_to_v2(array)
     assert np.asarray(array.index).tolist() == [0, 1, -1, 2, -1, -1, 3, 4]
     assert (
-        ak.to_list(array2.simplify())
+        ak.to_list(array2.simplify_optiontype())
         == ak.to_list(array2)
         == [None, None, "two", "four", None]
     )
 
 
-@pytest.mark.skip(reason="Simplify Not Implemented")
+@pytest.mark.skip(reason="FIXME: assert False")
 def test_indexedarray_simplify_more():
     content = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
@@ -683,74 +682,83 @@ def test_indexedarray_simplify_more():
     array = ak.layout.IndexedArray32(
         index2_32, ak.layout.IndexedArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArray32(
         index2_32, ak.layout.IndexedArrayU32(index1_U32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArray32(
         index2_32, ak.layout.IndexedArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedArrayU32(index1_U32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedArrayU32(index1_U32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, 4.4, 2.2, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, 4.4, 2.2, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     index1_32 = ak.layout.Index32(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int32))
     index1_64 = ak.layout.Index64(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int64))
@@ -761,50 +769,56 @@ def test_indexedarray_simplify_more():
     array = ak.layout.IndexedArray32(
         index2_32, ak.layout.IndexedOptionArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArray32(
         index2_32, ak.layout.IndexedOptionArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedOptionArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedOptionArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedOptionArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedOptionArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, 0.0]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, 0.0]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     index1_32 = ak.layout.Index32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int32))
     index1_U32 = ak.layout.IndexU32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.uint32))
@@ -815,50 +829,56 @@ def test_indexedarray_simplify_more():
     array = ak.layout.IndexedOptionArray32(
         index2_32, ak.layout.IndexedArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, 2.2, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, 2.2, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedOptionArray32(
         index2_32, ak.layout.IndexedArrayU32(index1_U32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, 2.2, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, 2.2, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedOptionArray32(
         index2_32, ak.layout.IndexedArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, 2.2, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, 2.2, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, 2.2, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, 2.2, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedArrayU32(index1_U32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, 2.2, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, 2.2, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, 2.2, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, 2.2, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     index1_32 = ak.layout.Index32(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int32))
     index1_64 = ak.layout.Index64(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int64))
@@ -868,37 +888,40 @@ def test_indexedarray_simplify_more():
     array = ak.layout.IndexedOptionArray32(
         index2_32, ak.layout.IndexedOptionArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedOptionArray32(
         index2_32, ak.layout.IndexedOptionArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedOptionArray32(index1_32, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedOptionArray64(index1_64, content)
     )
+    array = v1_to_v2(array)
     assert ak.to_list(array) == [6.6, None, None, None]
-    assert ak.to_list(array.simplify()) == [6.6, None, None, None]
-    assert isinstance(array.simplify(), ak.layout.IndexedOptionArray64)
-    assert isinstance(array.simplify().content, ak.layout.NumpyArray)
+    assert ak.to_list(array.simplify_optiontype()) == [6.6, None, None, None]
+    assert isinstance(array.simplify_optiontype(), ak.layout.IndexedOptionArray64)
+    assert isinstance(array.simplify_optiontype().content, ak.layout.NumpyArray)
 
 
-@pytest.mark.skip(reason="Simplify Not Implemented")
 def test_unionarray_simplify_one():
     one = ak.from_iter([5, 4, 3, 2, 1], highlevel=False)
     two = ak.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
@@ -943,7 +966,6 @@ def test_unionarray_simplify_one():
     assert len(array.simplify().contents) == 2
 
 
-@pytest.mark.skip(reason="Simplify Not Implemented")
 def test_unionarray_simplify():
     one = ak.from_iter([5, 4, 3, 2, 1], highlevel=False)
     two = ak.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)

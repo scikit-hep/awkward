@@ -227,7 +227,7 @@ class IndexedOptionArray(Content):
         out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             outindex, out, self._identifier, self._parameters
         )
-        return out2._simplify_optiontype()
+        return out2.simplify_optiontype()
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         return self._getitem_next_jagged_generic(
@@ -246,7 +246,7 @@ class IndexedOptionArray(Content):
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._getitem_next(head, tail, advanced)
             out2 = IndexedOptionArray(outindex, out, self._identifier, self._parameters)
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -463,6 +463,60 @@ class IndexedOptionArray(Content):
         )
         return out
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+
+            if isinstance(
+                self.content,
+                (
+                    ak._v2.contents.indexedarray.IndexedArray,
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ),
+            ):
+                inner = self.content.index
+                result = ak._v2.index.Index64.zeros(len(self.index), self.nplike)
+            elif isinstance(
+                self.content,
+                (
+                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                    ak._v2.contents.unmaskedarray.UnmaskedArray,
+                ),
+            ):
+                rawcontent = self.content.toIndexedOptionArray64()
+                inner = rawcontent.index
+                result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
+
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedArray_simplify",
+                    result.dtype.type,
+                    self._index.dtype.type,
+                    inner.dtype.type,
+                ](
+                    result.to(self.nplike),
+                    self._index.to(self.nplike),
+                    len(self._index),
+                    inner.to(self.nplike),
+                    len(inner),
+                )
+            )
+            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                result, self.content.content, self.identifier, self.parameters
+            )
+
+        else:
+            return self
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -676,7 +730,7 @@ class IndexedOptionArray(Content):
             out,
             None,
             self._parameters,
-        )._simplify_optiontype()
+        ).simplify_optiontype()
 
         if inject_nones:
             out = ak._v2.contents.RegularArray(
@@ -717,7 +771,7 @@ class IndexedOptionArray(Content):
                     out._content,
                     None,
                     self._parameters,
-                )._simplify_optiontype()
+                ).simplify_optiontype()
 
                 if inject_nones:
                     return tmp
@@ -827,7 +881,7 @@ class IndexedOptionArray(Content):
             out,
             None,
             self._parameters,
-        )._simplify_optiontype()
+        ).simplify_optiontype()
 
         if inject_nones:
             out = ak._v2.contents.RegularArray(
@@ -868,7 +922,7 @@ class IndexedOptionArray(Content):
                     out._content,
                     None,
                     self._parameters,
-                )._simplify_optiontype()
+                ).simplify_optiontype()
 
                 if inject_nones:
                     return tmp
@@ -903,7 +957,7 @@ class IndexedOptionArray(Content):
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex, out, parameters=parameters
             )
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
     def _reduce_next(
         self,
@@ -1028,7 +1082,7 @@ class IndexedOptionArray(Content):
                     out.content,
                     None,
                     None,
-                )._simplify_optiontype()
+                ).simplify_optiontype()
 
                 return ak._v2.contents.ListOffsetArray(
                     outoffsets,

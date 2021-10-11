@@ -260,7 +260,7 @@ class ByteMaskedArray(Content):
         out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             outindex, out, self._identifier, self._parameters
         )
-        return out2._simplify_optiontype()
+        return out2.simplify_optiontype()
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         return self._getitem_next_jagged_generic(
@@ -284,7 +284,7 @@ class ByteMaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -315,6 +315,21 @@ class ByteMaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskeddarray.BitMaskedArray,
+                ak._v2.contents.unmaskeddarray.UnmaskedArray,
+            ),
+        ):
+            return self.toIndexedOptionArray64.simplify_optiontype
+        else:
+            return self
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -331,7 +346,7 @@ class ByteMaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
     def _argsort_next(
         self,
@@ -394,7 +409,7 @@ class ByteMaskedArray(Content):
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex, out, parameters=parameters
             )
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
     def _reduce_next(
         self,
@@ -524,7 +539,7 @@ class ByteMaskedArray(Content):
                     out.content,
                     None,
                     None,
-                )._simplify_optiontype()
+                ).simplify_optiontype()
 
                 return ak._v2.contents.ListOffsetArray(
                     outoffsets,
