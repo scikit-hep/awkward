@@ -559,9 +559,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             keepdims,
         )
 
-        if isinstance(next, ak._v2.contents.NumpyArray) and len(next) == 1:
-            return next
-
         return next[0]
 
     def argmin(self, axis=-1, mask=True, keepdims=False):

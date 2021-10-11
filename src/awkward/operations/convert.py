@@ -923,7 +923,22 @@ def to_list(array):
 
     See also #ak.from_iter and #ak.Array.tolist.
     """
-    if array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
+    if isinstance(array, np.bool_):
+        return bool(array)
+
+    elif isinstance(array, np.number):
+        if isinstance(array, (np.datetime64, np.timedelta64)):
+            return array
+        elif isinstance(array, np.integer):
+            return int(array)
+        elif isinstance(array, np.floating):
+            return float(array)
+        elif isinstance(array, np.all_complex):
+            return complex(array)
+        else:
+            raise NotImplementedError(type(array))
+
+    elif array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return array
 
     elif ak._util.py27 and isinstance(array, ak._util.unicode):

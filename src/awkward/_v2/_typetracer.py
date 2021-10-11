@@ -120,6 +120,9 @@ def _length_after_slice(slice, original_length):
 class TypeTracerArray(object):
     @classmethod
     def from_array(cls, array, dtype=None, fill=0):
+        if isinstance(array, ak._v2.index.Index):
+            array = array.data
+
         if dtype is None:
             dtype = array.dtype
 
@@ -411,21 +414,23 @@ class TypeTracer(ak.nplike.NumpyLike):
         # array[, dtype=]
         raise NotImplementedError
 
-    def zeros(self, *args, **kwargs):
+    def zeros(self, shape, dtype=np.float64, **kwargs):
         # shape/len[, dtype=]
-        raise NotImplementedError
+        return TypeTracerArray(dtype, shape)
 
-    def ones(self, *args, **kwargs):
+    def ones(self, shape, dtype=np.float64, **kwargs):
         # shape/len[, dtype=]
-        raise NotImplementedError
+        return TypeTracerArray(dtype, shape)
 
     def empty(self, shape, dtype=np.float64, **kwargs):
         # shape/len[, dtype=]
         return TypeTracerArray(dtype, shape)
 
-    def full(self, *args, **kwargs):
+    def full(self, shape, value, dtype=unset, **kwargs):
         # shape/len, value[, dtype=]
-        raise NotImplementedError
+        if dtype is unset:
+            dtype = numpy.array(value).dtype
+        return TypeTracerArray(dtype, shape, fill=value)
 
     def zeros_like(self, *args, **kwargs):
         # array

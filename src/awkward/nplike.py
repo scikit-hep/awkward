@@ -129,6 +129,10 @@ if hasattr(numpy, "datetime64"):
 if hasattr(numpy, "timedelta64"):
     NumpyMetadata.timedelta64 = numpy.timedelta64
 
+NumpyMetadata.all_complex = tuple(
+    x for x in dir(NumpyMetadata) if x.startswith("complex")
+)
+
 
 class NumpyLike(Singleton):
     ############################ array creation
