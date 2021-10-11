@@ -291,51 +291,74 @@ def test_listoffsetarray_merge():
 def test_recordarray_merge():
     emptyarray = v1_to_v2(ak.layout.EmptyArray())
 
-    arrayr1 = v1_to_v2(ak.from_iter(
-        [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}],
-        highlevel=False,
-    ))
-    arrayr2 = v1_to_v2(ak.from_iter(
-        [
-            {"x": 2.2, "y": [2.2, 2.2]},
-            {"x": 1.1, "y": [1.1, 1.1]},
-            {"x": 0.0, "y": [0.0, 0.0]},
-        ],
-        highlevel=False,
-    ))
-    arrayr3 = v1_to_v2(ak.from_iter(
-        [{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}], highlevel=False
-    ))
-    arrayr4 = v1_to_v2(ak.from_iter(
-        [{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}],
-        highlevel=False,
-    ))
-    arrayr5 = v1_to_v2(ak.from_iter(
-        [
-            {"x": 0, "y": [], "z": 0},
-            {"x": 1, "y": [1, 1], "z": 1},
-            {"x": 2, "y": [2, 2], "z": 2},
-        ],
-        highlevel=False,
-    ))
-    arrayr6 = v1_to_v2(ak.from_iter(
-        [
-            {"z": 0, "x": 0, "y": []},
-            {"z": 1, "x": 1, "y": [1, 1]},
-            {"z": 2, "x": 2, "y": [2, 2]},
-        ],
-        highlevel=False,
-    ))
+    arrayr1 = v1_to_v2(
+        ak.from_iter(
+            [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}],
+            highlevel=False,
+        )
+    )
+    arrayr2 = v1_to_v2(
+        ak.from_iter(
+            [
+                {"x": 2.2, "y": [2.2, 2.2]},
+                {"x": 1.1, "y": [1.1, 1.1]},
+                {"x": 0.0, "y": [0.0, 0.0]},
+            ],
+            highlevel=False,
+        )
+    )
+    arrayr3 = v1_to_v2(
+        ak.from_iter(
+            [{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}],
+            highlevel=False,
+        )
+    )
+    arrayr4 = v1_to_v2(
+        ak.from_iter(
+            [{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}],
+            highlevel=False,
+        )
+    )
+    arrayr5 = v1_to_v2(
+        ak.from_iter(
+            [
+                {"x": 0, "y": [], "z": 0},
+                {"x": 1, "y": [1, 1], "z": 1},
+                {"x": 2, "y": [2, 2], "z": 2},
+            ],
+            highlevel=False,
+        )
+    )
+    arrayr6 = v1_to_v2(
+        ak.from_iter(
+            [
+                {"z": 0, "x": 0, "y": []},
+                {"z": 1, "x": 1, "y": [1, 1]},
+                {"z": 2, "x": 2, "y": [2, 2]},
+            ],
+            highlevel=False,
+        )
+    )
     arrayr7 = v1_to_v2(ak.from_iter([{"x": 0}, {"x": 1}, {"x": 2}], highlevel=False))
 
-    arrayt1 = v1_to_v2(ak.from_iter([(0, []), (1, [1.1]), (2, [2, 2])], highlevel=False))
-    arrayt2 = v1_to_v2(ak.from_iter(
-        [(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], highlevel=False
-    ))
+    arrayt1 = v1_to_v2(
+        ak.from_iter([(0, []), (1, [1.1]), (2, [2, 2])], highlevel=False)
+    )
+    arrayt2 = v1_to_v2(
+        ak.from_iter(
+            [(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], highlevel=False
+        )
+    )
     arrayt3 = v1_to_v2(ak.from_iter([(0, 0.0), (1, 1.1), (2, 2.2)], highlevel=False))
-    arrayt4 = v1_to_v2(ak.from_iter([([], 0), ([1.1], 1), ([2.2, 2.2], 2)], highlevel=False))
-    arrayt5 = v1_to_v2(ak.from_iter([(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], highlevel=False))
-    arrayt6 = v1_to_v2(ak.from_iter([(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], highlevel=False))
+    arrayt4 = v1_to_v2(
+        ak.from_iter([([], 0), ([1.1], 1), ([2.2, 2.2], 2)], highlevel=False)
+    )
+    arrayt5 = v1_to_v2(
+        ak.from_iter([(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], highlevel=False)
+    )
+    arrayt6 = v1_to_v2(
+        ak.from_iter([(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], highlevel=False)
+    )
     arrayt7 = v1_to_v2(ak.from_iter([(0,), (1,), (2,)], highlevel=False))
 
     assert arrayr1.mergeable(arrayr2)
@@ -517,9 +540,11 @@ def test_unionarray_merge():
     emptyarray = v1_to_v2(ak.layout.EmptyArray())
 
     one = v1_to_v2(ak.from_iter([0.0, 1.1, 2.2, [], [1], [2, 2]], highlevel=False))
-    two = v1_to_v2(ak.from_iter(
-        [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], highlevel=False
-    ))
+    two = v1_to_v2(
+        ak.from_iter(
+            [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], highlevel=False
+        )
+    )
     three = v1_to_v2(ak.from_iter(["one", "two", "three"], highlevel=False))
 
     assert ak.to_list(one.merge(two)) == [
@@ -594,9 +619,11 @@ def test_unionarray_merge():
 
 @pytest.mark.skip(reason="Concatenate Not Implemented")
 def test_merge_parameters():
-    one = v1_to_v2(ak.from_iter(
-        [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], highlevel=False
-    ))
+    one = v1_to_v2(
+        ak.from_iter(
+            [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], highlevel=False
+        )
+    )
     two = v1_to_v2(ak.from_iter(["good", "stuff"], highlevel=False))
 
     assert ak.to_list(ak.concatenate([one, two])) == [
@@ -630,7 +657,7 @@ def test_indexedarray_simplify():
         ["one", "two", None, "three", None, None, "four", "five"], highlevel=False
     )
     index2 = ak.layout.Index64(np.array([2, 2, 1, 6, 5], dtype=np.int64))
-    
+
     array2 = v1_to_v2(ak.layout.IndexedArray64(index2, array))
     array = v1_to_v2(array)
     assert np.asarray(array.index).tolist() == [0, 1, -1, 2, -1, -1, 3, 4]
@@ -1023,10 +1050,14 @@ def test_concatenate():
 
 @pytest.mark.skip(reason="</NumpyArray> cannot be converted into an Awkward Array")
 def test_where():
-    condition = v1_to_v2(ak.Array([True, False, True, False, True], check_valid=True).layout)
+    condition = v1_to_v2(
+        ak.Array([True, False, True, False, True], check_valid=True).layout
+    )
     one = v1_to_v2(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True).layout)
     two = v1_to_v2(ak.Array([False, False, False, True, True], check_valid=True).layout)
-    three = v1_to_v2(ak.Array([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], check_valid=True).layout)
+    three = v1_to_v2(
+        ak.Array([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], check_valid=True).layout
+    )
 
     assert ak.to_list(ak.where(condition, one, two)) == [1.1, 0.0, 3.3, 1.0, 5.5]
     assert ak.to_list(ak.where(condition, one, three)) == [
