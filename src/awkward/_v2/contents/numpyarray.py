@@ -298,6 +298,12 @@ class NumpyArray(Content):
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
 
+    def contiguous(self):
+        if self._data.ndim >= 1:
+            return ak._v2.contents.NumpyArray(self.nplike.ascontiguousarray(self))
+        else:
+            return self
+
     def iscontiguous(self):
         x = self._data.dtype.itemsize
 
@@ -309,18 +315,126 @@ class NumpyArray(Content):
 
         return True
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if self.shape[0] == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        if len(self.shape) == 0:
+            raise TypeError(
+                "{0} attempting to argsort a scalar ".format(type(self).__name__)
+            )
+        elif len(self.shape) != 1 or not self.iscontiguous():
+            contiguous_self = self if self.iscontiguous() else self.contiguous()
+            return contiguous_self.toRegularArray()._argsort_next(
+                negaxis,
+                starts,
+                shifts,
+                parents,
+                outlength,
+                ascending,
+                stable,
+                kind,
+                order,
+            )
+
+        else:
+            nplike = self.nplike
+
+            parents_length = len(parents)
+            offsets_length = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges_length",
+                    offsets_length.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets_length.to(nplike),
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
+            offsets_length = offsets_length[0]
+
+            offsets = ak._v2.index.Index64.empty(offsets_length, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges",
+                    offsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets.to(nplike),
+                    offsets_length,
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
+
+            nextcarry = ak._v2.index.Index64.empty(self.__len__(), nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_argsort",
+                    nextcarry.dtype.type,
+                    self._data.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    nextcarry.to(nplike),
+                    self._data,
+                    self.__len__(),
+                    offsets.to(nplike),
+                    offsets_length,
+                    ascending,
+                    stable,
+                )
+            )
+
+            if shifts is not None:
+                self._handle_error(
+                    nplike[
+                        "awkward_NumpyArray_rearrange_shifted",
+                        nextcarry.dtype.type,
+                        shifts.dtype.type,
+                        offsets.dtype.type,
+                        parents.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        nextcarry.to(nplike),
+                        shifts.to(nplike),
+                        len(shifts),
+                        offsets.to(nplike),
+                        offsets_length,
+                        parents.to(nplike),
+                        parents_length,
+                        starts.to(nplike),
+                        len(starts),
+                    )
+                )
+            out = NumpyArray(nextcarry)
+            return out
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
+        if self.shape[0] == 0:
+            return self
+
         if len(self.shape) == 0:
             raise TypeError(
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
 
         elif len(self.shape) != 1 or not self.iscontiguous():
-            contiguous_self = ak._v2.contents.NumpyArray(
-                self._data[self.localindex(-1)]
-            )
+            contiguous_self = self if self.iscontiguous() else self.contiguous()
             return contiguous_self.toRegularArray()._sort_next(
                 negaxis,
                 starts,
@@ -335,6 +449,7 @@ class NumpyArray(Content):
         else:
             nplike = self.nplike
 
+            parents_length = len(parents)
             offsets_length = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
                 nplike[
@@ -344,7 +459,7 @@ class NumpyArray(Content):
                 ](
                     offsets_length.to(nplike),
                     parents.to(nplike),
-                    len(parents),
+                    parents_length,
                 )
             )
 
@@ -359,31 +474,29 @@ class NumpyArray(Content):
                     offsets.to(nplike),
                     offsets_length[0],
                     parents.to(nplike),
-                    len(parents),
+                    parents_length,
                 )
             )
 
-            contiguous_self = ak._v2.contents.NumpyArray(
-                self._data[self.localindex(-1)]
-            )
+            out = ak._v2.contents.NumpyArray(nplike.empty(len(self._data), self.dtype))
             self._handle_error(
                 nplike[
                     "awkward_sort",
-                    contiguous_self._data.dtype.type,
+                    out._data.dtype.type,
                     self._data.dtype.type,
                     offsets.dtype.type,
                 ](
-                    contiguous_self._data,
+                    out._data,
                     self._data,
                     self.shape[0],
                     offsets.to(nplike),
-                    len(offsets),
-                    len(parents),
+                    offsets_length[0],
+                    parents_length,
                     ascending,
                     stable,
                 )
             )
-            return contiguous_self
+            return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self._axis_wrap_if_negative(axis)

@@ -296,10 +296,40 @@ class BitMaskedArray(Content):
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._mask) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        return self.toIndexedOptionArray64()._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        return self.toByteMaskedArray()._sort_next(
+        if len(self._mask) == 0:
+            return self
+
+        return self.toIndexedOptionArray64()._sort_next(
             negaxis,
             starts,
             parents,

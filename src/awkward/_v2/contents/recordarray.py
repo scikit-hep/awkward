@@ -378,9 +378,29 @@ class RecordArray(Content):
                 contents, self._keys, len(self), self._identifier, self._parameters
             )
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if self._keys is None or len(self._keys) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+        else:
+            raise NotImplementedError
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
+        if self._keys is None or len(self._keys) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.instance().empty(0, np.int64))
+
         if len(self._contents) > 1:
             raise NotImplementedError
 

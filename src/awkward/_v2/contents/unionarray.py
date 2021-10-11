@@ -341,6 +341,26 @@ class UnionArray(Content):
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        simplified = self._simplify_uniontype()
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ValueError("cannot argsort an irreducible UnionArray")
+
+        return simplified._argsort_next(
+            negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order
+        )
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):

@@ -172,9 +172,57 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
+    def _argsort_next(
+        self,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+        ascending,
+        stable,
+        kind,
+        order,
+    ):
+        if len(self._content) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
+        out = self._content._argsort_next(
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+        if isinstance(out, ak._v2.contents.RegularArray):
+            tmp = ak._v2.contents.UnmaskedArray(
+                out._content,
+                None,
+                None,
+            )._simplify_optiontype()
+
+            return ak._v2.contents.RegularArray(
+                tmp,
+                out._size,
+                out._length,
+                None,
+                None,
+            )
+
+        else:
+            return out
+
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
+        if len(self._content) == 0:
+            return self
+
         out = self._content._sort_next(
             negaxis,
             starts,
