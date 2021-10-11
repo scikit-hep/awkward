@@ -127,17 +127,7 @@ class EmptyArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        as_numpy = ak._v2.contents.NumpyArray(self)
-        return as_numpy._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+        return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)

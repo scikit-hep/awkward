@@ -299,7 +299,7 @@ class NumpyArray(Content):
             return self.toRegularArray()._localindex(posaxis, depth)
 
     def iscontiguous(self):
-        x = self._data.itemsize
+        x = self._data.dtype.itemsize
 
         for i in range(len(self.shape), 0, -1):  # FIXME: more Pythonic way to do it?
             if x != self.strides[i - 1]:
@@ -316,6 +316,7 @@ class NumpyArray(Content):
             raise TypeError(
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
+
         elif len(self.shape) != 1 or not self.iscontiguous():
             contiguous_self = ak._v2.contents.NumpyArray(
                 self._data[self.localindex(-1)]
@@ -330,6 +331,7 @@ class NumpyArray(Content):
                 kind,
                 order,
             )
+
         else:
             nplike = self.nplike
 
@@ -346,7 +348,8 @@ class NumpyArray(Content):
                 )
             )
 
-            offsets = ak._v2.index.Index64.zeros(offsets_length, nplike)
+            offsets = ak._v2.index.Index64.zeros(offsets_length[0], nplike)
+
             self._handle_error(
                 nplike[
                     "awkward_sorting_ranges",

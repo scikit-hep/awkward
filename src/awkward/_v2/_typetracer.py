@@ -144,6 +144,36 @@ class Interval(object):
 
         return self
 
+    def __lt__(self, other):
+        if isinstance(other, Interval):
+            return NotImplemented
+
+        elif isinstance(other, numbers.Integral):
+            return self._min < other
+
+        else:
+            return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, Interval):
+            return NotImplemented
+
+        elif isinstance(other, numbers.Integral):
+            return self._min <= other
+
+        else:
+            return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, Interval):
+            return NotImplemented
+
+        elif isinstance(other, numbers.Integral):
+            return self._min > other
+
+        else:
+            return NotImplemented
+
     def __ge__(self, other):
         if isinstance(other, Interval):
             return NotImplemented
@@ -228,6 +258,13 @@ class TypeTracerArray(object):
         self._shape = value
 
     @property
+    def strides(self):
+        out = (self._dtype.itemsize,)
+        for x in self._shape[:0:-1]:
+            out = (x * out[0],) + out
+        return out
+
+    @property
     def fill_zero(self):
         return self._fill_zero
 
@@ -256,11 +293,24 @@ class TypeTracerArray(object):
             "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
         )
 
-    def __array__(self):
+    def __array__(self, *args, **kwargs):
         return self.__iter__()
+
+    def itemsize(self):
+        return self._dtype.itemsize
+
+    class _CTypes(object):
+        data = 0
+
+    @property
+    def ctypes(self):
+        return self._CTypes
 
     def __len__(self):
         return self._shape[0]
+
+    def __setitem__(self, where, what):
+        pass
 
     def __getitem__(self, where):
         if isinstance(where, tuple):

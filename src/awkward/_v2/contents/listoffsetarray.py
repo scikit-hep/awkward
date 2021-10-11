@@ -531,8 +531,6 @@ class ListOffsetArray(Content):
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         nplike = self.nplike
-        if len(self._offsets) - 1 == 0:
-            return self
 
         branch, depth = self.branch_depth
 

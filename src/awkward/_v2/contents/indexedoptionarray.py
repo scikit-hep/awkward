@@ -327,9 +327,6 @@ class IndexedOptionArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._index) == 0:
-            return self
-
         nplike = self.nplike
         branch, depth = self.branch_depth
 

@@ -266,9 +266,6 @@ class IndexedArray(Content):
         kind,
         order,
     ):
-        if len(self._index) == 0:
-            return self
-
         next = self._content._carry(self._index, False, NestedIndexError)
         return next._sort_next(
             negaxis,

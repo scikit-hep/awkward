@@ -381,7 +381,7 @@ class RecordArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._keys) > 1:
+        if len(self._contents) > 1:
             raise NotImplementedError
 
         contents = []
