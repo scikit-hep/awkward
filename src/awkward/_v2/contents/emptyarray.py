@@ -54,9 +54,9 @@ class EmptyArray(Content):
     def __len__(self):
         return 0
 
-    def toNumpyArray(self, dtype):
+    def toNumpyArray(self, dtype, nplike=None):
         return ak._v2.contents.numpyarray.NumpyArray(
-            numpy.empty(0, dtype), self._identifier, self._parameters
+            numpy.empty(0, dtype), self._identifier, self._parameters, nplike=nplike
         )
 
     def _getitem_nothing(self):
@@ -153,7 +153,7 @@ class EmptyArray(Content):
         mask,
         keepdims,
     ):
-        as_numpy = self.toNumpyArray(reducer.preferred_dtype)
+        as_numpy = self.toNumpyArray(reducer.preferred_dtype, nplike=parents.nplike)
         return as_numpy._reduce_next(
             reducer,
             negaxis,
