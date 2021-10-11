@@ -516,7 +516,6 @@ class RegularArray(Content):
                     self._length,
                 )
             )
-
             return ak._v2.contents.RegularArray(
                 ak._v2.contents.numpyarray.NumpyArray(localindex),
                 self._size,

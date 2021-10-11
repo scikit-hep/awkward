@@ -89,6 +89,9 @@ class Index(object):
     def to(self, nplike):
         return nplike.asarray(self._data)
 
+    def __array__(self, *args, **kwargs):
+        return self._nplike.asarray(self._data, *args, **kwargs)
+
     def __repr__(self):
         return self._repr("", "", "")
 

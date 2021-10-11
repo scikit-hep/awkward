@@ -52,11 +52,8 @@ def test():
     assert ak.to_list(data.max(axis=-1)) == 113
 
 
-@pytest.mark.skip(
-    reason="FIXME: v1_to_v2 ValueError: 'M8[s]' is not a valid PEP 3118 buffer format string"
-)
+@pytest.mark.skip(reason="FIXME: handle date-time case for min/max (@ianna)")
 def test_date_time():
-
     numpy_array = np.array(
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
     )
@@ -70,7 +67,7 @@ def test_date_time():
     ]
 
     array = v1_to_v2(array.layout)
-    assert array.tolist() == [
+    assert ak.to_list(array) == [
         np.datetime64("2020-07-27T10:41:11"),
         np.datetime64("2019-01-01T00:00:00"),
         np.datetime64("2020-01-01T00:00:00"),
