@@ -287,7 +287,6 @@ def test_listoffsetarray_merge():
         ]
 
 
-@pytest.mark.skip(reason="Mergeable Not Implemented")
 def test_recordarray_merge():
     emptyarray = v1_to_v2(ak.layout.EmptyArray())
 

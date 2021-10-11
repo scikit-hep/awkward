@@ -346,6 +346,57 @@ class RecordArray(Content):
             next = RecordArray(contents, self._keys, None, self._identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)
 
+    def mergeable(self, other, mergebool=False):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not self.parameters == other.parameters:
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyarray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        elif isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return self.mergeable(other.content, mergebool)
+
+        if isinstance(other, ak._v2.contents.recordarray.RecordArray):
+
+            if self.is_tuple and other.is_tuple:
+                if len(self.contents) == len(other.contents):
+                    for i in range(len(self.contents)):
+                        if not self.contents[i].mergeable(other.contents[i], mergebool):
+                            return False
+                    return True
+
+            elif not self.is_tuple and not other.is_tuple:
+                self_keys = self.keys.copy()
+                other_keys = other.keys.copy()
+                self_keys.sort()
+                other_keys.sort()
+                if self_keys == other_keys:
+                    for key in self_keys:
+                        if not self[key].mergeable(other[key], mergebool):
+                            return False
+                    return True
+            return False
+        else:
+            return False
+
     def mergemany(self, others):
         if len(others) == 0:
             return self
@@ -390,7 +441,7 @@ class RecordArray(Content):
                     )
 
         else:
-            these_keys = self.keys
+            these_keys = self.keys.copy()
             these_keys.sort()
 
             for array in headless:
@@ -399,7 +450,7 @@ class RecordArray(Content):
 
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
                     if not array.is_tuple:
-                        those_keys = array.keys
+                        those_keys = array.keys.copy()
                         those_keys.sort()
 
                         if these_keys == those_keys:

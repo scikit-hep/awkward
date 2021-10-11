@@ -276,6 +276,60 @@ class NumpyArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not self.parameters == other.parameters:
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyarray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        elif isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return self.mergeable(other.content, mergebool)
+
+        if self._data.ndim == 0:
+            return False
+
+        if isinstance(other, ak._v2.contents.numpyarray.NumpyArray):
+            if self._data.ndim != other.data.ndim:
+                return False
+
+            # if not mergebool and self.dtype != other.dtype and (self.dtype == np.bool  or  other.dtype == np.bool):
+            #     return False
+
+            if self.dtype != other.dtype and (
+                self.dtype == np.datetime64 or other.dtype == np.datetime64
+            ):
+                return False
+
+            if self.dtype != other.dtype and (
+                self.dtype == np.timedelta64 or other.dtype == np.timedelta64
+            ):
+                return False
+
+            if len(self.shape) > 1 and self.shape != other.shape:
+                return False
+            return True
+        else:
+            return False
+
     def mergemany(self, others):
         if len(others) == 0:
             return self

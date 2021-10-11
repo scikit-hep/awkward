@@ -486,6 +486,47 @@ class ListOffsetArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not self.parameters == other.parameters:
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyarray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        elif isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return self.mergeable(other.content, mergebool)
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.regulararray.RegularArray,
+                ak._v2.contents.listarray.ListArray,
+                ak._v2.contents.listoffsetarray.ListOffsetArray,
+            ),
+        ):
+            return self.content.mergeable(other.content, mergebool)
+
+        else:
+            return False
+
     def mergemany(self, others):
         if len(others) == 0:
             return self

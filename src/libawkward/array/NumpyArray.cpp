@@ -1665,6 +1665,7 @@ namespace awkward {
 
   bool
   NumpyArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    std::cout<<"OTHER: "<<other.get()->tostring()<<std::endl;
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return mergeable(raw->array(), mergebool);
     }
