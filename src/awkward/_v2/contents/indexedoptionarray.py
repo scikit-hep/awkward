@@ -299,7 +299,7 @@ class IndexedOptionArray(Content):
 
     def _merging_strategy(self, others):
         if len(others) == 0:
-            raise ValueErros(
+            raise ValueError(
                 "to merge this array with 'others', at least one other must be provided"
             )
 
@@ -446,6 +446,22 @@ class IndexedOptionArray(Content):
         raise NotImplementedError(
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
+
+    def bytemask(self):
+        nplike = self.nplike
+        out = ak._v2.index.Index8.empty(len(self.index), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_mask",
+                out.dtype.type,
+                self._index.dtype.type,
+            ](
+                out.to(nplike),
+                self._index.to(nplike),
+                len(self.index),
+            )
+        )
+        return out
 
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)

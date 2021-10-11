@@ -488,7 +488,7 @@ class ListOffsetArray(Content):
 
     def mergemany(self, others):
         if len(others) == 0:
-            return self.shallow_copy()
+            return self
         listarray = ak._v2.contents.listarray.ListArray(
             self.starts, self.stops, self.content, None, self.parameters
         )

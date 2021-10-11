@@ -316,7 +316,7 @@ class UnionArray(Content):
         contents.extend(self.contents)
 
         self._handle_error(
-            self.nplike["awkward_UnionArray_filltags_const", tags.dtype.type,](
+            self.nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
                 tags.to(self.nplike),
                 0,
                 theirlength,
@@ -325,7 +325,7 @@ class UnionArray(Content):
         )
 
         self._handle_error(
-            self.nplike["awkward_UnionArray_fillindex_count", index.dtype.type,](
+            self.nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
                 index.to(self.nplike),
                 0,
                 theirlength,

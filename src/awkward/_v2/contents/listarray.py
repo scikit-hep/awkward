@@ -643,7 +643,7 @@ class ListArray(Content):
 
     def mergemany(self, others):
         if len(others) == 0:
-            return self.shallow_copy()
+            return self
 
         head, tail = self._merging_strategy(others)
 
@@ -759,7 +759,7 @@ class ListArray(Content):
             return next
 
         reversed = tail[0]._reverse_merge(next)
-        if tail.size() == 1:
+        if len(tail) == 1:
             return reversed
         else:
             return reversed.mergemany(tail[1:])

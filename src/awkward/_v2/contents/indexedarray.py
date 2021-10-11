@@ -238,9 +238,9 @@ class IndexedArray(Content):
         )
         return self._content._carry(nextcarry, False, NestedIndexError)
 
-    def _merging_strategy(others):
+    def _merging_strategy(self, others):
         if len(others) == 0:
-            raise ValueErros(
+            raise ValueError(
                 "to merge this array with 'others', at least one other must be provided"
             )
 
@@ -252,7 +252,7 @@ class IndexedArray(Content):
             other = others[i]
             if isinstance(other, ak._v2.content.unionarray.UnionArray):
                 break
-            elif (other, ak._v2.content.virtualarray.VirtualArray):
+            elif isinstance(other, ak._v2.content.virtualarray.VirtualArray):
                 head.append(other.array)
             else:
                 head.append(other)
@@ -388,6 +388,17 @@ class IndexedArray(Content):
         raise NotImplementedError(
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
+
+    def bytemask(self):
+        nplike = self.nplike
+        out = ak._v2.index.Index8.empty(len(self.index), nplike)
+        self._handle_error(
+            nplike["awkward_zero_mask", out.dtype.type](
+                out.to(nplike),
+                len(self.index),
+            )
+        )
+        return out
 
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
