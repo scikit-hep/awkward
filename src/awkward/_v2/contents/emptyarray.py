@@ -117,19 +117,16 @@ class EmptyArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def shallow_copy(self):
-        return self
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
 
-    def _mergemany(self, others):
-        if others.empty():
-            return self.shallow_copy()
-
-        elif others.size() == 1:
+        elif len(others) == 1:
             return others[0]
 
         else:
             tail_others = others[1:]
-            return others[0]._mergemany(tail_others)
+            return others[0].mergemany(tail_others)
 
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))

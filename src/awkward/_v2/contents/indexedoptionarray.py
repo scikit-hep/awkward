@@ -297,6 +297,32 @@ class IndexedOptionArray(Content):
 
         return self._content._carry(nextcarry, False, NestedIndexError)
 
+    def _merging_strategy(self, others):
+        if len(others) == 0:
+            raise ValueErros(
+                "to merge this array with 'others', at least one other must be provided"
+            )
+
+        head = [self]
+        tail = []
+
+        i = 0
+        while i < len(others):
+            other = others[i]
+            if isinstance(other, ak._v2.contents.unionarray.UnionArray):
+                break
+            elif isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+                head.append(other.array)
+            else:
+                head.append(other)
+            i = i + 1
+
+        while i < len(others):
+            tail.append(others[i])
+            i = i + 1
+
+        return (head, tail)
+
     def _reverse_merge(self, other):
         if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
             return other.array._reverse_merge()
@@ -305,19 +331,17 @@ class IndexedOptionArray(Content):
         mylength = len(self)
         index = ak._v2.index.Index64.empty((theirlength + mylength), self.nplike)
 
-        content = other._merge(self.content)
+        content = other.merge(self.content)
 
         self._handle_error(
-            self.nplike["awkward_IndexedArray_fill_to64_count", index.dtype.type](
+            self.nplike["awkward_IndexedArray_fill_count", index.dtype.type](
                 index.to(self.nplike),
                 0,
                 theirlength,
                 0,
             )
         )
-        reinterpreted_index = ak._v2.index.Index(
-            np.asarray(index.data.view(self[0].dtype))
-        )
+        reinterpreted_index = ak._v2.index.Index(self.nplike.asarray(self.index.data))
 
         self._handle_error(
             self.nplike[
@@ -338,15 +362,15 @@ class IndexedOptionArray(Content):
             index, content, None, parameters
         )
 
-    def _mergemany(self, others):
+    def mergemany(self, others):
         if len(others) == 0:
-            return self.shallow_copy()
+            return self
 
         head, tail = self._merging_strategy(others)
 
         total_length = 0
         for array in head:
-            total_length += array.length()
+            total_length += len(array)
 
         contents = []
         contentlength_so_far = 0
@@ -369,7 +393,7 @@ class IndexedOptionArray(Content):
 
             if isinstance(array, ak._v2.contents.indexedoptionarray.IndexedOptionArray):
                 contents.append(array.content)
-                array_index = array.index()
+                array_index = array.index
                 self._handle_error(
                     self.nplike[
                         "awkward_IndexedArray_fill",
@@ -383,16 +407,16 @@ class IndexedOptionArray(Content):
                         contentlength_so_far,
                     )
                 )
-                contentlength_so_far += len(array.content())
+                contentlength_so_far += len(array.content)
                 length_so_far += len(array)
 
             elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                 pass
             else:
-                contents.append(array.content())
+                contents.append(array)
                 self._handle_error(
                     self.nplike[
-                        "awkward_IndexedArray_fill_to64_count",
+                        "awkward_IndexedArray_fill_count",
                         nextindex.dtype.type,
                     ](
                         nextindex.to(self.nplike),
@@ -405,7 +429,7 @@ class IndexedOptionArray(Content):
                 length_so_far += len(array)
 
         tail_contents = contents[1:]
-        nextcontent = contents[0]._mergemany(tail_contents)
+        nextcontent = contents[0].mergemany(tail_contents)
         next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             nextindex, nextcontent, None, parameters
         )
@@ -414,17 +438,17 @@ class IndexedOptionArray(Content):
             return next
 
         reversed = tail[0]._reverse_merge(next)
-        if tail.size() == 1:
+        if len(tail) == 1:
             return reversed
         else:
-            return reversed._mergemany(tail[1:])
+            return reversed.mergemany(tail[1:])
 
         raise NotImplementedError(
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
 
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -851,7 +875,7 @@ class IndexedOptionArray(Content):
                 )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:

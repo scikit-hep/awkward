@@ -307,16 +307,16 @@ class ByteMaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def shallow_copy(self):
-        return self
+    def _reverse_merge(self, other):
+        return self.toIndexedOptionArray64()._reverse_merge(other)
 
-    def _mergemany(self, others):
-        if others.empty():
-            return self.shallow_copy()
-        return self.toIndexedOptionArray64()._mergemany(others)
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+        return self.toIndexedOptionArray64().mergemany(others)
 
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -380,7 +380,7 @@ class ByteMaskedArray(Content):
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         if n < 1:
             raise ValueError("in combinations, 'n' must be at least 1")
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:

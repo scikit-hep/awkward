@@ -159,7 +159,7 @@ class UnmaskedArray(Content):
         return self.toIndexedOptionArray64()._mergemany(others)
 
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -250,7 +250,7 @@ class UnmaskedArray(Content):
             return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:

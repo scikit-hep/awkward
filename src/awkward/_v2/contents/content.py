@@ -474,7 +474,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         else:
             raise NotImplementedError
 
-    def _axis_wrap_if_negative(self, axis):
+    def axis_wrap_if_negative(self, axis):
         if axis >= 0:
             return axis
         mindepth, maxdepth = self.minmax_depth
@@ -502,17 +502,22 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
         return ak._v2.contents.NumpyArray(localindex)
 
-    # FIXME for indexedarray
+    def merge(self, other):
+        others = [other]
+        return self.mergemany(others)
+
     def _merging_strategy(self, others):
+
         if len(others) == 0:
             raise ValueError(
                 "to merge this array with 'others', at least one other must be provided"
             )
 
-        head = [self.shallow_copy()]
+        head = [self]
         tail = []
+        i = 0
 
-        for i in range(len(others)):
+        while i < len(others):
             other = others[i]
             if isinstance(
                 other,
@@ -526,12 +531,15 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 ),
             ):
                 break
-            # elif isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            #     head.append(other.array)
+            elif isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+                head.append(other.array)
             else:
                 head.append(other)
+            i = i + 1
 
-        tail.extend(others)
+        while i < len(others):
+            tail.append(others[i])
+            i = i + 1
 
         return (head, tail)
 
@@ -1142,8 +1150,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                             )
                         )
                         contents.append(self._contents[i])
-        if len(contents) > 2 ^ 7:
-            raise ValueError("FIXME: handle UnionArray with more than 127 contents")
+        if len(contents) > 2 ** 7:
+            raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
         if len(contents) == 1:
             return contents[0]._carry(index, True, NestedIndexError)
         else:

@@ -239,7 +239,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
+            out2 = NumpyArray(out, None, self.parameters, nplike=nplike)
             return out2
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -258,7 +258,7 @@ class NumpyArray(Content):
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
-            return NumpyArray(out, None, self._parameters, nplike=nplike)
+            return NumpyArray(out, None, self.parameters, nplike=nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             where = (slice(None), head) + tail
@@ -266,7 +266,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
+            out2 = NumpyArray(out, None, self.parameters, nplike=nplike)
             return out2
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
@@ -276,8 +276,43 @@ class NumpyArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+        head, tail = self._merging_strategy(others)
+
+        contiguous_arrays = []
+
+        for array in head:
+            parameters = dict(self.parameters.items() & array.parameters.items())
+            if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
+                array = array.array
+            if isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                pass
+            elif isinstance(array, ak._v2.contents.numpyarray.NumpyArray):
+                contiguous_arrays.append(array.data)
+            else:
+                raise ValueError(
+                    "cannot merge "
+                    + type(self).__name__
+                    + " with "
+                    + type(array).__name__
+                )
+
+        contiguous_arrays = self.nplike.concatenate(contiguous_arrays)
+        next = NumpyArray(contiguous_arrays, self.identifier, parameters)
+
+        if len(tail) == 0:
+            return next
+
+        reversed = tail[0]._reverse_merge(next)
+        if len(tail) == 1:
+            return reversed
+        else:
+            return reversed.mergemany(tail[1:])
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         elif len(self.shape) <= 1:
@@ -483,7 +518,7 @@ class NumpyArray(Content):
             return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:

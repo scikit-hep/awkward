@@ -346,8 +346,114 @@ class RecordArray(Content):
             next = RecordArray(contents, self._keys, None, self._identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)
 
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+
+        head, tail = self._merging_strategy(others)
+
+        parameters = {}
+        headless = head[1:]
+
+        for_each_field = []
+        for field in self.contents:
+            trimmed = field[0 : len(self)]
+            for_each_field.append([field])
+
+        if self.is_tuple:
+            for array in headless:
+                parameters = dict(self.parameters.items() & array.parameters.items())
+
+                if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
+                    array = array.array
+
+                if isinstance(array, ak._v2.contents.recordarray.RecordArray):
+                    if self.is_tuple:
+                        if len(self.contents) == len(array.contents):
+                            for i in range(len(self.contents)):
+                                field = array[self.index_to_key(i)]
+                                for_each_field[i].append(field[0 : len(array)])
+                        else:
+                            raise ValueError(
+                                "cannot merge tuples with different numbers of fields"
+                            )
+                    else:
+                        raise ValueError("cannot merge tuple with non-tuple record")
+                elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                    pass
+                else:
+                    raise AssertionError(
+                        "cannot merge "
+                        + type(self).__name__
+                        + " with "
+                        + type(array).__name__
+                    )
+
+        else:
+            these_keys = self.keys
+            these_keys.sort()
+
+            for array in headless:
+                if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
+                    array = array.array
+
+                if isinstance(array, ak._v2.contents.recordarray.RecordArray):
+                    if not array.is_tuple:
+                        those_keys = array.keys
+                        those_keys.sort()
+
+                        if these_keys == those_keys:
+                            for i in range(len(self.contents)):
+                                field = array[self.index_to_key(i)]
+
+                                trimmed = field[0 : len(array)]
+                                for_each_field[i].append(trimmed)
+                        else:
+                            raise ValueError(
+                                "cannot merge records with different sets of field names"
+                            )
+                    else:
+                        raise ValueError("cannot merge non-tuple record with tuple")
+
+                elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                    pass
+                else:
+                    raise AssertionError(
+                        "cannot merge "
+                        + type(self).__name__
+                        + " with "
+                        + type(array).__name__
+                    )
+
+        nextcontents = []
+        minlength = -1
+
+        for forfield in for_each_field:
+            tail_forfield = forfield[1:]
+            merged = forfield[0].mergemany(tail_forfield)
+
+            nextcontents.append(merged)
+
+            if minlength == -1 or len(merged) < minlength:
+                minlength = len(merged)
+
+        next = RecordArray(nextcontents, self._keys, minlength, None, parameters)
+
+        if len(tail) == 0:
+            return next
+
+        reversed = tail[0]._reverse_merge(next)
+        if len(tail) == 1:
+            return reversed
+        else:
+            return reversed.mergemany(tail[1:])
+
+        raise NotImplementedError(
+            "not implemented: " + type(self).__name__ + " ::mergemany"
+        )
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -401,7 +507,7 @@ class RecordArray(Content):
         return RecordArray(contents, self._keys, len(self), None, self._parameters)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:

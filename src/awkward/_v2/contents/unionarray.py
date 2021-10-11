@@ -302,15 +302,75 @@ class UnionArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def shallow_copy(self):
-        return self
-
     def _reverse_merge(self, other):
-        raise NotImplementedError
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self._reverse_merge(other.array)
 
-    def _mergemany(self, others):
+        theirlength = len(other)
+        mylength = len(self)
+
+        tags = ak._v2.index.Index8.empty(theirlength + mylength, self.nplike)
+        index = ak._v2.index.Index64.empty(theirlength + mylength, self.nplike)
+
+        contents = [other]
+        contents.extend(self.contents)
+
+        self._handle_error(
+            self.nplike["awkward_UnionArray_filltags_const", tags.dtype.type,](
+                tags.to(self.nplike),
+                0,
+                theirlength,
+                0,
+            )
+        )
+
+        self._handle_error(
+            self.nplike["awkward_UnionArray_fillindex_count", index.dtype.type,](
+                index.to(self.nplike),
+                0,
+                theirlength,
+            )
+        )
+
+        self._handle_error(
+            self.nplike[
+                "awkward_UnionArray_filltags",
+                tags.dtype.type,
+                self.tags.dtype.type,
+            ](
+                tags.to(self.nplike),
+                theirlength,
+                self.tags.to(self.nplike),
+                mylength,
+                1,
+            )
+        )
+
+        self._handle_error(
+            self.nplike[
+                "awkward_UnionArray_fillindex",
+                index.dtype.type,
+                self.index.dtype.type,
+            ](
+                index.to(self.nplike),
+                theirlength,
+                self.index.to(self.nplike),
+                mylength,
+            )
+        )
+
+        if len(contents) > 2 ** 7:
+            raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
+
+        parameters = {}
+        parameters = dict(self.parameters.items() & other.parameters.items())
+        return ak._v2.contents.unionarray.UnionArray(
+            tags, index, contents, None, parameters
+        )
+
+    def mergemany(self, others):
         if len(others) == 0:
-            return self.shallow_copy()
+            return self
 
         head, tail = self._merging_strategy(others)
 
@@ -400,10 +460,10 @@ class UnionArray(Content):
         if len(tail) == 1:
             return reversed
         else:
-            return reversed._mergemany(tail[1:])
+            return reversed.mergemany(tail[1:])
 
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -415,7 +475,7 @@ class UnionArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:

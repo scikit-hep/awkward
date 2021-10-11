@@ -641,7 +641,7 @@ class ListArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _mergemany(self, others):
+    def mergemany(self, others):
         if len(others) == 0:
             return self.shallow_copy()
 
@@ -681,7 +681,7 @@ class ListArray(Content):
                 )
 
         tail_contents = contents[1:]
-        nextcontent = contents[0]._mergemany(tail_contents)
+        nextcontent = contents[0].mergemany(tail_contents)
 
         nextstarts = ak._v2.index.Index64.empty(total_length, self.nplike)
         nextstops = ak._v2.index.Index64.empty(total_length, self.nplike)
@@ -762,10 +762,10 @@ class ListArray(Content):
         if tail.size() == 1:
             return reversed
         else:
-            return reversed._mergemany(tail[1:])
+            return reversed.mergemany(tail[1:])
 
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         elif posaxis == depth + 1:

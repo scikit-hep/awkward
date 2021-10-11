@@ -489,13 +489,13 @@ class RegularArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _mergemany(self, others):
+    def mergemany(self, others):
         if len(others) == 0:
-            return self.shallow_copy()
-        return self.toListOffsetArray64(True)._mergemany(others)
+            return self
+        return self.toListOffsetArray64(True).mergemany(others)
 
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         elif posaxis == depth + 1:
@@ -597,7 +597,7 @@ class RegularArray(Content):
         return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis == depth + 1:

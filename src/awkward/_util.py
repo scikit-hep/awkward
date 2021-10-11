@@ -725,7 +725,13 @@ def broadcast_and_apply(  # noqa: C901
                     return apply(nextinputs, depth, user)
 
         # now all lengths must agree
-        checklength([x for x in inputs if isinstance(x, ak.layout.Content)])
+        checklength(
+            [
+                x
+                for x in inputs
+                if isinstance(x, (ak.layout.Content, ak._v2.contents.Content))
+            ]
+        )
 
         args = ()
         if pass_depth:
