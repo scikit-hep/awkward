@@ -199,6 +199,8 @@ class RegularArray(Content):
                 self._size,
             )
         )
+        if isinstance(out.data, ak._v2._typetracer.TypeTracerArray):
+            out.data.fill_other = self._length * self._size
         return out
 
     def _broadcast_tooffsets64(self, offsets):

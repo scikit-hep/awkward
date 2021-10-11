@@ -320,6 +320,13 @@ class Content(object):
             elif isinstance(where, ak.layout.Content):
                 return self.__getitem__(v1_to_v2(where))
 
+            elif (
+                isinstance(where, Content)
+                and where._parameters is not None
+                and (where._parameters.get("__array__") in ("string", "bytestring"))
+            ):
+                return self._getitem_fields(ak.to_list(where))
+
             elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
                 return where.toNumpyArray(np.int64)
 
@@ -402,17 +409,21 @@ class Content(object):
                 else:
                     return repr(x)
 
+            try:
+                tmp = "    " + repr(ak.Array(v2_to_v1(self)))
+            except Exception:
+                tmp = self._repr("    ", "", "")
             raise IndexError(
                 """cannot slice
 
-    {0}
+{0}
 
 with
 
     {1}
 
 at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
-                    repr(ak.Array(v2_to_v1(self))),
+                    tmp,
                     format_slice(where),
                     type(err.array).__name__,
                     len(err.array),

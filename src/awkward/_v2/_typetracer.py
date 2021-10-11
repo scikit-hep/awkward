@@ -119,7 +119,7 @@ def _length_after_slice(slice, original_length):
 
 class TypeTracerArray(object):
     @classmethod
-    def from_array(cls, array, dtype=None, fill=0):
+    def from_array(cls, array, dtype=None, fill_zero=0, fill_other=0):
         if isinstance(array, ak._v2.index.Index):
             array = array.data
 
@@ -130,9 +130,9 @@ class TypeTracerArray(object):
         if len(shape) != 0 and not isinstance(shape[0], Interval):
             shape[0] = Interval.exact(shape[0])
 
-        return cls(dtype, shape=shape, fill=fill)
+        return cls(dtype, shape=shape, fill_zero=fill_zero, fill_other=fill_other)
 
-    def __init__(self, dtype, shape=None, fill=0):
+    def __init__(self, dtype, shape=None, fill_zero=0, fill_other=0):
         if shape is None:
             shape = (Interval.unknown(),)
         elif isinstance(shape, Interval):
@@ -150,7 +150,8 @@ class TypeTracerArray(object):
 
         self._dtype = np.dtype(dtype)
         self._shape = shape
-        self._fill = fill
+        self._fill_zero = fill_zero
+        self._fill_other = fill_other
 
     def __repr__(self):
         dtype = repr(self._dtype)
@@ -159,11 +160,12 @@ class TypeTracerArray(object):
         if self._shape != (Interval.unknown(),):
             shape = ", " + repr(self._shape)
 
-        fill = ""
-        if self._fill != 0:
-            fill = ", " + repr(self._fill)
-
-        return "TypeTracerArray({0}{1}{2})".format(dtype, shape, fill)
+        fills = ""
+        if self._fill_zero != 0 or self._fill_other != 0:
+            fills = ", fill_zero={0}, fill_other={1}".format(
+                self._fill_zero, self._fill_other
+            )
+        return "TypeTracerArray({0}{1}{2})".format(dtype, shape, fills)
 
     @property
     def dtype(self):
@@ -174,8 +176,20 @@ class TypeTracerArray(object):
         return self._shape
 
     @property
-    def fill(self):
-        return self._fill
+    def fill_zero(self):
+        return self._fill_zero
+
+    @fill_zero.setter
+    def fill_zero(self, value):
+        self._fill_zero = value
+
+    @property
+    def fill_other(self):
+        return self._fill_other
+
+    @fill_other.setter
+    def fill_other(self, value):
+        self._fill_other = value
 
     @property
     def nplike(self):
@@ -209,9 +223,14 @@ class TypeTracerArray(object):
 
         if isinstance(where, numbers.Integral):
             if len(self._shape) == 1:
-                return self._dtype.type(self._fill)
+                if where == 0:
+                    return self._dtype.type(self._fill_zero)
+                else:
+                    return self._dtype.type(self._fill_other)
             else:
-                return numpy.full(self._shape[1:], self._fill, dtype=self._dtype)
+                out = numpy.full(self._shape[1:], self._fill_other, dtype=self._dtype)
+                out[0] = self._fill_zero
+                return out
 
         elif isinstance(where, slice):
             length1 = _length_after_slice(where, self._shape[0].min)
@@ -230,7 +249,9 @@ class TypeTracerArray(object):
 
             shape = (Interval(length1, length2),) + self._shape[1:]
 
-            return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
+            return TypeTracerArray(
+                self._dtype, shape, self._fill_zero, self._fill_other
+            )
 
         elif (
             hasattr(where, "dtype")
@@ -239,7 +260,9 @@ class TypeTracerArray(object):
         ):
             assert len(self._shape) != 0
             shape = where.shape + self._shape[1:]
-            return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
+            return TypeTracerArray(
+                self._dtype, shape, self._fill_zero, self._fill_other
+            )
 
         elif isinstance(where, tuple) and any(
             hasattr(x, "dtype") and hasattr(x, "shape") for x in where
@@ -279,7 +302,9 @@ class TypeTracerArray(object):
             else:
                 fixed_shape = (Interval.exact(shape[0]),) + shape[1:]
 
-            return TypeTracerArray(self._dtype, shape=fixed_shape, fill=self._fill)
+            return TypeTracerArray(
+                self._dtype, fixed_shape, self._fill_zero, self._fill_other
+            )
 
         elif (
             isinstance(where, tuple)
@@ -300,32 +325,34 @@ class TypeTracerArray(object):
                     raise NotImplementedError(repr(wh))
 
             shape = (next._shape[0],) + tuple(after_shape)
-            return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
+            return TypeTracerArray(
+                self._dtype, shape, self._fill_zero, self._fill_other
+            )
 
         else:
             raise NotImplementedError(repr(where))
 
     def __lt__(self, other):
         if isinstance(other, numbers.Real):
-            return TypeTracerArray(np.bool_, shape=self._shape, fill=False)
+            return TypeTracerArray(np.bool_, self._shape, False, False)
         else:
             return NotImplemented
 
     def __le__(self, other):
         if isinstance(other, numbers.Real):
-            return TypeTracerArray(np.bool_, shape=self._shape, fill=False)
+            return TypeTracerArray(np.bool_, self._shape, False, False)
         else:
             return NotImplemented
 
     def __gt__(self, other):
         if isinstance(other, numbers.Real):
-            return TypeTracerArray(np.bool_, shape=self._shape, fill=False)
+            return TypeTracerArray(np.bool_, self._shape, False, False)
         else:
             return NotImplemented
 
     def __ge__(self, other):
         if isinstance(other, numbers.Real):
-            return TypeTracerArray(np.bool_, shape=self._shape, fill=False)
+            return TypeTracerArray(np.bool_, self._shape, False, False)
         else:
             return NotImplemented
 
@@ -359,7 +386,7 @@ class TypeTracerArray(object):
         else:
             shape = (Interval.exact(args[0]),) + args[1:]
 
-        return TypeTracerArray(self._dtype, shape=shape, fill=self._fill)
+        return TypeTracerArray(self._dtype, shape, self._fill_zero, self._fill_other)
 
     def copy(self):
         return self
@@ -430,7 +457,7 @@ class TypeTracer(ak.nplike.NumpyLike):
         # shape/len, value[, dtype=]
         if dtype is unset:
             dtype = numpy.array(value).dtype
-        return TypeTracerArray(dtype, shape, fill=value)
+        return TypeTracerArray(dtype, shape, fill_zero=value, fill_other=value)
 
     def zeros_like(self, *args, **kwargs):
         # array
