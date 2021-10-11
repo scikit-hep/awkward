@@ -220,9 +220,6 @@ class UnmaskedArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._content) == 0:
-            return self
-
         out = self._content._sort_next(
             negaxis,
             starts,

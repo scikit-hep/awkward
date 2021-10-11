@@ -401,9 +401,6 @@ class RecordArray(Content):
         if self._keys is None or len(self._keys) == 0:
             return ak._v2.contents.NumpyArray(self.nplike.instance().empty(0, np.int64))
 
-        if len(self._contents) > 1:
-            raise NotImplementedError
-
         contents = []
         for content in self._contents:
             contents.append(

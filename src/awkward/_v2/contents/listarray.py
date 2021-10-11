@@ -721,9 +721,6 @@ class ListArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._starts) == 0:
-            return self
-
         return self.toListOffsetArray64(True)._sort_next(
             negaxis,
             starts,

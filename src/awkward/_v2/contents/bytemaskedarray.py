@@ -365,9 +365,6 @@ class ByteMaskedArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._mask) == 0:
-            return self
-
         return self.toIndexedOptionArray64()._sort_next(
             negaxis,
             starts,
