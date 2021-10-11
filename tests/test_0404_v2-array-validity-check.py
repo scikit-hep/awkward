@@ -28,8 +28,115 @@ def test_NumpyArray():
     array = ak.layout.NumpyArray(np.array([5, 6, 1, 3, 4, 5]))
     array = v1_to_v2(array)
     assert array.is_unique() is False
+    assert ak.to_list(array.unique()) == [1, 3, 4, 5, 6]
 
 
+def test_2d():
+    # array = ak.from_iter(
+    array = ak.layout.NumpyArray(
+        np.array(
+            [
+                [3.3, 2.2, 5.5, 1.1, 4.4],
+                [4.4, 2.2, 1.1, 3.3, 5.5],
+                [2.2, 1.1, 4.4, 3.3, 5.5],
+            ]
+        )  # ,
+        #     highlevel=False,
+    )
+    array = v1_to_v2(array)
+
+    assert array.is_unique() is False
+    assert ak.to_list(array.unique()) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+
+def test_2d_in_axis():
+    # array = ak.from_iter(
+    array = ak.layout.NumpyArray(
+        np.array(
+            [
+                [3.3, 2.2, 5.5, 1.1, 4.4, 1.1],
+                [4.4, 2.2, 1.1, 3.3, 5.5, 3.3],
+                [2.2, 2.2, 1.1, 4.4, 3.3, 5.5],
+            ]
+        )  # ,
+        #     highlevel=False,
+    )
+    array = v1_to_v2(array)
+
+    assert array.is_unique() is False
+    assert ak.to_list(array.unique()) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+    assert ak.to_list(array.unique(axis=-1)) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+    ]
+
+    assert ak.to_list(array.unique(axis=0)) == [
+        [2.2, 3.3, 4.4],
+        [2.2],
+        [1.1, 5.5],
+        [1.1, 3.3, 4.4],
+        [3.3, 4.4, 5.5],
+        [1.1, 3.3, 5.5],
+    ]
+
+
+# def test_3d():
+#     array = ak.layout.NumpyArray(
+#         np.array(
+#             [
+#                 # axis 2:    0       1       2       3       4         # axis 1:
+#                 [
+#                     [1.1, 2.2, 3.3, 4.4, 5.5],  # 0
+#                     [6.6, 7.7, 8.8, 9.9, 10.10],  # 1
+#                     [11.11, 12.12, 13.13, 14.14, 15.15],
+#                 ],  # 2
+#                 [
+#                     [-1.1, -2.2, -3.3, -4.4, -5.5],  # 3
+#                     [-6.6, -7.7, -8.8, -9.9, -10.1],  # 4
+#                     [-11.11, -12.12, -13.13, -14.14, -15.15],
+#                 ],
+#             ]
+#         )
+#     )  # 5
+#     array = v1_to_v2(array)
+#     assert array.is_unique() is True
+#
+#     assert ak.to_list(array.unique()) == [
+#         -15.15,
+#         -14.14,
+#         -13.13,
+#         -12.12,
+#         -11.11,
+#         -10.1,
+#         -9.9,
+#         -8.8,
+#         -7.7,
+#         -6.6,
+#         -5.5,
+#         -4.4,
+#         -3.3,
+#         -2.2,
+#         -1.1,
+#         1.1,
+#         2.2,
+#         3.3,
+#         4.4,
+#         5.5,
+#         6.6,
+#         7.7,
+#         8.8,
+#         9.9,
+#         10.1,
+#         11.11,
+#         12.12,
+#         13.13,
+#         14.14,
+#         15.15,
+#     ]
+#
+#
 #
 # def test_ListOffsetArray():
 #     array = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)

@@ -925,7 +925,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return self.Form.purelist_parameter(self, key)
     
     def is_unique(self, axis=None):
-        return self._is_unique(axis)
+        negaxis = axis if axis is None else -axis
+        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        return self._is_unique(negaxis, starts, parents, 1)
 
     def unique(self, axis=None):
         negaxis = axis if axis is None else -axis
@@ -957,7 +960,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         starts = ak._v2.index.Index64.zeros(1, self.nplike)
         parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
 
-        return self._unique(negaxis, starts, parents)
+        return self._unique(negaxis, starts, parents, 1)
 
     @property
     def purelist_isregular(self):

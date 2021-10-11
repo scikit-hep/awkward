@@ -395,73 +395,162 @@ class NumpyArray(Content):
 
         return True
 
-    def _is_unique(self, axis):
+    def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._data) == 0:
             return True
 
-        out = self.unique(axis)
-        return len(out._data) == len(self._data)
+        if len(self.shape) == 0:
+            return True
 
-    def _unique(self, axis, starts, parents):
+        elif len(self.shape) != 1 or not self.iscontiguous():
+            contiguous_self = self if self.iscontiguous() else self.contiguous()
+            return contiguous_self.toRegularArray()._is_unique(
+                negaxis,
+                starts,
+                parents,
+                outlength,
+            )
+        else:
+            out = self._unique(negaxis, starts, parents, outlength)
+            # print(out, out.shape, self, self.shape)
+            return len(out._data) == len(self._data)
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if self.shape[0] == 0:
+            return self
+
+        if len(self.shape) == 0:
+            return self
+
         nplike = self.nplike
 
-        parents_length = len(parents)
-        offsets_length = ak._v2.index.Index64.empty(1, nplike)
-        self._handle_error(
-            nplike[
-                "awkward_sorting_ranges_length",
-                offsets_length.dtype.type,
-                parents.dtype.type,
-            ](
-                offsets_length.to(nplike),
-                parents.to(nplike),
-                parents_length,
+        if negaxis is None:
+            contiguous_self = self if self.iscontiguous() else self.contiguous()
+            flattened_shape = 1
+            for i in range(len(self.shape)):
+                flattened_shape = flattened_shape * self.shape[i]
+
+            offsets = ak._v2.index.Index64.zeros(2, nplike)
+            offsets[1] = flattened_shape
+            out = ak._v2.contents.NumpyArray(nplike.empty(offsets[1], self.dtype))
+            self._handle_error(
+                nplike[
+                    "awkward_sort",
+                    out._data.dtype.type,
+                    out._data.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    out._data,
+                    contiguous_self._data,
+                    offsets[1],
+                    offsets.to(nplike),
+                    2,
+                    offsets[1],
+                    True,
+                    False,
+                )
             )
-        )
 
-        offsets = ak._v2.index.Index64.empty(offsets_length, nplike)
-        self._handle_error(
-            nplike[  # noqa: E231
-                "awkward_sorting_ranges",
-                offsets.dtype.type,
-                parents.dtype.type,
-            ](
-                offsets.to(nplike),
-                offsets_length[0],
-                parents.to(nplike),
-                parents_length,
+            nextoffsets = ak._v2.index.Index64.zeros(2, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_unique_ranges",
+                    out._data.dtype.type,
+                    offsets.dtype.type,
+                    nextoffsets.dtype.type,
+                ](
+                    out._data,
+                    len(out._data),
+                    offsets.to(nplike),
+                    2,
+                    nextoffsets.to(nplike),
+                )
             )
-        )
 
-        out = ak._v2.contents.NumpyArray(nplike.empty(len(self._data), self.dtype))
-        self._handle_error(
-            nplike[
-                "awkward_sort",
-                out._data.dtype.type,
-                self._data.dtype.type,
-                offsets.dtype.type,
-            ](
-                out._data,
-                self._data,
-                self.shape[0],
-                offsets.to(nplike),
-                offsets_length[0],
-                parents_length,
-                True,
-                False,
+            return out[nextoffsets[0] : nextoffsets[1]]
+
+        # axis is non None
+        if len(self.shape) != 1 or not self.iscontiguous():
+            contiguous_self = self if self.iscontiguous() else self.contiguous()
+            return contiguous_self.toRegularArray()._unique(
+                negaxis,
+                starts,
+                parents,
+                outlength,
             )
-        )
+        else:
 
-        nextoffsets = ak._v2.index.Index64.zeros(offsets_length, nplike)
-        self._handle_error(
-            nplike[
-                "awkward_unique",
-                out._data.dtype.type,
-                nextoffsets.dtype.type,
-            ](out._data, len(out._data), nextoffsets.to(nplike))
-        )
+            parents_length = len(parents)
+            offsets_length = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_sorting_ranges_length",
+                    offsets_length.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets_length.to(nplike),
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
 
-        return out[0 : nextoffsets[0]]
+            offsets = ak._v2.index.Index64.empty(offsets_length[0], nplike)
+            self._handle_error(
+                nplike[  # noqa: E231
+                    "awkward_sorting_ranges",
+                    offsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets.to(nplike),
+                    offsets_length[0],
+                    parents.to(nplike),
+                    parents_length,
+                )
+            )
+
+            out = ak._v2.contents.NumpyArray(nplike.empty(len(self._data), self.dtype))
+            self._handle_error(
+                nplike[
+                    "awkward_sort",
+                    out._data.dtype.type,
+                    self._data.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    out._data,
+                    self._data,
+                    self.shape[0],
+                    offsets.to(nplike),
+                    offsets_length[0],
+                    parents_length,
+                    True,
+                    False,
+                )
+            )
+
+            nextoffsets = ak._v2.index.Index64.zeros(offsets_length[0], nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_unique_ranges",
+                    out._data.dtype.type,
+                    offsets.dtype.type,
+                    nextoffsets.dtype.type,
+                ](
+                    out._data,
+                    len(out._data),
+                    offsets.to(nplike),
+                    offsets_length[0],
+                    nextoffsets.to(nplike),
+                )
+            )
+
+            out = out[0 : nextoffsets[-1]]
+
+            return ak._v2.contents.ListOffsetArray(
+                nextoffsets,
+                out,
+                None,
+                self._parameters,
+            )
 
     def _argsort_next(
         self,
