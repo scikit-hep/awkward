@@ -500,6 +500,37 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         others = [other]
         return self.mergemany(others)
 
+    def merge_as_union(self, other):
+        mylength = len(self)
+        theirlength = len(other)
+        tags = ak._v2.index.Index8.empty((mylength + theirlength), self.nplike)
+        index = ak._v2.index.Index64.empty((mylength + theirlength), self.nplike)
+        contents = [self, other]
+        self._handle_error(
+            self.nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.to(self.nplike), 0, mylength, 0
+            )
+        )
+        self._handle_error(
+            self.nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.to(self.nplike), 0, mylength
+            )
+        )
+        self._handle_error(
+            self.nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.to(self.nplike), mylength, theirlength, 1
+            )
+        )
+        self._handle_error(
+            self.nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.to(self.nplike), mylength, theirlength
+            )
+        )
+
+        return ak._v2.contents.unionarray.UnionArray(
+            tags, index, contents, None, self.parameters
+        )
+
     def _merging_strategy(self, others):
 
         if len(others) == 0:
