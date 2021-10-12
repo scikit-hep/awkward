@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import json
 
 from awkward._v2.types.type import Type
+from awkward._v2.forms.form import _parameters_equal
 
 import awkward as ak
 
@@ -108,3 +109,13 @@ class NumpyType(Type):
     def __repr__(self):
         args = [repr(self._primitive)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
+
+    def __eq__(self, other):
+        if isinstance(other, NumpyType):
+            return (
+                self._typestr == other._typestr
+                and self._primitive == other._primitive
+                and _parameters_equal(self._parameters, other._parameters)
+            )
+        else:
+            return False

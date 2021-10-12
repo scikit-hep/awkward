@@ -19,16 +19,32 @@ def test():
     data = ak.Array([[1, 3, 5, 4, 2], [], [2, 3, 1], [5]])
     data = v1_to_v2(data.layout)
     assert ak.to_list(data.min(axis=1, initial=4)) == [1, None, 1, 4]
+    assert (
+        data.typetracer.min(axis=1, initial=4).form == data.min(axis=1, initial=4).form
+    )
     assert ak.to_list(data.min(axis=1)) == [1, None, 1, 5]
+    assert data.typetracer.min(axis=1).form == data.min(axis=1).form
     assert ak.to_list(data.max(axis=1, initial=4)) == [5, None, 4, 5]
+    assert (
+        data.typetracer.max(axis=1, initial=4).form == data.max(axis=1, initial=4).form
+    )
     assert ak.to_list(data.max(axis=1)) == [5, None, 3, 5]
+    assert data.typetracer.max(axis=1).form == data.max(axis=1).form
 
     data = ak.Array([[1.1, 3.3, 5.5, 4.4, 2.2], [], [2.2, 3.3, 1.1], [5.5]])
     data = v1_to_v2(data.layout)
     assert ak.to_list(data.min(axis=1, initial=4)) == [1.1, None, 1.1, 4]
+    assert (
+        data.typetracer.min(axis=1, initial=4).form == data.min(axis=1, initial=4).form
+    )
     assert ak.to_list(data.min(axis=1)) == [1.1, None, 1.1, 5.5]
+    assert data.typetracer.min(axis=1).form == data.min(axis=1).form
     assert ak.to_list(data.max(axis=1, initial=4)) == [5.5, None, 4, 5.5]
+    assert (
+        data.typetracer.max(axis=1, initial=4).form == data.max(axis=1, initial=4).form
+    )
     assert ak.to_list(data.max(axis=1)) == [5.5, None, 3.3, 5.5]
+    assert data.typetracer.max(axis=1).form == data.max(axis=1).form
 
     array = ak.layout.NumpyArray(np.array(primes[2 : 2 * 3 * 5], dtype=np.int32))
     array = data = v1_to_v2(array)
@@ -52,11 +68,8 @@ def test():
     assert ak.to_list(data.max(axis=-1)) == 113
 
 
-@pytest.mark.skip(
-    reason="FIXME: v1_to_v2 ValueError: 'M8[s]' is not a valid PEP 3118 buffer format string"
-)
+@pytest.mark.skip(reason="FIXME: handle date-time case for min/max (@ianna)")
 def test_date_time():
-
     numpy_array = np.array(
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
     )
@@ -70,7 +83,7 @@ def test_date_time():
     ]
 
     array = v1_to_v2(array.layout)
-    assert array.tolist() == [
+    assert ak.to_list(array) == [
         np.datetime64("2020-07-27T10:41:11"),
         np.datetime64("2019-01-01T00:00:00"),
         np.datetime64("2020-01-01T00:00:00"),

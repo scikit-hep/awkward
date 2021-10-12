@@ -136,6 +136,14 @@ class RecordForm(Form):
 
         return self._tolist_extra(out, verbose)
 
+    def _type(self, typestrs):
+        return ak._v2.types.recordtype.RecordType(
+            [x._type(typestrs) for x in self._contents],
+            self._keys,
+            self._parameters,
+            ak._util.gettypestr(self._parameters, typestrs),
+        )
+
     def __eq__(self, other):
         if isinstance(other, RecordForm):
             if (

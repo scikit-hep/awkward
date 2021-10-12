@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import awkward as ak
 import awkward._v2.types.type
+from awkward._v2.forms.form import _parameters_equal
 
 
 class ArrayType(object):
@@ -37,3 +38,13 @@ class ArrayType(object):
     def __repr__(self):
         args = [repr(self._content), repr(self._length)]
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
+
+    def __eq__(self, other):
+        if isinstance(other, ArrayType):
+            return (
+                self._length == other._length
+                and _parameters_equal(self._parameters, other._parameters)
+                and self._content == other._content
+            )
+        else:
+            return False

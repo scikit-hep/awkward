@@ -129,8 +129,15 @@ if hasattr(numpy, "datetime64"):
 if hasattr(numpy, "timedelta64"):
     NumpyMetadata.timedelta64 = numpy.timedelta64
 
+NumpyMetadata.all_complex = tuple(
+    x for x in dir(NumpyMetadata) if x.startswith("complex")
+)
+
 
 class NumpyLike(Singleton):
+    known_shape = True
+    known_dtype = True
+
     ############################ array creation
 
     def array(self, *args, **kwargs):
@@ -327,6 +334,7 @@ class NumpyLike(Singleton):
 
     def any(self, *args, **kwargs):
         # array
+        kwargs.pop("prefer", None)
         return self._module.any(*args, **kwargs)
 
     def count_nonzero(self, *args, **kwargs):
@@ -541,14 +549,16 @@ or
 
     # For all reducers: https://github.com/cupy/cupy/issues/3819
 
-    def all(self, array, axis=None):
+    def all(self, array, axis=None, **kwargs):
+        kwargs.pop("prefer", None)
         out = self._module.all(array, axis=axis)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
 
-    def any(self, array, axis=None):
+    def any(self, array, axis=None, **kwargs):
+        kwargs.pop("prefer", None)
         out = self._module.any(array, axis=axis)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()

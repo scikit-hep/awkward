@@ -9,6 +9,7 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.types.type import Type
+from awkward._v2.forms.form import _parameters_equal
 
 
 class UnionType(Type):
@@ -66,3 +67,13 @@ class UnionType(Type):
     def __repr__(self):
         args = [repr(self._contents)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
+
+    def __eq__(self, other):
+        if isinstance(other, UnionType):
+            return (
+                self._typestr == other._typestr
+                and _parameters_equal(self._parameters, other._parameters)
+                and self._contents == other._contents
+            )
+        else:
+            return False

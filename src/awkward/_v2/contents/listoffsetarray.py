@@ -75,6 +75,16 @@ class ListOffsetArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
+        return ListOffsetArray(
+            ak._v2.index.Index(self._offsets.to(tt)),
+            self._content.typetracer,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._offsets) - 1
 
@@ -144,7 +154,7 @@ class ListOffsetArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         start, stop = self._offsets[where], self._offsets[where + 1]
         return self._content._getitem_range(slice(start, stop))
@@ -207,6 +217,8 @@ class ListOffsetArray(Content):
                 self._offsets.dtype.type,
             ](out.to(self.nplike), self._offsets.to(self.nplike), offsets_len)
         )
+        if isinstance(out.data, ak._v2._typetracer.TypeTracerArray):
+            out.data.fill_other = len(self._content)
         return out
 
     def _broadcast_tooffsets64(self, offsets):
@@ -744,8 +756,6 @@ class ListOffsetArray(Content):
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         nplike = self.nplike
-        if len(self._offsets) - 1 == 0:
-            return self
 
         branch, depth = self.branch_depth
 

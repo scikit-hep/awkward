@@ -185,7 +185,7 @@ def readspec():
         loadfile = yaml.safe_load(specfile)
         indspec = loadfile["kernels"]
         data = yaml.safe_load(
-            open(os.path.join(CURRENT_DIR, "..", "test-data.yml"), "r")
+            open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"), "r")
         )["tests"]
         for spec in indspec:
             if "def " in spec["definition"]:
@@ -704,7 +704,7 @@ class Error(ctypes.Structure):
 
 def genunittests():
     print("Generating Unit Tests")
-    datayml = open(os.path.join(CURRENT_DIR, "..", "test-data.yml"), "r")
+    datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"), "r")
     data = yaml.safe_load(datayml)["unit-tests"]
     for function in data:
         num = 0

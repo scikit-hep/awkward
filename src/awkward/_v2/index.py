@@ -89,6 +89,9 @@ class Index(object):
     def to(self, nplike):
         return nplike.asarray(self._data)
 
+    def __array__(self, *args, **kwargs):
+        return self._nplike.asarray(self._data, *args, **kwargs)
+
     def __repr__(self):
         return self._repr("", "", "")
 
@@ -96,7 +99,7 @@ class Index(object):
         out = [indent, pre, "<Index dtype="]
         out.append(repr(str(self.dtype)))
         out.append(" len=")
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self._data.shape[0])))
 
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
             "\n"
@@ -133,7 +136,7 @@ class Index(object):
 
     def __getitem__(self, where):
         out = self._data[where]
-        if isinstance(out, type(self._data)):
+        if hasattr(out, "shape") and len(out.shape) != 0:
             return type(self)(out)
         else:
             return out

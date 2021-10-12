@@ -11,6 +11,7 @@ import json
 
 import awkward as ak
 from awkward._v2.types.type import Type
+from awkward._v2.forms.form import _parameters_equal
 
 
 class RecordType(Type):
@@ -110,3 +111,40 @@ class RecordType(Type):
     def __repr__(self):
         args = [repr(self._contents), repr(self._keys)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
+
+    def __eq__(self, other):
+        if isinstance(other, RecordType):
+            if self._typestr != other._typestr or not _parameters_equal(
+                self._parameters, other._parameters
+            ):
+                return False
+
+            if self._keys is None and other._keys is None:
+                return self._contents == other._contents
+
+            elif self._keys is not None and other._keys is not None:
+                if set(self._keys) != set(other._keys):
+                    return False
+                for key in self._keys:
+                    if self.content(key) != other.content(key):
+                        return False
+                else:
+                    return True
+
+            else:
+                return False
+
+        else:
+            return False
+
+    def index_to_key(self, index):
+        return ak._v2.forms.recordform.RecordForm.index_to_key(self, index)
+
+    def key_to_index(self, key):
+        return ak._v2.forms.recordform.RecordForm.key_to_index(self, key)
+
+    def haskey(self, key):
+        return ak._v2.forms.recordform.RecordForm.haskey(self, key)
+
+    def content(self, index_or_key):
+        return ak._v2.forms.recordform.RecordForm.content(self, index_or_key)

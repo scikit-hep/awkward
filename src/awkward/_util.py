@@ -54,9 +54,9 @@ def isint(x):
     Returns True if and only if ``x`` is an integer (including NumPy, not
     including bool).
     """
-    return isinstance(x, (int, numbers.Integral, np.integer)) and not isinstance(
-        x, (bool, np.bool_)
-    )
+    return isinstance(
+        x, (int, numbers.Integral, np.integer, ak._v2._typetracer.Interval)
+    ) and not isinstance(x, (bool, np.bool_))
 
 
 def isnum(x):
@@ -346,6 +346,21 @@ def typestrs(behavior):
         ):
             out[key[1]] = typestr
     return out
+
+
+def gettypestr(parameters, typestrs):
+    if parameters is not None:
+        record = parameters.get("__record__")
+        if record is not None:
+            typestr = typestrs.get(record)
+            if typestr is not None:
+                return typestr
+        array = parameters.get("__array__")
+        if array is not None:
+            typestr = typestrs.get(array)
+            if typestr is not None:
+                return typestr
+    return None
 
 
 def numba_record_typer(layouttype, behavior):

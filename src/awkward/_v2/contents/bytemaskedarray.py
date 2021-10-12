@@ -78,6 +78,16 @@ class ByteMaskedArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return ByteMaskedArray(
+            ak._v2.index.Index(self._mask.to(ak._v2._typetracer.TypeTracer.instance())),
+            self._content.typetracer,
+            self._valid_when,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._mask)
 
@@ -132,7 +142,7 @@ class ByteMaskedArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         if self._mask[where] == self._valid_when:
             return self._content._getitem_at(where)
@@ -221,7 +231,7 @@ class ByteMaskedArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
-        if len(slicestarts) != len(self):
+        if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
@@ -355,9 +365,6 @@ class ByteMaskedArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._mask) == 0:
-            return self
-
         return self.toIndexedOptionArray64()._sort_next(
             negaxis,
             starts,

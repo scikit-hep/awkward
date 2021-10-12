@@ -9,3 +9,4 @@ import awkward._v2.record  # noqa: F401
 import awkward._v2.types  # noqa: F401
 import awkward._v2.forms  # noqa: F401
 import awkward._v2._slicing  # noqa: F401
+import awkward._v2._typetracer  # noqa: F401

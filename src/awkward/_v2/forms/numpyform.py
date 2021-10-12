@@ -118,6 +118,16 @@ class NumpyForm(Form):
                 out["inner_shape"] = list(self._inner_shape)
             return self._tolist_extra(out, verbose)
 
+    def _type(self, typestrs):
+        out = ak._v2.types.numpytype.NumpyType(
+            self._primitive,
+            self._parameters,
+            ak._util.gettypestr(self._parameters, typestrs),
+        )
+        for x in self._inner_shape[::-1]:
+            out = ak._v2.types.regulartype.RegularType(out, x)
+        return out
+
     def __eq__(self, other):
         if isinstance(other, NumpyForm):
             return (

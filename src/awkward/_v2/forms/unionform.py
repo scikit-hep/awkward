@@ -89,6 +89,13 @@ class UnionForm(Form):
             verbose,
         )
 
+    def _type(self, typestrs):
+        return ak._v2.types.uniontype.UnionType(
+            [x._type(typestrs) for x in self._contents],
+            self._parameters,
+            ak._util.gettypestr(self._parameters, typestrs),
+        )
+
     def __eq__(self, other):
         if isinstance(other, UnionForm):
             if (

@@ -67,6 +67,16 @@ class RegularArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return RegularArray(
+            self._content.typetracer,
+            self._size,
+            self._length,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return self._length
 
@@ -99,7 +109,7 @@ class RegularArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))
@@ -146,16 +156,16 @@ class RegularArray(Content):
             copied = True
 
         negative = where < 0
-        if nplike.any(negative):
+        if nplike.any(negative, prefer=False):
             if not copied:
                 where = where.copy()
                 copied = True
             where[negative] += self._length
 
-        if nplike.any(where >= self._length):
+        if nplike.any(where >= self._length, prefer=False):
             raise NestedIndexError(self, where)
 
-        nextcarry = ak._v2.index.Index64.empty(len(where) * self._size, nplike)
+        nextcarry = ak._v2.index.Index64.empty(where.shape[0] * self._size, nplike)
 
         self._handle_error(
             nplike[
@@ -189,6 +199,8 @@ class RegularArray(Content):
                 self._size,
             )
         )
+        if isinstance(out.data, ak._v2._typetracer.TypeTracerArray):
+            out.data.fill_other = self._length * self._size
         return out
 
     def _broadcast_tooffsets64(self, offsets):
@@ -356,7 +368,7 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            nplike = head.nplike
+            nplike = self._content.nplike
 
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = nplike.asarray(head.data.reshape(-1))
@@ -449,7 +461,7 @@ class RegularArray(Content):
                     "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
-            if len(head) != self._size:
+            if len(head) != self._size and nplike.known_shape:
                 raise NestedIndexError(
                     self,
                     head,
@@ -504,7 +516,6 @@ class RegularArray(Content):
                     self._length,
                 )
             )
-
             return ak._v2.contents.RegularArray(
                 ak._v2.contents.numpyarray.NumpyArray(localindex),
                 self._size,
@@ -564,9 +575,6 @@ class RegularArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if self._length == 0:
-            return self
-
         out = self.toListOffsetArray64(True)._sort_next(
             negaxis,
             starts,

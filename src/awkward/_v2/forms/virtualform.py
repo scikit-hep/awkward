@@ -2,7 +2,13 @@
 
 from __future__ import absolute_import
 
-from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
+import awkward as ak
+from awkward._v2.forms.form import (
+    Form,
+    _parameters_equal,
+    _parameters_update,
+    nonvirtual,
+)
 
 
 class VirtualForm(Form):
@@ -51,6 +57,24 @@ class VirtualForm(Form):
             out["form"] = self._form._tolist_part(verbose, toplevel=False)
         out["has_length"] = self._has_length
         return self._tolist_extra(out, verbose)
+
+    def _type(self, typestrs):
+        if self._form is None:
+            return ak._v2.types.unknowntype.UnknownType(
+                self._parameters,
+                ak._util.gettypestr(self._parameters, typestrs),
+            )
+        else:
+            out = self._form._type(typestrs)
+
+            if self._parameters is not None:
+                if out._parameters is None:
+                    out._parameters = self._parameters
+                else:
+                    out._parameters = dict(out._parameters)
+                    _parameters_update(out._parameters, self._parameters)
+
+            return out
 
     def __eq__(self, other):
         if isinstance(other, VirtualForm):

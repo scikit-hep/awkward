@@ -17,7 +17,7 @@ class NumpyArray(Content):
 
         if (
             self._data.dtype not in ak._v2.types.numpytype._dtype_to_primitive
-            and not isinstance(self._data.dtype.type, (np.datetime64, np.timedelta64))
+            and not issubclass(self._data.dtype.type, (np.datetime64, np.timedelta64))
         ):
             raise TypeError(
                 "{0} 'data' dtype {1} is not supported; must be one of {2}".format(
@@ -81,8 +81,20 @@ class NumpyArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return NumpyArray(
+            self.to(ak._v2._typetracer.TypeTracer.instance()),
+            self._typetracer_identifier(),
+            self._parameters,
+            nplike=ak._v2._typetracer.TypeTracer.instance(),
+        )
+
     def __len__(self):
         return len(self._data)
+
+    def to(self, nplike):
+        return nplike.asarray(self._data)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -91,11 +103,11 @@ class NumpyArray(Content):
         out = [indent, pre, "<NumpyArray dtype="]
         out.append(repr(str(self.dtype)))
         if len(self._data.shape) == 1:
-            out.append(" len=")
-            out.append(repr(str(len(self))))
+            out.append(" len=" + repr(str(self._data.shape[0])))
         else:
-            out.append(" shape=")
-            out.append(repr(str(self._data.shape)))
+            out.append(
+                " shape='({0})'".format(", ".join(str(x) for x in self._data.shape))
+            )
 
         extra = self._repr_extra(indent + "    ")
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
@@ -241,6 +253,7 @@ class NumpyArray(Content):
                 raise NestedIndexError(self, (head,) + tail, str(err))
             out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
             return out2
+
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 
@@ -292,7 +305,7 @@ class NumpyArray(Content):
             return self
 
     def iscontiguous(self):
-        x = self._data.itemsize
+        x = self._data.dtype.itemsize
 
         for i in range(len(self.shape), 0, -1):  # FIXME: more Pythonic way to do it?
             if x != self.strides[i - 1]:
@@ -412,13 +425,11 @@ class NumpyArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if self.shape[0] == 0:
-            return self
-
         if len(self.shape) == 0:
             raise TypeError(
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
+
         elif len(self.shape) != 1 or not self.iscontiguous():
             contiguous_self = self if self.iscontiguous() else self.contiguous()
             return contiguous_self.toRegularArray()._sort_next(
@@ -431,6 +442,7 @@ class NumpyArray(Content):
                 kind,
                 order,
             )
+
         else:
             nplike = self.nplike
 
@@ -448,7 +460,8 @@ class NumpyArray(Content):
                 )
             )
 
-            offsets = ak._v2.index.Index64.zeros(offsets_length, nplike)
+            offsets = ak._v2.index.Index64.zeros(offsets_length[0], nplike)
+
             self._handle_error(
                 nplike[
                     "awkward_sorting_ranges",
