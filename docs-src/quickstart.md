@@ -94,3 +94,7 @@ See Awkward Array's [GitHub page](https://github.com/scikit-hep/awkward-1.0) for
    * The [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE) is BSD-3.
 
 See also [papers and talks about Awkward Array](https://github.com/scikit-hep/awkward-1.0#papers-and-talks-about-awkward-array) and a [table of contributors](https://github.com/scikit-hep/awkward-1.0#acknowledgements).
+
+----------
+
+Support for this work was provided by NSF cooperative agreement [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) (IRIS-HEP), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-1520942](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).

@@ -79,6 +79,17 @@ class ListArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
+        return ListArray(
+            ak._v2.index.Index(self._starts.to(tt)),
+            ak._v2.index.Index(self._stops.to(tt)),
+            self._content.typetracer,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._starts)
 
@@ -112,7 +123,7 @@ class ListArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         start, stop = self._starts[where], self._stops[where]
         return self._content._getitem_range(slice(start, stop))
@@ -182,6 +193,8 @@ class ListArray(Content):
                 starts_len,
             )
         )
+        if isinstance(out.data, ak._v2._typetracer.TypeTracerArray):
+            out.data.fill_other = len(self._content)
         return out
 
     def _broadcast_tooffsets64(self, offsets):
@@ -189,7 +202,7 @@ class ListArray(Content):
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
-        if len(slicestarts) != len(self):
+        if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
@@ -285,7 +298,7 @@ class ListArray(Content):
         elif isinstance(
             slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray
         ):
-            if len(self._starts) < len(slicestarts):
+            if len(self._starts) < len(slicestarts) and nplike.known_shape:
                 raise NestedIndexError(
                     self,
                     ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
@@ -312,6 +325,11 @@ class ListArray(Content):
             )
 
             nextcarry = ak._v2.index.Index64.empty(numvalid[0], nplike)
+            if isinstance(nextcarry.data, ak._v2._typetracer.TypeTracerArray):
+                nextcarry.data.shape = ak._v2._typetracer.Interval(
+                    0, len(slicecontent._index)
+                )
+
             smalloffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
             largeoffsets = ak._v2.index.Index64.empty(len(slicestarts) + 1, nplike)
 
@@ -626,7 +644,7 @@ class ListArray(Content):
                     length,
                 ),
             )
-            carried = self._content._carry(nextcarry, True)
+            carried = self._content._carry(nextcarry, True, NestedIndexError)
             down = carried._getitem_next_jagged(
                 multistarts, multistops, head._content, tail
             )
@@ -866,9 +884,6 @@ class ListArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._starts) == 0:
-            return self
-
         return self.toListOffsetArray64(True)._sort_next(
             negaxis,
             starts,

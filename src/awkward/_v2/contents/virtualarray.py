@@ -44,6 +44,23 @@ class ArrayGenerator(object):
     def form(self):
         return self._form
 
+    @property
+    def typetracer(self):
+        generator = FunctionGenerator(
+            self._generator.length,
+            self._generator.form,
+            lambda *a, **k: self._generator.function(*a, **k).typetracer,
+            self._generator.args,
+            self._generator.kwargs,
+        )
+        return VirtualArray(
+            generator,
+            None,
+            self._cache_key,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def generate(self):
         raise AssertionError()
 

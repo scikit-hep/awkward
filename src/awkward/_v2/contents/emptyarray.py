@@ -40,6 +40,10 @@ class EmptyArray(Content):
         )
 
     @property
+    def typetracer(self):
+        return EmptyArray(self._typetracer_identifier(), self._parameters)
+
+    @property
     def nplike(self):
         return ak.nplike.Numpy.instance()
 
@@ -50,9 +54,9 @@ class EmptyArray(Content):
     def __len__(self):
         return 0
 
-    def toNumpyArray(self, dtype):
+    def toNumpyArray(self, dtype, nplike=None):
         return ak._v2.contents.numpyarray.NumpyArray(
-            numpy.empty(0, dtype), self._identifier, self._parameters
+            numpy.empty(0, dtype), self._identifier, self._parameters, nplike=nplike
         )
 
     def _getitem_nothing(self):
@@ -164,17 +168,7 @@ class EmptyArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        as_numpy = ak._v2.contents.NumpyArray(self)
-        return as_numpy._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+        return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)
@@ -190,7 +184,7 @@ class EmptyArray(Content):
         mask,
         keepdims,
     ):
-        as_numpy = self.toNumpyArray(reducer.preferred_dtype)
+        as_numpy = self.toNumpyArray(reducer.preferred_dtype, nplike=parents.nplike)
         return as_numpy._reduce_next(
             reducer,
             negaxis,

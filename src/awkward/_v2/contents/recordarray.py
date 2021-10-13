@@ -142,6 +142,16 @@ class RecordArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return RecordArray(
+            [x.typetracer for x in self._contents],
+            self._keys,
+            self._length,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return self._length
 
@@ -194,7 +204,7 @@ class RecordArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         return Record(self, where)
 
@@ -271,10 +281,10 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if nplike.any(negative):
+            if nplike.any(negative, prefer=False):
                 where[negative] += self._length
 
-            if nplike.any(where >= self._length):
+            if nplike.any(where >= self._length, prefer=False):
                 if issubclass(exception, NestedIndexError):
                     raise exception(self, where)
                 else:
@@ -308,6 +318,16 @@ class RecordArray(Content):
                 self._carry_identifier(carry, exception),
                 self._parameters,
             )
+
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        contents = []
+        for i in range(len(self._contents)):
+            contents.append(
+                self.content(i)._getitem_next_jagged(
+                    slicestarts, slicestops, slicecontent, tail
+                )
+            )
+        return RecordArray(contents, self._keys, self._length)
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():
@@ -537,9 +557,6 @@ class RecordArray(Content):
     ):
         if self._keys is None or len(self._keys) == 0:
             return ak._v2.contents.NumpyArray(self.nplike.instance().empty(0, np.int64))
-
-        if len(self._keys) > 1:
-            raise NotImplementedError
 
         contents = []
         for content in self._contents:

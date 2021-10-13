@@ -219,11 +219,19 @@ def v1_to_v2(v1):
         )
 
     elif isinstance(v1, ak.layout.NumpyArray):
-        return ak._v2.contents.NumpyArray(
-            fix(np.asarray(v1)),
-            identifier=v1_to_v2_id(v1.identities),
-            parameters=v1.parameters,
-        )
+        primitive = v1.form.primitive
+        if primitive == "datetime64" or primitive == "timedelta64":
+            return ak._v2.contents.NumpyArray(
+                fix(np.asarray(v1.view_int64)).view(np.dtype(v1.format)),
+                identifier=v1_to_v2_id(v1.identities),
+                parameters=v1.parameters,
+            )
+        else:
+            return ak._v2.contents.NumpyArray(
+                fix(np.asarray(v1)),
+                identifier=v1_to_v2_id(v1.identities),
+                parameters=v1.parameters,
+            )
 
     elif isinstance(v1, ak.layout.RegularArray):
         return ak._v2.contents.RegularArray(

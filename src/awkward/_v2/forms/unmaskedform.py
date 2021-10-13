@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import awkward as ak
 from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
 
 
@@ -38,6 +39,13 @@ class UnmaskedForm(Form):
                 "content": self._content._tolist_part(verbose, toplevel=False),
             },
             verbose,
+        )
+
+    def _type(self, typestrs):
+        return ak._v2.types.optiontype.OptionType(
+            self._content._type(typestrs),
+            self._parameters,
+            ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

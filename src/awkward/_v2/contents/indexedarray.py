@@ -65,6 +65,16 @@ class IndexedArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
+        return IndexedArray(
+            ak._v2.index.Index(self._index.to(tt)),
+            self._content.typetracer,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._index)
 
@@ -94,7 +104,7 @@ class IndexedArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         return self._content._getitem_at(self._index[where])
 
@@ -144,7 +154,7 @@ class IndexedArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         nplike = self.nplike
-        if len(slicestarts) != len(self):
+        if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
@@ -545,9 +555,6 @@ class IndexedArray(Content):
         kind,
         order,
     ):
-        if len(self._index) == 0:
-            ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
-
         next = self._content._carry(self._index, False, NestedIndexError)
         return next._sort_next(
             negaxis,

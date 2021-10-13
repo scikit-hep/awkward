@@ -99,6 +99,17 @@ class UnionArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
+        return UnionArray(
+            ak._v2.index.Index(self._tags.to(tt)),
+            ak._v2.index.Index(self._index.to(tt)),
+            [x.typetracer for x in self._contents],
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._tags)
 
@@ -129,7 +140,7 @@ class UnionArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)

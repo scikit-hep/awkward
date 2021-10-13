@@ -113,6 +113,18 @@ class BitMaskedArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return BitMaskedArray(
+            ak._v2.index.Index(self._mask.to(ak._v2._typetracer.TypeTracer.instance())),
+            self._content.typetracer,
+            self._valid_when,
+            self._length,
+            self._lsb_order,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return self._length
 
@@ -208,7 +220,7 @@ class BitMaskedArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)):
+        if not (0 <= where < len(self)) and self.nplike.known_shape:
             raise NestedIndexError(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
@@ -368,9 +380,6 @@ class BitMaskedArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._mask) == 0:
-            return self
-
         return self.toIndexedOptionArray64()._sort_next(
             negaxis,
             starts,

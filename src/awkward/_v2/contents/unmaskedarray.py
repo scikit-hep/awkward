@@ -44,6 +44,14 @@ class UnmaskedArray(Content):
             form_key=None,
         )
 
+    @property
+    def typetracer(self):
+        return UnmaskedArray(
+            self._content.typetracer,
+            self._typetracer_identifier(),
+            self._parameters,
+        )
+
     def __len__(self):
         return len(self._content)
 
@@ -266,9 +274,6 @@ class UnmaskedArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if len(self._content) == 0:
-            return self
-
         out = self._content._sort_next(
             negaxis,
             starts,

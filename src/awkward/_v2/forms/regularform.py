@@ -49,6 +49,14 @@ class RegularForm(Form):
             verbose,
         )
 
+    def _type(self, typestrs):
+        return ak._v2.types.regulartype.RegularType(
+            self._content._type(typestrs),
+            self._size,
+            self._parameters,
+            ak._util.gettypestr(self._parameters, typestrs),
+        )
+
     def __eq__(self, other):
         if isinstance(other, RegularForm):
             return (
