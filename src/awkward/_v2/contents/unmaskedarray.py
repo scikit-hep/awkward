@@ -61,21 +61,6 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
-    def simplify_optiontype(self):
-        if isinstance(
-            self.content,
-            (
-                ak._v2.contents.indexedarray.IndexedArray,
-                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
-                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
-                ak._v2.contents.bitmaskedarray.BitMaskedArray,
-                ak._v2.contents.unmaskedarray.UnmaskedArray,
-            ),
-        ):
-            return self.content
-        else:
-            return self
-
     def toByteMaskedArray(self):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
             ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
@@ -168,10 +153,59 @@ class UnmaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return self.content
+        else:
+            return self
+
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not self.parameters == other.parameters:
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            self.content.mergeable(other.content, mergebool)
+
+        else:
+            return self.content.mergeable(other, mergebool)
+
+    def _reverse_merge(self, other):
+        return self.toIndexedOptionArray64()._reverse_merge(other)
+
     def _mergemany(self, others):
         if len(others) == 0:
-            return self.shallow_copy()
-        return self.toIndexedOptionArray64()._mergemany(others)
+            return self
+        return self.toIndexedOptionArray64().mergemany(others)
 
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)

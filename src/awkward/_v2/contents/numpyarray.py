@@ -311,9 +311,6 @@ class NumpyArray(Content):
             if self._data.ndim != other.data.ndim:
                 return False
 
-            # if not mergebool and self.dtype != other.dtype and (self.dtype == np.bool  or  other.dtype == np.bool):
-            #     return False
-
             if self.dtype != other.dtype and (
                 self.dtype == np.datetime64 or other.dtype == np.datetime64
             ):
@@ -346,7 +343,7 @@ class NumpyArray(Content):
             elif isinstance(array, ak._v2.contents.numpyarray.NumpyArray):
                 contiguous_arrays.append(array.data)
             else:
-                raise ValueError(
+                raise AssertionError(
                     "cannot merge "
                     + type(self).__name__
                     + " with "

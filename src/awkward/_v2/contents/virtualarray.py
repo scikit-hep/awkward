@@ -444,6 +444,12 @@ class VirtualArray(Content):
     def _getitem_next(self, head, tail, advanced):
         return self.array._getitem_next(head, tail, advanced)
 
+    def mergeable(self, other, mergebool):
+        return self.array.mergeable(other, mergebool)
+
+    def mergemany(self, others):
+        return self.array.mergemany(others)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

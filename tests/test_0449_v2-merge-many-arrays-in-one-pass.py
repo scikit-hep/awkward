@@ -746,13 +746,13 @@ def test_strings():
     ]
 
 
-@pytest.mark.skip(reason="Concatenated Not Implemented")
 def test_concatenate():
     one = v1_to_v2(ak.Array([1, 2, 3]).layout)
     two = v1_to_v2(ak.Array([4.4, 5.5]).layout)
     three = v1_to_v2(ak.Array([6, 7, 8]).layout)
     four = v1_to_v2(ak.Array([[9, 9, 9], [10, 10, 10]]).layout)
-    assert ak.concatenate([one, two, three, four]).tolist() == [
+
+    assert ak.to_list(one.concatenate([two, three, four])) == [
         1,
         2,
         3,
@@ -764,7 +764,7 @@ def test_concatenate():
         [9, 9, 9],
         [10, 10, 10],
     ]
-    assert ak.concatenate([four, one, two, three]).tolist() == [
+    assert ak.to_list(four.concatenate([one, two, three])) == [
         [9, 9, 9],
         [10, 10, 10],
         1,
@@ -776,7 +776,7 @@ def test_concatenate():
         7,
         8,
     ]
-    assert ak.concatenate([one, two, four, three]).tolist() == [
+    assert ak.to_list(one.concatenate([two, four, three])) == [
         1,
         2,
         3,
@@ -790,7 +790,7 @@ def test_concatenate():
     ]
 
     five = v1_to_v2(ak.Array(["nine", "ten"]).layout)
-    assert ak.concatenate([one, two, three, five]).tolist() == [
+    assert ak.to_list(one.concatenate([two, three, five])) == [
         1,
         2,
         3,
@@ -802,7 +802,7 @@ def test_concatenate():
         "nine",
         "ten",
     ]
-    assert ak.concatenate([five, one, two, three]).tolist() == [
+    assert ak.to_list(five.concatenate([one, two, three])) == [
         "nine",
         "ten",
         1,
@@ -814,7 +814,7 @@ def test_concatenate():
         7,
         8,
     ]
-    assert ak.concatenate([one, two, five, three]).tolist() == [
+    assert ak.to_list(one.concatenate([two, five, three])) == [
         1,
         2,
         3,

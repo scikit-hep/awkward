@@ -281,14 +281,6 @@ class BitMaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def _reverse_merge(self, other):
-        return self.toIndexedOptionArray64()._reverse_merge(other)
-
-    def mergemany(self, others):
-        if len(others) == 0:
-            return self
-        return self.toIndexedOptionArray64().mergemany(others)
-
     def simplify_optiontype(self):
         if isinstance(
             self.content,
@@ -303,6 +295,45 @@ class BitMaskedArray(Content):
             return self.toIndexedOptionArray64.simplify_optiontype
         else:
             return self
+
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not self.parameters == other.parameters:
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            self.content.mergeable(other.content, mergebool)
+
+        else:
+            return self.content.mergeable(other, mergebool)
+
+    def _reverse_merge(self, other):
+        return self.toIndexedOptionArray64()._reverse_merge(other)
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+        return self.toIndexedOptionArray64().mergemany(others)
 
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)

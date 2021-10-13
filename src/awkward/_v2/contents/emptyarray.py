@@ -117,6 +117,11 @@ class EmptyArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def mergeable(self, other, mergebool):
+        if not self.parameters == other.parameters:
+            return False
+        return True
+
     def mergemany(self, others):
         if len(others) == 0:
             return self

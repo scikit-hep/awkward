@@ -238,6 +238,116 @@ class IndexedArray(Content):
         )
         return self._content._carry(nextcarry, False, NestedIndexError)
 
+    def bytemask(self):
+        nplike = self.nplike
+        out = ak._v2.index.Index8.empty(len(self.index), nplike)
+        self._handle_error(
+            nplike["awkward_zero_mask", out.dtype.type](
+                out.to(nplike),
+                len(self.index),
+            )
+        )
+        return out
+
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+
+            if isinstance(
+                self.content,
+                (
+                    ak._v2.contents.indexedarray.IndexedArray,
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ),
+            ):
+                inner = self.content.index
+                result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
+            elif isinstance(
+                self.content,
+                (
+                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                    ak._v2.contents.unmaskedarray.UnmaskedArray,
+                ),
+            ):
+                rawcontent = self.contents.toIndexedOptionArray64()
+                inner = rawcontent.index
+                result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
+
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedArray_simplify",
+                    result.dtype.type,
+                    self._index.dtype.type,
+                    inner.dtype.type,
+                ](
+                    result.to(self.nplike),
+                    self._index.to(self.nplike),
+                    len(self._index),
+                    inner.to(self.nplike),
+                    len(inner),
+                )
+            )
+            if isinstance(self.content, ak._v2.contents.indexedarray.IndexedArray):
+                return IndexedArray(
+                    result, self.content.content, self.identifier, self.parameters
+                )
+
+            if isinstance(
+                self.content,
+                (
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                    ak._v2.contents.unmaskedarray.UnmaskedArray,
+                ),
+            ):
+                return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                    result, self.content.content, self.identifier, self.parameters
+                )
+
+        else:
+            return self
+
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not self.parameters == other.parameters:
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            self.content.mergeable(other.content, mergebool)
+
+        else:
+            return self.content.mergeable(other, mergebool)
+
     def _merging_strategy(self, others):
         if len(others) == 0:
             raise ValueError(
@@ -388,85 +498,6 @@ class IndexedArray(Content):
         raise NotImplementedError(
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
-
-    def bytemask(self):
-        nplike = self.nplike
-        out = ak._v2.index.Index8.empty(len(self.index), nplike)
-        self._handle_error(
-            nplike["awkward_zero_mask", out.dtype.type](
-                out.to(nplike),
-                len(self.index),
-            )
-        )
-        return out
-
-    def simplify_optiontype(self):
-        if isinstance(
-            self.content,
-            (
-                ak._v2.contents.indexedarray.IndexedArray,
-                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
-                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
-                ak._v2.contents.bitmaskedarray.BitMaskedArray,
-                ak._v2.contents.unmaskedarray.UnmaskedArray,
-            ),
-        ):
-
-            if isinstance(
-                self.content,
-                (
-                    ak._v2.contents.indexedarray.IndexedArray,
-                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
-                ),
-            ):
-                inner = self.content.index
-                result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
-            elif isinstance(
-                self.content,
-                (
-                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
-                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
-                    ak._v2.contents.unmaskedarray.UnmaskedArray,
-                ),
-            ):
-                rawcontent = self.contents.toIndexedOptionArray64()
-                inner = rawcontent.index
-                result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
-
-            self._handle_error(
-                self.nplike[
-                    "awkward_IndexedArray_simplify",
-                    result.dtype.type,
-                    self._index.dtype.type,
-                    inner.dtype.type,
-                ](
-                    result.to(self.nplike),
-                    self._index.to(self.nplike),
-                    len(self._index),
-                    inner.to(self.nplike),
-                    len(inner),
-                )
-            )
-            if isinstance(self.content, ak._v2.contents.indexedarray.IndexedArray):
-                return IndexedArray(
-                    result, self.content.content, self.identifier, self.parameters
-                )
-
-            if isinstance(
-                self.content,
-                (
-                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
-                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
-                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
-                    ak._v2.contents.unmaskedarray.UnmaskedArray,
-                ),
-            ):
-                return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                    result, self.content.content, self.identifier, self.parameters
-                )
-
-        else:
-            return self
 
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)

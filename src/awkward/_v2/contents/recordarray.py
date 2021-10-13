@@ -346,7 +346,7 @@ class RecordArray(Content):
             next = RecordArray(contents, self._keys, None, self._identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)
 
-    def mergeable(self, other, mergebool=False):
+    def mergeable(self, other, mergebool=True):
         if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
             return self.mergeable(other.array, mergebool)
 
