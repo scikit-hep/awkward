@@ -121,7 +121,6 @@ def test_lists():
     ]
 
 
-@pytest.mark.skip(reason="cannot merge NumpyArray with ListOffsetArray")
 def test_records():
     one = v1_to_v2(
         ak.Array(
@@ -141,9 +140,8 @@ def test_records():
         {"x": 6, "y": [1]},
         {"x": 7, "y": [1, 2]},
     ]
-    assert 1 == 2
 
-    three = ak.layout.EmptyArray()
+    three = v1_to_v2(ak.layout.EmptyArray())
     assert ak.to_list(one.mergemany([two, three, four])) == [
         {"x": 1, "y": [1]},
         {"x": 2, "y": [1, 2]},
@@ -155,7 +153,6 @@ def test_records():
     ]
 
 
-@pytest.mark.skip(reason="cannot merge NumpyArray with ListOffsetArray")
 def test_tuples():
     one = v1_to_v2(ak.Array([(1, [1]), (2, [1, 2]), (3, [1, 2, 3])]).layout)
     two = v1_to_v2(ak.Array([(4, []), (5, [3, 2, 1])]).layout)
@@ -171,7 +168,7 @@ def test_tuples():
         (7, [1, 2]),
     ]
 
-    three = ak.layout.EmptyArray()
+    three = v1_to_v2(ak.layout.EmptyArray())
     assert ak.to_list(one.mergemany([two, three, four])) == [
         (1, [1]),
         (2, [1, 2]),

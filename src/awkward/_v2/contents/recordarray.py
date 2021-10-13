@@ -480,11 +480,11 @@ class RecordArray(Content):
                                 trimmed = field[0 : len(array)]
                                 for_each_field[i].append(trimmed)
                         else:
-                            raise ValueError(
+                            raise AssertionError(
                                 "cannot merge records with different sets of field names"
                             )
                     else:
-                        raise ValueError("cannot merge non-tuple record with tuple")
+                        raise AssertionError("cannot merge non-tuple record with tuple")
 
                 elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                     pass
