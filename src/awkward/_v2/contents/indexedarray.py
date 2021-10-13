@@ -526,6 +526,20 @@ class IndexedArray(Content):
         else:
             return self.project()._localindex(posaxis, depth)
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if len(self._index) == 0:
+            return True
+
+        next = self._content._carry(self._index, False, NestedIndexError)
+        return next._is_unique(negaxis, starts, parents, outlength)
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if len(self._index) == 0:
+            return self
+
+        next = self._content._carry(self._index, False, NestedIndexError)
+        return next._unique(negaxis, starts, parents, outlength)
+
     def _argsort_next(
         self,
         negaxis,

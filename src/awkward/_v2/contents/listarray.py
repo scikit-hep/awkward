@@ -845,6 +845,20 @@ class ListArray(Content):
                 self._parameters,
             )
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if len(self._starts) == 0:
+            return True
+
+        next = self.toListOffsetArray64(True)
+        return next._is_unique(negaxis, starts, parents, outlength)
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if len(self._starts) == 0:
+            return self
+
+        next = self.toListOffsetArray64(True)
+        return next._unique(negaxis, starts, parents, outlength)
+
     def _argsort_next(
         self,
         negaxis,

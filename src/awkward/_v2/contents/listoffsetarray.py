@@ -576,6 +576,27 @@ class ListOffsetArray(Content):
 
         branch, depth = self.branch_depth
 
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            if branch or (negaxis is not None and negaxis != depth):
+                raise ValueError(
+                    "array with strings can only be checked if it is unique with axis=-1"
+                )
+
+            # FIXME: check validity error
+
+            if isinstance(self._content, ak._v2.contents.NumpyArray):
+                out, outoffsets = self._content._as_unique_strings(self._offsets)
+                out2 = ak._v2.contents.listoffsetarray.ListOffsetArray(
+                    outoffsets,
+                    out,
+                    None,
+                    self._parameters,
+                )
+                return len(out2) == len(self)
+
         if not branch and (negaxis == depth):
             return self._content._is_unique(negaxis - 1, starts, parents, outlength)
         else:

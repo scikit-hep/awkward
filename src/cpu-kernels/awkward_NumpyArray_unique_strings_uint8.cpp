@@ -17,7 +17,7 @@ ERROR awkward_NumpyArray_unique_strings_uint8(
   int64_t start = 0;
   int64_t k = 0;
   bool differ = false;
-
+  outoffsets[counter++] = offsets[0];
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     differ = false;
     if (offsets[i + 1] - offsets[i] != slen) {
@@ -36,11 +36,11 @@ ERROR awkward_NumpyArray_unique_strings_uint8(
         toptr[index++] = toptr[j];
         start = offsets[i];
      }
-     counter++;
+     outoffsets[counter++] = index;
    }
    slen = offsets[i + 1] - offsets[i];
   }
-  *tolength = counter + 1;
+  *tolength = counter;
 
   return success();
 }

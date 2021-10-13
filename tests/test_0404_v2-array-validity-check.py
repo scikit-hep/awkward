@@ -13,15 +13,19 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.skip(reason="FIXME: NumpyArray 'data' dtype dtype('O') is not supported")
-def test_NumpyArray_Object_Type():
-    array = ak.layout.NumpyArray(
-        np.array(["1chchc", "1chchc", "2sss", "3", "4", "5"], dtype=object),
-        parameters={"__array__": "categorical"},
-    )
-    array = v1_to_v2(array)
-    assert ak.is_valid(ak.Array(array)) is False
-    # FIXME? assert array.is_unique() is False
+def test_categorical():
+    array = ak.Array(["1chchc", "1chchc", "2sss", "3", "4", "5"])
+    categorical = ak.to_categorical(array)
+    assert ak.is_valid(categorical) is True
+    assert categorical.layout.is_unique() is False
+
+    array = v1_to_v2(array.layout)
+    categorical = v1_to_v2(categorical.layout)
+
+    assert ak.is_valid(ak.Array(array)) is True
+    assert array.is_unique() is False
+    assert ak.is_valid(ak.Array(categorical)) is True
+    assert categorical.is_unique() is False
 
 
 def test_NumpyArray():
@@ -82,129 +86,173 @@ def test_2d_in_axis():
     ]
 
 
-# def test_3d():
-#     array = ak.layout.NumpyArray(
-#         np.array(
-#             [
-#                 # axis 2:    0       1       2       3       4         # axis 1:
-#                 [
-#                     [1.1, 2.2, 3.3, 4.4, 5.5],  # 0
-#                     [6.6, 7.7, 8.8, 9.9, 10.10],  # 1
-#                     [11.11, 12.12, 13.13, 14.14, 15.15],
-#                 ],  # 2
-#                 [
-#                     [-1.1, -2.2, -3.3, -4.4, -5.5],  # 3
-#                     [-6.6, -7.7, -8.8, -9.9, -10.1],  # 4
-#                     [-11.11, -12.12, -13.13, -14.14, -15.15],
-#                 ],
-#             ]
-#         )
-#     )  # 5
-#     array = v1_to_v2(array)
-#     assert array.is_unique() is True
-#
-#     assert ak.to_list(array.unique()) == [
-#         -15.15,
-#         -14.14,
-#         -13.13,
-#         -12.12,
-#         -11.11,
-#         -10.1,
-#         -9.9,
-#         -8.8,
-#         -7.7,
-#         -6.6,
-#         -5.5,
-#         -4.4,
-#         -3.3,
-#         -2.2,
-#         -1.1,
-#         1.1,
-#         2.2,
-#         3.3,
-#         4.4,
-#         5.5,
-#         6.6,
-#         7.7,
-#         8.8,
-#         9.9,
-#         10.1,
-#         11.11,
-#         12.12,
-#         13.13,
-#         14.14,
-#         15.15,
-#     ]
-#
-#
-#
-# def test_ListOffsetArray():
-#     array = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
-#     assert ak.to_list(array.sort(0, True, True)) == [
-#         "five",
-#         "four",
-#         "one",
-#         "three",
-#         "two",
-#     ]
-#     assert array.is_unique() is True
-#
-#     array2 = ak.from_iter(["one", "two", "one", "four", "two"], highlevel=False)
-#     assert ak.to_list(array2.sort(0, True, True)) == [
-#         "four",
-#         "one",
-#         "one",
-#         "two",
-#         "two",
-#     ]
-#     assert array2.is_unique() is False
-#
-#     content = ak.layout.NumpyArray(
-#         np.array([3.3, 1.1, 2.2, 0.0, 4.4, 9.9, 6.6, 7.7, 8.8, 5.5])
-#     )
-#     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-#     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-#     assert ak.to_list(listoffsetarray) == [
-#         [3.3, 1.1, 2.2],
-#         [],
-#         [0.0, 4.4],
-#         [9.9],
-#         [6.6, 7.7, 8.8, 5.5],
-#         [],
-#     ]
-#     assert listoffsetarray.is_unique() is True
-#
-#     content = ak.layout.NumpyArray(
-#         np.array([3.3, 1.1, 2.2, 0.0, 4.4, 9.9, 2.2, 3.3, 1.1, 5.5])
-#     )
-#     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9, 10]))
-#     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-#     assert ak.to_list(listoffsetarray) == [
-#         [3.3, 1.1, 2.2],
-#         [],
-#         [0.0, 4.4],
-#         [9.9],
-#         [2.2, 3.3, 1.1],
-#         [5.5],
-#     ]
-#     assert listoffsetarray.is_unique() is False
-#
-#     content2 = ak.layout.NumpyArray(
-#         np.array([0.0, 1.1, 2.2, 3.3, 1.1, 5.5, 6.6, 7.7, 2.2, 9.9])
-#     )
-#     offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-#     listoffsetarray2 = ak.layout.ListOffsetArray64(offsets2, content2)
-#     assert ak.to_list(listoffsetarray2) == [
-#         [0.0, 1.1, 2.2],
-#         [],
-#         [3.3, 1.1],
-#         [5.5],
-#         [6.6, 7.7, 2.2, 9.9],
-#         [],
-#     ]
-#     assert listoffsetarray2.is_unique() is True
-#
-#
+def test_3d():
+    array = ak.layout.NumpyArray(
+        np.array(
+            [
+                # axis 2:    0       1       2       3       4         # axis 1:
+                [
+                    [1.1, 2.2, 3.3, 4.4, 5.5],  # 0
+                    [6.6, 7.7, 8.8, 9.9, 10.10],  # 1
+                    [11.11, 12.12, 13.13, 14.14, 15.15],
+                ],  # 2
+                [
+                    [-1.1, -2.2, -3.3, -4.4, -5.5],  # 3
+                    [-6.6, -7.7, -8.8, -9.9, -10.1],  # 4
+                    [-11.11, -12.12, -13.13, -14.14, -15.15],
+                ],
+            ]
+        )
+    )  # 5
+    array = v1_to_v2(array)
+    assert array.is_unique() is True
+
+    assert ak.to_list(array.unique()) == [
+        -15.15,
+        -14.14,
+        -13.13,
+        -12.12,
+        -11.11,
+        -10.1,
+        -9.9,
+        -8.8,
+        -7.7,
+        -6.6,
+        -5.5,
+        -4.4,
+        -3.3,
+        -2.2,
+        -1.1,
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+        6.6,
+        7.7,
+        8.8,
+        9.9,
+        10.1,
+        11.11,
+        12.12,
+        13.13,
+        14.14,
+        15.15,
+    ]
+
+    assert ak.to_list(array.unique(axis=-1)) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+        [6.6, 7.7, 8.8, 9.9, 10.1],
+        [11.11, 12.12, 13.13, 14.14, 15.15],
+        [-5.5, -4.4, -3.3, -2.2, -1.1],
+        [-10.1, -9.9, -8.8, -7.7, -6.6],
+        [-15.15, -14.14, -13.13, -12.12, -11.11],
+    ]
+
+    assert ak.to_list(array.unique(axis=-2)) == [
+        [1.1, 6.6, 11.11],
+        [-11.11, -6.6, -1.1],
+        [2.2, 7.7, 12.12],
+        [-12.12, -7.7, -2.2],
+        [3.3, 8.8, 13.13],
+        [-13.13, -8.8, -3.3],
+        [4.4, 9.9, 14.14],
+        [-14.14, -9.9, -4.4],
+        [5.5, 10.1, 15.15],
+        [-15.15, -10.1, -5.5],
+    ]
+
+    assert ak.to_list(array.unique(axis=-3)) == [
+        [-1.1, 1.1],
+        [-6.6, 6.6],
+        [-11.11, 11.11],
+        [-2.2, 2.2],
+        [-7.7, 7.7],
+        [-12.12, 12.12],
+        [-3.3, 3.3],
+        [-8.8, 8.8],
+        [-13.13, 13.13],
+        [-4.4, 4.4],
+        [-9.9, 9.9],
+        [-14.14, 14.14],
+        [-5.5, 5.5],
+        [-10.1, 10.1],
+        [-15.15, 15.15],
+    ]
+
+
+def test_ListOffsetArray():
+    array = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
+    array = v1_to_v2(array)
+    assert ak.to_list(array.sort(0, True, True)) == [
+        "five",
+        "four",
+        "one",
+        "three",
+        "two",
+    ]
+    assert array.is_unique() is True
+
+    array2 = ak.from_iter(["one", "two", "one", "four", "two"], highlevel=False)
+    array2 = v1_to_v2(array2)
+    assert ak.to_list(array2.sort(0, True, True)) == [
+        "four",
+        "one",
+        "one",
+        "two",
+        "two",
+    ]
+    assert array2.is_unique() is False
+
+    content = ak.layout.NumpyArray(
+        np.array([3.3, 1.1, 2.2, 0.0, 4.4, 9.9, 6.6, 7.7, 8.8, 5.5])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+    listoffsetarray = v1_to_v2(listoffsetarray)
+    assert ak.to_list(listoffsetarray) == [
+        [3.3, 1.1, 2.2],
+        [],
+        [0.0, 4.4],
+        [9.9],
+        [6.6, 7.7, 8.8, 5.5],
+        [],
+    ]
+    assert listoffsetarray.is_unique() is True
+
+    content = ak.layout.NumpyArray(
+        np.array([3.3, 1.1, 2.2, 0.0, 4.4, 9.9, 2.2, 3.3, 1.1, 5.5])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+    listoffsetarray = v1_to_v2(listoffsetarray)
+    assert ak.to_list(listoffsetarray) == [
+        [3.3, 1.1, 2.2],
+        [],
+        [0.0, 4.4],
+        [9.9],
+        [2.2, 3.3, 1.1],
+        [5.5],
+    ]
+    assert listoffsetarray.is_unique() is False
+
+    content2 = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 1.1, 5.5, 6.6, 7.7, 2.2, 9.9])
+    )
+    offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray2 = ak.layout.ListOffsetArray64(offsets2, content2)
+    listoffsetarray2 = v1_to_v2(listoffsetarray2)
+    assert ak.to_list(listoffsetarray2) == [
+        [0.0, 1.1, 2.2],
+        [],
+        [3.3, 1.1],
+        [5.5],
+        [6.6, 7.7, 2.2, 9.9],
+        [],
+    ]
+    # assert listoffsetarray2.is_unique() is True
+
+
 # def test_RegularArray():
 #     content = ak.layout.NumpyArray(
 #         np.array(
@@ -236,6 +284,7 @@ def test_2d_in_axis():
 #     )
 #     indexedarray = ak.layout.IndexedOptionArray64(index, content)
 #     regular_array = ak.layout.RegularArray(indexedarray, 3, zeros_length=0)
+#     regular_array = v1_to_v2(regular_array)
 #     assert ak.to_list(regular_array) == [
 #         [6.9, 3.9, 6.9],
 #         [2.2, 1.5, 1.6],
@@ -248,6 +297,7 @@ def test_2d_in_axis():
 #     )
 #     indexedarray2 = ak.layout.IndexedOptionArray64(index2, content)
 #     regular_array2 = ak.layout.RegularArray(indexedarray2, 3, zeros_length=0)
+#     regular_array2 = v1_to_v2(regular_array2)
 #     assert ak.to_list(regular_array2) == [
 #         [6.9, 3.9, 6.9],
 #         [3.9, 6.9, 6.9],
@@ -262,12 +312,14 @@ def test_2d_in_axis():
 #     )
 #     index = ak.layout.Index64(np.array([0, 2, 4, 6, 8, 9], dtype=np.int64))
 #     indexedarray = ak.layout.IndexedArray64(index, content)
+#     indexedarray = v1_to_v2(indexedarray)
 #
 #     assert ak.to_list(indexedarray) == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9]
 #     assert indexedarray.is_unique() is True
 #
 #     index2 = ak.layout.Index64(np.array([0, 2, 9, 6, 0, 9], dtype=np.int64))
 #     indexedarray2 = ak.layout.IndexedArray64(index2, content)
+#     indexedarray2 = v1_to_v2(indexedarray2)
 #
 #     assert ak.to_list(indexedarray2) == [0.0, 2.2, 9.9, 6.6, 0.0, 9.9]
 #     assert indexedarray2.is_unique() is False
@@ -287,6 +339,7 @@ def test_2d_in_axis():
 #             {"x": 0.0, "y": []},
 #         ]
 #     )
+#     array = v1_to_v2(array)
 #
 #     assert array.layout.is_unique() is True
 #     assert array.x.layout.is_unique() is False
@@ -303,6 +356,9 @@ def test_2d_in_axis():
 #     categorical2 = ak.layout.IndexedArray64(
 #         index2, categories.layout, parameters={"__array__": "categorical"}
 #     )
+#     categorical1 = v1_to_v2(categorical1)
+#     categorical2 = v1_to_v2(categorical2)
+#
 #     assert ak.to_list(categorical1.sort(0, True, True)) == [
 #         "one",
 #         "one",
@@ -318,6 +374,7 @@ def test_2d_in_axis():
 #     assert categorical2.is_unique() is False
 #
 #     array1 = ak.Array(categorical1)
+#     array1 = v1_to_v2(array1)
 #     assert array1.tolist() == [
 #         "one",
 #         "three",
@@ -330,6 +387,8 @@ def test_2d_in_axis():
 #     ]
 #
 #     array2 = ak.Array(categorical2)
+#     array2 = v1_to_v2(array2)
+#
 #     assert array2.tolist() == ["two", "two", "three", "two", "one", "one", "one", "two"]
 #
 #     assert (array1 == array2).tolist() == [

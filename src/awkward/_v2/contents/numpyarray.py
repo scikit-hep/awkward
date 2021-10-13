@@ -395,6 +395,51 @@ class NumpyArray(Content):
 
         return True
 
+    def _as_unique_strings(self, offsets):
+        nplike = self.nplike
+
+        outoffsets = ak._v2.index.Index64.empty(len(offsets), nplike)
+        out = ak._v2.contents.NumpyArray(nplike.empty(self.shape[0], self.dtype))
+
+        self._handle_error(
+            nplike[
+                "awkward_NumpyArray_sort_asstrings_uint8",
+                out._data.dtype.type,
+                self._data.dtype.type,
+                offsets._data.dtype.type,
+                outoffsets.dtype.type,
+            ](
+                out._data,
+                self._data,
+                offsets.to(nplike),
+                len(offsets),
+                outoffsets.to(nplike),
+                True,
+                False,
+            )
+        )
+
+        outlength = ak._v2.index.Index64.empty(1, nplike)
+        nextoffsets = ak._v2.index.Index64.empty(len(offsets), nplike)
+        self._handle_error(
+            nplike[
+                "awkward_NumpyArray_unique_strings",
+                out._data.dtype.type,
+                outoffsets.dtype.type,
+                nextoffsets.dtype.type,
+                outlength.dtype.type,
+            ](
+                out._data,
+                outoffsets.to(nplike),
+                len(offsets),
+                nextoffsets.to(nplike),
+                outlength.to(nplike),
+            )
+        )
+        out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
+
+        return out2, nextoffsets[: outlength[0]]
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._data) == 0:
             return True
