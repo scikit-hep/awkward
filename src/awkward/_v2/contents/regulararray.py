@@ -8,6 +8,7 @@ import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.regularform import RegularForm
+from awkward._v2.forms.form import _parameters_equal
 
 
 class RegularArray(Content):
@@ -452,7 +453,7 @@ class RegularArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            nplike = head.nplike
+            nplike = self.nplike
 
             if advanced is not None:
                 raise NestedIndexError(
@@ -505,7 +506,7 @@ class RegularArray(Content):
         if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
             return self.mergeable(other.array, mergebool)
 
-        if not self.parameters == other.parameters:
+        if not _parameters_equal(self._parameters, other._parameters):
             return False
 
         if isinstance(

@@ -350,7 +350,6 @@ class TypeTracerArray(object):
                     length2 = None
 
             shape = (Interval(length1, length2),) + self._shape[1:]
-
             return TypeTracerArray(
                 self._dtype, shape, self._fill_zero, self._fill_other
             )
@@ -633,9 +632,18 @@ class TypeTracer(ak.nplike.NumpyLike):
         # array
         raise NotImplementedError
 
-    def concatenate(self, *args, **kwargs):
-        # arrays
-        raise NotImplementedError
+    def concatenate(self, arrays):
+        shape = arrays[0].shape[0]
+        dtype = arrays[0].dtype
+        for i in range(1, len(arrays)):
+            assert arrays[i - 1].shape[1:] == arrays[i].shape[1:]
+            shape += arrays[i].shape[0]
+            array1 = numpy.asarray([0], dtype=arrays[i - 1].dtype)
+            array2 = numpy.asarray([0], dtype=arrays[i].dtype)
+            array = numpy.concatenate([array1, array2])
+
+        dtype = array.dtype
+        return TypeTracerArray(dtype, shape)
 
     def repeat(self, *args, **kwargs):
         # array, int

@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.numpyform import NumpyForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -293,7 +294,7 @@ class NumpyArray(Content):
         if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
             return self.mergeable(other.array, mergebool)
 
-        if not self.parameters == other.parameters:
+        if not _parameters_equal(self._parameters, other._parameters):
             return False
 
         if isinstance(
@@ -336,6 +337,9 @@ class NumpyArray(Content):
 
             if len(self.shape) > 1 and self.shape != other.shape:
                 return False
+
+            if isinstance(self.data, ak._v2._typetracer.TypeTracerArray):
+                return False
             return True
         else:
             return False
@@ -364,6 +368,7 @@ class NumpyArray(Content):
                 )
 
         contiguous_arrays = self.nplike.concatenate(contiguous_arrays)
+
         next = NumpyArray(contiguous_arrays, self.identifier, parameters)
 
         if len(tail) == 0:

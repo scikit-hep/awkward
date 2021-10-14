@@ -7,6 +7,7 @@ from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.indexedoptionform import IndexedOptionForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -234,6 +235,7 @@ class IndexedOptionArray(Content):
         )
         next = self._content._carry(nextcarry, True, NestedIndexError)
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
+
         out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             outindex, out, self._identifier, self._parameters
         )
@@ -355,7 +357,6 @@ class IndexedOptionArray(Content):
                 rawcontent = self.content.toIndexedOptionArray64()
                 inner = rawcontent.index
                 result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
-
             self._handle_error(
                 self.nplike[
                     "awkward_IndexedArray_simplify",
@@ -381,7 +382,7 @@ class IndexedOptionArray(Content):
         if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
             return self.mergeable(other.array, mergebool)
 
-        if not self.parameters == other.parameters:
+        if not _parameters_equal(self._parameters, other._parameters):
             return False
 
         if isinstance(

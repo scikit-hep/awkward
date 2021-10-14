@@ -14,6 +14,7 @@ from awkward._v2.record import Record
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.recordform import RecordForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -367,10 +368,11 @@ class RecordArray(Content):
             return next._getitem_next(nexthead, nexttail, advanced)
 
     def mergeable(self, other, mergebool=True):
+
         if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
             return self.mergeable(other.array, mergebool)
 
-        if not self.parameters == other.parameters:
+        if not _parameters_equal(self._parameters, other._parameters):
             return False
 
         if isinstance(
@@ -395,7 +397,6 @@ class RecordArray(Content):
             return self.mergeable(other.content, mergebool)
 
         if isinstance(other, ak._v2.contents.recordarray.RecordArray):
-
             if self.is_tuple and other.is_tuple:
                 if len(self.contents) == len(other.contents):
                     for i in range(len(self.contents)):

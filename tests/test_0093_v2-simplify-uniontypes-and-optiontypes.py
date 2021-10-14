@@ -296,6 +296,7 @@ def test_recordarray_merge():
             highlevel=False,
         )
     )
+    print(arrayr1)
     arrayr2 = v1_to_v2(
         ak.from_iter(
             [

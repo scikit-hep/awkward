@@ -13,7 +13,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_concatenate_number():
     a1 = v1_to_v2(ak.Array([[1, 2, 3], [], [4, 5]]).layout)
     assert ak.to_list(a1.concatenate(999)) == [[1, 2, 3, 999], [999], [4, 5, 999]]
@@ -51,7 +51,7 @@ def test_concatenate_number():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_list_offset_array_concatenate():
     content_one = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
@@ -141,7 +141,7 @@ def test_list_offset_array_concatenate():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_list_array_concatenate():
     one = ak.Array([[1, 2, 3], [], [4, 5]]).layout
     two = ak.Array([[1.1, 2.2], [3.3, 4.4], [5.5]]).layout
@@ -163,7 +163,7 @@ def test_list_array_concatenate():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_records_concatenate():
     one = ak.Array(
         [{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}]
@@ -184,7 +184,7 @@ def test_records_concatenate():
         ak.to_list(ak.concatenate([one, two], 2))
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_indexed_array_concatenate():
     one = ak.Array([[1, 2, 3], [None, 4], None, [None, 5]]).layout
     two = ak.Array([6, 7, 8]).layout
@@ -212,7 +212,7 @@ def test_indexed_array_concatenate():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_bytemasked_concatenate():
     one = (
         ak.Array([1, 2, 3, 4, 5, 6]).mask[[True, True, False, True, False, True]].layout
@@ -237,7 +237,7 @@ def test_bytemasked_concatenate():
         ak.to_list(ak.concatenate([one, two], 1))
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_listoffsetarray_concatenate():
     content_one = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
     offsets_one = ak.layout.Index64(np.array([0, 3, 3, 5, 9]))
@@ -268,7 +268,7 @@ def test_listoffsetarray_concatenate():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_numpyarray_concatenate_axis0():
     np1 = np.arange(2 * 7 * 5, dtype=np.float64).reshape(2, 7, 5)
     np2 = np.arange(3 * 7 * 5, dtype=np.int64).reshape(3, 7, 5)
@@ -286,7 +286,7 @@ def test_numpyarray_concatenate_axis0():
     )
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_numpyarray_concatenate():
 
     np1 = np.arange(2 * 7 * 5, dtype=np.float64).reshape(2, 7, 5)
@@ -311,7 +311,7 @@ def test_numpyarray_concatenate():
     )
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_numbers_and_records_concatenate():
     numbers = [
         ak.Array(
@@ -398,7 +398,7 @@ def test_numbers_and_records_concatenate():
     assert str(err.value).startswith("cannot broadcast")
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_broadcast_and_apply_levels():
     arrays = [
         ak.Array([[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]),
@@ -427,7 +427,7 @@ def test_broadcast_and_apply_levels():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_negative_axis_concatenate():
     arrays = [
         ak.Array([[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]),
@@ -456,7 +456,7 @@ def test_negative_axis_concatenate():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yes")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_even_more():
     dim1 = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
     dim1a = ak.Array([[1.1], [2.2], [3.3], [4.4], [5.5]])

@@ -148,7 +148,7 @@ class Content(object):
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        nplike = head.nplike
+        nplike = self.nplike
 
         index = ak._v2.index.Index64(head.index)
         outindex = ak._v2.index.Index64.empty(len(index) * length, nplike)
@@ -172,7 +172,7 @@ class Content(object):
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
-        nplike = head.nplike
+        nplike = self.nplike
         jagged = head.content.toListOffsetArray64()
 
         index = ak._v2.index.Index64(head._index)
@@ -212,7 +212,6 @@ class Content(object):
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             outputmask, tmp, None, self._parameters
         )
-
         return ak._v2.contents.regulararray.RegularArray(
             out.simplify_optiontype(), len(index), 1, None, self._parameters
         )
@@ -513,6 +512,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
         return ak._v2.contents.NumpyArray(localindex)
 
+    # Temporary fix for concatenate (only working for axis = 0)
     def concatenate(self, others):
         if not isinstance(others, list):
             others = [others]

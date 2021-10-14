@@ -8,6 +8,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -378,6 +379,8 @@ class ListArray(Content):
                         missing_trim, content, None, self._parameters
                     )
                 )
+                if isinstance(self.nplike, ak._v2._typetracer.TypeTracer):
+                    indexedoptionarray = indexedoptionarray.typetracer
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
                     largeoffsets,
                     indexedoptionarray.simplify_optiontype(),
@@ -663,7 +666,7 @@ class ListArray(Content):
         if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
             return self.mergeable(other.array, mergebool)
 
-        if not self.parameters == other.parameters:
+        if not _parameters_equal(self._parameters, other._parameters):
             return False
 
         if isinstance(
