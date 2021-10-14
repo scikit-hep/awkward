@@ -47,7 +47,7 @@ namespace awkward {
       writer.Int64(value.GetInt());
     }
     else if (value.IsDouble()) {
-      writer.Int64((int64_t)value.GetDouble());
+      writer.Double(value.GetDouble());
     }
     else if (value.IsString()) {
       writer.String(value.GetString());
