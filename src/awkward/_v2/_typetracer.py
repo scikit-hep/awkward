@@ -634,6 +634,7 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def concatenate(self, arrays):
         shape = arrays[0].shape[0]
+        array = arrays[0]
         for i in range(1, len(arrays)):
             assert arrays[i - 1].shape[1:] == arrays[i].shape[1:]
             shape += arrays[i].shape[0]
