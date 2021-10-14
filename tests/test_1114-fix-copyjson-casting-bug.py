@@ -15,8 +15,8 @@ def test():
             {
                 "class": "NumpyArray",
                 "itemsize": 8,
-                "format": "l",
-                "primitive": "int64",
+                "format": "d",
+                "primitive": "float64",
                 "parameters": {"thing": 1.23},
             }
         )
@@ -24,7 +24,7 @@ def test():
     assert json.loads(repr(f)) == {
         "class": "NumpyArray",
         "itemsize": 8,
-        "format": "l",
-        "primitive": "int64",
+        "format": "d",
+        "primitive": "float64",
         "parameters": {"thing": 1.23},  # not 1 (int)
     }
