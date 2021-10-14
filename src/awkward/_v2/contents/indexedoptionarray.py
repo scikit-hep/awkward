@@ -309,22 +309,6 @@ class IndexedOptionArray(Content):
 
         return self._content._carry(nextcarry, False, NestedIndexError)
 
-    def bytemask(self):
-        nplike = self.nplike
-        out = ak._v2.index.Index8.empty(len(self.index), nplike)
-        self._handle_error(
-            nplike[
-                "awkward_IndexedArray_mask",
-                out.dtype.type,
-                self._index.dtype.type,
-            ](
-                out.to(nplike),
-                self._index.to(nplike),
-                len(self.index),
-            )
-        )
-        return out
-
     def simplify_optiontype(self):
         if isinstance(
             self.content,

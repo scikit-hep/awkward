@@ -634,14 +634,12 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def concatenate(self, arrays):
         shape = arrays[0].shape[0]
-        dtype = arrays[0].dtype
         for i in range(1, len(arrays)):
             assert arrays[i - 1].shape[1:] == arrays[i].shape[1:]
             shape += arrays[i].shape[0]
-            array1 = numpy.asarray([0], dtype=arrays[i - 1].dtype)
-            array2 = numpy.asarray([0], dtype=arrays[i].dtype)
-            array = numpy.concatenate([array1, array2])
-
+            array = numpy.concatenate(
+                [numpy.empty(0, arrays[i - 1].dtype), numpy.empty(0, arrays[i].dtype)]
+            )
         dtype = array.dtype
         return TypeTracerArray(dtype, shape)
 

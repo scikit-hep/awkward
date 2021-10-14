@@ -99,6 +99,12 @@ class IndexedArray(Content):
             self._index, self._content, self._identifier, self._parameters
         )
 
+    def mask_as_bool(self, valid_when=True):
+        if valid_when:
+            return self._index.data >= 0
+        else:
+            return self._index.data < 0
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
@@ -248,17 +254,6 @@ class IndexedArray(Content):
             )
         )
         return self._content._carry(nextcarry, False, NestedIndexError)
-
-    def bytemask(self):
-        nplike = self.nplike
-        out = ak._v2.index.Index8.empty(len(self.index), nplike)
-        self._handle_error(
-            nplike["awkward_zero_mask", out.dtype.type](
-                out.to(nplike),
-                len(self.index),
-            )
-        )
-        return out
 
     def simplify_optiontype(self):
         if isinstance(

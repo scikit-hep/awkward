@@ -640,15 +640,29 @@ def test_merge_parameters():
     ]
 
 
-def test_bytemask():
+def test_mask_as_bool():
     array = ak.from_iter(
         ["one", "two", None, "three", None, None, "four"], highlevel=False
     )
     index2 = ak.layout.Index64(np.array([2, 2, 1, 5, 0], dtype=np.int64))
     array2 = v1_to_v2(ak.layout.IndexedArray64(index2, array))
     array = v1_to_v2(array)
-    assert np.asarray(array.bytemask()).tolist() == [0, 0, 1, 0, 1, 1, 0]
-    assert np.asarray(array2.bytemask()).tolist() == [0, 0, 0, 0, 0]
+    assert np.asarray(array.mask_as_bool(valid_when=False).view(np.int8)).tolist() == [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+    ]
+    assert np.asarray(array2.mask_as_bool(valid_when=False).view(np.int8)).tolist() == [
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]
 
 
 def test_indexedarray_simplify():
