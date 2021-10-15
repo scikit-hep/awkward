@@ -281,33 +281,63 @@ class IndexedOptionArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def project(self):
-        numnull = ak._v2.index.Index64.empty(1, self.nplike)
-
-        self._handle_error(
-            self.nplike[
-                "awkward_IndexedArray_numnull",
-                numnull.dtype.type,
-                self._index.dtype.type,
-            ](numnull.to(self.nplike), self._index.to(self.nplike), len(self._index))
-        )
-
-        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull[0], self.nplike)
-
-        self._handle_error(
-            self.nplike[
-                "awkward_IndexedArray_flatten_nextcarry",
-                nextcarry.dtype.type,
-                self._index.dtype.type,
-            ](
-                nextcarry.to(self.nplike),
-                self._index.to(self.nplike),
-                len(self._index),
-                len(self._content),
+    def project(self, mask=None):
+        if mask is not None:
+            if len(self._index) != len(mask):
+                raise ValueError(
+                    "mask length ({0}) is not equal to {1} length ({2})".format(
+                        mask.length(), type(self).__name__, len(self._index)
+                    )
+                )
+            nextindex = ak._v2.index.Index64.empty(len(self._index), self.nplike)
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedArray_overlay_mask",
+                    nextindex.dtype.type,
+                    mask.dtype.type,
+                    self._index.dtype.type,
+                ](
+                    nextindex.to(self.nplike),
+                    mask.to(self.nplike),
+                    self._index.to(self.nplike),
+                    len(self._index),
+                )
             )
-        )
+            next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                nextindex, self.content, self.identifier, self.parameters
+            )
+            return next.project()
+        else:
+            numnull = ak._v2.index.Index64.empty(1, self.nplike)
 
-        return self._content._carry(nextcarry, False, NestedIndexError)
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedArray_numnull",
+                    numnull.dtype.type,
+                    self._index.dtype.type,
+                ](
+                    numnull.to(self.nplike),
+                    self._index.to(self.nplike),
+                    len(self._index),
+                )
+            )
+
+            nextcarry = ak._v2.index.Index64.empty(len(self) - numnull[0], self.nplike)
+
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedArray_flatten_nextcarry",
+                    nextcarry.dtype.type,
+                    self._index.dtype.type,
+                ](
+                    nextcarry.to(self.nplike),
+                    self._index.to(self.nplike),
+                    len(self._index),
+                    len(self._content),
+                )
+            )
+
+            return self._content._carry(nextcarry, False, NestedIndexError)
 
     def simplify_optiontype(self):
         if isinstance(

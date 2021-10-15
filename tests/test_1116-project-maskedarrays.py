@@ -52,3 +52,14 @@ def test_unmasked():
     unmaskedarray2 = v1_to_v2(unmaskedarray)
 
     assert ak.to_list(unmaskedarray.project()) == ak.to_list(unmaskedarray2.project())
+
+
+def test_indexed():
+    array = ak.Array([1, 2, 3, None, 4, None, None, 5]).layout
+    mask = ak.layout.Index8(np.array([0, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+
+    array2 = v1_to_v2(array)
+    mask2 = v1_to_v2_index(mask)
+
+    assert ak.to_list(array.project()) == ak.to_list(array2.project())
+    assert ak.to_list(array.project(mask)) == ak.to_list(array2.project(mask2))
