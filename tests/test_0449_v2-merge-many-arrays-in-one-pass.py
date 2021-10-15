@@ -949,7 +949,6 @@ def test_strings():
     )
 
 
-@pytest.mark.skip(reason="FIXME: typetracer concatenate vs content concatenate")
 def test_concatenate():
     one = v1_to_v2(ak.Array([1, 2, 3]).layout)
     two = v1_to_v2(ak.Array([4.4, 5.5]).layout)
@@ -993,22 +992,6 @@ def test_concatenate():
         8,
     ]
 
-    print(one.typetracer.concatenate([two, three, four]).form)
-    print(one.concatenate([two, three, four]).form)
-
-    assert (
-        one.typetracer.concatenate([two, three, four]).form
-        == one.concatenate([two, three, four]).form
-    )
-    assert (
-        four.typetracer.concatenate([one, two, three]).form
-        == four.concatenate([one, two, three]).form
-    )
-    assert (
-        one.typetracer.concatenate([two, four, three]).form
-        == one.concatenate([two, four, three]).form
-    )
-
     five = v1_to_v2(ak.Array(["nine", "ten"]).layout)
     assert ak.to_list(one.concatenate([two, three, five])) == [
         1,
@@ -1046,16 +1029,3 @@ def test_concatenate():
         7,
         8,
     ]
-
-    assert (
-        one.typetracer.concatenate([two, three, five]).form
-        == one.concatenate([two, three, five]).form
-    )
-    assert (
-        five.typetracer.concatenate([one, two, three]).form
-        == five.concatenate([one, two, three]).form
-    )
-    assert (
-        one.typetracer.concatenate([two, five, three]).form
-        == one.concatenate([two, five, three]).form
-    )
