@@ -642,7 +642,7 @@ class TypeTracer(ak.nplike.NumpyLike):
                 [numpy.empty(0, arrays[i - 1].dtype), numpy.empty(0, arrays[i].dtype)]
             )
         dtype = array.dtype
-        return TypeTracerArray(dtype, shape)
+        return TypeTracerArray(dtype, (shape,) + arrays[0].shape[1:])
 
     def repeat(self, *args, **kwargs):
         # array, int

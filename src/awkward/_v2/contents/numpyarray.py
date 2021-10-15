@@ -335,11 +335,9 @@ class NumpyArray(Content):
             ):
                 return False
 
-            if len(self.shape) > 1 and self.shape != other.shape:
+            if len(self.shape) > 1 and len(self.shape) != (other.shape):
                 return False
 
-            if isinstance(self.data, ak._v2._typetracer.TypeTracerArray):
-                return False
             return True
         else:
             return False

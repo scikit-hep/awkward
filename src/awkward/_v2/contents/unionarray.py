@@ -318,10 +318,10 @@ class UnionArray(Content):
         tags = ak._v2.index.Index8.empty(len(self), self.nplike)
         index = ak._v2.index.Index64.empty(len(self), self.nplike)
         contents = []
-
         for i in range(len(self.contents)):
             rawcontent = self.contents[i]
             if isinstance(rawcontent, ak._v2.contents.unionarray.UnionArray):
+
                 innertags = rawcontent.tags
                 innerindex = rawcontent.index
                 innercontents = rawcontent.contents

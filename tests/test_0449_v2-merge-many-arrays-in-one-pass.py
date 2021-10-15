@@ -13,7 +13,6 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.skip(reason="FIXME: typetracer types (@ioanaif)")
 def test_numpyarray():
     for dtype1 in ("i1", "i2", "i4", "i8", "u1", "u2", "u4", "u8", "f4", "f8", "?"):
         for dtype2 in ("i1", "i2", "i4", "i8", "u1", "u2", "u4", "u8", "f4", "f8", "?"):
@@ -60,6 +59,20 @@ def test_numpyarray():
                     assert ak.to_list(ak_combined) == combined.tolist()
                     assert ak_combined.dtype == combined.dtype
 
+                    # assert v1_to_v2(ak.layout.NumpyArray(one)).typetracer.mergemany(
+                    #     [
+                    #         v1_to_v2(ak.layout.NumpyArray(two)),
+                    #         v1_to_v2(ak.layout.NumpyArray(three)),
+                    #         v1_to_v2(ak.layout.NumpyArray(four)),
+                    #     ]
+                    # ).form == v1_to_v2(ak.layout.NumpyArray(one)).mergemany(
+                    #     [
+                    #         v1_to_v2(ak.layout.NumpyArray(two)),
+                    #         v1_to_v2(ak.layout.NumpyArray(three)),
+                    #         v1_to_v2(ak.layout.NumpyArray(four)),
+                    #     ]
+                    # ).form
+
                     ak_combined = v1_to_v2(ak.layout.NumpyArray(one)).mergemany(
                         [
                             v1_to_v2(ak.layout.NumpyArray(two)),
@@ -70,6 +83,20 @@ def test_numpyarray():
 
                     assert ak.to_list(ak_combined) == combined.tolist()
                     assert ak_combined.dtype == np.concatenate([one, two, four]).dtype
+
+                    # assert v1_to_v2(ak.layout.NumpyArray(one)).typetracer.mergemany(
+                    #     [
+                    #         v1_to_v2(ak.layout.NumpyArray(two)),
+                    #         v1_to_v2(ak.layout.EmptyArray()),
+                    #         v1_to_v2(ak.layout.NumpyArray(four)),
+                    #     ]
+                    # ).form == v1_to_v2(ak.layout.NumpyArray(one)).mergemany(
+                    #     [
+                    #         v1_to_v2(ak.layout.NumpyArray(two)),
+                    #         v1_to_v2(ak.layout.EmptyArray()),
+                    #         v1_to_v2(ak.layout.NumpyArray(four)),
+                    #     ]
+                    # ).form
 
 
 def test_lists():
@@ -922,7 +949,7 @@ def test_strings():
     )
 
 
-@pytest.mark.skip(reason="FIXME: typetracer types (@ioanaif)")
+@pytest.mark.skip(reason="FIXME: typetracer concatenate vs content concatenate")
 def test_concatenate():
     one = v1_to_v2(ak.Array([1, 2, 3]).layout)
     two = v1_to_v2(ak.Array([4.4, 5.5]).layout)

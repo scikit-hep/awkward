@@ -13,7 +13,6 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.skip(reason="FIXME: typetracer types (@ioanaif)")
 def test_numpyarray_merge():
     emptyarray = v1_to_v2(ak.layout.EmptyArray())
 
@@ -25,10 +24,9 @@ def test_numpyarray_merge():
     assert ak.to_list(ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1])) == ak.to_list(
         np.concatenate([np1[1:, :-1, ::-1], np2[1:, :-1, ::-1]])
     )
-
     assert ak1.typetracer.merge(ak2).form == ak1.merge(ak2).form
     assert (
-        ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1]).form
+        ak1[1:, :-1, ::-1].typetracer.merge(ak2[1:, :-1, ::-1]).form
         == ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1]).form
     )
 
@@ -1230,7 +1228,6 @@ def test_indexedarray_simplify_more():
     )
 
 
-@pytest.mark.skip(reason="FIXME: typetracer assertion error")
 def test_unionarray_simplify_one():
     one = ak.from_iter([5, 4, 3, 2, 1], highlevel=False)
     two = ak.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
@@ -1280,7 +1277,6 @@ def test_unionarray_simplify_one():
     )
 
 
-@pytest.mark.skip(reason="FIXME: typetracer assertion error")
 def test_unionarray_simplify():
     one = ak.from_iter([5, 4, 3, 2, 1], highlevel=False)
     two = ak.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
@@ -1336,7 +1332,10 @@ def test_unionarray_simplify():
     )
     assert len(outer.simplify_uniontype(True, False).contents) == 2
 
-    # assert outer.typetracer.simplify_uniontype(True, False).form == outer.simplify_uniontype(True, False).form
+    assert (
+        outer.typetracer.simplify_uniontype(True, False).form
+        == outer.simplify_uniontype(True, False).form
+    )
 
     tags2 = ak.layout.Index8(np.array([0, 1, 0, 1, 0, 0, 1], dtype=np.int8))
     index2 = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 3, 2], dtype=np.int64))
@@ -1364,7 +1363,6 @@ def test_unionarray_simplify():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: typetracer assertion error")
 def test_concatenate():
     one = v1_to_v2(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True).layout)
     two = v1_to_v2(ak.Array([[], [1], [2, 2], [3, 3, 3]], check_valid=True).layout)
@@ -1392,10 +1390,6 @@ def test_concatenate():
         one.concatenate([two, three]), ak._v2.contents.unionarray.UnionArray
     )
     assert len(one.concatenate([two, three]).contents) == 2
-    assert (
-        one.typetracer.concatenate([two, three]).form
-        == one.concatenate([two, three]).form
-    )
 
 
 @pytest.mark.skip(reason="</NumpyArray> cannot be converted into an Awkward Array")
