@@ -9,6 +9,7 @@ from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.bytemaskedform import ByteMaskedForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -270,7 +271,7 @@ class ByteMaskedArray(Content):
         out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             outindex, out, self._identifier, self._parameters
         )
-        return out2._simplify_optiontype()
+        return out2.simplify_optiontype()
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         return self._getitem_next_jagged_generic(
@@ -294,7 +295,7 @@ class ByteMaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -317,8 +318,62 @@ class ByteMaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskeddarray.BitMaskedArray,
+                ak._v2.contents.unmaskeddarray.UnmaskedArray,
+            ),
+        ):
+            return self.toIndexedOptionArray64.simplify_optiontype
+        else:
+            return self
+
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not _parameters_equal(self._parameters, other._parameters):
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            self.content.mergeable(other.content, mergebool)
+
+        else:
+            return self.content.mergeable(other, mergebool)
+
+    def _reverse_merge(self, other):
+        return self.toIndexedOptionArray64()._reverse_merge(other)
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+        return self.toIndexedOptionArray64().mergemany(others)
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -333,7 +388,7 @@ class ByteMaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
     def _argsort_next(
         self,
@@ -379,7 +434,7 @@ class ByteMaskedArray(Content):
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         if n < 1:
             raise ValueError("in combinations, 'n' must be at least 1")
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -393,7 +448,7 @@ class ByteMaskedArray(Content):
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex, out, parameters=parameters
             )
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
     def _reduce_next(
         self,
@@ -523,7 +578,7 @@ class ByteMaskedArray(Content):
                     out.content,
                     None,
                     None,
-                )._simplify_optiontype()
+                ).simplify_optiontype()
 
                 return ak._v2.contents.ListOffsetArray(
                     outoffsets,

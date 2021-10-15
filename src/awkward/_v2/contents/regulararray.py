@@ -8,6 +8,7 @@ import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.regularform import RegularForm
+from awkward._v2.forms.form import _parameters_equal
 
 
 class RegularArray(Content):
@@ -452,7 +453,7 @@ class RegularArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            nplike = head.nplike
+            nplike = self.nplike
 
             if advanced is not None:
                 raise NestedIndexError(
@@ -501,8 +502,54 @@ class RegularArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not _parameters_equal(self._parameters, other._parameters):
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyarray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        elif isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return self.mergeable(other.content, mergebool)
+
+        elif isinstance(
+            other,
+            (
+                ak._v2.contents.regulararray.RegularArray,
+                ak._v2.contents.listarray.ListArray,
+                ak._v2.contents.listoffsetarray.ListOffsetArray,
+            ),
+        ):
+            return self.content.mergeable(other.content, mergebool)
+
+        else:
+            return False
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+        return self.toListOffsetArray64(True).mergemany(others)
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         elif posaxis == depth + 1:
@@ -600,7 +647,7 @@ class RegularArray(Content):
         return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif posaxis == depth + 1:

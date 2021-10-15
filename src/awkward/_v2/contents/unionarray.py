@@ -12,6 +12,7 @@ from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.unionform import UnionForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -253,7 +254,7 @@ class UnionArray(Content):
         return outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        simplified = self._simplify_uniontype()
+        simplified = self.simplify_uniontype(True, False)
         if (
             simplified.index.dtype == np.dtype(np.int32)
             or simplified.index.dtype == np.dtype(np.uint32)
@@ -293,7 +294,7 @@ class UnionArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out._simplify_uniontype()
+            return out.simplify_uniontype(True, False)
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -313,8 +314,341 @@ class UnionArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def simplify_uniontype(self, merge, mergebool):
+        tags = ak._v2.index.Index8.empty(len(self), self.nplike)
+        index = ak._v2.index.Index64.empty(len(self), self.nplike)
+        contents = []
+        for i in range(len(self.contents)):
+            rawcontent = self.contents[i]
+            if isinstance(rawcontent, ak._v2.contents.unionarray.UnionArray):
+
+                innertags = rawcontent.tags
+                innerindex = rawcontent.index
+                innercontents = rawcontent.contents
+                for j in range(len(innercontents)):
+                    unmerged = True
+                    for k in range(len(contents)):
+                        if merge and contents[k].mergeable(innercontents[j], mergebool):
+                            self._handle_error(
+                                self.nplike[
+                                    "awkward_UnionArray_simplify",
+                                    tags.dtype.type,
+                                    index.dtype.type,
+                                    self._tags.dtype.type,
+                                    self._index.dtype.type,
+                                    innertags.dtype.type,
+                                    innerindex.dtype.type,
+                                ](
+                                    tags.to(self.nplike),
+                                    index.to(self.nplike),
+                                    self._tags.to(self.nplike),
+                                    self._index.to(self.nplike),
+                                    innertags.to(self.nplike),
+                                    innerindex.to(self.nplike),
+                                    k,
+                                    j,
+                                    i,
+                                    len(self),
+                                    len(contents[k]),
+                                )
+                            )
+                            contents[k] = contents[k].merge(innercontents[j])
+                            unmerged = False
+                            break
+
+                    if unmerged:
+                        self._handle_error(
+                            self.nplike[
+                                "awkward_UnionArray_simplify",
+                                tags.dtype.type,
+                                index.dtype.type,
+                                self._tags.dtype.type,
+                                self._index.dtype.type,
+                                innertags.dtype.type,
+                                innerindex.dtype.type,
+                            ](
+                                tags.to(self.nplike),
+                                index.to(self.nplike),
+                                self._tags.to(self.nplike),
+                                self._index.to(self.nplike),
+                                innertags.to(self.nplike),
+                                innerindex.to(self.nplike),
+                                len(contents),
+                                j,
+                                i,
+                                len(self),
+                                0,
+                            )
+                        )
+                        contents.append(innercontents[j])
+            else:
+                unmerged = True
+                for k in range(len(contents)):
+                    if contents[k] == self.contents[i]:
+                        self._handle_error(
+                            self.nplike[
+                                "awkward_UnionArray_simplify_one",
+                                tags.dtype.type,
+                                index.dtype.type,
+                                self._tags.dtype.type,
+                                self._index.dtype.type,
+                            ](
+                                tags.to(self.nplike),
+                                index.to(self.nplike),
+                                self._tags.to(self.nplike),
+                                self._index.to(self.nplike),
+                                k,
+                                i,
+                                len(self),
+                                0,
+                            )
+                        )
+                        unmerged = False
+                        break
+
+                    elif merge and contents[k].mergeable(self.contents[i], mergebool):
+                        self._handle_error(
+                            self.nplike[
+                                "awkward_UnionArray_simplify_one",
+                                tags.dtype.type,
+                                index.dtype.type,
+                                self._tags.dtype.type,
+                                self._index.dtype.type,
+                            ](
+                                tags.to(self.nplike),
+                                index.to(self.nplike),
+                                self._tags.to(self.nplike),
+                                self._index.to(self.nplike),
+                                k,
+                                i,
+                                len(self),
+                                len(contents[k]),
+                            )
+                        )
+                        contents[k] = contents[k].merge(self.contents[i])
+                        unmerged = False
+                        break
+
+                if unmerged:
+                    self._handle_error(
+                        self.nplike[
+                            "awkward_UnionArray_simplify_one",
+                            tags.dtype.type,
+                            index.dtype.type,
+                            self._tags.dtype.type,
+                            self._index.dtype.type,
+                        ](
+                            tags.to(self.nplike),
+                            index.to(self.nplike),
+                            self._tags.to(self.nplike),
+                            self._index.to(self.nplike),
+                            len(contents),
+                            i,
+                            len(self),
+                            0,
+                        )
+                    )
+
+                    contents.append(self.contents[i])
+
+        if len(contents) > 2 ** 7:
+            raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
+
+        if len(contents) == 1:
+            return contents[0]._carry(index, True, NestedIndexError)
+
+        else:
+            return UnionArray(tags, index, contents, self.identifier, self.parameters)
+
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not _parameters_equal(self._parameters, other._parameters):
+            return False
+
+        return True
+
+    def merging_strategy(self, others):
+        if len(others) == 0:
+            raise ValueError(
+                "to merge this array with 'others', at least one other must be provided"
+            )
+
+        head = [self]
+        tail = []
+
+        for i in range(len(others)):
+            other = others[i]
+            if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+                head.append(other.array)
+            else:
+                head.append(other)
+
+        return (head, tail)
+
+    def _reverse_merge(self, other):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self._reverse_merge(other.array)
+
+        theirlength = len(other)
+        mylength = len(self)
+
+        tags = ak._v2.index.Index8.empty(theirlength + mylength, self.nplike)
+        index = ak._v2.index.Index64.empty(theirlength + mylength, self.nplike)
+
+        contents = [other]
+        contents.extend(self.contents)
+
+        self._handle_error(
+            self.nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.to(self.nplike),
+                0,
+                theirlength,
+                0,
+            )
+        )
+
+        self._handle_error(
+            self.nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.to(self.nplike),
+                0,
+                theirlength,
+            )
+        )
+
+        self._handle_error(
+            self.nplike[
+                "awkward_UnionArray_filltags",
+                tags.dtype.type,
+                self.tags.dtype.type,
+            ](
+                tags.to(self.nplike),
+                theirlength,
+                self.tags.to(self.nplike),
+                mylength,
+                1,
+            )
+        )
+
+        self._handle_error(
+            self.nplike[
+                "awkward_UnionArray_fillindex",
+                index.dtype.type,
+                self.index.dtype.type,
+            ](
+                index.to(self.nplike),
+                theirlength,
+                self.index.to(self.nplike),
+                mylength,
+            )
+        )
+
+        if len(contents) > 2 ** 7:
+            raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
+
+        parameters = {}
+        parameters = dict(self.parameters.items() & other.parameters.items())
+        return ak._v2.contents.unionarray.UnionArray(
+            tags, index, contents, None, parameters
+        )
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+
+        head, tail = self._merging_strategy(others)
+
+        total_length = 0
+        for array in head:
+            total_length += len(array)
+
+        nexttags = ak._v2.index.Index8.empty(total_length, self.nplike)
+        nextindex = ak._v2.index.Index64.empty(total_length, self.nplike)
+
+        nextcontents = []
+        length_so_far = 0
+        parameters = {}
+
+        for array in head:
+            parameters = dict(self.parameters.items() & array.parameters.items())
+            if isinstance(array, ak._v2.contents.unionarray.UnionArray):
+                union_tags = ak._v2.index.Index(array.tags)
+                union_index = ak._v2.index.Index(array.index)
+                union_contents = array.contents
+                self._handle_error(
+                    self.nplike[
+                        "awkward_UnionArray_filltags",
+                        nexttags.dtype.type,
+                        union_tags.dtype.type,
+                    ](
+                        nexttags.to(self.nplike),
+                        length_so_far,
+                        union_tags.to(self.nplike),
+                        len(array),
+                        len(nextcontents),
+                    )
+                )
+                self._handle_error(
+                    self.nplike[
+                        "awkward_UnionArray_fillindex",
+                        nextindex.dtype.type,
+                        union_index.dtype.type,
+                    ](
+                        nextindex.to(self.nplike),
+                        length_so_far,
+                        union_index.to(self.nplike),
+                        len(array),
+                    )
+                )
+                length_so_far += len(array)
+                nextcontents.extend(union_contents)
+
+            elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                pass
+
+            else:
+                self._handle_error(
+                    self.nplike[
+                        "awkward_UnionArray_filltags_const",
+                        nexttags.dtype.type,
+                    ](
+                        nexttags.to(self.nplike),
+                        length_so_far,
+                        len(array),
+                        len(nextcontents),
+                    )
+                )
+
+                self._handle_error(
+                    self.nplike[
+                        "awkward_UnionArray_fillindex_count", nextindex.dtype.type
+                    ](nextindex.to(self.nplike), length_so_far, len(array))
+                )
+
+                length_so_far += len(array)
+                nextcontents.append(array)
+
+        if len(nextcontents) > 127:
+            raise ValueError("FIXME: handle UnionArray with more than 127 contents")
+
+        next = ak._v2.contents.unionarray.UnionArray(
+            nexttags, nextindex, nextcontents, None, parameters
+        )
+
+        # Given UnionArray's merging_strategy, tail is always empty, but just to be formal...
+
+        if len(tail) == 0:
+            return next
+
+        reversed = tail[0]._reverse_merge(next)
+        if len(tail) == 1:
+            return reversed
+        else:
+            return reversed.mergemany(tail[1:])
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -326,7 +660,7 @@ class UnionArray(Content):
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -353,7 +687,7 @@ class UnionArray(Content):
         kind,
         order,
     ):
-        simplified = self._simplify_uniontype()
+        simplified = self.simplify_uniontype(True, True)
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
@@ -364,7 +698,7 @@ class UnionArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        simplified = self._simplify_uniontype()
+        simplified = self.simplify_uniontype(True, True)
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot sort an irreducible UnionArray")
 
@@ -383,7 +717,7 @@ class UnionArray(Content):
         mask,
         keepdims,
     ):
-        simplified = self._simplify_uniontype()
+        simplified = self.simplify_uniontype(True, True)
         if isinstance(simplified, UnionArray):
             raise ValueError(
                 "cannot call ak.{0} on an irreducible UnionArray".format(reducer.name)

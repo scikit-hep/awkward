@@ -1424,7 +1424,10 @@ def concatenate(
         for x in arrays
     ]
     if not any(
-        isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
+        isinstance(
+            x,
+            (ak.layout.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+        )
         for x in contents
     ):
         raise ValueError(
@@ -1435,14 +1438,24 @@ def concatenate(
     first_content = [
         x
         for x in contents
-        if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
+        if isinstance(
+            x,
+            (ak.layout.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+        )
     ][0]
     posaxis = first_content.axis_wrap_if_negative(axis)
     maxdepth = max(
         [
             x.minmax_depth[1]
             for x in contents
-            if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
+            if isinstance(
+                x,
+                (
+                    ak.layout.Content,
+                    ak.partition.PartitionedArray,
+                    ak._v2.contents.Content,
+                ),
+            )
         ]
     )
     if not 0 <= posaxis < maxdepth:

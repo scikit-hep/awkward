@@ -7,6 +7,7 @@ from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.indexedoptionform import IndexedOptionForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -234,10 +235,11 @@ class IndexedOptionArray(Content):
         )
         next = self._content._carry(nextcarry, True, NestedIndexError)
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
+
         out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             outindex, out, self._identifier, self._parameters
         )
-        return out2._simplify_optiontype()
+        return out2.simplify_optiontype()
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         return self._getitem_next_jagged_generic(
@@ -256,7 +258,7 @@ class IndexedOptionArray(Content):
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._getitem_next(head, tail, advanced)
             out2 = IndexedOptionArray(outindex, out, self._identifier, self._parameters)
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -307,8 +309,242 @@ class IndexedOptionArray(Content):
 
         return self._content._carry(nextcarry, False, NestedIndexError)
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self.content,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+
+            if isinstance(
+                self.content,
+                (
+                    ak._v2.contents.indexedarray.IndexedArray,
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ),
+            ):
+                inner = self.content.index
+                result = ak._v2.index.Index64.zeros(len(self.index), self.nplike)
+            elif isinstance(
+                self.content,
+                (
+                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                    ak._v2.contents.unmaskedarray.UnmaskedArray,
+                ),
+            ):
+                rawcontent = self.content.toIndexedOptionArray64()
+                inner = rawcontent.index
+                result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedArray_simplify",
+                    result.dtype.type,
+                    self._index.dtype.type,
+                    inner.dtype.type,
+                ](
+                    result.to(self.nplike),
+                    self._index.to(self.nplike),
+                    len(self._index),
+                    inner.to(self.nplike),
+                    len(inner),
+                )
+            )
+            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                result, self.content.content, self.identifier, self.parameters
+            )
+
+        else:
+            return self
+
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not _parameters_equal(self._parameters, other._parameters):
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            self.content.mergeable(other.content, mergebool)
+
+        else:
+            return self.content.mergeable(other, mergebool)
+
+    def _merging_strategy(self, others):
+        if len(others) == 0:
+            raise ValueError(
+                "to merge this array with 'others', at least one other must be provided"
+            )
+
+        head = [self]
+        tail = []
+
+        i = 0
+        while i < len(others):
+            other = others[i]
+            if isinstance(other, ak._v2.contents.unionarray.UnionArray):
+                break
+            elif isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+                head.append(other.array)
+            else:
+                head.append(other)
+            i = i + 1
+
+        while i < len(others):
+            tail.append(others[i])
+            i = i + 1
+
+        return (head, tail)
+
+    def _reverse_merge(self, other):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return other.array._reverse_merge()
+
+        theirlength = len(other)
+        mylength = len(self)
+        index = ak._v2.index.Index64.empty((theirlength + mylength), self.nplike)
+
+        content = other.merge(self.content)
+
+        self._handle_error(
+            self.nplike["awkward_IndexedArray_fill_count", index.dtype.type](
+                index.to(self.nplike),
+                0,
+                theirlength,
+                0,
+            )
+        )
+        reinterpreted_index = ak._v2.index.Index(self.nplike.asarray(self.index.data))
+
+        self._handle_error(
+            self.nplike[
+                "awkward_IndexedArray_fill",
+                index.dtype.type,
+                reinterpreted_index.dtype.type,
+            ](
+                index.to(self.nplike),
+                theirlength,
+                reinterpreted_index.to(self.nplike),
+                mylength,
+                theirlength,
+            )
+        )
+        parameters = dict(self.parameters.items() & other.parameters.items())
+
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            index, content, None, parameters
+        )
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+
+        head, tail = self._merging_strategy(others)
+
+        total_length = 0
+        for array in head:
+            total_length += len(array)
+
+        contents = []
+        contentlength_so_far = 0
+        length_so_far = 0
+        nextindex = ak._v2.index.Index64.empty(total_length, self.nplike)
+        parameters = {}
+
+        for array in head:
+            parameters = dict(self.parameters.items() & array.parameters.items())
+
+            if isinstance(
+                array,
+                (
+                    ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                    ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                    ak._v2.contents.unmaskedarray.UnmaskedArray,
+                ),
+            ):
+                array = array.toIndexedOptionArray64()
+
+            if isinstance(array, ak._v2.contents.indexedoptionarray.IndexedOptionArray):
+                contents.append(array.content)
+                array_index = array.index
+                self._handle_error(
+                    self.nplike[
+                        "awkward_IndexedArray_fill",
+                        nextindex.dtype.type,
+                        array_index.dtype.type,
+                    ](
+                        nextindex.to(self.nplike),
+                        length_so_far,
+                        array_index.to(self.nplike),
+                        len(array),
+                        contentlength_so_far,
+                    )
+                )
+                contentlength_so_far += len(array.content)
+                length_so_far += len(array)
+
+            elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                pass
+            else:
+                contents.append(array)
+                self._handle_error(
+                    self.nplike[
+                        "awkward_IndexedArray_fill_count",
+                        nextindex.dtype.type,
+                    ](
+                        nextindex.to(self.nplike),
+                        length_so_far,
+                        len(array),
+                        contentlength_so_far,
+                    )
+                )
+                contentlength_so_far += len(array)
+                length_so_far += len(array)
+
+        tail_contents = contents[1:]
+        nextcontent = contents[0].mergemany(tail_contents)
+        next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            nextindex, nextcontent, None, parameters
+        )
+
+        if len(tail) == 0:
+            return next
+
+        reversed = tail[0]._reverse_merge(next)
+        if len(tail) == 1:
+            return reversed
+        else:
+            return reversed.mergemany(tail[1:])
+
+        raise NotImplementedError(
+            "not implemented: " + type(self).__name__ + " ::mergemany"
+        )
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -520,7 +756,7 @@ class IndexedOptionArray(Content):
             out,
             None,
             self._parameters,
-        )._simplify_optiontype()
+        ).simplify_optiontype()
 
         if inject_nones:
             out = ak._v2.contents.RegularArray(
@@ -561,7 +797,7 @@ class IndexedOptionArray(Content):
                     out._content,
                     None,
                     self._parameters,
-                )._simplify_optiontype()
+                ).simplify_optiontype()
 
                 if inject_nones:
                     return tmp
@@ -668,7 +904,7 @@ class IndexedOptionArray(Content):
             out,
             None,
             self._parameters,
-        )._simplify_optiontype()
+        ).simplify_optiontype()
 
         if inject_nones:
             out = ak._v2.contents.RegularArray(
@@ -709,7 +945,7 @@ class IndexedOptionArray(Content):
                     out._content,
                     None,
                     self._parameters,
-                )._simplify_optiontype()
+                ).simplify_optiontype()
 
                 if inject_nones:
                     return tmp
@@ -732,7 +968,7 @@ class IndexedOptionArray(Content):
                 )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
@@ -744,7 +980,7 @@ class IndexedOptionArray(Content):
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex, out, parameters=parameters
             )
-            return out2._simplify_optiontype()
+            return out2.simplify_optiontype()
 
     def _reduce_next(
         self,
@@ -869,7 +1105,7 @@ class IndexedOptionArray(Content):
                     out.content,
                     None,
                     None,
-                )._simplify_optiontype()
+                ).simplify_optiontype()
 
                 return ak._v2.contents.ListOffsetArray(
                     outoffsets,

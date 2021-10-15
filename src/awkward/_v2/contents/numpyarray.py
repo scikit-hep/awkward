@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.numpyform import NumpyForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -251,7 +252,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
+            out2 = NumpyArray(out, None, self.parameters, nplike=nplike)
             return out2
 
         elif ak._util.isstr(head):
@@ -271,7 +272,7 @@ class NumpyArray(Content):
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
-            return NumpyArray(out, None, self._parameters, nplike=nplike)
+            return NumpyArray(out, None, self.parameters, nplike=nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             where = (slice(None), head) + tail
@@ -279,7 +280,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
+            out2 = NumpyArray(out, None, self.parameters, nplike=nplike)
             return out2
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
@@ -289,8 +290,96 @@ class NumpyArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not _parameters_equal(self._parameters, other._parameters):
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyarray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        elif isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return self.mergeable(other.content, mergebool)
+
+        if self._data.ndim == 0:
+            return False
+
+        if isinstance(other, ak._v2.contents.numpyarray.NumpyArray):
+            if self._data.ndim != other.data.ndim:
+                return False
+
+            if self.dtype != other.dtype and (
+                self.dtype == np.datetime64 or other.dtype == np.datetime64
+            ):
+                return False
+
+            if self.dtype != other.dtype and (
+                self.dtype == np.timedelta64 or other.dtype == np.timedelta64
+            ):
+                return False
+
+            if len(self.shape) > 1 and len(self.shape) != (other.shape):
+                return False
+
+            return True
+        else:
+            return False
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+        head, tail = self._merging_strategy(others)
+
+        contiguous_arrays = []
+
+        for array in head:
+            parameters = dict(self.parameters.items() & array.parameters.items())
+            if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
+                array = array.array
+            if isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                pass
+            elif isinstance(array, ak._v2.contents.numpyarray.NumpyArray):
+                contiguous_arrays.append(array.data)
+            else:
+                raise AssertionError(
+                    "cannot merge "
+                    + type(self).__name__
+                    + " with "
+                    + type(array).__name__
+                )
+
+        contiguous_arrays = self.nplike.concatenate(contiguous_arrays)
+
+        next = NumpyArray(contiguous_arrays, self.identifier, parameters)
+
+        if len(tail) == 0:
+            return next
+
+        reversed = tail[0]._reverse_merge(next)
+        if len(tail) == 1:
+            return reversed
+        else:
+            return reversed.mergemany(tail[1:])
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         elif len(self.shape) <= 1:
@@ -496,7 +585,7 @@ class NumpyArray(Content):
             return out
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:

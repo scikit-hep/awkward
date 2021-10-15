@@ -14,6 +14,7 @@ from awkward._v2.record import Record
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.recordform import RecordForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -366,8 +367,165 @@ class RecordArray(Content):
             next = RecordArray(contents, self._keys, None, self._identifier, parameters)
             return next._getitem_next(nexthead, nexttail, advanced)
 
+    def mergeable(self, other, mergebool=True):
+
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not _parameters_equal(self._parameters, other._parameters):
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyarray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+
+        elif isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            return self.mergeable(other.content, mergebool)
+
+        if isinstance(other, ak._v2.contents.recordarray.RecordArray):
+            if self.is_tuple and other.is_tuple:
+                if len(self.contents) == len(other.contents):
+                    for i in range(len(self.contents)):
+                        if not self.contents[i].mergeable(other.contents[i], mergebool):
+                            return False
+                    return True
+
+            elif not self.is_tuple and not other.is_tuple:
+                self_keys = self.keys.copy()
+                other_keys = other.keys.copy()
+                self_keys.sort()
+                other_keys.sort()
+                if self_keys == other_keys:
+                    for key in self_keys:
+                        if not self[key].mergeable(other[key], mergebool):
+                            return False
+                    return True
+            return False
+        else:
+            return False
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+
+        head, tail = self._merging_strategy(others)
+
+        parameters = {}
+        headless = head[1:]
+
+        for_each_field = []
+        for field in self.contents:
+            trimmed = field[0 : len(self)]
+            for_each_field.append([field])
+
+        if self.is_tuple:
+            for array in headless:
+                parameters = dict(self.parameters.items() & array.parameters.items())
+
+                if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
+                    array = array.array
+
+                if isinstance(array, ak._v2.contents.recordarray.RecordArray):
+                    if self.is_tuple:
+                        if len(self.contents) == len(array.contents):
+                            for i in range(len(self.contents)):
+                                field = array[self.index_to_key(i)]
+                                for_each_field[i].append(field[0 : len(array)])
+                        else:
+                            raise ValueError(
+                                "cannot merge tuples with different numbers of fields"
+                            )
+                    else:
+                        raise ValueError("cannot merge tuple with non-tuple record")
+                elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                    pass
+                else:
+                    raise AssertionError(
+                        "cannot merge "
+                        + type(self).__name__
+                        + " with "
+                        + type(array).__name__
+                    )
+
+        else:
+            these_keys = self.keys.copy()
+            these_keys.sort()
+
+            for array in headless:
+                if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
+                    array = array.array
+
+                if isinstance(array, ak._v2.contents.recordarray.RecordArray):
+                    if not array.is_tuple:
+                        those_keys = array.keys.copy()
+                        those_keys.sort()
+
+                        if these_keys == those_keys:
+                            for i in range(len(self.contents)):
+                                field = array[self.index_to_key(i)]
+
+                                trimmed = field[0 : len(array)]
+                                for_each_field[i].append(trimmed)
+                        else:
+                            raise AssertionError(
+                                "cannot merge records with different sets of field names"
+                            )
+                    else:
+                        raise AssertionError("cannot merge non-tuple record with tuple")
+
+                elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                    pass
+                else:
+                    raise AssertionError(
+                        "cannot merge "
+                        + type(self).__name__
+                        + " with "
+                        + type(array).__name__
+                    )
+
+        nextcontents = []
+        minlength = -1
+
+        for forfield in for_each_field:
+            tail_forfield = forfield[1:]
+            merged = forfield[0].mergemany(tail_forfield)
+
+            nextcontents.append(merged)
+
+            if minlength == -1 or len(merged) < minlength:
+                minlength = len(merged)
+
+        next = RecordArray(nextcontents, self._keys, minlength, None, parameters)
+
+        if len(tail) == 0:
+            return next
+
+        reversed = tail[0]._reverse_merge(next)
+        if len(tail) == 1:
+            return reversed
+        else:
+            return reversed.mergemany(tail[1:])
+
+        raise NotImplementedError(
+            "not implemented: " + type(self).__name__ + " ::mergemany"
+        )
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
@@ -418,7 +576,7 @@ class RecordArray(Content):
         return RecordArray(contents, self._keys, len(self), None, self._parameters)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:

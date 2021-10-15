@@ -8,6 +8,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -378,9 +379,11 @@ class ListArray(Content):
                         missing_trim, content, None, self._parameters
                     )
                 )
+                if isinstance(self.nplike, ak._v2._typetracer.TypeTracer):
+                    indexedoptionarray = indexedoptionarray.typetracer
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
                     largeoffsets,
-                    indexedoptionarray._simplify_optiontype(),
+                    indexedoptionarray.simplify_optiontype(),
                     None,
                     self._parameters,
                 )
@@ -659,8 +662,171 @@ class ListArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def mergeable(self, other, mergebool):
+        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
+            return self.mergeable(other.array, mergebool)
+
+        if not _parameters_equal(self._parameters, other._parameters):
+            return False
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.unionarray.UnionArray,
+            ),
+        ):
+            return True
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.indexedarray.IndexedArray,
+                ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+                ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
+            ),
+        ):
+            self.mergeable(other.content, mergebool)
+
+        if isinstance(
+            other,
+            (
+                ak._v2.contents.regulararray.RegularArray,
+                ak._v2.contents.listarray.ListArray,
+                ak._v2.contents.listoffsetarray.ListOffsetArray,
+            ),
+        ):
+            self.content.mergeable(other.content, mergebool)
+
+        else:
+            return False
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+
+        head, tail = self._merging_strategy(others)
+
+        total_length = 0
+        for array in head:
+            total_length += len(array)
+
+        contents = []
+
+        for array in head:
+            if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
+                array = array.array
+
+            parameters = dict(self.parameters.items() & array.parameters.items())
+
+            if isinstance(
+                array,
+                (
+                    ak._v2.contents.listarray.ListArray,
+                    ak._v2.contents.listoffsetarray.ListOffsetArray,
+                    ak._v2.contents.regulararray.RegularArray,
+                ),
+            ):
+                contents.append(array.content)
+
+            elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                pass
+            else:
+                raise ValueError(
+                    "cannot merge "
+                    + type(self).__name__
+                    + " with "
+                    + type(array).__name__
+                    + "."
+                )
+
+        tail_contents = contents[1:]
+        nextcontent = contents[0].mergemany(tail_contents)
+
+        nextstarts = ak._v2.index.Index64.empty(total_length, self.nplike)
+        nextstops = ak._v2.index.Index64.empty(total_length, self.nplike)
+
+        contentlength_so_far = 0
+        length_so_far = 0
+
+        for array in head:
+            if isinstance(
+                array,
+                (
+                    ak._v2.contents.listarray.ListArray,
+                    ak._v2.contents.listoffsetarray.ListOffsetArray,
+                ),
+            ):
+                array_starts = ak._v2.index.Index(array.starts)
+                array_stops = ak._v2.index.Index(array.stops)
+
+                self._handle_error(
+                    self.nplike[
+                        "awkward_ListArray_fill",
+                        nextstarts.dtype.type,
+                        nextstops.dtype.type,
+                        array_starts.dtype.type,
+                        array_stops.dtype.type,
+                    ](
+                        nextstarts.to(self.nplike),
+                        length_so_far,
+                        nextstops.to(self.nplike),
+                        length_so_far,
+                        array_starts.to(self.nplike),
+                        array_stops.to(self.nplike),
+                        len(array),
+                        contentlength_so_far,
+                    )
+                )
+                contentlength_so_far += len(array.content)
+                length_so_far += len(array)
+
+            elif isinstance(array, ak._v2.contents.regulararray.RegularArray):
+                listoffsetarray = array.toListOffsetArray64(True)
+
+                array_starts = ak._v2.index.Index64(listoffsetarray.starts)
+                array_stops = ak._v2.index.Index64(listoffsetarray.stops)
+
+                self._handle_error(
+                    self.nplike[
+                        "awkward_ListArray_fill",
+                        nextstarts.dtype.type,
+                        nextstops.dtype.type,
+                        array_starts.dtype.type,
+                        array_stops.dtype.type,
+                    ](
+                        nextstarts.to(self.nplike),
+                        length_so_far,
+                        nextstops.to(self.nplike),
+                        length_so_far,
+                        array_starts.to(self.nplike),
+                        array_stops.to(self.nplike),
+                        len(listoffsetarray),
+                        contentlength_so_far,
+                    )
+                )
+                contentlength_so_far += len(array.content)
+                length_so_far += len(listoffsetarray)
+
+            elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+                pass
+
+        next = ak._v2.contents.listarray.ListArray(
+            nextstarts, nextstops, nextcontent, None, parameters
+        )
+
+        if len(tail) == 0:
+            return next
+
+        reversed = tail[0]._reverse_merge(next)
+        if len(tail) == 1:
+            return reversed
+        else:
+            return reversed.mergemany(tail[1:])
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         elif posaxis == depth + 1:

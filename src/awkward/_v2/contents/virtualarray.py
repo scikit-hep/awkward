@@ -461,15 +461,21 @@ class VirtualArray(Content):
     def _getitem_next(self, head, tail, advanced):
         return self.array._getitem_next(head, tail, advanced)
 
+    def mergeable(self, other, mergebool):
+        return self.array.mergeable(other, mergebool)
+
+    def mergemany(self, others):
+        return self.array.mergemany(others)
+
     def _localindex(self, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._localindex_axis0()
         else:
             return self.array._localindex(posaxis, depth)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self._axis_wrap_if_negative(axis)
+        posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:

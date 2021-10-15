@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.emptyform import EmptyForm
+from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -120,6 +121,22 @@ class EmptyArray(Content):
 
         else:
             raise AssertionError(repr(head))
+
+    def mergeable(self, other, mergebool):
+        if not _parameters_equal(self._parameters, other._parameters):
+            return False
+        return True
+
+    def mergemany(self, others):
+        if len(others) == 0:
+            return self
+
+        elif len(others) == 1:
+            return others[0]
+
+        else:
+            tail_others = others[1:]
+            return others[0].mergemany(tail_others)
 
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))

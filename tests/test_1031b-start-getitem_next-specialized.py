@@ -271,6 +271,7 @@ def test_UnionArray():
         ],
     )
     new = v1_to_v2(old)
+    assert new.typetracer[1, [1, 0]].form == new[1, [1, 0]].form
 
     assert ak.to_list(old[0, :]) == [
         [15, 16, 17, 18, 19],
@@ -297,7 +298,6 @@ def test_UnionArray():
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]
     ]
     assert new.typetracer[0, np.newaxis].form == new[0, np.newaxis].form
-
     assert old.minmax_depth == (3, 3)
     assert new.minmax_depth == (3, 3)
 
@@ -344,7 +344,6 @@ def test_UnionArray():
     assert ak.to_list(new[[1, 0]]) == expectation
     assert ak.to_list(old[1, [1, 0]]) == [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
     assert ak.to_list(new[1, [1, 0]]) == [[5, 6, 7, 8, 9], [0, 1, 2, 3, 4]]
-    assert new.typetracer[1, [1, 0]].form == new[1, [1, 0]].form
 
 
 def test_IndexedArray():
