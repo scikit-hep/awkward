@@ -900,11 +900,10 @@ def test_union_option():
     )
 
 
-@pytest.mark.skip(reason="FIXME: typetracer types (@ioanaif)")
 def test_strings():
-    one = ak.Array(["uno", "dos", "tres"]).layout
-    two = ak.Array(["un", "deux", "trois", "quatre"]).layout
-    three = ak.Array(["onay", "ootay", "eethray"]).layout
+    one = v1_to_v2(ak.Array(["uno", "dos", "tres"]).layout)
+    two = v1_to_v2(ak.Array(["un", "deux", "trois", "quatre"]).layout)
+    three = v1_to_v2(ak.Array(["onay", "ootay", "eethray"]).layout)
     assert ak.to_list(one.mergemany([two, three])) == [
         "uno",
         "dos",
@@ -966,6 +965,9 @@ def test_concatenate():
         7,
         8,
     ]
+
+    print(one.typetracer.concatenate([two, three, four]).form)
+    print(one.concatenate([two, three, four]).form)
 
     assert (
         one.typetracer.concatenate([two, three, four]).form

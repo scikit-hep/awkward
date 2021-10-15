@@ -512,7 +512,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
         return ak._v2.contents.NumpyArray(localindex)
 
-    # Temporary fix for concatenate (only working for axis = 0)
+    # FIXME: Temporary fix for concatenate (only working for axis = 0)
     def concatenate(self, others):
         if not isinstance(others, list):
             others = [others]
