@@ -294,6 +294,9 @@ class BitMaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def project(self, mask=None):
+        return self.toByteMaskedArray().project(mask)
+
     def simplify_optiontype(self):
         if isinstance(
             self.content,

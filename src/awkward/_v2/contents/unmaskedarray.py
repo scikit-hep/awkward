@@ -162,6 +162,18 @@ class UnmaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def project(self, mask=None):
+        if mask is not None:
+            return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+                mask,
+                self.content,
+                valid_when=False,
+                identifier=None,
+                parameters=self.parameters,
+            ).project()
+        else:
+            return self.content
+
     def simplify_optiontype(self):
         if isinstance(
             self.content,
