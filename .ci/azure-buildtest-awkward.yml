@@ -269,12 +269,12 @@ jobs:
         displayName: "Install NumPy"
 
       - script: |
-          python -m pip list
-        displayName: "Print versions"
-
-      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+
+      - script: |
+          python -m pip list
+        displayName: "Print versions"
 
       - script: |
           python dev/kernel-diagnostics.py --check-spec-sorted
@@ -297,7 +297,7 @@ jobs:
         displayName: "Test CPU kernels"
 
       - script: |
-          python -m pytest -vv -rs tests --cov=src/awkward --cov-report=term --cov-report=xml
+          python -m pytest -vv -rs tests --cov=src/awkward --cov-report=term --cov-report=xml --cov-config=
         displayName: "Test"
 
       - script: |
