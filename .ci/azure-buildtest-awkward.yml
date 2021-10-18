@@ -43,42 +43,42 @@ jobs:
 
     strategy:
       matrix:
-        "py27-32bit":
-          python.version: "2.7"
-          python.architecture: "x86"
-          numpy.version: "1.16.5"
-        "py27-64bit":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.16.5"
-        "py35-64bit":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py36-64bit":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py37-32bit":
-          python.version: "3.7"
-          python.architecture: "x86"
-          numpy.version: "latest"
-        "py37-64bit":
-          python.version: "3.7"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py38-64bit":
-          python.version: "3.8"
+        "py39-64bit":
+          python.version: "3.9"
           python.architecture: "x64"
           numpy.version: "latest"
         "py39-32bit":
           python.version: "3.9"
           python.architecture: "x86"
           numpy.version: "latest"
-        "py39-64bit":
-          python.version: "3.9"
+        "py38-64bit":
+          python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py37-64bit":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-32bit":
+          python.version: "3.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py36-64bit":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35-64bit":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py27-64bit":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py27-32bit":
+          python.version: "2.7"
+          python.architecture: "x86"
+          numpy.version: "1.16.5"
 
     steps:
       - checkout: self
@@ -136,30 +136,30 @@ jobs:
 
     strategy:
       matrix:
-        "py27":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.16.5"
-        "py35":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py36":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py37":
-          python.version: "3.7"
+        "py39":
+          python.version: "3.9"
           python.architecture: "x64"
           numpy.version: "latest"
         "py38":
           python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
-        "py39":
-          python.version: "3.9"
+        "py37":
+          python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
 
     steps:
       - checkout: self
@@ -217,34 +217,34 @@ jobs:
 
     strategy:
       matrix:
-        "py27-np13":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
-        "py27-np16":
-          python.version: "2.7"
-          python.architecture: "x64"
-          numpy.version: "1.16.5"
-        "py35-np13":
-          python.version: "3.5"
-          python.architecture: "x64"
-          numpy.version: "1.13.1"
-        "py36-np*":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
-        "py37-np*":
-          python.version: "3.7"
+        "py39-np*":
+          python.version: "3.9"
           python.architecture: "x64"
           numpy.version: "latest"
         "py38-np*":
           python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
-        "py39-np*":
-          python.version: "3.9"
+        "py37-np*":
+          python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py36-np*":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py35-np13":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py27-np16":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py27-np13":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
 
     steps:
       - checkout: self
@@ -269,12 +269,12 @@ jobs:
         displayName: "Install NumPy"
 
       - script: |
-          python -m pip list
-        displayName: "Print versions"
-
-      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+
+      - script: |
+          python -m pip list
+        displayName: "Print versions"
 
       - script: |
           python dev/kernel-diagnostics.py --check-spec-sorted
@@ -297,5 +297,10 @@ jobs:
         displayName: "Test CPU kernels"
 
       - script: |
-          python -m pytest -vv -rs tests
+          python -m pytest -vv -rs tests --cov=awkward._v2 --cov-report=term --cov-report=xml
         displayName: "Test"
+
+      - script: |
+          bash <(curl -s https://codecov.io/bash)
+        displayName: "Codecov"
+        condition: "eq(variables['python.version'], '3.9')"
