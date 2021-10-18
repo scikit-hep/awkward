@@ -314,6 +314,70 @@ class ByteMaskedArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def project(self, mask=None):
+        mask_length = len(self._mask)
+        numnull = ak._v2.index.Index64.zeros(1, self.nplike)
+
+        if mask is not None:
+            if mask_length != len(mask):
+                raise ValueError(
+                    "mask length ({0}) is not equal to {1} length ({2})".format(
+                        mask.length(), type(self).__name__, mask_length
+                    )
+                )
+
+            nextmask = ak._v2.index.Index8.zeros(mask_length, self.nplike)
+            self._handle_error(
+                self.nplike[
+                    "awkward_ByteMaskedArray_overlay_mask",
+                    nextmask.dtype.type,
+                    mask.dtype.type,
+                    self._mask.dtype.type,
+                ](
+                    nextmask.to(self.nplike),
+                    mask.to(self.nplike),
+                    self._mask.to(self.nplike),
+                    mask_length,
+                    self._valid_when,
+                )
+            )
+            valid_when = False
+            next = ByteMaskedArray(
+                nextmask, self.content, valid_when, self.identifier, self.parameters
+            )
+            return next.project()
+
+        else:
+            self._handle_error(
+                self.nplike[
+                    "awkward_ByteMaskedArray_numnull",
+                    numnull.dtype.type,
+                    self._mask.dtype.type,
+                ](
+                    numnull.to(self.nplike),
+                    self._mask.to(self.nplike),
+                    mask_length,
+                    self._valid_when,
+                )
+            )
+            nextcarry = ak._v2.index.Index64.zeros(
+                mask_length - numnull[0], self.nplike
+            )
+            self._handle_error(
+                self.nplike[
+                    "awkward_ByteMaskedArray_getitem_nextcarry",
+                    nextcarry.dtype.type,
+                    self._mask.dtype.type,
+                ](
+                    nextcarry.to(self.nplike),
+                    self._mask.to(self.nplike),
+                    mask_length,
+                    self._valid_when,
+                )
+            )
+
+            return self.content._carry(nextcarry, False, NestedIndexError)
+
     def simplify_optiontype(self):
         if isinstance(
             self.content,
