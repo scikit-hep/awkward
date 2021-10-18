@@ -113,23 +113,9 @@ class RecordArray(Content):
     @property
     def nplike(self):
         for content in self._contents:
-            nplike = content.nonvirtual_nplike
-            if nplike is not None:
-                return nplike
+            return content.nplike
         else:
-            for content in self._contents:
-                return content.nplike
-            else:
-                return ak.nplike.Numpy.instance()
-
-    @property
-    def nonvirtual_nplike(self):
-        for content in self._contents:
-            nplike = content.nonvirtual_nplike
-            if nplike is not None:
-                return nplike
-        else:
-            return None
+            return ak.nplike.Numpy.instance()
 
     Form = RecordForm
 
@@ -368,10 +354,6 @@ class RecordArray(Content):
             return next._getitem_next(nexthead, nexttail, advanced)
 
     def mergeable(self, other, mergebool=True):
-
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return self.mergeable(other.array, mergebool)
-
         if not _parameters_equal(self._parameters, other._parameters):
             return False
 
@@ -436,9 +418,6 @@ class RecordArray(Content):
             for array in headless:
                 parameters = dict(self.parameters.items() & array.parameters.items())
 
-                if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
-                    array = array.array
-
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
                     if self.is_tuple:
                         if len(self.contents) == len(array.contents):
@@ -466,9 +445,6 @@ class RecordArray(Content):
             these_keys.sort()
 
             for array in headless:
-                if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
-                    array = array.array
-
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
                     if not array.is_tuple:
                         those_keys = array.keys.copy()

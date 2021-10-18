@@ -154,13 +154,7 @@ def from_iter(input):
         )
 
     elif input["class"] == "VirtualArray":
-        return ak._v2.forms.virtualform.VirtualForm(
-            form=from_iter(input["form"]),
-            has_length=input["has_length"],
-            has_identifier=has_identifier,
-            parameters=parameters,
-            form_key=form_key,
-        )
+        raise ValueError("Awkward 1.x VirtualArrays are not supported")
 
     else:
         raise ValueError(
@@ -200,14 +194,6 @@ def _parameters_update(one, two):
     for k, v in two.items():
         if v is not None:
             one[k] = v
-
-
-def nonvirtual(form):
-    if isinstance(form, ak._v2.forms.virtualform.VirtualForm):
-        return form.form
-
-    else:
-        return form
 
 
 class Form(object):

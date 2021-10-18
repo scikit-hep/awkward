@@ -15,4 +15,3 @@ from awkward._v2.forms.bytemaskedform import ByteMaskedForm  # noqa: F401
 from awkward._v2.forms.bitmaskedform import BitMaskedForm  # noqa: F401
 from awkward._v2.forms.unmaskedform import UnmaskedForm  # noqa: F401
 from awkward._v2.forms.unionform import UnionForm  # noqa: F401
-from awkward._v2.forms.virtualform import VirtualForm  # noqa: F401

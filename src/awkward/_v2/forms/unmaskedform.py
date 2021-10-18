@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
+from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class UnmaskedForm(Form):
@@ -60,8 +60,6 @@ class UnmaskedForm(Form):
             return False
 
     def generated_compatibility(self, other):
-        other = nonvirtual(other)
-
         if other is None:
             return True
 

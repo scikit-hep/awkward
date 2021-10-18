@@ -60,10 +60,6 @@ class ListOffsetArray(Content):
     def nplike(self):
         return self._offsets.nplike
 
-    @property
-    def nonvirtual_nplike(self):
-        return self._offsets.nplike
-
     Form = ListOffsetForm
 
     @property
@@ -500,9 +496,6 @@ class ListOffsetArray(Content):
             raise AssertionError(repr(head))
 
     def mergeable(self, other, mergebool):
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return self.mergeable(other.array, mergebool)
-
         if not _parameters_equal(self._parameters, other._parameters):
             return False
 

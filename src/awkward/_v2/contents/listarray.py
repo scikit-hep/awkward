@@ -63,10 +63,6 @@ class ListArray(Content):
     def nplike(self):
         return self._starts.nplike
 
-    @property
-    def nonvirtual_nplike(self):
-        return self._starts.nplike
-
     Form = ListForm
 
     @property
@@ -663,9 +659,6 @@ class ListArray(Content):
             raise AssertionError(repr(head))
 
     def mergeable(self, other, mergebool):
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return self.mergeable(other.array, mergebool)
-
         if not _parameters_equal(self._parameters, other._parameters):
             return False
 
@@ -715,9 +708,6 @@ class ListArray(Content):
         contents = []
 
         for array in head:
-            if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
-                array = array.array
-
             parameters = dict(self.parameters.items() & array.parameters.items())
 
             if isinstance(

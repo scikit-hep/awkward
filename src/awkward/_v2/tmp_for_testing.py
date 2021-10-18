@@ -2,9 +2,6 @@
 
 from __future__ import absolute_import
 
-import re
-import json
-
 import awkward as ak
 import numpy as np
 
@@ -174,7 +171,7 @@ def v1v2_equal(v1, v2):
     elif isinstance(v1, ak.layout.VirtualArray) and isinstance(
         v2, ak._v2.contents.VirtualArray
     ):
-        raise NotImplementedError("VirtualArray")
+        raise AssertionError("VirtualArray is v1 only")
 
     else:
         raise AssertionError("{0} vs {1}".format(type(v1), type(v2)))
@@ -346,49 +343,7 @@ def v1_to_v2(v1):
         )
 
     elif isinstance(v1, ak.layout.VirtualArray):
-        form = v1.generator.form
-        if form is not None:
-            form = ak._v2.forms.from_json(form.tojson())
-
-        cache = v1.cache
-        if cache is not None:
-            cache = cache.mutablemapping
-
-        if isinstance(v1.generator, ak.layout.SliceGenerator):
-            # cheesy way to get the slice
-            repr_gen = repr(v1.generator)
-            range_slice = re.search(
-                r"<slice>\[(-?[0-9]+):(-?[0-9]+)\]</slice>", repr_gen
-            )
-            field_slice = re.search(r"<slice>\[(.*)\]</slice>", repr_gen)
-            if range_slice is not None:
-                slc = slice(int(range_slice.group(1)), int(range_slice.group(2)))
-            else:
-                slc = eval(field_slice.group(1))
-
-            generator = ak._v2.contents.virtualarray.SliceGenerator(
-                v1.generator.length,
-                form,
-                v1_to_v2(v1.generator.content),
-                slc,
-            )
-
-        else:
-            generator = ak._v2.contents.virtualarray.FunctionGenerator(
-                v1.generator.length,
-                form,
-                v1.generator.callable,
-                v1.generator.args,
-                v1.generator.kwargs,
-            )
-
-        return ak._v2.contents.VirtualArray(
-            generator,
-            cache=cache,
-            cache_key=v1.cache_key,
-            identifier=v1_to_v2_id(v1.identities),
-            parameters=v1.parameters,
-        )
+        raise AssertionError("VirtualArray is v1 only")
 
     else:
         raise AssertionError(type(v1))
@@ -545,27 +500,6 @@ def v2_to_v1(v2):
             [v2_to_v1(x) for x in v2.contents],
             identities=v2_to_v1_id(v2.identifier),
             parameters=v2.parameters,
-        )
-
-    elif isinstance(v2, ak._v2.contents.VirtualArray):
-        if v2.generator.form is None:
-            form = None
-        else:
-            form = ak.forms.Form.fromjson(json.dumps(v2.generator.form.tolist()))
-
-        def function(v2generator):
-            array = v2generator.generate()
-            if isinstance(array, (ak._v2.contents.Content, ak._v2.record.Record)):
-                return v2_to_v1(array)
-            else:
-                return array
-
-        generator = ak.layout.ArrayGenerator(
-            function, (v2.generator,), {}, form=form, length=v2.generator.length
-        )
-
-        return ak.layout.VirtualArray(
-            generator, None, cache_key=v2.cache_key, parameters=v2.parameters
         )
 
     else:

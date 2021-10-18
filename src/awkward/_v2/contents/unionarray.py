@@ -83,10 +83,6 @@ class UnionArray(Content):
     def nplike(self):
         return self._tags.nplike
 
-    @property
-    def nonvirtual_nplike(self):
-        return self._tags.nplike
-
     Form = UnionForm
 
     @property
@@ -461,9 +457,6 @@ class UnionArray(Content):
             return UnionArray(tags, index, contents, self.identifier, self.parameters)
 
     def mergeable(self, other, mergebool):
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return self.mergeable(other.array, mergebool)
-
         if not _parameters_equal(self._parameters, other._parameters):
             return False
 
@@ -479,18 +472,11 @@ class UnionArray(Content):
         tail = []
 
         for i in range(len(others)):
-            other = others[i]
-            if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-                head.append(other.array)
-            else:
-                head.append(other)
+            head.append(others[i])
 
         return (head, tail)
 
     def _reverse_merge(self, other):
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return self._reverse_merge(other.array)
-
         theirlength = len(other)
         mylength = len(self)
 
