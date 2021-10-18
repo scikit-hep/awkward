@@ -23,15 +23,3 @@ def test_fill_none_axis_1():
 def test_fill_none_axis_none():
     filled = ak.fill_none(array, 10, axis=None)
     assert ak.to_list(filled) == [[10, 2], 10, [4, 10]]
-
-
-def test_fill_none_axis_deprecated():
-    ak.deprecations_as_errors = False
-
-    with pytest.deprecated_call():
-        filled = ak.fill_none(array, 10)
-        assert ak.to_list(filled) == [[None, 2], 10, [4, None]]
-
-        with pytest.deprecated_call():
-            filled_twice = ak.fill_none(filled, 20)
-            assert ak.to_list(filled_twice) == [[20, 2], 10, [4, 20]]
