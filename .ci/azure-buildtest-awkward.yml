@@ -297,10 +297,14 @@ jobs:
         displayName: "Test CPU kernels"
 
       - script: |
-          python -m pytest -vv -rs tests --cov=src/awkward --cov-report=xml
+          python -m pytest -vv -rs tests --cov=src/awkward --cov-report=term --cov-report=xml
         displayName: "Test"
 
       - script: |
+          head coverage.xml
+        displayName: "Print coverage"
+
+      - script: |
           bash <(curl -s https://codecov.io/bash)
-        displayName: "Upload coverage report"
+        displayName: "Codecov"
         condition: "eq(variables['python.version'], '3.9')"
