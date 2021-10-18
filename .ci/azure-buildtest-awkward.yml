@@ -297,7 +297,7 @@ jobs:
         displayName: "Test CPU kernels"
 
       - script: |
-          python -m pytest -vv -rs tests --cov=src/awkward --cov-report=term --cov-report=xml --cov-config=
+          python -m pytest -vv -rs tests --cov=awkward --cov-report=term --cov-report=xml
         displayName: "Test"
 
       - script: |
