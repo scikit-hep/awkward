@@ -2687,52 +2687,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
-# TODO: remove in 1.7.0!
-def _fill_none_deprecated(array, value, highlevel=True, behavior=None):
-    arraylayout = ak.operations.convert.to_layout(
-        array, allow_record=True, allow_other=False
-    )
-    nplike = ak.nplike.of(arraylayout)
-
-    if isinstance(arraylayout, ak.partition.PartitionedArray):
-        out = ak.partition.apply(
-            lambda x: _fill_none_deprecated(x, value, highlevel=False), arraylayout
-        )
-
-    else:
-        if (
-            isinstance(value, Iterable)
-            and not (
-                isinstance(value, (str, bytes))
-                or (ak._util.py27 and isinstance(value, ak._util.unicode))
-            )
-            or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
-        ):
-            valuelayout = ak.operations.convert.to_layout(
-                value, allow_record=True, allow_other=False
-            )
-            if isinstance(valuelayout, ak.layout.Record):
-                valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
-            elif len(valuelayout) == 0:
-                offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
-                valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
-            else:
-                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
-
-        else:
-            valuelayout = ak.operations.convert.to_layout(
-                [value], allow_record=False, allow_other=False
-            )
-
-        out = arraylayout.fillna(valuelayout)
-
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
-    else:
-        return out
-
-
-def fill_none(array, value, axis=ak._util.MISSING, highlevel=True, behavior=None):
+def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
     """
     Args:
         array: Data in which to replace None with a given value.
@@ -2778,26 +2733,6 @@ def fill_none(array, value, axis=ak._util.MISSING, highlevel=True, behavior=None
         array, allow_record=True, allow_other=False
     )
     nplike = ak.nplike.of(arraylayout)
-
-    # Add a condition for the "old" behaviour
-    if axis is ak._util.MISSING:
-        if isinstance(arraylayout, ak.layout.Record):
-            mindepth, maxdepth = arraylayout.array.minmax_depth
-        else:
-            mindepth, maxdepth = arraylayout.minmax_depth
-
-        if mindepth == maxdepth == 1:
-            axis = 0
-        else:
-            ak._util.deprecate(
-                "ak.fill_none needs an explicit `axis` because the default will change to `axis=-1`",
-                "1.7.0",
-                date="2021-10-01",
-                will_be="changed",
-            )
-            return _fill_none_deprecated(
-                array, value, highlevel=highlevel, behavior=behavior
-            )
 
     # Convert value type to appropriate layout
     if (
