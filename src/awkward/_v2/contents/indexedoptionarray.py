@@ -49,10 +49,6 @@ class IndexedOptionArray(Content):
     def nplike(self):
         return self._index.nplike
 
-    @property
-    def nonvirtual_nplike(self):
-        return self._index.nplike
-
     Form = IndexedOptionForm
 
     @property
@@ -363,9 +359,6 @@ class IndexedOptionArray(Content):
             return self
 
     def mergeable(self, other, mergebool):
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return self.mergeable(other.array, mergebool)
-
         if not _parameters_equal(self._parameters, other._parameters):
             return False
 
@@ -407,8 +400,6 @@ class IndexedOptionArray(Content):
             other = others[i]
             if isinstance(other, ak._v2.contents.unionarray.UnionArray):
                 break
-            elif isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-                head.append(other.array)
             else:
                 head.append(other)
             i = i + 1
@@ -420,9 +411,6 @@ class IndexedOptionArray(Content):
         return (head, tail)
 
     def _reverse_merge(self, other):
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return other.array._reverse_merge()
-
         theirlength = len(other)
         mylength = len(self)
         index = ak._v2.index.Index64.empty((theirlength + mylength), self.nplike)

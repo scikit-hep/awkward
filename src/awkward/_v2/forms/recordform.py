@@ -8,7 +8,7 @@ except ImportError:
     from collections import Iterable
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal, nonvirtual
+from awkward._v2.forms.form import Form, _parameters_equal
 from awkward._v2.forms.indexedform import IndexedForm
 
 
@@ -174,8 +174,6 @@ class RecordForm(Form):
             return False
 
     def generated_compatibility(self, other):
-        other = nonvirtual(other)
-
         if other is None:
             return True
 

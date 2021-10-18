@@ -52,10 +52,6 @@ class RegularArray(Content):
     def nplike(self):
         return self._content.nplike
 
-    @property
-    def nonvirtual_nplike(self):
-        return self._content.nonvirtual_nplike
-
     Form = RegularForm
 
     @property
@@ -503,9 +499,6 @@ class RegularArray(Content):
             raise AssertionError(repr(head))
 
     def mergeable(self, other, mergebool):
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return self.mergeable(other.array, mergebool)
-
         if not _parameters_equal(self._parameters, other._parameters):
             return False
 

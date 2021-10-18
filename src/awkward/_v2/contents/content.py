@@ -588,8 +588,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 ),
             ):
                 break
-            elif isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-                head.append(other.array)
             else:
                 head.append(other)
             i = i + 1

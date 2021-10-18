@@ -18,9 +18,3 @@ from awkward._v2.contents.bytemaskedarray import ByteMaskedArray  # noqa: F401
 from awkward._v2.contents.bitmaskedarray import BitMaskedArray  # noqa: F401
 from awkward._v2.contents.unmaskedarray import UnmaskedArray  # noqa: F401
 from awkward._v2.contents.unionarray import UnionArray  # noqa: F401
-from awkward._v2.contents.virtualarray import (  # noqa: F401
-    VirtualArray,
-    ArrayGenerator,
-    FunctionGenerator,
-    SliceGenerator,
-)

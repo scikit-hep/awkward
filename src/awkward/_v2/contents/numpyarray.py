@@ -63,10 +63,6 @@ class NumpyArray(Content):
         return self._nplike
 
     @property
-    def nonvirtual_nplike(self):
-        return self._nplike
-
-    @property
     def ptr(self):
         return self._data.ctypes.data
 
@@ -291,9 +287,6 @@ class NumpyArray(Content):
             raise AssertionError(repr(head))
 
     def mergeable(self, other, mergebool):
-        if isinstance(other, ak._v2.contents.virtualarray.VirtualArray):
-            return self.mergeable(other.array, mergebool)
-
         if not _parameters_equal(self._parameters, other._parameters):
             return False
 
@@ -351,8 +344,6 @@ class NumpyArray(Content):
 
         for array in head:
             parameters = dict(self.parameters.items() & array.parameters.items())
-            if isinstance(array, ak._v2.contents.virtualarray.VirtualArray):
-                array = array.array
             if isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                 pass
             elif isinstance(array, ak._v2.contents.numpyarray.NumpyArray):
