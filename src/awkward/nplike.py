@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
+
 from __future__ import absolute_import
 
 import ctypes
