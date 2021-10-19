@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# v2: replace with deeply rewritten src/awkward/_v2/_connect/jax.
+
 from __future__ import absolute_import
 
 import distutils.version

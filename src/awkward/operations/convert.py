@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# v2: replace with all the src/awkward/_v2/operations/convert/*.py files.
+
 from __future__ import absolute_import
 
 import numbers

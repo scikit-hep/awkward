@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# v2: drop this file; partitioning will be handled by Awkward-Dask.
+
 from __future__ import absolute_import
 
 import numbers
