@@ -3,3 +3,9 @@ codecov:
 
 comment:
   layout: "files"
+
+coverage:
+  status:
+    project:
+      default:
+        target: 20%
