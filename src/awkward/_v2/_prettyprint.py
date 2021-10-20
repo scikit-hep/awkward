@@ -213,5 +213,3 @@ def pretty(data, num_rows, num_cols):
 
     else:
         raise AssertionError(type(data))
-
-
