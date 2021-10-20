@@ -149,5 +149,69 @@ def pretty(data, num_rows, num_cols):
         _, strs = horizontal(data, num_cols)
         return "".join(strs)
 
+    elif isinstance(data, ak._v2.contents.Content):
+        front, back = [], []
+        which = 0
+        for forward, index in alternate(len(data)):
+            _, strs = horizontal(data[index], num_cols - 2)
+            if forward:
+                front.append("".join(strs))
+            else:
+                back.insert(0, "".join(strs))
+
+            which += 1
+            if which >= num_rows:
+                break
+
+        if len(data) != 0 and which != len(data):
+            back[0] = "..."
+
+        out = front + back
+        for i in range(len(out)):
+            if i > 0:
+                out[i] = " " + out[i]
+            else:
+                out[i] = "[" + out[i]
+            if i < len(out) - 1:
+                out[i] = out[i] + ","
+            else:
+                out[i] = out[i] + "]"
+        return "\n".join(out)
+
+    elif isinstance(data, ak._v2.record.Record):
+        front = []
+        which = 0
+        keys = data.keys
+        for key in keys:
+            raise NotImplementedError("deal with key_str")
+
+            _, strs = horizontal(data[key], num_cols - 2)
+            front.append("".join(strs))
+
+            which += 1
+            if which >= num_rows:
+                break
+
+        if len(keys) != 0 and which != len(data):
+            back[0] = "..."
+
+        out = front + back
+        for i in range(len(out)):
+            if i > 0:
+                out[i] = " " + out[i]
+            elif data.is_tuple:
+                out[i] = "(" + out[i]
+            else:
+                out[i] = "{" + out[i]
+            if i < len(out) - 1:
+                out[i] = out[i] + ","
+            elif data.is_tuple:
+                out[i] = out[i] + ")"
+            else:
+                out[i] = out[i] + "}"
+        return "\n".join(out)
+
     else:
-        raise NotImplementedError
+        raise AssertionError(type(data))
+
+
