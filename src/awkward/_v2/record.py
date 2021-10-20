@@ -47,7 +47,7 @@ class Record(object):
 
     @property
     def is_tuple(self):
-        return self._array.keys is None
+        return self._array.is_tuple
 
     @property
     def as_tuple(self):
