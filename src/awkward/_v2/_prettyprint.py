@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import math
 import re
+import numbers
 
 import awkward as ak
 
@@ -36,7 +37,7 @@ is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 def valuestr_horiz(data, limit_cols):
     original_limit_cols = limit_cols
 
-    if isinstance(data, ak._v2.contents.Content):
+    if isinstance(data, ak._v2.highlevel.Array):
         front, back = ["["], ["]"]
         limit_cols -= 2
 
@@ -85,15 +86,15 @@ def valuestr_horiz(data, limit_cols):
             limit_cols += 5  # credit the ", ..."
             return original_limit_cols - limit_cols, front + back
 
-    elif isinstance(data, ak._v2.record.Record):
-        is_tuple = data.is_tuple
+    elif isinstance(data, ak._v2.highlevel.Record):
+        is_tuple = data.layout.is_tuple
 
         front = ["("] if is_tuple else ["{"]
         limit_cols -= 2  # both the opening and closing brackets
         limit_cols -= 5  # anticipate the ", ..."
 
         which = 0
-        keys = data.keys
+        keys = data.fields
         for key in keys:
             for_comma = 0 if which == 0 else 2
             if is_tuple:
@@ -142,7 +143,17 @@ def valuestr_horiz(data, limit_cols):
         return original_limit_cols - limit_cols, front
 
     else:
-        out = str(data)
+        if isinstance(data, (str, bytes)):
+            out = repr(data)
+        elif isinstance(data, numbers.Integral):
+            out = str(data)
+        elif isinstance(data, numbers.Real):
+            out = "{0:.3g}".format(data)
+        elif isinstance(data, numbers.Complex):
+            out = "{0:.2g}+{1:.2g}j".format(data.real, data.imag)
+        else:
+            out = str(data)
+
         return len(out), [out]
 
 
@@ -151,7 +162,7 @@ def valuestr(data, limit_rows, limit_cols):
         _, strs = valuestr_horiz(data, limit_cols)
         return "".join(strs)
 
-    elif isinstance(data, ak._v2.contents.Content):
+    elif isinstance(data, ak._v2.highlevel.Array):
         front, back = [], []
         which = 0
         for forward, index in alternate(len(data)):
@@ -180,13 +191,13 @@ def valuestr(data, limit_rows, limit_cols):
                 out[i] = out[i] + "]"
         return "\n".join(out)
 
-    elif isinstance(data, ak._v2.record.Record):
-        is_tuple = data.is_tuple
+    elif isinstance(data, ak._v2.highlevel.Record):
+        is_tuple = data.layout.is_tuple
 
         front = []
 
         which = 0
-        keys = data.keys
+        keys = data.fields
         for key in keys:
             if is_tuple:
                 key_str = ""

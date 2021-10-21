@@ -487,9 +487,9 @@ def wrap(content, behavior=None, highlevel=True, like=None):
             behavior = behavior_of(like)
 
         if isinstance(content, ak._v2.contents.Content):
-            return ak.highlevel.Array(content, behavior=behavior)
+            return ak._v2.highlevel.Array(content, behavior=behavior)
         elif isinstance(content, ak._v2.record.Record):
-            return ak.highlevel.Record(content, behavior=behavior)
+            return ak._v2.highlevel.Record(content, behavior=behavior)
 
     return content
 

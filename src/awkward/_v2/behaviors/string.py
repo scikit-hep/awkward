@@ -1,14 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# from __future__ import absolute_import
+from __future__ import absolute_import
 
-# import awkward as ak
+import awkward as ak
+from awkward._v2.highlevel import Array
 
-# np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
 
-# class ByteBehavior(ak.highlevel.Array):
-#     __name__ = "Array"
+class ByteBehavior(Array):
+    __name__ = "Array"
+
 
 #     def __bytes__(self):
 #         tmp = ak.nplike.of(self.layout).asarray(self.layout)
@@ -49,8 +51,9 @@
 #             raise TypeError("can only concatenate bytes to bytes")
 
 
-# class CharBehavior(ak.highlevel.Array):
-#     __name__ = "Array"
+class CharBehavior(Array):
+    __name__ = "Array"
+
 
 #     def __bytes__(self):
 #         tmp = ak.nplike.of(self.layout).asarray(self.layout)

@@ -45,6 +45,7 @@ except ImportError:
     from collections import Mapping
 
 import awkward as ak
+from awkward._v2._connect.numpy import NDArrayOperatorsMixin
 
 np = ak.nplike.NumpyMetadata.instance()
 # numpy = ak.nplike.Numpy.instance()
@@ -60,7 +61,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 #         return ":" + out
 
 
-class Array(ak._v2._connect.numpy.NDArrayOperatorsMixin, Iterable, Sized):
+class Array(NDArrayOperatorsMixin, Iterable, Sized):
     u"""
     Args:
         data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
@@ -524,6 +525,19 @@ class Array(ak._v2._connect.numpy.NDArrayOperatorsMixin, Iterable, Sized):
         wrapped by an #ak.types.ArrayType.
         """
         return ak._v2.types.ArrayType(self._layout.form.type, len(self._layout))
+
+    @property
+    def typestr(self):
+        """
+        The high-level type of this Array, presented as a string.
+
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
+
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
+        """
+        return str(ak._v2.types.ArrayType(self._layout.form.type, len(self._layout)))
 
     def __len__(self):
         """
@@ -1209,11 +1223,15 @@ class Array(ak._v2._connect.numpy.NDArrayOperatorsMixin, Iterable, Sized):
         return self["9"]
 
     def __str__(self):
-        return ak._v2._prettyprint.valuestr(self._layout, 1, 80)
+        import awkward._v2._prettyprint
+
+        return awkward._v2._prettyprint.valuestr(self, 1, 80)
 
     def __repr__(self):
+        import awkward._v2._prettyprint
+
         pytype = type(self).__name__
-        valuestr = ak._v2._prettyprint.valuestr(self._layout, 1, 50)
+        valuestr = awkward._v2._prettyprint.valuestr(self, 1, 50)
         length = max(10, 80 - len(pytype) - 10 - len(valuestr))
         typestr = repr(str(self.type))[1:-1]
         if len(typestr) > length:
@@ -1229,18 +1247,24 @@ class Array(ak._v2._connect.numpy.NDArrayOperatorsMixin, Iterable, Sized):
             limit_cols (int): Maximum number of columns (characters wide).
             type (bool): If True, print the type as well. (Doesn't count toward number
                 of rows/lines limit.)
-            stream (object with a ``write(str)`` method): Stream to write the
-                output to.
+            stream (object with a ``write(str)`` method or None): Stream to write the
+                output to. If None, return a string instead of writing to a stream.
 
         Display the contents of the array within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
         """
-        valuestr = ak._v2._prettyprint.valuestr(self._layout, limit_rows, limit_cols)
+        import awkward._v2._prettyprint
+
+        valuestr = awkward._v2._prettyprint.valuestr(self, limit_rows, limit_cols)
         if type:
-            out = "type: " + str(self.type) + "\n" + valuestr + "\n"
+            out = "type: " + str(self.type) + "\n" + valuestr
         else:
-            out = valuestr + "\n"
-        stream.write(out)
+            out = valuestr
+
+        if stream is None:
+            return out
+        else:
+            stream.write(out + "\n")
 
     #     def __array__(self, *args, **kwargs):
     #         """
@@ -1420,7 +1444,7 @@ class Array(ak._v2._connect.numpy.NDArrayOperatorsMixin, Iterable, Sized):
 #         return False
 
 
-class Record(ak._v2._connect.numpy.NDArrayOperatorsMixin):
+class Record(NDArrayOperatorsMixin):
     """
     Args:
         data (#ak.layout.Record, #ak.Record, str, or dict):
@@ -1643,6 +1667,16 @@ class Record(ak._v2._connect.numpy.NDArrayOperatorsMixin):
         #ak.types.RecordType.
         """
         return self._layout.array.form.type
+
+    @property
+    def typestr(self):
+        """
+        The high-level type of this Record, presented as a string.
+
+        Note that the outermost element of a Record's type is always a
+        #ak.types.RecordType.
+        """
+        return str(self._layout.array.form.type)
 
     def __getitem__(self, where):
         """
@@ -1867,11 +1901,15 @@ class Record(ak._v2._connect.numpy.NDArrayOperatorsMixin):
         return self["9"]
 
     def __str__(self):
-        return ak._v2._prettyprint.valuestr(self._layout, 1, 80)
+        import awkward._v2._prettyprint
+
+        return awkward._v2._prettyprint.valuestr(self, 1, 80)
 
     def __repr__(self):
+        import awkward._v2._prettyprint
+
         pytype = type(self).__name__
-        valuestr = ak._v2._prettyprint.valuestr(self._layout, 1, 50)
+        valuestr = awkward._v2._prettyprint.valuestr(self, 1, 50)
         length = max(10, 80 - len(pytype) - 10 - len(valuestr))
         typestr = repr(str(self.type))[1:-1]
         if len(typestr) > length:
@@ -1887,18 +1925,24 @@ class Record(ak._v2._connect.numpy.NDArrayOperatorsMixin):
             limit_cols (int): Maximum number of columns (characters wide).
             type (bool): If True, print the type as well. (Doesn't count toward number
                 of rows/lines limit.)
-            stream (object with a ``write(str)`` method): Stream to write the
-                output to.
+            stream (object with a ``write(str)`` method or None): Stream to write the
+                output to. If None, return a string instead of writing to a stream.
 
         Display the contents of the record within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
         """
-        valuestr = ak._v2._prettyprint.valuestr(self._layout, limit_rows, limit_cols)
+        import awkward._v2._prettyprint
+
+        valuestr = awkward._v2._prettyprint.valuestr(self, limit_rows, limit_cols)
         if type:
-            out = "type: " + str(self.type) + "\n" + valuestr + "\n"
+            out = "type: " + str(self.type) + "\n" + valuestr
         else:
-            out = valuestr + "\n"
-        stream.write(out)
+            out = valuestr
+
+        if stream is None:
+            return out
+        else:
+            stream.write(out + "\n")
 
     #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
     #         """
