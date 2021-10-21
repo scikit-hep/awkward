@@ -3,99 +3,68 @@
 # First, transition all the _v2 code to start using implementations in this file.
 # Then build up the high-level replacements.
 
-# from __future__ import absolute_import
+from __future__ import absolute_import
 
 # import re
 # import sys
-# import os
+import os
+
 # import os.path
 # import warnings
 # import itertools
-# import numbers
+import numbers
 
-# try:
-#     from collections.abc import Mapping
-#     from collections.abc import MutableMapping
-# except ImportError:
-#     from collections import Mapping
-#     from collections import MutableMapping
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 
-# import awkward as ak
+import awkward as ak
 
-# np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplike.NumpyMetadata.instance()
 
-# py27 = sys.version_info[0] < 3
-# py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
-# win = os.name == "nt"
-# bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
+win = os.name == "nt"
+bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
 
-# # to silence flake8 F821 errors
-# if py27:
-#     unicode = eval("unicode")
-# else:
-#     unicode = None
-
-# # matches include/awkward/common.h
-# kMaxInt8 = 127  # 2**7  - 1
-# kMaxUInt8 = 255  # 2**8  - 1
-# kMaxInt32 = 2147483647  # 2**31 - 1
-# kMaxUInt32 = 4294967295  # 2**32 - 1
-# kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
-# kSliceNone = kMaxInt64 + 1  # for Slice::none()
-# kMaxLevels = 48
+# matches include/awkward/common.h
+kMaxInt8 = 127  # 2**7  - 1
+kMaxUInt8 = 255  # 2**8  - 1
+kMaxInt32 = 2147483647  # 2**31 - 1
+kMaxUInt32 = 4294967295  # 2**32 - 1
+kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
+kSliceNone = kMaxInt64 + 1  # for Slice::none()
+kMaxLevels = 48
 
 
-# def is_file_path(x):
-#     try:
-#         return os.path.isfile(x)
-#     except ValueError:
-#         return False
+def in_module(obj, modulename):
+    m = type(obj).__module__
+    return m == modulename or m.startswith(modulename + ".")
 
 
-# def isint(x):
-#     """
-#     Returns True if and only if ``x`` is an integer (including NumPy, not
-#     including bool).
-#     """
-#     return isinstance(
-#         x, (int, numbers.Integral, np.integer, ak._v2._typetracer.Interval)
-#     ) and not isinstance(x, (bool, np.bool_))
+def is_file_path(x):
+    try:
+        return os.path.isfile(x)
+    except ValueError:
+        return False
 
 
-# def isnum(x):
-#     """
-#     Returns True if and only if ``x`` is a number (including NumPy, not
-#     including bool).
-#     """
-#     return isinstance(x, (int, float, numbers.Real, np.number)) and not isinstance(
-#         x, (bool, np.bool_)
-#     )
+def isint(x):
+    return isinstance(
+        x, (int, numbers.Integral, np.integer, ak._v2._typetracer.Interval)
+    ) and not isinstance(x, (bool, np.bool_))
 
 
-# def isstr(x):
-#     """
-#     Returns True if and only if ``x`` is a string (including Python 2 unicode).
-#     """
-#     if py27:
-#         return isinstance(x, (bytes, unicode))
-#     else:
-#         return isinstance(x, str)
+def isnum(x):
+    return isinstance(x, (int, float, numbers.Real, np.number)) and not isinstance(
+        x, (bool, np.bool_)
+    )
 
 
-# def exception_suffix(filename):
-#     line = ""
-#     if hasattr(sys, "_getframe"):
-#         line = "#L" + str(sys._getframe(1).f_lineno)
-#     filename = filename.replace("\\", "/")
-#     filename = "/src/awkward/" + filename.split("awkward/")[1]
-#     return (
-#         "\n\n(https://github.com/scikit-hep/awkward-1.0/blob/"
-#         + ak.__version__
-#         + filename
-#         + line
-#         + ")"
-#     )
+def isstr(x):
+    return isinstance(x, str)
 
+
+###############################################################################
 
 # # Enable warnings for the Awkward package
 # warnings.filterwarnings("default", module="awkward.*")
@@ -199,57 +168,56 @@
 #     return is_path, path
 
 
-# class Behavior(Mapping):
-#     def __init__(self, defaults, overrides):
-#         self.defaults = defaults
-#         if overrides is None:
-#             self.overrides = {}
-#         else:
-#             self.overrides = overrides
+class Behavior(Mapping):
+    def __init__(self, defaults, overrides):
+        self.defaults = defaults
+        if overrides is None:
+            self.overrides = {}
+        else:
+            self.overrides = overrides
 
-#     def __getitem__(self, where):
-#         try:
-#             return self.overrides[where]
-#         except KeyError:
-#             try:
-#                 return self.defaults[where]
-#             except KeyError:
-#                 return None
+    def __getitem__(self, where):
+        try:
+            return self.overrides[where]
+        except KeyError:
+            try:
+                return self.defaults[where]
+            except KeyError:
+                return None
 
-#     def items(self):
-#         for n, x in self.overrides.items():
-#             yield n, x
-#         for n, x in self.defaults.items():
-#             if n not in self.overrides:
-#                 yield n, x
+    def items(self):
+        for n, x in self.overrides.items():
+            yield n, x
+        for n, x in self.defaults.items():
+            if n not in self.overrides:
+                yield n, x
 
-#     def __iter__(self):
-#         for x in self.keys():
-#             yield x
+    def __iter__(self):
+        for x in self.keys():
+            yield x
 
-#     def __len__(self):
-#         return len(set(self.defaults) | set(self.overrides))
+    def __len__(self):
+        return len(set(self.defaults) | set(self.overrides))
 
 
-# def arrayclass(layout, behavior):
-#     layout = ak.partition.first(layout)
-#     behavior = Behavior(ak.behavior, behavior)
-#     arr = layout.parameter("__array__")
-#     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
-#         cls = behavior[arr]
-#         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
-#             return cls
-#     rec = layout.parameter("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         cls = behavior[".", rec]
-#         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
-#             return cls
-#     deeprec = layout.purelist_parameter("__record__")
-#     if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
-#         cls = behavior["*", deeprec]
-#         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
-#             return cls
-#     return ak.highlevel.Array
+def arrayclass(layout, behavior):
+    behavior = Behavior(ak.behavior, behavior)
+    arr = layout.parameter("__array__")
+    if isstr(arr):
+        cls = behavior[arr]
+        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
+            return cls
+    rec = layout.parameter("__record__")
+    if isstr(rec):
+        cls = behavior[".", rec]
+        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
+            return cls
+    deeprec = layout.purelist_parameter("__record__")
+    if isstr(deeprec):
+        cls = behavior["*", deeprec]
+        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
+            return cls
+    return ak._v2.highlevel.Array
 
 
 # def custom_cast(obj, behavior):
@@ -325,15 +293,14 @@
 #     return None
 
 
-# def recordclass(layout, behavior):
-#     layout = ak.partition.first(layout)
-#     behavior = Behavior(ak.behavior, behavior)
-#     rec = layout.parameter("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         cls = behavior[rec]
-#         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
-#             return cls
-#     return ak.highlevel.Record
+def recordclass(layout, behavior):
+    behavior = Behavior(ak.behavior, behavior)
+    rec = layout.parameter("__record__")
+    if isstr(rec):
+        cls = behavior[rec]
+        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Record):
+            return cls
+    return ak._v2.highlevel.Record
 
 
 # def typestrs(behavior):
@@ -486,54 +453,45 @@
 #                 yield typer, lower
 
 
-# def behaviorof(*arrays, **kwargs):
-#     behavior = kwargs.get("behavior")
-#     if behavior is not None:
-#         # An explicit 'behavior' always wins.
-#         return behavior
+def behavior_of(*arrays, **kwargs):
+    behavior = kwargs.get("behavior")
+    if behavior is not None:
+        # An explicit 'behavior' always wins.
+        return behavior
 
-#     copied = False
-#     for x in arrays[::-1]:
-#         if (
-#             isinstance(
-#                 x,
-#                 (ak.highlevel.Array, ak.highlevel.Record, ak.highlevel.ArrayBuilder),
-#             )
-#             and x.behavior is not None
-#         ):
-#             if behavior is None:
-#                 behavior = x.behavior
-#             elif behavior is x.behavior:
-#                 pass
-#             elif not copied:
-#                 behavior = dict(behavior)
-#                 behavior.update(x.behavior)
-#                 copied = True
-#             else:
-#                 behavior.update(x.behavior)
-#     return behavior
-
-
-# def wrap(content, behavior):
-#     if isinstance(content, (ak.layout.Content, ak.partition.PartitionedArray)):
-#         return ak.highlevel.Array(content, behavior=behavior, kernels=None)
-
-#     elif isinstance(content, ak.layout.Record):
-#         return ak.highlevel.Record(content, behavior=behavior, kernels=None)
-
-#     else:
-#         return content
+    copied = False
+    highs = (
+        ak._v2.highlevel.Array,
+        ak._v2.highlevel.Record,
+        ak._v2.highlevel.ArrayBuilder,
+    )
+    for x in arrays[::-1]:
+        if isinstance(x, highs) and x.behavior is not None:
+            if behavior is None:
+                behavior = x.behavior
+            elif behavior is x.behavior:
+                pass
+            elif not copied:
+                behavior = dict(behavior)
+                behavior.update(x.behavior)
+                copied = True
+            else:
+                behavior.update(x.behavior)
+    return behavior
 
 
-# def maybe_wrap(content, behavior, highlevel):
-#     if highlevel:
-#         return ak._util.wrap(content, behavior)
-#     else:
-#         return content
+# maybe_wrap and maybe_wrap_like go here
+def wrap(content, behavior=None, highlevel=True, like=None):
+    if highlevel:
+        if like is not None and behavior is None:
+            behavior = behavior_of(like)
 
+        if isinstance(content, ak._v2.contents.Content):
+            return ak._v2.highlevel.Array(content, behavior=behavior)
+        elif isinstance(content, ak._v2.record.Record):
+            return ak._v2.highlevel.Record(content, behavior=behavior)
 
-# def maybe_wrap_like(content, array, behavior, highlevel):
-#     return maybe_wrap(content, behaviorof(array, behavior=behavior), highlevel)
+    return content
 
 
 # def extra(args, kwargs, defaults):
@@ -1519,32 +1477,6 @@
 #         )
 
 
-# def find_caches(layout):
-#     # Both of the implementations below find referentially unique mutablemappings,
-#     # but the PartitionedArray case is optimized for many unique values (with a set)
-#     # and the non-partitioned case is optimized for few (O(n^2) algo, but no hashmap).
-#     if isinstance(layout, ak.partition.PartitionedArray):
-#         seen = set()
-#         mutablemappings = []
-#         for partition in layout.partitions:
-#             for cache in partition.caches:
-#                 x = cache.mutablemapping
-#                 if id(x) not in seen:
-#                     seen.add(id(x))
-#                     mutablemappings.append(x)
-#     else:
-#         mutablemappings = []
-#         for cache in layout.caches:
-#             x = cache.mutablemapping
-#             for y in mutablemappings:
-#                 if x is y:
-#                     break
-#             else:
-#                 mutablemappings.append(x)
-
-#     return tuple(mutablemappings)
-
-
 # def highlevel_type(layout, behavior, isarray):
 #     if isarray:
 #         return ak.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
@@ -1556,7 +1488,7 @@
 
 
 # def minimally_touching_string(limit_length, layout, behavior):
-#     if isinstance(layout, ak.layout.Record):
+#     if isinstance(layout, ak._v2.layout.Record):
 #         layout = layout.array[layout.at : layout.at + 1]
 
 #     if len(layout) == 0:
@@ -1564,22 +1496,22 @@
 
 #     def forward(x, space, brackets=True, wrap=True, stop=None):
 #         done = False
-#         if wrap and isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
+#         if wrap and isinstance(x, ak._v2.contents.Content):
 #             cls = arrayclass(x, behavior)
-#             if cls is not ak.highlevel.Array:
+#             if cls is not ak._v2.highlevel.Array:
 #                 y = cls(x, behavior=behavior)
 #                 if "__repr__" in type(y).__dict__:
 #                     yield space + repr(y)
 #                     done = True
 #         if wrap and isinstance(x, ak.layout.Record):
 #             cls = recordclass(x, behavior)
-#             if cls is not ak.highlevel.Record:
+#             if cls is not ak._v2.highlevel.Record:
 #                 y = cls(x, behavior=behavior)
 #                 if "__repr__" in type(y).__dict__:
 #                     yield space + repr(y)
 #                     done = True
 #         if not done:
-#             if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
+#             if isinstance(x, ak._v2.contents.Content):
 #                 if brackets:
 #                     yield space + "["
 #                 sp = ""
@@ -1624,22 +1556,22 @@
 
 #     def backward(x, space, brackets=True, wrap=True, stop=-1):
 #         done = False
-#         if wrap and isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
+#         if wrap and isinstance(x, ak._v2.contents.Content):
 #             cls = arrayclass(x, behavior)
-#             if cls is not ak.highlevel.Array:
+#             if cls is not ak._v2.highlevel.Array:
 #                 y = cls(x, behavior=behavior)
 #                 if "__repr__" in type(y).__dict__:
 #                     yield repr(y) + space
 #                     done = True
 #         if wrap and isinstance(x, ak.layout.Record):
 #             cls = recordclass(x, behavior)
-#             if cls is not ak.highlevel.Record:
+#             if cls is not ak._v2.highlevel.Record:
 #                 y = cls(x, behavior=behavior)
 #                 if "__repr__" in type(y).__dict__:
 #                     yield repr(y) + space
 #                     done = True
 #         if not done:
-#             if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
+#             if isinstance(x, ak._v2.contents.Content):
 #                 if brackets:
 #                     yield "]" + space
 #                 sp = ""
@@ -1769,42 +1701,6 @@
 #                 + ", ... "
 #                 + "".join(reversed(right)).lstrip(" ")
 #             )
-
-
-# class MappingProxy(MutableMapping):
-#     """
-#     A type suitable for use with layout.ArrayCache.
-
-#     This can be used to wrap plain dict instances if need be,
-#     since they are not able to be weak referenced.
-#     """
-
-#     @classmethod
-#     def maybe_wrap(cls, mapping):
-#         if type(mapping) is dict:
-#             return cls(mapping)
-#         return mapping
-
-#     def __init__(self, base):
-#         self.base = base
-
-#     def __repr__(self):
-#         return repr(self.base)
-
-#     def __getitem__(self, key):
-#         return self.base[key]
-
-#     def __setitem__(self, key, value):
-#         self.base[key] = value
-
-#     def __delitem__(self, key):
-#         del self.base[key]
-
-#     def __iter__(self):
-#         return iter(self.base)
-
-#     def __len__(self):
-#         return len(self.base)
 
 
 # def make_union(tags, index, contents, identities, parameters):

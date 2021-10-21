@@ -3,3 +3,13 @@ codecov:
 
 comment:
   layout: "files"
+
+coverage:
+  status:
+    project:
+      default:
+        target: 20%
+    patch: false
+
+github_checks:
+  annotations: false

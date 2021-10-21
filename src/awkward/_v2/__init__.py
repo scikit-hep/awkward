@@ -10,3 +10,15 @@ import awkward._v2.types  # noqa: F401
 import awkward._v2.forms  # noqa: F401
 import awkward._v2._slicing  # noqa: F401
 import awkward._v2._typetracer  # noqa: F401
+
+import awkward._v2._util  # noqa: F401
+import awkward._v2.operations.io  # noqa: F401
+import awkward._v2.operations.convert  # noqa: F401
+import awkward._v2.operations.describe  # noqa: F401
+import awkward._v2.operations.structure  # noqa: F401
+import awkward._v2.operations.reducers  # noqa: F401
+
+import awkward._v2.highlevel  # noqa: F401
+import awkward._v2.behaviors.categorical  # noqa: F401
+import awkward._v2.behaviors.mixins  # noqa: F401
+import awkward._v2.behaviors.string  # noqa: F401

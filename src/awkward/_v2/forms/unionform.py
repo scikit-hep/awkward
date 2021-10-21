@@ -172,6 +172,18 @@ class UnionForm(Form):
             form_key=None,
         )
 
+    def purelist_parameter(self, key):
+        if self._parameters is None or key not in self._parameters:
+            out = self._contents[0].purelist_parameter(key)
+            for content in self._contents[1:]:
+                tmp = content.purelist_parameter(key)
+                if out != tmp:
+                    return None
+            else:
+                return out
+        else:
+            return self._parameters[key]
+
     @property
     def purelist_isregular(self):
         for content in self._contents:

@@ -61,6 +61,12 @@ class EmptyForm(Form):
             form_key=None,
         )
 
+    def purelist_parameter(self, key):
+        if self._parameters is None or key not in self._parameters:
+            return None
+        else:
+            return self._parameters[key]
+
     @property
     def purelist_isregular(self):
         return True
