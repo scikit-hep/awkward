@@ -921,6 +921,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return paramcheck
         return self._validityerror(path)
 
+    def purelist_parameter(self, key):
+        return self.Form.purelist_parameter(self, key)
+
     @property
     def purelist_isregular(self):
         return self.Form.purelist_isregular.__get__(self)

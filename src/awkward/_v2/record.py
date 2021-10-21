@@ -76,6 +76,37 @@ class Record(object):
         out.append(post)
         return "".join(out)
 
+    def validityerror(self, path="layout.array"):
+        return self._array.validityerror(path)
+
+    @property
+    def parameters(self):
+        return self._array.parameters
+
+    def parameter(self, key):
+        return self._array.parameter(key)
+
+    def purelist_parameter(self, key):
+        return self._array.purelist_parameter(key)
+
+    @property
+    def purelist_isregular(self):
+        return self._array.purelist_isregular
+
+    @property
+    def purelist_depth(self):
+        return 0
+
+    @property
+    def minmax_depth(self):
+        mindepth, maxdepth = self._array.minmax_depth
+        return mindepth - 1, maxdepth - 1
+
+    @property
+    def branch_depth(self):
+        branch, depth = self._array.branch_depth
+        return branch, depth - 1
+
     def __getitem__(self, where):
         if ak._util.isint(where):
             raise IndexError("scalar Record cannot be sliced by an integer")

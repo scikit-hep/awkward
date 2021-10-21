@@ -146,6 +146,12 @@ class ByteMaskedForm(Form):
             form_key=None,
         )
 
+    def purelist_parameter(self, key):
+        if self._parameters is None or key not in self._parameters:
+            return self._content.purelist_parameter(key)
+        else:
+            return self._parameters[key]
+
     @property
     def purelist_isregular(self):
         return self._content.purelist_isregular

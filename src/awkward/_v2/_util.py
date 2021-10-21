@@ -201,24 +201,23 @@ class Behavior(Mapping):
 
 
 def arrayclass(layout, behavior):
-    layout = ak.partition.first(layout)
     behavior = Behavior(ak.behavior, behavior)
     arr = layout.parameter("__array__")
     if isstr(arr):
         cls = behavior[arr]
-        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
+        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
             return cls
     rec = layout.parameter("__record__")
     if isstr(rec):
         cls = behavior[".", rec]
-        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
+        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
     if isstr(deeprec):
         cls = behavior["*", deeprec]
-        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
+        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
             return cls
-    return ak.highlevel.Array
+    return ak._v2.highlevel.Array
 
 
 # def custom_cast(obj, behavior):
@@ -294,15 +293,14 @@ def arrayclass(layout, behavior):
 #     return None
 
 
-# def recordclass(layout, behavior):
-#     layout = ak.partition.first(layout)
-#     behavior = Behavior(ak.behavior, behavior)
-#     rec = layout.parameter("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         cls = behavior[rec]
-#         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
-#             return cls
-#     return ak.highlevel.Record
+def recordclass(layout, behavior):
+    behavior = Behavior(ak.behavior, behavior)
+    rec = layout.parameter("__record__")
+    if isstr(rec):
+        cls = behavior[rec]
+        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Record):
+            return cls
+    return ak._v2.highlevel.Record
 
 
 # def typestrs(behavior):

@@ -262,6 +262,9 @@ class RecordForm(Form):
                 form_key=None,
             )
 
+    def purelist_parameter(self, key):
+        return self.parameter(key)
+
     @property
     def purelist_isregular(self):
         return True

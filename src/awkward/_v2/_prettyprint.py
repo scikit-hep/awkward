@@ -33,41 +33,43 @@ def alternate(length):
 is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 
 
-def horizontal(data, num_cols):
-    original_num_cols = num_cols
+def valuestr_horiz(data, limit_cols):
+    original_limit_cols = limit_cols
 
     if isinstance(data, ak._v2.contents.Content):
         front, back = ["["], ["]"]
-        num_cols -= 2
+        limit_cols -= 2
 
         if len(data) == 0:
             return 2, front + back
 
         elif len(data) == 1:
-            cols_taken, strs = horizontal(data[0], num_cols)
+            cols_taken, strs = valuestr_horiz(data[0], limit_cols)
             return 2 + cols_taken, front + strs + back
 
         else:
-            num_cols -= 5  # anticipate the ", ..."
+            limit_cols -= 5  # anticipate the ", ..."
             which = 0
             for forward, index in alternate(len(data)):
                 if forward:
                     for_comma = 0 if which == 0 else 2
-                    cols_taken, strs = horizontal(data[index], num_cols - for_comma)
-                    if num_cols - (for_comma + cols_taken) >= 0:
+                    cols_taken, strs = valuestr_horiz(
+                        data[index], limit_cols - for_comma
+                    )
+                    if limit_cols - (for_comma + cols_taken) >= 0:
                         if which != 0:
                             front.append(", ")
-                            num_cols -= 2
+                            limit_cols -= 2
                         front.extend(strs)
-                        num_cols -= cols_taken
+                        limit_cols -= cols_taken
                     else:
                         break
                 else:
-                    cols_taken, strs = horizontal(data[index], num_cols - 2)
-                    if num_cols - (2 + cols_taken) >= 0:
+                    cols_taken, strs = valuestr_horiz(data[index], limit_cols - 2)
+                    if limit_cols - (2 + cols_taken) >= 0:
                         back[:0] = strs
                         back.insert(0, ", ")
-                        num_cols -= 2 + cols_taken
+                        limit_cols -= 2 + cols_taken
                     else:
                         break
 
@@ -75,20 +77,20 @@ def horizontal(data, num_cols):
 
             if which == 0:
                 front.append("...")
-                num_cols -= 3
+                limit_cols -= 3
             elif which != len(data):
                 front.append(", ...")
-                num_cols -= 5
+                limit_cols -= 5
 
-            num_cols += 5  # credit the ", ..."
-            return original_num_cols - num_cols, front + back
+            limit_cols += 5  # credit the ", ..."
+            return original_limit_cols - limit_cols, front + back
 
     elif isinstance(data, ak._v2.record.Record):
         is_tuple = data.is_tuple
 
         front = ["("] if is_tuple else ["{"]
-        num_cols -= 2  # both the opening and closing brackets
-        num_cols -= 5  # anticipate the ", ..."
+        limit_cols -= 2  # both the opening and closing brackets
+        limit_cols -= 5  # anticipate the ", ..."
 
         which = 0
         keys = data.keys
@@ -104,22 +106,22 @@ def horizontal(data, num_cols):
                 else:
                     key_str = key + ": "
 
-            if num_cols - (for_comma + len(key_str) + 3) >= 0:
+            if limit_cols - (for_comma + len(key_str) + 3) >= 0:
                 if which != 0:
                     front.append(", ")
-                    num_cols -= 2
+                    limit_cols -= 2
                 front.append(key_str)
-                num_cols -= len(key_str)
+                limit_cols -= len(key_str)
                 which += 1
 
-                target = num_cols if len(keys) == 1 else half(num_cols)
-                cols_taken, strs = horizontal(data[key], target)
-                if num_cols - cols_taken >= 0:
+                target = limit_cols if len(keys) == 1 else half(limit_cols)
+                cols_taken, strs = valuestr_horiz(data[key], target)
+                if limit_cols - cols_taken >= 0:
                     front.extend(strs)
-                    num_cols -= cols_taken
+                    limit_cols -= cols_taken
                 else:
                     front.append("...")
-                    num_cols -= 3
+                    limit_cols -= 3
                     break
 
             else:
@@ -130,37 +132,37 @@ def horizontal(data, num_cols):
         if len(keys) != 0:
             if which == 0:
                 front.append("...")
-                num_cols -= 3
+                limit_cols -= 3
             elif which != 2 * len(keys):
                 front.append(", ...")
-                num_cols -= 5
+                limit_cols -= 5
 
-        num_cols += 5  # credit the ", ..."
+        limit_cols += 5  # credit the ", ..."
         front.append(")" if is_tuple else "}")
-        return original_num_cols - num_cols, front
+        return original_limit_cols - limit_cols, front
 
     else:
         out = str(data)
         return len(out), [out]
 
 
-def pretty(data, num_rows, num_cols):
-    if num_rows <= 1:
-        _, strs = horizontal(data, num_cols)
+def valuestr(data, limit_rows, limit_cols):
+    if limit_rows <= 1:
+        _, strs = valuestr_horiz(data, limit_cols)
         return "".join(strs)
 
     elif isinstance(data, ak._v2.contents.Content):
         front, back = [], []
         which = 0
         for forward, index in alternate(len(data)):
-            _, strs = horizontal(data[index], num_cols - 2)
+            _, strs = valuestr_horiz(data[index], limit_cols - 2)
             if forward:
                 front.append("".join(strs))
             else:
                 back.insert(0, "".join(strs))
 
             which += 1
-            if which >= num_rows:
+            if which >= limit_rows:
                 break
 
         if len(data) != 0 and which != len(data):
@@ -196,11 +198,11 @@ def pretty(data, num_rows, num_cols):
                 else:
                     key_str = key + ": "
 
-            _, strs = horizontal(data[key], num_cols - 2 - len(key_str))
+            _, strs = valuestr_horiz(data[key], limit_cols - 2 - len(key_str))
             front.append(key_str + "".join(strs))
 
             which += 1
-            if which >= num_rows:
+            if which >= limit_rows:
                 break
 
         if len(keys) != 0 and which != len(keys):
