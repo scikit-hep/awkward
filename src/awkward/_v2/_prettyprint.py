@@ -179,23 +179,34 @@ def pretty(data, num_rows, num_cols):
         return "\n".join(out)
 
     elif isinstance(data, ak._v2.record.Record):
+        is_tuple = data.is_tuple
+
         front = []
+
         which = 0
         keys = data.keys
         for key in keys:
-            raise NotImplementedError("deal with key_str")
+            if is_tuple:
+                key_str = ""
+            else:
+                if is_identifier.match(key) is None:
+                    key_str = repr(key) + ": "
+                    if key_str.startswith("u"):
+                        key_str = key_str[1:]
+                else:
+                    key_str = key + ": "
 
-            _, strs = horizontal(data[key], num_cols - 2)
-            front.append("".join(strs))
+            _, strs = horizontal(data[key], num_cols - 2 - len(key_str))
+            front.append(key_str + "".join(strs))
 
             which += 1
             if which >= num_rows:
                 break
 
-        if len(keys) != 0 and which != len(data):
-            back[0] = "..."
+        if len(keys) != 0 and which != len(keys):
+            front[-1] = "..."
 
-        out = front + back
+        out = front
         for i in range(len(out)):
             if i > 0:
                 out[i] = " " + out[i]

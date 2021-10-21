@@ -10,3 +10,12 @@ import awkward._v2.types  # noqa: F401
 import awkward._v2.forms  # noqa: F401
 import awkward._v2._slicing  # noqa: F401
 import awkward._v2._typetracer  # noqa: F401
+
+import awkward._v2._util  # noqa: F401
+import awkward._v2._prettyprint  # noqa: F401
+import awkward._v2._connect.numpy  # noqa: F401
+import awkward._v2.operations.io  # noqa: F401
+import awkward._v2.operations.convert  # noqa: F401
+import awkward._v2.operations.describe  # noqa: F401
+import awkward._v2.operations.structure  # noqa: F401
+import awkward._v2.operations.reducers  # noqa: F401

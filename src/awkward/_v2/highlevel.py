@@ -9,6 +9,7 @@
 
 from __future__ import absolute_import
 
+import sys
 import re
 import keyword
 
@@ -38,7 +39,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 class Array(
-    ak._connect.numpy.NDArrayOperatorsMixin,
+    ak._v2._connect.numpy.NDArrayOperatorsMixin,
     Iterable,
     Sized,
 ):
@@ -1030,8 +1031,9 @@ class Array(
         ):
             raise TypeError("only fields may be assigned in-place (by field name)")
 
-        array = ak._v2.operations.structure.with_field(self._layout, what, where)
-        self._layout = array.layout
+        self._layout = ak._v2.operations.structure.with_field(
+            self._layout, what, where, highlevel=False
+        )
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1191,76 +1193,18 @@ class Array(
         return self["9"]
 
     def __str__(self):
-        """
-        Args:
-            limit_value (int): Maximum number of characters to use when
-                presenting the Array as a string.
-
-        Presents this Array as a string without type or `"<Array ...>"`.
-
-        Large Arrays are truncated to the first few elements and the last
-        few elements to fit within `limit_value` characters, using ellipsis
-        to indicate the break. For example, an `array` like
-
-            ak.Array([[1.1, 2.2, 3.3],
-                      [],
-                      [4.4, 5.5, 6.6],
-                      [7.7, 8.8, 9.9, 10.0],
-                      [],
-                      [],
-                      [],
-                      [11.1, 12.2]])
-
-        is shown as
-
-            [[1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7, 8.8, 9.9, ... [], [], [], [11.1, 12.2]]
-
-        The algorithm does not split tokens; it will not show half a number
-        (which can be very misleading), but it can lose structural elements
-        like the `]` that closes `[7.7, 8.8, 9.9, 10.0]`.
-
-        The algorithm also avoids reading data unnecessarily: most of the data
-        in the ellipsis are not even read. This can be particularly important
-        for datasets that contain #ak.layout.VirtualArray nodes that might
-        be expensive to read.
-
-        Note that the string also does not quote field names. An `array` like
-
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}],
-                      [],
-                      [{"x": 4.4, "y": [4, 4, 4, 4]}]])
-
-        is presented as
-
-            [[{x: 1.1, y: [1]}, {x: 2.2, y: [2, 2]}, ... [], [{x: 4.4, y: [4, 4, 4, 4]}]]
-
-        Floating point numbers are presented in `.3g` format (3 digits using
-        exponential notation if necessary).
-
-        The string representation cannot be read as JSON or as an #ak.Array
-        constructor.
-
-        See #ak.to_list and #ak.to_json to convert whole Arrays into Python
-        data or JSON strings without loss (except for #type).
-        """
-        return self._str()
+        return ak._v2._prettyprint.pretty(self._layout, 1, 80)
 
     def __repr__(self):
+        pytype = type(self).__name__
+        values = ak._v2._prettyprint.pretty(self._layout, 1, 80 - len(pytype) - 3)
+        return "<{0} {1}>".format(pytype, values)
+
+    def show(self, type=False, num_rows=20, num_cols=80, stream=sys.stdout):
         """
         Args:
-            limit_value (int): Maximum number of characters to use when
-                presenting the data of the Array.
-            limit_total (int): Maximum number of characters to use for
-                the whole string (should be larger than `limit_value`).
 
-        Presents this Array as a string with its type and `"<Array ...>"`.
-
-        See #__str__ for details of the string truncation algorithm.
-
-        The #type is truncated as well, but showing only the left side
-        of its string (the outermost data structures).
         """
-        return self._repr()
 
 
 #     def _str(self, limit_value=85):
