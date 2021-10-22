@@ -56,17 +56,17 @@ def to_list(array):
 #     elif isinstance(array, np.ndarray):
 #         return array.tolist()
 
-#     elif isinstance(array, ak.behaviors.string.ByteBehavior):
+#     elif isinstance(array, ak._v2.behaviors.string.ByteBehavior):
 #         return array.__bytes__()
 
-#     elif isinstance(array, ak.behaviors.string.CharBehavior):
+#     elif isinstance(array, ak._v2.behaviors.string.CharBehavior):
 #         return array.__str__()
 
 #     elif ak._v2.operations.describe.parameters(array).get("__array__") == "byte":
-#         return ak.behaviors.string.CharBehavior(array).__bytes__()
+#         return ak._v2.behaviors.string.CharBehavior(array).__bytes__()
 
 #     elif ak._v2.operations.describe.parameters(array).get("__array__") == "char":
-#         return ak.behaviors.string.CharBehavior(array).__str__()
+#         return ak._v2.behaviors.string.CharBehavior(array).__str__()
 
 #     elif isinstance(array, np.datetime64) or isinstance(array, np.timedelta64):
 #         return array

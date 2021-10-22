@@ -2234,9 +2234,9 @@ class Record(NDArrayOperatorsMixin):
 #         """
 #         tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
 
-#         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
+#         if isinstance(tmp, ak._v2.behaviors.string.ByteBehavior):
 #             return bytes(tmp)
-#         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
+#         elif isinstance(tmp, ak._v2.behaviors.string.CharBehavior):
 #             return ak._v2._util.unicode(tmp) if ak._v2._util.py27 else str(tmp)
 #         else:
 #             return tmp
@@ -2290,7 +2290,7 @@ class Record(NDArrayOperatorsMixin):
 #         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
 #         typestrs = ak._v2._util.typestrs(self._behavior)
 #         typestr = repr(
-#             str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
+#             str(ak._v2.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
 #         )
 #         if len(typestr) > limit_type:
 #             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
@@ -2640,7 +2640,7 @@ class Record(NDArrayOperatorsMixin):
 #             )
 #             typestrs = ak._v2._util.typestrs(self._arraybuilder._behavior)
 #             typestr = repr(
-#                 str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
+#                 str(ak._v2.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
 #             )
 #             if len(typestr) > limit_type:
 #                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]

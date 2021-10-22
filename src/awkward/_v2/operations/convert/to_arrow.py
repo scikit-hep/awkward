@@ -166,7 +166,7 @@ def to_arrow(
 #             content_buffer = recurse(layout.content[: offsets[-1]], None, False)
 #             content_type = pyarrow.list_(content_buffer.type).value_field.with_nullable(
 #                 isinstance(
-#                     ak._v2.operations.describe.type(layout.content), ak.types.OptionType
+#                     ak._v2.operations.describe.type(layout.content), ak._v2.types.OptionType
 #                 )
 #             )
 #             if mask is None:
@@ -252,7 +252,7 @@ def to_arrow(
 #             content_buffer = recurse(layout.content[: offsets[-1]], None, False)
 #             content_type = pyarrow.list_(content_buffer.type).value_field.with_nullable(
 #                 isinstance(
-#                     ak._v2.operations.describe.type(layout.content), ak.types.OptionType
+#                     ak._v2.operations.describe.type(layout.content), ak._v2.types.OptionType
 #                 )
 #             )
 #             if mask is None:
@@ -302,7 +302,7 @@ def to_arrow(
 #             types = pyarrow.struct(
 #                 [
 #                     pyarrow.field(layout.key(i), values[i].type).with_nullable(
-#                         isinstance(ak._v2.operations.describe.type(x), ak.types.OptionType)
+#                         isinstance(ak._v2.operations.describe.type(x), ak._v2.types.OptionType)
 #                     )
 #                     for i, x in enumerate(layout.contents)
 #                 ]
@@ -370,7 +370,7 @@ def to_arrow(
 #                 [
 #                     pyarrow.field(str(i), values[i].type).with_nullable(
 #                         is_option
-#                         or isinstance(layout.content(i).type, ak.types.OptionType)
+#                         or isinstance(layout.content(i).type, ak._v2.types.OptionType)
 #                     )
 #                     for i in range(len(values))
 #                 ],
@@ -438,7 +438,7 @@ def to_arrow(
 #                                 layout_content.key(i), values[i].type
 #                             ).with_nullable(
 #                                 isinstance(
-#                                     ak._v2.operations.describe.type(x), ak.types.OptionType
+#                                     ak._v2.operations.describe.type(x), ak._v2.types.OptionType
 #                                 )
 #                             )
 #                             for i, x in enumerate(layout_content.contents)

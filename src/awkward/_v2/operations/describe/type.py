@@ -57,16 +57,16 @@ def type(array):
 #     to the language.)
 #     """
 #     if array is None:
-#         return ak.types.UnknownType()
+#         return ak._v2.types.UnknownType()
 
 #     elif isinstance(array, (bool, np.bool_)):
-#         return ak.types.PrimitiveType("bool")
+#         return ak._v2.types.PrimitiveType("bool")
 
 #     elif isinstance(array, numbers.Integral):
-#         return ak.types.PrimitiveType("int64")
+#         return ak._v2.types.PrimitiveType("int64")
 
 #     elif isinstance(array, numbers.Real):
-#         return ak.types.PrimitiveType("float64")
+#         return ak._v2.types.PrimitiveType("float64")
 
 #     elif isinstance(
 #         array,
@@ -87,7 +87,7 @@ def type(array):
 #             np.timedelta64,
 #         ),
 #     ):
-#         return ak.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
+#         return ak._v2.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
 
 #     elif isinstance(array, ak._v2.highlevel.Array):
 #         return ak._v2._util.highlevel_type(array.layout, array.behavior, True)
@@ -111,10 +111,10 @@ def type(array):
 #                 raise TypeError(
 #                     "numpy array type is unrecognized by awkward: %r" % array.dtype.type
 #                 )
-#             out = ak.types.PrimitiveType(out)
+#             out = ak._v2.types.PrimitiveType(out)
 #             for x in array.shape[-1:0:-1]:
-#                 out = ak.types.RegularType(out, x)
-#             return ak.types.ArrayType(out, array.shape[0])
+#                 out = ak._v2.types.RegularType(out, x)
+#             return ak._v2.types.ArrayType(out, array.shape[0])
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         return array.type(ak._v2._util.typestrs(None))

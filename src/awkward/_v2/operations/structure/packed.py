@@ -210,7 +210,7 @@ def packed(array, highlevel=True, behavior=None):
 #     elif isinstance(layout, ak._v2.contents.BitMaskedArray):
 #         layout = layout.simplify()
 
-#         if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
+#         if not isinstance(ak.type(layout.content), ak._v2.types.PrimitiveType):
 #             return layout.toIndexedOptionArray64()
 
 #         return ak._v2.contents.BitMaskedArray(
@@ -227,7 +227,7 @@ def packed(array, highlevel=True, behavior=None):
 #     elif isinstance(layout, ak._v2.contents.ByteMaskedArray):
 #         layout = layout.simplify()
 
-#         if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
+#         if not isinstance(ak.type(layout.content), ak._v2.types.PrimitiveType):
 #             return layout.toIndexedOptionArray64()
 
 #         return ak._v2.contents.ByteMaskedArray(

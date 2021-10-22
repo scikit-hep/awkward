@@ -61,7 +61,7 @@ def to_numpy(array, allow_missing=True):
 #     elif ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring":
 #         return numpy.array(
 #             [
-#                 ak.behaviors.string.ByteBehavior(array[i]).__bytes__()
+#                 ak._v2.behaviors.string.ByteBehavior(array[i]).__bytes__()
 #                 for i in range(len(array))
 #             ]
 #         )
@@ -69,7 +69,7 @@ def to_numpy(array, allow_missing=True):
 #     elif ak._v2.operations.describe.parameters(array).get("__array__") == "string":
 #         return numpy.array(
 #             [
-#                 ak.behaviors.string.CharBehavior(array[i]).__str__()
+#                 ak._v2.behaviors.string.CharBehavior(array[i]).__str__()
 #                 for i in range(len(array))
 #             ]
 #         )
