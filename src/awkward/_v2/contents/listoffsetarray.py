@@ -582,7 +582,7 @@ class ListOffsetArray(Content):
         ):
             if branch or (negaxis is not None and negaxis != depth):
                 raise ValueError(
-                    "array with strings can only be checked if it is unique with axis=-1"
+                    "array with strings can only be checked on uniqueness with axis=-1"
                 )
 
             # FIXME: check validity error
@@ -597,10 +597,14 @@ class ListOffsetArray(Content):
                 )
                 return len(out2) == len(self)
 
+        if negaxis is None:
+            return self._content._is_unique(negaxis, starts, parents, outlength)
+
         if not branch and (negaxis == depth):
             return self._content._is_unique(negaxis - 1, starts, parents, outlength)
         else:
-            return self._content._is_unique(negaxis, starts, parents, outlength)
+            starts, stops = self._offsets[:-1], self._offsets[1:]
+            return not self._content._subranges_equal(starts, stops, stops[-1], False)
 
     def _unique(self, negaxis, starts, parents, outlength):
         nplike = self.nplike
@@ -619,30 +623,13 @@ class ListOffsetArray(Content):
             # FIXME: check validity error
 
             if isinstance(self._content, ak._v2.contents.NumpyArray):
-                nextcarry = ak._v2.index.Index64.empty(len(self._offsets) - 1, nplike)
-
-                starts, stops = self._offsets[:-1], self._offsets[1:]
-                self._handle_error(
-                    nplike[
-                        "awkward_ListOffsetArray_argsort_strings",
-                        nextcarry.dtype.type,
-                        parents.dtype.type,
-                        self._content.dtype.type,
-                        starts.dtype.type,
-                        stops.dtype.type,
-                    ](
-                        nextcarry.to(nplike),
-                        parents.to(nplike),
-                        len(parents),
-                        self._content._data,
-                        starts.to(nplike),
-                        stops.to(nplike),
-                        False,
-                        True,
-                        False,
-                    )
+                out, nextoffsets = self._content._as_unique_strings(self._offsets)
+                return ak._v2.contents.ListOffsetArray(
+                    nextoffsets,
+                    out,
+                    None,
+                    self._parameters,
                 )
-                return self._carry(nextcarry, False, NestedIndexError)
 
         if not branch and (negaxis == depth):
             if (
@@ -723,20 +710,18 @@ class ListOffsetArray(Content):
                 maxnextparents[0] + 1,
             )
 
-            outcarry = ak._v2.index.Index64.empty(nextlen, nplike)
-            self._handle_error(
-                nplike[
-                    "awkward_ListOffsetArray_local_preparenext_64",
-                    outcarry.dtype.type,
-                    nextcarry.dtype.type,
-                ](
-                    outcarry.to(nplike),
-                    nextcarry.to(nplike),
-                    nextlen,
-                )
-            )
-            # print("outcarry", outcarry)
-            # print("outcontent", outcontent)
+            # outcarry = ak._v2.index.Index64.empty(nextlen, nplike)
+            # self._handle_error(
+            #     nplike[
+            #         "awkward_ListOffsetArray_local_preparenext_64",
+            #         outcarry.dtype.type,
+            #         nextcarry.dtype.type,
+            #     ](
+            #         outcarry.to(nplike),
+            #         nextcarry.to(nplike),
+            #         nextlen,
+            #     )
+            # )
             return outcontent
             # FIXME
             # return ak._v2.contents.ListOffsetArray(
@@ -763,18 +748,12 @@ class ListOffsetArray(Content):
             )
 
             trimmed = self._content[self._offsets[0] : self._offsets[-1]]
-            outcontent = trimmed._unique(
+
+            return trimmed._unique(
                 negaxis,
                 self._offsets[:-1],
                 nextparents,
-                len(self._offsets) - 1,
-            )
-
-            return ak._v2.contents.ListOffsetArray(
-                outcontent._offsets,
-                outcontent._content,
-                None,
-                self._parameters,
+                len(self._offsets),
             )
 
     def _argsort_next(

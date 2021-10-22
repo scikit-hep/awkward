@@ -4849,6 +4849,84 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_NumpyArray_unique_ranges
+    specializations:
+      - name: awkward_NumpyArray_unique_ranges_int8
+        args:
+          - {name: toptr, type: "List[int8_t]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_uint8
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_int16
+        args:
+          - {name: toptr, type: "List[int16_t]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_uint16
+        args:
+          - {name: toptr, type: "List[uint16_t]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_int32
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_uint32
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_uint64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_float32
+        args:
+          - {name: toptr, type: "List[float]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+      - name: awkward_NumpyArray_unique_ranges_float64
+        args:
+          - {name: toptr, type: "List[double]", dir: out, role: IndexedArray-index}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: outoffsets, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_unique_strings
     specializations:
       - name: awkward_NumpyArray_unique_strings_uint8
@@ -8011,6 +8089,69 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
+  - name: awkward_sort_ascending
+    specializations:
+      - name: awkward_sort_ascending_bool
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_int8
+        args:
+          - {name: toptr, type: "List[int8_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_int16
+        args:
+          - {name: toptr, type: "List[int16_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_int32
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_uint8
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_uint16
+        args:
+          - {name: toptr, type: "List[uint16_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_uint32
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_uint64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_float32
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_sort_ascending_float64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_unique
     specializations:
       - name: awkward_unique_bool
@@ -8065,6 +8206,80 @@ kernels:
           - {name: tolength, type: "List[int64_t]", dir: out, role: default}
       - name: awkward_unique_float64
         args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
+  - name: awkward_unique_copy
+    specializations:
+      - name: awkward_unique_copy_bool
+        args:
+          - {name: fromptr, type: "Const[List[bool]]", dir: in}
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_int8
+        args:
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in}
+          - {name: toptr, type: "List[int8_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_int16
+        args:
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in}
+          - {name: toptr, type: "List[int16_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_int32
+        args:
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in}
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_int64
+        args:
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in}
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_uint8
+        args:
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in}
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_uint16
+        args:
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in}
+          - {name: toptr, type: "List[uint16_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_uint32
+        args:
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in}
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_uint64
+        args:
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in}
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_float32
+        args:
+          - {name: fromptr, type: "Const[List[float]]", dir: in}
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "List[int64_t]", dir: out, role: default}
+      - name: awkward_unique_copy_float64
+        args:
+          - {name: fromptr, type: "Const[List[double]]", dir: in}
           - {name: toptr, type: "List[double]", dir: out}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: tolength, type: "List[int64_t]", dir: out, role: default}

@@ -578,6 +578,107 @@ class IndexedOptionArray(Content):
             )
             return out2
 
+    def _unique_index(self, index, sorted=True):
+        nplike = self.nplike
+        next = ak._v2.index.Index64.empty(len(self), nplike)
+
+        length = ak._v2.index.Index64.empty(1, nplike)
+        if not sorted:
+            self._handle_error(
+                nplike["awkward_sort_ascending", next.dtype.type, index.dtype.type](
+                    next.to(nplike),
+                    index.to(nplike),
+                    len(next),
+                )
+            )
+
+            self._handle_error(
+                nplike["awkward_unique", next.dtype.type, length.dtype.type](
+                    next.to(nplike),
+                    len(self._index),
+                    length.to(nplike),
+                )
+            )
+
+        else:
+            self._handle_error(
+                nplike[
+                    "awkward_unique_copy",
+                    self._index.dtype.type,
+                    next.dtype.type,
+                    length.dtype.type,
+                ](
+                    self._index.to(nplike),
+                    next.to(nplike),
+                    len(self._index),
+                    length.to(nplike),
+                )
+            )
+        # start from 1 to drop Nones
+        return next[1 : length[0]]
+
+    def _is_subrange_equal(self, starts, stops, length, sorted=True):
+        nplike = self.nplike
+
+        nextstarts = ak._v2.index.Index64.empty(length, nplike)
+        nextstops = ak._v2.index.Index64.empty(length, nplike)
+
+        subranges_length = ak._v2.index.Index64.empty(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_ranges_next_64",
+                self._index.dtype.type,
+                starts.dtype.type,
+                stops.dtype.type,
+                nextstarts.dtype.type,
+                nextstops.dtype.type,
+                subranges_length.dtype.type,
+            ](
+                self._index.to(nplike),
+                starts.to(nplike),
+                stops.to(nplike),
+                length,
+                nextstarts.to(nplike),
+                nextstops.to(nplike),
+                subranges_length.to(nplike),
+            )
+        )
+
+        nextcarry = ak._v2.index.Index64.empty(subranges_length[0], nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_ranges_carry_next_64",
+                self._index.dtype.type,
+                starts.dtype.type,
+                stops.dtype.type,
+                nextcarry.dtype.type,
+            ](
+                self._index.to(nplike),
+                starts.to(nplike),
+                stops.to(nplike),
+                length,
+                nextcarry.to(nplike),
+            )
+        )
+
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        if len(nextstarts) > 1:
+            return next._is_subrange_equal(nextstarts, nextstops, len(nextstarts))
+        else:
+            return next._subranges_equal(nextstarts, nextstops, len(nextstarts), False)
+
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if len(self._index) == 0:
+            return True
+
+        nextindex = self._unique_index(self._index, False)
+        next = self._content._carry(nextindex, False, NestedIndexError)
+
+        return next._is_unique(negaxis, starts, parents, outlength)
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        raise NotImplementedError
+
     def _argsort_next(
         self,
         negaxis,

@@ -526,11 +526,66 @@ class IndexedArray(Content):
         else:
             return self.project()._localindex(posaxis, depth)
 
+    def _unique_index(self, index, sorted=True):
+        nplike = self.nplike
+
+        next = ak._v2.index.Index64.empty(len(self), nplike)
+        length = ak._v2.index.Index64.empty(1, nplike)
+
+        if not sorted:
+            next = self._index
+            offsets = ak._v2.index.Index64.zeros(2, nplike)
+            offsets[1] = len(next)
+            self._handle_error(
+                nplike[
+                    "awkward_sort",
+                    next.dtype.type,
+                    next.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    next.to(nplike),
+                    next.to(nplike),
+                    offsets[1],
+                    offsets.to(nplike),
+                    2,
+                    offsets[1],
+                    True,
+                    False,
+                )
+            )
+
+            self._handle_error(
+                nplike["awkward_unique", next.dtype.type, length.dtype.type](
+                    next.to(nplike),
+                    len(self._index),
+                    length.to(nplike),
+                )
+            )
+
+        else:
+            self._handle_error(
+                nplike[
+                    "awkward_unique_copy",
+                    self._index.dtype.type,
+                    next.dtype.type,
+                    length.dtype.type,
+                ](
+                    self._index.to(nplike),
+                    next.to(nplike),
+                    len(self._index),
+                    length.to(nplike),
+                )
+            )
+
+        return next[0 : length[0]]
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._index) == 0:
             return True
 
-        next = self._content._carry(self._index, False, NestedIndexError)
+        nextindex = self._unique_index(self._index)
+
+        next = self._content._carry(nextindex, False, NestedIndexError)
         return next._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
