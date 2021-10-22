@@ -251,11 +251,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = ak.operations.convert.from_arrow(data, highlevel=False)
 
         elif isinstance(data, dict):
-            keys = []
+            fields = []
             contents = []
             length = None
             for k, v in data.items():
-                keys.append(k)
+                fields.append(k)
                 contents.append(Array(v).layout)
                 if length is None:
                     length = len(contents[-1])
@@ -264,7 +264,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         "dict of arrays in ak.Array constructor must have arrays "
                         "of equal length ({0} vs {1})".format(length, len(contents[-1]))
                     )
-            layout = ak._v2.contents.RecordArray(contents, keys)
+            layout = ak._v2.contents.RecordArray(contents, fields)
 
         elif isinstance(data, str):
             layout = ak._v2.operations.convert.from_json(data, highlevel=False)
@@ -508,10 +508,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #ak.fields.
         """
-        return self._layout.keys
+        return self._layout.fields
 
     def _ipython_key_completions_(self):
-        return self._layout.keys
+        return self._layout.fields
 
     @property
     def type(self):
@@ -1108,7 +1108,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if where in dir(type(self)):
             return super(Array, self).__getattribute__(where)
         else:
-            if where in self._layout.keys:
+            if where in self._layout.fields:
                 try:
                     return self[where]
                 except Exception as err:
@@ -1130,7 +1130,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 + dir(super(Array, self))
                 + [
                     x
-                    for x in self._layout.keys
+                    for x in self._layout.fields
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )
@@ -1649,13 +1649,13 @@ class Record(NDArrayOperatorsMixin):
 
         See also #ak.fields.
         """
-        return self._layout.array.keys
+        return self._layout.array.fields
 
     def _ipython_key_completions_(self):
-        return self._layout.array.keys
+        return self._layout.array.fields
 
     def __iter__(self):
-        for x in self._layout.array.keys:
+        for x in self._layout.array.fields:
             yield x
 
     @property
@@ -1772,7 +1772,7 @@ class Record(NDArrayOperatorsMixin):
         if where in dir(type(self)):
             return super(Record, self).__getattribute__(where)
         else:
-            if where in self._layout.keys:
+            if where in self._layout.fields:
                 try:
                     return self[where]
                 except Exception as err:
@@ -1794,7 +1794,7 @@ class Record(NDArrayOperatorsMixin):
                 + dir(super(Record, self))
                 + [
                     x
-                    for x in self.layout.keys
+                    for x in self.layout.fields
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )

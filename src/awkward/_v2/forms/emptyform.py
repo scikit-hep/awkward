@@ -84,7 +84,7 @@ class EmptyForm(Form):
         return (False, 1)
 
     @property
-    def keys(self):
+    def fields(self):
         return []
 
     @property

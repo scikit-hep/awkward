@@ -15,7 +15,7 @@ from awkward._v2.forms.form import _parameters_equal
 
 
 class RecordType(Type):
-    def __init__(self, contents, keys, parameters=None, typestr=None):
+    def __init__(self, contents, fields, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{0} 'contents' must be iterable, not {1}".format(
@@ -31,9 +31,9 @@ class RecordType(Type):
                         type(self).__name__, repr(content)
                     )
                 )
-        if keys is not None and not isinstance(keys, Iterable):
+        if fields is not None and not isinstance(fields, Iterable):
             raise TypeError(
-                "{0} 'keys' must be iterable, not {1}".format(
+                "{0} 'fields' must be iterable, not {1}".format(
                     type(self).__name__, repr(contents)
                 )
             )
@@ -50,7 +50,7 @@ class RecordType(Type):
                 )
             )
         self._contents = contents
-        self._keys = keys
+        self._fields = fields
         self._parameters = parameters
         self._typestr = typestr
 
@@ -59,12 +59,12 @@ class RecordType(Type):
         return self._contents
 
     @property
-    def keys(self):
-        return self._keys
+    def fields(self):
+        return self._fields
 
     @property
     def is_tuple(self):
-        return self._keys is None
+        return self._fields is None
 
     _str_parameters_exclude = ("__categorical__", "__record__")
 
@@ -84,7 +84,7 @@ class RecordType(Type):
                     else:
                         out = name + "[" + ", ".join(children) + "]"
                 else:
-                    pairs = [k + ": " + v for k, v in zip(self._keys, children)]
+                    pairs = [k + ": " + v for k, v in zip(self._fields, children)]
                     if name is None:
                         out = "{" + ", ".join(pairs) + "}"
                     else:
@@ -98,18 +98,18 @@ class RecordType(Type):
                         out = "{0}[{1}, {2}]".format(name, ", ".join(children), params)
                 else:
                     if name is None:
-                        keys = [json.dumps(x) for x in self._keys]
+                        fields = [json.dumps(x) for x in self._fields]
                         out = "struct[[{0}], [{1}], {2}]".format(
-                            ", ".join(keys), ", ".join(children), params
+                            ", ".join(fields), ", ".join(children), params
                         )
                     else:
-                        pairs = [k + ": " + v for k, v in zip(self._keys, children)]
+                        pairs = [k + ": " + v for k, v in zip(self._fields, children)]
                         out = "{0}[{1}, {2}]".format(name, ", ".join(pairs), params)
 
         return self._str_categorical_begin() + out + self._str_categorical_end()
 
     def __repr__(self):
-        args = [repr(self._contents), repr(self._keys)] + self._repr_args()
+        args = [repr(self._contents), repr(self._fields)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):
@@ -119,14 +119,14 @@ class RecordType(Type):
             ):
                 return False
 
-            if self._keys is None and other._keys is None:
+            if self._fields is None and other._fields is None:
                 return self._contents == other._contents
 
-            elif self._keys is not None and other._keys is not None:
-                if set(self._keys) != set(other._keys):
+            elif self._fields is not None and other._fields is not None:
+                if set(self._fields) != set(other._fields):
                     return False
-                for key in self._keys:
-                    if self.content(key) != other.content(key):
+                for field in self._fields:
+                    if self.content(field) != other.content(field):
                         return False
                 else:
                     return True
@@ -137,14 +137,14 @@ class RecordType(Type):
         else:
             return False
 
-    def index_to_key(self, index):
-        return ak._v2.forms.recordform.RecordForm.index_to_key(self, index)
+    def index_to_field(self, index):
+        return ak._v2.forms.recordform.RecordForm.index_to_field(self, index)
 
-    def key_to_index(self, key):
-        return ak._v2.forms.recordform.RecordForm.key_to_index(self, key)
+    def field_to_index(self, field):
+        return ak._v2.forms.recordform.RecordForm.field_to_index(self, field)
 
-    def haskey(self, key):
-        return ak._v2.forms.recordform.RecordForm.haskey(self, key)
+    def has_field(self, field):
+        return ak._v2.forms.recordform.RecordForm.has_field(self, field)
 
-    def content(self, index_or_key):
-        return ak._v2.forms.recordform.RecordForm.content(self, index_or_key)
+    def content(self, index_or_field):
+        return ak._v2.forms.recordform.RecordForm.content(self, index_or_field)

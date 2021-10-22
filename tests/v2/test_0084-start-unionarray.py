@@ -210,8 +210,10 @@ def test_getitem():
     content3 = v1_to_v2(content3)
     array3 = v1_to_v2(array3)
     array4 = v1_to_v2(array4)
-    assert set(content2.keys) == set(["x", "y"])
-    assert set(content3.keys) == set(["x", "y", "z"])
-    assert set(array2.keys) == set(["x", "y"])
-    assert set(array3.keys) == set(["x", "y"])
-    assert set(array4.keys) == set()  # v2 definition: keys is now the INTERSECTION
+    assert set(content2.fields) == set(["x", "y"])
+    assert set(content3.fields) == set(["x", "y", "z"])
+    assert set(array2.fields) == set(["x", "y"])
+    assert set(array3.fields) == set(["x", "y"])
+    assert (
+        set(array4.fields) == set()
+    )  # v2 definition: fields (old keys()) is now the INTERSECTION

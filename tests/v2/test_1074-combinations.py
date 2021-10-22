@@ -39,7 +39,9 @@ def test_ListOffsetArray():
         v2_array.typetracer.combinations(2, replacement=False).form
         == v2_array.combinations(2, replacement=False).form
     )
-    assert ak.to_list(v2_array.combinations(2, replacement=False, keys=["x", "y"])) == [
+    assert ak.to_list(
+        v2_array.combinations(2, replacement=False, fields=["x", "y"])
+    ) == [
         [
             {"x": 0.0, "y": 1.1},
             {"x": 0.0, "y": 2.2},
@@ -65,8 +67,8 @@ def test_ListOffsetArray():
         ],
     ]
     assert (
-        v2_array.typetracer.combinations(2, replacement=False, keys=["x", "y"]).form
-        == v2_array.combinations(2, replacement=False, keys=["x", "y"]).form
+        v2_array.typetracer.combinations(2, replacement=False, fields=["x", "y"]).form
+        == v2_array.combinations(2, replacement=False, fields=["x", "y"]).form
     )
 
     assert (
@@ -240,7 +242,9 @@ def test_RegularArray():
         == v2_array.combinations(2, replacement=False).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, replacement=False, keys=["x", "y"])) == [
+    assert ak.to_list(
+        v2_array.combinations(2, replacement=False, fields=["x", "y"])
+    ) == [
         [
             {"x": 0.0, "y": 1.1},
             {"x": 0.0, "y": 2.2},
@@ -259,8 +263,8 @@ def test_RegularArray():
         ],
     ]
     assert (
-        v2_array.typetracer.combinations(2, replacement=False, keys=["x", "y"]).form
-        == v2_array.combinations(2, replacement=False, keys=["x", "y"]).form
+        v2_array.typetracer.combinations(2, replacement=False, fields=["x", "y"]).form
+        == v2_array.combinations(2, replacement=False, fields=["x", "y"]).form
     )
 
     assert (
@@ -388,7 +392,7 @@ def test_axis0():
     )
 
     assert ak.to_list(
-        v2_array.combinations(2, replacement=False, axis=0, keys=["x", "y"])
+        v2_array.combinations(2, replacement=False, axis=0, fields=["x", "y"])
     ) == [
         {"x": 0.0, "y": 1.1},
         {"x": 0.0, "y": 2.2},
@@ -399,9 +403,9 @@ def test_axis0():
     ]
     assert (
         v2_array.typetracer.combinations(
-            2, replacement=False, axis=0, keys=["x", "y"]
+            2, replacement=False, axis=0, fields=["x", "y"]
         ).form
-        == v2_array.combinations(2, replacement=False, axis=0, keys=["x", "y"]).form
+        == v2_array.combinations(2, replacement=False, axis=0, fields=["x", "y"]).form
     )
 
     assert (

@@ -20,7 +20,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class RecordArray(Content):
-    def __init__(self, contents, keys, length=None, identifier=None, parameters=None):
+    def __init__(self, contents, fields, length=None, identifier=None, parameters=None):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{0} 'contents' must be iterable, not {1}".format(
@@ -58,30 +58,30 @@ class RecordArray(Content):
                     )
                 )
 
-        if isinstance(keys, Iterable):
-            if not isinstance(keys, list):
-                keys = list(keys)
-            if not all(ak._util.isstr(x) for x in keys):
+        if isinstance(fields, Iterable):
+            if not isinstance(fields, list):
+                fields = list(fields)
+            if not all(ak._util.isstr(x) for x in fields):
                 raise TypeError(
-                    "{0} 'keys' must all be strings, not {1}".format(
-                        type(self).__name__, repr(keys)
+                    "{0} 'fields' must all be strings, not {1}".format(
+                        type(self).__name__, repr(fields)
                     )
                 )
-            if not len(contents) == len(keys):
+            if not len(contents) == len(fields):
                 raise ValueError(
-                    "{0} len(contents) ({1}) must be equal to len(keys) ({2})".format(
-                        type(self).__name__, len(contents), len(keys)
+                    "{0} len(contents) ({1}) must be equal to len(fields) ({2})".format(
+                        type(self).__name__, len(contents), len(fields)
                     )
                 )
-        elif keys is not None:
+        elif fields is not None:
             raise TypeError(
-                "{0} 'keys' must be iterable or None, not {1}".format(
-                    type(self).__name__, repr(keys)
+                "{0} 'fields' must be iterable or None, not {1}".format(
+                    type(self).__name__, repr(fields)
                 )
             )
 
         self._contents = contents
-        self._keys = keys
+        self._fields = fields
         self._length = length
         self._init(identifier, parameters)
 
@@ -90,15 +90,15 @@ class RecordArray(Content):
         return self._contents
 
     @property
-    def keys(self):
-        if self._keys is None:
+    def fields(self):
+        if self._fields is None:
             return [str(i) for i in range(len(self._contents))]
         else:
-            return self._keys
+            return self._fields
 
     @property
     def is_tuple(self):
-        return self._keys is None
+        return self._fields is None
 
     @property
     def as_tuple(self):
@@ -123,7 +123,7 @@ class RecordArray(Content):
     def form(self):
         return self.Form(
             [x.form for x in self._contents],
-            self._keys,
+            self._fields,
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
             form_key=None,
@@ -133,7 +133,7 @@ class RecordArray(Content):
     def typetracer(self):
         return RecordArray(
             [x.typetracer for x in self._contents],
-            self._keys,
+            self._fields,
             self._length,
             self._typetracer_identifier(),
             self._parameters,
@@ -154,7 +154,7 @@ class RecordArray(Content):
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
 
-        if self._keys is None:
+        if self._fields is None:
             for i, x in enumerate(self._contents):
                 out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
                 out.append(x._repr(indent + "        ", "", "\n"))
@@ -162,8 +162,8 @@ class RecordArray(Content):
         else:
             for i, x in enumerate(self._contents):
                 out.append(
-                    "{0}    <content index={1} key={2}>\n".format(
-                        indent, repr(str(i)), repr(self._keys[i])
+                    "{0}    <content index={1} field={2}>\n".format(
+                        indent, repr(str(i)), repr(self._fields[i])
                     )
                 )
                 out.append(x._repr(indent + "        ", "", "\n"))
@@ -173,17 +173,17 @@ class RecordArray(Content):
         out.append(post)
         return "".join(out)
 
-    def index_to_key(self, index):
-        return self.Form.index_to_key(self, index)
+    def index_to_field(self, index):
+        return self.Form.index_to_field(self, index)
 
-    def key_to_index(self, key):
-        return self.Form.key_to_index(self, key)
+    def field_to_index(self, field):
+        return self.Form.field_to_index(self, field)
 
-    def haskey(self, key):
-        return self.Form.haskey(self, key)
+    def has_field(self, field):
+        return self.Form.has_field(self, field)
 
-    def content(self, index_or_key):
-        return self.Form.content(self, index_or_key)[: self._length]
+    def content(self, index_or_field):
+        return self.Form.content(self, index_or_field)[: self._length]
 
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
@@ -205,7 +205,7 @@ class RecordArray(Content):
                 stop = start
             return RecordArray(
                 [],
-                self._keys,
+                self._fields,
                 stop - start,
                 self._range_identifier(start, stop),
                 self._parameters,
@@ -214,7 +214,7 @@ class RecordArray(Content):
             nextslice = slice(start, stop)
             return RecordArray(
                 [x._getitem_range(nextslice) for x in self._contents],
-                self._keys,
+                self._fields,
                 stop - start,
                 self._range_identifier(start, stop),
                 self._parameters,
@@ -232,11 +232,11 @@ class RecordArray(Content):
                 return self.content(where)._getitem_fields(nexthead, nexttail)
 
     def _getitem_fields(self, where, only_fields=()):
-        indexes = [self.key_to_index(key) for key in where]
-        if self._keys is None:
-            keys = None
+        indexes = [self.field_to_index(field) for field in where]
+        if self._fields is None:
+            fields = None
         else:
-            keys = [self._keys[i] for i in indexes]
+            fields = [self._fields[i] for i in indexes]
 
         if len(only_fields) == 0:
             contents = [self.content(i) for i in indexes]
@@ -253,7 +253,7 @@ class RecordArray(Content):
 
         return RecordArray(
             contents,
-            keys,
+            fields,
             self._fields_identifier(where),
             None,
         )
@@ -300,7 +300,7 @@ class RecordArray(Content):
 
             return RecordArray(
                 contents,
-                self._keys,
+                self._fields,
                 length,
                 self._carry_identifier(carry, exception),
                 self._parameters,
@@ -314,7 +314,7 @@ class RecordArray(Content):
                     slicestarts, slicestops, slicecontent, tail
                 )
             )
-        return RecordArray(contents, self._keys, self._length)
+        return RecordArray(contents, self._fields, self._length)
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():
@@ -350,7 +350,9 @@ class RecordArray(Content):
                 or advanced is None
             ):
                 parameters = self._parameters
-            next = RecordArray(contents, self._keys, None, self._identifier, parameters)
+            next = RecordArray(
+                contents, self._fields, None, self._identifier, parameters
+            )
             return next._getitem_next(nexthead, nexttail, advanced)
 
     def mergeable(self, other, mergebool=True):
@@ -387,13 +389,13 @@ class RecordArray(Content):
                     return True
 
             elif not self.is_tuple and not other.is_tuple:
-                self_keys = self.keys.copy()
-                other_keys = other.keys.copy()
-                self_keys.sort()
-                other_keys.sort()
-                if self_keys == other_keys:
-                    for key in self_keys:
-                        if not self[key].mergeable(other[key], mergebool):
+                self_fields = self.fields.copy()
+                other_fields = other.fields.copy()
+                self_fields.sort()
+                other_fields.sort()
+                if self_fields == other_fields:
+                    for field in self_fields:
+                        if not self[field].mergeable(other[field], mergebool):
                             return False
                     return True
             return False
@@ -422,7 +424,7 @@ class RecordArray(Content):
                     if self.is_tuple:
                         if len(self.contents) == len(array.contents):
                             for i in range(len(self.contents)):
-                                field = array[self.index_to_key(i)]
+                                field = array[self.index_to_field(i)]
                                 for_each_field[i].append(field[0 : len(array)])
                         else:
                             raise ValueError(
@@ -441,18 +443,18 @@ class RecordArray(Content):
                     )
 
         else:
-            these_keys = self.keys.copy()
-            these_keys.sort()
+            these_fields = self._fields.copy()
+            these_fields.sort()
 
             for array in headless:
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
                     if not array.is_tuple:
-                        those_keys = array.keys.copy()
-                        those_keys.sort()
+                        those_fields = array._fields.copy()
+                        those_fields.sort()
 
-                        if these_keys == those_keys:
+                        if these_fields == those_fields:
                             for i in range(len(self.contents)):
-                                field = array[self.index_to_key(i)]
+                                field = array[self.index_to_field(i)]
 
                                 trimmed = field[0 : len(array)]
                                 for_each_field[i].append(trimmed)
@@ -485,7 +487,7 @@ class RecordArray(Content):
             if minlength == -1 or len(merged) < minlength:
                 minlength = len(merged)
 
-        next = RecordArray(nextcontents, self._keys, minlength, None, parameters)
+        next = RecordArray(nextcontents, self._fields, minlength, None, parameters)
 
         if len(tail) == 0:
             return next
@@ -509,7 +511,7 @@ class RecordArray(Content):
             for content in self._contents:
                 contents.append(content._localindex(posaxis, depth))
             return RecordArray(
-                contents, self._keys, len(self), self._identifier, self._parameters
+                contents, self._fields, len(self), self._identifier, self._parameters
             )
 
     def _argsort_next(
@@ -524,7 +526,7 @@ class RecordArray(Content):
         kind,
         order,
     ):
-        if self._keys is None or len(self._keys) == 0:
+        if self._fields is None or len(self._fields) == 0:
             return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
         else:
             raise NotImplementedError
@@ -532,7 +534,7 @@ class RecordArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        if self._keys is None or len(self._keys) == 0:
+        if self._fields is None or len(self._fields) == 0:
             return ak._v2.contents.NumpyArray(self.nplike.instance().empty(0, np.int64))
 
         contents = []
@@ -549,7 +551,7 @@ class RecordArray(Content):
                     order,
                 )
             )
-        return RecordArray(contents, self._keys, len(self), None, self._parameters)
+        return RecordArray(contents, self._fields, len(self), None, self._parameters)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -595,7 +597,7 @@ class RecordArray(Content):
 
         return ak._v2.contents.RecordArray(
             contents,
-            self._keys,
+            self._fields,
             outlength,
             None,
             None,

@@ -243,7 +243,7 @@ class Content(object):
             )
 
         elif isinstance(nextcontent, ak._v2.contents.recordarray.RecordArray):
-            if len(nextcontent._keys) == 0:
+            if len(nextcontent._fields) == 0:
                 return nextcontent
 
             contents = []
@@ -263,7 +263,7 @@ class Content(object):
                     )
 
             return ak._v2.contents.recordarray.RecordArray(
-                contents, nextcontent._keys, None, None, self._parameters
+                contents, nextcontent._fields, None, None, self._parameters
             )
 
         else:
@@ -807,15 +807,15 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             contents, recordlookup, parameters=parameters
         )
 
-    def combinations(self, n, replacement=False, axis=1, keys=None, parameters=None):
+    def combinations(self, n, replacement=False, axis=1, fields=None, parameters=None):
         if n < 1:
             raise ValueError("in combinations, 'n' must be at least 1")
 
         recordlookup = None
-        if keys is not None:
-            recordlookup = keys
+        if fields is not None:
+            recordlookup = fields
             if len(recordlookup) != n:
-                raise ValueError("if provided, the length of 'keys' must be 'n'")
+                raise ValueError("if provided, the length of 'fields' must be 'n'")
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
     def validityerror_parameters(self, path):
@@ -941,8 +941,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return self.Form.branch_depth.__get__(self)
 
     @property
-    def keys(self):
-        return self.Form.keys.__get__(self)
+    def fields(self):
+        return self.Form.fields.__get__(self)
 
     # WIP
     def simplify_uniontype(self, merge, mergebool):
