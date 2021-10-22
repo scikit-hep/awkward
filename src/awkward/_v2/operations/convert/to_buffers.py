@@ -161,15 +161,15 @@ def to_buffers(
 #         container = {}
 
 #     def index_form(index):
-#         if isinstance(index, ak.layout.Index64):
+#         if isinstance(index, ak._v2.index.Index64):
 #             return "i64"
-#         elif isinstance(index, ak.layout.Index32):
+#         elif isinstance(index, ak._v2.index.Index32):
 #             return "i32"
-#         elif isinstance(index, ak.layout.IndexU32):
+#         elif isinstance(index, ak._v2.index.IndexU32):
 #             return "u32"
-#         elif isinstance(index, ak.layout.Index8):
+#         elif isinstance(index, ak._v2.index.Index8):
 #             return "i8"
-#         elif isinstance(index, ak.layout.IndexU8):
+#         elif isinstance(index, ak._v2.index.IndexU8):
 #             return "u8"
 #         else:
 #             raise AssertionError(
@@ -215,7 +215,7 @@ def to_buffers(
 #                 + ak._util.exception_suffix(__file__)
 #             )
 
-#         if isinstance(layout, ak.layout.EmptyArray):
+#         if isinstance(layout, ak._v2.contents.EmptyArray):
 #             fk = form_key(id=str(key_index))
 #             key = key_format(form_key=fk, attribute="data", partition=str(part))
 #             container[key] = little_endian(numpy.asarray(layout))
@@ -224,9 +224,9 @@ def to_buffers(
 #         elif isinstance(
 #             layout,
 #             (
-#                 ak.layout.IndexedArray32,
-#                 ak.layout.IndexedArrayU32,
-#                 ak.layout.IndexedArray64,
+#                 ak._v2.contents.IndexedArray32,
+#                 ak._v2.contents.IndexedArrayU32,
+#                 ak._v2.contents.IndexedArray64,
 #             ),
 #         ):
 #             fk = form_key(id=str(key_index), layout=layout)
@@ -241,7 +241,7 @@ def to_buffers(
 #             )
 
 #         elif isinstance(
-#             layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64)
+#             layout, (ak._v2.contents.IndexedOptionArray32, ak._v2.contents.IndexedOptionArray64)
 #         ):
 #             fk = form_key(id=str(key_index), layout=layout)
 #             key = key_format(form_key=fk, attribute="index", partition=str(part))
@@ -254,7 +254,7 @@ def to_buffers(
 #                 fk,
 #             )
 
-#         elif isinstance(layout, ak.layout.ByteMaskedArray):
+#         elif isinstance(layout, ak._v2.contents.ByteMaskedArray):
 #             fk = form_key(id=str(key_index), layout=layout)
 #             key = key_format(form_key=fk, attribute="mask", partition=str(part))
 #             container[key] = little_endian(numpy.asarray(layout.mask))
@@ -267,7 +267,7 @@ def to_buffers(
 #                 fk,
 #             )
 
-#         elif isinstance(layout, ak.layout.BitMaskedArray):
+#         elif isinstance(layout, ak._v2.contents.BitMaskedArray):
 #             fk = form_key(id=str(key_index), layout=layout)
 #             key = key_format(form_key=fk, attribute="mask", partition=str(part))
 #             container[key] = little_endian(numpy.asarray(layout.mask))
@@ -281,7 +281,7 @@ def to_buffers(
 #                 fk,
 #             )
 
-#         elif isinstance(layout, ak.layout.UnmaskedArray):
+#         elif isinstance(layout, ak._v2.contents.UnmaskedArray):
 #             return ak.forms.UnmaskedForm(
 #                 fill(layout.content, part),
 #                 has_identities,
@@ -291,7 +291,7 @@ def to_buffers(
 
 #         elif isinstance(
 #             layout,
-#             (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64),
+#             (ak._v2.contents.ListArray32, ak._v2.contents.ListArrayU32, ak._v2.contents.ListArray64),
 #         ):
 #             fk = form_key(id=str(key_index), layout=layout)
 #             key = key_format(form_key=fk, attribute="starts", partition=str(part))
@@ -310,9 +310,9 @@ def to_buffers(
 #         elif isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListOffsetArray32,
-#                 ak.layout.ListOffsetArrayU32,
-#                 ak.layout.ListOffsetArray64,
+#                 ak._v2.contents.ListOffsetArray32,
+#                 ak._v2.contents.ListOffsetArrayU32,
+#                 ak._v2.contents.ListOffsetArray64,
 #             ),
 #         ):
 #             fk = form_key(id=str(key_index), layout=layout)
@@ -326,7 +326,7 @@ def to_buffers(
 #                 fk,
 #             )
 
-#         elif isinstance(layout, ak.layout.NumpyArray):
+#         elif isinstance(layout, ak._v2.contents.NumpyArray):
 #             fk = form_key(id=str(key_index), layout=layout)
 #             key = key_format(form_key=fk, attribute="data", partition=str(part))
 #             array = numpy.asarray(layout)
@@ -341,7 +341,7 @@ def to_buffers(
 #                 fk,
 #             )
 
-#         elif isinstance(layout, ak.layout.RecordArray):
+#         elif isinstance(layout, ak._v2.contents.RecordArray):
 #             if layout.istuple:
 #                 forms = [fill(x, part) for x in layout.contents]
 #                 keys = None
@@ -360,7 +360,7 @@ def to_buffers(
 #                 form_key(id=str(key_index), layout=layout),
 #             )
 
-#         elif isinstance(layout, ak.layout.RegularArray):
+#         elif isinstance(layout, ak._v2.contents.RegularArray):
 #             return ak.forms.RegularForm(
 #                 fill(layout.content, part),
 #                 layout.size,
@@ -372,9 +372,9 @@ def to_buffers(
 #         elif isinstance(
 #             layout,
 #             (
-#                 ak.layout.UnionArray8_32,
-#                 ak.layout.UnionArray8_U32,
-#                 ak.layout.UnionArray8_64,
+#                 ak._v2.contents.UnionArray8_32,
+#                 ak._v2.contents.UnionArray8_U32,
+#                 ak._v2.contents.UnionArray8_64,
 #             ),
 #         ):
 #             forms = []
@@ -395,7 +395,7 @@ def to_buffers(
 #                 fk,
 #             )
 
-#         elif isinstance(layout, ak.layout.VirtualArray):
+#         elif isinstance(layout, ak._v2.contents.VirtualArray):
 #             if virtual == "materialize":
 #                 return fill(layout.array, part)
 #             elif virtual == "pass":

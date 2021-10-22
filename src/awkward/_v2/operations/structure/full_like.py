@@ -92,10 +92,10 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
 #         if layout.parameter("__array__") == "bytestring" and fill_value is _ZEROS:
 #             nplike = ak.nplike.of(layout)
 #             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
-#             return lambda: ak.layout.ListArray64(
-#                 ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-#                 ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-#                 ak.layout.NumpyArray(asbytes, parameters={"__array__": "byte"}),
+#             return lambda: ak._v2.contents.ListArray64(
+#                 ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+#                 ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+#                 ak._v2.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
 #                 parameters={"__array__": "bytestring"},
 #             )
 
@@ -111,22 +111,22 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
 #                 asbytes = str(fill_value).encode("utf-8", "surrogateescape")
 #             asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
 
-#             return lambda: ak.layout.ListArray64(
-#                 ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-#                 ak.layout.Index64(
+#             return lambda: ak._v2.contents.ListArray64(
+#                 ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+#                 ak._v2.index.Index64(
 #                     nplike.full(len(layout), len(asbytes), dtype=np.int64)
 #                 ),
-#                 ak.layout.NumpyArray(asbytes, parameters={"__array__": "byte"}),
+#                 ak._v2.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
 #                 parameters={"__array__": "bytestring"},
 #             )
 
 #         elif layout.parameter("__array__") == "string" and fill_value is _ZEROS:
 #             nplike = ak.nplike.of(layout)
 #             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
-#             return lambda: ak.layout.ListArray64(
-#                 ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-#                 ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-#                 ak.layout.NumpyArray(asbytes, parameters={"__array__": "char"}),
+#             return lambda: ak._v2.contents.ListArray64(
+#                 ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+#                 ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+#                 ak._v2.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
 #                 parameters={"__array__": "string"},
 #             )
 
@@ -134,32 +134,32 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
 #             nplike = ak.nplike.of(layout)
 #             asstr = str(fill_value).encode("utf-8", "surrogateescape")
 #             asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
-#             return lambda: ak.layout.ListArray64(
-#                 ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-#                 ak.layout.Index64(
+#             return lambda: ak._v2.contents.ListArray64(
+#                 ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+#                 ak._v2.index.Index64(
 #                     nplike.full(len(layout), len(asbytes), dtype=np.int64)
 #                 ),
-#                 ak.layout.NumpyArray(asbytes, parameters={"__array__": "char"}),
+#                 ak._v2.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
 #                 parameters={"__array__": "string"},
 #             )
 
-#         elif isinstance(layout, ak.layout.NumpyArray):
+#         elif isinstance(layout, ak._v2.contents.NumpyArray):
 #             nplike = ak.nplike.of(layout)
 #             original = nplike.asarray(layout)
 #             if fill_value == 0 or fill_value is _ZEROS:
-#                 return lambda: ak.layout.NumpyArray(
+#                 return lambda: ak._v2.contents.NumpyArray(
 #                     nplike.zeros_like(original),
 #                     layout.identities,
 #                     layout.parameters,
 #                 )
 #             elif fill_value == 1:
-#                 return lambda: ak.layout.NumpyArray(
+#                 return lambda: ak._v2.contents.NumpyArray(
 #                     nplike.ones_like(original),
 #                     layout.identities,
 #                     layout.parameters,
 #                 )
 #             else:
-#                 return lambda: ak.layout.NumpyArray(
+#                 return lambda: ak._v2.contents.NumpyArray(
 #                     nplike.full_like(original, fill_value),
 #                     layout.identities,
 #                     layout.parameters,

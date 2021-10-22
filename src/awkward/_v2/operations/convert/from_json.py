@@ -104,16 +104,16 @@ def from_json(  # note: move ability to read from file into from_json_file
 #         raise exc("file not found or not a regular file: {0}".format(source))
 
 #     def getfunction(recordnode):
-#         if isinstance(recordnode, ak.layout.RecordArray):
+#         if isinstance(recordnode, ak._v2.contents.RecordArray):
 #             keys = recordnode.keys()
 #             if complex_record_fields[0] in keys and complex_record_fields[1] in keys:
 #                 nplike = ak.nplike.of(recordnode)
 #                 real = recordnode[complex_record_fields[0]]
 #                 imag = recordnode[complex_record_fields[1]]
 #                 if (
-#                     isinstance(real, ak.layout.NumpyArray)
+#                     isinstance(real, ak._v2.contents.NumpyArray)
 #                     and len(real.shape) == 1
-#                     and isinstance(imag, ak.layout.NumpyArray)
+#                     and isinstance(imag, ak._v2.contents.NumpyArray)
 #                     and len(imag.shape) == 1
 #                 ):
 #                     return lambda: nplike.asarray(real) + nplike.asarray(imag) * 1j
@@ -122,7 +122,7 @@ def from_json(  # note: move ability to read from file into from_json_file
 #                         "Complex number fields must be numbers"
 #                         + ak._util.exception_suffix(__file__)
 #                     )
-#                 return lambda: ak.layout.NumpyArray(real + imag * 1j)
+#                 return lambda: ak._v2.contents.NumpyArray(real + imag * 1j)
 #             else:
 #                 return None
 #         else:

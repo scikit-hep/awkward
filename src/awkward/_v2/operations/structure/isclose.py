@@ -35,11 +35,11 @@ def isclose(
 #     nplike = ak.nplike.of(one, two)
 
 #     def getfunction(inputs):
-#         if isinstance(inputs[0], ak.layout.NumpyArray) and isinstance(
-#             inputs[1], ak.layout.NumpyArray
+#         if isinstance(inputs[0], ak._v2.contents.NumpyArray) and isinstance(
+#             inputs[1], ak._v2.contents.NumpyArray
 #         ):
 #             return lambda: (
-#                 ak.layout.NumpyArray(
+#                 ak._v2.contents.NumpyArray(
 #                     nplike.isclose(
 #                         nplike.asarray(inputs[0]),
 #                         nplike.asarray(inputs[1]),

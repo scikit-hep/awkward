@@ -27,8 +27,8 @@ import numpy
 #             ak.Array,
 #             ak.Record,
 #             ak.ArrayBuilder,
-#             ak.layout.Content,
-#             ak.layout.Record,
+#             ak._v2.contents.Content,
+#             ak._v2.record.Record,
 #             ak.layout.ArrayBuilder,
 #             ak.layout.LayoutBuilder32,
 #             ak.layout.LayoutBuilder64,
@@ -82,7 +82,7 @@ import numpy
 #     def adjust(custom, inputs, kwargs):
 #         args = [
 #             ak._util.wrap(x, behavior)
-#             if isinstance(x, (ak.layout.Content, ak.layout.Record))
+#             if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
 #             else x
 #             for x in inputs
 #         ]
@@ -98,7 +98,7 @@ import numpy
 #     def adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs):
 #         nextinputs = [
 #             ak._util.wrap(x, behavior)
-#             if isinstance(x, (ak.layout.Content, ak.layout.Record))
+#             if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
 #             else x
 #             for x in inputs
 #         ]
@@ -120,13 +120,13 @@ import numpy
 
 #     def is_fully_regular(layout):
 #         if (
-#             isinstance(layout, ak.layout.RegularArray)
+#             isinstance(layout, ak._v2.contents.RegularArray)
 #             and layout.parameter("__record__") is None
 #             and layout.parameter("__array__") is None
 #         ):
-#             if isinstance(layout.content, ak.layout.NumpyArray):
+#             if isinstance(layout.content, ak._v2.contents.NumpyArray):
 #                 return True
-#             elif isinstance(layout.content, ak.layout.RegularArray):
+#             elif isinstance(layout.content, ak._v2.contents.RegularArray):
 #                 return is_fully_regular(layout.content)
 #             else:
 #                 return False
@@ -139,13 +139,13 @@ import numpy
 #         else:
 #             shape = [len(layout)]
 #             node = layout
-#             while isinstance(node, ak.layout.RegularArray):
+#             while isinstance(node, ak._v2.contents.RegularArray):
 #                 shape.append(node.size)
 #                 node = node.content
 #             if node.format.upper().startswith("M"):
 #                 nparray = ak.nplike.of(node).asarray(node.view_int64).view(node.format)
 #                 nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
-#                 return ak.layout.NumpyArray(
+#                 return ak._v2.contents.NumpyArray(
 #                     nparray,
 #                     node.identities,
 #                     node.parameters,
@@ -153,7 +153,7 @@ import numpy
 #             else:
 #                 nparray = ak.nplike.of(node).asarray(node)
 #                 nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
-#                 return ak.layout.NumpyArray(
+#                 return ak._v2.contents.NumpyArray(
 #                     nparray,
 #                     node.identities,
 #                     node.parameters,
@@ -162,14 +162,14 @@ import numpy
 #     def getfunction(inputs):
 #         signature = [ufunc]
 #         for x in inputs:
-#             if isinstance(x, ak.layout.Content):
+#             if isinstance(x, ak._v2.contents.Content):
 #                 record = x.parameter("__record__")
 #                 array = x.parameter("__array__")
 #                 if record is not None:
 #                     signature.append(record)
 #                 elif array is not None:
 #                     signature.append(array)
-#                 elif isinstance(x, ak.layout.NumpyArray):
+#                 elif isinstance(x, ak._v2.contents.NumpyArray):
 #                     if x.format.upper().startswith("M"):
 #                         signature.append(
 #                             ak.nplike.of(x)
@@ -197,10 +197,10 @@ import numpy
 
 #         if all(
 #             (
-#                 isinstance(x, ak.layout.NumpyArray)
+#                 isinstance(x, ak._v2.contents.NumpyArray)
 #                 and not (x.format.upper().startswith("M"))
 #             )
-#             or not isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
+#             or not isinstance(x, (ak._v2.contents.Content, ak.partition.PartitionedArray))
 #             for x in inputs
 #         ):
 #             nplike = ak.nplike.of(*inputs)
@@ -209,7 +209,7 @@ import numpy
 #             )
 #             return lambda: (ak.operations.convert.from_numpy(result, highlevel=False),)
 #         elif all(
-#             isinstance(x, ak.layout.NumpyArray) and (x.format.upper().startswith("M"))
+#             isinstance(x, ak._v2.contents.NumpyArray) and (x.format.upper().startswith("M"))
 #             for x in inputs
 #         ):
 #             nplike = ak.nplike.of(*inputs)
@@ -219,7 +219,7 @@ import numpy
 #             return lambda: (ak.operations.convert.from_numpy(result, highlevel=False),)
 
 #         for x in inputs:
-#             if isinstance(x, ak.layout.Content):
+#             if isinstance(x, ak._v2.contents.Content):
 #                 chained_behavior = ak._util.Behavior(ak.behavior, behavior)
 #                 apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__array__")]
 #                 if apply_ufunc is not None:
@@ -236,11 +236,11 @@ import numpy
 #             x.parameter("__array__") is not None
 #             or x.parameter("__record__") is not None
 #             for x in inputs
-#             if isinstance(x, ak.layout.Content)
+#             if isinstance(x, ak._v2.contents.Content)
 #         ):
 #             custom_types = []
 #             for x in inputs:
-#                 if isinstance(x, ak.layout.Content):
+#                 if isinstance(x, ak._v2.contents.Content):
 #                     if x.parameter("__array__") is not None:
 #                         custom_types.append(x.parameter("__array__"))
 #                     elif x.parameter("__record__") is not None:
@@ -350,7 +350,7 @@ import numpy
 #         ak._util.recursively_apply(
 #             x, (lambda _: _), pass_depth=False, numpy_to_regular=True
 #         )
-#         if isinstance(x, (ak.layout.Content, ak.layout.Record))
+#         if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
 #         else x
 #         for x in inputs
 #     ]
@@ -358,7 +358,7 @@ import numpy
 #     if len(inputs) == 2 and all(
 #         isinstance(x, ak._util.listtypes)
 #         and isinstance(x.content, ak._util.listtypes)
-#         and isinstance(x.content.content, ak.layout.NumpyArray)
+#         and isinstance(x.content.content, ak._v2.contents.NumpyArray)
 #         for x in inputs
 #     ):
 #         ak._connect._numba.register_and_check()
@@ -374,11 +374,11 @@ import numpy
 #         outer, inner, content = matmul_for_numba.numbafied(lefts, rights, dtype)
 
 #         return lambda: (
-#             ak.layout.ListOffsetArray64(
-#                 ak.layout.Index64(outer),
-#                 ak.layout.ListOffsetArray64(
-#                     ak.layout.Index64(inner),
-#                     ak.layout.NumpyArray(content),
+#             ak._v2.contents.ListOffsetArray64(
+#                 ak._v2.index.Index64(outer),
+#                 ak._v2.contents.ListOffsetArray64(
+#                     ak._v2.index.Index64(inner),
+#                     ak._v2.contents.NumpyArray(content),
 #                 ),
 #             ),
 #         )

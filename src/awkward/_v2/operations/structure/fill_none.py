@@ -79,18 +79,18 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #             isinstance(value, (str, bytes))
 #             or (ak._util.py27 and isinstance(value, ak._util.unicode))
 #         )
-#         or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
+#         or isinstance(value, (ak.highlevel.Record, ak._v2.record.Record))
 #     ):
 #         valuelayout = ak.operations.convert.to_layout(
 #             value, allow_record=True, allow_other=False
 #         )
-#         if isinstance(valuelayout, ak.layout.Record):
+#         if isinstance(valuelayout, ak._v2.record.Record):
 #             valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
 #         elif len(valuelayout) == 0:
-#             offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
-#             valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
+#             offsets = ak._v2.index.Index64(nplike.array([0, 0], dtype=np.int64))
+#             valuelayout = ak._v2.contents.ListOffsetArray64(offsets, valuelayout)
 #         else:
-#             valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+#             valuelayout = ak._v2.contents.RegularArray(valuelayout, len(valuelayout), 1)
 #     else:
 #         valuelayout = ak.operations.convert.to_layout(
 #             [value], allow_record=False, allow_other=False

@@ -80,16 +80,16 @@ def to_list(array):
 #     elif isinstance(array, ak.highlevel.ArrayBuilder):
 #         return to_list(array.snapshot())
 
-#     elif isinstance(array, ak.layout.Record) and array.istuple:
+#     elif isinstance(array, ak._v2.record.Record) and array.istuple:
 #         return tuple(to_list(x) for x in array.fields())
 
-#     elif isinstance(array, ak.layout.Record):
+#     elif isinstance(array, ak._v2.record.Record):
 #         return {n: to_list(x) for n, x in array.fielditems()}
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         return [to_list(x) for x in array.snapshot()]
 
-#     elif isinstance(array, ak.layout.NumpyArray):
+#     elif isinstance(array, ak._v2.contents.NumpyArray):
 #         if array.format.upper().startswith("M"):
 #             return (
 #                 [
@@ -106,7 +106,7 @@ def to_list(array):
 #         else:
 #             return ak.nplike.of(array).asarray(array).tolist()
 
-#     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
+#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):
 #         return [to_list(x) for x in array]
 
 #     elif isinstance(array, ak._v2.contents.Content):

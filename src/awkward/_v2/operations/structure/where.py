@@ -54,22 +54,22 @@ def where(condition, *args, **kwargs):
 #         if isinstance(akcondition, ak.partition.PartitionedArray):
 #             akcondition = akcondition.replace_partitions(
 #                 [
-#                     ak.layout.NumpyArray(ak.operations.convert.to_numpy(x))
+#                     ak._v2.contents.NumpyArray(ak.operations.convert.to_numpy(x))
 #                     for x in akcondition.partitions
 #                 ]
 #             )
 #         else:
-#             akcondition = ak.layout.NumpyArray(
+#             akcondition = ak._v2.contents.NumpyArray(
 #                 ak.operations.convert.to_numpy(akcondition)
 #             )
 #         out = nplike.nonzero(ak.operations.convert.to_numpy(akcondition))
 #         if highlevel:
 #             return tuple(
-#                 ak._util.wrap(ak.layout.NumpyArray(x), ak._util.behaviorof(condition))
+#                 ak._util.wrap(ak._v2.contents.NumpyArray(x), ak._util.behaviorof(condition))
 #                 for x in out
 #             )
 #         else:
-#             return tuple(ak.layout.NumpyArray(x) for x in out)
+#             return tuple(ak._v2.contents.NumpyArray(x) for x in out)
 
 #     elif len(args) == 1:
 #         raise ValueError(
@@ -83,23 +83,23 @@ def where(condition, *args, **kwargs):
 #             for x in args
 #         ]
 #         good_arrays = [akcondition]
-#         if isinstance(left, ak.layout.Content):
+#         if isinstance(left, ak._v2.contents.Content):
 #             good_arrays.append(left)
-#         if isinstance(right, ak.layout.Content):
+#         if isinstance(right, ak._v2.contents.Content):
 #             good_arrays.append(right)
 #         nplike = ak.nplike.of(*good_arrays)
 
 #         def getfunction(inputs):
 #             akcondition, left, right = inputs
-#             if isinstance(akcondition, ak.layout.NumpyArray):
+#             if isinstance(akcondition, ak._v2.contents.NumpyArray):
 #                 npcondition = nplike.asarray(akcondition)
-#                 tags = ak.layout.Index8((npcondition == 0).view(np.int8))
-#                 index = ak.layout.Index64(nplike.arange(len(tags), dtype=np.int64))
-#                 if not isinstance(left, ak.layout.Content):
-#                     left = ak.layout.NumpyArray(nplike.repeat(left, len(tags)))
-#                 if not isinstance(right, ak.layout.Content):
-#                     right = ak.layout.NumpyArray(nplike.repeat(right, len(tags)))
-#                 tmp = ak.layout.UnionArray8_64(tags, index, [left, right])
+#                 tags = ak._v2.index.Index8((npcondition == 0).view(np.int8))
+#                 index = ak._v2.index.Index64(nplike.arange(len(tags), dtype=np.int64))
+#                 if not isinstance(left, ak._v2.contents.Content):
+#                     left = ak._v2.contents.NumpyArray(nplike.repeat(left, len(tags)))
+#                 if not isinstance(right, ak._v2.contents.Content):
+#                     right = ak._v2.contents.NumpyArray(nplike.repeat(right, len(tags)))
+#                 tmp = ak._v2.contents.UnionArray8_64(tags, index, [left, right])
 #                 return lambda: (tmp.simplify(mergebool=mergebool),)
 #             else:
 #                 return None

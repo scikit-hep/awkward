@@ -78,22 +78,22 @@
 
 
 # def tolookup(layout, positions, sharedptrs, arrays):
-#     if isinstance(layout, ak.layout.NumpyArray):
+#     if isinstance(layout, ak._v2.contents.NumpyArray):
 #         return ak._connect._numba.layout.NumpyArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.NumpyForm):
+#     elif isinstance(layout, ak._v2.forms.NumpyForm):
 #         return ak._connect._numba.layout.NumpyArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.layout.RegularArray):
+#     elif isinstance(layout, ak._v2.contents.RegularArray):
 #         return ak._connect._numba.layout.RegularArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.RegularForm):
+#     elif isinstance(layout, ak._v2.forms.RegularForm):
 #         return ak._connect._numba.layout.RegularArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
@@ -101,19 +101,19 @@
 #     elif isinstance(
 #         layout,
 #         (
-#             ak.layout.ListArray32,
-#             ak.layout.ListArrayU32,
-#             ak.layout.ListArray64,
-#             ak.layout.ListOffsetArray32,
-#             ak.layout.ListOffsetArrayU32,
-#             ak.layout.ListOffsetArray64,
+#             ak._v2.contents.ListArray32,
+#             ak._v2.contents.ListArrayU32,
+#             ak._v2.contents.ListArray64,
+#             ak._v2.contents.ListOffsetArray32,
+#             ak._v2.contents.ListOffsetArrayU32,
+#             ak._v2.contents.ListOffsetArray64,
 #         ),
 #     ):
 #         return ak._connect._numba.layout.ListArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, (ak.forms.ListForm, ak.forms.ListOffsetForm)):
+#     elif isinstance(layout, (ak._v2.forms.ListForm, ak._v2.forms.ListOffsetForm)):
 #         return ak._connect._numba.layout.ListArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
@@ -121,74 +121,74 @@
 #     elif isinstance(
 #         layout,
 #         (
-#             ak.layout.IndexedArray32,
-#             ak.layout.IndexedArrayU32,
-#             ak.layout.IndexedArray64,
+#             ak._v2.contents.IndexedArray32,
+#             ak._v2.contents.IndexedArrayU32,
+#             ak._v2.contents.IndexedArray64,
 #         ),
 #     ):
 #         return ak._connect._numba.layout.IndexedArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.IndexedForm):
+#     elif isinstance(layout, ak._v2.forms.IndexedForm):
 #         return ak._connect._numba.layout.IndexedArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
 #     elif isinstance(
 #         layout,
-#         (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64),
+#         (ak._v2.contents.IndexedOptionArray32, ak._v2.contents.IndexedOptionArray64),
 #     ):
 #         return ak._connect._numba.layout.IndexedOptionArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.IndexedOptionForm):
+#     elif isinstance(layout, ak._v2.forms.IndexedOptionForm):
 #         return ak._connect._numba.layout.IndexedOptionArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.layout.ByteMaskedArray):
+#     elif isinstance(layout, ak._v2.contents.ByteMaskedArray):
 #         return ak._connect._numba.layout.ByteMaskedArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.ByteMaskedForm):
+#     elif isinstance(layout, ak._v2.forms.ByteMaskedForm):
 #         return ak._connect._numba.layout.ByteMaskedArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.layout.BitMaskedArray):
+#     elif isinstance(layout, ak._v2.contents.BitMaskedArray):
 #         return ak._connect._numba.layout.BitMaskedArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.BitMaskedForm):
+#     elif isinstance(layout, ak._v2.forms.BitMaskedForm):
 #         return ak._connect._numba.layout.BitMaskedArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.layout.UnmaskedArray):
+#     elif isinstance(layout, ak._v2.contents.UnmaskedArray):
 #         return ak._connect._numba.layout.UnmaskedArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.UnmaskedForm):
+#     elif isinstance(layout, ak._v2.forms.UnmaskedForm):
 #         return ak._connect._numba.layout.UnmaskedArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.layout.RecordArray):
+#     elif isinstance(layout, ak._v2.contents.RecordArray):
 #         return ak._connect._numba.layout.RecordArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.RecordForm):
+#     elif isinstance(layout, ak._v2.forms.RecordForm):
 #         return ak._connect._numba.layout.RecordArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.layout.Record):
+#     elif isinstance(layout, ak._v2.contents.Record):
 #         return ak._connect._numba.layout.RecordType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
@@ -196,26 +196,26 @@
 #     elif isinstance(
 #         layout,
 #         (
-#             ak.layout.UnionArray8_32,
-#             ak.layout.UnionArray8_U32,
-#             ak.layout.UnionArray8_64,
+#             ak._v2.contents.UnionArray8_32,
+#             ak._v2.contents.UnionArray8_U32,
+#             ak._v2.contents.UnionArray8_64,
 #         ),
 #     ):
 #         return ak._connect._numba.layout.UnionArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.UnionForm):
+#     elif isinstance(layout, ak._v2.forms.UnionForm):
 #         return ak._connect._numba.layout.UnionArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.layout.VirtualArray):
+#     elif isinstance(layout, ak._v2.contents.VirtualArray):
 #         return ak._connect._numba.layout.VirtualArrayType.tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
 
-#     elif isinstance(layout, ak.forms.VirtualForm):
+#     elif isinstance(layout, ak._v2.forms.VirtualForm):
 #         return ak._connect._numba.layout.VirtualArrayType.form_tolookup(
 #             layout, positions, sharedptrs, arrays
 #         )
@@ -228,37 +228,37 @@
 
 
 # def tonumbatype(form):
-#     if isinstance(form, ak.forms.NumpyForm):
+#     if isinstance(form, ak._v2.forms.NumpyForm):
 #         return ak._connect._numba.layout.NumpyArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.RegularForm):
+#     elif isinstance(form, ak._v2.forms.RegularForm):
 #         return ak._connect._numba.layout.RegularArrayType.from_form(form)
 
-#     elif isinstance(form, (ak.forms.ListForm, ak.forms.ListOffsetForm)):
+#     elif isinstance(form, (ak._v2.forms.ListForm, ak._v2.forms.ListOffsetForm)):
 #         return ak._connect._numba.layout.ListArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.IndexedForm):
+#     elif isinstance(form, ak._v2.forms.IndexedForm):
 #         return ak._connect._numba.layout.IndexedArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.IndexedOptionForm):
+#     elif isinstance(form, ak._v2.forms.IndexedOptionForm):
 #         return ak._connect._numba.layout.IndexedOptionArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.ByteMaskedForm):
+#     elif isinstance(form, ak._v2.forms.ByteMaskedForm):
 #         return ak._connect._numba.layout.ByteMaskedArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.BitMaskedForm):
+#     elif isinstance(form, ak._v2.forms.BitMaskedForm):
 #         return ak._connect._numba.layout.BitMaskedArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.UnmaskedForm):
+#     elif isinstance(form, ak._v2.forms.UnmaskedForm):
 #         return ak._connect._numba.layout.UnmaskedArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.RecordForm):
+#     elif isinstance(form, ak._v2.forms.RecordForm):
 #         return ak._connect._numba.layout.RecordArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.UnionForm):
+#     elif isinstance(form, ak._v2.forms.UnionForm):
 #         return ak._connect._numba.layout.UnionArrayType.from_form(form)
 
-#     elif isinstance(form, ak.forms.VirtualForm):
+#     elif isinstance(form, ak._v2.forms.VirtualForm):
 #         return ak._connect._numba.layout.VirtualArrayType.from_form(form)
 
 #     else:
@@ -320,8 +320,8 @@
 #             allow_other=False,
 #             numpytype=(np.number, bool, np.bool_),
 #         )
-#         while isinstance(layout, ak.layout.VirtualArray) and isinstance(
-#             layout.generator, ak.layout.SliceGenerator
+#         while isinstance(layout, ak._v2.contents.VirtualArray) and isinstance(
+#             layout.generator, ak._v2.contents.SliceGenerator
 #         ):
 #             layout = layout.array
 #         layout = ak.operations.convert.regularize_numpyarray(
@@ -747,7 +747,7 @@
 #             allow_other=False,
 #             numpytype=(np.number, bool, np.bool_),
 #         )
-#         assert isinstance(layout, ak.layout.Record)
+#         assert isinstance(layout, ak._v2.contents.Record)
 #         arraylayout = layout.array
 #         return RecordView(
 #             ArrayView(
@@ -769,7 +769,7 @@
 #     def torecord(self):
 #         arraylayout = self.arrayview.toarray().layout
 #         return ak._util.wrap(
-#             ak.layout.Record(arraylayout, self.at), self.arrayview.behavior
+#             ak._v2.contents.Record(arraylayout, self.at), self.arrayview.behavior
 #         )
 
 

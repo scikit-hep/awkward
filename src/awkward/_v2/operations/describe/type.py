@@ -98,7 +98,7 @@ def type(array):
 #     elif isinstance(array, ak.highlevel.ArrayBuilder):
 #         return ak._util.highlevel_type(array.snapshot().layout, array.behavior, True)
 
-#     elif isinstance(array, ak.layout.Record):
+#     elif isinstance(array, ak._v2.record.Record):
 #         return array.type(ak._util.typestrs(None))
 
 #     elif isinstance(array, np.ndarray):
@@ -119,7 +119,7 @@ def type(array):
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         return array.type(ak._util.typestrs(None))
 
-#     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
+#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):
 #         return array.type(ak._util.typestrs(None))
 
 #     else:

@@ -88,7 +88,7 @@ def to_jax(array):
 #             )
 #         return to_jax(array)
 
-#     elif isinstance(array, ak.layout.UnmaskedArray):
+#     elif isinstance(array, ak._v2.contents.UnmaskedArray):
 #         return to_jax(array.content)
 
 #     elif isinstance(array, ak._util.optiontypes):
@@ -105,7 +105,7 @@ def to_jax(array):
 #         else:
 #             return content
 
-#     elif isinstance(array, ak.layout.RegularArray):
+#     elif isinstance(array, ak._v2.contents.RegularArray):
 #         out = to_jax(array.content)
 #         head, tail = out.shape[0], out.shape[1:]
 #         shape = (head // array.size, array.size) + tail
@@ -120,10 +120,10 @@ def to_jax(array):
 #             + ak._util.exception_suffix(__file__)
 #         )
 
-#     elif isinstance(array, ak.layout.NumpyArray):
+#     elif isinstance(array, ak._v2.contents.NumpyArray):
 #         return array.to_jax()
 
-#     elif isinstance(array, ak.layout.Content):
+#     elif isinstance(array, ak._v2.contents.Content):
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(array))
 #             + ak._util.exception_suffix(__file__)

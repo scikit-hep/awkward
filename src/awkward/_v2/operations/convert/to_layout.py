@@ -46,10 +46,10 @@ def to_layout(
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         return array.snapshot()
 
-#     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
+#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):
 #         return array
 
-#     elif allow_record and isinstance(array, ak.layout.Record):
+#     elif allow_record and isinstance(array, ak._v2.record.Record):
 #         return array
 
 #     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):

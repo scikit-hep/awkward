@@ -48,7 +48,7 @@ def from_numpy(
 
 #     def recurse(array, mask):
 #         if regulararray and len(array.shape) > 1:
-#             return ak.layout.RegularArray(
+#             return ak._v2.contents.RegularArray(
 #                 recurse(array.reshape((-1,) + array.shape[2:]), mask),
 #                 array.shape[1],
 #                 array.shape[0],
@@ -62,53 +62,53 @@ def from_numpy(
 #             itemsize = asbytes.dtype.itemsize
 #             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
 #             stops = starts + numpy.char.str_len(asbytes)
-#             data = ak.layout.ListArray64(
-#                 ak.layout.Index64(starts),
-#                 ak.layout.Index64(stops),
-#                 ak.layout.NumpyArray(
+#             data = ak._v2.contents.ListArray64(
+#                 ak._v2.index.Index64(starts),
+#                 ak._v2.index.Index64(stops),
+#                 ak._v2.contents.NumpyArray(
 #                     asbytes.view("u1"), parameters={"__array__": "byte"}
 #                 ),
 #                 parameters={"__array__": "bytestring"},
 #             )
 #             for i in range(len(array.shape) - 1, 0, -1):
-#                 data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
+#                 data = ak._v2.contents.RegularArray(data, array.shape[i], array.shape[i - 1])
 #         elif array.dtype.kind == "U":
 #             asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
 #             itemsize = asbytes.dtype.itemsize
 #             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
 #             stops = starts + numpy.char.str_len(asbytes)
-#             data = ak.layout.ListArray64(
-#                 ak.layout.Index64(starts),
-#                 ak.layout.Index64(stops),
-#                 ak.layout.NumpyArray(
+#             data = ak._v2.contents.ListArray64(
+#                 ak._v2.index.Index64(starts),
+#                 ak._v2.index.Index64(stops),
+#                 ak._v2.contents.NumpyArray(
 #                     asbytes.view("u1"), parameters={"__array__": "char"}
 #                 ),
 #                 parameters={"__array__": "string"},
 #             )
 #             for i in range(len(array.shape) - 1, 0, -1):
-#                 data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
+#                 data = ak._v2.contents.RegularArray(data, array.shape[i], array.shape[i - 1])
 #         else:
-#             data = ak.layout.NumpyArray(array)
+#             data = ak._v2.contents.NumpyArray(array)
 
 #         if mask is None:
 #             return data
 #         elif mask is False or (isinstance(mask, np.bool_) and not mask):
 #             # NumPy's MaskedArray with mask == False is an UnmaskedArray
 #             if len(array.shape) == 1:
-#                 return ak.layout.UnmaskedArray(data)
+#                 return ak._v2.contents.UnmaskedArray(data)
 #             else:
 
 #                 def attach(x):
-#                     if isinstance(x, ak.layout.NumpyArray):
-#                         return ak.layout.UnmaskedArray(x)
+#                     if isinstance(x, ak._v2.contents.NumpyArray):
+#                         return ak._v2.contents.UnmaskedArray(x)
 #                     else:
-#                         return ak.layout.RegularArray(attach(x.content), x.size, len(x))
+#                         return ak._v2.contents.RegularArray(attach(x.content), x.size, len(x))
 
 #                 return attach(data.toRegularArray())
 #         else:
 #             # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
-#             return ak.layout.ByteMaskedArray(
-#                 ak.layout.Index8(mask), data, valid_when=False
+#             return ak._v2.contents.ByteMaskedArray(
+#                 ak._v2.index.Index8(mask), data, valid_when=False
 #             )
 
 #     if isinstance(array, numpy.ma.MaskedArray):
@@ -126,6 +126,6 @@ def from_numpy(
 #         contents = []
 #         for name in array.dtype.names:
 #             contents.append(recurse(array[name], mask))
-#         layout = ak.layout.RecordArray(contents, array.dtype.names)
+#         layout = ak._v2.contents.RecordArray(contents, array.dtype.names)
 
 #     return ak._util.maybe_wrap(layout, behavior, highlevel)

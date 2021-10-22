@@ -1999,7 +1999,7 @@ class Record(NDArrayOperatorsMixin):
     #             layout = ak.operations.convert.from_buffers(
     #                 form, length, container, highlevel=False, behavior=behavior
     #             )
-    #         layout = ak.layout.Record(layout, at)
+    #         layout = ak._v2.record.Record(layout, at)
     #         if self.__class__ is Record:
     #             self.__class__ = ak._util.recordclass(layout, behavior)
     #         self.layout = layout

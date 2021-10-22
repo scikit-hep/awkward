@@ -35,8 +35,8 @@ def nan_to_num(
 #     nplike = ak.nplike.of(layout)
 
 #     def getfunction(layout):
-#         if isinstance(layout, ak.layout.NumpyArray):
-#             return lambda: ak.layout.NumpyArray(
+#         if isinstance(layout, ak._v2.contents.NumpyArray):
+#             return lambda: ak._v2.contents.NumpyArray(
 #                 nplike.nan_to_num(
 #                     nplike.asarray(layout),
 #                     nan=nan,

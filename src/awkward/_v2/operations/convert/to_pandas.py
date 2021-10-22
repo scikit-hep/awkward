@@ -187,7 +187,7 @@ def to_pandas(
 #                     [],
 #                 )
 
-#         elif isinstance(layout, ak.layout.RecordArray):
+#         elif isinstance(layout, ak._v2.contents.RecordArray):
 #             return sum(
 #                 [
 #                     recurse(layout.field(n), row_arrays, col_names + (n,))
@@ -203,7 +203,7 @@ def to_pandas(
 #     if isinstance(layout, ak.partition.PartitionedArray):
 #         layout = layout.toContent()
 
-#     if isinstance(layout, ak.layout.Record):
+#     if isinstance(layout, ak._v2.record.Record):
 #         layout2 = layout.array[layout.at : layout.at + 1]
 #     else:
 #         layout2 = layout
@@ -211,7 +211,7 @@ def to_pandas(
 #     tables = []
 #     last_row_arrays = None
 #     for column, row_arrays, col_names in recurse(layout2, [], ()):
-#         if isinstance(layout, ak.layout.Record):
+#         if isinstance(layout, ak._v2.record.Record):
 #             row_arrays = row_arrays[1:]  # Record --> one-element RecordArray
 #         if len(col_names) == 0:
 #             columns = [anonymous]

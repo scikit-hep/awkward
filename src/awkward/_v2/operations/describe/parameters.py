@@ -29,8 +29,8 @@ def parameters(array):
 #     elif isinstance(
 #         array,
 #         (
-#             ak.layout.Content,
-#             ak.layout.Record,
+#             ak._v2.contents.Content,
+#             ak._v2.record.Record,
 #             ak.partition.PartitionedArray,
 #         ),
 #     ):

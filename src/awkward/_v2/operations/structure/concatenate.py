@@ -47,7 +47,7 @@ def concatenate(
 #     if not any(
 #         isinstance(
 #             x,
-#             (ak.layout.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
 #         )
 #         for x in contents
 #     ):
@@ -61,7 +61,7 @@ def concatenate(
 #         for x in contents
 #         if isinstance(
 #             x,
-#             (ak.layout.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
 #         )
 #     ][0]
 #     posaxis = first_content.axis_wrap_if_negative(axis)
@@ -72,7 +72,7 @@ def concatenate(
 #             if isinstance(
 #                 x,
 #                 (
-#                     ak.layout.Content,
+#                     ak._v2.contents.Content,
 #                     ak.partition.PartitionedArray,
 #                     ak._v2.contents.Content,
 #                 ),
@@ -85,7 +85,7 @@ def concatenate(
 #             "is ambiguous".format(axis) + ak._util.exception_suffix(__file__)
 #         )
 #     for x in contents:
-#         if isinstance(x, ak.layout.Content):
+#         if isinstance(x, ak._v2.contents.Content):
 #             if x.axis_wrap_if_negative(axis) != posaxis:
 #                 raise ValueError(
 #                     "arrays to concatenate do not have the same depth for negative "
@@ -106,7 +106,7 @@ def concatenate(
 #                         start = stop
 #                         partitions.append(part)
 #                         offsets.append(offsets[-1] + count)
-#                 elif isinstance(content, ak.layout.Content):
+#                 elif isinstance(content, ak._v2.contents.Content):
 #                     partitions.append(content)
 #                     offsets.append(offsets[-1] + len(content))
 #                 else:
@@ -135,7 +135,7 @@ def concatenate(
 #                 for content in contents:
 #                     if isinstance(content, ak.partition.PartitionedArray):
 #                         newcontents.append(content[slc].toContent())
-#                     elif isinstance(content, ak.layout.Content):
+#                     elif isinstance(content, ak._v2.contents.Content):
 #                         newcontents.append(content[slc])
 #                     else:
 #                         newcontents.append(content)
@@ -156,7 +156,7 @@ def concatenate(
 #     elif posaxis == 0:
 #         contents = [
 #             x
-#             if isinstance(x, ak.layout.Content)
+#             if isinstance(x, ak._v2.contents.Content)
 #             else ak.operations.convert.to_layout([x])
 #             for x in contents
 #         ]
@@ -190,26 +190,26 @@ def concatenate(
 
 #             if depth == posaxis and all(
 #                 isinstance(x, ak._util.listtypes)
-#                 or (isinstance(x, ak.layout.NumpyArray) and x.ndim > 1)
-#                 or not isinstance(x, ak.layout.Content)
+#                 or (isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1)
+#                 or not isinstance(x, ak._v2.contents.Content)
 #                 for x in inputs
 #             ):
 #                 nplike = ak.nplike.of(*inputs)
 
 #                 length = max(
-#                     [len(x) for x in inputs if isinstance(x, ak.layout.Content)]
+#                     [len(x) for x in inputs if isinstance(x, ak._v2.contents.Content)]
 #                 )
 #                 nextinputs = []
 #                 for x in inputs:
-#                     if isinstance(x, ak.layout.Content):
+#                     if isinstance(x, ak._v2.contents.Content):
 #                         nextinputs.append(x)
 #                     else:
 #                         nextinputs.append(
-#                             ak.layout.ListOffsetArray64(
-#                                 ak.layout.Index64(
+#                             ak._v2.contents.ListOffsetArray64(
+#                                 ak._v2.index.Index64(
 #                                     nplike.arange(length + 1, dtype=np.int64)
 #                                 ),
-#                                 ak.layout.NumpyArray(
+#                                 ak._v2.contents.NumpyArray(
 #                                     nplike.broadcast_to(nplike.array([x]), (length,))
 #                                 ),
 #                             )
@@ -230,14 +230,14 @@ def concatenate(
 #                 offsets[0] = 0
 #                 nplike.cumsum(counts, out=offsets[1:])
 
-#                 offsets = ak.layout.Index64(offsets)
-#                 tags, index = ak.layout.UnionArray8_64.nested_tags_index(
+#                 offsets = ak._v2.index.Index64(offsets)
+#                 tags, index = ak._v2.contents.UnionArray8_64.nested_tags_index(
 #                     offsets,
-#                     [ak.layout.Index64(x) for x in all_counts],
+#                     [ak._v2.index.Index64(x) for x in all_counts],
 #                 )
-#                 inner = ak.layout.UnionArray8_64(tags, index, all_flatten)
+#                 inner = ak._v2.contents.UnionArray8_64(tags, index, all_flatten)
 
-#                 out = ak.layout.ListOffsetArray64(
+#                 out = ak._v2.contents.ListOffsetArray64(
 #                     offsets, inner.simplify(merge=merge, mergebool=mergebool)
 #                 )
 #                 return lambda: (out,)
@@ -245,7 +245,7 @@ def concatenate(
 #             elif any(
 #                 x.minmax_depth == (1, 1)
 #                 for x in inputs
-#                 if isinstance(x, ak.layout.Content)
+#                 if isinstance(x, ak._v2.contents.Content)
 #             ):
 #                 raise ValueError(
 #                     "at least one array is not deep enough to concatenate at "
@@ -304,7 +304,7 @@ def concatenate(
 #     if not any(
 #         isinstance(
 #             x,
-#             (ak.layout.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
 #         )
 #         for x in contents
 #     ):
@@ -318,7 +318,7 @@ def concatenate(
 #         for x in contents
 #         if isinstance(
 #             x,
-#             (ak.layout.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
 #         )
 #     ][0]
 #     posaxis = first_content.axis_wrap_if_negative(axis)
@@ -329,7 +329,7 @@ def concatenate(
 #             if isinstance(
 #                 x,
 #                 (
-#                     ak.layout.Content,
+#                     ak._v2.contents.Content,
 #                     ak.partition.PartitionedArray,
 #                     ak._v2.contents.Content,
 #                 ),
@@ -342,7 +342,7 @@ def concatenate(
 #             "is ambiguous".format(axis) + ak._util.exception_suffix(__file__)
 #         )
 #     for x in contents:
-#         if isinstance(x, ak.layout.Content):
+#         if isinstance(x, ak._v2.contents.Content):
 #             if x.axis_wrap_if_negative(axis) != posaxis:
 #                 raise ValueError(
 #                     "arrays to concatenate do not have the same depth for negative "
@@ -363,7 +363,7 @@ def concatenate(
 #                         start = stop
 #                         partitions.append(part)
 #                         offsets.append(offsets[-1] + count)
-#                 elif isinstance(content, ak.layout.Content):
+#                 elif isinstance(content, ak._v2.contents.Content):
 #                     partitions.append(content)
 #                     offsets.append(offsets[-1] + len(content))
 #                 else:
@@ -392,7 +392,7 @@ def concatenate(
 #                 for content in contents:
 #                     if isinstance(content, ak.partition.PartitionedArray):
 #                         newcontents.append(content[slc].toContent())
-#                     elif isinstance(content, ak.layout.Content):
+#                     elif isinstance(content, ak._v2.contents.Content):
 #                         newcontents.append(content[slc])
 #                     else:
 #                         newcontents.append(content)
@@ -413,7 +413,7 @@ def concatenate(
 #     elif posaxis == 0:
 #         contents = [
 #             x
-#             if isinstance(x, ak.layout.Content)
+#             if isinstance(x, ak._v2.contents.Content)
 #             else ak.operations.convert.to_layout([x])
 #             for x in contents
 #         ]
@@ -447,26 +447,26 @@ def concatenate(
 
 #             if depth == posaxis and all(
 #                 isinstance(x, ak._util.listtypes)
-#                 or (isinstance(x, ak.layout.NumpyArray) and x.ndim > 1)
-#                 or not isinstance(x, ak.layout.Content)
+#                 or (isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1)
+#                 or not isinstance(x, ak._v2.contents.Content)
 #                 for x in inputs
 #             ):
 #                 nplike = ak.nplike.of(*inputs)
 
 #                 length = max(
-#                     [len(x) for x in inputs if isinstance(x, ak.layout.Content)]
+#                     [len(x) for x in inputs if isinstance(x, ak._v2.contents.Content)]
 #                 )
 #                 nextinputs = []
 #                 for x in inputs:
-#                     if isinstance(x, ak.layout.Content):
+#                     if isinstance(x, ak._v2.contents.Content):
 #                         nextinputs.append(x)
 #                     else:
 #                         nextinputs.append(
-#                             ak.layout.ListOffsetArray64(
-#                                 ak.layout.Index64(
+#                             ak._v2.contents.ListOffsetArray64(
+#                                 ak._v2.index.Index64(
 #                                     nplike.arange(length + 1, dtype=np.int64)
 #                                 ),
-#                                 ak.layout.NumpyArray(
+#                                 ak._v2.contents.NumpyArray(
 #                                     nplike.broadcast_to(nplike.array([x]), (length,))
 #                                 ),
 #                             )
@@ -487,14 +487,14 @@ def concatenate(
 #                 offsets[0] = 0
 #                 nplike.cumsum(counts, out=offsets[1:])
 
-#                 offsets = ak.layout.Index64(offsets)
-#                 tags, index = ak.layout.UnionArray8_64.nested_tags_index(
+#                 offsets = ak._v2.index.Index64(offsets)
+#                 tags, index = ak._v2.contents.UnionArray8_64.nested_tags_index(
 #                     offsets,
-#                     [ak.layout.Index64(x) for x in all_counts],
+#                     [ak._v2.index.Index64(x) for x in all_counts],
 #                 )
-#                 inner = ak.layout.UnionArray8_64(tags, index, all_flatten)
+#                 inner = ak._v2.contents.UnionArray8_64(tags, index, all_flatten)
 
-#                 out = ak.layout.ListOffsetArray64(
+#                 out = ak._v2.contents.ListOffsetArray64(
 #                     offsets, inner.simplify(merge=merge, mergebool=mergebool)
 #                 )
 #                 return lambda: (out,)
@@ -502,7 +502,7 @@ def concatenate(
 #             elif any(
 #                 x.minmax_depth == (1, 1)
 #                 for x in inputs
-#                 if isinstance(x, ak.layout.Content)
+#                 if isinstance(x, ak._v2.contents.Content)
 #             ):
 #                 raise ValueError(
 #                     "at least one array is not deep enough to concatenate at "

@@ -147,7 +147,7 @@ class CharBehavior(Array):
 #         # update same-length strings with a verdict about their characters
 #         out[possible] = reduced
 
-#     return ak._util.wrap(ak.layout.NumpyArray(out), behavior)
+#     return ak._util.wrap(ak._v2.contents.NumpyArray(out), behavior)
 
 
 # def _string_notequal(one, two):
@@ -167,7 +167,7 @@ class CharBehavior(Array):
 #     if ak._util.win or ak._util.bits32:
 #         counts = counts.astype(np.int32)
 #     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
-#     return ak.layout.IndexedArray64(ak.layout.Index64(parents), layout).project()
+#     return ak._v2.contents.IndexedArray64(ak._v2.index.Index64(parents), layout).project()
 
 
 # ak.behavior["__broadcast__", "bytestring"] = _string_broadcast

@@ -105,9 +105,9 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #         assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
 #         if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
-#             out = ak.layout.NumpyArray(nplike.ma.concatenate(out))
+#             out = ak._v2.contents.NumpyArray(nplike.ma.concatenate(out))
 #         else:
-#             out = ak.layout.NumpyArray(nplike.concatenate(out))
+#             out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
 
 #     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
@@ -116,7 +116,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #                 return apply(layout.array)
 
 #             elif isinstance(layout, ak._util.unknowntypes):
-#                 return apply(ak.layout.NumpyArray(nplike.array([])))
+#                 return apply(ak._v2.contents.NumpyArray(nplike.array([])))
 
 #             elif isinstance(layout, ak._util.indexedtypes):
 #                 return apply(layout.project())
@@ -124,7 +124,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #             elif isinstance(layout, ak._util.uniontypes):
 #                 if not any(
 #                     isinstance(x, ak._util.optiontypes)
-#                     and not isinstance(x, ak.layout.UnmaskedArray)
+#                     and not isinstance(x, ak._v2.contents.UnmaskedArray)
 #                     for x in layout.contents
 #                 ):
 #                     return layout
@@ -134,7 +134,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #                 bigmask = nplike.empty(len(index), dtype=np.bool_)
 #                 for tag, content in enumerate(layout.contents):
 #                     if isinstance(content, ak._util.optiontypes) and not isinstance(
-#                         content, ak.layout.UnmaskedArray
+#                         content, ak._v2.contents.UnmaskedArray
 #                     ):
 #                         bigmask[:] = False
 #                         bigmask[tags == tag] = nplike.asarray(content.bytemask()).view(
@@ -143,9 +143,9 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #                         index[bigmask] = -1
 
 #                 good = index >= 0
-#                 return ak.layout.UnionArray8_64(
-#                     ak.layout.Index8(tags[good]),
-#                     ak.layout.Index64(index[good]),
+#                 return ak._v2.contents.UnionArray8_64(
+#                     ak._v2.index.Index8(tags[good]),
+#                     ak._v2.index.Index64(index[good]),
 #                     layout.contents,
 #                 )
 

@@ -90,21 +90,21 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 
 #         if len(keys) == 0:
 #             # the only key was removed, so just create new Record
-#             out = (ak.layout.RecordArray([what], [where], parameters=base.parameters),)
+#             out = (ak._v2.contents.RecordArray([what], [where], parameters=base.parameters),)
 
 #         else:
 
 #             def getfunction(inputs):
 #                 nplike = ak.nplike.of(*inputs)
 #                 base, what = inputs
-#                 if isinstance(base, ak.layout.RecordArray):
+#                 if isinstance(base, ak._v2.contents.RecordArray):
 #                     if what is None:
-#                         what = ak.layout.IndexedOptionArray64(
-#                             ak.layout.Index64(nplike.full(len(base), -1, np.int64)),
-#                             ak.layout.EmptyArray(),
+#                         what = ak._v2.contents.IndexedOptionArray64(
+#                             ak._v2.index.Index64(nplike.full(len(base), -1, np.int64)),
+#                             ak._v2.contents.EmptyArray(),
 #                         )
-#                     elif not isinstance(what, ak.layout.Content):
-#                         what = ak.layout.NumpyArray(nplike.repeat(what, len(base)))
+#                     elif not isinstance(what, ak._v2.contents.Content):
+#                         what = ak._v2.contents.NumpyArray(nplike.repeat(what, len(base)))
 #                     if base.istuple and where is None:
 #                         recordlookup = None
 #                     elif base.istuple:
@@ -113,7 +113,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #                         recordlookup = keys + [str(len(keys))]
 #                     else:
 #                         recordlookup = keys + [where]
-#                     out = ak.layout.RecordArray(
+#                     out = ak._v2.contents.RecordArray(
 #                         [base[k] for k in keys] + [what],
 #                         recordlookup,
 #                         parameters=base.parameters,

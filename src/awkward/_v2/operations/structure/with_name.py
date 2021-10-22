@@ -34,10 +34,10 @@ def with_name(array, name, highlevel=True, behavior=None):
 #     """
 
 #     def getfunction(layout):
-#         if isinstance(layout, ak.layout.RecordArray):
+#         if isinstance(layout, ak._v2.contents.RecordArray):
 #             parameters = dict(layout.parameters)
 #             parameters["__record__"] = name
-#             return lambda: ak.layout.RecordArray(
+#             return lambda: ak._v2.contents.RecordArray(
 #                 layout.contents,
 #                 layout.recordlookup,
 #                 len(layout),

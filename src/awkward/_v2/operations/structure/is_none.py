@@ -32,7 +32,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
 #         if posaxis == depth - 1:
 #             nplike = ak.nplike.of(layout)
 #             if isinstance(layout, ak._util.optiontypes):
-#                 return lambda: ak.layout.NumpyArray(
+#                 return lambda: ak._v2.contents.NumpyArray(
 #                     nplike.asarray(layout.bytemask()).view(np.bool_)
 #                 )
 #             elif isinstance(
@@ -41,10 +41,10 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
 #                     ak._util.unknowntypes,
 #                     ak._util.listtypes,
 #                     ak._util.recordtypes,
-#                     ak.layout.NumpyArray,
+#                     ak._v2.contents.NumpyArray,
 #                 ),
 #             ):
-#                 return lambda: ak.layout.NumpyArray(
+#                 return lambda: ak._v2.contents.NumpyArray(
 #                     nplike.zeros(len(layout), dtype=np.bool_)
 #                 )
 #             else:

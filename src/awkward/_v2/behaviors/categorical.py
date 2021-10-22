@@ -89,7 +89,7 @@
 #         one_mapped = one_to_two[one_index]
 
 #     out = one_mapped == two_index
-#     return ak._util.wrap(ak.layout.NumpyArray(out), ak._util.behaviorof(one, two))
+#     return ak._util.wrap(ak._v2.contents.NumpyArray(out), ak._util.behaviorof(one, two))
 
 
 # ak.behavior[ak.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
@@ -243,16 +243,16 @@
 
 #             if isinstance(layout, ak._util.indexedoptiontypes):
 #                 content = layout.content
-#                 cls = ak.layout.IndexedOptionArray64
+#                 cls = ak._v2.contents.IndexedOptionArray64
 #             elif isinstance(layout, ak._util.indexedtypes):
 #                 content = layout.content
-#                 cls = ak.layout.IndexedArray64
+#                 cls = ak._v2.contents.IndexedArray64
 #             elif isinstance(layout, ak._util.optiontypes):
 #                 content = layout.content
-#                 cls = ak.layout.IndexedOptionArray64
+#                 cls = ak._v2.contents.IndexedOptionArray64
 #             else:
 #                 content = layout
-#                 cls = ak.layout.IndexedArray64
+#                 cls = ak._v2.contents.IndexedArray64
 
 #             content_list = ak.operations.convert.to_list(content)
 #             hashable = [_hashable(x) for x in content_list]
@@ -273,19 +273,19 @@
 #                 original_index = ak.nplike.numpy.asarray(layout.index)
 #                 index = mapping[original_index]
 #                 index[original_index < 0] = -1
-#                 index = ak.layout.Index64(index)
+#                 index = ak._v2.index.Index64(index)
 
 #             elif isinstance(layout, ak._util.indexedtypes):
 #                 original_index = ak.nplike.numpy.asarray(layout.index)
-#                 index = ak.layout.Index64(mapping[original_index])
+#                 index = ak._v2.index.Index64(mapping[original_index])
 
 #             elif isinstance(layout, ak._util.optiontypes):
 #                 mask = ak.nplike.numpy.asarray(layout.bytemask())
 #                 mapping[mask.view(np.bool_)] = -1
-#                 index = ak.layout.Index64(mapping)
+#                 index = ak._v2.index.Index64(mapping)
 
 #             else:
-#                 index = ak.layout.Index64(mapping)
+#                 index = ak._v2.index.Index64(mapping)
 
 #             out = cls(index, content[is_first], parameters={"__array__": "categorical"})
 #             return lambda: out

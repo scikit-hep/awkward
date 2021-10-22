@@ -125,12 +125,12 @@ def broadcast_arrays(*arrays, **kwargs):
 #         y = ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
 #         if isinstance(y, ak.partition.PartitionedArray):
 #             y = y.toContent()
-#         if not isinstance(y, (ak.layout.Content, ak.layout.Record)):
-#             y = ak.layout.NumpyArray(ak.nplike.of(*arrays).array([y]))
+#         if not isinstance(y, (ak._v2.contents.Content, ak._v2.contents.Record)):
+#             y = ak._v2.contents.NumpyArray(ak.nplike.of(*arrays).array([y]))
 #         inputs.append(y)
 
 #     def getfunction(inputs):
-#         if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
+#         if all(isinstance(x, ak._v2.contents.NumpyArray) for x in inputs):
 #             return lambda: tuple(inputs)
 #         else:
 #             return None

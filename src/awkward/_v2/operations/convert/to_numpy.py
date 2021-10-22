@@ -125,7 +125,7 @@ def to_numpy(array, allow_missing=True):
 #             out[mask] = content
 #         return out
 
-#     elif isinstance(array, ak.layout.UnmaskedArray):
+#     elif isinstance(array, ak._v2.contents.UnmaskedArray):
 #         content = to_numpy(array.content, allow_missing=allow_missing)
 #         if allow_missing:
 #             return numpy.ma.MaskedArray(content)
@@ -164,7 +164,7 @@ def to_numpy(array, allow_missing=True):
 #             else:
 #                 return content
 
-#     elif isinstance(array, ak.layout.RegularArray):
+#     elif isinstance(array, ak._v2.contents.RegularArray):
 #         out = to_numpy(array.content, allow_missing=allow_missing)
 #         head, tail = out.shape[0], out.shape[1:]
 #         if array.size == 0:
@@ -209,14 +209,14 @@ def to_numpy(array, allow_missing=True):
 
 #         return out
 
-#     elif isinstance(array, ak.layout.NumpyArray):
+#     elif isinstance(array, ak._v2.contents.NumpyArray):
 #         out = ak.nplike.of(array).asarray(array)
 #         if type(out).__module__.startswith("cupy."):
 #             return out.get()
 #         else:
 #             return out
 
-#     elif isinstance(array, ak.layout.Content):
+#     elif isinstance(array, ak._v2.contents.Content):
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(array))
 #             + ak._util.exception_suffix(__file__)

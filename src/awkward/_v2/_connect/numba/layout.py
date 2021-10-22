@@ -13,33 +13,33 @@
 # numpy = ak.nplike.Numpy.instance()
 
 
-# @numba.extending.typeof_impl.register(ak.layout.NumpyArray)
-# @numba.extending.typeof_impl.register(ak.layout.RegularArray)
-# @numba.extending.typeof_impl.register(ak.layout.ListArray32)
-# @numba.extending.typeof_impl.register(ak.layout.ListArrayU32)
-# @numba.extending.typeof_impl.register(ak.layout.ListArray64)
-# @numba.extending.typeof_impl.register(ak.layout.ListOffsetArray32)
-# @numba.extending.typeof_impl.register(ak.layout.ListOffsetArrayU32)
-# @numba.extending.typeof_impl.register(ak.layout.ListOffsetArray64)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedArray32)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedArrayU32)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedArray64)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedOptionArray32)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedOptionArray64)
-# @numba.extending.typeof_impl.register(ak.layout.ByteMaskedArray)
-# @numba.extending.typeof_impl.register(ak.layout.BitMaskedArray)
-# @numba.extending.typeof_impl.register(ak.layout.UnmaskedArray)
-# @numba.extending.typeof_impl.register(ak.layout.RecordArray)
-# @numba.extending.typeof_impl.register(ak.layout.UnionArray8_32)
-# @numba.extending.typeof_impl.register(ak.layout.UnionArray8_U32)
-# @numba.extending.typeof_impl.register(ak.layout.UnionArray8_64)
-# @numba.extending.typeof_impl.register(ak.layout.VirtualArray)
-# @numba.extending.typeof_impl.register(ak.layout.Index8)
-# @numba.extending.typeof_impl.register(ak.layout.IndexU8)
-# @numba.extending.typeof_impl.register(ak.layout.Index32)
-# @numba.extending.typeof_impl.register(ak.layout.IndexU32)
-# @numba.extending.typeof_impl.register(ak.layout.Index64)
-# @numba.extending.typeof_impl.register(ak.layout.Record)
+# @numba.extending.typeof_impl.register(ak._v2.contents.NumpyArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.RegularArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListArray32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListArrayU32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListArray64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListOffsetArray32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListOffsetArrayU32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListOffsetArray64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedArray32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedArrayU32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedArray64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedOptionArray32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedOptionArray64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ByteMaskedArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.BitMaskedArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.UnmaskedArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.RecordArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.UnionArray8_32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.UnionArray8_U32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.UnionArray8_64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.VirtualArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.Index8)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexU8)
+# @numba.extending.typeof_impl.register(ak._v2.contents.Index32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexU32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.Index64)
+# @numba.extending.typeof_impl.register(ak._v2.record.Record)
 # def fake_typeof(obj, c):
 #     raise TypeError(
 #         "{0} objects cannot be passed directly into Numba-compiled functions; "
@@ -50,21 +50,21 @@
 
 
 # def typeof(obj):
-#     if isinstance(obj, ak.layout.NumpyArray):
+#     if isinstance(obj, ak._v2.contents.NumpyArray):
 #         return typeof_NumpyArray(obj)
 
-#     elif isinstance(obj, ak.layout.RegularArray):
+#     elif isinstance(obj, ak._v2.contents.RegularArray):
 #         return typeof_RegularArray(obj)
 
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.ListArray32,
-#             ak.layout.ListArrayU32,
-#             ak.layout.ListArray64,
-#             ak.layout.ListOffsetArray32,
-#             ak.layout.ListOffsetArrayU32,
-#             ak.layout.ListOffsetArray64,
+#             ak._v2.contents.ListArray32,
+#             ak._v2.contents.ListArrayU32,
+#             ak._v2.contents.ListArray64,
+#             ak._v2.contents.ListOffsetArray32,
+#             ak._v2.contents.ListOffsetArrayU32,
+#             ak._v2.contents.ListOffsetArray64,
 #         ),
 #     ):
 #         return typeof_ListArray(obj)
@@ -72,9 +72,9 @@
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.IndexedArray32,
-#             ak.layout.IndexedArrayU32,
-#             ak.layout.IndexedArray64,
+#             ak._v2.contents.IndexedArray32,
+#             ak._v2.contents.IndexedArrayU32,
+#             ak._v2.contents.IndexedArray64,
 #         ),
 #     ):
 #         return typeof_IndexedArray(obj)
@@ -82,42 +82,42 @@
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.IndexedOptionArray32,
-#             ak.layout.IndexedOptionArray64,
+#             ak._v2.contents.IndexedOptionArray32,
+#             ak._v2.contents.IndexedOptionArray64,
 #         ),
 #     ):
 #         return typeof_IndexedOptionArray(obj)
 
-#     elif isinstance(obj, ak.layout.ByteMaskedArray):
+#     elif isinstance(obj, ak._v2.contents.ByteMaskedArray):
 #         return typeof_ByteMaskedArray(obj)
 
-#     elif isinstance(obj, ak.layout.BitMaskedArray):
+#     elif isinstance(obj, ak._v2.contents.BitMaskedArray):
 #         return typeof_BitMaskedArray(obj)
 
-#     elif isinstance(obj, ak.layout.UnmaskedArray):
+#     elif isinstance(obj, ak._v2.contents.UnmaskedArray):
 #         return typeof_UnmaskedArray(obj)
 
-#     elif isinstance(obj, ak.layout.RecordArray):
+#     elif isinstance(obj, ak._v2.contents.RecordArray):
 #         return typeof_RecordArray(obj)
 
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.UnionArray8_32,
-#             ak.layout.UnionArray8_U32,
-#             ak.layout.UnionArray8_64,
+#             ak._v2.contents.UnionArray8_32,
+#             ak._v2.contents.UnionArray8_U32,
+#             ak._v2.contents.UnionArray8_64,
 #         ),
 #     ):
 #         return typeof_UnionArray(obj)
 
-#     elif isinstance(obj, ak.layout.VirtualArray):
+#     elif isinstance(obj, ak._v2.contents.VirtualArray):
 #         return typeof_VirtualArray(obj)
 
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.Identities32,
-#             ak.layout.Identities64,
+#             ak._v2.identifier.Identifier32,
+#             ak._v2.identifier.Identifier64,
 #         ),
 #     ):
 #         raise NotImplementedError(
@@ -127,11 +127,11 @@
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.Index8,
-#             ak.layout.IndexU8,
-#             ak.layout.Index32,
-#             ak.layout.IndexU32,
-#             ak.layout.Index64,
+#             ak._v2.index.Index8,
+#             ak._v2.index.IndexU8,
+#             ak._v2.index.Index32,
+#             ak._v2.index.IndexU32,
+#             ak._v2.index.Index64,
 #         ),
 #     ):
 #         raise RuntimeError(
@@ -303,15 +303,15 @@
 
 #     def IndexOf(self, arraytype):
 #         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
-#             return ak.layout.Index8
+#             return ak._v2.index.Index8
 #         elif arraytype.dtype.bitwidth == 8:
-#             return ak.layout.IndexU8
+#             return ak._v2.index.IndexU8
 #         elif arraytype.dtype.bitwidth == 32 and arraytype.dtype.signed:
-#             return ak.layout.Index32
+#             return ak._v2.index.Index32
 #         elif arraytype.dtype.bitwidth == 32:
-#             return ak.layout.IndexU32
+#             return ak._v2.index.IndexU32
 #         elif arraytype.dtype.bitwidth == 64 and arraytype.dtype.signed:
-#             return ak.layout.Index64
+#             return ak._v2.index.Index64
 #         else:
 #             raise AssertionError(
 #                 "no Index* type for array: {0}".format(arraytype)
@@ -596,7 +596,7 @@
 
 #     def tolayout(self, lookup, pos, fields):
 #         assert fields == ()
-#         return ak.layout.NumpyArray(
+#         return ak._v2.contents.NumpyArray(
 #             lookup.original_positions[pos + self.ARRAY], parameters=self.parameters
 #         )
 
@@ -705,7 +705,7 @@
 #         content = self.contenttype.tolayout(
 #             lookup, lookup.positions[pos + self.CONTENT], fields
 #         )
-#         return ak.layout.RegularArray(content, self.size, 0, parameters=self.parameters)
+#         return ak._v2.contents.RegularArray(content, self.size, 0, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -774,9 +774,9 @@
 #         if isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListArray32,
-#                 ak.layout.ListArrayU32,
-#                 ak.layout.ListArray64,
+#                 ak._v2.contents.ListArray32,
+#                 ak._v2.contents.ListArrayU32,
+#                 ak._v2.contents.ListArray64,
 #             ),
 #         ):
 #             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
@@ -784,9 +784,9 @@
 #         elif isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListOffsetArray32,
-#                 ak.layout.ListOffsetArrayU32,
-#                 ak.layout.ListOffsetArray64,
+#                 ak._v2.contents.ListOffsetArray32,
+#                 ak._v2.contents.ListOffsetArrayU32,
+#                 ak._v2.contents.ListOffsetArray64,
 #             ),
 #         ):
 #             offsets = ak.nplike.of(layout.offsets).asarray(layout.offsets)
@@ -860,9 +860,9 @@
 #         if isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListArray32,
-#                 ak.layout.ListArrayU32,
-#                 ak.layout.ListArray64,
+#                 ak._v2.contents.ListArray32,
+#                 ak._v2.contents.ListArrayU32,
+#                 ak._v2.contents.ListArray64,
 #             ),
 #         ):
 #             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
@@ -870,9 +870,9 @@
 #         elif isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListOffsetArray32,
-#                 ak.layout.ListOffsetArrayU32,
-#                 ak.layout.ListOffsetArray64,
+#                 ak._v2.contents.ListOffsetArray32,
+#                 ak._v2.contents.ListOffsetArrayU32,
+#                 ak._v2.contents.ListOffsetArray64,
 #             ),
 #         ):
 #             offsets = ak.nplike.of(layout.offsets).asarray(layout.offsets)
@@ -890,11 +890,11 @@
 
 #     def ListArrayOf(self):
 #         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak.layout.ListArray32
+#             return ak._v2.contents.ListArray32
 #         elif self.indextype.dtype.bitwidth == 32:
-#             return ak.layout.ListArrayU32
+#             return ak._v2.contents.ListArrayU32
 #         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak.layout.ListArray64
+#             return ak._v2.contents.ListArray64
 #         else:
 #             raise AssertionError(
 #                 "no ListArray* type for array: {0}".format(self.indextype)
@@ -1056,11 +1056,11 @@
 
 #     def IndexedArrayOf(self):
 #         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak.layout.IndexedArray32
+#             return ak._v2.contents.IndexedArray32
 #         elif self.indextype.dtype.bitwidth == 32:
-#             return ak.layout.IndexedArrayU32
+#             return ak._v2.contents.IndexedArrayU32
 #         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak.layout.IndexedArray64
+#             return ak._v2.contents.IndexedArray64
 #         else:
 #             raise AssertionError(
 #                 "no IndexedArray* type for array: {0}".format(self.indextype)
@@ -1229,9 +1229,9 @@
 
 #     def IndexedOptionArrayOf(self):
 #         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak.layout.IndexedOptionArray32
+#             return ak._v2.contents.IndexedOptionArray32
 #         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak.layout.IndexedOptionArray64
+#             return ak._v2.contents.IndexedOptionArray64
 #         else:
 #             raise AssertionError(
 #                 "no IndexedOptionArray* type for array: {0}".format(self.indextype)
@@ -1424,7 +1424,7 @@
 #         content = self.contenttype.tolayout(
 #             lookup, lookup.positions[pos + self.CONTENT], fields
 #         )
-#         return ak.layout.ByteMaskedArray(
+#         return ak._v2.contents.ByteMaskedArray(
 #             mask, content, self.valid_when, parameters=self.parameters
 #         )
 
@@ -1607,7 +1607,7 @@
 #         content = self.contenttype.tolayout(
 #             lookup, lookup.positions[pos + self.CONTENT], fields
 #         )
-#         return ak.layout.BitMaskedArray(
+#         return ak._v2.contents.BitMaskedArray(
 #             mask,
 #             content,
 #             self.valid_when,
@@ -1787,7 +1787,7 @@
 #         content = self.contenttype.tolayout(
 #             lookup, lookup.positions[pos + self.CONTENT], fields
 #         )
-#         return ak.layout.UnmaskedArray(content, parameters=self.parameters)
+#         return ak._v2.contents.UnmaskedArray(content, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -1986,14 +1986,14 @@
 #                 contents.append(layout)
 
 #             if len(contents) == 0:
-#                 return ak.layout.RecordArray(
+#                 return ak._v2.contents.RecordArray(
 #                     contents,
 #                     self.recordlookup,
 #                     np.iinfo(np.int64).max,
 #                     parameters=self.parameters,
 #                 )
 #             else:
-#                 return ak.layout.RecordArray(
+#                 return ak._v2.contents.RecordArray(
 #                     contents, self.recordlookup, parameters=self.parameters
 #                 )
 
@@ -2357,11 +2357,11 @@
 #     def UnionArrayOf(self):
 #         if self.tagstype.dtype.bitwidth == 8 and self.tagstype.dtype.signed:
 #             if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#                 return ak.layout.UnionArray8_32
+#                 return ak._v2.contents.UnionArray8_32
 #             elif self.indextype.dtype.bitwidth == 32:
-#                 return ak.layout.UnionArray8_U32
+#                 return ak._v2.contents.UnionArray8_U32
 #             elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#                 return ak.layout.UnionArray8_64
+#                 return ak._v2.contents.UnionArray8_64
 #             else:
 #                 raise AssertionError(
 #                     "no UnionArray* type for index array: {0}".format(self.indextype)

@@ -123,42 +123,42 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #         if not isinstance(
 #             intercept,
 #             (
-#                 ak.layout.Content,
-#                 ak.layout.Record,
+#                 ak._v2.contents.Content,
+#                 ak._v2.record.Record,
 #                 ak.partition.PartitionedArray,
 #             ),
 #         ):
-#             intercept = ak.layout.NumpyArray(nplike.array([intercept]))
+#             intercept = ak._v2.contents.NumpyArray(nplike.array([intercept]))
 #             scalar = True
 #         if not isinstance(
 #             slope,
 #             (
-#                 ak.layout.Content,
-#                 ak.layout.Record,
+#                 ak._v2.contents.Content,
+#                 ak._v2.record.Record,
 #                 ak.partition.PartitionedArray,
 #             ),
 #         ):
-#             slope = ak.layout.NumpyArray(nplike.array([slope]))
+#             slope = ak._v2.contents.NumpyArray(nplike.array([slope]))
 #             scalar = True
 #         if not isinstance(
 #             intercept_error,
 #             (
-#                 ak.layout.Content,
-#                 ak.layout.Record,
+#                 ak._v2.contents.Content,
+#                 ak._v2.record.Record,
 #                 ak.partition.PartitionedArray,
 #             ),
 #         ):
-#             intercept_error = ak.layout.NumpyArray(nplike.array([intercept_error]))
+#             intercept_error = ak._v2.contents.NumpyArray(nplike.array([intercept_error]))
 #             scalar = True
 #         if not isinstance(
 #             slope_error,
 #             (
-#                 ak.layout.Content,
-#                 ak.layout.Record,
+#                 ak._v2.contents.Content,
+#                 ak._v2.record.Record,
 #                 ak.partition.PartitionedArray,
 #             ),
 #         ):
-#             slope_error = ak.layout.NumpyArray(nplike.array([slope_error]))
+#             slope_error = ak._v2.contents.NumpyArray(nplike.array([slope_error]))
 #             scalar = True
 
 #         sample = None
@@ -185,7 +185,7 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #                 sample.numpartitions, (intercept, slope, intercept_error, slope_error)
 #             ):
 #                 output.append(
-#                     ak.layout.RecordArray(
+#                     ak._v2.contents.RecordArray(
 #                         [a, b, c, d],
 #                         ["intercept", "slope", "intercept_error", "slope_error"],
 #                         parameters={"__record__": "LinearFit"},
@@ -194,7 +194,7 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #             out = ak.partition.IrregularlyPartitionedArray(output)
 
 #         else:
-#             out = ak.layout.RecordArray(
+#             out = ak._v2.contents.RecordArray(
 #                 [intercept, slope, intercept_error, slope_error],
 #                 ["intercept", "slope", "intercept_error", "slope_error"],
 #                 parameters={"__record__": "LinearFit"},

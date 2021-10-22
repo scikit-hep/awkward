@@ -108,7 +108,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #                     "too large counts for array or negative counts"
 #                     + ak._util.exception_suffix(__file__)
 #                 )
-#             out = ak.layout.RegularArray(layout, counts)
+#             out = ak._v2.contents.RegularArray(layout, counts)
 
 #         else:
 #             position = (
@@ -128,10 +128,10 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             offsets = current_offsets[0][: position + 1]
 #             current_offsets[0] = current_offsets[0][position:] - len(layout)
 
-#             out = ak.layout.ListOffsetArray64(ak.layout.Index64(offsets), layout)
+#             out = ak._v2.contents.ListOffsetArray64(ak._v2.contents.Index64(offsets), layout)
 #             if not isinstance(mask, (bool, np.bool_)):
-#                 index = ak.layout.Index8(nplike.asarray(mask).astype(np.int8))
-#                 out = ak.layout.ByteMaskedArray(index, out, valid_when=False)
+#                 index = ak._v2.index.Index8(nplike.asarray(mask).astype(np.int8))
+#                 out = ak._v2.contents.ByteMaskedArray(index, out, valid_when=False)
 
 #         return out
 
@@ -159,9 +159,9 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #                 outeroffsets = nplike.asarray(listoffsetarray.offsets)
 
 #                 content = doit(listoffsetarray.content[: outeroffsets[-1]])
-#                 if isinstance(content, ak.layout.ByteMaskedArray):
+#                 if isinstance(content, ak._v2.contents.ByteMaskedArray):
 #                     inneroffsets = nplike.asarray(content.content.offsets)
-#                 elif isinstance(content, ak.layout.RegularArray):
+#                 elif isinstance(content, ak._v2.contents.RegularArray):
 #                     inneroffsets = nplike.asarray(
 #                         content.toListOffsetArray64(True).offsets
 #                     )
@@ -177,8 +177,8 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #                         "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
 #                     )
 
-#                 return ak.layout.ListOffsetArray64(
-#                     ak.layout.Index64(positions), content
+#                 return ak._v2.contents.ListOffsetArray64(
+#                     ak._v2.index.Index64(positions), content
 #                 )
 
 #             else:

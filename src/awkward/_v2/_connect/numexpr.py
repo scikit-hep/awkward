@@ -91,11 +91,11 @@
 
 #     def getfunction(inputs):
 #         if all(
-#             isinstance(x, ak.layout.NumpyArray) or not isinstance(x, ak.layout.Content)
+#             isinstance(x, ak._v2.contents.NumpyArray) or not isinstance(x, ak._v2.contents.Content)
 #             for x in inputs
 #         ):
 #             return lambda: (
-#                 ak.layout.NumpyArray(
+#                 ak._v2.contents.NumpyArray(
 #                     numexpr.evaluate(
 #                         expression,
 #                         dict(zip(names, inputs)),
@@ -140,11 +140,11 @@
 
 #     def getfunction(inputs):
 #         if all(
-#             isinstance(x, ak.layout.NumpyArray) or not isinstance(x, ak.layout.Content)
+#             isinstance(x, ak._v2.contents.NumpyArray) or not isinstance(x, ak._v2.contents.Content)
 #             for x in inputs
 #         ):
 #             return lambda: (
-#                 ak.layout.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
+#                 ak._v2.contents.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
 #             )
 #         else:
 #             return None

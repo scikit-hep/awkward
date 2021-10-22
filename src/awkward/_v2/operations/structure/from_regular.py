@@ -40,7 +40,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
 
 #     def getfunction(layout, depth, posaxis):
 #         posaxis = layout.axis_wrap_if_negative(posaxis)
-#         if posaxis == depth and isinstance(layout, ak.layout.RegularArray):
+#         if posaxis == depth and isinstance(layout, ak._v2.contents.RegularArray):
 #             return lambda: layout.toListOffsetArray64(False)
 #         elif posaxis == depth and isinstance(layout, ak._util.listtypes):
 #             return lambda: layout

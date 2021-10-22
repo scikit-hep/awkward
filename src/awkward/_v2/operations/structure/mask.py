@@ -93,16 +93,16 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 
 #     def getfunction(inputs):
 #         layoutarray, layoutmask = inputs
-#         if isinstance(layoutmask, ak.layout.NumpyArray):
+#         if isinstance(layoutmask, ak._v2.contents.NumpyArray):
 #             m = ak.nplike.of(layoutmask).asarray(layoutmask)
 #             if not issubclass(m.dtype.type, (bool, np.bool_)):
 #                 raise ValueError(
 #                     "mask must have boolean type, not "
 #                     "{0}".format(repr(m.dtype)) + ak._util.exception_suffix(__file__)
 #                 )
-#             bytemask = ak.layout.Index8(m.view(np.int8))
+#             bytemask = ak._v2.index.Index8(m.view(np.int8))
 #             return lambda: (
-#                 ak.layout.ByteMaskedArray(
+#                 ak._v2.contents.ByteMaskedArray(
 #                     bytemask, layoutarray, valid_when=valid_when
 #                 ).simplify(),
 #             )

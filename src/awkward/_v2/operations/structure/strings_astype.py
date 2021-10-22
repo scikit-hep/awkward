@@ -62,7 +62,7 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 #             npnumbers = (
 #                 npstrings.reshape(-1).view("<S" + str(max_length)).astype(to_dtype)
 #             )
-#             return lambda: ak.layout.NumpyArray(npnumbers)
+#             return lambda: ak._v2.contents.NumpyArray(npnumbers)
 #         else:
 #             return None
 

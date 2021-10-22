@@ -41,8 +41,8 @@ def singletons(array, highlevel=True, behavior=None):
 #             offsets[0] = 0
 #             offsets[1:][nulls] = 0
 #             nplike.cumsum(offsets, out=offsets)
-#             return lambda: ak.layout.ListOffsetArray64(
-#                 ak.layout.Index64(offsets), layout.project()
+#             return lambda: ak._v2.contents.ListOffsetArray64(
+#                 ak._v2.index.Index64(offsets), layout.project()
 #             )
 #         else:
 #             return None

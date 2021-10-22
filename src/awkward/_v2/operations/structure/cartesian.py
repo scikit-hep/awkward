@@ -312,20 +312,20 @@ def cartesian(
 #         ]
 
 #         indexes = [
-#             ak.layout.Index64(x.reshape(-1))
+#             ak._v2.index.Index64(x.reshape(-1))
 #             for x in nplike.meshgrid(
 #                 *[nplike.arange(len(x), dtype=np.int64) for x in layouts], indexing="ij"
 #             )
 #         ]
 #         outs = [
-#             ak.layout.IndexedArray64(x, y)
+#             ak._v2.contents.IndexedArray64(x, y)
 #             for x, y in __builtins__["zip"](indexes, layouts)
 #         ]
 
-#         result = ak.layout.RecordArray(outs, recordlookup, parameters=parameters)
+#         result = ak._v2.contents.RecordArray(outs, recordlookup, parameters=parameters)
 #         for i in range(len(new_arrays) - 1, -1, -1):
 #             if i in nested:
-#                 result = ak.layout.RegularArray(result, len(layouts[i + 1]), 0)
+#                 result = ak._v2.contents.RegularArray(result, len(layouts[i + 1]), 0)
 
 #     elif is_partitioned:
 #         sample = None
@@ -363,7 +363,7 @@ def cartesian(
 #             if i == 0:
 #                 return layout
 #             else:
-#                 return ak.layout.RegularArray(newaxis(layout, i - 1), 1, 0)
+#                 return ak._v2.contents.RegularArray(newaxis(layout, i - 1), 1, 0)
 
 #         def getgetfunction1(i):
 #             def getfunction1(layout, depth):
@@ -449,12 +449,12 @@ def cartesian(
 #                 if all(len(x) == 0 for x in inputs):
 #                     inputs = [
 #                         x.content
-#                         if isinstance(x, ak.layout.RegularArray) and x.size == 1
+#                         if isinstance(x, ak._v2.contents.RegularArray) and x.size == 1
 #                         else x
 #                         for x in inputs
 #                     ]
 #                 return lambda: (
-#                     ak.layout.RecordArray(inputs, recordlookup, parameters=parameters),
+#                     ak._v2.contents.RecordArray(inputs, recordlookup, parameters=parameters),
 #                 )
 #             else:
 #                 return None
