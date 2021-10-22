@@ -7,7 +7,7 @@
 # np = ak.nplike.NumpyMetadata.instance()
 
 
-# class CategoricalBehavior(ak.highlevel.Array):
+# class CategoricalBehavior(ak._v2.highlevel.Array):
 #     __name__ = "Array"
 
 
@@ -98,11 +98,11 @@
 # def _apply_ufunc(ufunc, method, inputs, kwargs):
 #     nextinputs = []
 #     for x in inputs:
-#         if isinstance(x, ak.highlevel.Array) and isinstance(
+#         if isinstance(x, ak._v2.highlevel.Array) and isinstance(
 #             x.layout, ak._v2._util.indexedtypes
 #         ):
 #             nextinputs.append(
-#                 ak.highlevel.Array(x.layout.project(), behavior=ak._v2._util.behaviorof(x))
+#                 ak._v2.highlevel.Array(x.layout.project(), behavior=ak._v2._util.behaviorof(x))
 #             )
 #         else:
 #             nextinputs.append(x)

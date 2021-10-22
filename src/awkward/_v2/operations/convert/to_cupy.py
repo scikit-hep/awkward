@@ -36,16 +36,16 @@ def to_cupy(array):
 #     elif isinstance(array, np.ndarray):
 #         return cupy.asarray(array)
 
-#     elif isinstance(array, ak.highlevel.Array):
+#     elif isinstance(array, ak._v2.highlevel.Array):
 #         return to_cupy(array.layout)
 
-#     elif isinstance(array, ak.highlevel.Record):
+#     elif isinstance(array, ak._v2.highlevel.Record):
 #         raise ValueError(
 #             "CuPy does not support record structures"
 #
 #         )
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return to_cupy(array.snapshot().layout)
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):

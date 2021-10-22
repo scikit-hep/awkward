@@ -26,10 +26,10 @@ def validity_error(array, exception=False):
 
 #     See also #ak.is_valid.
 #     """
-#     if isinstance(array, (ak.highlevel.Array, ak.highlevel.Record)):
+#     if isinstance(array, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
 #         return validity_error(array.layout, exception=exception)
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return validity_error(array.snapshot().layout, exception=exception)
 
 #     elif isinstance(

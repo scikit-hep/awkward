@@ -89,13 +89,13 @@ def type(array):
 #     ):
 #         return ak.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
 
-#     elif isinstance(array, ak.highlevel.Array):
+#     elif isinstance(array, ak._v2.highlevel.Array):
 #         return ak._v2._util.highlevel_type(array.layout, array.behavior, True)
 
-#     elif isinstance(array, ak.highlevel.Record):
+#     elif isinstance(array, ak._v2.highlevel.Record):
 #         return ak._v2._util.highlevel_type(array.layout, array.behavior, False)
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return ak._v2._util.highlevel_type(array.snapshot().layout, array.behavior, True)
 
 #     elif isinstance(array, ak._v2.record.Record):

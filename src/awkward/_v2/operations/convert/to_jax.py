@@ -43,16 +43,16 @@ def to_jax(array):
 #     elif isinstance(array, np.ndarray):
 #         return jax.numpy.asarray(array)
 
-#     elif isinstance(array, ak.highlevel.Array):
+#     elif isinstance(array, ak._v2.highlevel.Array):
 #         return to_jax(array.layout)
 
-#     elif isinstance(array, ak.highlevel.Record):
+#     elif isinstance(array, ak._v2.highlevel.Record):
 #         raise ValueError(
 #             "JAX does not support record structures"
 #
 #         )
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return to_jax(array.snapshot().layout)
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):

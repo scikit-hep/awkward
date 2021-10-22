@@ -32,14 +32,14 @@
 
 #         record = type(
 #             cls_name + "Record",
-#             (cls, ak.highlevel.Record),
+#             (cls, ak._v2.highlevel.Record),
 #             {"__module__": cls.__module__},
 #         )
 #         setattr(sys.modules[cls.__module__], cls_name + "Record", record)
 #         registry[behavior_name] = record
 #         array = type(
 #             cls_name + "Array",
-#             (cls, ak.highlevel.Array),
+#             (cls, ak._v2.highlevel.Array),
 #             {"__module__": cls.__module__},
 #         )
 #         setattr(sys.modules[cls.__module__], cls_name + "Array", array)

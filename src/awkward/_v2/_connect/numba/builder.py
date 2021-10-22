@@ -77,7 +77,7 @@
 # @numba.extending.box(ArrayBuilderType)
 # def box_ArrayBuilder(arraybuildertype, arraybuilderval, c):
 #     ArrayBuilder_obj = c.pyapi.unserialize(
-#         c.pyapi.serialize_object(ak.highlevel.ArrayBuilder)
+#         c.pyapi.serialize_object(ak._v2.highlevel.ArrayBuilder)
 #     )
 #     behavior_obj = c.pyapi.unserialize(
 #         c.pyapi.serialize_object(arraybuildertype.behavior)
@@ -351,7 +351,7 @@
 #                         isinstance(key, tuple)
 #                         and len(key) == 3
 #                         and key[0] == "__numba_lower__"
-#                         and key[1] == ak.highlevel.ArrayBuilder.append
+#                         and key[1] == ak._v2.highlevel.ArrayBuilder.append
 #                         and (
 #                             args[0] == key[2]
 #                             or (

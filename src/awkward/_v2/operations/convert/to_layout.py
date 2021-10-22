@@ -34,13 +34,13 @@ def to_layout(
 #     This function is usually used to sanitize inputs for other functions; it
 #     would rarely be used in a data analysis.
 #     """
-#     if isinstance(array, ak.highlevel.Array):
+#     if isinstance(array, ak._v2.highlevel.Array):
 #         return array.layout
 
-#     elif allow_record and isinstance(array, ak.highlevel.Record):
+#     elif allow_record and isinstance(array, ak._v2.highlevel.Record):
 #         return array.layout
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return array.snapshot().layout
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):

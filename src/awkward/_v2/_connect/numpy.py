@@ -91,7 +91,7 @@ import numpy
 #             out = (out,)
 
 #         return tuple(
-#             x.layout if isinstance(x, (ak.highlevel.Array, ak.highlevel.Record)) else x
+#             x.layout if isinstance(x, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)) else x
 #             for x in out
 #         )
 
@@ -112,7 +112,7 @@ import numpy
 #                 out = (out,)
 #             out = tuple(
 #                 x.layout
-#                 if isinstance(x, (ak.highlevel.Array, ak.highlevel.Record))
+#                 if isinstance(x, (ak._v2.highlevel.Array, ak._v2.highlevel.Record))
 #                 else x
 #                 for x in out
 #             )
@@ -367,8 +367,8 @@ import numpy
 #         if matmul_for_numba.numbafied is None:
 #             matmul_for_numba.numbafied = numba.njit(matmul_for_numba)
 
-#         lefts = ak.highlevel.Array(inputs[0])
-#         rights = ak.highlevel.Array(inputs[1])
+#         lefts = ak._v2.highlevel.Array(inputs[0])
+#         rights = ak._v2.highlevel.Array(inputs[1])
 #         dtype = numpy.asarray(lefts[0:0, 0:0, 0:0] + rights[0:0, 0:0, 0:0]).dtype
 
 #         outer, inner, content = matmul_for_numba.numbafied(lefts, rights, dtype)

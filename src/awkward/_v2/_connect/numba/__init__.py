@@ -64,15 +64,15 @@
 #     n.ArrayBuilderType = awkward._v2._connect.numba.builder.ArrayBuilderType
 #     n.ArrayBuilderModel = awkward._v2._connect.numba.builder.ArrayBuilderModel
 
-#     @numba.extending.typeof_impl.register(ak.highlevel.Array)
+#     @numba.extending.typeof_impl.register(ak._v2.highlevel.Array)
 #     def typeof_Array(obj, c):
 #         return obj.numba_type
 
-#     @numba.extending.typeof_impl.register(ak.highlevel.Record)
+#     @numba.extending.typeof_impl.register(ak._v2.highlevel.Record)
 #     def typeof_Record(obj, c):
 #         return obj.numba_type
 
-#     @numba.extending.typeof_impl.register(ak.highlevel.ArrayBuilder)
+#     @numba.extending.typeof_impl.register(ak._v2.highlevel.ArrayBuilder)
 #     def typeof_ArrayBuilder(obj, c):
 #         return obj.numba_type
 

@@ -79,7 +79,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #             isinstance(value, (str, bytes))
 #             or (ak._v2._util.py27 and isinstance(value, ak._v2._util.unicode))
 #         )
-#         or isinstance(value, (ak.highlevel.Record, ak._v2.record.Record))
+#         or isinstance(value, (ak._v2.highlevel.Record, ak._v2.record.Record))
 #     ):
 #         valuelayout = ak._v2.operations.convert.to_layout(
 #             value, allow_record=True, allow_other=False

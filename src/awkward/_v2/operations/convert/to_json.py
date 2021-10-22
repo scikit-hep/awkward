@@ -74,13 +74,13 @@ def to_json(
 #     elif isinstance(array, np.ndarray):
 #         out = ak._v2.contents.NumpyArray(array)
 
-#     elif isinstance(array, ak.highlevel.Array):
+#     elif isinstance(array, ak._v2.highlevel.Array):
 #         out = array.layout
 
-#     elif isinstance(array, ak.highlevel.Record):
+#     elif isinstance(array, ak._v2.highlevel.Record):
 #         out = array.layout
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         out = array.snapshot().layout
 
 #     elif isinstance(array, ak._v2.record.Record):

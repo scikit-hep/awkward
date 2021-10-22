@@ -34,7 +34,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #     other.)
 #     """
 
-#     if isinstance(what, (ak.highlevel.Array, ak.highlevel.Record)):
+#     if isinstance(what, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
 #         what_caches = what.caches  # noqa: F841
 
 #     if not (

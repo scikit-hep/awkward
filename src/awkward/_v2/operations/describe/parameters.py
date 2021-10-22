@@ -23,7 +23,7 @@ def parameters(array):
 #     See #ak.Array and #ak.behavior for a more complete description of
 #     behaviors.
 #     """
-#     if isinstance(array, (ak.highlevel.Array, ak.highlevel.Record)):
+#     if isinstance(array, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
 #         return array.layout.parameters
 
 #     elif isinstance(
@@ -36,7 +36,7 @@ def parameters(array):
 #     ):
 #         return array.parameters
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return array.snapshot().layout.parameters
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):

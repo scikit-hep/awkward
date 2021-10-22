@@ -100,7 +100,7 @@ class CharBehavior(Array):
 # ak.behavior["__typestr__", "char"] = "char"
 
 
-# class ByteStringBehavior(ak.highlevel.Array):
+# class ByteStringBehavior(ak._v2.highlevel.Array):
 #     __name__ = "Array"
 
 #     def __iter__(self):
@@ -108,7 +108,7 @@ class CharBehavior(Array):
 #             yield x.__bytes__()
 
 
-# class StringBehavior(ak.highlevel.Array):
+# class StringBehavior(ak._v2.highlevel.Array):
 #     __name__ = "Array"
 
 #     def __iter__(self):

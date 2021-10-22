@@ -71,13 +71,13 @@ def to_list(array):
 #     elif isinstance(array, np.datetime64) or isinstance(array, np.timedelta64):
 #         return array
 
-#     elif isinstance(array, ak.highlevel.Array):
+#     elif isinstance(array, ak._v2.highlevel.Array):
 #         return [to_list(x) for x in array]
 
-#     elif isinstance(array, ak.highlevel.Record):
+#     elif isinstance(array, ak._v2.highlevel.Record):
 #         return to_list(array.layout)
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return to_list(array.snapshot())
 
 #     elif isinstance(array, ak._v2.record.Record) and array.istuple:

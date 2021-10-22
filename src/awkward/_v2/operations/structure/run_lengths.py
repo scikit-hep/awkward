@@ -94,7 +94,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #             return nplike.empty(0, np.int64), offsets
 #         else:
 #             diffs = data[1:] != data[:-1]
-#             if isinstance(diffs, ak.highlevel.Array):
+#             if isinstance(diffs, ak._v2.highlevel.Array):
 #                 diffs = nplike.asarray(diffs)
 #             if offsets is not None:
 #                 diffs[offsets[1:-1] - 1] = True
@@ -119,7 +119,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 layout.parameter("__array__") == "string"
 #                 or layout.parameter("__array__") == "bytestring"
 #             ):
-#                 nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
+#                 nextcontent, _ = lengths_of(ak._v2.highlevel.Array(layout), None)
 #                 return lambda: ak._v2.contents.NumpyArray(nextcontent)
 
 #             if not isinstance(layout, (ak._v2.contents.NumpyArray, ak._v2.contents.EmptyArray)):
@@ -155,7 +155,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                     content = content.project()
 
 #                 nextcontent, nextoffsets = lengths_of(
-#                     ak.highlevel.Array(content), offsets - offsets[0]
+#                     ak._v2.highlevel.Array(content), offsets - offsets[0]
 #                 )
 #                 return lambda: ak._v2.contents.ListOffsetArray64(
 #                     ak._v2.index.Index64(nextoffsets), ak._v2.contents.NumpyArray(nextcontent)

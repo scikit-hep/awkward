@@ -45,14 +45,14 @@ def to_numpy(array, allow_missing=True):
 #     elif isinstance(array, np.ndarray):
 #         return array
 
-#     elif isinstance(array, ak.highlevel.Array):
+#     elif isinstance(array, ak._v2.highlevel.Array):
 #         return to_numpy(array.layout, allow_missing=allow_missing)
 
-#     elif isinstance(array, ak.highlevel.Record):
+#     elif isinstance(array, ak._v2.highlevel.Record):
 #         out = array.layout
 #         return to_numpy(out.array[out.at : out.at + 1], allow_missing=allow_missing)[0]
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return to_numpy(array.snapshot().layout, allow_missing=allow_missing)
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):
