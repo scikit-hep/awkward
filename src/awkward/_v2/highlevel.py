@@ -395,7 +395,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #             suffix = _suffix(self)
     #             limit_value -= len(suffix)
 
-    #             value = ak._util.minimally_touching_string(
+    #             value = ak._v2._util.minimally_touching_string(
     #                 limit_value, self._array.layout, self._array._behavior
     #             )
 
@@ -406,7 +406,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
     #             typestr = repr(
     #                 str(
-    #                     ak._util.highlevel_type(
+    #                     ak._v2._util.highlevel_type(
     #                         self._array.layout, self._array._behavior, True
     #                     )
     #                 )
@@ -1407,7 +1407,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #     def __setstate__(self, state):
     #         if isinstance(state[1], dict):
     #             form, container, num_partitions, behavior = state
-    #             layout = ak._util.adjust_old_pickle(
+    #             layout = ak._v2._util.adjust_old_pickle(
     #                 form, container, num_partitions, behavior
     #             )
     #         else:
@@ -1416,10 +1416,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #                 form, length, container, highlevel=False, behavior=behavior
     #             )
     #         if self.__class__ is Array:
-    #             self.__class__ = ak._util.arrayclass(layout, behavior)
+    #             self.__class__ = ak._v2._util.arrayclass(layout, behavior)
     #         self.layout = layout
     #         self.behavior = behavior
-    #         self._caches = ak._util.find_caches(self.layout)
+    #         self._caches = ak._v2._util.find_caches(self.layout)
 
     #     def __copy__(self):
     #         return Array(self.layout, behavior=self._behavior)
@@ -1438,7 +1438,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
 
 #     def __contains__(self, element):
-#         for test in ak._util.completely_flatten(self.layout):
+#         for test in ak._v2._util.completely_flatten(self.layout):
 #             if element in test:
 #                 return True
 #         return False
@@ -1991,7 +1991,7 @@ class Record(NDArrayOperatorsMixin):
     #     def __setstate__(self, state):
     #         if isinstance(state[1], dict):
     #             form, container, num_partitions, behavior, at = state
-    #             layout = ak._util.adjust_old_pickle(
+    #             layout = ak._v2._util.adjust_old_pickle(
     #                 form, container, num_partitions, behavior
     #             )
     #         else:
@@ -2001,10 +2001,10 @@ class Record(NDArrayOperatorsMixin):
     #             )
     #         layout = ak._v2.record.Record(layout, at)
     #         if self.__class__ is Record:
-    #             self.__class__ = ak._util.recordclass(layout, behavior)
+    #             self.__class__ = ak._v2._util.recordclass(layout, behavior)
     #         self.layout = layout
     #         self.behavior = behavior
-    #         self._caches = ak._util.find_caches(self.layout)
+    #         self._caches = ak._v2._util.find_caches(self.layout)
 
     #     def __copy__(self):
     #         return Record(self.layout, behavior=self._behavior)
@@ -2020,7 +2020,7 @@ class Record(NDArrayOperatorsMixin):
 
 
 #     def __contains__(self, element):
-#         for test in ak._util.completely_flatten(self.layout):
+#         for test in ak._v2._util.completely_flatten(self.layout):
 #             if element in test:
 #                 return True
 #         return False
@@ -2200,7 +2200,7 @@ class Record(NDArrayOperatorsMixin):
 #             self._behavior = behavior
 #         else:
 #             raise TypeError(
-#                 "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
+#                 "behavior must be None or a dict" + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     @property
@@ -2232,12 +2232,12 @@ class Record(NDArrayOperatorsMixin):
 
 #         See #ak.Array.__getitem__ for a more complete description.
 #         """
-#         tmp = ak._util.wrap(self._layout[where], self._behavior)
+#         tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
 
 #         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
 #             return bytes(tmp)
 #         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-#             return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+#             return ak._v2._util.unicode(tmp) if ak._v2._util.py27 else str(tmp)
 #         else:
 #             return tmp
 
@@ -2288,7 +2288,7 @@ class Record(NDArrayOperatorsMixin):
 #         value = self._str(limit_value=limit_value, snapshot=snapshot)
 
 #         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
-#         typestrs = ak._util.typestrs(self._behavior)
+#         typestrs = ak._v2._util.typestrs(self._behavior)
 #         typestr = repr(
 #             str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
 #         )
@@ -2369,7 +2369,7 @@ class Record(NDArrayOperatorsMixin):
 #         buffers are deleted exactly once.
 #         """
 #         layout = self._layout.snapshot()
-#         return ak._util.wrap(layout, self._behavior)
+#         return ak._v2._util.wrap(layout, self._behavior)
 
 #     def null(self):
 #         """
@@ -2605,7 +2605,7 @@ class Record(NDArrayOperatorsMixin):
 #             else:
 #                 raise TypeError(
 #                     "'append' method can only be used with 'at' when "
-#                     "'obj' is an ak.Array" + ak._util.exception_suffix(__file__)
+#                     "'obj' is an ak.Array" + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #     def extend(self, obj):
@@ -2621,7 +2621,7 @@ class Record(NDArrayOperatorsMixin):
 #         else:
 #             raise TypeError(
 #                 "'extend' method requires an ak.Array"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     class _Nested(object):
@@ -2638,7 +2638,7 @@ class Record(NDArrayOperatorsMixin):
 #                 - len("<ArrayBuilder.  type=>")
 #                 - len(self._name)
 #             )
-#             typestrs = ak._util.typestrs(self._arraybuilder._behavior)
+#             typestrs = ak._v2._util.typestrs(self._arraybuilder._behavior)
 #             typestr = repr(
 #                 str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
 #             )

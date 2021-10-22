@@ -104,7 +104,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
 #             if isinstance(fill_value, bytes):
 #                 asbytes = fill_value
 #             elif isinstance(fill_value, str) or (
-#                 ak._util.py27 and isinstance(fill_value, ak._util.unicode)
+#                 ak._v2._util.py27 and isinstance(fill_value, ak._v2._util.unicode)
 #             ):
 #                 asbytes = fill_value.encode("utf-8", "surrogateescape")
 #             else:
@@ -167,8 +167,8 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
 #         else:
 #             return None
 
-#     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
+#     out = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
 #     if dtype is not None:
 #         out = strings_astype(out, dtype)
 #         out = values_astype(out, dtype)
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

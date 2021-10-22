@@ -223,7 +223,7 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Content or Form type: {0}".format(type(layout))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 
@@ -264,7 +264,7 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Form type: {0}".format(type(form))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 
@@ -313,7 +313,7 @@
 # class ArrayView(object):
 #     @classmethod
 #     def fromarray(cls, array):
-#         behavior = ak._util.behaviorof(array)
+#         behavior = ak._v2._util.behaviorof(array)
 #         layout = ak.operations.convert.to_layout(
 #             array,
 #             allow_record=False,
@@ -337,7 +337,7 @@
 #                     raise ValueError(
 #                         "partitioned arrays can only be used in Numba if all "
 #                         "partitions have the same numba_type"
-#                         + ak._util.exception_suffix(__file__)
+#                         + ak._v2._util.exception_suffix(__file__)
 #                     )
 #             return PartitionedView(
 #                 ak._connect._numba.layout.typeof(part),
@@ -372,7 +372,7 @@
 #     def toarray(self):
 #         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
 #         sliced = layout.getitem_range_nowrap(self.start, self.stop)
-#         return ak._util.wrap(sliced, self.behavior)
+#         return ak._v2._util.wrap(sliced, self.behavior)
 
 
 # @numba.extending.typeof_impl.register(ArrayView)
@@ -589,7 +589,7 @@
 #                 raise TypeError(
 #                     "only an integer, start:stop range, or a *constant* "
 #                     "field name string may be used as ak.Array "
-#                     "slices in compiled code" + ak._util.exception_suffix(__file__)
+#                     "slices in compiled code" + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 
@@ -740,7 +740,7 @@
 # class RecordView(object):
 #     @classmethod
 #     def fromrecord(cls, record):
-#         behavior = ak._util.behaviorof(record)
+#         behavior = ak._v2._util.behaviorof(record)
 #         layout = ak.operations.convert.to_layout(
 #             record,
 #             allow_record=True,
@@ -768,7 +768,7 @@
 
 #     def torecord(self):
 #         arraylayout = self.arrayview.toarray().layout
-#         return ak._util.wrap(
+#         return ak._v2._util.wrap(
 #             ak._v2.contents.Record(arraylayout, self.at), self.arrayview.behavior
 #         )
 
@@ -879,7 +879,7 @@
 #                 raise TypeError(
 #                     "only a *constant* field name string may be used as "
 #                     "ak.Record slices in compiled code"
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 
@@ -899,7 +899,7 @@
 #     key = RecordViewType
 
 #     def generic_resolve(self, recordviewtype, attr):
-#         for methodname, typer, lower in ak._util.numba_methods(
+#         for methodname, typer, lower in ak._v2._util.numba_methods(
 #             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
 #         ):
 #             if attr == methodname:
@@ -927,7 +927,7 @@
 
 #                 return numba.types.BoundFunction(type_method, recordviewtype)
 
-#         for attrname, typer, _ in ak._util.numba_attrs(
+#         for attrname, typer, _ in ak._v2._util.numba_attrs(
 #             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
 #         ):
 #             if attr == attrname:
@@ -939,7 +939,7 @@
 
 # @numba.extending.lower_getattr_generic(RecordViewType)
 # def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
-#     for attrname, typer, lower in ak._util.numba_attrs(
+#     for attrname, typer, lower in ak._v2._util.numba_attrs(
 #         recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
 #     ):
 #         if attr == attrname:
@@ -964,7 +964,7 @@
 #                     left = args[0].arrayviewtype.type
 #                     behavior = args[0].arrayviewtype.behavior
 
-#                     for typer, lower in ak._util.numba_unaryops(
+#                     for typer, lower in ak._v2._util.numba_unaryops(
 #                         unaryop, left, behavior
 #                     ):
 #                         numba.extending.lower_builtin(unaryop, *args)(lower)
@@ -1000,7 +1000,7 @@
 #                         behavior = args[1].arrayviewtype.behavior
 
 #                 if left is not None or right is not None:
-#                     for typer, lower in ak._util.numba_binops(
+#                     for typer, lower in ak._v2._util.numba_binops(
 #                         binop, left, right, behavior
 #                     ):
 #                         numba.extending.lower_builtin(binop, *args)(lower)
@@ -1292,7 +1292,7 @@
 
 #             partition_start = partition_stop
 
-#         return ak._util.wrap(
+#         return ak._v2._util.wrap(
 #             ak.partition.IrregularlyPartitionedArray(output), self.behavior
 #         )
 
@@ -1513,7 +1513,7 @@
 #                 raise TypeError(
 #                     "only an integer, start:stop range, or a *constant* "
 #                     "field name string may be used as ak.Array "
-#                     "slices in compiled code" + ak._util.exception_suffix(__file__)
+#                     "slices in compiled code" + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 

@@ -128,4 +128,4 @@ def from_numpy(
 #             contents.append(recurse(array[name], mask))
 #         layout = ak._v2.contents.RecordArray(contents, array.dtype.names)
 
-#     return ak._util.maybe_wrap(layout, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(layout, behavior, highlevel)

@@ -52,11 +52,11 @@ def isclose(
 #         else:
 #             return None
 
-#     behavior = ak._util.behaviorof(one, two, behavior=behavior)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(one, two, behavior=behavior)
+#     out = ak._v2._util.broadcast_and_apply(
 #         [one, two], getfunction, behavior, pass_depth=False
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
 #     result = out[0]
 
-#     return ak._util.maybe_wrap(result, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(result, behavior, highlevel)

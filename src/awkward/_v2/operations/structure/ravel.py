@@ -51,7 +51,7 @@ def ravel(array, highlevel=True, behavior=None):
 #     )
 #     nplike = ak.nplike.of(layout)
 
-#     out = ak._util.completely_flatten(layout)
+#     out = ak._v2._util.completely_flatten(layout)
 #     assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
 #     if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
@@ -59,4 +59,4 @@ def ravel(array, highlevel=True, behavior=None):
 #     else:
 #         out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

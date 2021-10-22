@@ -41,4 +41,4 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
 #     else:
 #         out = layout.withparameter(parameter, value)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

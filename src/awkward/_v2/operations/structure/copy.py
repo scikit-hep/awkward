@@ -60,4 +60,4 @@ def copy(array):
 #         allow_record=True,
 #         allow_other=False,
 #     )
-#     return ak._util.wrap(layout.deep_copy(), ak._util.behaviorof(array))
+#     return ak._v2._util.wrap(layout.deep_copy(), ak._v2._util.behaviorof(array))

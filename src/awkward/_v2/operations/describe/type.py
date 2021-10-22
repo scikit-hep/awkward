@@ -90,16 +90,16 @@ def type(array):
 #         return ak.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
 
 #     elif isinstance(array, ak.highlevel.Array):
-#         return ak._util.highlevel_type(array.layout, array.behavior, True)
+#         return ak._v2._util.highlevel_type(array.layout, array.behavior, True)
 
 #     elif isinstance(array, ak.highlevel.Record):
-#         return ak._util.highlevel_type(array.layout, array.behavior, False)
+#         return ak._v2._util.highlevel_type(array.layout, array.behavior, False)
 
 #     elif isinstance(array, ak.highlevel.ArrayBuilder):
-#         return ak._util.highlevel_type(array.snapshot().layout, array.behavior, True)
+#         return ak._v2._util.highlevel_type(array.snapshot().layout, array.behavior, True)
 
 #     elif isinstance(array, ak._v2.record.Record):
-#         return array.type(ak._util.typestrs(None))
+#         return array.type(ak._v2._util.typestrs(None))
 
 #     elif isinstance(array, np.ndarray):
 #         if len(array.shape) == 0:
@@ -117,15 +117,15 @@ def type(array):
 #             return ak.types.ArrayType(out, array.shape[0])
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):
-#         return array.type(ak._util.typestrs(None))
+#         return array.type(ak._v2._util.typestrs(None))
 
 #     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):
-#         return array.type(ak._util.typestrs(None))
+#         return array.type(ak._v2._util.typestrs(None))
 
 #     else:
 #         raise TypeError(
 #             "unrecognized array type: {0}".format(repr(array))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 

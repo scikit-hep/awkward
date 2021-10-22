@@ -41,7 +41,7 @@ def where(condition, *args, **kwargs):
 #     for all `i`. The structure of `x` and `y` do not need to be the same; if
 #     they are incompatible types, the output will have #ak.type.UnionType.
 #     """
-#     mergebool, highlevel = ak._util.extra(
+#     mergebool, highlevel = ak._v2._util.extra(
 #         (), kwargs, [("mergebool", True), ("highlevel", True)]
 #     )
 
@@ -65,7 +65,7 @@ def where(condition, *args, **kwargs):
 #         out = nplike.nonzero(ak.operations.convert.to_numpy(akcondition))
 #         if highlevel:
 #             return tuple(
-#                 ak._util.wrap(ak._v2.contents.NumpyArray(x), ak._util.behaviorof(condition))
+#                 ak._v2._util.wrap(ak._v2.contents.NumpyArray(x), ak._v2._util.behaviorof(condition))
 #                 for x in out
 #             )
 #         else:
@@ -74,7 +74,7 @@ def where(condition, *args, **kwargs):
 #     elif len(args) == 1:
 #         raise ValueError(
 #             "either both or neither of x and y should be given"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     elif len(args) == 2:
@@ -104,8 +104,8 @@ def where(condition, *args, **kwargs):
 #             else:
 #                 return None
 
-#         behavior = ak._util.behaviorof(akcondition, left, right)
-#         out = ak._util.broadcast_and_apply(
+#         behavior = ak._v2._util.behaviorof(akcondition, left, right)
+#         out = ak._v2._util.broadcast_and_apply(
 #             [akcondition, left, right],
 #             getfunction,
 #             behavior,
@@ -113,10 +113,10 @@ def where(condition, *args, **kwargs):
 #             numpy_to_regular=True,
 #         )
 
-#         return ak._util.maybe_wrap(out[0], behavior, highlevel)
+#         return ak._v2._util.maybe_wrap(out[0], behavior, highlevel)
 
 #     else:
 #         raise TypeError(
 #             "where() takes from 1 to 3 positional arguments but {0} were "
-#             "given".format(len(args) + 1) + ak._util.exception_suffix(__file__)
+#             "given".format(len(args) + 1) + ak._v2._util.exception_suffix(__file__)
 #         )

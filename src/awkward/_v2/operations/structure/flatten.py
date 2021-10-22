@@ -101,7 +101,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #     nplike = ak.nplike.of(layout)
 
 #     if axis is None:
-#         out = ak._util.completely_flatten(layout)
+#         out = ak._v2._util.completely_flatten(layout)
 #         assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
 #         if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
@@ -112,18 +112,18 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
 #         def apply(layout):
-#             if isinstance(layout, ak._util.virtualtypes):
+#             if isinstance(layout, ak._v2._util.virtualtypes):
 #                 return apply(layout.array)
 
-#             elif isinstance(layout, ak._util.unknowntypes):
+#             elif isinstance(layout, ak._v2._util.unknowntypes):
 #                 return apply(ak._v2.contents.NumpyArray(nplike.array([])))
 
-#             elif isinstance(layout, ak._util.indexedtypes):
+#             elif isinstance(layout, ak._v2._util.indexedtypes):
 #                 return apply(layout.project())
 
-#             elif isinstance(layout, ak._util.uniontypes):
+#             elif isinstance(layout, ak._v2._util.uniontypes):
 #                 if not any(
-#                     isinstance(x, ak._util.optiontypes)
+#                     isinstance(x, ak._v2._util.optiontypes)
 #                     and not isinstance(x, ak._v2.contents.UnmaskedArray)
 #                     for x in layout.contents
 #                 ):
@@ -133,7 +133,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #                 index = nplike.array(nplike.asarray(layout.index), copy=True)
 #                 bigmask = nplike.empty(len(index), dtype=np.bool_)
 #                 for tag, content in enumerate(layout.contents):
-#                     if isinstance(content, ak._util.optiontypes) and not isinstance(
+#                     if isinstance(content, ak._v2._util.optiontypes) and not isinstance(
 #                         content, ak._v2.contents.UnmaskedArray
 #                     ):
 #                         bigmask[:] = False
@@ -149,7 +149,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #                     layout.contents,
 #                 )
 
-#             elif isinstance(layout, ak._util.optiontypes):
+#             elif isinstance(layout, ak._v2._util.optiontypes):
 #                 return layout.project()
 
 #             else:
@@ -162,9 +162,9 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #         else:
 #             out = apply(layout)
 
-#         return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#         return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 #     else:
 #         out = layout.flatten(axis)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

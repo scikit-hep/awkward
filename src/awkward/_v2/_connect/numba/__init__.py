@@ -97,7 +97,7 @@
 #     if not isinstance(fromtype, numba.types.Integer):
 #         raise AssertionError(
 #             "unrecognized integer type: {0}".format(repr(fromtype))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     if fromtype.bitwidth < totype.bitwidth:

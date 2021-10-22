@@ -40,4 +40,4 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=N
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = layout.sort(axis, ascending, stable)
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

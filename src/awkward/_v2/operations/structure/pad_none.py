@@ -133,4 +133,4 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
 #         out = layout.rpad_and_clip(target, axis)
 #     else:
 #         out = layout.rpad(target, axis)
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

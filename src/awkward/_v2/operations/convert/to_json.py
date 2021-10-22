@@ -68,7 +68,7 @@ def to_json(
 #     elif isinstance(array, bytes):
 #         return json.dumps(array.decode("utf-8", "surrogateescape"))
 
-#     elif ak._util.py27 and isinstance(array, ak._util.unicode):
+#     elif ak._v2._util.py27 and isinstance(array, ak._v2._util.unicode):
 #         return json.dumps(array)
 
 #     elif isinstance(array, np.ndarray):
@@ -98,7 +98,7 @@ def to_json(
 #     else:
 #         raise TypeError(
 #             "unrecognized array type: {0}".format(repr(array))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     if complex_record_fields is None:

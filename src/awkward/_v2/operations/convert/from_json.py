@@ -71,9 +71,9 @@ def from_json(  # note: move ability to read from file into from_json_file
 #     ):
 #         complex_real_string, complex_imag_string = complex_record_fields
 
-#     is_path, source = ak._util.regularize_path(source)
+#     is_path, source = ak._v2._util.regularize_path(source)
 
-#     if ak._util.is_file_path(source):
+#     if ak._v2._util.is_file_path(source):
 #         layout = ak._ext.fromjsonfile(
 #             source,
 #             nan_string=nan_string,
@@ -97,7 +97,7 @@ def from_json(  # note: move ability to read from file into from_json_file
 #             buffersize=buffersize,
 #         )
 #     else:
-#         if ak._util.py27:
+#         if ak._v2._util.py27:
 #             exc = IOError
 #         else:
 #             exc = FileNotFoundError
@@ -120,7 +120,7 @@ def from_json(  # note: move ability to read from file into from_json_file
 #                 else:
 #                     raise ValueError(
 #                         "Complex number fields must be numbers"
-#                         + ak._util.exception_suffix(__file__)
+#                         + ak._v2._util.exception_suffix(__file__)
 #                     )
 #                 return lambda: ak._v2.contents.NumpyArray(real + imag * 1j)
 #             else:
@@ -129,6 +129,6 @@ def from_json(  # note: move ability to read from file into from_json_file
 #             return None
 
 #     if complex_imag_string is not None:
-#         layout = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
+#         layout = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
 
-#     return ak._util.maybe_wrap(layout, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(layout, behavior, highlevel)

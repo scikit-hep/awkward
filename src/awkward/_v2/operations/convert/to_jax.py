@@ -49,7 +49,7 @@ def to_jax(array):
 #     elif isinstance(array, ak.highlevel.Record):
 #         raise ValueError(
 #             "JAX does not support record structures"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     elif isinstance(array, ak.highlevel.ArrayBuilder):
@@ -64,34 +64,34 @@ def to_jax(array):
 #     ):
 #         raise ValueError(
 #             "JAX does not support arrays of strings"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     elif isinstance(array, ak.partition.PartitionedArray):
 #         return jax.numpy.concatenate([to_jax(x) for x in array.partitions])
 
-#     elif isinstance(array, ak._util.virtualtypes):
+#     elif isinstance(array, ak._v2._util.virtualtypes):
 #         return to_jax(array.array)
 
-#     elif isinstance(array, ak._util.unknowntypes):
+#     elif isinstance(array, ak._v2._util.unknowntypes):
 #         return jax.numpy.array([])
 
-#     elif isinstance(array, ak._util.indexedtypes):
+#     elif isinstance(array, ak._v2._util.indexedtypes):
 #         return to_jax(array.project())
 
-#     elif isinstance(array, ak._util.uniontypes):
+#     elif isinstance(array, ak._v2._util.uniontypes):
 #         array = array.simplify()
-#         if isinstance(array, ak._util.uniontypes):
+#         if isinstance(array, ak._v2._util.uniontypes):
 #             raise ValueError(
 #                 "cannot convert {0} into jax.numpy.array".format(array)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         return to_jax(array)
 
 #     elif isinstance(array, ak._v2.contents.UnmaskedArray):
 #         return to_jax(array.content)
 
-#     elif isinstance(array, ak._util.optiontypes):
+#     elif isinstance(array, ak._v2._util.optiontypes):
 #         content = to_jax(array.project())
 
 #         shape = list(content.shape)
@@ -100,7 +100,7 @@ def to_jax(array):
 #         if mask0.any():
 #             raise ValueError(
 #                 "JAX does not support masked arrays"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         else:
 #             return content
@@ -111,13 +111,13 @@ def to_jax(array):
 #         shape = (head // array.size, array.size) + tail
 #         return out[: shape[0] * array.size].reshape(shape)
 
-#     elif isinstance(array, ak._util.listtypes):
+#     elif isinstance(array, ak._v2._util.listtypes):
 #         return to_jax(array.toRegularArray())
 
-#     elif isinstance(array, ak._util.recordtypes):
+#     elif isinstance(array, ak._v2._util.recordtypes):
 #         raise ValueError(
 #             "JAX does not support record structures"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     elif isinstance(array, ak._v2.contents.NumpyArray):
@@ -126,7 +126,7 @@ def to_jax(array):
 #     elif isinstance(array, ak._v2.contents.Content):
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(array))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     elif isinstance(array, Iterable):
@@ -135,5 +135,5 @@ def to_jax(array):
 #     else:
 #         raise ValueError(
 #             "cannot convert {0} into jax.numpy.array".format(array)
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )

@@ -46,7 +46,7 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 #     to_dtype = np.dtype(to)
 
 #     def getfunction(layout):
-#         if isinstance(layout, ak._util.listtypes) and (
+#         if isinstance(layout, ak._v2._util.listtypes) and (
 #             layout.parameter("__array__") == "string"
 #             or layout.parameter("__array__") == "bytestring"
 #         ):
@@ -69,10 +69,10 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 #     layout = ak.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
-#     out = ak._util.recursively_apply(
+#     out = ak._v2._util.recursively_apply(
 #         layout,
 #         getfunction,
 #         pass_depth=False,
 #         pass_user=False,
 #     )
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

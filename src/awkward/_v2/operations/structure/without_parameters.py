@@ -29,8 +29,8 @@ def without_parameters(array, highlevel=True, behavior=None):
 #         array, allow_record=True, allow_other=False
 #     )
 
-#     out = ak._util.recursively_apply(
+#     out = ak._v2._util.recursively_apply(
 #         layout, lambda layout: None, pass_depth=False, keep_parameters=False
 #     )
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

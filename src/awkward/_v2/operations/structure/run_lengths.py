@@ -112,7 +112,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 
 #     def getfunction(layout):
 #         if layout.branch_depth == (False, 1):
-#             if isinstance(layout, ak._util.indexedtypes):
+#             if isinstance(layout, ak._v2._util.indexedtypes):
 #                 layout = layout.project()
 
 #             if (
@@ -126,21 +126,21 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 raise NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #             nextcontent, _ = lengths_of(nplike.asarray(layout), None)
 #             return lambda: ak._v2.contents.NumpyArray(nextcontent)
 
 #         elif layout.branch_depth == (False, 2):
-#             if isinstance(layout, ak._util.indexedtypes):
+#             if isinstance(layout, ak._v2._util.indexedtypes):
 #                 layout = layout.project()
 
-#             if not isinstance(layout, ak._util.listtypes):
+#             if not isinstance(layout, ak._v2._util.listtypes):
 #                 raise NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #             if (
@@ -151,7 +151,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 offsets = nplike.asarray(listoffsetarray.offsets)
 #                 content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
-#                 if isinstance(content, ak._util.indexedtypes):
+#                 if isinstance(content, ak._v2._util.indexedtypes):
 #                     content = content.project()
 
 #                 nextcontent, nextoffsets = lengths_of(
@@ -165,7 +165,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #             offsets = nplike.asarray(listoffsetarray.offsets)
 #             content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
-#             if isinstance(content, ak._util.indexedtypes):
+#             if isinstance(content, ak._v2._util.indexedtypes):
 #                 content = content.project()
 
 #             if not isinstance(content, (ak._v2.contents.NumpyArray, ak._v2.contents.EmptyArray)):
@@ -174,7 +174,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                     + type(layout).__name__
 #                     + " with content "
 #                     + type(content).__name__
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #             nextcontent, nextoffsets = lengths_of(
@@ -196,7 +196,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #             False,
 #             1,
 #         ):
-#             out = ak._util.recursively_apply(
+#             out = ak._v2._util.recursively_apply(
 #                 layout.toContent(),
 #                 getfunction,
 #                 pass_depth=False,
@@ -206,7 +206,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #             outparts = []
 #             for part in layout.partitions:
 #                 outparts.append(
-#                     ak._util.recursively_apply(
+#                     ak._v2._util.recursively_apply(
 #                         part,
 #                         getfunction,
 #                         pass_depth=False,
@@ -215,11 +215,11 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 )
 #             out = ak.partition.IrregularlyPartitionedArray(outparts)
 #     else:
-#         out = ak._util.recursively_apply(
+#         out = ak._v2._util.recursively_apply(
 #             layout,
 #             getfunction,
 #             pass_depth=False,
 #             pass_user=False,
 #         )
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

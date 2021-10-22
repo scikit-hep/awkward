@@ -39,7 +39,7 @@ def to_numpy(array, allow_missing=True):
 #     if isinstance(array, (bool, str, bytes, numbers.Number)):
 #         return numpy.array([array])[0]
 
-#     elif ak._util.py27 and isinstance(array, ak._util.unicode):
+#     elif ak._v2._util.py27 and isinstance(array, ak._v2._util.unicode):
 #         return numpy.array([array])[0]
 
 #     elif isinstance(array, np.ndarray):
@@ -87,16 +87,16 @@ def to_numpy(array, allow_missing=True):
 #         else:
 #             return numpy.concatenate(tocat)
 
-#     elif isinstance(array, ak._util.virtualtypes):
+#     elif isinstance(array, ak._v2._util.virtualtypes):
 #         return to_numpy(array.array, allow_missing=True)
 
-#     elif isinstance(array, ak._util.unknowntypes):
+#     elif isinstance(array, ak._v2._util.unknowntypes):
 #         return numpy.array([])
 
-#     elif isinstance(array, ak._util.indexedtypes):
+#     elif isinstance(array, ak._v2._util.indexedtypes):
 #         return to_numpy(array.project(), allow_missing=allow_missing)
 
-#     elif isinstance(array, ak._util.uniontypes):
+#     elif isinstance(array, ak._v2._util.uniontypes):
 #         contents = [
 #             to_numpy(array.project(i), allow_missing=allow_missing)
 #             for i in range(array.numcontents)
@@ -108,7 +108,7 @@ def to_numpy(array, allow_missing=True):
 #             except Exception:
 #                 raise ValueError(
 #                     "cannot convert {0} into numpy.ma.MaskedArray".format(array)
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #         else:
 #             try:
@@ -116,7 +116,7 @@ def to_numpy(array, allow_missing=True):
 #             except Exception:
 #                 raise ValueError(
 #                     "cannot convert {0} into np.ndarray".format(array)
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #         tags = numpy.asarray(array.tags)
@@ -132,7 +132,7 @@ def to_numpy(array, allow_missing=True):
 #         else:
 #             return content
 
-#     elif isinstance(array, ak._util.optiontypes):
+#     elif isinstance(array, ak._v2._util.optiontypes):
 #         content = to_numpy(array.project(), allow_missing=allow_missing)
 
 #         shape = list(content.shape)
@@ -156,7 +156,7 @@ def to_numpy(array, allow_missing=True):
 #                     "ak.to_numpy cannot convert 'None' values to "
 #                     "np.ma.MaskedArray unless the "
 #                     "'allow_missing' parameter is set to True"
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #         else:
 #             if allow_missing:
@@ -173,10 +173,10 @@ def to_numpy(array, allow_missing=True):
 #             shape = (head // array.size, array.size) + tail
 #         return out[: shape[0] * array.size].reshape(shape)
 
-#     elif isinstance(array, ak._util.listtypes):
+#     elif isinstance(array, ak._v2._util.listtypes):
 #         return to_numpy(array.toRegularArray(), allow_missing=allow_missing)
 
-#     elif isinstance(array, ak._util.recordtypes):
+#     elif isinstance(array, ak._v2._util.recordtypes):
 #         if array.numfields == 0:
 #             return numpy.empty(len(array), dtype=[])
 #         contents = [
@@ -186,7 +186,7 @@ def to_numpy(array, allow_missing=True):
 #         if any(len(x.shape) != 1 for x in contents):
 #             raise ValueError(
 #                 "cannot convert {0} into np.ndarray".format(array)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         out = numpy.empty(
 #             len(contents[0]),
@@ -219,7 +219,7 @@ def to_numpy(array, allow_missing=True):
 #     elif isinstance(array, ak._v2.contents.Content):
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(array))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     elif isinstance(array, Iterable):
@@ -228,5 +228,5 @@ def to_numpy(array, allow_missing=True):
 #     else:
 #         raise ValueError(
 #             "cannot convert {0} into np.ndarray".format(array)
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )

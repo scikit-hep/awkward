@@ -109,12 +109,12 @@
 #         else:
 #             return None
 
-#     behavior = ak._util.behaviorof(*arrays)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(*arrays)
+#     out = ak._v2._util.broadcast_and_apply(
 #         arrays, getfunction, behavior, allow_records=False, pass_depth=False
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._util.wrap(out[0], behavior)
+#     return ak._v2._util.wrap(out[0], behavior)
 
 
 # evaluate.evaluate = evaluate
@@ -128,7 +128,7 @@
 #     except KeyError:
 #         raise RuntimeError(
 #             "not a previous evaluate() execution found"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 #     names = numexpr.necompiler._numexpr_last["argnames"]
 #     arguments = getArguments(names, local_dict)
@@ -149,12 +149,12 @@
 #         else:
 #             return None
 
-#     behavior = ak._util.behaviorof(*arrays)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(*arrays)
+#     out = ak._v2._util.broadcast_and_apply(
 #         arrays, getfunction, behavior, allow_records=False, pass_depth=False
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._util.wrap(out[0], behavior)
+#     return ak._v2._util.wrap(out[0], behavior)
 
 
 # ak.numexpr = types.ModuleType("numexpr")

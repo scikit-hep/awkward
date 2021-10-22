@@ -80,4 +80,4 @@ def local_index(array, axis=-1, highlevel=True, behavior=None):
 #         array, allow_record=True, allow_other=False
 #     )
 #     out = layout.localindex(axis)
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

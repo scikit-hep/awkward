@@ -146,10 +146,10 @@ def to_pandas(
 #         return out
 
 #     def recurse(layout, row_arrays, col_names):
-#         if isinstance(layout, ak._util.virtualtypes):
+#         if isinstance(layout, ak._v2._util.virtualtypes):
 #             return recurse(layout.array, row_arrays, col_names)
 
-#         elif isinstance(layout, ak._util.indexedtypes):
+#         elif isinstance(layout, ak._v2._util.indexedtypes):
 #             return recurse(layout.project(), row_arrays, col_names)
 
 #         elif layout.parameter("__array__") in ("string", "bytestring"):
@@ -160,7 +160,7 @@ def to_pandas(
 #             offsets = numpy.asarray(offsets)
 #             starts, stops = offsets[:-1], offsets[1:]
 #             counts = stops - starts
-#             if ak._util.win or ak._util.bits32:
+#             if ak._v2._util.win or ak._v2._util.bits32:
 #                 counts = counts.astype(np.int32)
 #             if len(row_arrays) == 0:
 #                 newrows = [
@@ -174,9 +174,9 @@ def to_pandas(
 #             )
 #             return recurse(flattened, newrows, col_names)
 
-#         elif isinstance(layout, ak._util.uniontypes):
-#             layout = ak._util.union_to_record(layout, anonymous)
-#             if isinstance(layout, ak._util.uniontypes):
+#         elif isinstance(layout, ak._v2._util.uniontypes):
+#             layout = ak._v2._util.union_to_record(layout, anonymous)
+#             if isinstance(layout, ak._v2._util.uniontypes):
 #                 return [(to_numpy(layout), row_arrays, col_names)]
 #             else:
 #                 return sum(

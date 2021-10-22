@@ -47,16 +47,16 @@ def with_name(array, name, highlevel=True, behavior=None):
 #         else:
 #             return None
 
-#     out = ak._util.recursively_apply(
+#     out = ak._v2._util.recursively_apply(
 #         ak.operations.convert.to_layout(array), getfunction, pass_depth=False
 #     )
 
 #     def getfunction2(layout):
-#         if isinstance(layout, ak._util.uniontypes):
+#         if isinstance(layout, ak._v2._util.uniontypes):
 #             return lambda: layout.simplify(merge=True, mergebool=False)
 #         else:
 #             return None
 
-#     out2 = ak._util.recursively_apply(out, getfunction2, pass_depth=False)
+#     out2 = ak._v2._util.recursively_apply(out, getfunction2, pass_depth=False)
 
-#     return ak._util.maybe_wrap_like(out2, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out2, array, behavior, highlevel)

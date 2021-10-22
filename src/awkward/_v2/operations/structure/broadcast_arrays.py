@@ -114,7 +114,7 @@ def broadcast_arrays(*arrays, **kwargs):
 #     #ak.Array.type, but it is lost when converting an array into JSON or
 #     Python objects.
 #     """
-#     (highlevel, left_broadcast, right_broadcast) = ak._util.extra(
+#     (highlevel, left_broadcast, right_broadcast) = ak._v2._util.extra(
 #         (),
 #         kwargs,
 #         [("highlevel", True), ("left_broadcast", True), ("right_broadcast", True)],
@@ -135,8 +135,8 @@ def broadcast_arrays(*arrays, **kwargs):
 #         else:
 #             return None
 
-#     behavior = ak._util.behaviorof(*arrays)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(*arrays)
+#     out = ak._v2._util.broadcast_and_apply(
 #         inputs,
 #         getfunction,
 #         behavior,
@@ -147,6 +147,6 @@ def broadcast_arrays(*arrays, **kwargs):
 #     )
 #     assert isinstance(out, tuple)
 #     if highlevel:
-#         return [ak._util.wrap(x, behavior) for x in out]
+#         return [ak._v2._util.wrap(x, behavior) for x in out]
 #     else:
 #         return list(out)

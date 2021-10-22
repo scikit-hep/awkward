@@ -98,7 +98,7 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 #             if not issubclass(m.dtype.type, (bool, np.bool_)):
 #                 raise ValueError(
 #                     "mask must have boolean type, not "
-#                     "{0}".format(repr(m.dtype)) + ak._util.exception_suffix(__file__)
+#                     "{0}".format(repr(m.dtype)) + ak._v2._util.exception_suffix(__file__)
 #                 )
 #             bytemask = ak._v2.index.Index8(m.view(np.int8))
 #             return lambda: (
@@ -116,8 +116,8 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 #         mask, allow_record=True, allow_other=False
 #     )
 
-#     behavior = ak._util.behaviorof(array, mask, behavior=behavior)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(array, mask, behavior=behavior)
+#     out = ak._v2._util.broadcast_and_apply(
 #         [layoutarray, layoutmask],
 #         getfunction,
 #         behavior,
@@ -126,4 +126,4 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 #         pass_depth=False,
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._util.maybe_wrap(out[0], behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(out[0], behavior, highlevel)

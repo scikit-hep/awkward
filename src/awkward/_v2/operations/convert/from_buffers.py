@@ -82,7 +82,7 @@ def from_buffers(
 #     See #ak.to_buffers for examples.
 #     """
 
-#     if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
+#     if isinstance(form, str) or (ak._v2._util.py27 and isinstance(form, ak._v2._util.unicode)):
 #         form = ak.forms.Form.fromjson(form)
 #     elif isinstance(form, dict):
 #         form = ak.forms.Form.fromjson(json.dumps(form))
@@ -102,12 +102,12 @@ def from_buffers(
 #         form = _wrap_record_with_virtual(form)
 
 #         if lazy_cache == "new":
-#             hold_cache = ak._util.MappingProxy({})
+#             hold_cache = ak._v2._util.MappingProxy({})
 #             lazy_cache = ak._v2.contents.ArrayCache(hold_cache)
 #         elif lazy_cache is not None and not isinstance(
 #             lazy_cache, ak._v2.contents.ArrayCache
 #         ):
-#             hold_cache = ak._util.MappingProxy.maybe_wrap(lazy_cache)
+#             hold_cache = ak._v2._util.MappingProxy.maybe_wrap(lazy_cache)
 #             if not isinstance(hold_cache, MutableMapping):
 #                 raise TypeError("lazy_cache must be a MutableMapping")
 #             lazy_cache = ak._v2.contents.ArrayCache(hold_cache)
@@ -119,7 +119,7 @@ def from_buffers(
 #         if length is None:
 #             raise TypeError(
 #                 "length must be an integer or an iterable of integers"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         args = (form, container, str(partition_start), key_format, length)
@@ -168,10 +168,10 @@ def from_buffers(
 #         raise TypeError(
 #             "length must be an integer or an iterable of integers, not "
 #             + repr(length)
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
-#     return ak._util.maybe_wrap(out, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(out, behavior, highlevel)
 
 
 # _index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
@@ -234,7 +234,7 @@ def from_buffers(
 #     if form.has_identities:
 #         raise NotImplementedError(
 #             "ak.from_buffers for an array with Identities"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 #     else:
 #         identities = None
@@ -266,7 +266,7 @@ def from_buffers(
 #             raise ValueError(
 #                 "mask is too short for BitMaskedArray: content length "
 #                 "is {0}, mask length * 8 is {1}".format(length, len(mask) * 8)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         return ak._v2.contents.BitMaskedArray(
@@ -294,7 +294,7 @@ def from_buffers(
 #                 "mask is too short for ByteMaskedArray: expected {0}, mask length is {1}".format(
 #                     length, len(mask)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         content = _form_to_layout(
@@ -317,7 +317,7 @@ def from_buffers(
 #                 "EmptyArray found in node with non-zero expected length: expected {0}".format(
 #                     length
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         return ak._v2.contents.EmptyArray(identities, parameters)
 
@@ -336,7 +336,7 @@ def from_buffers(
 #                 "index too short for IndexedArray: expected {0}, index length is {1}".format(
 #                     length, len(index)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         content = _form_to_layout(
@@ -368,7 +368,7 @@ def from_buffers(
 #                 "index too short for IndexedOptionArray: expected {0}, index length is {1}".format(
 #                     length, len(index)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         content = _form_to_layout(
@@ -406,14 +406,14 @@ def from_buffers(
 #                 "starts too short for ListArray: expected {0}, starts length is {1}".format(
 #                     length, len(starts)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         elif length > len(stops):
 #             raise ValueError(
 #                 "stops too short for ListArray: expected {0}, stops length is {1}".format(
 #                     length, len(stops)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         array_starts = numpy.asarray(starts)
@@ -452,7 +452,7 @@ def from_buffers(
 #                 "offsets too short for ListOffsetArray: expected {0}, offsets length - 1 is {1}".format(
 #                     length, len(offsets) - 1
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         content = _form_to_layout(
@@ -487,7 +487,7 @@ def from_buffers(
 #                 raise ValueError(
 #                     "buffer is too short for NumpyArray: expected {0}, buffer "
 #                     "has {1} items ({2} bytes)".format(length, actual, len(raw_array))
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #         # NumPy can only infer the length of the array from the buffer
@@ -539,7 +539,7 @@ def from_buffers(
 #                 "RecordArray length mismatch: expected {0}, minimum content is {1}".format(
 #                     length, minlength
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         return ak._v2.contents.RecordArray(
@@ -589,14 +589,14 @@ def from_buffers(
 #                 "tags too short for UnionArray: expected {0}, tags length is {1}".format(
 #                     length, len(tags)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         elif length > len(index):
 #             raise ValueError(
 #                 "index too short for UnionArray: expected {0}, index length is {1}".format(
 #                     length, len(index)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         array_tags = numpy.asarray(tags)
@@ -675,7 +675,7 @@ def from_buffers(
 #         raise AssertionError(
 #             "unexpected form node type: "
 #             + str(type(form))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 

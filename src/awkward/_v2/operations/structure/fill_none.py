@@ -77,7 +77,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #         isinstance(value, Iterable)
 #         and not (
 #             isinstance(value, (str, bytes))
-#             or (ak._util.py27 and isinstance(value, ak._util.unicode))
+#             or (ak._v2._util.py27 and isinstance(value, ak._v2._util.unicode))
 #         )
 #         or isinstance(value, (ak.highlevel.Record, ak._v2.record.Record))
 #     ):
@@ -97,7 +97,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #         )
 
 #     def maybe_fillna(layout):
-#         if isinstance(layout, ak._util.optiontypes):
+#         if isinstance(layout, ak._v2._util.optiontypes):
 #             return layout.fillna(valuelayout)
 #         else:
 #             return layout
@@ -105,7 +105,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #     if axis is None:
 
 #         def transform(layout, depth, posaxis):
-#             return ak._util.transform_child_layouts(
+#             return ak._v2._util.transform_child_layouts(
 #                 transform, maybe_fillna(layout), depth, posaxis
 #             )
 
@@ -119,8 +119,8 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #             if posaxis + 1 == depth:
 #                 layout = maybe_fillna(layout)
 
-#             return ak._util.transform_child_layouts(transform, layout, depth, posaxis)
+#             return ak._v2._util.transform_child_layouts(transform, layout, depth, posaxis)
 
 #     out = transform(arraylayout, 1, axis)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

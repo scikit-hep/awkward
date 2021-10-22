@@ -42,19 +42,19 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
 #         posaxis = layout.axis_wrap_if_negative(posaxis)
 #         if posaxis == depth and isinstance(layout, ak._v2.contents.RegularArray):
 #             return lambda: layout.toListOffsetArray64(False)
-#         elif posaxis == depth and isinstance(layout, ak._util.listtypes):
+#         elif posaxis == depth and isinstance(layout, ak._v2._util.listtypes):
 #             return lambda: layout
 #         elif posaxis == 0:
 #             raise ValueError(
 #                 "array has no axis {0}".format(axis)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         else:
 #             return posaxis
 
 #     out = ak.operations.convert.to_layout(array)
 #     if axis != 0:
-#         out = ak._util.recursively_apply(
+#         out = ak._v2._util.recursively_apply(
 #             out,
 #             getfunction,
 #             pass_depth=True,
@@ -63,4 +63,4 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
 #             numpy_to_regular=True,
 #         )
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

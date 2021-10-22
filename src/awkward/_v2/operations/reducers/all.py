@@ -52,10 +52,10 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
 #                 return xs[0] and reduce(xs[1:])
 
 #         return reduce(
-#             [ak.nplike.of(x).all(x) for x in ak._util.completely_flatten(layout)]
+#             [ak.nplike.of(x).all(x) for x in ak._v2._util.completely_flatten(layout)]
 #         )
 #     else:
-#         behavior = ak._util.behaviorof(array)
-#         return ak._util.wrap(
+#         behavior = ak._v2._util.behaviorof(array)
+#         return ak._v2._util.wrap(
 #             layout.all(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
 #         )

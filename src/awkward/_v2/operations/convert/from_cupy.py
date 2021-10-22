@@ -52,4 +52,4 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
 
 #     layout = recurse(array)
 
-#     return ak._util.maybe_wrap(layout, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(layout, behavior, highlevel)

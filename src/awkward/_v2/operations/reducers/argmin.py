@@ -55,7 +55,7 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
 #             best_index = None
 #             best_value = None
 #             for partition in layout.partitions:
-#                 for tmp in ak._util.completely_flatten(partition):
+#                 for tmp in ak._v2._util.completely_flatten(partition):
 #                     out = ak.nplike.of(tmp).argmin(tmp, axis=None)
 #                     if best_index is None or tmp[out] < best_value:
 #                         best_index = start + out
@@ -66,7 +66,7 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
 #         else:
 #             best_index = None
 #             best_value = None
-#             for tmp in ak._util.completely_flatten(layout):
+#             for tmp in ak._v2._util.completely_flatten(layout):
 #                 out = ak.nplike.of(tmp).argmin(tmp, axis=None)
 #                 if best_index is None or tmp[out] < best_value:
 #                     best_index = out
@@ -74,7 +74,7 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
 #             return best_index
 
 #     else:
-#         behavior = ak._util.behaviorof(array)
-#         return ak._util.wrap(
+#         behavior = ak._v2._util.behaviorof(array)
+#         return ak._v2._util.wrap(
 #             layout.argmin(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
 #         )

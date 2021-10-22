@@ -59,11 +59,11 @@ def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
 #                 x, y = xs[0], reduce(xs[1:])
 #                 return x if x < y else y
 
-#         tmp = ak._util.completely_flatten(layout)
+#         tmp = ak._v2._util.completely_flatten(layout)
 #         return reduce([ak.nplike.of(x).min(x) for x in tmp if len(x) > 0])
 #     else:
-#         behavior = ak._util.behaviorof(array)
-#         return ak._util.wrap(
+#         behavior = ak._v2._util.behaviorof(array)
+#         return ak._v2._util.wrap(
 #             layout.min(
 #                 axis=axis, mask=mask_identity, keepdims=keepdims, initial=initial
 #             ),

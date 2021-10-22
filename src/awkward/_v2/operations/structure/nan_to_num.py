@@ -47,7 +47,7 @@ def nan_to_num(
 #         else:
 #             return None
 
-#     out = ak._util.recursively_apply(
+#     out = ak._v2._util.recursively_apply(
 #         layout, getfunction, pass_depth=False, pass_user=False
 #     )
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

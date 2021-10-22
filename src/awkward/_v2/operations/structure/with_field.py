@@ -45,7 +45,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #         raise TypeError(
 #             "New fields may only be assigned by field name(s) "
 #             "or as a new integer slot by passing None for 'where'"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 #     if (
 #         not isinstance(where, str)
@@ -70,14 +70,14 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #         if not (isinstance(where, str) or where is None):
 #             where = where[0]
 
-#         behavior = ak._util.behaviorof(base, what, behavior=behavior)
+#         behavior = ak._v2._util.behaviorof(base, what, behavior=behavior)
 #         base = ak.operations.convert.to_layout(
 #             base, allow_record=True, allow_other=False
 #         )
 #         if base.numfields < 0:
 #             raise ValueError(
 #                 "no tuples or records in array; cannot add a new field"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         what = ak.operations.convert.to_layout(
@@ -122,7 +122,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #                 else:
 #                     return None
 
-#             out = ak._util.broadcast_and_apply(
+#             out = ak._v2._util.broadcast_and_apply(
 #                 [base, what],
 #                 getfunction,
 #                 behavior,
@@ -132,4 +132,4 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 
 #         assert isinstance(out, tuple) and len(out) == 1
 
-#         return ak._util.maybe_wrap(out[0], behavior, highlevel)
+#         return ak._v2._util.maybe_wrap(out[0], behavior, highlevel)

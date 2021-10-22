@@ -67,11 +67,11 @@ import numpy
 #     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
 #         return NotImplemented
 
-#     behavior = ak._util.behaviorof(*inputs)
+#     behavior = ak._v2._util.behaviorof(*inputs)
 
 #     nextinputs = []
 #     for x in inputs:
-#         cast_fcn = ak._util.custom_cast(x, behavior)
+#         cast_fcn = ak._v2._util.custom_cast(x, behavior)
 #         if cast_fcn is not None:
 #             x = cast_fcn(x)
 #         nextinputs.append(
@@ -81,7 +81,7 @@ import numpy
 
 #     def adjust(custom, inputs, kwargs):
 #         args = [
-#             ak._util.wrap(x, behavior)
+#             ak._v2._util.wrap(x, behavior)
 #             if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
 #             else x
 #             for x in inputs
@@ -97,7 +97,7 @@ import numpy
 
 #     def adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs):
 #         nextinputs = [
-#             ak._util.wrap(x, behavior)
+#             ak._v2._util.wrap(x, behavior)
 #             if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
 #             else x
 #             for x in inputs
@@ -184,7 +184,7 @@ import numpy
 #             else:
 #                 signature.append(type(x))
 
-#         custom = ak._util.overload(behavior, signature)
+#         custom = ak._v2._util.overload(behavior, signature)
 #         if custom is not None:
 #             return lambda: adjust(custom, inputs, kwargs)
 
@@ -220,7 +220,7 @@ import numpy
 
 #         for x in inputs:
 #             if isinstance(x, ak._v2.contents.Content):
-#                 chained_behavior = ak._util.Behavior(ak.behavior, behavior)
+#                 chained_behavior = ak._v2._util.Behavior(ak.behavior, behavior)
 #                 apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__array__")]
 #                 if apply_ufunc is not None:
 #                     out = adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs)
@@ -254,16 +254,16 @@ import numpy
 #                     ufunc.__name__,
 #                     ", ".join(custom_types),
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #         return None
 
-#     out = ak._util.broadcast_and_apply(
+#     out = ak._v2._util.broadcast_and_apply(
 #         inputs, getfunction, behavior, allow_records=False, pass_depth=False
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._util.wrap(out[0], behavior)
+#     return ak._v2._util.wrap(out[0], behavior)
 
 
 # def matmul_for_numba(lefts, rights, dtype):
@@ -347,7 +347,7 @@ import numpy
 
 # def getfunction_matmul(inputs):
 #     inputs = [
-#         ak._util.recursively_apply(
+#         ak._v2._util.recursively_apply(
 #             x, (lambda _: _), pass_depth=False, numpy_to_regular=True
 #         )
 #         if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
@@ -356,8 +356,8 @@ import numpy
 #     ]
 
 #     if len(inputs) == 2 and all(
-#         isinstance(x, ak._util.listtypes)
-#         and isinstance(x.content, ak._util.listtypes)
+#         isinstance(x, ak._v2._util.listtypes)
+#         and isinstance(x.content, ak._v2._util.listtypes)
 #         and isinstance(x.content.content, ak._v2.contents.NumpyArray)
 #         for x in inputs
 #     ):

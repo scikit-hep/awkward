@@ -66,13 +66,13 @@ def packed(array, highlevel=True, behavior=None):
 #     )
 
 #     def transform(layout, depth=1, user=None):
-#         return ak._util.transform_child_layouts(
+#         return ak._v2._util.transform_child_layouts(
 #             transform, _pack_layout(layout), depth, user
 #         )
 
 #     out = transform(layout)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 # def _pack_layout(layout):
@@ -86,8 +86,8 @@ def packed(array, highlevel=True, behavior=None):
 #         return layout
 
 #     # Project indexed arrays
-#     elif isinstance(layout, ak._util.indexedoptiontypes):
-#         if isinstance(layout.content, ak._util.optiontypes):
+#     elif isinstance(layout, ak._v2._util.indexedoptiontypes):
+#         if isinstance(layout.content, ak._v2._util.optiontypes):
 #             return layout.simplify()
 
 #         index = nplike.asarray(layout.index)
@@ -105,7 +105,7 @@ def packed(array, highlevel=True, behavior=None):
 #         )
 
 #     # Project indexed arrays
-#     elif isinstance(layout, ak._util.indexedtypes):
+#     elif isinstance(layout, ak._v2._util.indexedtypes):
 #         return layout.project()
 
 #     # ListArray performs both ordering and resizing
@@ -145,11 +145,11 @@ def packed(array, highlevel=True, behavior=None):
 
 #     # UnionArrays can be simplified
 #     # and their contents too
-#     elif isinstance(layout, ak._util.uniontypes):
+#     elif isinstance(layout, ak._v2._util.uniontypes):
 #         layout = layout.simplify()
 
 #         # If we managed to lose the drop type entirely
-#         if not isinstance(layout, ak._util.uniontypes):
+#         if not isinstance(layout, ak._v2._util.uniontypes):
 #             return layout
 
 #         # Pack simplified layout
@@ -250,5 +250,5 @@ def packed(array, highlevel=True, behavior=None):
 #     # Finally, fall through to failure
 #     else:
 #         raise AssertionError(
-#             "unrecognized layout: " + repr(layout) + ak._util.exception_suffix(__file__)
+#             "unrecognized layout: " + repr(layout) + ak._v2._util.exception_suffix(__file__)
 #         )

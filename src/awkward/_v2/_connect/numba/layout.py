@@ -237,11 +237,11 @@
 #     if obj.form.form is None:
 #         raise ValueError(
 #             "VirtualArrays without a known 'form' can't be used in Numba"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 #     if obj.form.has_identities:
 #         raise NotImplementedError(
-#             "TODO: identities in VirtualArray" + ak._util.exception_suffix(__file__)
+#             "TODO: identities in VirtualArray" + ak._v2._util.exception_suffix(__file__)
 #         )
 #     return VirtualArrayType(obj.form.form, numba.none, obj.parameters)
 
@@ -273,7 +273,7 @@
 #             return numba.none
 #         else:
 #             raise NotImplementedError(
-#                 "TODO: identities in VirtualArray" + ak._util.exception_suffix(__file__)
+#                 "TODO: identities in VirtualArray" + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     @classmethod
@@ -291,7 +291,7 @@
 #         else:
 #             raise AssertionError(
 #                 "unrecognized Form index type: {0}".format(index_string)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def form_fill_identities(self, pos, layout, lookup):
@@ -315,11 +315,11 @@
 #         else:
 #             raise AssertionError(
 #                 "no Index* type for array: {0}".format(arraytype)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def getitem_at_check(self, viewtype):
-#         typer = ak._util.numba_array_typer(viewtype.type, viewtype.behavior)
+#         typer = ak._v2._util.numba_array_typer(viewtype.type, viewtype.behavior)
 #         if typer is None:
 #             return self.getitem_at(viewtype)
 #         else:
@@ -336,7 +336,7 @@
 #         else:
 #             raise TypeError(
 #                 "array does not have a field with key {0}".format(repr(key))
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def lower_getitem_at_check(
@@ -352,7 +352,7 @@
 #         wrapneg,
 #         checkbounds,
 #     ):
-#         lower = ak._util.numba_array_lower(viewtype.type, viewtype.behavior)
+#         lower = ak._v2._util.numba_array_lower(viewtype.type, viewtype.behavior)
 #         if lower is not None:
 #             atval = regularize_atval(
 #                 context, builder, viewproxy, attype, atval, wrapneg, checkbounds
@@ -523,7 +523,7 @@
 #             raise NotImplementedError(
 #                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
 #                 " just as NumpyArrays are converted to RegularArrays"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         pos = len(positions)
 #         cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
@@ -539,7 +539,7 @@
 #             raise NotImplementedError(
 #                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
 #                 " just as NumpyArrays are converted to RegularArrays"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         if form.primitive == "float64":
 #             arraytype = numba.types.Array(numba.float64, 1, "A")
@@ -566,7 +566,7 @@
 #         else:
 #             raise ValueError(
 #                 "unrecognized NumpyForm.primitive type: {0}".format(form.primitive)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         return NumpyArrayType(
 #             arraytype, cls.from_form_identities(form), form.parameters
@@ -898,7 +898,7 @@
 #         else:
 #             raise AssertionError(
 #                 "no ListArray* type for array: {0}".format(self.indextype)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def tolayout(self, lookup, pos, fields):
@@ -1064,7 +1064,7 @@
 #         else:
 #             raise AssertionError(
 #                 "no IndexedArray* type for array: {0}".format(self.indextype)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def tolayout(self, lookup, pos, fields):
@@ -1235,7 +1235,7 @@
 #         else:
 #             raise AssertionError(
 #                 "no IndexedOptionArray* type for array: {0}".format(self.indextype)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def tolayout(self, lookup, pos, fields):
@@ -2003,7 +2003,7 @@
 #     def getitem_at_check(self, viewtype):
 #         out = self.getitem_at(viewtype)
 #         if isinstance(out, ak._connect._numba.arrayview.RecordViewType):
-#             typer = ak._util.numba_record_typer(
+#             typer = ak._v2._util.numba_record_typer(
 #                 out.arrayviewtype.type, out.arrayviewtype.behavior
 #             )
 #             if typer is not None:
@@ -2022,7 +2022,7 @@
 #                         "no field {0} in tuples with {1} fields".format(
 #                             repr(key), len(self.contenttypes)
 #                         )
-#                         + ak._util.exception_suffix(__file__)
+#                         + ak._v2._util.exception_suffix(__file__)
 #                     )
 #                 else:
 #                     raise ValueError(
@@ -2030,7 +2030,7 @@
 #                         "fields: [{1}]".format(
 #                             repr(key), ", ".join(repr(x) for x in self.recordlookup)
 #                         )
-#                         + ak._util.exception_suffix(__file__)
+#                         + ak._v2._util.exception_suffix(__file__)
 #                     )
 #             contenttype = self.contenttypes[index]
 #             subviewtype = ak._connect._numba.arrayview.wrap(
@@ -2046,14 +2046,14 @@
 #                     "no field {0} in tuples with {1} fields".format(
 #                         repr(key), len(self.contenttypes)
 #                     )
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #             else:
 #                 raise ValueError(
 #                     "no field {0} in records with fields: [{1}]".format(
 #                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
 #                     )
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #         contenttype = self.contenttypes[index]
 #         subviewtype = ak._connect._numba.arrayview.wrap(contenttype, viewtype, None)
@@ -2067,14 +2067,14 @@
 #                     "no field {0} in tuple with {1} fields".format(
 #                         repr(key), len(self.contenttypes)
 #                     )
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #             else:
 #                 raise ValueError(
 #                     "no field {0} in record with fields: [{1}]".format(
 #                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
 #                     )
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #         contenttype = self.contenttypes[index]
 #         subviewtype = ak._connect._numba.arrayview.wrap(
@@ -2109,7 +2109,7 @@
 #         )
 #         baretype = self.getitem_at(viewtype)
 #         if isinstance(baretype, ak._connect._numba.arrayview.RecordViewType):
-#             lower = ak._util.numba_record_lower(
+#             lower = ak._v2._util.numba_record_lower(
 #                 baretype.arrayviewtype.type, baretype.arrayviewtype.behavior
 #             )
 #             if lower is not None:
@@ -2365,12 +2365,12 @@
 #             else:
 #                 raise AssertionError(
 #                     "no UnionArray* type for index array: {0}".format(self.indextype)
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #         else:
 #             raise AssertionError(
 #                 "no UnionArray* type for tags array: {0}".format(self.tagstype)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def tolayout(self, lookup, pos, fields):
@@ -2393,21 +2393,21 @@
 #         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
 #             raise TypeError(
 #                 "union types cannot be accessed in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def getitem_range(self, viewtype):
 #         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
 #             raise TypeError(
 #                 "union types cannot be accessed in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def getitem_field(self, viewtype, key):
 #         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
 #             raise TypeError(
 #                 "union types cannot be accessed in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     def lower_getitem_at(
@@ -2426,7 +2426,7 @@
 #         raise NotImplementedError(
 #             type(self).__name__
 #             + ".lower_getitem_at not implemented"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     def lower_getitem_range(
@@ -2444,14 +2444,14 @@
 #         raise NotImplementedError(
 #             type(self).__name__
 #             + ".lower_getitem_range not implemented"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
 #         raise NotImplementedError(
 #             type(self).__name__
 #             + ".lower_getitem_field not implemented"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     @property
@@ -2496,7 +2496,7 @@
 #         if layout.form is None:
 #             raise ValueError(
 #                 "VirtualArrays without a known 'form' can't be used in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         pyptr = ctypes.py_object(layout)
 #         ctypes.pythonapi.Py_IncRef(pyptr)
@@ -2519,7 +2519,7 @@
 #         if form.form is None:
 #             raise ValueError(
 #                 "VirtualArrays without a known 'form' can't be used in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         positions.append(0)
 #         sharedptrs.append(None)
@@ -2535,7 +2535,7 @@
 #         if form.form is None:
 #             raise ValueError(
 #                 "VirtualArrays without a known 'form' can't be used in Numba "
-#                 "(including nested)" + ak._util.exception_suffix(__file__)
+#                 "(including nested)" + ak._v2._util.exception_suffix(__file__)
 #             )
 #         return VirtualArrayType(
 #             form.form, cls.from_form_identities(form), form.parameters
@@ -2545,7 +2545,7 @@
 #         if generator_form is None:
 #             raise ValueError(
 #                 "VirtualArrays without a known 'form' can't be used in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         super(VirtualArrayType, self).__init__(
 #             name="ak.VirtualArrayType({0}, {1}, {2})".format(
@@ -2609,7 +2609,7 @@
 #                         "unrecognized NumpyForm.primitive type: {0}".format(
 #                             form.primitive
 #                         )
-#                         + ak._util.exception_suffix(__file__)
+#                         + ak._v2._util.exception_suffix(__file__)
 #                     )
 
 #             elif isinstance(
@@ -2643,7 +2643,7 @@
 #             elif isinstance(form, ak.forms.UnionForm):
 #                 raise TypeError(
 #                     "union types cannot be accessed in Numba"
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #             elif isinstance(form, ak.forms.VirtualForm):
@@ -2652,7 +2652,7 @@
 #             else:
 #                 raise AssertionError(
 #                     "unrecognized Form type: {0}".format(type(form))
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #         def wrap(out):
@@ -2839,7 +2839,7 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Form type: {0}".format(type(form))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 
@@ -2881,7 +2881,7 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Form type: {0}".format(type(form))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 
@@ -2925,5 +2925,5 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Form type: {0}".format(type(form))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )

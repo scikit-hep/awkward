@@ -55,19 +55,19 @@
 
 
 # def _categorical_equal(one, two):
-#     behavior = ak._util.behaviorof(one, two)
+#     behavior = ak._v2._util.behaviorof(one, two)
 
 #     one, two = one.layout, two.layout
 
-#     assert isinstance(one, ak._util.indexedtypes + ak._util.indexedoptiontypes)
-#     assert isinstance(two, ak._util.indexedtypes + ak._util.indexedoptiontypes)
+#     assert isinstance(one, ak._v2._util.indexedtypes + ak._v2._util.indexedoptiontypes)
+#     assert isinstance(two, ak._v2._util.indexedtypes + ak._v2._util.indexedoptiontypes)
 #     assert one.parameter("__array__") == "categorical"
 #     assert two.parameter("__array__") == "categorical"
 
 #     one_index = ak.nplike.numpy.asarray(one.index)
 #     two_index = ak.nplike.numpy.asarray(two.index)
-#     one_content = ak._util.wrap(one.content, behavior)
-#     two_content = ak._util.wrap(two.content, behavior)
+#     one_content = ak._v2._util.wrap(one.content, behavior)
+#     two_content = ak._v2._util.wrap(two.content, behavior)
 
 #     if len(one_content) == len(two_content) and ak.operations.reducers.all(
 #         one_content == two_content, axis=None
@@ -89,7 +89,7 @@
 #         one_mapped = one_to_two[one_index]
 
 #     out = one_mapped == two_index
-#     return ak._util.wrap(ak._v2.contents.NumpyArray(out), ak._util.behaviorof(one, two))
+#     return ak._v2._util.wrap(ak._v2.contents.NumpyArray(out), ak._v2._util.behaviorof(one, two))
 
 
 # ak.behavior[ak.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
@@ -99,10 +99,10 @@
 #     nextinputs = []
 #     for x in inputs:
 #         if isinstance(x, ak.highlevel.Array) and isinstance(
-#             x.layout, ak._util.indexedtypes
+#             x.layout, ak._v2._util.indexedtypes
 #         ):
 #             nextinputs.append(
-#                 ak.highlevel.Array(x.layout.project(), behavior=ak._util.behaviorof(x))
+#                 ak.highlevel.Array(x.layout.project(), behavior=ak._v2._util.behaviorof(x))
 #             )
 #         else:
 #             nextinputs.append(x)
@@ -159,12 +159,12 @@
 #     layout = ak.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
-#     ak._util.recursively_apply(layout, getfunction, pass_depth=False)
+#     ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
 
 #     if output[0] is None:
 #         return None
 #     elif highlevel:
-#         return ak._util.wrap(output[0], ak._util.behaviorof(array))
+#         return ak._v2._util.wrap(output[0], ak._v2._util.behaviorof(array))
 #     else:
 #         return output[0]
 
@@ -238,16 +238,16 @@
 
 #     def getfunction(layout):
 #         if layout.purelist_depth == 1:
-#             if isinstance(layout, ak._util.optiontypes):
+#             if isinstance(layout, ak._v2._util.optiontypes):
 #                 layout = layout.simplify()
 
-#             if isinstance(layout, ak._util.indexedoptiontypes):
+#             if isinstance(layout, ak._v2._util.indexedoptiontypes):
 #                 content = layout.content
 #                 cls = ak._v2.contents.IndexedOptionArray64
-#             elif isinstance(layout, ak._util.indexedtypes):
+#             elif isinstance(layout, ak._v2._util.indexedtypes):
 #                 content = layout.content
 #                 cls = ak._v2.contents.IndexedArray64
-#             elif isinstance(layout, ak._util.optiontypes):
+#             elif isinstance(layout, ak._v2._util.optiontypes):
 #                 content = layout.content
 #                 cls = ak._v2.contents.IndexedOptionArray64
 #             else:
@@ -269,17 +269,17 @@
 #                     lookup[x] = j = len(lookup)
 #                     mapping[i] = j
 
-#             if isinstance(layout, ak._util.indexedoptiontypes):
+#             if isinstance(layout, ak._v2._util.indexedoptiontypes):
 #                 original_index = ak.nplike.numpy.asarray(layout.index)
 #                 index = mapping[original_index]
 #                 index[original_index < 0] = -1
 #                 index = ak._v2.index.Index64(index)
 
-#             elif isinstance(layout, ak._util.indexedtypes):
+#             elif isinstance(layout, ak._v2._util.indexedtypes):
 #                 original_index = ak.nplike.numpy.asarray(layout.index)
 #                 index = ak._v2.index.Index64(mapping[original_index])
 
-#             elif isinstance(layout, ak._util.optiontypes):
+#             elif isinstance(layout, ak._v2._util.optiontypes):
 #                 mask = ak.nplike.numpy.asarray(layout.bytemask())
 #                 mapping[mask.view(np.bool_)] = -1
 #                 index = ak._v2.index.Index64(mapping)
@@ -296,9 +296,9 @@
 #     layout = ak.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
-#     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
+#     out = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
 #     if highlevel:
-#         return ak._util.wrap(out, ak._util.behaviorof(array))
+#         return ak._v2._util.wrap(out, ak._v2._util.behaviorof(array))
 #     else:
 #         return out
 
@@ -334,9 +334,9 @@
 #     layout = ak.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
-#     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
+#     out = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
 #     if highlevel:
-#         return ak._util.wrap(out, ak._util.behaviorof(array))
+#         return ak._v2._util.wrap(out, ak._v2._util.behaviorof(array))
 #     else:
 #         return out
 

@@ -85,7 +85,7 @@
 #         if not isinstance(rhs, (set, type(None))):
 #             raise ValueError(
 #                 "expected a set of right-hand-side argument types"
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         if transpose and rhs is not None:
 

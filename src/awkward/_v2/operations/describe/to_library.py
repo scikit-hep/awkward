@@ -56,4 +56,4 @@ def to_library(
 #     arr = ak.to_layout(array)
 #     out = arr.copy_to(kernels)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

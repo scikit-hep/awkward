@@ -56,7 +56,7 @@ def to_layout(
 #         if not issubclass(array.dtype.type, numpytype):
 #             raise ValueError(
 #                 "NumPy {0} not allowed".format(repr(array.dtype))
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 #         return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
 
@@ -66,7 +66,7 @@ def to_layout(
 #         return from_cupy(array, regulararray=True, highlevel=False)
 
 #     elif isinstance(array, (str, bytes)) or (
-#         ak._util.py27 and isinstance(array, ak._util.unicode)
+#         ak._v2._util.py27 and isinstance(array, ak._v2._util.unicode)
 #     ):
 #         return from_iter([array], highlevel=False)
 
@@ -76,7 +76,7 @@ def to_layout(
 #     elif not allow_other:
 #         raise TypeError(
 #             "{0} cannot be converted into an Awkward Array".format(array)
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     else:

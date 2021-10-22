@@ -124,7 +124,7 @@ class CharBehavior(Array):
 
 # def _string_equal(one, two):
 #     nplike = ak.nplike.of(one, two)
-#     behavior = ak._util.behaviorof(one, two)
+#     behavior = ak._v2._util.behaviorof(one, two)
 
 #     one, two = ak.without_parameters(one).layout, ak.without_parameters(two).layout
 
@@ -147,7 +147,7 @@ class CharBehavior(Array):
 #         # update same-length strings with a verdict about their characters
 #         out[possible] = reduced
 
-#     return ak._util.wrap(ak._v2.contents.NumpyArray(out), behavior)
+#     return ak._v2._util.wrap(ak._v2.contents.NumpyArray(out), behavior)
 
 
 # def _string_notequal(one, two):
@@ -164,7 +164,7 @@ class CharBehavior(Array):
 #     nplike = ak.nplike.of(offsets)
 #     offsets = nplike.asarray(offsets)
 #     counts = offsets[1:] - offsets[:-1]
-#     if ak._util.win or ak._util.bits32:
+#     if ak._v2._util.win or ak._v2._util.bits32:
 #         counts = counts.astype(np.int32)
 #     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
 #     return ak._v2.contents.IndexedArray64(ak._v2.index.Index64(parents), layout).project()

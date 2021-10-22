@@ -60,7 +60,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
 #         else:
 #             raise ValueError(
 #                 "cannot use {0} to cast the numeric type of an array".format(to_dtype)
-#                 + ak._util.exception_suffix(__file__)
+#                 + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     layout = ak.operations.convert.to_layout(
@@ -68,7 +68,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
 #     )
 #     out = layout.numbers_to_type(to_str)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 # _dtype_to_string = {

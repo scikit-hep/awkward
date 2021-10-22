@@ -63,7 +63,7 @@ def argcombinations(
 #     if axis < 0:
 #         raise ValueError(
 #             "the 'axis' for argcombinations must be non-negative"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 #     else:
 #         layout = ak.operations.convert.to_layout(
@@ -72,4 +72,4 @@ def argcombinations(
 #         out = layout.combinations(
 #             n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
 #         )
-#         return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#         return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

@@ -202,4 +202,4 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #             if scalar:
 #                 out = out[0]
 
-#         return ak._util.wrap(out, ak._util.behaviorof(x, y))
+#         return ak._v2._util.wrap(out, ak._v2._util.behaviorof(x, y))

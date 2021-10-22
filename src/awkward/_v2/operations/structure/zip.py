@@ -112,11 +112,11 @@ def zip(
 #     if depth_limit is not None and depth_limit <= 0:
 #         raise ValueError(
 #             "depth_limit must be None or at least 1"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     if isinstance(arrays, dict):
-#         behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
+#         behavior = ak._v2._util.behaviorof(*arrays.values(), behavior=behavior)
 #         recordlookup = []
 #         layouts = []
 #         num_scalars = 0
@@ -134,7 +134,7 @@ def zip(
 #             layouts.append(layout)
 
 #     else:
-#         behavior = ak._util.behaviorof(*arrays, behavior=behavior)
+#         behavior = ak._v2._util.behaviorof(*arrays, behavior=behavior)
 #         recordlookup = None
 #         layouts = []
 #         num_scalars = 0
@@ -178,7 +178,7 @@ def zip(
 #         else:
 #             return None
 
-#     out = ak._util.broadcast_and_apply(
+#     out = ak._v2._util.broadcast_and_apply(
 #         layouts,
 #         getfunction,
 #         behavior,
@@ -192,4 +192,4 @@ def zip(
 #         out = out[0]
 #         assert isinstance(out, ak.layout.Record)
 
-#     return ak._util.maybe_wrap(out, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(out, behavior, highlevel)

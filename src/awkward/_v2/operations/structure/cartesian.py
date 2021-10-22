@@ -221,7 +221,7 @@ def cartesian(
 #     """
 #     is_partitioned = False
 #     if isinstance(arrays, dict):
-#         behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
+#         behavior = ak._v2._util.behaviorof(*arrays.values(), behavior=behavior)
 #         nplike = ak.nplike.of(*arrays.values())
 #         new_arrays = {}
 #         for n, x in arrays.items():
@@ -231,7 +231,7 @@ def cartesian(
 #             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
 #                 is_partitioned = True
 #     else:
-#         behavior = ak._util.behaviorof(*arrays, behavior=behavior)
+#         behavior = ak._v2._util.behaviorof(*arrays, behavior=behavior)
 #         nplike = ak.nplike.of(*arrays)
 #         new_arrays = []
 #         for x in arrays:
@@ -258,13 +258,13 @@ def cartesian(
 #     posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
 #     if posaxis < 0:
 #         raise ValueError(
-#             "negative axis depth is ambiguous" + ak._util.exception_suffix(__file__)
+#             "negative axis depth is ambiguous" + ak._v2._util.exception_suffix(__file__)
 #         )
 #     for x in new_arrays_values[1:]:
 #         if x.axis_wrap_if_negative(axis) != posaxis:
 #             raise ValueError(
 #                 "arrays to cartesian-product do not have the same depth for "
-#                 "negative axis" + ak._util.exception_suffix(__file__)
+#                 "negative axis" + ak._v2._util.exception_suffix(__file__)
 #             )
 
 #     if posaxis == 0:
@@ -277,7 +277,7 @@ def cartesian(
 #             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be dict keys "
-#                     "for a dict of arrays" + ak._util.exception_suffix(__file__)
+#                     "for a dict of arrays" + ak._v2._util.exception_suffix(__file__)
 #                 )
 #             recordlookup = []
 #             layouts = []
@@ -299,7 +299,7 @@ def cartesian(
 #                 raise ValueError(
 #                     "the 'nested' prarmeter of cartesian must be integers in "
 #                     "[0, len(arrays) - 1) for an iterable of arrays"
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #             recordlookup = None
 #             layouts = []
@@ -386,9 +386,9 @@ def cartesian(
 #                         raise ValueError(
 #                             "ak.cartesian does not compute combinations of the "
 #                             "characters of a string; please split it into lists"
-#                             + ak._util.exception_suffix(__file__)
+#                             + ak._v2._util.exception_suffix(__file__)
 #                         )
-#                     nextlayout = ak._util.recursively_apply(
+#                     nextlayout = ak._v2._util.recursively_apply(
 #                         layout, getgetfunction1(inside), pass_depth=True
 #                     )
 #                     return lambda: newaxis(nextlayout, outside)
@@ -401,7 +401,7 @@ def cartesian(
 #             layout = ak.operations.convert.to_layout(
 #                 x, allow_record=False, allow_other=False
 #             )
-#             return ak._util.recursively_apply(
+#             return ak._v2._util.recursively_apply(
 #                 layout, getgetfunction2(i), pass_depth=True
 #             )
 
@@ -415,7 +415,7 @@ def cartesian(
 #             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be dict keys "
-#                     "for a dict of arrays" + ak._util.exception_suffix(__file__)
+#                     "for a dict of arrays" + ak._v2._util.exception_suffix(__file__)
 #                 )
 #             recordlookup = []
 #             layouts = []
@@ -435,7 +435,7 @@ def cartesian(
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be integers in "
 #                     "[0, len(arrays) - 1) for an iterable of arrays"
-#                     + ak._util.exception_suffix(__file__)
+#                     + ak._v2._util.exception_suffix(__file__)
 #                 )
 #             recordlookup = None
 #             layouts = []
@@ -459,7 +459,7 @@ def cartesian(
 #             else:
 #                 return None
 
-#         out = ak._util.broadcast_and_apply(
+#         out = ak._v2._util.broadcast_and_apply(
 #             layouts, getfunction3, behavior, right_broadcast=False, pass_depth=True
 #         )
 #         assert isinstance(out, tuple) and len(out) == 1
@@ -469,4 +469,4 @@ def cartesian(
 #             flatten_axis = toflatten.pop()
 #             result = flatten(result, axis=flatten_axis, highlevel=False)
 
-#     return ak._util.maybe_wrap(result, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(result, behavior, highlevel)

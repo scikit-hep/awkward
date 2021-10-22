@@ -53,7 +53,7 @@ def concatenate(
 #     ):
 #         raise ValueError(
 #             "need at least one array to concatenate"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     first_content = [
@@ -82,14 +82,14 @@ def concatenate(
 #     if not 0 <= posaxis < maxdepth:
 #         raise ValueError(
 #             "axis={0} is beyond the depth of this array or the depth of this array "
-#             "is ambiguous".format(axis) + ak._util.exception_suffix(__file__)
+#             "is ambiguous".format(axis) + ak._v2._util.exception_suffix(__file__)
 #         )
 #     for x in contents:
 #         if isinstance(x, ak._v2.contents.Content):
 #             if x.axis_wrap_if_negative(axis) != posaxis:
 #                 raise ValueError(
 #                     "arrays to concatenate do not have the same depth for negative "
-#                     "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+#                     "axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):
@@ -169,19 +169,19 @@ def concatenate(
 #                 batch = [collapsed.merge_as_union(x)]
 
 #         out = batch[0].mergemany(batch[1:])
-#         if isinstance(out, ak._util.uniontypes):
+#         if isinstance(out, ak._v2._util.uniontypes):
 #             out = out.simplify(merge=merge, mergebool=mergebool)
 
 #     else:
 
 #         def getfunction(inputs, depth):
 #             if depth == posaxis and any(
-#                 isinstance(x, ak._util.optiontypes) for x in inputs
+#                 isinstance(x, ak._v2._util.optiontypes) for x in inputs
 #             ):
 #                 nextinputs = []
 #                 for x in inputs:
-#                     if isinstance(x, ak._util.optiontypes) and isinstance(
-#                         x.content, ak._util.listtypes
+#                     if isinstance(x, ak._v2._util.optiontypes) and isinstance(
+#                         x.content, ak._v2._util.listtypes
 #                     ):
 #                         nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
 #                     else:
@@ -189,7 +189,7 @@ def concatenate(
 #                 inputs = nextinputs
 
 #             if depth == posaxis and all(
-#                 isinstance(x, ak._util.listtypes)
+#                 isinstance(x, ak._v2._util.listtypes)
 #                 or (isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1)
 #                 or not isinstance(x, ak._v2.contents.Content)
 #                 for x in inputs
@@ -249,23 +249,23 @@ def concatenate(
 #             ):
 #                 raise ValueError(
 #                     "at least one array is not deep enough to concatenate at "
-#                     "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+#                     "axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #             else:
 #                 return None
 
-#         out = ak._util.broadcast_and_apply(
+#         out = ak._v2._util.broadcast_and_apply(
 #             contents,
 #             getfunction,
-#             behavior=ak._util.behaviorof(*arrays, behavior=behavior),
+#             behavior=ak._v2._util.behaviorof(*arrays, behavior=behavior),
 #             allow_records=True,
 #             right_broadcast=False,
 #             pass_depth=True,
 #         )[0]
 
-#     return ak._util.maybe_wrap(
-#         out, ak._util.behaviorof(*arrays, behavior=behavior), highlevel
+#     return ak._v2._util.maybe_wrap(
+#         out, ak._v2._util.behaviorof(*arrays, behavior=behavior), highlevel
 #     )
 # @ak._connect._numpy.implements("concatenate")
 # def concatenate(
@@ -310,7 +310,7 @@ def concatenate(
 #     ):
 #         raise ValueError(
 #             "need at least one array to concatenate"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     first_content = [
@@ -339,14 +339,14 @@ def concatenate(
 #     if not 0 <= posaxis < maxdepth:
 #         raise ValueError(
 #             "axis={0} is beyond the depth of this array or the depth of this array "
-#             "is ambiguous".format(axis) + ak._util.exception_suffix(__file__)
+#             "is ambiguous".format(axis) + ak._v2._util.exception_suffix(__file__)
 #         )
 #     for x in contents:
 #         if isinstance(x, ak._v2.contents.Content):
 #             if x.axis_wrap_if_negative(axis) != posaxis:
 #                 raise ValueError(
 #                     "arrays to concatenate do not have the same depth for negative "
-#                     "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+#                     "axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):
@@ -426,19 +426,19 @@ def concatenate(
 #                 batch = [collapsed.merge_as_union(x)]
 
 #         out = batch[0].mergemany(batch[1:])
-#         if isinstance(out, ak._util.uniontypes):
+#         if isinstance(out, ak._v2._util.uniontypes):
 #             out = out.simplify(merge=merge, mergebool=mergebool)
 
 #     else:
 
 #         def getfunction(inputs, depth):
 #             if depth == posaxis and any(
-#                 isinstance(x, ak._util.optiontypes) for x in inputs
+#                 isinstance(x, ak._v2._util.optiontypes) for x in inputs
 #             ):
 #                 nextinputs = []
 #                 for x in inputs:
-#                     if isinstance(x, ak._util.optiontypes) and isinstance(
-#                         x.content, ak._util.listtypes
+#                     if isinstance(x, ak._v2._util.optiontypes) and isinstance(
+#                         x.content, ak._v2._util.listtypes
 #                     ):
 #                         nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
 #                     else:
@@ -446,7 +446,7 @@ def concatenate(
 #                 inputs = nextinputs
 
 #             if depth == posaxis and all(
-#                 isinstance(x, ak._util.listtypes)
+#                 isinstance(x, ak._v2._util.listtypes)
 #                 or (isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1)
 #                 or not isinstance(x, ak._v2.contents.Content)
 #                 for x in inputs
@@ -506,21 +506,21 @@ def concatenate(
 #             ):
 #                 raise ValueError(
 #                     "at least one array is not deep enough to concatenate at "
-#                     "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+#                     "axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
 #                 )
 
 #             else:
 #                 return None
 
-#         out = ak._util.broadcast_and_apply(
+#         out = ak._v2._util.broadcast_and_apply(
 #             contents,
 #             getfunction,
-#             behavior=ak._util.behaviorof(*arrays, behavior=behavior),
+#             behavior=ak._v2._util.behaviorof(*arrays, behavior=behavior),
 #             allow_records=True,
 #             right_broadcast=False,
 #             pass_depth=True,
 #         )[0]
 
-#     return ak._util.maybe_wrap(
-#         out, ak._util.behaviorof(*arrays, behavior=behavior), highlevel
+#     return ak._v2._util.maybe_wrap(
+#         out, ak._v2._util.behaviorof(*arrays, behavior=behavior), highlevel
 #     )

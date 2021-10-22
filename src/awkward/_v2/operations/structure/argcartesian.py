@@ -78,12 +78,12 @@ def argcartesian(
 #     if axis < 0:
 #         raise ValueError(
 #             "the 'axis' of argcartesian must be non-negative"
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
 
 #     else:
 #         if isinstance(arrays, dict):
-#             behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
+#             behavior = ak._v2._util.behaviorof(*arrays.values(), behavior=behavior)
 #             layouts = dict(
 #                 (
 #                     n,
@@ -94,7 +94,7 @@ def argcartesian(
 #                 for n, x in arrays.items()
 #             )
 #         else:
-#             behavior = ak._util.behaviorof(*arrays, behavior=behavior)
+#             behavior = ak._v2._util.behaviorof(*arrays, behavior=behavior)
 #             layouts = [
 #                 ak.operations.convert.to_layout(
 #                     x, allow_record=False, allow_other=False
@@ -113,4 +113,4 @@ def argcartesian(
 #             layouts, axis=axis, nested=nested, parameters=parameters, highlevel=False
 #         )
 
-#         return ak._util.maybe_wrap(result, behavior, highlevel)
+#         return ak._v2._util.maybe_wrap(result, behavior, highlevel)

@@ -75,4 +75,4 @@ def num(array, axis=1, highlevel=True, behavior=None):
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = layout.num(axis=axis)
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

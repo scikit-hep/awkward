@@ -50,7 +50,7 @@ def to_list(array):
 #     elif array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
 #         return array
 
-#     elif ak._util.py27 and isinstance(array, ak._util.unicode):
+#     elif ak._v2._util.py27 and isinstance(array, ak._v2._util.unicode):
 #         return array
 
 #     elif isinstance(array, np.ndarray):
@@ -132,5 +132,5 @@ def to_list(array):
 #     else:
 #         raise TypeError(
 #             "unrecognized array type: {0}".format(type(array))
-#             + ak._util.exception_suffix(__file__)
+#             + ak._v2._util.exception_suffix(__file__)
 #         )
