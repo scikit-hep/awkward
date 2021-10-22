@@ -923,7 +923,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def purelist_parameter(self, key):
         return self.Form.purelist_parameter(self, key)
-    
+
     def is_unique(self, axis=None):
         negaxis = axis if axis is None else -axis
         starts = ak._v2.index.Index64.zeros(1, self.nplike)
