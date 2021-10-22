@@ -45,7 +45,7 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
 #             elif posaxis != x.axis_wrap_if_negative(axis):
 #                 raise ValueError(
 #                     "ak.firsts for partitions with different axis depths"
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 #     else:
 #         posaxis = layout.axis_wrap_if_negative(axis)
@@ -59,7 +59,7 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
 #         if posaxis < 0:
 #             raise NotImplementedError(
 #                 "ak.firsts with ambiguous negative axis"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 #         toslice = (slice(None, None, None),) * posaxis + (0,)
 #         out = ak.mask(layout, ak.num(layout, axis=posaxis) > 0, highlevel=False)[

@@ -254,7 +254,7 @@ import numpy
 #                     ufunc.__name__,
 #                     ", ".join(custom_types),
 #                 )
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #         return None

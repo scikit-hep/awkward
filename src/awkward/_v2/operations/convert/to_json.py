@@ -98,7 +98,7 @@ def to_json(
 #     else:
 #         raise TypeError(
 #             "unrecognized array type: {0}".format(repr(array))
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     if complex_record_fields is None:

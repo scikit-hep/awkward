@@ -128,7 +128,7 @@
 #     except KeyError:
 #         raise RuntimeError(
 #             "not a previous evaluate() execution found"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 #     names = numexpr.necompiler._numexpr_last["argnames"]
 #     arguments = getArguments(names, local_dict)

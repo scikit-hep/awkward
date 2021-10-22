@@ -258,13 +258,13 @@ def cartesian(
 #     posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
 #     if posaxis < 0:
 #         raise ValueError(
-#             "negative axis depth is ambiguous" + ak._v2._util.exception_suffix(__file__)
+#             "negative axis depth is ambiguous"
 #         )
 #     for x in new_arrays_values[1:]:
 #         if x.axis_wrap_if_negative(axis) != posaxis:
 #             raise ValueError(
 #                 "arrays to cartesian-product do not have the same depth for "
-#                 "negative axis" + ak._v2._util.exception_suffix(__file__)
+#                 "negative axis"
 #             )
 
 #     if posaxis == 0:
@@ -277,7 +277,7 @@ def cartesian(
 #             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be dict keys "
-#                     "for a dict of arrays" + ak._v2._util.exception_suffix(__file__)
+#                     "for a dict of arrays"
 #                 )
 #             recordlookup = []
 #             layouts = []
@@ -299,7 +299,7 @@ def cartesian(
 #                 raise ValueError(
 #                     "the 'nested' prarmeter of cartesian must be integers in "
 #                     "[0, len(arrays) - 1) for an iterable of arrays"
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 #             recordlookup = None
 #             layouts = []
@@ -386,7 +386,7 @@ def cartesian(
 #                         raise ValueError(
 #                             "ak.cartesian does not compute combinations of the "
 #                             "characters of a string; please split it into lists"
-#                             + ak._v2._util.exception_suffix(__file__)
+#
 #                         )
 #                     nextlayout = ak._v2._util.recursively_apply(
 #                         layout, getgetfunction1(inside), pass_depth=True
@@ -415,7 +415,7 @@ def cartesian(
 #             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be dict keys "
-#                     "for a dict of arrays" + ak._v2._util.exception_suffix(__file__)
+#                     "for a dict of arrays"
 #                 )
 #             recordlookup = []
 #             layouts = []
@@ -435,7 +435,7 @@ def cartesian(
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be integers in "
 #                     "[0, len(arrays) - 1) for an iterable of arrays"
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 #             recordlookup = None
 #             layouts = []

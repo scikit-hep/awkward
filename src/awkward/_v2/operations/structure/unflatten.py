@@ -87,15 +87,15 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             mask = False
 #         else:
 #             raise AssertionError(
-#                 "unrecognized kernels lib" + ak._v2._util.exception_suffix(__file__)
+#                 "unrecognized kernels lib"
 #             )
 #         if counts.ndim != 1:
 #             raise ValueError(
-#                 "counts must be one-dimensional" + ak._v2._util.exception_suffix(__file__)
+#                 "counts must be one-dimensional"
 #             )
 #         if not issubclass(counts.dtype.type, np.integer):
 #             raise ValueError(
-#                 "counts must be integers" + ak._v2._util.exception_suffix(__file__)
+#                 "counts must be integers"
 #             )
 #         current_offsets = [nplike.empty(len(counts) + 1, np.int64)]
 #         current_offsets[0][0] = 0
@@ -106,7 +106,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             if counts < 0 or counts > len(layout):
 #                 raise ValueError(
 #                     "too large counts for array or negative counts"
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 #             out = ak._v2.contents.RegularArray(layout, counts)
 
@@ -122,7 +122,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             ] != len(layout):
 #                 raise ValueError(
 #                     "structure imposed by 'counts' does not fit in the array or partition "
-#                     "at axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
+#                     "at axis={0}".format(axis)
 #                 )
 
 #             offsets = current_offsets[0][: position + 1]
@@ -174,7 +174,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #                 if not nplike.array_equal(inneroffsets[positions], outeroffsets):
 #                     raise ValueError(
 #                         "structure imposed by 'counts' does not fit in the array or partition "
-#                         "at axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
+#                         "at axis={0}".format(axis)
 #                     )
 
 #                 return ak._v2.contents.ListOffsetArray64(
@@ -199,7 +199,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #     ):
 #         raise ValueError(
 #             "structure imposed by 'counts' does not fit in the array or partition "
-#             "at axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
+#             "at axis={0}".format(axis)
 #         )
 
 #     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

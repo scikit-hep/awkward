@@ -42,7 +42,7 @@ def to_cupy(array):
 #     elif isinstance(array, ak.highlevel.Record):
 #         raise ValueError(
 #             "CuPy does not support record structures"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     elif isinstance(array, ak.highlevel.ArrayBuilder):
@@ -57,7 +57,7 @@ def to_cupy(array):
 #     ):
 #         raise ValueError(
 #             "CuPy does not support arrays of strings"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     elif isinstance(array, ak.partition.PartitionedArray):
@@ -94,7 +94,7 @@ def to_cupy(array):
 #         if mask0.any():
 #             raise ValueError(
 #                 "CuPy does not support masked arrays"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 #         else:
 #             return content
@@ -111,7 +111,7 @@ def to_cupy(array):
 #     elif isinstance(array, ak._v2._util.recordtypes):
 #         raise ValueError(
 #             "CuPy does not support record structures"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     elif isinstance(array, ak._v2.contents.NumpyArray):
@@ -120,7 +120,7 @@ def to_cupy(array):
 #     elif isinstance(array, ak._v2.contents.Content):
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(array))
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     elif isinstance(array, Iterable):
@@ -129,5 +129,5 @@ def to_cupy(array):
 #     else:
 #         raise ValueError(
 #             "cannot convert {0} into cp.ndarray".format(array)
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )

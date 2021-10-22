@@ -45,7 +45,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #         raise TypeError(
 #             "New fields may only be assigned by field name(s) "
 #             "or as a new integer slot by passing None for 'where'"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 #     if (
 #         not isinstance(where, str)
@@ -77,7 +77,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #         if base.numfields < 0:
 #             raise ValueError(
 #                 "no tuples or records in array; cannot add a new field"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #         what = ak.operations.convert.to_layout(

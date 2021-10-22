@@ -53,7 +53,7 @@ def to_regular(array, axis=1, highlevel=True, behavior=None):
 #         elif posaxis == 0:
 #             raise ValueError(
 #                 "array has no axis {0}".format(axis)
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 #         else:
 #             return posaxis

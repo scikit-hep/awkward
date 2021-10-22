@@ -120,7 +120,7 @@ def from_json(  # note: move ability to read from file into from_json_file
 #                 else:
 #                     raise ValueError(
 #                         "Complex number fields must be numbers"
-#                         + ak._v2._util.exception_suffix(__file__)
+#
 #                     )
 #                 return lambda: ak._v2.contents.NumpyArray(real + imag * 1j)
 #             else:

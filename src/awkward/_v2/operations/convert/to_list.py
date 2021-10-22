@@ -132,5 +132,5 @@ def to_list(array):
 #     else:
 #         raise TypeError(
 #             "unrecognized array type: {0}".format(type(array))
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )

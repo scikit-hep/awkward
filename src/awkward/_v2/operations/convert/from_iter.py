@@ -67,7 +67,7 @@ def from_iter(
 #         else:
 #             raise ValueError(
 #                 "cannot produce an array from a dict"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     out = ak.layout.ArrayBuilder(initial=initial, resize=resize)

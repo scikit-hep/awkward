@@ -223,7 +223,7 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Content or Form type: {0}".format(type(layout))
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 
@@ -264,7 +264,7 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Form type: {0}".format(type(form))
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 
@@ -337,7 +337,7 @@
 #                     raise ValueError(
 #                         "partitioned arrays can only be used in Numba if all "
 #                         "partitions have the same numba_type"
-#                         + ak._v2._util.exception_suffix(__file__)
+#
 #                     )
 #             return PartitionedView(
 #                 ak._connect._numba.layout.typeof(part),
@@ -589,7 +589,7 @@
 #                 raise TypeError(
 #                     "only an integer, start:stop range, or a *constant* "
 #                     "field name string may be used as ak.Array "
-#                     "slices in compiled code" + ak._v2._util.exception_suffix(__file__)
+#                     "slices in compiled code"
 #                 )
 
 
@@ -879,7 +879,7 @@
 #                 raise TypeError(
 #                     "only a *constant* field name string may be used as "
 #                     "ak.Record slices in compiled code"
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 
 
@@ -1513,7 +1513,7 @@
 #                 raise TypeError(
 #                     "only an integer, start:stop range, or a *constant* "
 #                     "field name string may be used as ak.Array "
-#                     "slices in compiled code" + ak._v2._util.exception_suffix(__file__)
+#                     "slices in compiled code"
 #                 )
 
 

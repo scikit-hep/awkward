@@ -163,7 +163,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             else:
 #                 raise TypeError(
 #                     "unrecognized Arrow union array mode: {0}".format(repr(tpe.mode))
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 
 #             mask = buffers.pop(0)
@@ -288,7 +288,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #         else:
 #             raise TypeError(
 #                 "unrecognized Arrow array type: {0}".format(repr(tpe))
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #         # All 'no return yet' cases need to become option-type (even if the UnmaskedArray
@@ -369,7 +369,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #         else:
 #             raise TypeError(
 #                 "unrecognized Arrow type: {0}".format(type(obj))
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     return ak._v2._util.maybe_wrap(handle_arrow(array), behavior, highlevel)

@@ -53,7 +53,7 @@ def concatenate(
 #     ):
 #         raise ValueError(
 #             "need at least one array to concatenate"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     first_content = [
@@ -82,14 +82,14 @@ def concatenate(
 #     if not 0 <= posaxis < maxdepth:
 #         raise ValueError(
 #             "axis={0} is beyond the depth of this array or the depth of this array "
-#             "is ambiguous".format(axis) + ak._v2._util.exception_suffix(__file__)
+#             "is ambiguous".format(axis)
 #         )
 #     for x in contents:
 #         if isinstance(x, ak._v2.contents.Content):
 #             if x.axis_wrap_if_negative(axis) != posaxis:
 #                 raise ValueError(
 #                     "arrays to concatenate do not have the same depth for negative "
-#                     "axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
+#                     "axis={0}".format(axis)
 #                 )
 
 #     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):
@@ -249,7 +249,7 @@ def concatenate(
 #             ):
 #                 raise ValueError(
 #                     "at least one array is not deep enough to concatenate at "
-#                     "axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
+#                     "axis={0}".format(axis)
 #                 )
 
 #             else:
@@ -310,7 +310,7 @@ def concatenate(
 #     ):
 #         raise ValueError(
 #             "need at least one array to concatenate"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     first_content = [
@@ -339,14 +339,14 @@ def concatenate(
 #     if not 0 <= posaxis < maxdepth:
 #         raise ValueError(
 #             "axis={0} is beyond the depth of this array or the depth of this array "
-#             "is ambiguous".format(axis) + ak._v2._util.exception_suffix(__file__)
+#             "is ambiguous".format(axis)
 #         )
 #     for x in contents:
 #         if isinstance(x, ak._v2.contents.Content):
 #             if x.axis_wrap_if_negative(axis) != posaxis:
 #                 raise ValueError(
 #                     "arrays to concatenate do not have the same depth for negative "
-#                     "axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
+#                     "axis={0}".format(axis)
 #                 )
 
 #     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):
@@ -506,7 +506,7 @@ def concatenate(
 #             ):
 #                 raise ValueError(
 #                     "at least one array is not deep enough to concatenate at "
-#                     "axis={0}".format(axis) + ak._v2._util.exception_suffix(__file__)
+#                     "axis={0}".format(axis)
 #                 )
 
 #             else:

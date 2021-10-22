@@ -112,7 +112,7 @@ def zip(
 #     if depth_limit is not None and depth_limit <= 0:
 #         raise ValueError(
 #             "depth_limit must be None or at least 1"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     if isinstance(arrays, dict):

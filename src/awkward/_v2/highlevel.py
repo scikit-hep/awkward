@@ -2200,7 +2200,7 @@ class Record(NDArrayOperatorsMixin):
 #             self._behavior = behavior
 #         else:
 #             raise TypeError(
-#                 "behavior must be None or a dict" + ak._v2._util.exception_suffix(__file__)
+#                 "behavior must be None or a dict"
 #             )
 
 #     @property
@@ -2605,7 +2605,7 @@ class Record(NDArrayOperatorsMixin):
 #             else:
 #                 raise TypeError(
 #                     "'append' method can only be used with 'at' when "
-#                     "'obj' is an ak.Array" + ak._v2._util.exception_suffix(__file__)
+#                     "'obj' is an ak.Array"
 #                 )
 
 #     def extend(self, obj):
@@ -2621,7 +2621,7 @@ class Record(NDArrayOperatorsMixin):
 #         else:
 #             raise TypeError(
 #                 "'extend' method requires an ak.Array"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     class _Nested(object):

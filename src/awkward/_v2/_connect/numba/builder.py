@@ -151,7 +151,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.clear"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("null")
@@ -161,7 +161,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.null"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("boolean")
@@ -175,7 +175,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.boolean"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("integer")
@@ -189,7 +189,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.integer"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("real")
@@ -203,7 +203,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.real"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("begin_list")
@@ -213,7 +213,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.begin_list"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("end_list")
@@ -223,7 +223,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.end_list"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("begin_tuple")
@@ -237,7 +237,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.begin_tuple"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("index")
@@ -251,7 +251,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.index"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("end_tuple")
@@ -261,7 +261,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.end_tuple"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("begin_record")
@@ -277,7 +277,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.begin_record"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("field")
@@ -291,7 +291,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.field"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("end_record")
@@ -301,7 +301,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.end_record"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("append")
@@ -366,7 +366,7 @@
 
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.append"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("extend")
@@ -380,7 +380,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.extend"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 
@@ -691,7 +691,7 @@
 #                 )
 #             else:
 #                 raise AssertionError(
-#                     repr(opttype.type) + ak._v2._util.exception_suffix(__file__)
+#                     repr(opttype.type)
 #                 )
 
 #         with is_not_valid:

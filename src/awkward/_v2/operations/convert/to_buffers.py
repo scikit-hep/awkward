@@ -175,7 +175,7 @@ def to_buffers(
 #             raise AssertionError(
 #                 "unrecognized index: "
 #                 + repr(index)
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     if isinstance(form_key, str):
@@ -212,7 +212,7 @@ def to_buffers(
 #         if has_identities:
 #             raise NotImplementedError(
 #                 "ak.to_buffers for an array with Identities"
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #         if isinstance(layout, ak._v2.contents.EmptyArray):
@@ -410,14 +410,14 @@ def to_buffers(
 #                 raise ValueError(
 #                     "unrecognized value for 'virtual': "
 #                     + str(virtual)
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 
 #         else:
 #             raise AssertionError(
 #                 "unrecognized layout node type: "
 #                 + str(type(layout))
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 
 #     layout = to_layout(array, allow_record=False, allow_other=False)
@@ -445,7 +445,7 @@ def to_buffers(
 #                         f.tojson(True, False),
 #                         form.tojson(True, False),
 #                     )
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 #             length.append(len(content))
 

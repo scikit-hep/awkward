@@ -125,7 +125,7 @@ def type(array):
 #     else:
 #         raise TypeError(
 #             "unrecognized array type: {0}".format(repr(array))
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 

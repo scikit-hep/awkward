@@ -74,7 +74,7 @@ def where(condition, *args, **kwargs):
 #     elif len(args) == 1:
 #         raise ValueError(
 #             "either both or neither of x and y should be given"
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     elif len(args) == 2:
@@ -118,5 +118,5 @@ def where(condition, *args, **kwargs):
 #     else:
 #         raise TypeError(
 #             "where() takes from 1 to 3 positional arguments but {0} were "
-#             "given".format(len(args) + 1) + ak._v2._util.exception_suffix(__file__)
+#             "given".format(len(args) + 1)
 #         )

@@ -250,5 +250,5 @@ def packed(array, highlevel=True, behavior=None):
 #     # Finally, fall through to failure
 #     else:
 #         raise AssertionError(
-#             "unrecognized layout: " + repr(layout) + ak._v2._util.exception_suffix(__file__)
+#             "unrecognized layout: " + repr(layout)
 #         )

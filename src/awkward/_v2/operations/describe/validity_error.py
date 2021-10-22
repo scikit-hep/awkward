@@ -52,5 +52,5 @@ def validity_error(array, exception=False):
 #     else:
 #         raise TypeError(
 #             "not an awkward array: {0}".format(repr(array))
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )

@@ -523,7 +523,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 #     if attempt is None:
 #         raise ValueError(
-#             "key {0} not found in record".format(repr(key)) + exception_suffix(__file__)
+#             "key {0} not found in record".format(repr(key))
 #         )
 #     else:
 #         return attempt
@@ -584,7 +584,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #     else:
 #         raise RuntimeError(
 #             "cannot completely flatten: {0}".format(type(array))
-#             + exception_suffix(__file__)
+#
 #         )
 
 
@@ -610,7 +610,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     "length {3}".format(
 #                         type(inputs[0]).__name__, length, type(x).__name__, len(x)
 #                     )
-#                     + exception_suffix(__file__)
+#
 #                 )
 
 #     def all_same_offsets(nplike, inputs):
@@ -770,7 +770,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                             "with UnionArray of length {1}".format(
 #                                 length, len(tagslist[-1])
 #                             )
-#                             + exception_suffix(__file__)
+#
 #                         )
 
 #             combos = nplike.stack(tagslist, axis=-1)
@@ -890,7 +890,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                                 "{0} with RegularArray of size {1}".format(
 #                                     x.size, maxsize
 #                                 )
-#                                 + exception_suffix(__file__)
+#
 #                             )
 #                     else:
 #                         nextinputs.append(x)
@@ -1023,14 +1023,14 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                         "unexpected offsets, starts: {0} {1}".format(
 #                             type(offsets), type(starts)
 #                         )
-#                         + exception_suffix(__file__)
+#
 #                     )
 
 #         elif any(isinstance(x, recordtypes) for x in inputs):
 #             if not allow_records:
 #                 raise ValueError(
 #                     "cannot broadcast records in this type of operation"
-#                     + exception_suffix(__file__)
+#
 #                 )
 
 #             keys = None
@@ -1046,7 +1046,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                             "match:\n    {0}\n    {1}".format(
 #                                 ", ".join(sorted(keys)), ", ".join(sorted(x.keys()))
 #                             )
-#                             + exception_suffix(__file__)
+#
 #                         )
 #                     if length is None:
 #                         length = len(x)
@@ -1054,7 +1054,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                         raise ValueError(
 #                             "cannot broadcast RecordArray of length {0} "
 #                             "with RecordArray of length {1}".format(length, len(x))
-#                             + exception_suffix(__file__)
+#
 #                         )
 #                     if not x.istuple:
 #                         istuple = False
@@ -1086,7 +1086,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         else:
 #             raise ValueError(
 #                 "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
-#                 + exception_suffix(__file__)
+#
 #             )
 
 #     if any(isinstance(x, ak.partition.PartitionedArray) for x in inputs):
@@ -1273,7 +1273,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #     else:
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(layout))
-#             + exception_suffix(__file__)
+#
 #         )
 
 
@@ -1473,7 +1473,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #     else:
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(layout))
-#             + exception_suffix(__file__)
+#
 #         )
 
 

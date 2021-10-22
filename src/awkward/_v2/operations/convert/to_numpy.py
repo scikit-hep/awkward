@@ -108,7 +108,7 @@ def to_numpy(array, allow_missing=True):
 #             except Exception:
 #                 raise ValueError(
 #                     "cannot convert {0} into numpy.ma.MaskedArray".format(array)
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 #         else:
 #             try:
@@ -116,7 +116,7 @@ def to_numpy(array, allow_missing=True):
 #             except Exception:
 #                 raise ValueError(
 #                     "cannot convert {0} into np.ndarray".format(array)
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 
 #         tags = numpy.asarray(array.tags)
@@ -156,7 +156,7 @@ def to_numpy(array, allow_missing=True):
 #                     "ak.to_numpy cannot convert 'None' values to "
 #                     "np.ma.MaskedArray unless the "
 #                     "'allow_missing' parameter is set to True"
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 #         else:
 #             if allow_missing:
@@ -186,7 +186,7 @@ def to_numpy(array, allow_missing=True):
 #         if any(len(x.shape) != 1 for x in contents):
 #             raise ValueError(
 #                 "cannot convert {0} into np.ndarray".format(array)
-#                 + ak._v2._util.exception_suffix(__file__)
+#
 #             )
 #         out = numpy.empty(
 #             len(contents[0]),
@@ -219,7 +219,7 @@ def to_numpy(array, allow_missing=True):
 #     elif isinstance(array, ak._v2.contents.Content):
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(array))
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )
 
 #     elif isinstance(array, Iterable):
@@ -228,5 +228,5 @@ def to_numpy(array, allow_missing=True):
 #     else:
 #         raise ValueError(
 #             "cannot convert {0} into np.ndarray".format(array)
-#             + ak._v2._util.exception_suffix(__file__)
+#
 #         )

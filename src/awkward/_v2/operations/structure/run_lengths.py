@@ -126,7 +126,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 raise NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 
 #             nextcontent, _ = lengths_of(nplike.asarray(layout), None)
@@ -140,7 +140,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 raise NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 
 #             if (
@@ -174,7 +174,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                     + type(layout).__name__
 #                     + " with content "
 #                     + type(content).__name__
-#                     + ak._v2._util.exception_suffix(__file__)
+#
 #                 )
 
 #             nextcontent, nextoffsets = lengths_of(
