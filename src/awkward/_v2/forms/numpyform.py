@@ -203,7 +203,7 @@ class NumpyForm(Form):
         return (False, len(self.inner_shape) + 1)
 
     @property
-    def keys(self):
+    def fields(self):
         return []
 
     @property

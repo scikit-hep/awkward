@@ -231,11 +231,11 @@ class UnionForm(Form):
         return (anybranch, mindepth)
 
     @property
-    def keys(self):
-        keyslists = []
+    def fields(self):
+        fieldslists = []
         for i in range(len(self._contents)):
-            keyslists.append(self._contents[i].keys)
-        return list(set.intersection(*[set(x) for x in keyslists]))
+            fieldslists.append(self._contents[i].fields)
+        return list(set.intersection(*[set(x) for x in fieldslists]))
 
     @property
     def dimension_optiontype(self):

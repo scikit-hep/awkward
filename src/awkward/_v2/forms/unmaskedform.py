@@ -126,8 +126,8 @@ class UnmaskedForm(Form):
         return self._content.branch_depth
 
     @property
-    def keys(self):
-        return self._content.keys
+    def fields(self):
+        return self._content.fields
 
     @property
     def dimension_optiontype(self):

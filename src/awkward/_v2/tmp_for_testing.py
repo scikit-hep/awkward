@@ -417,7 +417,7 @@ def v2_to_v1(v2):
     elif isinstance(v2, ak._v2.contents.RecordArray):
         return ak.layout.RecordArray(
             [v2_to_v1(x) for x in v2.contents],
-            None if v2.is_tuple else v2.keys,
+            None if v2.is_tuple else v2.fields,
             len(v2),
             identities=v2_to_v1_id(v2.identifier),
             parameters=v2.parameters,

@@ -42,8 +42,8 @@ class Record(object):
         return self._at
 
     @property
-    def keys(self):
-        return self._array.keys
+    def fields(self):
+        return self._array.fields
 
     @property
     def is_tuple(self):
@@ -56,12 +56,12 @@ class Record(object):
     @property
     def contents(self):
         out = []
-        for key in self._array.keys:
-            out.append(self._array[key][self._at])
+        for field in self._array.fields:
+            out.append(self._array[field][self._at])
         return out
 
-    def content(self, index_or_key):
-        return self._array.content(index_or_key)[self._at]
+    def content(self, index_or_field):
+        return self._array.content(index_or_field)[self._at]
 
     def __repr__(self):
         return self._repr("", "", "")
