@@ -34,7 +34,7 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
 #         array, allow_record=True, allow_other=False
 #     )
 
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         out = layout.replace_partitions(
 #             x.withparameter(parameter, value) for x in layout.partitions
 #         )

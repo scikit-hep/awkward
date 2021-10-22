@@ -533,7 +533,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 
 # def completely_flatten(array):
-#     if isinstance(array, ak.partition.PartitionedArray):
+#     if isinstance(array, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         out = []
 #         for partition in array.partitions:
 #             for outi in completely_flatten(partition):
@@ -1089,11 +1089,11 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #
 #             )
 
-#     if any(isinstance(x, ak.partition.PartitionedArray) for x in inputs):
+#     if any(isinstance(x, ak.partition.PartitionedArray) for x in inputs):   # NO PARTITIONED ARRAY
 #         purelist_isregular = True
 #         purelist_depths = set()
 #         for x in inputs:
-#             if isinstance(x, (ak._v2.contents.Content, ak.partition.PartitionedArray)):
+#             if isinstance(x, (ak._v2.contents.Content, ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
 #                 if not x.purelist_isregular:
 #                     purelist_isregular = False
 #                     break
@@ -1102,7 +1102,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         if purelist_isregular and len(purelist_depths) > 1:
 #             nextinputs = []
 #             for x in inputs:
-#                 if isinstance(x, ak.partition.PartitionedArray):
+#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     nextinputs.append(x.toContent())
 #                 else:
 #                     nextinputs.append(x)
@@ -1115,7 +1115,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         else:
 #             sample = None
 #             for x in inputs:
-#                 if isinstance(x, ak.partition.PartitionedArray):
+#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     sample = x
 #                     break
 #             nextinputs = ak.partition.partition_as(sample, inputs)
@@ -1130,7 +1130,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             out = ()
 #             for i in range(len(part)):
 #                 out = out + (
-#                     ak.partition.IrregularlyPartitionedArray([x[i] for x in outputs]),
+#                     ak.partition.IrregularlyPartitionedArray([x[i] for x in outputs]),   # NO PARTITIONED ARRAY
 #                 )
 #             return out
 
@@ -1212,7 +1212,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 # def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
 #     apply(layout, depth, *args)
 
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         for x in layout.partitions:
 #             recursive_walk(x, apply, args, depth, materialize)
 
@@ -1279,8 +1279,8 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 # def transform_child_layouts(transform, layout, depth, user=None, keep_parameters=True):
 #     # the rest of this is one switch statement
-#     if isinstance(layout, ak.partition.PartitionedArray):
-#         return ak.partition.IrregularlyPartitionedArray(
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
+#         return ak.partition.IrregularlyPartitionedArray(   # NO PARTITIONED ARRAY
 #             [transform(x, depth, user) for x in layout.partitions]
 #         )
 

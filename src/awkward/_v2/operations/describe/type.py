@@ -119,7 +119,7 @@ def type(array):
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         return array.type(ak._v2._util.typestrs(None))
 
-#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):
+#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
 #         return array.type(ak._v2._util.typestrs(None))
 
 #     else:

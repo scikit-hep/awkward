@@ -50,7 +50,7 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
 #     )
 
 #     if axis is None:
-#         if isinstance(layout, ak.partition.PartitionedArray):
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             start = 0
 #             best_index = None
 #             best_value = None

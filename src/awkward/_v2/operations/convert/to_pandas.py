@@ -200,7 +200,7 @@ def to_pandas(
 #             return [(to_numpy(layout), row_arrays, col_names)]
 
 #     layout = to_layout(array, allow_record=True, allow_other=False)
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         layout = layout.toContent()
 
 #     if isinstance(layout, ak._v2.record.Record):

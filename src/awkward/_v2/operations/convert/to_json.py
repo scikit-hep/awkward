@@ -89,7 +89,7 @@ def to_json(
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         out = array.snapshot()
 
-#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):
+#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
 #         out = array
 
 #     elif isinstance(array, ak._v2.contents.Content):

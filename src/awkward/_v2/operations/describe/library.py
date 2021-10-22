@@ -48,7 +48,7 @@ def library(*arrays):  # note: convert.py's 'kernels'
 #         )
 
 #         if isinstance(
-#             layout, (ak._v2.contents.Content, ak._v2.record.Record, ak.partition.PartitionedArray)
+#             layout, (ak._v2.contents.Content, ak._v2.record.Record, ak.partition.PartitionedArray)   # NO PARTITIONED ARRAY
 #         ):
 #             libs.add(layout.kernels)
 

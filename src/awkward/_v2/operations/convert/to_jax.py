@@ -67,7 +67,7 @@ def to_jax(array):
 #
 #         )
 
-#     elif isinstance(array, ak.partition.PartitionedArray):
+#     elif isinstance(array, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         return jax.numpy.concatenate([to_jax(x) for x in array.partitions])
 
 #     elif isinstance(array, ak._v2._util.virtualtypes):

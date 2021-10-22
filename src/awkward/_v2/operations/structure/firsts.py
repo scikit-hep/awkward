@@ -37,7 +37,7 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
 #     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         posaxis = None
 #         for x in layout.partitions:
 #             if posaxis is None:

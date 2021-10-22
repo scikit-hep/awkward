@@ -422,7 +422,7 @@ def to_buffers(
 
 #     layout = to_layout(array, allow_record=False, allow_other=False)
 
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         form = None
 #         length = []
 #         for part, content in enumerate(layout.partitions):

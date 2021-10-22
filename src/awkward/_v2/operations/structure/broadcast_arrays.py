@@ -123,7 +123,7 @@ def broadcast_arrays(*arrays, **kwargs):
 #     inputs = []
 #     for x in arrays:
 #         y = ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
-#         if isinstance(y, ak.partition.PartitionedArray):
+#         if isinstance(y, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             y = y.toContent()
 #         if not isinstance(y, (ak._v2.contents.Content, ak._v2.contents.Record)):
 #             y = ak._v2.contents.NumpyArray(ak.nplike.of(*arrays).array([y]))

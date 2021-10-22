@@ -200,7 +200,7 @@ import numpy
 #                 isinstance(x, ak._v2.contents.NumpyArray)
 #                 and not (x.format.upper().startswith("M"))
 #             )
-#             or not isinstance(x, (ak._v2.contents.Content, ak.partition.PartitionedArray))
+#             or not isinstance(x, (ak._v2.contents.Content, ak.partition.PartitionedArray))   # NO PARTITIONED ARRAY
 #             for x in inputs
 #         ):
 #             nplike = ak.nplike.of(*inputs)

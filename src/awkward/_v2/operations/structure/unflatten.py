@@ -136,11 +136,11 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #         return out
 
 #     if axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
-#         if isinstance(layout, ak.partition.PartitionedArray):
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             outparts = []
 #             for part in layout.partitions:
 #                 outparts.append(doit(part))
-#             out = ak.partition.IrregularlyPartitionedArray(outparts)
+#             out = ak.partition.IrregularlyPartitionedArray(outparts)   # NO PARTITIONED ARRAY
 #         else:
 #             out = doit(layout)
 
@@ -186,11 +186,11 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #                     transform, layout, depth, posaxis
 #                 )
 
-#         if isinstance(layout, ak.partition.PartitionedArray):
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             outparts = []
 #             for part in layout.partitions:
 #                 outparts.append(transform(part, depth=1, posaxis=axis))
-#             out = ak.partition.IrregularlyPartitionedArray(outparts)
+#             out = ak.partition.IrregularlyPartitionedArray(outparts)   # NO PARTITIONED ARRAY
 #         else:
 #             out = transform(layout, depth=1, posaxis=axis)
 

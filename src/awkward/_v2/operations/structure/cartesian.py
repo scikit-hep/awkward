@@ -228,7 +228,7 @@ def cartesian(
 #             new_arrays[n] = ak._v2.operations.convert.to_layout(
 #                 x, allow_record=False, allow_other=False
 #             )
-#             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
+#             if isinstance(new_arrays[n], ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                 is_partitioned = True
 #     else:
 #         behavior = ak._v2._util.behaviorof(*arrays, behavior=behavior)
@@ -240,7 +240,7 @@ def cartesian(
 #                     x, allow_record=False, allow_other=False
 #                 )
 #             )
-#             if isinstance(new_arrays[-1], ak.partition.PartitionedArray):
+#             if isinstance(new_arrays[-1], ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                 is_partitioned = True
 
 #     if with_name is not None:
@@ -307,7 +307,7 @@ def cartesian(
 #                 layouts.append(x)
 
 #         layouts = [
-#             x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x
+#             x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x   # NO PARTITIONED ARRAY
 #             for x in layouts
 #         ]
 
@@ -331,12 +331,12 @@ def cartesian(
 #         sample = None
 #         if isinstance(new_arrays, dict):
 #             for x in new_arrays.values():
-#                 if isinstance(x, ak.partition.PartitionedArray):
+#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     sample = x
 #                     break
 #         else:
 #             for x in new_arrays:
-#                 if isinstance(x, ak.partition.PartitionedArray):
+#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     sample = x
 #                     break
 
@@ -355,7 +355,7 @@ def cartesian(
 #                 )
 #             )
 
-#         result = ak.partition.IrregularlyPartitionedArray(output)
+#         result = ak.partition.IrregularlyPartitionedArray(output)   # NO PARTITIONED ARRAY
 
 #     else:
 

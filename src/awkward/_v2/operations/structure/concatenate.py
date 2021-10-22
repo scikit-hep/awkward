@@ -47,7 +47,7 @@ def concatenate(
 #     if not any(
 #         isinstance(
 #             x,
-#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),   # NO PARTITIONED ARRAY
 #         )
 #         for x in contents
 #     ):
@@ -61,7 +61,7 @@ def concatenate(
 #         for x in contents
 #         if isinstance(
 #             x,
-#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),   # NO PARTITIONED ARRAY
 #         )
 #     ][0]
 #     posaxis = first_content.axis_wrap_if_negative(axis)
@@ -73,7 +73,7 @@ def concatenate(
 #                 x,
 #                 (
 #                     ak._v2.contents.Content,
-#                     ak.partition.PartitionedArray,
+#                     ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #                     ak._v2.contents.Content,
 #                 ),
 #             )
@@ -92,12 +92,12 @@ def concatenate(
 #                     "axis={0}".format(axis)
 #                 )
 
-#     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):
+#     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):   # NO PARTITIONED ARRAY
 #         if posaxis == 0:
 #             partitions = []
 #             offsets = [0]
 #             for content in contents:
-#                 if isinstance(content, ak.partition.PartitionedArray):
+#                 if isinstance(content, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     start = 0
 #                     for stop, part in __builtins__["zip"](
 #                         content.stops, content.partitions
@@ -115,11 +115,11 @@ def concatenate(
 #                     )
 #                     offsets.append(offsets[-1] + 1)
 
-#             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+#             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])   # NO PARTITIONED ARRAY
 
 #         else:
 #             for content in contents:
-#                 if isinstance(content, ak.partition.PartitionedArray):
+#                 if isinstance(content, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     stops = content.stops
 #                     slices = []
 #                     start = 0
@@ -133,7 +133,7 @@ def concatenate(
 #             for slc in slices:
 #                 newcontents = []
 #                 for content in contents:
-#                     if isinstance(content, ak.partition.PartitionedArray):
+#                     if isinstance(content, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                         newcontents.append(content[slc].toContent())
 #                     elif isinstance(content, ak._v2.contents.Content):
 #                         newcontents.append(content[slc])
@@ -151,7 +151,7 @@ def concatenate(
 #                 )
 #                 offsets.append(offsets[-1] + len(partitions[-1]))
 
-#             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+#             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])   # NO PARTITIONED ARRAY
 
 #     elif posaxis == 0:
 #         contents = [
@@ -305,7 +305,7 @@ def concatenate(
 #     if not any(
 #         isinstance(
 #             x,
-#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),   # NO PARTITIONED ARRAY
 #         )
 #         for x in contents
 #     ):
@@ -319,7 +319,7 @@ def concatenate(
 #         for x in contents
 #         if isinstance(
 #             x,
-#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),
+#             (ak._v2.contents.Content, ak.partition.PartitionedArray, ak._v2.contents.Content),   # NO PARTITIONED ARRAY
 #         )
 #     ][0]
 #     posaxis = first_content.axis_wrap_if_negative(axis)
@@ -331,7 +331,7 @@ def concatenate(
 #                 x,
 #                 (
 #                     ak._v2.contents.Content,
-#                     ak.partition.PartitionedArray,
+#                     ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #                     ak._v2.contents.Content,
 #                 ),
 #             )
@@ -350,12 +350,12 @@ def concatenate(
 #                     "axis={0}".format(axis)
 #                 )
 
-#     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):
+#     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):   # NO PARTITIONED ARRAY
 #         if posaxis == 0:
 #             partitions = []
 #             offsets = [0]
 #             for content in contents:
-#                 if isinstance(content, ak.partition.PartitionedArray):
+#                 if isinstance(content, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     start = 0
 #                     for stop, part in __builtins__["zip"](
 #                         content.stops, content.partitions
@@ -373,11 +373,11 @@ def concatenate(
 #                     )
 #                     offsets.append(offsets[-1] + 1)
 
-#             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+#             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])   # NO PARTITIONED ARRAY
 
 #         else:
 #             for content in contents:
-#                 if isinstance(content, ak.partition.PartitionedArray):
+#                 if isinstance(content, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     stops = content.stops
 #                     slices = []
 #                     start = 0
@@ -391,7 +391,7 @@ def concatenate(
 #             for slc in slices:
 #                 newcontents = []
 #                 for content in contents:
-#                     if isinstance(content, ak.partition.PartitionedArray):
+#                     if isinstance(content, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                         newcontents.append(content[slc].toContent())
 #                     elif isinstance(content, ak._v2.contents.Content):
 #                         newcontents.append(content[slc])
@@ -409,7 +409,7 @@ def concatenate(
 #                 )
 #                 offsets.append(offsets[-1] + len(partitions[-1]))
 
-#             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+#             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])   # NO PARTITIONED ARRAY
 
 #     elif posaxis == 0:
 #         contents = [

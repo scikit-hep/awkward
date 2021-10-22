@@ -37,7 +37,7 @@ def validity_error(array, exception=False):
 #         (
 #             ak._v2.contents.Content,
 #             ak._v2.record.Record,
-#             ak.partition.PartitionedArray,
+#             ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #         ),
 #     ):
 #         out = array.validityerror()

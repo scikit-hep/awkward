@@ -162,7 +162,7 @@ def from_buffers(
 #                 partitions.append(_form_to_layout(*(args + (partlen, None, None))))
 #                 offsets.append(offsets[-1] + len(partitions[-1]))
 
-#         out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+#         out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])   # NO PARTITIONED ARRAY
 
 #     else:
 #         raise TypeError(

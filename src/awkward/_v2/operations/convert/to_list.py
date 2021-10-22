@@ -106,7 +106,7 @@ def to_list(array):
 #         else:
 #             return ak.nplike.of(array).asarray(array).tolist()
 
-#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):
+#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
 #         return [to_list(x) for x in array]
 
 #     elif isinstance(array, ak._v2.contents.Content):

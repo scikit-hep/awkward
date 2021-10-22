@@ -64,7 +64,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
     u"""
     Args:
-        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
+        data (#ak.layout.Content, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
                - If a NumPy array, the regularity of its dimensions is preserved
                  and the data are viewed, not copied.

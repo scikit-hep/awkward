@@ -328,7 +328,7 @@
 #             layout, allow_empty=False, highlevel=False
 #         )
 
-#         if isinstance(layout, ak.partition.PartitionedArray):
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             numba_type = None
 #             for part in layout.partitions:
 #                 if numba_type is None:
@@ -1293,7 +1293,7 @@
 #             partition_start = partition_stop
 
 #         return ak._v2._util.wrap(
-#             ak.partition.IrregularlyPartitionedArray(output), self.behavior
+#             ak.partition.IrregularlyPartitionedArray(output), self.behavior   # NO PARTITIONED ARRAY
 #         )
 
 
@@ -1390,7 +1390,7 @@
 
 
 # @numba.extending.unbox(PartitionedViewType)
-# def unbox_PartitionedArray(partviewtype, arrayobj, c):
+# def unbox_PartitionedArray(partviewtype, arrayobj, c):   # NO PARTITIONED ARRAY
 #     partview_obj = c.pyapi.object_getattr_string(arrayobj, "_numbaview")
 #     out = unbox_PartitionedView(partviewtype, partview_obj, c)
 #     c.pyapi.decref(partview_obj)
@@ -1430,7 +1430,7 @@
 
 
 # @numba.extending.box(PartitionedViewType)
-# def box_PartitionedArray(partviewtype, partviewval, c):
+# def box_PartitionedArray(partviewtype, partviewval, c):   # NO PARTITIONED ARRAY
 #     arrayview_obj = box_PartitionedView(partviewtype, partviewval, c)
 #     out = c.pyapi.call_method(arrayview_obj, "toarray", ())
 #     c.pyapi.decref(arrayview_obj)

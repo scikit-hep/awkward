@@ -241,7 +241,7 @@ def packed(array, highlevel=True, behavior=None):
 #     elif isinstance(layout, ak._v2.contents.VirtualArray):
 #         return layout.array
 
-#     elif isinstance(layout, ak.partition.PartitionedArray):
+#     elif isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         return layout
 
 #     elif isinstance(layout, ak._v2.record.Record):

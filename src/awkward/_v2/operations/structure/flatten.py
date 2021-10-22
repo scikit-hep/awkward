@@ -155,8 +155,8 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #             else:
 #                 return layout
 
-#         if isinstance(layout, ak.partition.PartitionedArray):
-#             out = ak.partition.IrregularlyPartitionedArray(
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
+#             out = ak.partition.IrregularlyPartitionedArray(   # NO PARTITIONED ARRAY
 #                 [apply(x) for x in layout.partitions]
 #             )
 #         else:

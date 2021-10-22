@@ -546,7 +546,7 @@ def to_arrow(
 #         elif isinstance(layout, (ak._v2.contents.VirtualArray)):
 #             return recurse(layout.array, None, False)
 
-#         elif isinstance(layout, (ak.partition.PartitionedArray)):
+#         elif isinstance(layout, (ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
 #             return pyarrow.chunked_array(
 #                 [recurse(x, None, False) for x in layout.partitions]
 #             )

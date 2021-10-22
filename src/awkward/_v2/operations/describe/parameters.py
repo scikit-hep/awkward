@@ -31,7 +31,7 @@ def parameters(array):
 #         (
 #             ak._v2.contents.Content,
 #             ak._v2.record.Record,
-#             ak.partition.PartitionedArray,
+#             ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #         ),
 #     ):
 #         return array.parameters

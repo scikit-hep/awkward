@@ -51,7 +51,7 @@ def where(condition, *args, **kwargs):
 
 #     if len(args) == 0:
 #         nplike = ak.nplike.of(akcondition)
-#         if isinstance(akcondition, ak.partition.PartitionedArray):
+#         if isinstance(akcondition, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             akcondition = akcondition.replace_partitions(
 #                 [
 #                     ak._v2.contents.NumpyArray(ak._v2.operations.convert.to_numpy(x))

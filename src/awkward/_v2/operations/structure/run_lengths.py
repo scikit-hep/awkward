@@ -191,7 +191,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #         array, allow_record=False, allow_other=False
 #     )
 
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         if len(layout.partitions) != 0 and layout.partitions[0].branch_depth == (
 #             False,
 #             1,
@@ -213,7 +213,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                         pass_user=False,
 #                     )
 #                 )
-#             out = ak.partition.IrregularlyPartitionedArray(outparts)
+#             out = ak.partition.IrregularlyPartitionedArray(outparts)   # NO PARTITIONED ARRAY
 #     else:
 #         out = ak._v2._util.recursively_apply(
 #             layout,
