@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("argmin")
+# @ak._v2._connect.numpy.implements("argmin")
 def argmin(array, axis=None, keepdims=False, mask_identity=True):
     pass
 
@@ -45,17 +45,17 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
 #     See #ak.sum for a more complete description of nested list and missing
 #     value (None) handling in reducers.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 
 #     if axis is None:
-#         if isinstance(layout, ak.partition.PartitionedArray):
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             start = 0
 #             best_index = None
 #             best_value = None
 #             for partition in layout.partitions:
-#                 for tmp in ak._util.completely_flatten(partition):
+#                 for tmp in ak._v2._util.completely_flatten(partition):
 #                     out = ak.nplike.of(tmp).argmin(tmp, axis=None)
 #                     if best_index is None or tmp[out] < best_value:
 #                         best_index = start + out
@@ -66,7 +66,7 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
 #         else:
 #             best_index = None
 #             best_value = None
-#             for tmp in ak._util.completely_flatten(layout):
+#             for tmp in ak._v2._util.completely_flatten(layout):
 #                 out = ak.nplike.of(tmp).argmin(tmp, axis=None)
 #                 if best_index is None or tmp[out] < best_value:
 #                     best_index = out
@@ -74,7 +74,7 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
 #             return best_index
 
 #     else:
-#         behavior = ak._util.behaviorof(array)
-#         return ak._util.wrap(
+#         behavior = ak._v2._util.behaviorof(array)
+#         return ak._v2._util.wrap(
 #             layout.argmin(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
 #         )

@@ -23,7 +23,7 @@ def fields(array):
 #     If the array contains neither tuples nor records, this returns an empty
 #     list.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
 #     return layout.keys()

@@ -61,33 +61,33 @@ def packed(array, highlevel=True, behavior=None):
 
 #     See also #ak.to_buffers.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
 
 #     def transform(layout, depth=1, user=None):
-#         return ak._util.transform_child_layouts(
+#         return ak._v2._util.transform_child_layouts(
 #             transform, _pack_layout(layout), depth, user
 #         )
 
 #     out = transform(layout)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 
 # def _pack_layout(layout):
 #     nplike = ak.nplike.of(layout)
 
-#     if isinstance(layout, ak.layout.NumpyArray):
+#     if isinstance(layout, ak._v2.contents.NumpyArray):
 #         return layout.contiguous()
 
 #     # EmptyArray is a no-op
-#     elif isinstance(layout, ak.layout.EmptyArray):
+#     elif isinstance(layout, ak._v2.contents.EmptyArray):
 #         return layout
 
 #     # Project indexed arrays
-#     elif isinstance(layout, ak._util.indexedoptiontypes):
-#         if isinstance(layout.content, ak._util.optiontypes):
+#     elif isinstance(layout, ak._v2._util.indexedoptiontypes):
+#         if isinstance(layout.content, ak._v2._util.optiontypes):
 #             return layout.simplify()
 
 #         index = nplike.asarray(layout.index)
@@ -97,24 +97,24 @@ def packed(array, highlevel=True, behavior=None):
 #         new_index[is_none] = -1
 #         new_index[~is_none] = nplike.arange(len(new_index) - nplike.sum(is_none))
 
-#         return ak.layout.IndexedOptionArray64(
-#             ak.layout.Index64(new_index),
+#         return ak._v2.contents.IndexedOptionArray64(
+#             ak._v2.index.Index64(new_index),
 #             layout.project(),
 #             layout.identities,
 #             layout.parameters,
 #         )
 
 #     # Project indexed arrays
-#     elif isinstance(layout, ak._util.indexedtypes):
+#     elif isinstance(layout, ak._v2._util.indexedtypes):
 #         return layout.project()
 
 #     # ListArray performs both ordering and resizing
 #     elif isinstance(
 #         layout,
 #         (
-#             ak.layout.ListArray32,
-#             ak.layout.ListArrayU32,
-#             ak.layout.ListArray64,
+#             ak._v2.contents.ListArray32,
+#             ak._v2.contents.ListArrayU32,
+#             ak._v2.contents.ListArray64,
 #         ),
 #     ):
 #         return layout.toListOffsetArray64(True)
@@ -123,14 +123,14 @@ def packed(array, highlevel=True, behavior=None):
 #     elif isinstance(
 #         layout,
 #         (
-#             ak.layout.ListOffsetArray32,
-#             ak.layout.ListOffsetArray64,
-#             ak.layout.ListOffsetArrayU32,
+#             ak._v2.contents.ListOffsetArray32,
+#             ak._v2.contents.ListOffsetArray64,
+#             ak._v2.contents.ListOffsetArrayU32,
 #         ),
 #     ):
 #         new_layout = layout.toListOffsetArray64(True)
 #         new_length = new_layout.offsets[-1]
-#         return ak.layout.ListOffsetArray64(
+#         return ak._v2.contents.ListOffsetArray64(
 #             new_layout.offsets,
 #             new_layout.content[:new_length],
 #             new_layout.identities,
@@ -138,18 +138,18 @@ def packed(array, highlevel=True, behavior=None):
 #         )
 
 #     # UnmaskedArray just wraps another array
-#     elif isinstance(layout, ak.layout.UnmaskedArray):
-#         return ak.layout.UnmaskedArray(
+#     elif isinstance(layout, ak._v2.contents.UnmaskedArray):
+#         return ak._v2.contents.UnmaskedArray(
 #             layout.content, layout.identities, layout.parameters
 #         )
 
 #     # UnionArrays can be simplified
 #     # and their contents too
-#     elif isinstance(layout, ak._util.uniontypes):
+#     elif isinstance(layout, ak._v2._util.uniontypes):
 #         layout = layout.simplify()
 
 #         # If we managed to lose the drop type entirely
-#         if not isinstance(layout, ak._util.uniontypes):
+#         if not isinstance(layout, ak._v2._util.uniontypes):
 #             return layout
 
 #         # Pack simplified layout
@@ -166,17 +166,17 @@ def packed(array, highlevel=True, behavior=None):
 #             new_contents[i] = layout.project(i)
 #             new_index[is_i] = nplike.arange(nplike.sum(is_i))
 
-#         return ak.layout.UnionArray8_64(
-#             ak.layout.Index8(tags),
-#             ak.layout.Index64(new_index),
+#         return ak._v2.contents.UnionArray8_64(
+#             ak._v2.index.Index8(tags),
+#             ak._v2.index.Index64(new_index),
 #             new_contents,
 #             layout.identities,
 #             layout.parameters,
 #         )
 
 #     # RecordArray contents can be truncated
-#     elif isinstance(layout, ak.layout.RecordArray):
-#         return ak.layout.RecordArray(
+#     elif isinstance(layout, ak._v2.contents.RecordArray):
+#         return ak._v2.contents.RecordArray(
 #             [c[: len(layout)] for c in layout.contents],
 #             layout.recordlookup,
 #             len(layout),
@@ -185,7 +185,7 @@ def packed(array, highlevel=True, behavior=None):
 #         )
 
 #     # RegularArrays can change length
-#     elif isinstance(layout, ak.layout.RegularArray):
+#     elif isinstance(layout, ak._v2.contents.RegularArray):
 #         if not len(layout):
 #             return layout
 
@@ -198,7 +198,7 @@ def packed(array, highlevel=True, behavior=None):
 #         else:
 #             content = content[:0]
 
-#         return ak.layout.RegularArray(
+#         return ak._v2.contents.RegularArray(
 #             content,
 #             layout.size,
 #             len(layout),
@@ -207,13 +207,13 @@ def packed(array, highlevel=True, behavior=None):
 #         )
 
 #     # BitMaskedArrays can change length
-#     elif isinstance(layout, ak.layout.BitMaskedArray):
+#     elif isinstance(layout, ak._v2.contents.BitMaskedArray):
 #         layout = layout.simplify()
 
-#         if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
+#         if not isinstance(ak.type(layout.content), ak._v2.types.PrimitiveType):
 #             return layout.toIndexedOptionArray64()
 
-#         return ak.layout.BitMaskedArray(
+#         return ak._v2.contents.BitMaskedArray(
 #             layout.mask,
 #             layout.content[: len(layout)],
 #             layout.valid_when,
@@ -224,13 +224,13 @@ def packed(array, highlevel=True, behavior=None):
 #         )
 
 #     # ByteMaskedArrays can change length
-#     elif isinstance(layout, ak.layout.ByteMaskedArray):
+#     elif isinstance(layout, ak._v2.contents.ByteMaskedArray):
 #         layout = layout.simplify()
 
-#         if not isinstance(ak.type(layout.content), ak.types.PrimitiveType):
+#         if not isinstance(ak.type(layout.content), ak._v2.types.PrimitiveType):
 #             return layout.toIndexedOptionArray64()
 
-#         return ak.layout.ByteMaskedArray(
+#         return ak._v2.contents.ByteMaskedArray(
 #             layout.mask,
 #             layout.content[: len(layout)],
 #             layout.valid_when,
@@ -238,17 +238,17 @@ def packed(array, highlevel=True, behavior=None):
 #             layout.parameters,
 #         )
 
-#     elif isinstance(layout, ak.layout.VirtualArray):
+#     elif isinstance(layout, ak._v2.contents.VirtualArray):
 #         return layout.array
 
-#     elif isinstance(layout, ak.partition.PartitionedArray):
+#     elif isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         return layout
 
-#     elif isinstance(layout, ak.layout.Record):
-#         return ak.layout.Record(layout.array[layout.at : layout.at + 1], 0)
+#     elif isinstance(layout, ak._v2.record.Record):
+#         return ak._v2.record.Record(layout.array[layout.at : layout.at + 1], 0)
 
 #     # Finally, fall through to failure
 #     else:
 #         raise AssertionError(
-#             "unrecognized layout: " + repr(layout) + ak._util.exception_suffix(__file__)
+#             "unrecognized layout: " + repr(layout)
 #         )

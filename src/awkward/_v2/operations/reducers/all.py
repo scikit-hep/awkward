@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("all")
+# @ak._v2._connect.numpy.implements("all")
 def all(array, axis=None, keepdims=False, mask_identity=False):
     pass
 
@@ -40,7 +40,7 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
 #     See #ak.sum for a more complete description of nested list and missing
 #     value (None) handling in reducers.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     if axis is None:
@@ -52,10 +52,10 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
 #                 return xs[0] and reduce(xs[1:])
 
 #         return reduce(
-#             [ak.nplike.of(x).all(x) for x in ak._util.completely_flatten(layout)]
+#             [ak.nplike.of(x).all(x) for x in ak._v2._util.completely_flatten(layout)]
 #         )
 #     else:
-#         behavior = ak._util.behaviorof(array)
-#         return ak._util.wrap(
+#         behavior = ak._v2._util.behaviorof(array)
+#         return ak._v2._util.wrap(
 #             layout.all(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
 #         )

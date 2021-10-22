@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("broadcast_arrays")
+# @ak._v2._connect.numpy.implements("broadcast_arrays")
 def broadcast_arrays(*arrays, **kwargs):
     pass
 
@@ -114,7 +114,7 @@ def broadcast_arrays(*arrays, **kwargs):
 #     #ak.Array.type, but it is lost when converting an array into JSON or
 #     Python objects.
 #     """
-#     (highlevel, left_broadcast, right_broadcast) = ak._util.extra(
+#     (highlevel, left_broadcast, right_broadcast) = ak._v2._util.extra(
 #         (),
 #         kwargs,
 #         [("highlevel", True), ("left_broadcast", True), ("right_broadcast", True)],
@@ -122,21 +122,21 @@ def broadcast_arrays(*arrays, **kwargs):
 
 #     inputs = []
 #     for x in arrays:
-#         y = ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
-#         if isinstance(y, ak.partition.PartitionedArray):
+#         y = ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+#         if isinstance(y, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             y = y.toContent()
-#         if not isinstance(y, (ak.layout.Content, ak.layout.Record)):
-#             y = ak.layout.NumpyArray(ak.nplike.of(*arrays).array([y]))
+#         if not isinstance(y, (ak._v2.contents.Content, ak._v2.contents.Record)):
+#             y = ak._v2.contents.NumpyArray(ak.nplike.of(*arrays).array([y]))
 #         inputs.append(y)
 
 #     def getfunction(inputs):
-#         if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
+#         if all(isinstance(x, ak._v2.contents.NumpyArray) for x in inputs):
 #             return lambda: tuple(inputs)
 #         else:
 #             return None
 
-#     behavior = ak._util.behaviorof(*arrays)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(*arrays)
+#     out = ak._v2._util.broadcast_and_apply(
 #         inputs,
 #         getfunction,
 #         behavior,
@@ -147,6 +147,6 @@ def broadcast_arrays(*arrays, **kwargs):
 #     )
 #     assert isinstance(out, tuple)
 #     if highlevel:
-#         return [ak._util.wrap(x, behavior) for x in out]
+#         return [ak._v2._util.wrap(x, behavior) for x in out]
 #     else:
 #         return list(out)

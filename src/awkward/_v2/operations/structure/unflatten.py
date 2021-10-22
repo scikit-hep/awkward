@@ -66,36 +66,36 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #     """
 #     nplike = ak.nplike.of(array)
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 
 #     if isinstance(counts, (numbers.Integral, np.integer)):
 #         current_offsets = None
 #     else:
-#         counts = ak.operations.convert.to_layout(
+#         counts = ak._v2.operations.convert.to_layout(
 #             counts, allow_record=False, allow_other=False
 #         )
-#         ptr_lib = ak.operations.convert.kernels(array)
-#         counts = ak.operations.convert.to_kernels(counts, ptr_lib, highlevel=False)
+#         ptr_lib = ak._v2.operations.convert.kernels(array)
+#         counts = ak._v2.operations.convert.to_kernels(counts, ptr_lib, highlevel=False)
 #         if ptr_lib == "cpu":
-#             counts = ak.operations.convert.to_numpy(counts, allow_missing=True)
+#             counts = ak._v2.operations.convert.to_numpy(counts, allow_missing=True)
 #             mask = ak.nplike.numpy.ma.getmask(counts)
 #             counts = ak.nplike.numpy.ma.filled(counts, 0)
 #         elif ptr_lib == "cuda":
-#             counts = ak.operations.convert.to_cupy(counts)
+#             counts = ak._v2.operations.convert.to_cupy(counts)
 #             mask = False
 #         else:
 #             raise AssertionError(
-#                 "unrecognized kernels lib" + ak._util.exception_suffix(__file__)
+#                 "unrecognized kernels lib"
 #             )
 #         if counts.ndim != 1:
 #             raise ValueError(
-#                 "counts must be one-dimensional" + ak._util.exception_suffix(__file__)
+#                 "counts must be one-dimensional"
 #             )
 #         if not issubclass(counts.dtype.type, np.integer):
 #             raise ValueError(
-#                 "counts must be integers" + ak._util.exception_suffix(__file__)
+#                 "counts must be integers"
 #             )
 #         current_offsets = [nplike.empty(len(counts) + 1, np.int64)]
 #         current_offsets[0][0] = 0
@@ -106,9 +106,9 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             if counts < 0 or counts > len(layout):
 #                 raise ValueError(
 #                     "too large counts for array or negative counts"
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
-#             out = ak.layout.RegularArray(layout, counts)
+#             out = ak._v2.contents.RegularArray(layout, counts)
 
 #         else:
 #             position = (
@@ -122,25 +122,25 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             ] != len(layout):
 #                 raise ValueError(
 #                     "structure imposed by 'counts' does not fit in the array or partition "
-#                     "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+#                     "at axis={0}".format(axis)
 #                 )
 
 #             offsets = current_offsets[0][: position + 1]
 #             current_offsets[0] = current_offsets[0][position:] - len(layout)
 
-#             out = ak.layout.ListOffsetArray64(ak.layout.Index64(offsets), layout)
+#             out = ak._v2.contents.ListOffsetArray64(ak._v2.contents.Index64(offsets), layout)
 #             if not isinstance(mask, (bool, np.bool_)):
-#                 index = ak.layout.Index8(nplike.asarray(mask).astype(np.int8))
-#                 out = ak.layout.ByteMaskedArray(index, out, valid_when=False)
+#                 index = ak._v2.index.Index8(nplike.asarray(mask).astype(np.int8))
+#                 out = ak._v2.contents.ByteMaskedArray(index, out, valid_when=False)
 
 #         return out
 
 #     if axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
-#         if isinstance(layout, ak.partition.PartitionedArray):
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             outparts = []
 #             for part in layout.partitions:
 #                 outparts.append(doit(part))
-#             out = ak.partition.IrregularlyPartitionedArray(outparts)
+#             out = ak.partition.IrregularlyPartitionedArray(outparts)   # NO PARTITIONED ARRAY
 #         else:
 #             out = doit(layout)
 
@@ -153,15 +153,15 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             layout = _pack_layout(layout)
 
 #             posaxis = layout.axis_wrap_if_negative(posaxis)
-#             if posaxis == depth and isinstance(layout, ak._util.listtypes):
+#             if posaxis == depth and isinstance(layout, ak._v2._util.listtypes):
 #                 # We are one *above* the level where we want to apply this.
 #                 listoffsetarray = layout.toListOffsetArray64(True)
 #                 outeroffsets = nplike.asarray(listoffsetarray.offsets)
 
 #                 content = doit(listoffsetarray.content[: outeroffsets[-1]])
-#                 if isinstance(content, ak.layout.ByteMaskedArray):
+#                 if isinstance(content, ak._v2.contents.ByteMaskedArray):
 #                     inneroffsets = nplike.asarray(content.content.offsets)
-#                 elif isinstance(content, ak.layout.RegularArray):
+#                 elif isinstance(content, ak._v2.contents.RegularArray):
 #                     inneroffsets = nplike.asarray(
 #                         content.toListOffsetArray64(True).offsets
 #                     )
@@ -174,23 +174,23 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #                 if not nplike.array_equal(inneroffsets[positions], outeroffsets):
 #                     raise ValueError(
 #                         "structure imposed by 'counts' does not fit in the array or partition "
-#                         "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+#                         "at axis={0}".format(axis)
 #                     )
 
-#                 return ak.layout.ListOffsetArray64(
-#                     ak.layout.Index64(positions), content
+#                 return ak._v2.contents.ListOffsetArray64(
+#                     ak._v2.index.Index64(positions), content
 #                 )
 
 #             else:
-#                 return ak._util.transform_child_layouts(
+#                 return ak._v2._util.transform_child_layouts(
 #                     transform, layout, depth, posaxis
 #                 )
 
-#         if isinstance(layout, ak.partition.PartitionedArray):
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             outparts = []
 #             for part in layout.partitions:
 #                 outparts.append(transform(part, depth=1, posaxis=axis))
-#             out = ak.partition.IrregularlyPartitionedArray(outparts)
+#             out = ak.partition.IrregularlyPartitionedArray(outparts)   # NO PARTITIONED ARRAY
 #         else:
 #             out = transform(layout, depth=1, posaxis=axis)
 
@@ -199,7 +199,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #     ):
 #         raise ValueError(
 #             "structure imposed by 'counts' does not fit in the array or partition "
-#             "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+#             "at axis={0}".format(axis)
 #         )
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

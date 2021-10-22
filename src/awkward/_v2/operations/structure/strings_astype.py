@@ -46,14 +46,14 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 #     to_dtype = np.dtype(to)
 
 #     def getfunction(layout):
-#         if isinstance(layout, ak._util.listtypes) and (
+#         if isinstance(layout, ak._v2._util.listtypes) and (
 #             layout.parameter("__array__") == "string"
 #             or layout.parameter("__array__") == "bytestring"
 #         ):
 #             layout = without_parameters(layout, highlevel=False)
 #             max_length = ak.max(num(layout))
 #             regulararray = layout.rpad_and_clip(max_length, 1)
-#             maskedarray = ak.operations.convert.to_numpy(
+#             maskedarray = ak._v2.operations.convert.to_numpy(
 #                 regulararray, allow_missing=True
 #             )
 #             npstrings = maskedarray.data
@@ -62,17 +62,17 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 #             npnumbers = (
 #                 npstrings.reshape(-1).view("<S" + str(max_length)).astype(to_dtype)
 #             )
-#             return lambda: ak.layout.NumpyArray(npnumbers)
+#             return lambda: ak._v2.contents.NumpyArray(npnumbers)
 #         else:
 #             return None
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
-#     out = ak._util.recursively_apply(
+#     out = ak._v2._util.recursively_apply(
 #         layout,
 #         getfunction,
 #         pass_depth=False,
 #         pass_user=False,
 #     )
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

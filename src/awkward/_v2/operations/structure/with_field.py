@@ -34,7 +34,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #     other.)
 #     """
 
-#     if isinstance(what, (ak.highlevel.Array, ak.highlevel.Record)):
+#     if isinstance(what, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
 #         what_caches = what.caches  # noqa: F841
 
 #     if not (
@@ -45,7 +45,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #         raise TypeError(
 #             "New fields may only be assigned by field name(s) "
 #             "or as a new integer slot by passing None for 'where'"
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 #     if (
 #         not isinstance(where, str)
@@ -70,17 +70,17 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #         if not (isinstance(where, str) or where is None):
 #             where = where[0]
 
-#         behavior = ak._util.behaviorof(base, what, behavior=behavior)
-#         base = ak.operations.convert.to_layout(
+#         behavior = ak._v2._util.behaviorof(base, what, behavior=behavior)
+#         base = ak._v2.operations.convert.to_layout(
 #             base, allow_record=True, allow_other=False
 #         )
 #         if base.numfields < 0:
 #             raise ValueError(
 #                 "no tuples or records in array; cannot add a new field"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
-#         what = ak.operations.convert.to_layout(
+#         what = ak._v2.operations.convert.to_layout(
 #             what, allow_record=True, allow_other=True
 #         )
 
@@ -90,21 +90,21 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 
 #         if len(keys) == 0:
 #             # the only key was removed, so just create new Record
-#             out = (ak.layout.RecordArray([what], [where], parameters=base.parameters),)
+#             out = (ak._v2.contents.RecordArray([what], [where], parameters=base.parameters),)
 
 #         else:
 
 #             def getfunction(inputs):
 #                 nplike = ak.nplike.of(*inputs)
 #                 base, what = inputs
-#                 if isinstance(base, ak.layout.RecordArray):
+#                 if isinstance(base, ak._v2.contents.RecordArray):
 #                     if what is None:
-#                         what = ak.layout.IndexedOptionArray64(
-#                             ak.layout.Index64(nplike.full(len(base), -1, np.int64)),
-#                             ak.layout.EmptyArray(),
+#                         what = ak._v2.contents.IndexedOptionArray64(
+#                             ak._v2.index.Index64(nplike.full(len(base), -1, np.int64)),
+#                             ak._v2.contents.EmptyArray(),
 #                         )
-#                     elif not isinstance(what, ak.layout.Content):
-#                         what = ak.layout.NumpyArray(nplike.repeat(what, len(base)))
+#                     elif not isinstance(what, ak._v2.contents.Content):
+#                         what = ak._v2.contents.NumpyArray(nplike.repeat(what, len(base)))
 #                     if base.istuple and where is None:
 #                         recordlookup = None
 #                     elif base.istuple:
@@ -113,7 +113,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #                         recordlookup = keys + [str(len(keys))]
 #                     else:
 #                         recordlookup = keys + [where]
-#                     out = ak.layout.RecordArray(
+#                     out = ak._v2.contents.RecordArray(
 #                         [base[k] for k in keys] + [what],
 #                         recordlookup,
 #                         parameters=base.parameters,
@@ -122,7 +122,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #                 else:
 #                     return None
 
-#             out = ak._util.broadcast_and_apply(
+#             out = ak._v2._util.broadcast_and_apply(
 #                 [base, what],
 #                 getfunction,
 #                 behavior,
@@ -132,4 +132,4 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 
 #         assert isinstance(out, tuple) and len(out) == 1
 
-#         return ak._util.maybe_wrap(out[0], behavior, highlevel)
+#         return ak._v2._util.maybe_wrap(out[0], behavior, highlevel)

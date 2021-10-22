@@ -93,31 +93,31 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 
 #     def getfunction(inputs):
 #         layoutarray, layoutmask = inputs
-#         if isinstance(layoutmask, ak.layout.NumpyArray):
+#         if isinstance(layoutmask, ak._v2.contents.NumpyArray):
 #             m = ak.nplike.of(layoutmask).asarray(layoutmask)
 #             if not issubclass(m.dtype.type, (bool, np.bool_)):
 #                 raise ValueError(
 #                     "mask must have boolean type, not "
-#                     "{0}".format(repr(m.dtype)) + ak._util.exception_suffix(__file__)
+#                     "{0}".format(repr(m.dtype))
 #                 )
-#             bytemask = ak.layout.Index8(m.view(np.int8))
+#             bytemask = ak._v2.index.Index8(m.view(np.int8))
 #             return lambda: (
-#                 ak.layout.ByteMaskedArray(
+#                 ak._v2.contents.ByteMaskedArray(
 #                     bytemask, layoutarray, valid_when=valid_when
 #                 ).simplify(),
 #             )
 #         else:
 #             return None
 
-#     layoutarray = ak.operations.convert.to_layout(
+#     layoutarray = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
-#     layoutmask = ak.operations.convert.to_layout(
+#     layoutmask = ak._v2.operations.convert.to_layout(
 #         mask, allow_record=True, allow_other=False
 #     )
 
-#     behavior = ak._util.behaviorof(array, mask, behavior=behavior)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(array, mask, behavior=behavior)
+#     out = ak._v2._util.broadcast_and_apply(
 #         [layoutarray, layoutmask],
 #         getfunction,
 #         behavior,
@@ -126,4 +126,4 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 #         pass_depth=False,
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._util.maybe_wrap(out[0], behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(out[0], behavior, highlevel)

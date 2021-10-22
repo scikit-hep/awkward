@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("where")
+# @ak._v2._connect.numpy.implements("where")
 def where(condition, *args, **kwargs):
     pass
 
@@ -41,71 +41,71 @@ def where(condition, *args, **kwargs):
 #     for all `i`. The structure of `x` and `y` do not need to be the same; if
 #     they are incompatible types, the output will have #ak.type.UnionType.
 #     """
-#     mergebool, highlevel = ak._util.extra(
+#     mergebool, highlevel = ak._v2._util.extra(
 #         (), kwargs, [("mergebool", True), ("highlevel", True)]
 #     )
 
-#     akcondition = ak.operations.convert.to_layout(
+#     akcondition = ak._v2.operations.convert.to_layout(
 #         condition, allow_record=False, allow_other=False
 #     )
 
 #     if len(args) == 0:
 #         nplike = ak.nplike.of(akcondition)
-#         if isinstance(akcondition, ak.partition.PartitionedArray):
+#         if isinstance(akcondition, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             akcondition = akcondition.replace_partitions(
 #                 [
-#                     ak.layout.NumpyArray(ak.operations.convert.to_numpy(x))
+#                     ak._v2.contents.NumpyArray(ak._v2.operations.convert.to_numpy(x))
 #                     for x in akcondition.partitions
 #                 ]
 #             )
 #         else:
-#             akcondition = ak.layout.NumpyArray(
-#                 ak.operations.convert.to_numpy(akcondition)
+#             akcondition = ak._v2.contents.NumpyArray(
+#                 ak._v2.operations.convert.to_numpy(akcondition)
 #             )
-#         out = nplike.nonzero(ak.operations.convert.to_numpy(akcondition))
+#         out = nplike.nonzero(ak._v2.operations.convert.to_numpy(akcondition))
 #         if highlevel:
 #             return tuple(
-#                 ak._util.wrap(ak.layout.NumpyArray(x), ak._util.behaviorof(condition))
+#                 ak._v2._util.wrap(ak._v2.contents.NumpyArray(x), ak._v2._util.behaviorof(condition))
 #                 for x in out
 #             )
 #         else:
-#             return tuple(ak.layout.NumpyArray(x) for x in out)
+#             return tuple(ak._v2.contents.NumpyArray(x) for x in out)
 
 #     elif len(args) == 1:
 #         raise ValueError(
 #             "either both or neither of x and y should be given"
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 #     elif len(args) == 2:
 #         left, right = [
-#             ak.operations.convert.to_layout(x, allow_record=False, allow_other=True)
+#             ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=True)
 #             for x in args
 #         ]
 #         good_arrays = [akcondition]
-#         if isinstance(left, ak.layout.Content):
+#         if isinstance(left, ak._v2.contents.Content):
 #             good_arrays.append(left)
-#         if isinstance(right, ak.layout.Content):
+#         if isinstance(right, ak._v2.contents.Content):
 #             good_arrays.append(right)
 #         nplike = ak.nplike.of(*good_arrays)
 
 #         def getfunction(inputs):
 #             akcondition, left, right = inputs
-#             if isinstance(akcondition, ak.layout.NumpyArray):
+#             if isinstance(akcondition, ak._v2.contents.NumpyArray):
 #                 npcondition = nplike.asarray(akcondition)
-#                 tags = ak.layout.Index8((npcondition == 0).view(np.int8))
-#                 index = ak.layout.Index64(nplike.arange(len(tags), dtype=np.int64))
-#                 if not isinstance(left, ak.layout.Content):
-#                     left = ak.layout.NumpyArray(nplike.repeat(left, len(tags)))
-#                 if not isinstance(right, ak.layout.Content):
-#                     right = ak.layout.NumpyArray(nplike.repeat(right, len(tags)))
-#                 tmp = ak.layout.UnionArray8_64(tags, index, [left, right])
+#                 tags = ak._v2.index.Index8((npcondition == 0).view(np.int8))
+#                 index = ak._v2.index.Index64(nplike.arange(len(tags), dtype=np.int64))
+#                 if not isinstance(left, ak._v2.contents.Content):
+#                     left = ak._v2.contents.NumpyArray(nplike.repeat(left, len(tags)))
+#                 if not isinstance(right, ak._v2.contents.Content):
+#                     right = ak._v2.contents.NumpyArray(nplike.repeat(right, len(tags)))
+#                 tmp = ak._v2.contents.UnionArray8_64(tags, index, [left, right])
 #                 return lambda: (tmp.simplify(mergebool=mergebool),)
 #             else:
 #                 return None
 
-#         behavior = ak._util.behaviorof(akcondition, left, right)
-#         out = ak._util.broadcast_and_apply(
+#         behavior = ak._v2._util.behaviorof(akcondition, left, right)
+#         out = ak._v2._util.broadcast_and_apply(
 #             [akcondition, left, right],
 #             getfunction,
 #             behavior,
@@ -113,10 +113,10 @@ def where(condition, *args, **kwargs):
 #             numpy_to_regular=True,
 #         )
 
-#         return ak._util.maybe_wrap(out[0], behavior, highlevel)
+#         return ak._v2._util.maybe_wrap(out[0], behavior, highlevel)
 
 #     else:
 #         raise TypeError(
 #             "where() takes from 1 to 3 positional arguments but {0} were "
-#             "given".format(len(args) + 1) + ak._util.exception_suffix(__file__)
+#             "given".format(len(args) + 1)
 #         )

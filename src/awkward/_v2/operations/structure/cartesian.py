@@ -221,26 +221,26 @@ def cartesian(
 #     """
 #     is_partitioned = False
 #     if isinstance(arrays, dict):
-#         behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
+#         behavior = ak._v2._util.behaviorof(*arrays.values(), behavior=behavior)
 #         nplike = ak.nplike.of(*arrays.values())
 #         new_arrays = {}
 #         for n, x in arrays.items():
-#             new_arrays[n] = ak.operations.convert.to_layout(
+#             new_arrays[n] = ak._v2.operations.convert.to_layout(
 #                 x, allow_record=False, allow_other=False
 #             )
-#             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
+#             if isinstance(new_arrays[n], ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                 is_partitioned = True
 #     else:
-#         behavior = ak._util.behaviorof(*arrays, behavior=behavior)
+#         behavior = ak._v2._util.behaviorof(*arrays, behavior=behavior)
 #         nplike = ak.nplike.of(*arrays)
 #         new_arrays = []
 #         for x in arrays:
 #             new_arrays.append(
-#                 ak.operations.convert.to_layout(
+#                 ak._v2.operations.convert.to_layout(
 #                     x, allow_record=False, allow_other=False
 #                 )
 #             )
-#             if isinstance(new_arrays[-1], ak.partition.PartitionedArray):
+#             if isinstance(new_arrays[-1], ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                 is_partitioned = True
 
 #     if with_name is not None:
@@ -258,13 +258,13 @@ def cartesian(
 #     posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
 #     if posaxis < 0:
 #         raise ValueError(
-#             "negative axis depth is ambiguous" + ak._util.exception_suffix(__file__)
+#             "negative axis depth is ambiguous"
 #         )
 #     for x in new_arrays_values[1:]:
 #         if x.axis_wrap_if_negative(axis) != posaxis:
 #             raise ValueError(
 #                 "arrays to cartesian-product do not have the same depth for "
-#                 "negative axis" + ak._util.exception_suffix(__file__)
+#                 "negative axis"
 #             )
 
 #     if posaxis == 0:
@@ -277,7 +277,7 @@ def cartesian(
 #             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be dict keys "
-#                     "for a dict of arrays" + ak._util.exception_suffix(__file__)
+#                     "for a dict of arrays"
 #                 )
 #             recordlookup = []
 #             layouts = []
@@ -299,7 +299,7 @@ def cartesian(
 #                 raise ValueError(
 #                     "the 'nested' prarmeter of cartesian must be integers in "
 #                     "[0, len(arrays) - 1) for an iterable of arrays"
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 #             recordlookup = None
 #             layouts = []
@@ -307,36 +307,36 @@ def cartesian(
 #                 layouts.append(x)
 
 #         layouts = [
-#             x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x
+#             x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x   # NO PARTITIONED ARRAY
 #             for x in layouts
 #         ]
 
 #         indexes = [
-#             ak.layout.Index64(x.reshape(-1))
+#             ak._v2.index.Index64(x.reshape(-1))
 #             for x in nplike.meshgrid(
 #                 *[nplike.arange(len(x), dtype=np.int64) for x in layouts], indexing="ij"
 #             )
 #         ]
 #         outs = [
-#             ak.layout.IndexedArray64(x, y)
+#             ak._v2.contents.IndexedArray64(x, y)
 #             for x, y in __builtins__["zip"](indexes, layouts)
 #         ]
 
-#         result = ak.layout.RecordArray(outs, recordlookup, parameters=parameters)
+#         result = ak._v2.contents.RecordArray(outs, recordlookup, parameters=parameters)
 #         for i in range(len(new_arrays) - 1, -1, -1):
 #             if i in nested:
-#                 result = ak.layout.RegularArray(result, len(layouts[i + 1]), 0)
+#                 result = ak._v2.contents.RegularArray(result, len(layouts[i + 1]), 0)
 
 #     elif is_partitioned:
 #         sample = None
 #         if isinstance(new_arrays, dict):
 #             for x in new_arrays.values():
-#                 if isinstance(x, ak.partition.PartitionedArray):
+#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     sample = x
 #                     break
 #         else:
 #             for x in new_arrays:
-#                 if isinstance(x, ak.partition.PartitionedArray):
+#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     sample = x
 #                     break
 
@@ -355,7 +355,7 @@ def cartesian(
 #                 )
 #             )
 
-#         result = ak.partition.IrregularlyPartitionedArray(output)
+#         result = ak.partition.IrregularlyPartitionedArray(output)   # NO PARTITIONED ARRAY
 
 #     else:
 
@@ -363,7 +363,7 @@ def cartesian(
 #             if i == 0:
 #                 return layout
 #             else:
-#                 return ak.layout.RegularArray(newaxis(layout, i - 1), 1, 0)
+#                 return ak._v2.contents.RegularArray(newaxis(layout, i - 1), 1, 0)
 
 #         def getgetfunction1(i):
 #             def getfunction1(layout, depth):
@@ -386,9 +386,9 @@ def cartesian(
 #                         raise ValueError(
 #                             "ak.cartesian does not compute combinations of the "
 #                             "characters of a string; please split it into lists"
-#                             + ak._util.exception_suffix(__file__)
+#
 #                         )
-#                     nextlayout = ak._util.recursively_apply(
+#                     nextlayout = ak._v2._util.recursively_apply(
 #                         layout, getgetfunction1(inside), pass_depth=True
 #                     )
 #                     return lambda: newaxis(nextlayout, outside)
@@ -398,10 +398,10 @@ def cartesian(
 #             return getfunction2
 
 #         def apply(x, i):
-#             layout = ak.operations.convert.to_layout(
+#             layout = ak._v2.operations.convert.to_layout(
 #                 x, allow_record=False, allow_other=False
 #             )
-#             return ak._util.recursively_apply(
+#             return ak._v2._util.recursively_apply(
 #                 layout, getgetfunction2(i), pass_depth=True
 #             )
 
@@ -415,7 +415,7 @@ def cartesian(
 #             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be dict keys "
-#                     "for a dict of arrays" + ak._util.exception_suffix(__file__)
+#                     "for a dict of arrays"
 #                 )
 #             recordlookup = []
 #             layouts = []
@@ -435,7 +435,7 @@ def cartesian(
 #                 raise ValueError(
 #                     "the 'nested' parameter of cartesian must be integers in "
 #                     "[0, len(arrays) - 1) for an iterable of arrays"
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 #             recordlookup = None
 #             layouts = []
@@ -449,17 +449,17 @@ def cartesian(
 #                 if all(len(x) == 0 for x in inputs):
 #                     inputs = [
 #                         x.content
-#                         if isinstance(x, ak.layout.RegularArray) and x.size == 1
+#                         if isinstance(x, ak._v2.contents.RegularArray) and x.size == 1
 #                         else x
 #                         for x in inputs
 #                     ]
 #                 return lambda: (
-#                     ak.layout.RecordArray(inputs, recordlookup, parameters=parameters),
+#                     ak._v2.contents.RecordArray(inputs, recordlookup, parameters=parameters),
 #                 )
 #             else:
 #                 return None
 
-#         out = ak._util.broadcast_and_apply(
+#         out = ak._v2._util.broadcast_and_apply(
 #             layouts, getfunction3, behavior, right_broadcast=False, pass_depth=True
 #         )
 #         assert isinstance(out, tuple) and len(out) == 1
@@ -469,4 +469,4 @@ def cartesian(
 #             flatten_axis = toflatten.pop()
 #             result = flatten(result, axis=flatten_axis, highlevel=False)
 
-#     return ak._util.maybe_wrap(result, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(result, behavior, highlevel)

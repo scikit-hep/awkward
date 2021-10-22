@@ -52,7 +52,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #     The values could be floating-point numbers or strings.
 #     """
 
-#     arraylayout = ak.operations.convert.to_layout(
+#     arraylayout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
 #     nplike = ak.nplike.of(arraylayout)
@@ -63,41 +63,41 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #         and issubclass(value.dtype.type, (np.bool_, np.number))
 #         and len(value.shape) != 0
 #     ):
-#         valuelayout = ak.operations.convert.to_layout(
+#         valuelayout = ak._v2.operations.convert.to_layout(
 #             nplike.asarray(value)[np.newaxis], allow_record=False, allow_other=False
 #         )
 #     elif isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
 #         isinstance(value, np.ndarray)
 #         and issubclass(value.dtype.type, (np.bool_, np.number))
 #     ):
-#         valuelayout = ak.operations.convert.to_layout(
+#         valuelayout = ak._v2.operations.convert.to_layout(
 #             nplike.asarray(value), allow_record=False, allow_other=False
 #         )
 #     elif (
 #         isinstance(value, Iterable)
 #         and not (
 #             isinstance(value, (str, bytes))
-#             or (ak._util.py27 and isinstance(value, ak._util.unicode))
+#             or (ak._v2._util.py27 and isinstance(value, ak._v2._util.unicode))
 #         )
-#         or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
+#         or isinstance(value, (ak._v2.highlevel.Record, ak._v2.record.Record))
 #     ):
-#         valuelayout = ak.operations.convert.to_layout(
+#         valuelayout = ak._v2.operations.convert.to_layout(
 #             value, allow_record=True, allow_other=False
 #         )
-#         if isinstance(valuelayout, ak.layout.Record):
+#         if isinstance(valuelayout, ak._v2.record.Record):
 #             valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
 #         elif len(valuelayout) == 0:
-#             offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
-#             valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
+#             offsets = ak._v2.index.Index64(nplike.array([0, 0], dtype=np.int64))
+#             valuelayout = ak._v2.contents.ListOffsetArray64(offsets, valuelayout)
 #         else:
-#             valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+#             valuelayout = ak._v2.contents.RegularArray(valuelayout, len(valuelayout), 1)
 #     else:
-#         valuelayout = ak.operations.convert.to_layout(
+#         valuelayout = ak._v2.operations.convert.to_layout(
 #             [value], allow_record=False, allow_other=False
 #         )
 
 #     def maybe_fillna(layout):
-#         if isinstance(layout, ak._util.optiontypes):
+#         if isinstance(layout, ak._v2._util.optiontypes):
 #             return layout.fillna(valuelayout)
 #         else:
 #             return layout
@@ -105,7 +105,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #     if axis is None:
 
 #         def transform(layout, depth, posaxis):
-#             return ak._util.transform_child_layouts(
+#             return ak._v2._util.transform_child_layouts(
 #                 transform, maybe_fillna(layout), depth, posaxis
 #             )
 
@@ -119,8 +119,8 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #             if posaxis + 1 == depth:
 #                 layout = maybe_fillna(layout)
 
-#             return ak._util.transform_child_layouts(transform, layout, depth, posaxis)
+#             return ak._v2._util.transform_child_layouts(transform, layout, depth, posaxis)
 
 #     out = transform(arraylayout, 1, axis)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

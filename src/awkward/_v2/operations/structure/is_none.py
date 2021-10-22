@@ -31,20 +31,20 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
 #         posaxis = layout.axis_wrap_if_negative(posaxis)
 #         if posaxis == depth - 1:
 #             nplike = ak.nplike.of(layout)
-#             if isinstance(layout, ak._util.optiontypes):
-#                 return lambda: ak.layout.NumpyArray(
+#             if isinstance(layout, ak._v2._util.optiontypes):
+#                 return lambda: ak._v2.contents.NumpyArray(
 #                     nplike.asarray(layout.bytemask()).view(np.bool_)
 #                 )
 #             elif isinstance(
 #                 layout,
 #                 (
-#                     ak._util.unknowntypes,
-#                     ak._util.listtypes,
-#                     ak._util.recordtypes,
-#                     ak.layout.NumpyArray,
+#                     ak._v2._util.unknowntypes,
+#                     ak._v2._util.listtypes,
+#                     ak._v2._util.recordtypes,
+#                     ak._v2.contents.NumpyArray,
 #                 ),
 #             ):
-#                 return lambda: ak.layout.NumpyArray(
+#                 return lambda: ak._v2.contents.NumpyArray(
 #                     nplike.zeros(len(layout), dtype=np.bool_)
 #                 )
 #             else:
@@ -52,10 +52,10 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
 #         else:
 #             return posaxis
 
-#     layout = ak.operations.convert.to_layout(array)
+#     layout = ak._v2.operations.convert.to_layout(array)
 
-#     out = ak._util.recursively_apply(
+#     out = ak._v2._util.recursively_apply(
 #         layout, getfunction, pass_depth=True, pass_user=True, user=axis
 #     )
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

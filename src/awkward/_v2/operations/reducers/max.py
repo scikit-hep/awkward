@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("max")
+# @ak._v2._connect.numpy.implements("max")
 def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
     pass
 
@@ -45,7 +45,7 @@ def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
 #     See #ak.sum for a more complete description of nested list and missing
 #     value (None) handling in reducers.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     if axis is None:
@@ -59,11 +59,11 @@ def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
 #                 x, y = xs[0], reduce(xs[1:])
 #                 return x if x > y else y
 
-#         tmp = ak._util.completely_flatten(layout)
+#         tmp = ak._v2._util.completely_flatten(layout)
 #         return reduce([ak.nplike.of(x).max(x) for x in tmp if len(x) > 0])
 #     else:
-#         behavior = ak._util.behaviorof(array)
-#         return ak._util.wrap(
+#         behavior = ak._v2._util.behaviorof(array)
+#         return ak._v2._util.wrap(
 #             layout.max(
 #                 axis=axis, mask=mask_identity, keepdims=keepdims, initial=initial
 #             ),

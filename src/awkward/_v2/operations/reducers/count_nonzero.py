@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("count_nonzero")
+# @ak._v2._connect.numpy.implements("count_nonzero")
 def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
     pass
 
@@ -42,7 +42,7 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
 #     count None values. If it is desirable to count them, use #ak.fill_none
 #     to turn them into something that would be counted.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     if axis is None:
@@ -56,12 +56,12 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
 #         return reduce(
 #             [
 #                 ak.nplike.of(x).count_nonzero(x)
-#                 for x in ak._util.completely_flatten(layout)
+#                 for x in ak._v2._util.completely_flatten(layout)
 #             ]
 #         )
 #     else:
-#         behavior = ak._util.behaviorof(array)
-#         return ak._util.wrap(
+#         behavior = ak._v2._util.behaviorof(array)
+#         return ak._v2._util.wrap(
 #             layout.count_nonzero(axis=axis, mask=mask_identity, keepdims=keepdims),
 #             behavior,
 #         )

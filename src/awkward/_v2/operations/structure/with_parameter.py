@@ -30,15 +30,15 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
 #     You can also remove a single parameter with this function, since setting
 #     a parameter to None is equivalent to removing it.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
 
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         out = layout.replace_partitions(
 #             x.withparameter(parameter, value) for x in layout.partitions
 #         )
 #     else:
 #         out = layout.withparameter(parameter, value)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

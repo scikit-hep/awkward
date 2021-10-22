@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("copy")
+# @ak._v2._connect.numpy.implements("copy")
 def copy(array):
     pass
 
@@ -55,9 +55,9 @@ def copy(array):
 #     changes, so we don't support it. However, an #ak.Array's data might come from
 #     a mutable third-party library, so this function allows you to make a true copy.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array,
 #         allow_record=True,
 #         allow_other=False,
 #     )
-#     return ak._util.wrap(layout.deep_copy(), ak._util.behaviorof(array))
+#     return ak._v2._util.wrap(layout.deep_copy(), ak._v2._util.behaviorof(array))

@@ -34,29 +34,29 @@ def to_layout(
 #     This function is usually used to sanitize inputs for other functions; it
 #     would rarely be used in a data analysis.
 #     """
-#     if isinstance(array, ak.highlevel.Array):
+#     if isinstance(array, ak._v2.highlevel.Array):
 #         return array.layout
 
-#     elif allow_record and isinstance(array, ak.highlevel.Record):
+#     elif allow_record and isinstance(array, ak._v2.highlevel.Record):
 #         return array.layout
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return array.snapshot().layout
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         return array.snapshot()
 
-#     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
+#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
 #         return array
 
-#     elif allow_record and isinstance(array, ak.layout.Record):
+#     elif allow_record and isinstance(array, ak._v2.record.Record):
 #         return array
 
 #     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
 #         if not issubclass(array.dtype.type, numpytype):
 #             raise ValueError(
 #                 "NumPy {0} not allowed".format(repr(array.dtype))
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
 
@@ -66,7 +66,7 @@ def to_layout(
 #         return from_cupy(array, regulararray=True, highlevel=False)
 
 #     elif isinstance(array, (str, bytes)) or (
-#         ak._util.py27 and isinstance(array, ak._util.unicode)
+#         ak._v2._util.py27 and isinstance(array, ak._v2._util.unicode)
 #     ):
 #         return from_iter([array], highlevel=False)
 
@@ -76,7 +76,7 @@ def to_layout(
 #     elif not allow_other:
 #         raise TypeError(
 #             "{0} cannot be converted into an Awkward Array".format(array)
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 #     else:

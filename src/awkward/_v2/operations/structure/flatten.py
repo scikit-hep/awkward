@@ -95,36 +95,36 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #     However, it is important to keep in mind that this is a special case:
 #     #ak.flatten and `content` are not interchangeable!
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     nplike = ak.nplike.of(layout)
 
 #     if axis is None:
-#         out = ak._util.completely_flatten(layout)
+#         out = ak._v2._util.completely_flatten(layout)
 #         assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
 #         if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
-#             out = ak.layout.NumpyArray(nplike.ma.concatenate(out))
+#             out = ak._v2.contents.NumpyArray(nplike.ma.concatenate(out))
 #         else:
-#             out = ak.layout.NumpyArray(nplike.concatenate(out))
+#             out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
 
 #     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
 #         def apply(layout):
-#             if isinstance(layout, ak._util.virtualtypes):
+#             if isinstance(layout, ak._v2._util.virtualtypes):
 #                 return apply(layout.array)
 
-#             elif isinstance(layout, ak._util.unknowntypes):
-#                 return apply(ak.layout.NumpyArray(nplike.array([])))
+#             elif isinstance(layout, ak._v2._util.unknowntypes):
+#                 return apply(ak._v2.contents.NumpyArray(nplike.array([])))
 
-#             elif isinstance(layout, ak._util.indexedtypes):
+#             elif isinstance(layout, ak._v2._util.indexedtypes):
 #                 return apply(layout.project())
 
-#             elif isinstance(layout, ak._util.uniontypes):
+#             elif isinstance(layout, ak._v2._util.uniontypes):
 #                 if not any(
-#                     isinstance(x, ak._util.optiontypes)
-#                     and not isinstance(x, ak.layout.UnmaskedArray)
+#                     isinstance(x, ak._v2._util.optiontypes)
+#                     and not isinstance(x, ak._v2.contents.UnmaskedArray)
 #                     for x in layout.contents
 #                 ):
 #                     return layout
@@ -133,8 +133,8 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #                 index = nplike.array(nplike.asarray(layout.index), copy=True)
 #                 bigmask = nplike.empty(len(index), dtype=np.bool_)
 #                 for tag, content in enumerate(layout.contents):
-#                     if isinstance(content, ak._util.optiontypes) and not isinstance(
-#                         content, ak.layout.UnmaskedArray
+#                     if isinstance(content, ak._v2._util.optiontypes) and not isinstance(
+#                         content, ak._v2.contents.UnmaskedArray
 #                     ):
 #                         bigmask[:] = False
 #                         bigmask[tags == tag] = nplike.asarray(content.bytemask()).view(
@@ -143,28 +143,28 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #                         index[bigmask] = -1
 
 #                 good = index >= 0
-#                 return ak.layout.UnionArray8_64(
-#                     ak.layout.Index8(tags[good]),
-#                     ak.layout.Index64(index[good]),
+#                 return ak._v2.contents.UnionArray8_64(
+#                     ak._v2.index.Index8(tags[good]),
+#                     ak._v2.index.Index64(index[good]),
 #                     layout.contents,
 #                 )
 
-#             elif isinstance(layout, ak._util.optiontypes):
+#             elif isinstance(layout, ak._v2._util.optiontypes):
 #                 return layout.project()
 
 #             else:
 #                 return layout
 
-#         if isinstance(layout, ak.partition.PartitionedArray):
-#             out = ak.partition.IrregularlyPartitionedArray(
+#         if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
+#             out = ak.partition.IrregularlyPartitionedArray(   # NO PARTITIONED ARRAY
 #                 [apply(x) for x in layout.partitions]
 #             )
 #         else:
 #             out = apply(layout)
 
-#         return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#         return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)
 
 #     else:
 #         out = layout.flatten(axis)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

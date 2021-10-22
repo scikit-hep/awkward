@@ -25,12 +25,12 @@ def without_parameters(array, highlevel=True, behavior=None):
 #     Note that a "new array" is a lightweight shallow copy, not a duplication
 #     of large data buffers.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
 
-#     out = ak._util.recursively_apply(
+#     out = ak._v2._util.recursively_apply(
 #         layout, lambda layout: None, pass_depth=False, keep_parameters=False
 #     )
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

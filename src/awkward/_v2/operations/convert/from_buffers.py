@@ -82,7 +82,7 @@ def from_buffers(
 #     See #ak.to_buffers for examples.
 #     """
 
-#     if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
+#     if isinstance(form, str) or (ak._v2._util.py27 and isinstance(form, ak._v2._util.unicode)):
 #         form = ak.forms.Form.fromjson(form)
 #     elif isinstance(form, dict):
 #         form = ak.forms.Form.fromjson(json.dumps(form))
@@ -102,15 +102,15 @@ def from_buffers(
 #         form = _wrap_record_with_virtual(form)
 
 #         if lazy_cache == "new":
-#             hold_cache = ak._util.MappingProxy({})
-#             lazy_cache = ak.layout.ArrayCache(hold_cache)
+#             hold_cache = ak._v2._util.MappingProxy({})
+#             lazy_cache = ak._v2.contents.ArrayCache(hold_cache)
 #         elif lazy_cache is not None and not isinstance(
-#             lazy_cache, ak.layout.ArrayCache
+#             lazy_cache, ak._v2.contents.ArrayCache
 #         ):
-#             hold_cache = ak._util.MappingProxy.maybe_wrap(lazy_cache)
+#             hold_cache = ak._v2._util.MappingProxy.maybe_wrap(lazy_cache)
 #             if not isinstance(hold_cache, MutableMapping):
 #                 raise TypeError("lazy_cache must be a MutableMapping")
-#             lazy_cache = ak.layout.ArrayCache(hold_cache)
+#             lazy_cache = ak._v2.contents.ArrayCache(hold_cache)
 
 #         if lazy_cache_key is None:
 #             lazy_cache_key = "ak.from_buffers:{0}".format(_from_buffers_key())
@@ -119,19 +119,19 @@ def from_buffers(
 #         if length is None:
 #             raise TypeError(
 #                 "length must be an integer or an iterable of integers"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #         args = (form, container, str(partition_start), key_format, length)
 
 #         if lazy:
-#             generator = ak.layout.ArrayGenerator(
+#             generator = ak._v2.contents.ArrayGenerator(
 #                 _form_to_layout,
 #                 args + (lazy_cache, lazy_cache_key),
 #                 form=form,
 #                 length=length,
 #             )
-#             out = ak.layout.VirtualArray(generator, lazy_cache, lazy_cache_key)
+#             out = ak._v2.contents.VirtualArray(generator, lazy_cache, lazy_cache_key)
 
 #         else:
 #             out = _form_to_layout(*(args + (None, None)))
@@ -146,7 +146,7 @@ def from_buffers(
 
 #             if lazy:
 #                 lazy_cache_key_part = "{0}[{1}]".format(lazy_cache_key, partnum)
-#                 generator = ak.layout.ArrayGenerator(
+#                 generator = ak._v2.contents.ArrayGenerator(
 #                     _form_to_layout,
 #                     args + (partlen, lazy_cache, lazy_cache_key_part),
 #                     form=form,
@@ -154,7 +154,7 @@ def from_buffers(
 #                 )
 
 #                 partitions.append(
-#                     ak.layout.VirtualArray(generator, lazy_cache, lazy_cache_key_part)
+#                     ak._v2.contents.VirtualArray(generator, lazy_cache, lazy_cache_key_part)
 #                 )
 #                 offsets.append(offsets[-1] + length[part])
 
@@ -162,16 +162,16 @@ def from_buffers(
 #                 partitions.append(_form_to_layout(*(args + (partlen, None, None))))
 #                 offsets.append(offsets[-1] + len(partitions[-1]))
 
-#         out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+#         out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])   # NO PARTITIONED ARRAY
 
 #     else:
 #         raise TypeError(
 #             "length must be an integer or an iterable of integers, not "
 #             + repr(length)
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
-#     return ak._util.maybe_wrap(out, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(out, behavior, highlevel)
 
 
 # _index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
@@ -207,34 +207,34 @@ def from_buffers(
 #         }
 
 #         _index_form_to_index = {
-#             "i8": ak.layout.Index8,
-#             "u8": ak.layout.IndexU8,
-#             "i32": ak.layout.Index32,
-#             "u32": ak.layout.IndexU32,
-#             "i64": ak.layout.Index64,
+#             "i8": ak._v2.index.Index8,
+#             "u8": ak._v2.index.IndexU8,
+#             "i32": ak._v2.index.Index32,
+#             "u32": ak._v2.index.IndexU32,
+#             "i64": ak._v2.index.Index64,
 #         }
 
 #         _form_to_layout_class = {
-#             (ak.forms.IndexedForm, "i32"): ak.layout.IndexedArray32,
-#             (ak.forms.IndexedForm, "u32"): ak.layout.IndexedArrayU32,
-#             (ak.forms.IndexedForm, "i64"): ak.layout.IndexedArray64,
-#             (ak.forms.IndexedOptionForm, "i32"): ak.layout.IndexedOptionArray32,
-#             (ak.forms.IndexedOptionForm, "i64"): ak.layout.IndexedOptionArray64,
-#             (ak.forms.ListForm, "i32"): ak.layout.ListArray32,
-#             (ak.forms.ListForm, "u32"): ak.layout.ListArrayU32,
-#             (ak.forms.ListForm, "i64"): ak.layout.ListArray64,
-#             (ak.forms.ListOffsetForm, "i32"): ak.layout.ListOffsetArray32,
-#             (ak.forms.ListOffsetForm, "u32"): ak.layout.ListOffsetArrayU32,
-#             (ak.forms.ListOffsetForm, "i64"): ak.layout.ListOffsetArray64,
-#             (ak.forms.UnionForm, "i32"): ak.layout.UnionArray8_32,
-#             (ak.forms.UnionForm, "u32"): ak.layout.UnionArray8_U32,
-#             (ak.forms.UnionForm, "i64"): ak.layout.UnionArray8_64,
+#             (ak.forms.IndexedForm, "i32"): ak._v2.contents.IndexedArray32,
+#             (ak.forms.IndexedForm, "u32"): ak._v2.contents.IndexedArrayU32,
+#             (ak.forms.IndexedForm, "i64"): ak._v2.contents.IndexedArray64,
+#             (ak.forms.IndexedOptionForm, "i32"): ak._v2.contents.IndexedOptionArray32,
+#             (ak.forms.IndexedOptionForm, "i64"): ak._v2.contents.IndexedOptionArray64,
+#             (ak.forms.ListForm, "i32"): ak._v2.contents.ListArray32,
+#             (ak.forms.ListForm, "u32"): ak._v2.contents.ListArrayU32,
+#             (ak.forms.ListForm, "i64"): ak._v2.contents.ListArray64,
+#             (ak.forms.ListOffsetForm, "i32"): ak._v2.contents.ListOffsetArray32,
+#             (ak.forms.ListOffsetForm, "u32"): ak._v2.contents.ListOffsetArrayU32,
+#             (ak.forms.ListOffsetForm, "i64"): ak._v2.contents.ListOffsetArray64,
+#             (ak.forms.UnionForm, "i32"): ak._v2.contents.UnionArray8_32,
+#             (ak.forms.UnionForm, "u32"): ak._v2.contents.UnionArray8_U32,
+#             (ak.forms.UnionForm, "i64"): ak._v2.contents.UnionArray8_64,
 #         }
 
 #     if form.has_identities:
 #         raise NotImplementedError(
 #             "ak.from_buffers for an array with Identities"
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 #     else:
 #         identities = None
@@ -266,10 +266,10 @@ def from_buffers(
 #             raise ValueError(
 #                 "mask is too short for BitMaskedArray: content length "
 #                 "is {0}, mask length * 8 is {1}".format(length, len(mask) * 8)
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
-#         return ak.layout.BitMaskedArray(
+#         return ak._v2.contents.BitMaskedArray(
 #             mask,
 #             content,
 #             form.valid_when,
@@ -294,7 +294,7 @@ def from_buffers(
 #                 "mask is too short for ByteMaskedArray: expected {0}, mask length is {1}".format(
 #                     length, len(mask)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #         content = _form_to_layout(
@@ -307,7 +307,7 @@ def from_buffers(
 #             lazy_cache_key,
 #         )
 
-#         return ak.layout.ByteMaskedArray(
+#         return ak._v2.contents.ByteMaskedArray(
 #             mask, content, form.valid_when, identities, parameters
 #         )
 
@@ -317,9 +317,9 @@ def from_buffers(
 #                 "EmptyArray found in node with non-zero expected length: expected {0}".format(
 #                     length
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
-#         return ak.layout.EmptyArray(identities, parameters)
+#         return ak._v2.contents.EmptyArray(identities, parameters)
 
 #     elif isinstance(form, ak.forms.IndexedForm):
 #         raw_index = _asbuf(
@@ -336,7 +336,7 @@ def from_buffers(
 #                 "index too short for IndexedArray: expected {0}, index length is {1}".format(
 #                     length, len(index)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #         content = _form_to_layout(
@@ -368,7 +368,7 @@ def from_buffers(
 #                 "index too short for IndexedOptionArray: expected {0}, index length is {1}".format(
 #                     length, len(index)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #         content = _form_to_layout(
@@ -406,14 +406,14 @@ def from_buffers(
 #                 "starts too short for ListArray: expected {0}, starts length is {1}".format(
 #                     length, len(starts)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         elif length > len(stops):
 #             raise ValueError(
 #                 "stops too short for ListArray: expected {0}, stops length is {1}".format(
 #                     length, len(stops)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #         array_starts = numpy.asarray(starts)
@@ -452,7 +452,7 @@ def from_buffers(
 #                 "offsets too short for ListOffsetArray: expected {0}, offsets length - 1 is {1}".format(
 #                     length, len(offsets) - 1
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #         content = _form_to_layout(
@@ -487,7 +487,7 @@ def from_buffers(
 #                 raise ValueError(
 #                     "buffer is too short for NumpyArray: expected {0}, buffer "
 #                     "has {1} items ({2} bytes)".format(length, actual, len(raw_array))
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 
 #         # NumPy can only infer the length of the array from the buffer
@@ -506,7 +506,7 @@ def from_buffers(
 
 #         array = raw_array.view(dtype).reshape(leading_shape + inner_shape)
 
-#         return ak.layout.NumpyArray(array, identities, parameters)
+#         return ak._v2.contents.NumpyArray(array, identities, parameters)
 
 #     elif isinstance(form, ak.forms.RecordForm):
 #         items = list(form.contents.items())
@@ -539,10 +539,10 @@ def from_buffers(
 #                 "RecordArray length mismatch: expected {0}, minimum content is {1}".format(
 #                     length, minlength
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
-#         return ak.layout.RecordArray(
+#         return ak._v2.contents.RecordArray(
 #             contents,
 #             None if form.istuple else keys,
 #             length,
@@ -564,7 +564,7 @@ def from_buffers(
 #             lazy_cache_key,
 #         )
 
-#         return ak.layout.RegularArray(
+#         return ak._v2.contents.RegularArray(
 #             content, form.size, length, identities, parameters
 #         )
 
@@ -589,14 +589,14 @@ def from_buffers(
 #                 "tags too short for UnionArray: expected {0}, tags length is {1}".format(
 #                     length, len(tags)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         elif length > len(index):
 #             raise ValueError(
 #                 "index too short for UnionArray: expected {0}, index length is {1}".format(
 #                     length, len(index)
 #                 )
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #         array_tags = numpy.asarray(tags)
@@ -636,7 +636,7 @@ def from_buffers(
 #             lazy_cache_key,
 #         )
 
-#         return ak.layout.UnmaskedArray(content, identities, parameters)
+#         return ak._v2.contents.UnmaskedArray(content, identities, parameters)
 
 #     elif isinstance(form, ak.forms.VirtualForm):
 #         args = (
@@ -648,7 +648,7 @@ def from_buffers(
 #             lazy_cache,
 #             lazy_cache_key,
 #         )
-#         generator = ak.layout.ArrayGenerator(
+#         generator = ak._v2.contents.ArrayGenerator(
 #             _form_to_layout,
 #             args,
 #             form=form.form,
@@ -669,13 +669,13 @@ def from_buffers(
 #                 lazy_cache_key, node_cache_key, _from_buffers_key()
 #             )
 
-#         return ak.layout.VirtualArray(generator, lazy_cache, nested_cache_key)
+#         return ak._v2.contents.VirtualArray(generator, lazy_cache, nested_cache_key)
 
 #     else:
 #         raise AssertionError(
 #             "unexpected form node type: "
 #             + str(type(form))
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 

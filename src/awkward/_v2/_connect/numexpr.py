@@ -85,17 +85,17 @@
 #     arguments = getArguments(names, local_dict, global_dict)
 
 #     arrays = [
-#         ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+#         ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
 #         for x in arguments
 #     ]
 
 #     def getfunction(inputs):
 #         if all(
-#             isinstance(x, ak.layout.NumpyArray) or not isinstance(x, ak.layout.Content)
+#             isinstance(x, ak._v2.contents.NumpyArray) or not isinstance(x, ak._v2.contents.Content)
 #             for x in inputs
 #         ):
 #             return lambda: (
-#                 ak.layout.NumpyArray(
+#                 ak._v2.contents.NumpyArray(
 #                     numexpr.evaluate(
 #                         expression,
 #                         dict(zip(names, inputs)),
@@ -109,12 +109,12 @@
 #         else:
 #             return None
 
-#     behavior = ak._util.behaviorof(*arrays)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(*arrays)
+#     out = ak._v2._util.broadcast_and_apply(
 #         arrays, getfunction, behavior, allow_records=False, pass_depth=False
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._util.wrap(out[0], behavior)
+#     return ak._v2._util.wrap(out[0], behavior)
 
 
 # evaluate.evaluate = evaluate
@@ -128,33 +128,33 @@
 #     except KeyError:
 #         raise RuntimeError(
 #             "not a previous evaluate() execution found"
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 #     names = numexpr.necompiler._numexpr_last["argnames"]
 #     arguments = getArguments(names, local_dict)
 
 #     arrays = [
-#         ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+#         ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
 #         for x in arguments
 #     ]
 
 #     def getfunction(inputs):
 #         if all(
-#             isinstance(x, ak.layout.NumpyArray) or not isinstance(x, ak.layout.Content)
+#             isinstance(x, ak._v2.contents.NumpyArray) or not isinstance(x, ak._v2.contents.Content)
 #             for x in inputs
 #         ):
 #             return lambda: (
-#                 ak.layout.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
+#                 ak._v2.contents.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
 #             )
 #         else:
 #             return None
 
-#     behavior = ak._util.behaviorof(*arrays)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(*arrays)
+#     out = ak._v2._util.broadcast_and_apply(
 #         arrays, getfunction, behavior, allow_records=False, pass_depth=False
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._util.wrap(out[0], behavior)
+#     return ak._v2._util.wrap(out[0], behavior)
 
 
 # ak.numexpr = types.ModuleType("numexpr")

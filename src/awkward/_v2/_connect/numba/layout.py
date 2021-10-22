@@ -13,33 +13,33 @@
 # numpy = ak.nplike.Numpy.instance()
 
 
-# @numba.extending.typeof_impl.register(ak.layout.NumpyArray)
-# @numba.extending.typeof_impl.register(ak.layout.RegularArray)
-# @numba.extending.typeof_impl.register(ak.layout.ListArray32)
-# @numba.extending.typeof_impl.register(ak.layout.ListArrayU32)
-# @numba.extending.typeof_impl.register(ak.layout.ListArray64)
-# @numba.extending.typeof_impl.register(ak.layout.ListOffsetArray32)
-# @numba.extending.typeof_impl.register(ak.layout.ListOffsetArrayU32)
-# @numba.extending.typeof_impl.register(ak.layout.ListOffsetArray64)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedArray32)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedArrayU32)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedArray64)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedOptionArray32)
-# @numba.extending.typeof_impl.register(ak.layout.IndexedOptionArray64)
-# @numba.extending.typeof_impl.register(ak.layout.ByteMaskedArray)
-# @numba.extending.typeof_impl.register(ak.layout.BitMaskedArray)
-# @numba.extending.typeof_impl.register(ak.layout.UnmaskedArray)
-# @numba.extending.typeof_impl.register(ak.layout.RecordArray)
-# @numba.extending.typeof_impl.register(ak.layout.UnionArray8_32)
-# @numba.extending.typeof_impl.register(ak.layout.UnionArray8_U32)
-# @numba.extending.typeof_impl.register(ak.layout.UnionArray8_64)
-# @numba.extending.typeof_impl.register(ak.layout.VirtualArray)
-# @numba.extending.typeof_impl.register(ak.layout.Index8)
-# @numba.extending.typeof_impl.register(ak.layout.IndexU8)
-# @numba.extending.typeof_impl.register(ak.layout.Index32)
-# @numba.extending.typeof_impl.register(ak.layout.IndexU32)
-# @numba.extending.typeof_impl.register(ak.layout.Index64)
-# @numba.extending.typeof_impl.register(ak.layout.Record)
+# @numba.extending.typeof_impl.register(ak._v2.contents.NumpyArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.RegularArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListArray32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListArrayU32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListArray64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListOffsetArray32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListOffsetArrayU32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ListOffsetArray64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedArray32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedArrayU32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedArray64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedOptionArray32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexedOptionArray64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.ByteMaskedArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.BitMaskedArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.UnmaskedArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.RecordArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.UnionArray8_32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.UnionArray8_U32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.UnionArray8_64)
+# @numba.extending.typeof_impl.register(ak._v2.contents.VirtualArray)
+# @numba.extending.typeof_impl.register(ak._v2.contents.Index8)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexU8)
+# @numba.extending.typeof_impl.register(ak._v2.contents.Index32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.IndexU32)
+# @numba.extending.typeof_impl.register(ak._v2.contents.Index64)
+# @numba.extending.typeof_impl.register(ak._v2.record.Record)
 # def fake_typeof(obj, c):
 #     raise TypeError(
 #         "{0} objects cannot be passed directly into Numba-compiled functions; "
@@ -50,21 +50,21 @@
 
 
 # def typeof(obj):
-#     if isinstance(obj, ak.layout.NumpyArray):
+#     if isinstance(obj, ak._v2.contents.NumpyArray):
 #         return typeof_NumpyArray(obj)
 
-#     elif isinstance(obj, ak.layout.RegularArray):
+#     elif isinstance(obj, ak._v2.contents.RegularArray):
 #         return typeof_RegularArray(obj)
 
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.ListArray32,
-#             ak.layout.ListArrayU32,
-#             ak.layout.ListArray64,
-#             ak.layout.ListOffsetArray32,
-#             ak.layout.ListOffsetArrayU32,
-#             ak.layout.ListOffsetArray64,
+#             ak._v2.contents.ListArray32,
+#             ak._v2.contents.ListArrayU32,
+#             ak._v2.contents.ListArray64,
+#             ak._v2.contents.ListOffsetArray32,
+#             ak._v2.contents.ListOffsetArrayU32,
+#             ak._v2.contents.ListOffsetArray64,
 #         ),
 #     ):
 #         return typeof_ListArray(obj)
@@ -72,9 +72,9 @@
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.IndexedArray32,
-#             ak.layout.IndexedArrayU32,
-#             ak.layout.IndexedArray64,
+#             ak._v2.contents.IndexedArray32,
+#             ak._v2.contents.IndexedArrayU32,
+#             ak._v2.contents.IndexedArray64,
 #         ),
 #     ):
 #         return typeof_IndexedArray(obj)
@@ -82,42 +82,42 @@
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.IndexedOptionArray32,
-#             ak.layout.IndexedOptionArray64,
+#             ak._v2.contents.IndexedOptionArray32,
+#             ak._v2.contents.IndexedOptionArray64,
 #         ),
 #     ):
 #         return typeof_IndexedOptionArray(obj)
 
-#     elif isinstance(obj, ak.layout.ByteMaskedArray):
+#     elif isinstance(obj, ak._v2.contents.ByteMaskedArray):
 #         return typeof_ByteMaskedArray(obj)
 
-#     elif isinstance(obj, ak.layout.BitMaskedArray):
+#     elif isinstance(obj, ak._v2.contents.BitMaskedArray):
 #         return typeof_BitMaskedArray(obj)
 
-#     elif isinstance(obj, ak.layout.UnmaskedArray):
+#     elif isinstance(obj, ak._v2.contents.UnmaskedArray):
 #         return typeof_UnmaskedArray(obj)
 
-#     elif isinstance(obj, ak.layout.RecordArray):
+#     elif isinstance(obj, ak._v2.contents.RecordArray):
 #         return typeof_RecordArray(obj)
 
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.UnionArray8_32,
-#             ak.layout.UnionArray8_U32,
-#             ak.layout.UnionArray8_64,
+#             ak._v2.contents.UnionArray8_32,
+#             ak._v2.contents.UnionArray8_U32,
+#             ak._v2.contents.UnionArray8_64,
 #         ),
 #     ):
 #         return typeof_UnionArray(obj)
 
-#     elif isinstance(obj, ak.layout.VirtualArray):
+#     elif isinstance(obj, ak._v2.contents.VirtualArray):
 #         return typeof_VirtualArray(obj)
 
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.Identities32,
-#             ak.layout.Identities64,
+#             ak._v2.identifier.Identifier32,
+#             ak._v2.identifier.Identifier64,
 #         ),
 #     ):
 #         raise NotImplementedError(
@@ -127,11 +127,11 @@
 #     elif isinstance(
 #         obj,
 #         (
-#             ak.layout.Index8,
-#             ak.layout.IndexU8,
-#             ak.layout.Index32,
-#             ak.layout.IndexU32,
-#             ak.layout.Index64,
+#             ak._v2.index.Index8,
+#             ak._v2.index.IndexU8,
+#             ak._v2.index.Index32,
+#             ak._v2.index.IndexU32,
+#             ak._v2.index.Index64,
 #         ),
 #     ):
 #         raise RuntimeError(
@@ -237,11 +237,11 @@
 #     if obj.form.form is None:
 #         raise ValueError(
 #             "VirtualArrays without a known 'form' can't be used in Numba"
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 #     if obj.form.has_identities:
 #         raise NotImplementedError(
-#             "TODO: identities in VirtualArray" + ak._util.exception_suffix(__file__)
+#             "TODO: identities in VirtualArray"
 #         )
 #     return VirtualArrayType(obj.form.form, numba.none, obj.parameters)
 
@@ -273,7 +273,7 @@
 #             return numba.none
 #         else:
 #             raise NotImplementedError(
-#                 "TODO: identities in VirtualArray" + ak._util.exception_suffix(__file__)
+#                 "TODO: identities in VirtualArray"
 #             )
 
 #     @classmethod
@@ -291,7 +291,7 @@
 #         else:
 #             raise AssertionError(
 #                 "unrecognized Form index type: {0}".format(index_string)
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def form_fill_identities(self, pos, layout, lookup):
@@ -303,40 +303,40 @@
 
 #     def IndexOf(self, arraytype):
 #         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
-#             return ak.layout.Index8
+#             return ak._v2.index.Index8
 #         elif arraytype.dtype.bitwidth == 8:
-#             return ak.layout.IndexU8
+#             return ak._v2.index.IndexU8
 #         elif arraytype.dtype.bitwidth == 32 and arraytype.dtype.signed:
-#             return ak.layout.Index32
+#             return ak._v2.index.Index32
 #         elif arraytype.dtype.bitwidth == 32:
-#             return ak.layout.IndexU32
+#             return ak._v2.index.IndexU32
 #         elif arraytype.dtype.bitwidth == 64 and arraytype.dtype.signed:
-#             return ak.layout.Index64
+#             return ak._v2.index.Index64
 #         else:
 #             raise AssertionError(
 #                 "no Index* type for array: {0}".format(arraytype)
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def getitem_at_check(self, viewtype):
-#         typer = ak._util.numba_array_typer(viewtype.type, viewtype.behavior)
+#         typer = ak._v2._util.numba_array_typer(viewtype.type, viewtype.behavior)
 #         if typer is None:
 #             return self.getitem_at(viewtype)
 #         else:
 #             return typer(viewtype)
 
 #     def getitem_range(self, viewtype):
-#         return ak._connect._numba.arrayview.wrap(self, viewtype, None)
+#         return ak._v2._connect.numba.arrayview.wrap(self, viewtype, None)
 
 #     def getitem_field(self, viewtype, key):
 #         if self.has_field(key):
-#             return ak._connect._numba.arrayview.wrap(
+#             return ak._v2._connect.numba.arrayview.wrap(
 #                 self, viewtype, viewtype.fields + (key,)
 #             )
 #         else:
 #             raise TypeError(
 #                 "array does not have a field with key {0}".format(repr(key))
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def lower_getitem_at_check(
@@ -352,7 +352,7 @@
 #         wrapneg,
 #         checkbounds,
 #     ):
-#         lower = ak._util.numba_array_lower(viewtype.type, viewtype.behavior)
+#         lower = ak._v2._util.numba_array_lower(viewtype.type, viewtype.behavior)
 #         if lower is not None:
 #             atval = regularize_atval(
 #                 context, builder, viewproxy, attype, atval, wrapneg, checkbounds
@@ -469,7 +469,7 @@
 
 
 # def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
-#     atval = ak._connect._numba.castint(context, builder, attype, numba.intp, atval)
+#     atval = ak._v2._connect.numba.castint(context, builder, attype, numba.intp, atval)
 
 #     if not attype.signed:
 #         wrapneg = False
@@ -498,7 +498,7 @@
 #                     builder, ValueError, ("slice index out of bounds",)
 #                 )
 
-#     return ak._connect._numba.castint(context, builder, atval.type, numba.intp, atval)
+#     return ak._v2._connect.numba.castint(context, builder, atval.type, numba.intp, atval)
 
 
 # class NumpyArrayType(ContentType):
@@ -523,7 +523,7 @@
 #             raise NotImplementedError(
 #                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
 #                 " just as NumpyArrays are converted to RegularArrays"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         pos = len(positions)
 #         cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
@@ -539,7 +539,7 @@
 #             raise NotImplementedError(
 #                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
 #                 " just as NumpyArrays are converted to RegularArrays"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         if form.primitive == "float64":
 #             arraytype = numba.types.Array(numba.float64, 1, "A")
@@ -566,7 +566,7 @@
 #         else:
 #             raise ValueError(
 #                 "unrecognized NumpyForm.primitive type: {0}".format(form.primitive)
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         return NumpyArrayType(
 #             arraytype, cls.from_form_identities(form), form.parameters
@@ -596,7 +596,7 @@
 
 #     def tolayout(self, lookup, pos, fields):
 #         assert fields == ()
-#         return ak.layout.NumpyArray(
+#         return ak._v2.contents.NumpyArray(
 #             lookup.original_positions[pos + self.ARRAY], parameters=self.parameters
 #         )
 
@@ -655,7 +655,7 @@
 #         sharedptrs[-1] = layout._persistent_shared_ptr
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -667,7 +667,7 @@
 #         sharedptrs[-1] = 0
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -675,7 +675,7 @@
 #     @classmethod
 #     def from_form(cls, form):
 #         return RegularArrayType(
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             form.size,
 #             cls.from_form_identities(form),
 #             form.parameters,
@@ -705,13 +705,13 @@
 #         content = self.contenttype.tolayout(
 #             lookup, lookup.positions[pos + self.CONTENT], fields
 #         )
-#         return ak.layout.RegularArray(content, self.size, 0, parameters=self.parameters)
+#         return ak._v2.contents.RegularArray(content, self.size, 0, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         return ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 
 #     def lower_getitem_at(
 #         self,
@@ -774,9 +774,9 @@
 #         if isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListArray32,
-#                 ak.layout.ListArrayU32,
-#                 ak.layout.ListArray64,
+#                 ak._v2.contents.ListArray32,
+#                 ak._v2.contents.ListArrayU32,
+#                 ak._v2.contents.ListArray64,
 #             ),
 #         ):
 #             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
@@ -784,9 +784,9 @@
 #         elif isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListOffsetArray32,
-#                 ak.layout.ListOffsetArrayU32,
-#                 ak.layout.ListOffsetArray64,
+#                 ak._v2.contents.ListOffsetArray32,
+#                 ak._v2.contents.ListOffsetArrayU32,
+#                 ak._v2.contents.ListOffsetArray64,
 #             ),
 #         ):
 #             offsets = ak.nplike.of(layout.offsets).asarray(layout.offsets)
@@ -804,7 +804,7 @@
 #         arrays.append(stops)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -822,7 +822,7 @@
 #         arrays.append(0)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -833,7 +833,7 @@
 #             cls.from_form_index(
 #                 form.starts if isinstance(form, ak.forms.ListForm) else form.offsets
 #             ),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             cls.from_form_identities(form),
 #             form.parameters,
 #         )
@@ -860,9 +860,9 @@
 #         if isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListArray32,
-#                 ak.layout.ListArrayU32,
-#                 ak.layout.ListArray64,
+#                 ak._v2.contents.ListArray32,
+#                 ak._v2.contents.ListArrayU32,
+#                 ak._v2.contents.ListArray64,
 #             ),
 #         ):
 #             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
@@ -870,9 +870,9 @@
 #         elif isinstance(
 #             layout,
 #             (
-#                 ak.layout.ListOffsetArray32,
-#                 ak.layout.ListOffsetArrayU32,
-#                 ak.layout.ListOffsetArray64,
+#                 ak._v2.contents.ListOffsetArray32,
+#                 ak._v2.contents.ListOffsetArrayU32,
+#                 ak._v2.contents.ListOffsetArray64,
 #             ),
 #         ):
 #             offsets = ak.nplike.of(layout.offsets).asarray(layout.offsets)
@@ -890,15 +890,15 @@
 
 #     def ListArrayOf(self):
 #         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak.layout.ListArray32
+#             return ak._v2.contents.ListArray32
 #         elif self.indextype.dtype.bitwidth == 32:
-#             return ak.layout.ListArrayU32
+#             return ak._v2.contents.ListArrayU32
 #         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak.layout.ListArray64
+#             return ak._v2.contents.ListArray64
 #         else:
 #             raise AssertionError(
 #                 "no ListArray* type for array: {0}".format(self.indextype)
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def tolayout(self, lookup, pos, fields):
@@ -917,7 +917,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         return ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 
 #     def lower_getitem_at(
 #         self,
@@ -955,10 +955,10 @@
 
 #         proxyout = context.make_helper(builder, rettype)
 #         proxyout.pos = nextpos
-#         proxyout.start = ak._connect._numba.castint(
+#         proxyout.start = ak._v2._connect.numba.castint(
 #             context, builder, self.indextype.dtype, numba.intp, start
 #         )
-#         proxyout.stop = ak._connect._numba.castint(
+#         proxyout.stop = ak._v2._connect.numba.castint(
 #             context, builder, self.indextype.dtype, numba.intp, stop
 #         )
 #         proxyout.arrayptrs = viewproxy.arrayptrs
@@ -998,7 +998,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1013,7 +1013,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1022,7 +1022,7 @@
 #     def from_form(cls, form):
 #         return IndexedArrayType(
 #             cls.from_form_index(form.index),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             cls.from_form_identities(form),
 #             form.parameters,
 #         )
@@ -1056,15 +1056,15 @@
 
 #     def IndexedArrayOf(self):
 #         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak.layout.IndexedArray32
+#             return ak._v2.contents.IndexedArray32
 #         elif self.indextype.dtype.bitwidth == 32:
-#             return ak.layout.IndexedArrayU32
+#             return ak._v2.contents.IndexedArrayU32
 #         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak.layout.IndexedArray64
+#             return ak._v2.contents.IndexedArray64
 #         else:
 #             raise AssertionError(
 #                 "no IndexedArray* type for array: {0}".format(self.indextype)
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def tolayout(self, lookup, pos, fields):
@@ -1080,7 +1080,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return self.contenttype.getitem_at_check(viewtype)
 
 #     def lower_getitem_at(
@@ -1110,14 +1110,14 @@
 #             context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
 #         )
 
-#         nextviewtype = ak._connect._numba.arrayview.wrap(
+#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #             self.contenttype, viewtype, None
 #         )
 #         proxynext = context.make_helper(builder, nextviewtype)
 #         proxynext.pos = nextpos
 #         proxynext.start = context.get_constant(numba.intp, 0)
 #         proxynext.stop = builder.add(
-#             ak._connect._numba.castint(
+#             ak._v2._connect.numba.castint(
 #                 context, builder, self.indextype.dtype, numba.intp, nextat
 #             ),
 #             context.get_constant(numba.intp, 1),
@@ -1171,7 +1171,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1186,7 +1186,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1195,7 +1195,7 @@
 #     def from_form(cls, form):
 #         return IndexedOptionArrayType(
 #             cls.from_form_index(form.index),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             cls.from_form_identities(form),
 #             form.parameters,
 #         )
@@ -1229,13 +1229,13 @@
 
 #     def IndexedOptionArrayOf(self):
 #         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak.layout.IndexedOptionArray32
+#             return ak._v2.contents.IndexedOptionArray32
 #         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak.layout.IndexedOptionArray64
+#             return ak._v2.contents.IndexedOptionArray64
 #         else:
 #             raise AssertionError(
 #                 "no IndexedOptionArray* type for array: {0}".format(self.indextype)
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def tolayout(self, lookup, pos, fields):
@@ -1251,7 +1251,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 #     def lower_getitem_at(
@@ -1293,14 +1293,14 @@
 #                 output.data = numba.core.cgutils.get_null_value(output.data.type)
 
 #             with isvalid:
-#                 nextviewtype = ak._connect._numba.arrayview.wrap(
+#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                     self.contenttype, viewtype, None
 #                 )
 #                 proxynext = context.make_helper(builder, nextviewtype)
 #                 proxynext.pos = nextpos
 #                 proxynext.start = context.get_constant(numba.intp, 0)
 #                 proxynext.stop = builder.add(
-#                     ak._connect._numba.castint(
+#                     ak._v2._connect.numba.castint(
 #                         context, builder, self.indextype.dtype, numba.intp, nextat
 #                     ),
 #                     context.get_constant(numba.intp, 1),
@@ -1359,7 +1359,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1374,7 +1374,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1383,7 +1383,7 @@
 #     def from_form(cls, form):
 #         return ByteMaskedArrayType(
 #             cls.from_form_index(form.mask),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             form.valid_when,
 #             cls.from_form_identities(form),
 #             form.parameters,
@@ -1424,7 +1424,7 @@
 #         content = self.contenttype.tolayout(
 #             lookup, lookup.positions[pos + self.CONTENT], fields
 #         )
-#         return ak.layout.ByteMaskedArray(
+#         return ak._v2.contents.ByteMaskedArray(
 #             mask, content, self.valid_when, parameters=self.parameters
 #         )
 
@@ -1432,7 +1432,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 #     def lower_getitem_at(
@@ -1472,7 +1472,7 @@
 #             )
 #         ) as (isvalid, isnone):
 #             with isvalid:
-#                 nextviewtype = ak._connect._numba.arrayview.wrap(
+#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                     self.contenttype, viewtype, None
 #                 )
 #                 proxynext = context.make_helper(builder, nextviewtype)
@@ -1537,7 +1537,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1552,7 +1552,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1561,7 +1561,7 @@
 #     def from_form(cls, form):
 #         return BitMaskedArrayType(
 #             cls.from_form_index(form.mask),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             form.valid_when,
 #             form.lsb_order,
 #             cls.from_form_identities(form),
@@ -1607,7 +1607,7 @@
 #         content = self.contenttype.tolayout(
 #             lookup, lookup.positions[pos + self.CONTENT], fields
 #         )
-#         return ak.layout.BitMaskedArray(
+#         return ak._v2.contents.BitMaskedArray(
 #             mask,
 #             content,
 #             self.valid_when,
@@ -1620,7 +1620,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 #     def lower_getitem_at(
@@ -1643,7 +1643,7 @@
 #             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
 #         )
 #         bitatval = builder.sdiv(atval, context.get_constant(numba.intp, 8))
-#         shiftval = ak._connect._numba.castint(
+#         shiftval = ak._v2._connect.numba.castint(
 #             context,
 #             builder,
 #             numba.intp,
@@ -1678,7 +1678,7 @@
 #             )
 #         ) as (isvalid, isnone):
 #             with isvalid:
-#                 nextviewtype = ak._connect._numba.arrayview.wrap(
+#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                     self.contenttype, viewtype, None
 #                 )
 #                 proxynext = context.make_helper(builder, nextviewtype)
@@ -1739,7 +1739,7 @@
 #         sharedptrs[-1] = layout._persistent_shared_ptr
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1751,7 +1751,7 @@
 #         sharedptrs[-1] = 0
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1759,7 +1759,7 @@
 #     @classmethod
 #     def from_form(cls, form):
 #         return UnmaskedArrayType(
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             cls.from_form_identities(form),
 #             form.parameters,
 #         )
@@ -1787,13 +1787,13 @@
 #         content = self.contenttype.tolayout(
 #             lookup, lookup.positions[pos + self.CONTENT], fields
 #         )
-#         return ak.layout.UnmaskedArray(content, parameters=self.parameters)
+#         return ak._v2.contents.UnmaskedArray(content, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 #     def lower_getitem_at(
@@ -1818,7 +1818,7 @@
 
 #         output = context.make_helper(builder, rettype)
 
-#         nextviewtype = ak._connect._numba.arrayview.wrap(
+#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #             self.contenttype, viewtype, None
 #         )
 #         proxynext = context.make_helper(builder, nextviewtype)
@@ -1876,7 +1876,7 @@
 #         positions.extend([None] * layout.numfields)
 #         sharedptrs.extend([None] * layout.numfields)
 #         for i, content in enumerate(layout.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
+#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
 #                 content, positions, sharedptrs, arrays
 #             )
 #         return pos
@@ -1892,14 +1892,14 @@
 #             for i, (_, content) in enumerate(form.contents.items()):
 #                 positions[
 #                     pos + cls.CONTENTS + i
-#                 ] = ak._connect._numba.arrayview.tolookup(
+#                 ] = ak._v2._connect.numba.arrayview.tolookup(
 #                     content, positions, sharedptrs, arrays
 #                 )
 #         else:
 #             for i, (_, content) in enumerate(form.contents.items()):
 #                 positions[
 #                     pos + cls.CONTENTS + i
-#                 ] = ak._connect._numba.arrayview.tolookup(
+#                 ] = ak._v2._connect.numba.arrayview.tolookup(
 #                     content, positions, sharedptrs, arrays
 #                 )
 #         return pos
@@ -1910,11 +1910,11 @@
 #         if form.istuple:
 #             recordlookup = None
 #             for x in form.contents.values():
-#                 contents.append(ak._connect._numba.arrayview.tonumbatype(x))
+#                 contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
 #         else:
 #             recordlookup = []
 #             for n, x in form.contents.items():
-#                 contents.append(ak._connect._numba.arrayview.tonumbatype(x))
+#                 contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
 #                 recordlookup.append(n)
 
 #         return RecordArrayType(
@@ -1986,14 +1986,14 @@
 #                 contents.append(layout)
 
 #             if len(contents) == 0:
-#                 return ak.layout.RecordArray(
+#                 return ak._v2.contents.RecordArray(
 #                     contents,
 #                     self.recordlookup,
 #                     np.iinfo(np.int64).max,
 #                     parameters=self.parameters,
 #                 )
 #             else:
-#                 return ak.layout.RecordArray(
+#                 return ak._v2.contents.RecordArray(
 #                     contents, self.recordlookup, parameters=self.parameters
 #                 )
 
@@ -2002,8 +2002,8 @@
 
 #     def getitem_at_check(self, viewtype):
 #         out = self.getitem_at(viewtype)
-#         if isinstance(out, ak._connect._numba.arrayview.RecordViewType):
-#             typer = ak._util.numba_record_typer(
+#         if isinstance(out, ak._v2._connect.numba.arrayview.RecordViewType):
+#             typer = ak._v2._util.numba_record_typer(
 #                 out.arrayviewtype.type, out.arrayviewtype.behavior
 #             )
 #             if typer is not None:
@@ -2012,7 +2012,7 @@
 
 #     def getitem_at(self, viewtype):
 #         if len(viewtype.fields) == 0:
-#             return ak._connect._numba.arrayview.RecordViewType(viewtype)
+#             return ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
 #         else:
 #             key = viewtype.fields[0]
 #             index = self.fieldindex(key)
@@ -2022,7 +2022,7 @@
 #                         "no field {0} in tuples with {1} fields".format(
 #                             repr(key), len(self.contenttypes)
 #                         )
-#                         + ak._util.exception_suffix(__file__)
+#
 #                     )
 #                 else:
 #                     raise ValueError(
@@ -2030,10 +2030,10 @@
 #                         "fields: [{1}]".format(
 #                             repr(key), ", ".join(repr(x) for x in self.recordlookup)
 #                         )
-#                         + ak._util.exception_suffix(__file__)
+#
 #                     )
 #             contenttype = self.contenttypes[index]
-#             subviewtype = ak._connect._numba.arrayview.wrap(
+#             subviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                 contenttype, viewtype, viewtype.fields[1:]
 #             )
 #             return contenttype.getitem_at_check(subviewtype)
@@ -2046,17 +2046,17 @@
 #                     "no field {0} in tuples with {1} fields".format(
 #                         repr(key), len(self.contenttypes)
 #                     )
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 #             else:
 #                 raise ValueError(
 #                     "no field {0} in records with fields: [{1}]".format(
 #                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
 #                     )
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 #         contenttype = self.contenttypes[index]
-#         subviewtype = ak._connect._numba.arrayview.wrap(contenttype, viewtype, None)
+#         subviewtype = ak._v2._connect.numba.arrayview.wrap(contenttype, viewtype, None)
 #         return contenttype.getitem_range(subviewtype)
 
 #     def getitem_field_record(self, recordviewtype, key):
@@ -2067,17 +2067,17 @@
 #                     "no field {0} in tuple with {1} fields".format(
 #                         repr(key), len(self.contenttypes)
 #                     )
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 #             else:
 #                 raise ValueError(
 #                     "no field {0} in record with fields: [{1}]".format(
 #                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
 #                     )
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 #         contenttype = self.contenttypes[index]
-#         subviewtype = ak._connect._numba.arrayview.wrap(
+#         subviewtype = ak._v2._connect.numba.arrayview.wrap(
 #             contenttype, recordviewtype, None
 #         )
 #         return contenttype.getitem_at_check(subviewtype)
@@ -2108,8 +2108,8 @@
 #             checkbounds,
 #         )
 #         baretype = self.getitem_at(viewtype)
-#         if isinstance(baretype, ak._connect._numba.arrayview.RecordViewType):
-#             lower = ak._util.numba_record_lower(
+#         if isinstance(baretype, ak._v2._connect.numba.arrayview.RecordViewType):
+#             lower = ak._v2._util.numba_record_lower(
 #                 baretype.arrayviewtype.type, baretype.arrayviewtype.behavior
 #             )
 #             if lower is not None:
@@ -2135,7 +2135,7 @@
 
 #         if len(viewtype.fields) == 0:
 #             proxyout = context.make_helper(
-#                 builder, ak._connect._numba.arrayview.RecordViewType(viewtype)
+#                 builder, ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
 #             )
 #             proxyout.arrayview = viewval
 #             proxyout.at = atval
@@ -2148,7 +2148,7 @@
 #             whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
 #             nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#             nextviewtype = ak._connect._numba.arrayview.wrap(
+#             nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                 contenttype, viewtype, viewtype.fields[1:]
 #             )
 #             proxynext = context.make_helper(builder, nextviewtype)
@@ -2220,7 +2220,7 @@
 #         proxynext.sharedptrs = arrayviewproxy.sharedptrs
 #         proxynext.pylookup = arrayviewproxy.pylookup
 
-#         nextviewtype = ak._connect._numba.arrayview.wrap(
+#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #             contenttype, arrayviewtype, None
 #         )
 
@@ -2280,7 +2280,7 @@
 #         positions.extend([None] * layout.numcontents)
 #         sharedptrs.extend([None] * layout.numcontents)
 #         for i, content in enumerate(layout.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
+#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
 #                 content, positions, sharedptrs, arrays
 #             )
 #         return pos
@@ -2299,7 +2299,7 @@
 #         positions.extend([None] * form.numcontents)
 #         sharedptrs.extend([None] * form.numcontents)
 #         for i, content in enumerate(form.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
+#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
 #                 content, positions, sharedptrs, arrays
 #             )
 #         return pos
@@ -2308,7 +2308,7 @@
 #     def from_form(cls, form):
 #         contents = []
 #         for x in form.contents:
-#             contents.append(ak._connect._numba.arrayview.tonumbatype(x))
+#             contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
 
 #         return UnionArrayType(
 #             cls.from_form_index(form.tags),
@@ -2357,20 +2357,20 @@
 #     def UnionArrayOf(self):
 #         if self.tagstype.dtype.bitwidth == 8 and self.tagstype.dtype.signed:
 #             if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#                 return ak.layout.UnionArray8_32
+#                 return ak._v2.contents.UnionArray8_32
 #             elif self.indextype.dtype.bitwidth == 32:
-#                 return ak.layout.UnionArray8_U32
+#                 return ak._v2.contents.UnionArray8_U32
 #             elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#                 return ak.layout.UnionArray8_64
+#                 return ak._v2.contents.UnionArray8_64
 #             else:
 #                 raise AssertionError(
 #                     "no UnionArray* type for index array: {0}".format(self.indextype)
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 #         else:
 #             raise AssertionError(
 #                 "no UnionArray* type for tags array: {0}".format(self.tagstype)
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def tolayout(self, lookup, pos, fields):
@@ -2393,21 +2393,21 @@
 #         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
 #             raise TypeError(
 #                 "union types cannot be accessed in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def getitem_range(self, viewtype):
 #         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
 #             raise TypeError(
 #                 "union types cannot be accessed in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def getitem_field(self, viewtype, key):
 #         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
 #             raise TypeError(
 #                 "union types cannot be accessed in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     def lower_getitem_at(
@@ -2426,7 +2426,7 @@
 #         raise NotImplementedError(
 #             type(self).__name__
 #             + ".lower_getitem_at not implemented"
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 #     def lower_getitem_range(
@@ -2444,14 +2444,14 @@
 #         raise NotImplementedError(
 #             type(self).__name__
 #             + ".lower_getitem_range not implemented"
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 #     def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
 #         raise NotImplementedError(
 #             type(self).__name__
 #             + ".lower_getitem_field not implemented"
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 #     @property
@@ -2496,7 +2496,7 @@
 #         if layout.form is None:
 #             raise ValueError(
 #                 "VirtualArrays without a known 'form' can't be used in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         pyptr = ctypes.py_object(layout)
 #         ctypes.pythonapi.Py_IncRef(pyptr)
@@ -2506,7 +2506,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.ARRAY] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.ARRAY] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.form.form, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -2519,13 +2519,13 @@
 #         if form.form is None:
 #             raise ValueError(
 #                 "VirtualArrays without a known 'form' can't be used in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         positions.append(0)
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.ARRAY] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.ARRAY] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.form, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -2535,7 +2535,7 @@
 #         if form.form is None:
 #             raise ValueError(
 #                 "VirtualArrays without a known 'form' can't be used in Numba "
-#                 "(including nested)" + ak._util.exception_suffix(__file__)
+#                 "(including nested)"
 #             )
 #         return VirtualArrayType(
 #             form.form, cls.from_form_identities(form), form.parameters
@@ -2545,7 +2545,7 @@
 #         if generator_form is None:
 #             raise ValueError(
 #                 "VirtualArrays without a known 'form' can't be used in Numba"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 #         super(VirtualArrayType, self).__init__(
 #             name="ak.VirtualArrayType({0}, {1}, {2})".format(
@@ -2609,7 +2609,7 @@
 #                         "unrecognized NumpyForm.primitive type: {0}".format(
 #                             form.primitive
 #                         )
-#                         + ak._util.exception_suffix(__file__)
+#
 #                     )
 
 #             elif isinstance(
@@ -2643,7 +2643,7 @@
 #             elif isinstance(form, ak.forms.UnionForm):
 #                 raise TypeError(
 #                     "union types cannot be accessed in Numba"
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 
 #             elif isinstance(form, ak.forms.VirtualForm):
@@ -2652,13 +2652,13 @@
 #             else:
 #                 raise AssertionError(
 #                     "unrecognized Form type: {0}".format(type(form))
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 
 #         def wrap(out):
 #             if isinstance(out, ak.forms.Form):
-#                 numbatype = ak._connect._numba.arrayview.tonumbatype(out)
-#                 return ak._connect._numba.arrayview.wrap(numbatype, viewtype, None)
+#                 numbatype = ak._v2._connect.numba.arrayview.tonumbatype(out)
+#                 return ak._v2._connect.numba.arrayview.wrap(numbatype, viewtype, None)
 #             else:
 #                 return out
 
@@ -2691,7 +2691,7 @@
 #         )
 #         sharedptr = getat(context, builder, viewproxy.sharedptrs, arraypos)
 
-#         numbatype = ak._connect._numba.arrayview.tonumbatype(self.generator_form)
+#         numbatype = ak._v2._connect.numba.arrayview.tonumbatype(self.generator_form)
 
 #         with builder.if_then(
 #             builder.icmp_signed("==", sharedptr, context.get_constant(numba.intp, 0)),
@@ -2757,7 +2757,7 @@
 #         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
 #         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#         nextviewtype = ak._connect._numba.arrayview.wrap(numbatype, viewtype, None)
+#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(numbatype, viewtype, None)
 #         proxynext = context.make_helper(builder, nextviewtype)
 #         proxynext.pos = nextpos
 #         proxynext.start = viewproxy.start
@@ -2839,7 +2839,7 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Form type: {0}".format(type(form))
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 
@@ -2881,7 +2881,7 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Form type: {0}".format(type(form))
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 
@@ -2925,5 +2925,5 @@
 #     else:
 #         raise AssertionError(
 #             "unrecognized Form type: {0}".format(type(form))
-#             + ak._util.exception_suffix(__file__)
+#
 #         )

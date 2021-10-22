@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("nan_to_num")
+# @ak._v2._connect.numpy.implements("nan_to_num")
 def nan_to_num(
     array, copy=True, nan=0.0, posinf=None, neginf=None, highlevel=True, behavior=None
 ):
@@ -31,12 +31,12 @@ def nan_to_num(
 #     Implements [np.nan_to_num](https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html)
 #     for Awkward Arrays.
 #     """
-#     layout = ak.operations.convert.to_layout(array)
+#     layout = ak._v2.operations.convert.to_layout(array)
 #     nplike = ak.nplike.of(layout)
 
 #     def getfunction(layout):
-#         if isinstance(layout, ak.layout.NumpyArray):
-#             return lambda: ak.layout.NumpyArray(
+#         if isinstance(layout, ak._v2.contents.NumpyArray):
+#             return lambda: ak._v2.contents.NumpyArray(
 #                 nplike.nan_to_num(
 #                     nplike.asarray(layout),
 #                     nan=nan,
@@ -47,7 +47,7 @@ def nan_to_num(
 #         else:
 #             return None
 
-#     out = ak._util.recursively_apply(
+#     out = ak._v2._util.recursively_apply(
 #         layout, getfunction, pass_depth=False, pass_user=False
 #     )
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

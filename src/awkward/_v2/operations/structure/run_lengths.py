@@ -94,7 +94,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 #             return nplike.empty(0, np.int64), offsets
 #         else:
 #             diffs = data[1:] != data[:-1]
-#             if isinstance(diffs, ak.highlevel.Array):
+#             if isinstance(diffs, ak._v2.highlevel.Array):
 #                 diffs = nplike.asarray(diffs)
 #             if offsets is not None:
 #                 diffs[offsets[1:-1] - 1] = True
@@ -112,35 +112,35 @@ def run_lengths(array, highlevel=True, behavior=None):
 
 #     def getfunction(layout):
 #         if layout.branch_depth == (False, 1):
-#             if isinstance(layout, ak._util.indexedtypes):
+#             if isinstance(layout, ak._v2._util.indexedtypes):
 #                 layout = layout.project()
 
 #             if (
 #                 layout.parameter("__array__") == "string"
 #                 or layout.parameter("__array__") == "bytestring"
 #             ):
-#                 nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
-#                 return lambda: ak.layout.NumpyArray(nextcontent)
+#                 nextcontent, _ = lengths_of(ak._v2.highlevel.Array(layout), None)
+#                 return lambda: ak._v2.contents.NumpyArray(nextcontent)
 
-#             if not isinstance(layout, (ak.layout.NumpyArray, ak.layout.EmptyArray)):
+#             if not isinstance(layout, (ak._v2.contents.NumpyArray, ak._v2.contents.EmptyArray)):
 #                 raise NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 
 #             nextcontent, _ = lengths_of(nplike.asarray(layout), None)
-#             return lambda: ak.layout.NumpyArray(nextcontent)
+#             return lambda: ak._v2.contents.NumpyArray(nextcontent)
 
 #         elif layout.branch_depth == (False, 2):
-#             if isinstance(layout, ak._util.indexedtypes):
+#             if isinstance(layout, ak._v2._util.indexedtypes):
 #                 layout = layout.project()
 
-#             if not isinstance(layout, ak._util.listtypes):
+#             if not isinstance(layout, ak._v2._util.listtypes):
 #                 raise NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 
 #             if (
@@ -151,52 +151,52 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 offsets = nplike.asarray(listoffsetarray.offsets)
 #                 content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
-#                 if isinstance(content, ak._util.indexedtypes):
+#                 if isinstance(content, ak._v2._util.indexedtypes):
 #                     content = content.project()
 
 #                 nextcontent, nextoffsets = lengths_of(
-#                     ak.highlevel.Array(content), offsets - offsets[0]
+#                     ak._v2.highlevel.Array(content), offsets - offsets[0]
 #                 )
-#                 return lambda: ak.layout.ListOffsetArray64(
-#                     ak.layout.Index64(nextoffsets), ak.layout.NumpyArray(nextcontent)
+#                 return lambda: ak._v2.contents.ListOffsetArray64(
+#                     ak._v2.index.Index64(nextoffsets), ak._v2.contents.NumpyArray(nextcontent)
 #                 )
 
 #             listoffsetarray = layout.toListOffsetArray64(False)
 #             offsets = nplike.asarray(listoffsetarray.offsets)
 #             content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
-#             if isinstance(content, ak._util.indexedtypes):
+#             if isinstance(content, ak._v2._util.indexedtypes):
 #                 content = content.project()
 
-#             if not isinstance(content, (ak.layout.NumpyArray, ak.layout.EmptyArray)):
+#             if not isinstance(content, (ak._v2.contents.NumpyArray, ak._v2.contents.EmptyArray)):
 #                 raise NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
 #                     + " with content "
 #                     + type(content).__name__
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 
 #             nextcontent, nextoffsets = lengths_of(
 #                 nplike.asarray(content), offsets - offsets[0]
 #             )
-#             return lambda: ak.layout.ListOffsetArray64(
-#                 ak.layout.Index64(nextoffsets), ak.layout.NumpyArray(nextcontent)
+#             return lambda: ak._v2.contents.ListOffsetArray64(
+#                 ak._v2.index.Index64(nextoffsets), ak._v2.contents.NumpyArray(nextcontent)
 #             )
 
 #         else:
 #             return None
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         if len(layout.partitions) != 0 and layout.partitions[0].branch_depth == (
 #             False,
 #             1,
 #         ):
-#             out = ak._util.recursively_apply(
+#             out = ak._v2._util.recursively_apply(
 #                 layout.toContent(),
 #                 getfunction,
 #                 pass_depth=False,
@@ -206,20 +206,20 @@ def run_lengths(array, highlevel=True, behavior=None):
 #             outparts = []
 #             for part in layout.partitions:
 #                 outparts.append(
-#                     ak._util.recursively_apply(
+#                     ak._v2._util.recursively_apply(
 #                         part,
 #                         getfunction,
 #                         pass_depth=False,
 #                         pass_user=False,
 #                     )
 #                 )
-#             out = ak.partition.IrregularlyPartitionedArray(outparts)
+#             out = ak.partition.IrregularlyPartitionedArray(outparts)   # NO PARTITIONED ARRAY
 #     else:
-#         out = ak._util.recursively_apply(
+#         out = ak._v2._util.recursively_apply(
 #             layout,
 #             getfunction,
 #             pass_depth=False,
 #             pass_user=False,
 #         )
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

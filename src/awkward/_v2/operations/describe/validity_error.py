@@ -26,18 +26,18 @@ def validity_error(array, exception=False):
 
 #     See also #ak.is_valid.
 #     """
-#     if isinstance(array, (ak.highlevel.Array, ak.highlevel.Record)):
+#     if isinstance(array, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
 #         return validity_error(array.layout, exception=exception)
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return validity_error(array.snapshot().layout, exception=exception)
 
 #     elif isinstance(
 #         array,
 #         (
-#             ak.layout.Content,
-#             ak.layout.Record,
-#             ak.partition.PartitionedArray,
+#             ak._v2.contents.Content,
+#             ak._v2.record.Record,
+#             ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #         ),
 #     ):
 #         out = array.validityerror()
@@ -52,5 +52,5 @@ def validity_error(array, exception=False):
 #     else:
 #         raise TypeError(
 #             "not an awkward array: {0}".format(repr(array))
-#             + ak._util.exception_suffix(__file__)
+#
 #         )

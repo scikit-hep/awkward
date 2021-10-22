@@ -68,28 +68,28 @@ def to_json(
 #     elif isinstance(array, bytes):
 #         return json.dumps(array.decode("utf-8", "surrogateescape"))
 
-#     elif ak._util.py27 and isinstance(array, ak._util.unicode):
+#     elif ak._v2._util.py27 and isinstance(array, ak._v2._util.unicode):
 #         return json.dumps(array)
 
 #     elif isinstance(array, np.ndarray):
-#         out = ak.layout.NumpyArray(array)
+#         out = ak._v2.contents.NumpyArray(array)
 
-#     elif isinstance(array, ak.highlevel.Array):
+#     elif isinstance(array, ak._v2.highlevel.Array):
 #         out = array.layout
 
-#     elif isinstance(array, ak.highlevel.Record):
+#     elif isinstance(array, ak._v2.highlevel.Record):
 #         out = array.layout
 
-#     elif isinstance(array, ak.highlevel.ArrayBuilder):
+#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         out = array.snapshot().layout
 
-#     elif isinstance(array, ak.layout.Record):
+#     elif isinstance(array, ak._v2.record.Record):
 #         out = array
 
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         out = array.snapshot()
 
-#     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
+#     elif isinstance(array, (ak._v2.contents.Content, ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
 #         out = array
 
 #     elif isinstance(array, ak._v2.contents.Content):
@@ -98,7 +98,7 @@ def to_json(
 #     else:
 #         raise TypeError(
 #             "unrecognized array type: {0}".format(repr(array))
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 #     if complex_record_fields is None:

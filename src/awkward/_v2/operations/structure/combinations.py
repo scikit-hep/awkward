@@ -166,10 +166,10 @@ def combinations(
 #     if with_name is not None:
 #         parameters["__record__"] = with_name
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = layout.combinations(
 #         n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
 #     )
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

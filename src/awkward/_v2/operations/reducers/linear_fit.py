@@ -106,16 +106,16 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #         intercept_error = nplike.sqrt(nplike.true_divide(sumwxx, delta))
 #         slope_error = nplike.sqrt(nplike.true_divide(sumw, delta))
 
-#         intercept = ak.operations.convert.to_layout(
+#         intercept = ak._v2.operations.convert.to_layout(
 #             intercept, allow_record=True, allow_other=True
 #         )
-#         slope = ak.operations.convert.to_layout(
+#         slope = ak._v2.operations.convert.to_layout(
 #             slope, allow_record=True, allow_other=True
 #         )
-#         intercept_error = ak.operations.convert.to_layout(
+#         intercept_error = ak._v2.operations.convert.to_layout(
 #             intercept_error, allow_record=True, allow_other=True
 #         )
-#         slope_error = ak.operations.convert.to_layout(
+#         slope_error = ak._v2.operations.convert.to_layout(
 #             slope_error, allow_record=True, allow_other=True
 #         )
 
@@ -123,52 +123,52 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #         if not isinstance(
 #             intercept,
 #             (
-#                 ak.layout.Content,
-#                 ak.layout.Record,
-#                 ak.partition.PartitionedArray,
+#                 ak._v2.contents.Content,
+#                 ak._v2.record.Record,
+#                 ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #             ),
 #         ):
-#             intercept = ak.layout.NumpyArray(nplike.array([intercept]))
+#             intercept = ak._v2.contents.NumpyArray(nplike.array([intercept]))
 #             scalar = True
 #         if not isinstance(
 #             slope,
 #             (
-#                 ak.layout.Content,
-#                 ak.layout.Record,
-#                 ak.partition.PartitionedArray,
+#                 ak._v2.contents.Content,
+#                 ak._v2.record.Record,
+#                 ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #             ),
 #         ):
-#             slope = ak.layout.NumpyArray(nplike.array([slope]))
+#             slope = ak._v2.contents.NumpyArray(nplike.array([slope]))
 #             scalar = True
 #         if not isinstance(
 #             intercept_error,
 #             (
-#                 ak.layout.Content,
-#                 ak.layout.Record,
-#                 ak.partition.PartitionedArray,
+#                 ak._v2.contents.Content,
+#                 ak._v2.record.Record,
+#                 ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #             ),
 #         ):
-#             intercept_error = ak.layout.NumpyArray(nplike.array([intercept_error]))
+#             intercept_error = ak._v2.contents.NumpyArray(nplike.array([intercept_error]))
 #             scalar = True
 #         if not isinstance(
 #             slope_error,
 #             (
-#                 ak.layout.Content,
-#                 ak.layout.Record,
-#                 ak.partition.PartitionedArray,
+#                 ak._v2.contents.Content,
+#                 ak._v2.record.Record,
+#                 ak.partition.PartitionedArray,   # NO PARTITIONED ARRAY
 #             ),
 #         ):
-#             slope_error = ak.layout.NumpyArray(nplike.array([slope_error]))
+#             slope_error = ak._v2.contents.NumpyArray(nplike.array([slope_error]))
 #             scalar = True
 
 #         sample = None
-#         if isinstance(intercept, ak.partition.PartitionedArray):
+#         if isinstance(intercept, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             sample = intercept
-#         elif isinstance(slope, ak.partition.PartitionedArray):
+#         elif isinstance(slope, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             sample = slope
-#         elif isinstance(intercept_error, ak.partition.PartitionedArray):
+#         elif isinstance(intercept_error, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             sample = intercept_error
-#         elif isinstance(slope_error, ak.partition.PartitionedArray):
+#         elif isinstance(slope_error, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #             sample = slope_error
 
 #         if sample is not None:
@@ -185,16 +185,16 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #                 sample.numpartitions, (intercept, slope, intercept_error, slope_error)
 #             ):
 #                 output.append(
-#                     ak.layout.RecordArray(
+#                     ak._v2.contents.RecordArray(
 #                         [a, b, c, d],
 #                         ["intercept", "slope", "intercept_error", "slope_error"],
 #                         parameters={"__record__": "LinearFit"},
 #                     )
 #                 )
-#             out = ak.partition.IrregularlyPartitionedArray(output)
+#             out = ak.partition.IrregularlyPartitionedArray(output)   # NO PARTITIONED ARRAY
 
 #         else:
-#             out = ak.layout.RecordArray(
+#             out = ak._v2.contents.RecordArray(
 #                 [intercept, slope, intercept_error, slope_error],
 #                 ["intercept", "slope", "intercept_error", "slope_error"],
 #                 parameters={"__record__": "LinearFit"},
@@ -202,4 +202,4 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #             if scalar:
 #                 out = out[0]
 
-#         return ak._util.wrap(out, ak._util.behaviorof(x, y))
+#         return ak._v2._util.wrap(out, ak._v2._util.behaviorof(x, y))

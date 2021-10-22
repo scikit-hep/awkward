@@ -41,14 +41,14 @@ def library(*arrays):  # note: convert.py's 'kernels'
 #     """
 #     libs = set()
 #     for array in arrays:
-#         layout = ak.operations.convert.to_layout(
+#         layout = ak._v2.operations.convert.to_layout(
 #             array,
 #             allow_record=True,
 #             allow_other=True,
 #         )
 
 #         if isinstance(
-#             layout, (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray)
+#             layout, (ak._v2.contents.Content, ak._v2.record.Record, ak.partition.PartitionedArray)   # NO PARTITIONED ARRAY
 #         ):
 #             libs.add(layout.kernels)
 

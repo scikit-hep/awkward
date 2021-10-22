@@ -71,8 +71,8 @@ def num(array, axis=1, highlevel=True, behavior=None):
 #         >>> ak.mask(array, ak.num(array) > 0)[:, 0]
 #         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = layout.num(axis=axis)
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

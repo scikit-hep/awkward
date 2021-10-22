@@ -47,7 +47,7 @@ def to_arrow_table(
 #     layout = to_layout(array, allow_record=False, allow_other=False)
 
 #     if explode_records or isinstance(
-#         ak.operations.describe.type(layout), ak.types.RecordType
+#         ak._v2.operations.describe.type(layout), ak._v2.types.RecordType
 #     ):
 #         names = layout.keys()
 #         contents = [layout[name] for name in names]
@@ -68,7 +68,7 @@ def to_arrow_table(
 #         )
 #         pa_fields.append(
 #             pyarrow.field(name, pa_arrays[-1].type).with_nullable(
-#                 isinstance(ak.operations.describe.type(content), ak.types.OptionType)
+#                 isinstance(ak._v2.operations.describe.type(content), ak._v2.types.OptionType)
 #             )
 #         )
 

@@ -37,19 +37,19 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
 
 #     def recurse(array):
 #         if regulararray and len(array.shape) > 1:
-#             return ak.layout.RegularArray(
+#             return ak._v2.contents.RegularArray(
 #                 recurse(array.reshape((-1,) + array.shape[2:])),
 #                 array.shape[1],
 #                 array.shape[0],
 #             )
 
 #         if len(array.shape) == 0:
-#             data = ak.layout.NumpyArray.from_cupy(array.reshape(1))
+#             data = ak._v2.contents.NumpyArray.from_cupy(array.reshape(1))
 #         else:
-#             data = ak.layout.NumpyArray.from_cupy(array)
+#             data = ak._v2.contents.NumpyArray.from_cupy(array)
 
 #         return data
 
 #     layout = recurse(array)
 
-#     return ak._util.maybe_wrap(layout, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(layout, behavior, highlevel)

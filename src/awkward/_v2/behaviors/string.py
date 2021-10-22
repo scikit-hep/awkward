@@ -100,7 +100,7 @@ class CharBehavior(Array):
 # ak.behavior["__typestr__", "char"] = "char"
 
 
-# class ByteStringBehavior(ak.highlevel.Array):
+# class ByteStringBehavior(ak._v2.highlevel.Array):
 #     __name__ = "Array"
 
 #     def __iter__(self):
@@ -108,7 +108,7 @@ class CharBehavior(Array):
 #             yield x.__bytes__()
 
 
-# class StringBehavior(ak.highlevel.Array):
+# class StringBehavior(ak._v2.highlevel.Array):
 #     __name__ = "Array"
 
 #     def __iter__(self):
@@ -124,7 +124,7 @@ class CharBehavior(Array):
 
 # def _string_equal(one, two):
 #     nplike = ak.nplike.of(one, two)
-#     behavior = ak._util.behaviorof(one, two)
+#     behavior = ak._v2._util.behaviorof(one, two)
 
 #     one, two = ak.without_parameters(one).layout, ak.without_parameters(two).layout
 
@@ -147,7 +147,7 @@ class CharBehavior(Array):
 #         # update same-length strings with a verdict about their characters
 #         out[possible] = reduced
 
-#     return ak._util.wrap(ak.layout.NumpyArray(out), behavior)
+#     return ak._v2._util.wrap(ak._v2.contents.NumpyArray(out), behavior)
 
 
 # def _string_notequal(one, two):
@@ -164,10 +164,10 @@ class CharBehavior(Array):
 #     nplike = ak.nplike.of(offsets)
 #     offsets = nplike.asarray(offsets)
 #     counts = offsets[1:] - offsets[:-1]
-#     if ak._util.win or ak._util.bits32:
+#     if ak._v2._util.win or ak._v2._util.bits32:
 #         counts = counts.astype(np.int32)
 #     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
-#     return ak.layout.IndexedArray64(ak.layout.Index64(parents), layout).project()
+#     return ak._v2.contents.IndexedArray64(ak._v2.index.Index64(parents), layout).project()
 
 
 # ak.behavior["__broadcast__", "bytestring"] = _string_broadcast
@@ -189,45 +189,45 @@ class CharBehavior(Array):
 #     import numba
 #     import llvmlite.llvmpy.core
 
-#     whichpos = ak._connect._numba.layout.posat(
+#     whichpos = ak._v2._connect.numba.layout.posat(
 #         context, builder, viewproxy.pos, viewtype.type.CONTENT
 #     )
-#     nextpos = ak._connect._numba.layout.getat(
+#     nextpos = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.arrayptrs, whichpos
 #     )
 
-#     whichnextpos = ak._connect._numba.layout.posat(
+#     whichnextpos = ak._v2._connect.numba.layout.posat(
 #         context, builder, nextpos, viewtype.type.contenttype.ARRAY
 #     )
 
-#     startspos = ak._connect._numba.layout.posat(
+#     startspos = ak._v2._connect.numba.layout.posat(
 #         context, builder, viewproxy.pos, viewtype.type.STARTS
 #     )
-#     startsptr = ak._connect._numba.layout.getat(
+#     startsptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.arrayptrs, startspos
 #     )
 #     startsarraypos = builder.add(viewproxy.start, atval)
-#     start = ak._connect._numba.layout.getat(
+#     start = ak._v2._connect.numba.layout.getat(
 #         context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype
 #     )
 
-#     stopspos = ak._connect._numba.layout.posat(
+#     stopspos = ak._v2._connect.numba.layout.posat(
 #         context, builder, viewproxy.pos, viewtype.type.STOPS
 #     )
-#     stopsptr = ak._connect._numba.layout.getat(
+#     stopsptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.arrayptrs, stopspos
 #     )
 #     stopsarraypos = builder.add(viewproxy.start, atval)
-#     stop = ak._connect._numba.layout.getat(
+#     stop = ak._v2._connect.numba.layout.getat(
 #         context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype
 #     )
 
-#     baseptr = ak._connect._numba.layout.getat(
+#     baseptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.arrayptrs, whichnextpos
 #     )
 #     rawptr = builder.add(
 #         baseptr,
-#         ak._connect._numba.castint(
+#         ak._v2._connect.numba.castint(
 #             context, builder, viewtype.type.indextype.dtype, numba.intp, start
 #         ),
 #     )
@@ -238,7 +238,7 @@ class CharBehavior(Array):
 #         ),
 #     )
 #     strsize = builder.sub(stop, start)
-#     strsize_cast = ak._connect._numba.castint(
+#     strsize_cast = ak._v2._connect.numba.castint(
 #         context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
 #     )
 

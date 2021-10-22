@@ -38,41 +38,41 @@
 
 # def register():
 #     import numba
-#     import awkward._connect._numba.arrayview
-#     import awkward._connect._numba.layout
-#     import awkward._connect._numba.builder
+#     import awkward._v2._connect.numba.arrayview
+#     import awkward._v2._connect.numba.layout
+#     import awkward._v2._connect.numba.builder
 
 #     if hasattr(ak.numba, "ArrayViewType"):
 #         return
 
 #     n = ak.numba
-#     n.ArrayViewType = awkward._connect._numba.arrayview.ArrayViewType
-#     n.ArrayViewModel = awkward._connect._numba.arrayview.ArrayViewModel
-#     n.RecordViewType = awkward._connect._numba.arrayview.RecordViewType
-#     n.RecordViewModel = awkward._connect._numba.arrayview.RecordViewModel
-#     n.ContentType = awkward._connect._numba.layout.ContentType
-#     n.NumpyArrayType = awkward._connect._numba.layout.NumpyArrayType
-#     n.RegularArrayType = awkward._connect._numba.layout.RegularArrayType
-#     n.ListArrayType = awkward._connect._numba.layout.ListArrayType
-#     n.IndexedArrayType = awkward._connect._numba.layout.IndexedArrayType
-#     n.IndexedOptionArrayType = awkward._connect._numba.layout.IndexedOptionArrayType
-#     n.ByteMaskedArrayType = awkward._connect._numba.layout.ByteMaskedArrayType
-#     n.BitMaskedArrayType = awkward._connect._numba.layout.BitMaskedArrayType
-#     n.UnmaskedArrayType = awkward._connect._numba.layout.UnmaskedArrayType
-#     n.RecordArrayType = awkward._connect._numba.layout.RecordArrayType
-#     n.UnionArrayType = awkward._connect._numba.layout.UnionArrayType
-#     n.ArrayBuilderType = awkward._connect._numba.builder.ArrayBuilderType
-#     n.ArrayBuilderModel = awkward._connect._numba.builder.ArrayBuilderModel
+#     n.ArrayViewType = awkward._v2._connect.numba.arrayview.ArrayViewType
+#     n.ArrayViewModel = awkward._v2._connect.numba.arrayview.ArrayViewModel
+#     n.RecordViewType = awkward._v2._connect.numba.arrayview.RecordViewType
+#     n.RecordViewModel = awkward._v2._connect.numba.arrayview.RecordViewModel
+#     n.ContentType = awkward._v2._connect.numba.layout.ContentType
+#     n.NumpyArrayType = awkward._v2._connect.numba.layout.NumpyArrayType
+#     n.RegularArrayType = awkward._v2._connect.numba.layout.RegularArrayType
+#     n.ListArrayType = awkward._v2._connect.numba.layout.ListArrayType
+#     n.IndexedArrayType = awkward._v2._connect.numba.layout.IndexedArrayType
+#     n.IndexedOptionArrayType = awkward._v2._connect.numba.layout.IndexedOptionArrayType
+#     n.ByteMaskedArrayType = awkward._v2._connect.numba.layout.ByteMaskedArrayType
+#     n.BitMaskedArrayType = awkward._v2._connect.numba.layout.BitMaskedArrayType
+#     n.UnmaskedArrayType = awkward._v2._connect.numba.layout.UnmaskedArrayType
+#     n.RecordArrayType = awkward._v2._connect.numba.layout.RecordArrayType
+#     n.UnionArrayType = awkward._v2._connect.numba.layout.UnionArrayType
+#     n.ArrayBuilderType = awkward._v2._connect.numba.builder.ArrayBuilderType
+#     n.ArrayBuilderModel = awkward._v2._connect.numba.builder.ArrayBuilderModel
 
-#     @numba.extending.typeof_impl.register(ak.highlevel.Array)
+#     @numba.extending.typeof_impl.register(ak._v2.highlevel.Array)
 #     def typeof_Array(obj, c):
 #         return obj.numba_type
 
-#     @numba.extending.typeof_impl.register(ak.highlevel.Record)
+#     @numba.extending.typeof_impl.register(ak._v2.highlevel.Record)
 #     def typeof_Record(obj, c):
 #         return obj.numba_type
 
-#     @numba.extending.typeof_impl.register(ak.highlevel.ArrayBuilder)
+#     @numba.extending.typeof_impl.register(ak._v2.highlevel.ArrayBuilder)
 #     def typeof_ArrayBuilder(obj, c):
 #         return obj.numba_type
 
@@ -97,7 +97,7 @@
 #     if not isinstance(fromtype, numba.types.Integer):
 #         raise AssertionError(
 #             "unrecognized integer type: {0}".format(repr(fromtype))
-#             + ak._util.exception_suffix(__file__)
+#
 #         )
 
 #     if fromtype.bitwidth < totype.bitwidth:

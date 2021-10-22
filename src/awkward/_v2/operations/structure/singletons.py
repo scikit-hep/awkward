@@ -35,19 +35,19 @@ def singletons(array, highlevel=True, behavior=None):
 #     def getfunction(layout):
 #         nplike = ak.nplike.of(layout)
 
-#         if isinstance(layout, ak._util.optiontypes):
+#         if isinstance(layout, ak._v2._util.optiontypes):
 #             nulls = nplike.asarray(layout.bytemask()).view(np.bool_)
 #             offsets = nplike.ones(len(layout) + 1, dtype=np.int64)
 #             offsets[0] = 0
 #             offsets[1:][nulls] = 0
 #             nplike.cumsum(offsets, out=offsets)
-#             return lambda: ak.layout.ListOffsetArray64(
-#                 ak.layout.Index64(offsets), layout.project()
+#             return lambda: ak._v2.contents.ListOffsetArray64(
+#                 ak._v2.index.Index64(offsets), layout.project()
 #             )
 #         else:
 #             return None
 
-#     layout = ak.operations.convert.to_layout(array)
-#     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
+#     layout = ak._v2.operations.convert.to_layout(array)
+#     out = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
 
-#     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

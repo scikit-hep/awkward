@@ -64,14 +64,14 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             index = popbuffers(array.indices, tpe.index_type, buffers)
 #             content = handle_arrow(array.dictionary)
 
-#             out = ak.layout.IndexedArray32(
-#                 ak.layout.Index32(index.content),
+#             out = ak._v2.contents.IndexedArray32(
+#                 ak._v2.index.Index32(index.content),
 #                 content,
 #                 parameters={"__array__": "categorical"},
 #             ).simplify()
 
-#             if isinstance(index, ak.layout.BitMaskedArray):
-#                 return ak.layout.BitMaskedArray(
+#             if isinstance(index, ak._v2.contents.BitMaskedArray):
+#                 return ak._v2.contents.BitMaskedArray(
 #                     index.mask,
 #                     out,
 #                     True,
@@ -111,38 +111,38 @@ def from_arrow(array, highlevel=True, behavior=None):
 #                         keys.append(tpe[i].name)
 #                 assert found
 
-#             out = ak.layout.RecordArray(child_arrays, keys, length=len(array))
+#             out = ak._v2.contents.RecordArray(child_arrays, keys, length=len(array))
 #             if mask is not None:
-#                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-#                 return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+#                 mask = ak._v3.index.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
+#                 return ak._v2.contents.BitMaskedArray(mask, out, True, len(out), True)
 #             else:
-#                 return ak.layout.UnmaskedArray(out)
+#                 return ak._v2.contents.UnmaskedArray(out)
 #             # RETURNED because each field has already been offset-corrected.
 
 #         elif isinstance(tpe, pyarrow.lib.ListType):
 #             assert tpe.num_buffers == 2
 #             mask = buffers.pop(0)
-#             offsets = ak.layout.Index32(
+#             offsets = ak._v2.index.Index32(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.int32)
 #             )
 #             content = popbuffers(array.values, tpe.value_type, buffers)
 #             if not tpe.value_field.nullable:
 #                 content = content.content
 
-#             out = ak.layout.ListOffsetArray32(offsets, content)
+#             out = ak._v2.contents.ListOffsetArray32(offsets, content)
 #             # No return yet!
 
 #         elif isinstance(tpe, pyarrow.lib.LargeListType):
 #             assert tpe.num_buffers == 2
 #             mask = buffers.pop(0)
-#             offsets = ak.layout.Index64(
+#             offsets = ak._v2.index.Index64(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.int64)
 #             )
 #             content = popbuffers(array.values, tpe.value_type, buffers)
 #             if not tpe.value_field.nullable:
 #                 content = content.content
 
-#             out = ak.layout.ListOffsetArray64(offsets, content)
+#             out = ak._v2.contents.ListOffsetArray64(offsets, content)
 #             # No return yet!
 
 #         elif isinstance(tpe, pyarrow.lib.FixedSizeListType):
@@ -152,7 +152,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             if not tpe.value_field.nullable:
 #                 content = content.content
 
-#             out = ak.layout.RegularArray(content, tpe.list_size)
+#             out = ak._v2.contents.RegularArray(content, tpe.list_size)
 #             # No return yet!
 
 #         elif isinstance(tpe, pyarrow.lib.UnionType):
@@ -163,7 +163,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             else:
 #                 raise TypeError(
 #                     "unrecognized Arrow union array mode: {0}".format(repr(tpe.mode))
-#                     + ak._util.exception_suffix(__file__)
+#
 #                 )
 
 #             mask = buffers.pop(0)
@@ -188,64 +188,64 @@ def from_arrow(array, highlevel=True, behavior=None):
 #                 if not tpe[i].nullable:
 #                     contents[i] = contents[i].content
 
-#             tags = ak.layout.Index8(tags)
-#             index = ak.layout.Index32(index)
-#             out = ak.layout.UnionArray8_32(tags, index, contents)
+#             tags = ak._v2.index.Index8(tags)
+#             index = ak._v2_index.Index32(index)
+#             out = ak._v2.contents.UnionArray8_32(tags, index, contents)
 #             # No return yet!
 
 #         elif tpe == pyarrow.string():
 #             assert tpe.num_buffers == 3
 #             mask = buffers.pop(0)
-#             offsets = ak.layout.Index32(
+#             offsets = ak._v2.index.Index32(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.int32)
 #             )
-#             contents = ak.layout.NumpyArray(
+#             contents = ak._v2.contents.NumpyArray(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
 #             )
 #             contents.setparameter("__array__", "char")
-#             out = ak.layout.ListOffsetArray32(offsets, contents)
+#             out = ak._v2.contents.ListOffsetArray32(offsets, contents)
 #             out.setparameter("__array__", "string")
 #             # No return yet!
 
 #         elif tpe == pyarrow.large_string():
 #             assert tpe.num_buffers == 3
 #             mask = buffers.pop(0)
-#             offsets = ak.layout.Index64(
+#             offsets = ak._v2.index.Index64(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.int64)
 #             )
-#             contents = ak.layout.NumpyArray(
+#             contents = ak._v2.contents.NumpyArray(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
 #             )
 #             contents.setparameter("__array__", "char")
-#             out = ak.layout.ListOffsetArray64(offsets, contents)
+#             out = ak._v2.contents.ListOffsetArray64(offsets, contents)
 #             out.setparameter("__array__", "string")
 #             # No return yet!
 
 #         elif tpe == pyarrow.binary():
 #             assert tpe.num_buffers == 3
 #             mask = buffers.pop(0)
-#             offsets = ak.layout.Index32(
+#             offsets = ak._v2.index.Index32(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.int32)
 #             )
-#             contents = ak.layout.NumpyArray(
+#             contents = ak._v2.contents.NumpyArray(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
 #             )
 #             contents.setparameter("__array__", "byte")
-#             out = ak.layout.ListOffsetArray32(offsets, contents)
+#             out = ak._v2.contents.ListOffsetArray32(offsets, contents)
 #             out.setparameter("__array__", "bytestring")
 #             # No return yet!
 
 #         elif tpe == pyarrow.large_binary():
 #             assert tpe.num_buffers == 3
 #             mask = buffers.pop(0)
-#             offsets = ak.layout.Index64(
+#             offsets = ak._v2.index.Index64(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.int64)
 #             )
-#             contents = ak.layout.NumpyArray(
+#             contents = ak._v2.contents.NumpyArray(
 #                 numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
 #             )
 #             contents.setparameter("__array__", "byte")
-#             out = ak.layout.ListOffsetArray64(offsets, contents)
+#             out = ak._v2.contents.ListOffsetArray64(offsets, contents)
 #             out.setparameter("__array__", "bytestring")
 #             # No return yet!
 
@@ -258,7 +258,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #                 .reshape(-1, 8)[:, ::-1]
 #                 .reshape(-1)
 #             )
-#             out = ak.layout.NumpyArray(as_bytes.view(np.bool_))
+#             out = ak._v2.contents.NumpyArray(as_bytes.view(np.bool_))
 #             # No return yet!
 
 #         elif isinstance(tpe, pyarrow.lib.DataType) and tpe.num_buffers == 1:
@@ -266,9 +266,9 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             mask = buffers.pop(0)
 #             assert tpe.num_fields == 0
 #             assert mask is None
-#             out = ak.layout.IndexedOptionArray64(
-#                 ak.layout.Index64(numpy.full(len(array), -1, dtype=np.int64)),
-#                 ak.layout.EmptyArray(),
+#             out = ak._v2.contents.IndexedOptionArray64(
+#                 ak._v2.index.Index64(numpy.full(len(array), -1, dtype=np.int64)),
+#                 ak._v2.contents.EmptyArray(),
 #             )
 #             # No return yet!
 
@@ -282,22 +282,22 @@ def from_arrow(array, highlevel=True, behavior=None):
 #                 data = numpy.frombuffer(data, dtype=np.int32).astype(np.int64)
 #             if dt is None:
 #                 dt = tpe.to_pandas_dtype()
-#             out = ak.layout.NumpyArray(numpy.frombuffer(data, dtype=dt))
+#             out = ak._v2.contents.NumpyArray(numpy.frombuffer(data, dtype=dt))
 #             # No return yet!
 
 #         else:
 #             raise TypeError(
 #                 "unrecognized Arrow array type: {0}".format(repr(tpe))
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #         # All 'no return yet' cases need to become option-type (even if the UnmaskedArray
 #         # is just going to get stripped off in the recursive step that calls this one).
 #         if mask is not None:
-#             mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-#             out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+#             mask = ak._v2.index.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
+#             out = ak._v2.contents.BitMaskedArray(mask, out, True, len(out), True)
 #         else:
-#             out = ak.layout.UnmaskedArray(out)
+#             out = ak._v2.contents.UnmaskedArray(out)
 
 #         # All 'no return yet' cases need to be corrected for pyarrow's 'offset'.
 #         if array.offset == 0 and len(array) == len(out):
@@ -310,33 +310,33 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             buffers = obj.buffers()
 #             out = popbuffers(obj, obj.type, buffers)
 #             assert len(buffers) == 0
-#             if isinstance(out, ak.layout.UnmaskedArray):
+#             if isinstance(out, ak._v2.contents.UnmaskedArray):
 #                 return out.content
 #             else:
 #                 return out
 
 #         elif isinstance(obj, pyarrow.lib.ChunkedArray):
 #             layouts = [handle_arrow(x) for x in obj.chunks if len(x) > 0]
-#             if all(isinstance(x, ak.layout.UnmaskedArray) for x in layouts):
+#             if all(isinstance(x, ak._v2.contents.UnmaskedArray) for x in layouts):
 #                 layouts = [x.content for x in layouts]
 #             if len(layouts) == 1:
 #                 return layouts[0]
 #             else:
-#                 return ak.operations.structure.concatenate(layouts, highlevel=False)
+#                 return ak._v2.operations.structure.concatenate(layouts, highlevel=False)
 
 #         elif isinstance(obj, pyarrow.lib.RecordBatch):
 #             child_array = []
 #             for i in range(obj.num_columns):
 #                 layout = handle_arrow(obj.column(i))
 #                 if obj.schema.field(i).nullable and not isinstance(
-#                     layout, ak._util.optiontypes
+#                     layout, ak._v2._util.optiontypes
 #                 ):
-#                     layout = ak.layout.UnmaskedArray(layout)
+#                     layout = ak._v2.contents.UnmaskedArray(layout)
 #                 child_array.append(layout)
 #             if pass_empty_field and list(obj.schema.names) == [""]:
 #                 return child_array[0]
 #             else:
-#                 return ak.layout.RecordArray(child_array, obj.schema.names)
+#                 return ak._v2.contents.RecordArray(child_array, obj.schema.names)
 
 #         elif isinstance(obj, pyarrow.lib.Table):
 #             batches = obj.combine_chunks().to_batches()
@@ -347,7 +347,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #                 return handle_arrow(batches[0])
 #             else:
 #                 arrays = [handle_arrow(batch) for batch in batches if len(batch) > 0]
-#                 return ak.operations.structure.concatenate(arrays, highlevel=False)
+#                 return ak._v2.operations.structure.concatenate(arrays, highlevel=False)
 
 #         elif (
 #             isinstance(obj, Iterable)
@@ -364,12 +364,12 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             if len(chunks) == 1:
 #                 return chunks[0]
 #             else:
-#                 return ak.operations.structure.concatenate(chunks, highlevel=False)
+#                 return ak._v2.operations.structure.concatenate(chunks, highlevel=False)
 
 #         else:
 #             raise TypeError(
 #                 "unrecognized Arrow type: {0}".format(type(obj))
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
-#     return ak._util.maybe_wrap(handle_arrow(array), behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(handle_arrow(array), behavior, highlevel)

@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("isclose")
+# @ak._v2._connect.numpy.implements("isclose")
 def isclose(
     a, b, rtol=1e-05, atol=1e-08, equal_nan=False, highlevel=True, behavior=None
 ):
@@ -30,16 +30,16 @@ def isclose(
 #     Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
 #     for Awkward Arrays.
 #     """
-#     one = ak.operations.convert.to_layout(a)
-#     two = ak.operations.convert.to_layout(b)
+#     one = ak._v2.operations.convert.to_layout(a)
+#     two = ak._v2.operations.convert.to_layout(b)
 #     nplike = ak.nplike.of(one, two)
 
 #     def getfunction(inputs):
-#         if isinstance(inputs[0], ak.layout.NumpyArray) and isinstance(
-#             inputs[1], ak.layout.NumpyArray
+#         if isinstance(inputs[0], ak._v2.contents.NumpyArray) and isinstance(
+#             inputs[1], ak._v2.contents.NumpyArray
 #         ):
 #             return lambda: (
-#                 ak.layout.NumpyArray(
+#                 ak._v2.contents.NumpyArray(
 #                     nplike.isclose(
 #                         nplike.asarray(inputs[0]),
 #                         nplike.asarray(inputs[1]),
@@ -52,11 +52,11 @@ def isclose(
 #         else:
 #             return None
 
-#     behavior = ak._util.behaviorof(one, two, behavior=behavior)
-#     out = ak._util.broadcast_and_apply(
+#     behavior = ak._v2._util.behaviorof(one, two, behavior=behavior)
+#     out = ak._v2._util.broadcast_and_apply(
 #         [one, two], getfunction, behavior, pass_depth=False
 #     )
 #     assert isinstance(out, tuple) and len(out) == 1
 #     result = out[0]
 
-#     return ak._util.maybe_wrap(result, behavior, highlevel)
+#     return ak._v2._util.maybe_wrap(result, behavior, highlevel)
