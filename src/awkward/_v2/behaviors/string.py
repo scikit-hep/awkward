@@ -189,45 +189,45 @@ class CharBehavior(Array):
 #     import numba
 #     import llvmlite.llvmpy.core
 
-#     whichpos = ak._connect._numba.layout.posat(
+#     whichpos = ak._v2._connect.numba.layout.posat(
 #         context, builder, viewproxy.pos, viewtype.type.CONTENT
 #     )
-#     nextpos = ak._connect._numba.layout.getat(
+#     nextpos = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.arrayptrs, whichpos
 #     )
 
-#     whichnextpos = ak._connect._numba.layout.posat(
+#     whichnextpos = ak._v2._connect.numba.layout.posat(
 #         context, builder, nextpos, viewtype.type.contenttype.ARRAY
 #     )
 
-#     startspos = ak._connect._numba.layout.posat(
+#     startspos = ak._v2._connect.numba.layout.posat(
 #         context, builder, viewproxy.pos, viewtype.type.STARTS
 #     )
-#     startsptr = ak._connect._numba.layout.getat(
+#     startsptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.arrayptrs, startspos
 #     )
 #     startsarraypos = builder.add(viewproxy.start, atval)
-#     start = ak._connect._numba.layout.getat(
+#     start = ak._v2._connect.numba.layout.getat(
 #         context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype
 #     )
 
-#     stopspos = ak._connect._numba.layout.posat(
+#     stopspos = ak._v2._connect.numba.layout.posat(
 #         context, builder, viewproxy.pos, viewtype.type.STOPS
 #     )
-#     stopsptr = ak._connect._numba.layout.getat(
+#     stopsptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.arrayptrs, stopspos
 #     )
 #     stopsarraypos = builder.add(viewproxy.start, atval)
-#     stop = ak._connect._numba.layout.getat(
+#     stop = ak._v2._connect.numba.layout.getat(
 #         context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype
 #     )
 
-#     baseptr = ak._connect._numba.layout.getat(
+#     baseptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.arrayptrs, whichnextpos
 #     )
 #     rawptr = builder.add(
 #         baseptr,
-#         ak._connect._numba.castint(
+#         ak._v2._connect.numba.castint(
 #             context, builder, viewtype.type.indextype.dtype, numba.intp, start
 #         ),
 #     )
@@ -238,7 +238,7 @@ class CharBehavior(Array):
 #         ),
 #     )
 #     strsize = builder.sub(stop, start)
-#     strsize_cast = ak._connect._numba.castint(
+#     strsize_cast = ak._v2._connect.numba.castint(
 #         context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
 #     )
 

@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("argmin")
+# @ak._v2._connect.numpy.implements("argmin")
 def argmin(array, axis=None, keepdims=False, mask_identity=True):
     pass
 

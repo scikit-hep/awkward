@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("broadcast_arrays")
+# @ak._v2._connect.numpy.implements("broadcast_arrays")
 def broadcast_arrays(*arrays, **kwargs):
     pass
 

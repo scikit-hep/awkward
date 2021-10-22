@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("min")
+# @ak._v2._connect.numpy.implements("min")
 def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
     pass
 

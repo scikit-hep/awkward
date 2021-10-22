@@ -407,7 +407,7 @@ def recordclass(layout, behavior):
 #     behavior = Behavior(ak.behavior, behavior)
 #     done = False
 
-#     if isinstance(left, ak._connect._numba.layout.ContentType):
+#     if isinstance(left, ak._v2._connect.numba.layout.ContentType):
 #         left = left.parameters.get("__record__")
 #         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
 #             done = True
@@ -429,12 +429,12 @@ def recordclass(layout, behavior):
 #     behavior = Behavior(ak.behavior, behavior)
 #     done = False
 
-#     if isinstance(left, ak._connect._numba.layout.ContentType):
+#     if isinstance(left, ak._v2._connect.numba.layout.ContentType):
 #         left = left.parameters.get("__record__")
 #         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
 #             done = True
 
-#     if isinstance(right, ak._connect._numba.layout.ContentType):
+#     if isinstance(right, ak._v2._connect.numba.layout.ContentType):
 #         right = right.parameters.get("__record__")
 #         if not isinstance(right, str) and not (py27 and isinstance(right, unicode)):
 #             done = True

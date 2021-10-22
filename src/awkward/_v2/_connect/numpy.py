@@ -361,7 +361,7 @@ import numpy
 #         and isinstance(x.content.content, ak._v2.contents.NumpyArray)
 #         for x in inputs
 #     ):
-#         ak._connect._numba.register_and_check()
+#         ak._v2._connect.numba.register_and_check()
 #         import numba
 
 #         if matmul_for_numba.numbafied is None:

@@ -326,11 +326,11 @@
 #             return typer(viewtype)
 
 #     def getitem_range(self, viewtype):
-#         return ak._connect._numba.arrayview.wrap(self, viewtype, None)
+#         return ak._v2._connect.numba.arrayview.wrap(self, viewtype, None)
 
 #     def getitem_field(self, viewtype, key):
 #         if self.has_field(key):
-#             return ak._connect._numba.arrayview.wrap(
+#             return ak._v2._connect.numba.arrayview.wrap(
 #                 self, viewtype, viewtype.fields + (key,)
 #             )
 #         else:
@@ -469,7 +469,7 @@
 
 
 # def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
-#     atval = ak._connect._numba.castint(context, builder, attype, numba.intp, atval)
+#     atval = ak._v2._connect.numba.castint(context, builder, attype, numba.intp, atval)
 
 #     if not attype.signed:
 #         wrapneg = False
@@ -498,7 +498,7 @@
 #                     builder, ValueError, ("slice index out of bounds",)
 #                 )
 
-#     return ak._connect._numba.castint(context, builder, atval.type, numba.intp, atval)
+#     return ak._v2._connect.numba.castint(context, builder, atval.type, numba.intp, atval)
 
 
 # class NumpyArrayType(ContentType):
@@ -655,7 +655,7 @@
 #         sharedptrs[-1] = layout._persistent_shared_ptr
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -667,7 +667,7 @@
 #         sharedptrs[-1] = 0
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -675,7 +675,7 @@
 #     @classmethod
 #     def from_form(cls, form):
 #         return RegularArrayType(
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             form.size,
 #             cls.from_form_identities(form),
 #             form.parameters,
@@ -711,7 +711,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         return ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 
 #     def lower_getitem_at(
 #         self,
@@ -804,7 +804,7 @@
 #         arrays.append(stops)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -822,7 +822,7 @@
 #         arrays.append(0)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -833,7 +833,7 @@
 #             cls.from_form_index(
 #                 form.starts if isinstance(form, ak.forms.ListForm) else form.offsets
 #             ),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             cls.from_form_identities(form),
 #             form.parameters,
 #         )
@@ -917,7 +917,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         return ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 
 #     def lower_getitem_at(
 #         self,
@@ -955,10 +955,10 @@
 
 #         proxyout = context.make_helper(builder, rettype)
 #         proxyout.pos = nextpos
-#         proxyout.start = ak._connect._numba.castint(
+#         proxyout.start = ak._v2._connect.numba.castint(
 #             context, builder, self.indextype.dtype, numba.intp, start
 #         )
-#         proxyout.stop = ak._connect._numba.castint(
+#         proxyout.stop = ak._v2._connect.numba.castint(
 #             context, builder, self.indextype.dtype, numba.intp, stop
 #         )
 #         proxyout.arrayptrs = viewproxy.arrayptrs
@@ -998,7 +998,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1013,7 +1013,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1022,7 +1022,7 @@
 #     def from_form(cls, form):
 #         return IndexedArrayType(
 #             cls.from_form_index(form.index),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             cls.from_form_identities(form),
 #             form.parameters,
 #         )
@@ -1080,7 +1080,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return self.contenttype.getitem_at_check(viewtype)
 
 #     def lower_getitem_at(
@@ -1110,14 +1110,14 @@
 #             context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
 #         )
 
-#         nextviewtype = ak._connect._numba.arrayview.wrap(
+#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #             self.contenttype, viewtype, None
 #         )
 #         proxynext = context.make_helper(builder, nextviewtype)
 #         proxynext.pos = nextpos
 #         proxynext.start = context.get_constant(numba.intp, 0)
 #         proxynext.stop = builder.add(
-#             ak._connect._numba.castint(
+#             ak._v2._connect.numba.castint(
 #                 context, builder, self.indextype.dtype, numba.intp, nextat
 #             ),
 #             context.get_constant(numba.intp, 1),
@@ -1171,7 +1171,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1186,7 +1186,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1195,7 +1195,7 @@
 #     def from_form(cls, form):
 #         return IndexedOptionArrayType(
 #             cls.from_form_index(form.index),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             cls.from_form_identities(form),
 #             form.parameters,
 #         )
@@ -1251,7 +1251,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 #     def lower_getitem_at(
@@ -1293,14 +1293,14 @@
 #                 output.data = numba.core.cgutils.get_null_value(output.data.type)
 
 #             with isvalid:
-#                 nextviewtype = ak._connect._numba.arrayview.wrap(
+#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                     self.contenttype, viewtype, None
 #                 )
 #                 proxynext = context.make_helper(builder, nextviewtype)
 #                 proxynext.pos = nextpos
 #                 proxynext.start = context.get_constant(numba.intp, 0)
 #                 proxynext.stop = builder.add(
-#                     ak._connect._numba.castint(
+#                     ak._v2._connect.numba.castint(
 #                         context, builder, self.indextype.dtype, numba.intp, nextat
 #                     ),
 #                     context.get_constant(numba.intp, 1),
@@ -1359,7 +1359,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1374,7 +1374,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1383,7 +1383,7 @@
 #     def from_form(cls, form):
 #         return ByteMaskedArrayType(
 #             cls.from_form_index(form.mask),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             form.valid_when,
 #             cls.from_form_identities(form),
 #             form.parameters,
@@ -1432,7 +1432,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 #     def lower_getitem_at(
@@ -1472,7 +1472,7 @@
 #             )
 #         ) as (isvalid, isnone):
 #             with isvalid:
-#                 nextviewtype = ak._connect._numba.arrayview.wrap(
+#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                     self.contenttype, viewtype, None
 #                 )
 #                 proxynext = context.make_helper(builder, nextviewtype)
@@ -1537,7 +1537,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1552,7 +1552,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1561,7 +1561,7 @@
 #     def from_form(cls, form):
 #         return BitMaskedArrayType(
 #             cls.from_form_index(form.mask),
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             form.valid_when,
 #             form.lsb_order,
 #             cls.from_form_identities(form),
@@ -1620,7 +1620,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 #     def lower_getitem_at(
@@ -1643,7 +1643,7 @@
 #             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
 #         )
 #         bitatval = builder.sdiv(atval, context.get_constant(numba.intp, 8))
-#         shiftval = ak._connect._numba.castint(
+#         shiftval = ak._v2._connect.numba.castint(
 #             context,
 #             builder,
 #             numba.intp,
@@ -1678,7 +1678,7 @@
 #             )
 #         ) as (isvalid, isnone):
 #             with isvalid:
-#                 nextviewtype = ak._connect._numba.arrayview.wrap(
+#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                     self.contenttype, viewtype, None
 #                 )
 #                 proxynext = context.make_helper(builder, nextviewtype)
@@ -1739,7 +1739,7 @@
 #         sharedptrs[-1] = layout._persistent_shared_ptr
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1751,7 +1751,7 @@
 #         sharedptrs[-1] = 0
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.content, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -1759,7 +1759,7 @@
 #     @classmethod
 #     def from_form(cls, form):
 #         return UnmaskedArrayType(
-#             ak._connect._numba.arrayview.tonumbatype(form.content),
+#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
 #             cls.from_form_identities(form),
 #             form.parameters,
 #         )
@@ -1793,7 +1793,7 @@
 #         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
-#         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
+#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 #         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
 #     def lower_getitem_at(
@@ -1818,7 +1818,7 @@
 
 #         output = context.make_helper(builder, rettype)
 
-#         nextviewtype = ak._connect._numba.arrayview.wrap(
+#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #             self.contenttype, viewtype, None
 #         )
 #         proxynext = context.make_helper(builder, nextviewtype)
@@ -1876,7 +1876,7 @@
 #         positions.extend([None] * layout.numfields)
 #         sharedptrs.extend([None] * layout.numfields)
 #         for i, content in enumerate(layout.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
+#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
 #                 content, positions, sharedptrs, arrays
 #             )
 #         return pos
@@ -1892,14 +1892,14 @@
 #             for i, (_, content) in enumerate(form.contents.items()):
 #                 positions[
 #                     pos + cls.CONTENTS + i
-#                 ] = ak._connect._numba.arrayview.tolookup(
+#                 ] = ak._v2._connect.numba.arrayview.tolookup(
 #                     content, positions, sharedptrs, arrays
 #                 )
 #         else:
 #             for i, (_, content) in enumerate(form.contents.items()):
 #                 positions[
 #                     pos + cls.CONTENTS + i
-#                 ] = ak._connect._numba.arrayview.tolookup(
+#                 ] = ak._v2._connect.numba.arrayview.tolookup(
 #                     content, positions, sharedptrs, arrays
 #                 )
 #         return pos
@@ -1910,11 +1910,11 @@
 #         if form.istuple:
 #             recordlookup = None
 #             for x in form.contents.values():
-#                 contents.append(ak._connect._numba.arrayview.tonumbatype(x))
+#                 contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
 #         else:
 #             recordlookup = []
 #             for n, x in form.contents.items():
-#                 contents.append(ak._connect._numba.arrayview.tonumbatype(x))
+#                 contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
 #                 recordlookup.append(n)
 
 #         return RecordArrayType(
@@ -2002,7 +2002,7 @@
 
 #     def getitem_at_check(self, viewtype):
 #         out = self.getitem_at(viewtype)
-#         if isinstance(out, ak._connect._numba.arrayview.RecordViewType):
+#         if isinstance(out, ak._v2._connect.numba.arrayview.RecordViewType):
 #             typer = ak._v2._util.numba_record_typer(
 #                 out.arrayviewtype.type, out.arrayviewtype.behavior
 #             )
@@ -2012,7 +2012,7 @@
 
 #     def getitem_at(self, viewtype):
 #         if len(viewtype.fields) == 0:
-#             return ak._connect._numba.arrayview.RecordViewType(viewtype)
+#             return ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
 #         else:
 #             key = viewtype.fields[0]
 #             index = self.fieldindex(key)
@@ -2033,7 +2033,7 @@
 #
 #                     )
 #             contenttype = self.contenttypes[index]
-#             subviewtype = ak._connect._numba.arrayview.wrap(
+#             subviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                 contenttype, viewtype, viewtype.fields[1:]
 #             )
 #             return contenttype.getitem_at_check(subviewtype)
@@ -2056,7 +2056,7 @@
 #
 #                 )
 #         contenttype = self.contenttypes[index]
-#         subviewtype = ak._connect._numba.arrayview.wrap(contenttype, viewtype, None)
+#         subviewtype = ak._v2._connect.numba.arrayview.wrap(contenttype, viewtype, None)
 #         return contenttype.getitem_range(subviewtype)
 
 #     def getitem_field_record(self, recordviewtype, key):
@@ -2077,7 +2077,7 @@
 #
 #                 )
 #         contenttype = self.contenttypes[index]
-#         subviewtype = ak._connect._numba.arrayview.wrap(
+#         subviewtype = ak._v2._connect.numba.arrayview.wrap(
 #             contenttype, recordviewtype, None
 #         )
 #         return contenttype.getitem_at_check(subviewtype)
@@ -2108,7 +2108,7 @@
 #             checkbounds,
 #         )
 #         baretype = self.getitem_at(viewtype)
-#         if isinstance(baretype, ak._connect._numba.arrayview.RecordViewType):
+#         if isinstance(baretype, ak._v2._connect.numba.arrayview.RecordViewType):
 #             lower = ak._v2._util.numba_record_lower(
 #                 baretype.arrayviewtype.type, baretype.arrayviewtype.behavior
 #             )
@@ -2135,7 +2135,7 @@
 
 #         if len(viewtype.fields) == 0:
 #             proxyout = context.make_helper(
-#                 builder, ak._connect._numba.arrayview.RecordViewType(viewtype)
+#                 builder, ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
 #             )
 #             proxyout.arrayview = viewval
 #             proxyout.at = atval
@@ -2148,7 +2148,7 @@
 #             whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
 #             nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#             nextviewtype = ak._connect._numba.arrayview.wrap(
+#             nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #                 contenttype, viewtype, viewtype.fields[1:]
 #             )
 #             proxynext = context.make_helper(builder, nextviewtype)
@@ -2220,7 +2220,7 @@
 #         proxynext.sharedptrs = arrayviewproxy.sharedptrs
 #         proxynext.pylookup = arrayviewproxy.pylookup
 
-#         nextviewtype = ak._connect._numba.arrayview.wrap(
+#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
 #             contenttype, arrayviewtype, None
 #         )
 
@@ -2280,7 +2280,7 @@
 #         positions.extend([None] * layout.numcontents)
 #         sharedptrs.extend([None] * layout.numcontents)
 #         for i, content in enumerate(layout.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
+#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
 #                 content, positions, sharedptrs, arrays
 #             )
 #         return pos
@@ -2299,7 +2299,7 @@
 #         positions.extend([None] * form.numcontents)
 #         sharedptrs.extend([None] * form.numcontents)
 #         for i, content in enumerate(form.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
+#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
 #                 content, positions, sharedptrs, arrays
 #             )
 #         return pos
@@ -2308,7 +2308,7 @@
 #     def from_form(cls, form):
 #         contents = []
 #         for x in form.contents:
-#             contents.append(ak._connect._numba.arrayview.tonumbatype(x))
+#             contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
 
 #         return UnionArrayType(
 #             cls.from_form_index(form.tags),
@@ -2506,7 +2506,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.ARRAY] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.ARRAY] = ak._v2._connect.numba.arrayview.tolookup(
 #             layout.form.form, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -2525,7 +2525,7 @@
 #         sharedptrs.append(None)
 #         positions.append(None)
 #         sharedptrs.append(None)
-#         positions[pos + cls.ARRAY] = ak._connect._numba.arrayview.tolookup(
+#         positions[pos + cls.ARRAY] = ak._v2._connect.numba.arrayview.tolookup(
 #             form.form, positions, sharedptrs, arrays
 #         )
 #         return pos
@@ -2657,8 +2657,8 @@
 
 #         def wrap(out):
 #             if isinstance(out, ak.forms.Form):
-#                 numbatype = ak._connect._numba.arrayview.tonumbatype(out)
-#                 return ak._connect._numba.arrayview.wrap(numbatype, viewtype, None)
+#                 numbatype = ak._v2._connect.numba.arrayview.tonumbatype(out)
+#                 return ak._v2._connect.numba.arrayview.wrap(numbatype, viewtype, None)
 #             else:
 #                 return out
 
@@ -2691,7 +2691,7 @@
 #         )
 #         sharedptr = getat(context, builder, viewproxy.sharedptrs, arraypos)
 
-#         numbatype = ak._connect._numba.arrayview.tonumbatype(self.generator_form)
+#         numbatype = ak._v2._connect.numba.arrayview.tonumbatype(self.generator_form)
 
 #         with builder.if_then(
 #             builder.icmp_signed("==", sharedptr, context.get_constant(numba.intp, 0)),
@@ -2757,7 +2757,7 @@
 #         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
 #         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#         nextviewtype = ak._connect._numba.arrayview.wrap(numbatype, viewtype, None)
+#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(numbatype, viewtype, None)
 #         proxynext = context.make_helper(builder, nextviewtype)
 #         proxynext.pos = nextpos
 #         proxynext.start = viewproxy.start

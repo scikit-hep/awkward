@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("prod")
+# @ak._v2._connect.numpy.implements("prod")
 def prod(array, axis=None, keepdims=False, mask_identity=False):
     pass
 

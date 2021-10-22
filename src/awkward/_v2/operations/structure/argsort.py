@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("argsort")
+# @ak._v2._connect.numpy.implements("argsort")
 def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
     pass
 

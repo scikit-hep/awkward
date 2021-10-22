@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("max")
+# @ak._v2._connect.numpy.implements("max")
 def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
     pass
 

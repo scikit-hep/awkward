@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("ravel")
+# @ak._v2._connect.numpy.implements("ravel")
 def ravel(array, highlevel=True, behavior=None):
     pass
 

@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("where")
+# @ak._v2._connect.numpy.implements("where")
 def where(condition, *args, **kwargs):
     pass
 

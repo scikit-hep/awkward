@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("sum")
+# @ak._v2._connect.numpy.implements("sum")
 def sum(array, axis=None, keepdims=False, mask_identity=False):
     pass
 

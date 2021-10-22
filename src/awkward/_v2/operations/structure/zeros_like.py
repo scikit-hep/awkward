@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("zeros_like")
+# @ak._v2._connect.numpy.implements("zeros_like")
 def zeros_like(array, highlevel=True, behavior=None, dtype=None):
     pass
 

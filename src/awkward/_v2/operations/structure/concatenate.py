@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect._numpy.implements("concatenate")
+# @ak._v2._connect.numpy.implements("concatenate")
 def concatenate(
     arrays, axis=0, merge=True, mergebool=True, highlevel=True, behavior=None
 ):
@@ -267,7 +267,8 @@ def concatenate(
 #     return ak._v2._util.maybe_wrap(
 #         out, ak._v2._util.behaviorof(*arrays, behavior=behavior), highlevel
 #     )
-# @ak._connect._numpy.implements("concatenate")
+
+# @ak._v2._connect.numpy.implements("concatenate")
 # def concatenate(
 #     arrays, axis=0, merge=True, mergebool=True, highlevel=True, behavior=None
 # ):

@@ -1291,7 +1291,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         nested lists in a NumPy `"O"` array are severed from the array and
     #         cannot be sliced as dimensions.
     #         """
-    #         return ak._connect._numpy.convert_to_array(self.layout, args, kwargs)
+    #         return ak._v2._connect.numpy.convert_to_array(self.layout, args, kwargs)
 
     #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
     #         """
@@ -1351,9 +1351,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         See also #__array_function__.
     #         """
     #         if not hasattr(self, "_tracers"):
-    #             return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+    #             return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
     #         else:
-    #             return ak._connect._jax.jax_utils.array_ufunc(
+    #             return ak._v2._connect.jax.jax_utils.array_ufunc(
     #                 self, ufunc, method, inputs, kwargs
     #             )
 
@@ -1374,7 +1374,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     #         See also #__array_ufunc__.
     #         """
-    #         return ak._connect._numpy.array_function(func, types, args, kwargs)
+    #         return ak._v2._connect.numpy.array_function(func, types, args, kwargs)
 
     #     @property
     #     def numba_type(self):
@@ -1386,11 +1386,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
     #         on types and signatures.
     #         """
-    #         import awkward._connect._numba  # noqa: F401
+    #         import awkward._v2._connect.numba  # noqa: F401
 
-    #         ak._connect._numba.register_and_check()
+    #         ak._v2._connect.numba.register_and_check()
     #         if self._numbaview is None:
-    #             self._numbaview = ak._connect._numba.arrayview.ArrayView.fromarray(self)
+    #             self._numbaview = ak._v2._connect.numba.arrayview.ArrayView.fromarray(self)
     #         import numba
 
     #         return numba.typeof(self._numbaview)
@@ -1958,7 +1958,7 @@ class Record(NDArrayOperatorsMixin):
 
     #         See #ak.Array.__array_ufunc__ for a more complete description.
     #         """
-    #         return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+    #         return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     #     @property
     #     def numba_type(self):
@@ -1970,11 +1970,11 @@ class Record(NDArrayOperatorsMixin):
     #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
     #         on types and signatures.
     #         """
-    #         import awkward._connect._numba  # noqa: F401
+    #         import awkward._v2._connect.numba  # noqa: F401
 
-    #         ak._connect._numba.register_and_check()
+    #         ak._v2._connect.numba.register_and_check()
     #         if self._numbaview is None:
-    #             self._numbaview = ak._connect._numba.arrayview.RecordView.fromrecord(self)
+    #             self._numbaview = ak._v2._connect.numba.arrayview.RecordView.fromrecord(self)
     #         import numba
 
     #         return numba.typeof(self._numbaview)
@@ -2305,7 +2305,7 @@ class Record(NDArrayOperatorsMixin):
 
 #         See #ak.Array.__array__ for a more complete description.
 #         """
-#         return ak._connect._numpy.convert_to_array(self.snapshot(), args, kwargs)
+#         return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
 #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 #         """
@@ -2315,7 +2315,7 @@ class Record(NDArrayOperatorsMixin):
 
 #         See #ak.Array.__array_ufunc__ for a more complete description.
 #         """
-#         return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+#         return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
 #     def __array_function__(self, func, types, args, kwargs):
 #         """
@@ -2324,7 +2324,7 @@ class Record(NDArrayOperatorsMixin):
 
 #         See #ak.ArrayBuilder.__array_ufunc__ for a more complete description.
 #         """
-#         return ak._connect._numpy.array_function(func, types, args, kwargs)
+#         return ak._v2._connect.numpy.array_function(func, types, args, kwargs)
 
 #     @property
 #     def numba_type(self):
@@ -2336,12 +2336,12 @@ class Record(NDArrayOperatorsMixin):
 #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
 #         on types and signatures.
 #         """
-#         import awkward._connect._numba
+#         import awkward._v2._connect.numba
 
-#         ak._connect._numba.register_and_check()
-#         import awkward._connect._numba.builder  # noqa: F401
+#         ak._v2._connect.numba.register_and_check()
+#         import awkward._v2._connect.numba.builder  # noqa: F401
 
-#         return ak._connect._numba.builder.ArrayBuilderType(self._behavior)
+#         return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
 
 #     def __bool__(self):
 #         if len(self) == 1:
