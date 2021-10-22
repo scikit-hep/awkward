@@ -109,10 +109,10 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 #         else:
 #             return None
 
-#     layoutarray = ak.operations.convert.to_layout(
+#     layoutarray = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
-#     layoutmask = ak.operations.convert.to_layout(
+#     layoutmask = ak._v2.operations.convert.to_layout(
 #         mask, allow_record=True, allow_other=False
 #     )
 

@@ -52,7 +52,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #     The values could be floating-point numbers or strings.
 #     """
 
-#     arraylayout = ak.operations.convert.to_layout(
+#     arraylayout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
 #     nplike = ak.nplike.of(arraylayout)
@@ -63,14 +63,14 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #         and issubclass(value.dtype.type, (np.bool_, np.number))
 #         and len(value.shape) != 0
 #     ):
-#         valuelayout = ak.operations.convert.to_layout(
+#         valuelayout = ak._v2.operations.convert.to_layout(
 #             nplike.asarray(value)[np.newaxis], allow_record=False, allow_other=False
 #         )
 #     elif isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
 #         isinstance(value, np.ndarray)
 #         and issubclass(value.dtype.type, (np.bool_, np.number))
 #     ):
-#         valuelayout = ak.operations.convert.to_layout(
+#         valuelayout = ak._v2.operations.convert.to_layout(
 #             nplike.asarray(value), allow_record=False, allow_other=False
 #         )
 #     elif (
@@ -81,7 +81,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #         )
 #         or isinstance(value, (ak.highlevel.Record, ak._v2.record.Record))
 #     ):
-#         valuelayout = ak.operations.convert.to_layout(
+#         valuelayout = ak._v2.operations.convert.to_layout(
 #             value, allow_record=True, allow_other=False
 #         )
 #         if isinstance(valuelayout, ak._v2.record.Record):
@@ -92,7 +92,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 #         else:
 #             valuelayout = ak._v2.contents.RegularArray(valuelayout, len(valuelayout), 1)
 #     else:
-#         valuelayout = ak.operations.convert.to_layout(
+#         valuelayout = ak._v2.operations.convert.to_layout(
 #             [value], allow_record=False, allow_other=False
 #         )
 

@@ -48,7 +48,7 @@ def with_name(array, name, highlevel=True, behavior=None):
 #             return None
 
 #     out = ak._v2._util.recursively_apply(
-#         ak.operations.convert.to_layout(array), getfunction, pass_depth=False
+#         ak._v2.operations.convert.to_layout(array), getfunction, pass_depth=False
 #     )
 
 #     def getfunction2(layout):

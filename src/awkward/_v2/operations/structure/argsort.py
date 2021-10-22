@@ -47,7 +47,7 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavio
 #         >>> data[index]
 #         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = layout.argsort(axis, ascending, stable)

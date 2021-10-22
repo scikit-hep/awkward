@@ -10,7 +10,7 @@ import numpy
 
 
 # def convert_to_array(layout, args, kwargs):
-#     out = ak.operations.convert.to_numpy(layout, allow_missing=False)
+#     out = ak._v2.operations.convert.to_numpy(layout, allow_missing=False)
 #     if args == () and kwargs == {}:
 #         return out
 #     else:
@@ -75,7 +75,7 @@ import numpy
 #         if cast_fcn is not None:
 #             x = cast_fcn(x)
 #         nextinputs.append(
-#             ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+#             ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
 #         )
 #     inputs = nextinputs
 
@@ -207,7 +207,7 @@ import numpy
 #             result = getattr(ufunc, method)(
 #                 *[nplike.asarray(x) for x in inputs], **kwargs
 #             )
-#             return lambda: (ak.operations.convert.from_numpy(result, highlevel=False),)
+#             return lambda: (ak._v2.operations.convert.from_numpy(result, highlevel=False),)
 #         elif all(
 #             isinstance(x, ak._v2.contents.NumpyArray) and (x.format.upper().startswith("M"))
 #             for x in inputs
@@ -216,7 +216,7 @@ import numpy
 #             result = getattr(ufunc, method)(
 #                 *[nplike.asarray(x.view_int64).view(x.format) for x in inputs], **kwargs
 #             )
-#             return lambda: (ak.operations.convert.from_numpy(result, highlevel=False),)
+#             return lambda: (ak._v2.operations.convert.from_numpy(result, highlevel=False),)
 
 #         for x in inputs:
 #             if isinstance(x, ak._v2.contents.Content):

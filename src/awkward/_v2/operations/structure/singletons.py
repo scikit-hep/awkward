@@ -47,7 +47,7 @@ def singletons(array, highlevel=True, behavior=None):
 #         else:
 #             return None
 
-#     layout = ak.operations.convert.to_layout(array)
+#     layout = ak._v2.operations.convert.to_layout(array)
 #     out = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
 
 #     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

@@ -69,14 +69,14 @@
 #     one_content = ak._v2._util.wrap(one.content, behavior)
 #     two_content = ak._v2._util.wrap(two.content, behavior)
 
-#     if len(one_content) == len(two_content) and ak.operations.reducers.all(
+#     if len(one_content) == len(two_content) and ak._v2.operations.reducers.all(
 #         one_content == two_content, axis=None
 #     ):
 #         one_mapped = one_index
 
 #     else:
-#         one_list = ak.operations.convert.to_list(one_content)
-#         two_list = ak.operations.convert.to_list(two_content)
+#         one_list = ak._v2.operations.convert.to_list(one_content)
+#         two_list = ak._v2.operations.convert.to_list(two_content)
 #         one_hashable = [_hashable(x) for x in one_list]
 #         two_hashable = [_hashable(x) for x in two_list]
 #         two_lookup = {x: i for i, x in enumerate(two_hashable)}
@@ -126,7 +126,7 @@
 #     See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
 #     """
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     return layout.purelist_parameter("__array__") == "categorical"
@@ -156,7 +156,7 @@
 #         else:
 #             return None
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
@@ -254,7 +254,7 @@
 #                 content = layout
 #                 cls = ak._v2.contents.IndexedArray64
 
-#             content_list = ak.operations.convert.to_list(content)
+#             content_list = ak._v2.operations.convert.to_list(content)
 #             hashable = [_hashable(x) for x in content_list]
 
 #             lookup = {}
@@ -293,7 +293,7 @@
 #         else:
 #             return None
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
@@ -323,7 +323,7 @@
 
 #     def getfunction(layout):
 #         if layout.parameter("__array__") == "categorical":
-#             out = ak.operations.structure.with_parameter(
+#             out = ak._v2.operations.structure.with_parameter(
 #                 layout, "__array__", None, highlevel=False
 #             )
 #             return lambda: out
@@ -331,7 +331,7 @@
 #         else:
 #             return None
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)

@@ -30,8 +30,8 @@ def isclose(
 #     Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
 #     for Awkward Arrays.
 #     """
-#     one = ak.operations.convert.to_layout(a)
-#     two = ak.operations.convert.to_layout(b)
+#     one = ak._v2.operations.convert.to_layout(a)
+#     two = ak._v2.operations.convert.to_layout(b)
 #     nplike = ak.nplike.of(one, two)
 
 #     def getfunction(inputs):

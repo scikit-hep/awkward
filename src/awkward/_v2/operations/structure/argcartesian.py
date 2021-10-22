@@ -87,7 +87,7 @@ def argcartesian(
 #             layouts = dict(
 #                 (
 #                     n,
-#                     ak.operations.convert.to_layout(
+#                     ak._v2.operations.convert.to_layout(
 #                         x, allow_record=False, allow_other=False
 #                     ).localindex(axis),
 #                 )
@@ -96,7 +96,7 @@ def argcartesian(
 #         else:
 #             behavior = ak._v2._util.behaviorof(*arrays, behavior=behavior)
 #             layouts = [
-#                 ak.operations.convert.to_layout(
+#                 ak._v2.operations.convert.to_layout(
 #                     x, allow_record=False, allow_other=False
 #                 ).localindex(axis)
 #                 for x in arrays

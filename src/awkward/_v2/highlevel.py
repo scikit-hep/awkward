@@ -54,7 +54,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 # def _suffix(array):
-#     out = ak.operations.convert.kernels(array)
+#     out = ak._v2.operations.convert.kernels(array)
 #     if out is None or out == "cpu":
 #         return ""
 #     else:
@@ -248,7 +248,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = ak._v2.operations.convert.from_cupy(data, highlevel=False)
 
         elif ak._v2._util.in_module(data, "pyarrow"):
-            layout = ak.operations.convert.from_arrow(data, highlevel=False)
+            layout = ak._v2.operations.convert.from_arrow(data, highlevel=False)
 
         elif isinstance(data, dict):
             fields = []
@@ -417,7 +417,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #             return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     #         def __getitem__(self, where):
-    #             return ak.operations.structure.mask(self._array, where, self._valid_when)
+    #             return ak._v2.operations.structure.mask(self._array, where, self._valid_when)
 
     #     @property
     #     def mask(self, valid_when=True):
@@ -1396,8 +1396,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         return numba.typeof(self._numbaview)
 
     #     def __getstate__(self):
-    #         packed = ak.operations.structure.packed(self.layout, highlevel=False)
-    #         form, length, container = ak.operations.convert.to_buffers(packed)
+    #         packed = ak._v2.operations.structure.packed(self.layout, highlevel=False)
+    #         form, length, container = ak._v2.operations.convert.to_buffers(packed)
     #         if self._behavior is ak.behavior:
     #             behavior = None
     #         else:
@@ -1412,7 +1412,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #             )
     #         else:
     #             form, length, container, behavior = state
-    #             layout = ak.operations.convert.from_buffers(
+    #             layout = ak._v2.operations.convert.from_buffers(
     #                 form, length, container, highlevel=False, behavior=behavior
     #             )
     #         if self.__class__ is Array:
@@ -1493,10 +1493,10 @@ class Record(NDArrayOperatorsMixin):
             layout = data._layout
 
         elif isinstance(data, str):
-            layout = ak.operations.convert.from_json(data, highlevel=False)
+            layout = ak._v2.operations.convert.from_json(data, highlevel=False)
 
         elif isinstance(data, dict):
-            layout = ak.operations.convert.from_iter([data], highlevel=False)[0]
+            layout = ak._v2.operations.convert.from_iter([data], highlevel=False)[0]
 
         elif isinstance(data, Iterable):
             raise TypeError(
@@ -1980,8 +1980,8 @@ class Record(NDArrayOperatorsMixin):
     #         return numba.typeof(self._numbaview)
 
     #     def __getstate__(self):
-    #         packed = ak.operations.structure.packed(self._layout, highlevel=False)
-    #         form, length, container = ak.operations.convert.to_buffers(packed.array)
+    #         packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
+    #         form, length, container = ak._v2.operations.convert.to_buffers(packed.array)
     #         if self._behavior is ak.behavior:
     #             behavior = None
     #         else:
@@ -1996,7 +1996,7 @@ class Record(NDArrayOperatorsMixin):
     #             )
     #         else:
     #             form, length, container, behavior, at = state
-    #             layout = ak.operations.convert.from_buffers(
+    #             layout = ak._v2.operations.convert.from_buffers(
     #                 form, length, container, highlevel=False, behavior=behavior
     #             )
     #         layout = ak._v2.record.Record(layout, at)
@@ -2214,7 +2214,7 @@ class Record(NDArrayOperatorsMixin):
 #         The type of a #ak.layout.Content (from #ak.Array.layout) is not
 #         wrapped by an #ak.types.ArrayType.
 #         """
-#         return ak.operations.describe.type(self)
+#         return ak._v2.operations.describe.type(self)
 
 #     def __len__(self):
 #         """

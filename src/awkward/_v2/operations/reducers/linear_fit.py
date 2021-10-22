@@ -106,16 +106,16 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #         intercept_error = nplike.sqrt(nplike.true_divide(sumwxx, delta))
 #         slope_error = nplike.sqrt(nplike.true_divide(sumw, delta))
 
-#         intercept = ak.operations.convert.to_layout(
+#         intercept = ak._v2.operations.convert.to_layout(
 #             intercept, allow_record=True, allow_other=True
 #         )
-#         slope = ak.operations.convert.to_layout(
+#         slope = ak._v2.operations.convert.to_layout(
 #             slope, allow_record=True, allow_other=True
 #         )
-#         intercept_error = ak.operations.convert.to_layout(
+#         intercept_error = ak._v2.operations.convert.to_layout(
 #             intercept_error, allow_record=True, allow_other=True
 #         )
-#         slope_error = ak.operations.convert.to_layout(
+#         slope_error = ak._v2.operations.convert.to_layout(
 #             slope_error, allow_record=True, allow_other=True
 #         )
 

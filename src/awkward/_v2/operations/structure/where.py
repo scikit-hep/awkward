@@ -45,7 +45,7 @@ def where(condition, *args, **kwargs):
 #         (), kwargs, [("mergebool", True), ("highlevel", True)]
 #     )
 
-#     akcondition = ak.operations.convert.to_layout(
+#     akcondition = ak._v2.operations.convert.to_layout(
 #         condition, allow_record=False, allow_other=False
 #     )
 
@@ -54,15 +54,15 @@ def where(condition, *args, **kwargs):
 #         if isinstance(akcondition, ak.partition.PartitionedArray):
 #             akcondition = akcondition.replace_partitions(
 #                 [
-#                     ak._v2.contents.NumpyArray(ak.operations.convert.to_numpy(x))
+#                     ak._v2.contents.NumpyArray(ak._v2.operations.convert.to_numpy(x))
 #                     for x in akcondition.partitions
 #                 ]
 #             )
 #         else:
 #             akcondition = ak._v2.contents.NumpyArray(
-#                 ak.operations.convert.to_numpy(akcondition)
+#                 ak._v2.operations.convert.to_numpy(akcondition)
 #             )
-#         out = nplike.nonzero(ak.operations.convert.to_numpy(akcondition))
+#         out = nplike.nonzero(ak._v2.operations.convert.to_numpy(akcondition))
 #         if highlevel:
 #             return tuple(
 #                 ak._v2._util.wrap(ak._v2.contents.NumpyArray(x), ak._v2._util.behaviorof(condition))
@@ -79,7 +79,7 @@ def where(condition, *args, **kwargs):
 
 #     elif len(args) == 2:
 #         left, right = [
-#             ak.operations.convert.to_layout(x, allow_record=False, allow_other=True)
+#             ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=True)
 #             for x in args
 #         ]
 #         good_arrays = [akcondition]

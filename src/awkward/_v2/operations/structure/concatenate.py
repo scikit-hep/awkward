@@ -39,7 +39,7 @@ def concatenate(
 #     element for element, and similarly for deeper levels.
 #     """
 #     contents = [
-#         ak.operations.convert.to_layout(
+#         ak._v2.operations.convert.to_layout(
 #             x, allow_record=False if axis == 0 else True, allow_other=True
 #         )
 #         for x in arrays
@@ -111,7 +111,7 @@ def concatenate(
 #                     offsets.append(offsets[-1] + len(content))
 #                 else:
 #                     partitions.append(
-#                         ak.operations.convert.from_iter([content], highlevel=False)
+#                         ak._v2.operations.convert.from_iter([content], highlevel=False)
 #                     )
 #                     offsets.append(offsets[-1] + 1)
 
@@ -157,7 +157,7 @@ def concatenate(
 #         contents = [
 #             x
 #             if isinstance(x, ak._v2.contents.Content)
-#             else ak.operations.convert.to_layout([x])
+#             else ak._v2.operations.convert.to_layout([x])
 #             for x in contents
 #         ]
 #         batch = [contents[0]]
@@ -297,7 +297,7 @@ def concatenate(
 #     element for element, and similarly for deeper levels.
 #     """
 #     contents = [
-#         ak.operations.convert.to_layout(
+#         ak._v2.operations.convert.to_layout(
 #             x, allow_record=False if axis == 0 else True, allow_other=True
 #         )
 #         for x in arrays
@@ -369,7 +369,7 @@ def concatenate(
 #                     offsets.append(offsets[-1] + len(content))
 #                 else:
 #                     partitions.append(
-#                         ak.operations.convert.from_iter([content], highlevel=False)
+#                         ak._v2.operations.convert.from_iter([content], highlevel=False)
 #                     )
 #                     offsets.append(offsets[-1] + 1)
 
@@ -415,7 +415,7 @@ def concatenate(
 #         contents = [
 #             x
 #             if isinstance(x, ak._v2.contents.Content)
-#             else ak.operations.convert.to_layout([x])
+#             else ak._v2.operations.convert.to_layout([x])
 #             for x in contents
 #         ]
 #         batch = [contents[0]]

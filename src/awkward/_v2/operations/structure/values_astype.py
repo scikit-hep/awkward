@@ -63,7 +63,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
 #
 #             )
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = layout.numbers_to_type(to_str)

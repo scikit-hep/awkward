@@ -314,7 +314,7 @@
 #     @classmethod
 #     def fromarray(cls, array):
 #         behavior = ak._v2._util.behaviorof(array)
-#         layout = ak.operations.convert.to_layout(
+#         layout = ak._v2.operations.convert.to_layout(
 #             array,
 #             allow_record=False,
 #             allow_other=False,
@@ -324,7 +324,7 @@
 #             layout.generator, ak._v2.contents.SliceGenerator
 #         ):
 #             layout = layout.array
-#         layout = ak.operations.convert.regularize_numpyarray(
+#         layout = ak._v2.operations.convert.regularize_numpyarray(  # NOTE: NumpyArray has a .toRegularArray; use this instead
 #             layout, allow_empty=False, highlevel=False
 #         )
 
@@ -741,7 +741,7 @@
 #     @classmethod
 #     def fromrecord(cls, record):
 #         behavior = ak._v2._util.behaviorof(record)
-#         layout = ak.operations.convert.to_layout(
+#         layout = ak._v2.operations.convert.to_layout(
 #             record,
 #             allow_record=True,
 #             allow_other=False,

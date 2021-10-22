@@ -71,7 +71,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #             where = where[0]
 
 #         behavior = ak._v2._util.behaviorof(base, what, behavior=behavior)
-#         base = ak.operations.convert.to_layout(
+#         base = ak._v2.operations.convert.to_layout(
 #             base, allow_record=True, allow_other=False
 #         )
 #         if base.numfields < 0:
@@ -80,7 +80,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 #
 #             )
 
-#         what = ak.operations.convert.to_layout(
+#         what = ak._v2.operations.convert.to_layout(
 #             what, allow_record=True, allow_other=True
 #         )
 

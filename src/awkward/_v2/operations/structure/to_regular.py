@@ -58,7 +58,7 @@ def to_regular(array, axis=1, highlevel=True, behavior=None):
 #         else:
 #             return posaxis
 
-#     out = ak.operations.convert.to_layout(array)
+#     out = ak._v2.operations.convert.to_layout(array)
 #     if axis != 0:
 #         out = ak._v2._util.recursively_apply(
 #             out,

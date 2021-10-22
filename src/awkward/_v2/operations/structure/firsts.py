@@ -34,7 +34,7 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
 
 #     See #ak.singletons to invert this function.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     if isinstance(layout, ak.partition.PartitionedArray):

@@ -225,7 +225,7 @@ def cartesian(
 #         nplike = ak.nplike.of(*arrays.values())
 #         new_arrays = {}
 #         for n, x in arrays.items():
-#             new_arrays[n] = ak.operations.convert.to_layout(
+#             new_arrays[n] = ak._v2.operations.convert.to_layout(
 #                 x, allow_record=False, allow_other=False
 #             )
 #             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
@@ -236,7 +236,7 @@ def cartesian(
 #         new_arrays = []
 #         for x in arrays:
 #             new_arrays.append(
-#                 ak.operations.convert.to_layout(
+#                 ak._v2.operations.convert.to_layout(
 #                     x, allow_record=False, allow_other=False
 #                 )
 #             )
@@ -398,7 +398,7 @@ def cartesian(
 #             return getfunction2
 
 #         def apply(x, i):
-#             layout = ak.operations.convert.to_layout(
+#             layout = ak._v2.operations.convert.to_layout(
 #                 x, allow_record=False, allow_other=False
 #             )
 #             return ak._v2._util.recursively_apply(

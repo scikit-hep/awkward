@@ -53,7 +53,7 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 #             layout = without_parameters(layout, highlevel=False)
 #             max_length = ak.max(num(layout))
 #             regulararray = layout.rpad_and_clip(max_length, 1)
-#             maskedarray = ak.operations.convert.to_numpy(
+#             maskedarray = ak._v2.operations.convert.to_numpy(
 #                 regulararray, allow_missing=True
 #             )
 #             npstrings = maskedarray.data
@@ -66,7 +66,7 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 #         else:
 #             return None
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     out = ak._v2._util.recursively_apply(

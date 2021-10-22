@@ -62,10 +62,10 @@ def to_list(array):
 #     elif isinstance(array, ak.behaviors.string.CharBehavior):
 #         return array.__str__()
 
-#     elif ak.operations.describe.parameters(array).get("__array__") == "byte":
+#     elif ak._v2.operations.describe.parameters(array).get("__array__") == "byte":
 #         return ak.behaviors.string.CharBehavior(array).__bytes__()
 
-#     elif ak.operations.describe.parameters(array).get("__array__") == "char":
+#     elif ak._v2.operations.describe.parameters(array).get("__array__") == "char":
 #         return ak.behaviors.string.CharBehavior(array).__str__()
 
 #     elif isinstance(array, np.datetime64) or isinstance(array, np.timedelta64):

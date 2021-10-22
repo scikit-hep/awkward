@@ -85,7 +85,7 @@
 #     arguments = getArguments(names, local_dict, global_dict)
 
 #     arrays = [
-#         ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+#         ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
 #         for x in arguments
 #     ]
 
@@ -134,7 +134,7 @@
 #     arguments = getArguments(names, local_dict)
 
 #     arrays = [
-#         ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+#         ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
 #         for x in arguments
 #     ]
 

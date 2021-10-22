@@ -66,24 +66,24 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #     """
 #     nplike = ak.nplike.of(array)
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 
 #     if isinstance(counts, (numbers.Integral, np.integer)):
 #         current_offsets = None
 #     else:
-#         counts = ak.operations.convert.to_layout(
+#         counts = ak._v2.operations.convert.to_layout(
 #             counts, allow_record=False, allow_other=False
 #         )
-#         ptr_lib = ak.operations.convert.kernels(array)
-#         counts = ak.operations.convert.to_kernels(counts, ptr_lib, highlevel=False)
+#         ptr_lib = ak._v2.operations.convert.kernels(array)
+#         counts = ak._v2.operations.convert.to_kernels(counts, ptr_lib, highlevel=False)
 #         if ptr_lib == "cpu":
-#             counts = ak.operations.convert.to_numpy(counts, allow_missing=True)
+#             counts = ak._v2.operations.convert.to_numpy(counts, allow_missing=True)
 #             mask = ak.nplike.numpy.ma.getmask(counts)
 #             counts = ak.nplike.numpy.ma.filled(counts, 0)
 #         elif ptr_lib == "cuda":
-#             counts = ak.operations.convert.to_cupy(counts)
+#             counts = ak._v2.operations.convert.to_cupy(counts)
 #             mask = False
 #         else:
 #             raise AssertionError(

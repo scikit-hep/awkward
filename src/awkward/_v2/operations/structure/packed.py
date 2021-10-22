@@ -61,7 +61,7 @@ def packed(array, highlevel=True, behavior=None):
 
 #     See also #ak.to_buffers.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
 

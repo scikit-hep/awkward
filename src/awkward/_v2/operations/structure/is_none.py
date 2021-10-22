@@ -52,7 +52,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
 #         else:
 #             return posaxis
 
-#     layout = ak.operations.convert.to_layout(array)
+#     layout = ak._v2.operations.convert.to_layout(array)
 
 #     out = ak._v2._util.recursively_apply(
 #         layout, getfunction, pass_depth=True, pass_user=True, user=axis

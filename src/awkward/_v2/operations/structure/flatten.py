@@ -95,7 +95,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 #     However, it is important to keep in mind that this is a special case:
 #     #ak.flatten and `content` are not interchangeable!
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     nplike = ak.nplike.of(layout)

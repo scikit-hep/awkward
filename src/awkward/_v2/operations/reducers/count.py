@@ -79,7 +79,7 @@ def count(array, axis=None, keepdims=False, mask_identity=False):
 #     If it is desirable to include None values in #ak.count, use #ak.fill_none
 #     to turn the None values into something that would be counted.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     if axis is None:

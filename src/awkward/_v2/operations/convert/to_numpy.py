@@ -58,7 +58,7 @@ def to_numpy(array, allow_missing=True):
 #     elif isinstance(array, ak.layout.ArrayBuilder):
 #         return to_numpy(array.snapshot(), allow_missing=allow_missing)
 
-#     elif ak.operations.describe.parameters(array).get("__array__") == "bytestring":
+#     elif ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring":
 #         return numpy.array(
 #             [
 #                 ak.behaviors.string.ByteBehavior(array[i]).__bytes__()
@@ -66,7 +66,7 @@ def to_numpy(array, allow_missing=True):
 #             ]
 #         )
 
-#     elif ak.operations.describe.parameters(array).get("__array__") == "string":
+#     elif ak._v2.operations.describe.parameters(array).get("__array__") == "string":
 #         return numpy.array(
 #             [
 #                 ak.behaviors.string.CharBehavior(array[i]).__str__()
@@ -75,8 +75,8 @@ def to_numpy(array, allow_missing=True):
 #         )
 
 #     elif (
-#         str(ak.operations.describe.type(array)) == "datetime64"
-#         or str(ak.operations.describe.type(array)) == "timedelta64"
+#         str(ak._v2.operations.describe.type(array)) == "datetime64"
+#         or str(ak._v2.operations.describe.type(array)) == "timedelta64"
 #     ):
 #         return array
 

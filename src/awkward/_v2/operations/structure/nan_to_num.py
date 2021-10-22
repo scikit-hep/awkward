@@ -31,7 +31,7 @@ def nan_to_num(
 #     Implements [np.nan_to_num](https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html)
 #     for Awkward Arrays.
 #     """
-#     layout = ak.operations.convert.to_layout(array)
+#     layout = ak._v2.operations.convert.to_layout(array)
 #     nplike = ak.nplike.of(layout)
 
 #     def getfunction(layout):

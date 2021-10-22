@@ -29,7 +29,7 @@ def unzip(array):
 #         >>> y
 #         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
 #     """
-#     fields = ak.operations.describe.fields(array)
+#     fields = ak._v2.operations.describe.fields(array)
 #     if len(fields) == 0:
 #         return (array,)
 #     else:

@@ -126,7 +126,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
 #         >>> ak.type(ak.pad_none(array, 2, axis=2, clip=True))
 #         3 * var *   2 * ?float64
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     if clip:

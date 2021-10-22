@@ -52,8 +52,8 @@ def to_cupy(array):
 #         return to_cupy(array.snapshot())
 
 #     elif (
-#         ak.operations.describe.parameters(array).get("__array__") == "bytestring"
-#         or ak.operations.describe.parameters(array).get("__array__") == "string"
+#         ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring"
+#         or ak._v2.operations.describe.parameters(array).get("__array__") == "string"
 #     ):
 #         raise ValueError(
 #             "CuPy does not support arrays of strings"

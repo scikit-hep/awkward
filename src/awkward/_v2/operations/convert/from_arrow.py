@@ -322,7 +322,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             if len(layouts) == 1:
 #                 return layouts[0]
 #             else:
-#                 return ak.operations.structure.concatenate(layouts, highlevel=False)
+#                 return ak._v2.operations.structure.concatenate(layouts, highlevel=False)
 
 #         elif isinstance(obj, pyarrow.lib.RecordBatch):
 #             child_array = []
@@ -347,7 +347,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #                 return handle_arrow(batches[0])
 #             else:
 #                 arrays = [handle_arrow(batch) for batch in batches if len(batch) > 0]
-#                 return ak.operations.structure.concatenate(arrays, highlevel=False)
+#                 return ak._v2.operations.structure.concatenate(arrays, highlevel=False)
 
 #         elif (
 #             isinstance(obj, Iterable)
@@ -364,7 +364,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 #             if len(chunks) == 1:
 #                 return chunks[0]
 #             else:
-#                 return ak.operations.structure.concatenate(chunks, highlevel=False)
+#                 return ak._v2.operations.structure.concatenate(chunks, highlevel=False)
 
 #         else:
 #             raise TypeError(

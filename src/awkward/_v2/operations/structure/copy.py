@@ -55,7 +55,7 @@ def copy(array):
 #     changes, so we don't support it. However, an #ak.Array's data might come from
 #     a mutable third-party library, so this function allows you to make a true copy.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array,
 #         allow_record=True,
 #         allow_other=False,

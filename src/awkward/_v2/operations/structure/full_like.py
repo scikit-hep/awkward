@@ -84,7 +84,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
 #             # then for bools, only 0 and 1 give correct string behavior
 #             fill_value = int(fill_value)
 
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=True, allow_other=False
 #     )
 

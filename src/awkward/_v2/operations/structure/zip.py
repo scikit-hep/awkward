@@ -123,12 +123,12 @@ def zip(
 #         for n, x in arrays.items():
 #             recordlookup.append(n)
 #             try:
-#                 layout = ak.operations.convert.to_layout(
+#                 layout = ak._v2.operations.convert.to_layout(
 #                     x, allow_record=False, allow_other=False
 #                 )
 #             except TypeError:
 #                 num_scalars += 1
-#                 layout = ak.operations.convert.to_layout(
+#                 layout = ak._v2.operations.convert.to_layout(
 #                     [x], allow_record=False, allow_other=False
 #                 )
 #             layouts.append(layout)
@@ -140,12 +140,12 @@ def zip(
 #         num_scalars = 0
 #         for x in arrays:
 #             try:
-#                 layout = ak.operations.convert.to_layout(
+#                 layout = ak._v2.operations.convert.to_layout(
 #                     x, allow_record=False, allow_other=False
 #                 )
 #             except TypeError:
 #                 num_scalars += 1
-#                 layout = ak.operations.convert.to_layout(
+#                 layout = ak._v2.operations.convert.to_layout(
 #                     [x], allow_record=False, allow_other=False
 #                 )
 #             layouts.append(layout)

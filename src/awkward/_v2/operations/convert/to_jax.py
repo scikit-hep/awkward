@@ -59,8 +59,8 @@ def to_jax(array):
 #         return to_jax(array.snapshot())
 
 #     elif (
-#         ak.operations.describe.parameters(array).get("__array__") == "bytestring"
-#         or ak.operations.describe.parameters(array).get("__array__") == "string"
+#         ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring"
+#         or ak._v2.operations.describe.parameters(array).get("__array__") == "string"
 #     ):
 #         raise ValueError(
 #             "JAX does not support arrays of strings"

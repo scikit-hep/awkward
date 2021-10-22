@@ -1727,7 +1727,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             contents.append(union_to_record(layout, anonymous))
 #         elif isinstance(layout, optiontypes):
 #             contents.append(
-#                 ak.operations.structure.fill_none(
+#                 ak._v2.operations.structure.fill_none(
 #                     layout, np.nan, axis=0, highlevel=False
 #                 )
 #             )
@@ -1806,7 +1806,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             else:
 #                 return "{form_key}-{attribute}-part{partition}".format(**v)
 
-#     return ak.operations.convert.from_buffers(
+#     return ak._v2.operations.convert.from_buffers(
 #         form,
 #         None,
 #         container,

@@ -40,7 +40,7 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
 #     See #ak.sum for a more complete description of nested list and missing
 #     value (None) handling in reducers.
 #     """
-#     layout = ak.operations.convert.to_layout(
+#     layout = ak._v2.operations.convert.to_layout(
 #         array, allow_record=False, allow_other=False
 #     )
 #     if axis is None:

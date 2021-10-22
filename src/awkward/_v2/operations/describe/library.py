@@ -41,7 +41,7 @@ def library(*arrays):  # note: convert.py's 'kernels'
 #     """
 #     libs = set()
 #     for array in arrays:
-#         layout = ak.operations.convert.to_layout(
+#         layout = ak._v2.operations.convert.to_layout(
 #             array,
 #             allow_record=True,
 #             allow_other=True,
