@@ -143,8 +143,8 @@ class RecordType(Type):
     def field_to_index(self, field):
         return ak._v2.forms.recordform.RecordForm.field_to_index(self, field)
 
-    def hasfield(self, field):
-        return ak._v2.forms.recordform.RecordForm.hasfield(self, field)
+    def has_field(self, field):
+        return ak._v2.forms.recordform.RecordForm.has_field(self, field)
 
     def content(self, index_or_field):
         return ak._v2.forms.recordform.RecordForm.content(self, index_or_field)

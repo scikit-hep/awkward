@@ -179,8 +179,8 @@ class RecordArray(Content):
     def field_to_index(self, field):
         return self.Form.field_to_index(self, field)
 
-    def hasfield(self, field):
-        return self.Form.hasfield(self, field)
+    def has_field(self, field):
+        return self.Form.has_field(self, field)
 
     def content(self, index_or_field):
         return self.Form.content(self, index_or_field)[: self._length]

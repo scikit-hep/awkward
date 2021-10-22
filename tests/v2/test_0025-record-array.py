@@ -109,12 +109,12 @@ def test_basic():
     assert recordarray.field_to_index("two") == 1
     # assert recordarray.field_to_index("1") == 1
     assert recordarray.field_to_index("2") == 2
-    assert recordarray.hasfield("wonky")
-    assert recordarray.hasfield("one")
-    # assert recordarray.hasfield("0")
-    assert recordarray.hasfield("two")
-    # assert recordarray.hasfield("1")
-    assert recordarray.hasfield("2")
+    assert recordarray.has_field("wonky")
+    assert recordarray.has_field("one")
+    # assert recordarray.has_field("0")
+    assert recordarray.has_field("two")
+    # assert recordarray.has_field("1")
+    assert recordarray.has_field("2")
 
     assert recordarray.fields == ["one", "two", "2", "wonky"]
     assert [ak.to_list(x) for x in recordarray.contents] == [

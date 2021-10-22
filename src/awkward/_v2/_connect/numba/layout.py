@@ -329,7 +329,7 @@
 #         return ak._connect._numba.arrayview.wrap(self, viewtype, None)
 
 #     def getitem_field(self, viewtype, key):
-#         if self.hasfield(key):
+#         if self.has_field(key):
 #             return ak._connect._numba.arrayview.wrap(
 #                 self, viewtype, viewtype.fields + (key,)
 #             )
@@ -600,7 +600,7 @@
 #             lookup.original_positions[pos + self.ARRAY], parameters=self.parameters
 #         )
 
-#     def hasfield(self, key):
+#     def has_field(self, key):
 #         return False
 
 #     def getitem_at(self, viewtype):
@@ -707,8 +707,8 @@
 #         )
 #         return ak.layout.RegularArray(content, self.size, 0, parameters=self.parameters)
 
-#     def hasfield(self, key):
-#         return self.contenttype.hasfield(key)
+#     def has_field(self, key):
+#         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
 #         return ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
@@ -913,8 +913,8 @@
 #         )
 #         return self.ListArrayOf()(starts, stops, content, parameters=self.parameters)
 
-#     def hasfield(self, key):
-#         return self.contenttype.hasfield(key)
+#     def has_field(self, key):
+#         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
 #         return ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
@@ -1076,8 +1076,8 @@
 #         )
 #         return self.IndexedArrayOf()(index, content, parameters=self.parameters)
 
-#     def hasfield(self, key):
-#         return self.contenttype.hasfield(key)
+#     def has_field(self, key):
+#         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
 #         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
@@ -1247,8 +1247,8 @@
 #         )
 #         return self.IndexedOptionArrayOf()(index, content, parameters=self.parameters)
 
-#     def hasfield(self, key):
-#         return self.contenttype.hasfield(key)
+#     def has_field(self, key):
+#         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
 #         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
@@ -1428,8 +1428,8 @@
 #             mask, content, self.valid_when, parameters=self.parameters
 #         )
 
-#     def hasfield(self, key):
-#         return self.contenttype.hasfield(key)
+#     def has_field(self, key):
+#         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
 #         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
@@ -1616,8 +1616,8 @@
 #             parameters=self.parameters,
 #         )
 
-#     def hasfield(self, key):
-#         return self.contenttype.hasfield(key)
+#     def has_field(self, key):
+#         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
 #         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
@@ -1789,8 +1789,8 @@
 #         )
 #         return ak.layout.UnmaskedArray(content, parameters=self.parameters)
 
-#     def hasfield(self, key):
-#         return self.contenttype.hasfield(key)
+#     def has_field(self, key):
+#         return self.contenttype.has_field(key)
 
 #     def getitem_at(self, viewtype):
 #         viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
@@ -1997,7 +1997,7 @@
 #                     contents, self.recordlookup, parameters=self.parameters
 #                 )
 
-#     def hasfield(self, key):
+#     def has_field(self, key):
 #         return self.fieldindex(key) is not None
 
 #     def getitem_at_check(self, viewtype):
@@ -2386,8 +2386,8 @@
 #             contents.append(layout)
 #         return self.UnionArrayOf()(tags, index, contents, parameters=self.parameters)
 
-#     def hasfield(self, key):
-#         return any(x.hasfield(key) for x in self.contenttypes)
+#     def has_field(self, key):
+#         return any(x.has_field(key) for x in self.contenttypes)
 
 #     def getitem_at(self, viewtype):
 #         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
@@ -2575,7 +2575,7 @@
 #         virtualarray = pyptr.value
 #         return virtualarray
 
-#     def hasfield(self, key):
+#     def has_field(self, key):
 #         return self.generator_form.haskey(key)
 
 #     def getitem_at(self, viewtype):

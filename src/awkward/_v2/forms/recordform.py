@@ -99,7 +99,7 @@ class RecordForm(Form):
             )
         )
 
-    def hasfield(self, field):
+    def has_field(self, field):
         if self._fields is None:
             try:
                 i = int(field)
