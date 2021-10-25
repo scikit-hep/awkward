@@ -944,6 +944,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def fields(self):
         return self.Form.fields.__get__(self)
 
+    @property
+    def dimension_optiontype(self):
+        return self.Form.dimension_optiontype.__get__(self)
+
     # WIP
     def simplify_uniontype(self, merge, mergebool):
         nplike = self.nplike
@@ -1214,6 +1218,22 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 tags, index, contents, self._identifier, self._contents
             )
 
-    @property
-    def dimension_optiontype(self):
-        return self.Form.dimension_optiontype.__get__(self)
+    def to_arrow(
+        self,
+        list_to32=False,
+        string_to32=False,
+        bytestring_to32=False,
+    ):
+        import awkward._v2._connect.pyarrow
+
+        pyarrow = awkward._v2._connect.pyarrow.import_pyarrow("to_arrow")
+        return self._to_arrow(
+            pyarrow,
+            None,
+            None,
+            {
+                "list_to32": list_to32,
+                "string_to32": string_to32,
+                "bytestring_to32": bytestring_to32,
+            },
+        )

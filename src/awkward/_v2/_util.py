@@ -1818,3 +1818,19 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         highlevel=False,
 #         behavior=behavior,
 #     )
+
+
+def direct_Content_subclass(node):
+    if node is None:
+        return None
+    else:
+        mro = type(node).mro()
+        return mro[mro.index(ak._v2.contents.Content) - 1]
+
+
+def direct_Content_subclass_name(node):
+    out = direct_Content_subclass(node)
+    if out is None:
+        return None
+    else:
+        return out.__name__

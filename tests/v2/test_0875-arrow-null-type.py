@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-import os
+# import os
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401

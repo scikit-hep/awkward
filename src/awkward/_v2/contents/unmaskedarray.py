@@ -362,3 +362,6 @@ class UnmaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, mask_array, options):
+        return self._content._to_arrow(pyarrow, self, None, options)

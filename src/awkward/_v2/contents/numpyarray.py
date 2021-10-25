@@ -9,6 +9,7 @@ from awkward._v2.forms.numpyform import NumpyForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class NumpyArray(Content):
@@ -679,3 +680,33 @@ class NumpyArray(Content):
                     path, type(self), i
                 )
         return ""
+
+    def _to_arrow(self, pyarrow, mask_node, mask_array, options):
+        if self._data.ndim != 1:
+            return self.toRegularArray()._to_arrow(
+                pyarrow, mask_node, mask_array, options
+            )
+
+        node_array = numpy.asarray(self._data)
+
+        storage_type = pyarrow.from_numpy_dtype(node_array.dtype)
+
+        arrow_type = ak._v2._connect.pyarrow.AwkwardArrowType(
+            storage_type,
+            ak._v2._util.direct_Content_subclass_name(mask_node),
+            "NumpyArray",
+            None if mask_node is None else mask_node._parameters,
+            self._parameters,
+        )
+
+        if issubclass(node_array.dtype.type, (bool, np.bool_)):
+            raise NotImplementedError
+
+        if mask_array is not None:
+            mask_buffer = pyarrow.py_buffer(mask_array)
+        else:
+            mask_buffer = None
+
+        return pyarrow.Array.from_buffers(
+            arrow_type, len(node_array), [mask_buffer, pyarrow.py_buffer(node_array)]
+        )
