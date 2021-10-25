@@ -13,6 +13,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class IndexedArray(Content):
+    is_IndexedType = True
+
     def __init__(self, index, content, identifier=None, parameters=None):
         if not (
             isinstance(index, Index)

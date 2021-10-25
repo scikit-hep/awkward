@@ -14,6 +14,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class ListArray(Content):
+    is_ListType = True
+
     def __init__(self, starts, stops, content, identifier=None, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),

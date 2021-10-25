@@ -15,6 +15,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class ByteMaskedArray(Content):
+    is_OptionType = True
+
     def __init__(self, mask, content, valid_when, identifier=None, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(

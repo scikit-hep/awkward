@@ -18,6 +18,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class UnionArray(Content):
+    is_UnionType = True
+
     def __init__(self, tags, index, contents, identifier=None, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise TypeError(

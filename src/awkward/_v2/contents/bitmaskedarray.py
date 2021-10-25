@@ -16,6 +16,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class BitMaskedArray(Content):
+    is_OptionType = True
+
     def __init__(
         self,
         mask,

@@ -16,6 +16,15 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Content(object):
+    is_NumpyType = False
+    is_UnknownType = False
+    is_ListType = False
+    is_RegularType = False
+    is_OptionType = False
+    is_IndexedType = False
+    is_RecordType = False
+    is_UnionType = False
+
     def _init(self, identifier, parameters):
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier

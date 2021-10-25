@@ -115,6 +115,10 @@ if pyarrow is not None:
                 metadata["node_parameters"],
             )
 
+    pyarrow.register_extension_type(
+        AwkwardArrowType(pyarrow.null(), None, None, None, None)
+    )
+
 
 pyarrow_to_numpy_dtype = {
     "date32": (True, np.dtype("M8[D]")),
@@ -281,7 +285,7 @@ def handle_arrow(obj, pass_empty_field=True):
         assert len(buffers) == 0
 
         if not_null(extension_type, out):
-            assert isinstance(out, ak._v2.contents.UnmaskedArray)
+            assert type(out).is_OptionType
             return out.content
         else:
             return out

@@ -12,6 +12,9 @@ from awkward._v2.forms.form import _parameters_equal
 
 
 class RegularArray(Content):
+    is_ListType = True
+    is_RegularType = True
+
     def __init__(self, content, size, zeros_length=0, identifier=None, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(

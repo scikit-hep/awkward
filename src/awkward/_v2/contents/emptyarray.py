@@ -13,6 +13,9 @@ numpy = ak.nplike.Numpy.instance()
 
 
 class EmptyArray(Content):
+    is_NumpyType = True
+    is_UnknownType = True
+
     def __init__(self, identifier=None, parameters=None):
         self._init(identifier, parameters)
 

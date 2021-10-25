@@ -13,6 +13,8 @@ numpy = ak.nplike.Numpy.instance()
 
 
 class NumpyArray(Content):
+    is_NumpyType = True
+
     def __init__(self, data, identifier=None, parameters=None, nplike=None):
         self._nplike = ak.nplike.of(data) if nplike is None else nplike
         self._data = self._nplike.asarray(data)

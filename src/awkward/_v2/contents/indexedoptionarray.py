@@ -13,6 +13,9 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class IndexedOptionArray(Content):
+    is_OptionType = True
+    is_IndexedType = True
+
     def __init__(self, index, content, identifier=None, parameters=None):
         if not (
             isinstance(index, Index)

@@ -20,6 +20,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class RecordArray(Content):
+    is_RecordType = True
+
     def __init__(self, contents, fields, length=None, identifier=None, parameters=None):
         if not isinstance(contents, Iterable):
             raise TypeError(

@@ -11,6 +11,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class UnmaskedArray(Content):
+    is_OptionType = True
+
     def __init__(self, content, identifier=None, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
