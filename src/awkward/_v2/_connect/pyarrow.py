@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-# import distutils
+import distutils
 import json
 
 try:
@@ -10,10 +10,11 @@ try:
 except ImportError:
     from collections import Iterable, Sized
 
+import numpy
+
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
 
 try:
     import pyarrow
@@ -120,6 +121,44 @@ if pyarrow is not None:
     )
 
 
+if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVersion(
+    "1.17.0"
+):
+
+    def packbits(bytearray, lsb_order=True):
+        if lsb_order:
+            if len(bytearray) % 8 == 0:
+                ready_to_pack = bytearray
+            else:
+                ready_to_pack = numpy.empty(
+                    int(numpy.ceil(len(bytearray) / 8.0)) * 8,
+                    dtype=bytearray.dtype,
+                )
+                ready_to_pack[: len(bytearray)] = bytearray
+                ready_to_pack[len(bytearray) :] = 0
+            return numpy.packbits(ready_to_pack.reshape(-1, 8)[:, ::-1].reshape(-1))
+        else:
+            return numpy.packbits(bytearray)
+
+    def unpackbits(bitarray, length, lsb_order=True):
+        ready_to_bitswap = numpy.unpackbits(bitarray)
+        if lsb_order:
+            return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)[:length]
+        else:
+            return ready_to_bitswap[:length]
+
+
+else:
+
+    def packbits(bytearray, lsb_order=True):
+        return numpy.packbits(bytearray, bitorder=("little" if lsb_order else "big"))
+
+    def unpackbits(bitarray, length, lsb_order=True):
+        return numpy.unpackbits(
+            bitarray, count=length, bitorder=("little" if lsb_order else "big")
+        )
+
+
 pyarrow_to_numpy_dtype = {
     "date32": (True, np.dtype("M8[D]")),
     "date64": (False, np.dtype("M8[ms]")),
@@ -205,7 +244,20 @@ def popbuffers(array, extension_type, storage_type, buffers):
         raise NotImplementedError
 
     elif storage_type == pyarrow.bool_():
-        raise NotImplementedError
+        assert storage_type.num_buffers == 2
+        mask = buffers.pop(0)
+        data = buffers.pop(0)
+
+        bytearray = unpackbits(numpy.frombuffer(data, dtype=np.uint8), len(array))
+
+        parameters = None
+        if isinstance(extension_type, AwkwardArrowType):
+            parameters = extension_type.node_parameters
+
+        out = ak._v2.contents.NumpyArray(
+            bytearray.view(np.bool_), parameters=parameters
+        )
+        # no return yet!
 
     elif (
         isinstance(storage_type, pyarrow.lib.DataType) and storage_type.num_buffers == 1

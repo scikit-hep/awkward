@@ -693,16 +693,20 @@ class NumpyArray(Content):
 
         storage_type = pyarrow.from_numpy_dtype(node_array.dtype)
 
-        arrow_type = ak._v2._connect.pyarrow.AwkwardArrowType(
-            storage_type,
-            ak._v2._util.direct_Content_subclass_name(mask_node),
-            "NumpyArray",
-            None if mask_node is None else mask_node._parameters,
-            self._parameters,
-        )
+        if options["use_extensionarray"]:
+            arrow_type = ak._v2._connect.pyarrow.AwkwardArrowType(
+                storage_type,
+                ak._v2._util.direct_Content_subclass_name(mask_node),
+                "NumpyArray",
+                None if mask_node is None else mask_node._parameters,
+                self._parameters,
+            )
+        else:
+            arrow_type = storage_type
 
+        length = len(node_array)
         if issubclass(node_array.dtype.type, (bool, np.bool_)):
-            raise NotImplementedError
+            node_array = ak._v2._connect.pyarrow.packbits(node_array)
 
         if mask_array is not None:
             mask_buffer = pyarrow.py_buffer(mask_array)
@@ -710,5 +714,5 @@ class NumpyArray(Content):
             mask_buffer = None
 
         return pyarrow.Array.from_buffers(
-            arrow_type, len(node_array), [mask_buffer, pyarrow.py_buffer(node_array)]
+            arrow_type, length, [mask_buffer, pyarrow.py_buffer(node_array)]
         )
