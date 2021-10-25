@@ -13,6 +13,121 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+def test_BitMaskedArray():
+    content = ak.layout.NumpyArray(np.arange(13))
+    mask = ak.layout.IndexU8(np.array([58, 59], dtype=np.uint8))
+    array = ak.layout.BitMaskedArray(
+        mask, content, valid_when=False, length=13, lsb_order=False
+    )
+    array = v1_to_v2(array)
+    # FIXME: 'BitMaskedArray' object has no attribute 'bytemask'
+    # assert np.asarray(array.bytemask()).tolist() == [
+    #     0,
+    #     0,
+    #     1,
+    #     1,
+    #     1,
+    #     0,
+    #     1,
+    #     0,
+    #     0,
+    #     0,
+    #     1,
+    #     1,
+    #     1,
+    # ]
+    assert np.asarray(array.toByteMaskedArray().mask).tolist() == [
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+    ]
+    assert np.asarray(array.toIndexedOptionArray64().index).tolist() == [
+        0,
+        1,
+        -1,
+        -1,
+        -1,
+        5,
+        -1,
+        7,
+        8,
+        9,
+        -1,
+        -1,
+        -1,
+    ]
+    assert ak.to_list(array) == [
+        0,
+        1,
+        None,
+        None,
+        None,
+        5,
+        None,
+        7,
+        8,
+        9,
+        None,
+        None,
+        None,
+    ]
+    assert array.is_unique(axis=None) is True
+    assert ak.to_list(array.unique(axis=None)) == [0, 1, 5, 7, 8, 9]
+
+
+def test_ByteMaskedArray():
+    content = ak.from_iter(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
+    )
+    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
+    array = v1_to_v2(array)
+    assert ak.to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
+    assert array.is_unique(axis=None) is True
+    assert ak.to_list(array.unique(axis=None)) == [0.0, 1.1, 2.2, 6.6, 7.7, 8.8, 9.9]
+
+    content = ak.from_iter(
+        [[0.0, 1.1, 2.2], [], [1.1, 2.2], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
+    )
+    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
+    array = v1_to_v2(array)
+    assert ak.to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
+    assert array.is_unique(axis=None) is True
+    assert ak.to_list(array.unique(axis=None)) == [0.0, 1.1, 2.2, 6.6, 7.7, 8.8, 9.9]
+
+    content = ak.from_iter(
+        [[1.1, 1.1, 2.2], [], [1.1, 2.2], [5.5], [1.1, 7.7, 8.8, 9.9]], highlevel=False
+    )
+    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
+    array = v1_to_v2(array)
+    assert ak.to_list(array) == [[1.1, 1.1, 2.2], [], None, None, [1.1, 7.7, 8.8, 9.9]]
+    assert array.is_unique(axis=None) is False
+    assert ak.to_list(array.unique(axis=None)) == [1.1, 2.2, 7.7, 8.8, 9.9]
+
+
+def test_UnmaskedArray():
+    content = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
+    )
+    array = ak.layout.UnmaskedArray(content)
+    array = v1_to_v2(array)
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert array.is_unique(axis=None) is True
+    assert ak.to_list(array.unique(axis=None)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+
 def test_subranges_equal():
     array = ak.layout.NumpyArray(
         np.array(
@@ -430,6 +545,15 @@ def test_RegularArray():
         [3.6, None, 6.7],
     ]
     assert regular_array.is_unique() is True
+    assert ak.to_list(regular_array.unique(axis=None)) == [
+        1.5,
+        1.6,
+        2.2,
+        3.6,
+        3.9,
+        6.7,
+        6.9,
+    ]
 
     index2 = ak.layout.Index64(
         np.array([13, 9, 13, 9, 13, 13, -1, -1, -1, 2, 8], dtype=np.int64)
@@ -443,6 +567,7 @@ def test_RegularArray():
         [None, None, None],
     ]
     assert regular_array2.is_unique() is True
+    assert ak.to_list(regular_array2.unique(axis=None)) == [3.9, 6.9]
 
 
 def test_IndexedArray():
@@ -455,6 +580,7 @@ def test_IndexedArray():
 
     assert ak.to_list(indexedarray) == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9]
     assert indexedarray.is_unique() is True
+    assert ak.to_list(indexedarray.unique(axis=None)) == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9]
 
     index2 = ak.layout.Index64(np.array([0, 2, 9, 6, 0, 9], dtype=np.int64))
     indexedarray2 = ak.layout.IndexedArray64(index2, content)
@@ -462,6 +588,7 @@ def test_IndexedArray():
 
     assert ak.to_list(indexedarray2) == [0.0, 2.2, 9.9, 6.6, 0.0, 9.9]
     assert indexedarray2.is_unique() is False
+    assert ak.to_list(indexedarray2.unique(axis=None)) == [0.0, 2.2, 6.6, 9.9]
 
 
 def test_RecordArray():
@@ -541,3 +668,24 @@ def test_same_categories():
     ]
 
     assert (array1 == array2) is False
+
+
+def test_UnionArray():
+    content1 = ak.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
+    content2 = ak.from_iter([[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []], highlevel=False)
+    tags = ak.layout.Index8(np.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=np.int8))
+    index = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int64))
+    array = ak.layout.UnionArray8_64(tags, index, [content1, content2])
+    array = v1_to_v2(array)
+    assert ak.to_list(array) == [
+        [],
+        [3.3, 3.3, 3.3],
+        [1],
+        [2.2, 2.2],
+        [2, 2],
+        [1.1],
+        [3, 3, 3],
+        [],
+    ]
+    assert array.is_unique() is False
+    assert ak.to_list(array.unique(axis=None)) == [1.0, 1.1, 2.0, 2.2, 3.0, 3.3]

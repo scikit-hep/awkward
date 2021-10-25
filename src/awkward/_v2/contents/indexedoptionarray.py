@@ -667,17 +667,20 @@ class IndexedOptionArray(Content):
         else:
             return next._subranges_equal(nextstarts, nextstops, len(nextstarts), False)
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents):
         if len(self._index) == 0:
             return True
 
         nextindex = self._unique_index(self._index, False)
         next = self._content._carry(nextindex, False, NestedIndexError)
 
-        return next._is_unique(negaxis, starts, parents, outlength)
+        return next._is_unique(negaxis, starts, parents)
 
-    def _unique(self, negaxis, starts, parents, outlength):
-        raise NotImplementedError
+    def _unique(self, negaxis, starts, parents):
+        nextindex = self._unique_index(self._index, False)
+        next = self._content._carry(nextindex, False, NestedIndexError)
+
+        return next._unique(negaxis, starts, parents)
 
     def _argsort_next(
         self,

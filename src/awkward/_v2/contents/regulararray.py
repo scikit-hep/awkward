@@ -572,7 +572,7 @@ class RegularArray(Content):
                 self._parameters,
             )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents):
         if self._length == 0:
             return True
 
@@ -580,10 +580,9 @@ class RegularArray(Content):
             negaxis,
             starts,
             parents,
-            outlength,
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents):
         if self._length == 0:
             return self
 
@@ -591,7 +590,6 @@ class RegularArray(Content):
             negaxis,
             starts,
             parents,
-            outlength,
         )
 
         if isinstance(out, ak._v2.contents.RegularArray):

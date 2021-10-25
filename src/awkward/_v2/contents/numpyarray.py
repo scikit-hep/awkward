@@ -524,7 +524,7 @@ class NumpyArray(Content):
 
         return out2, nextoffsets[: outlength[0]]
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, parents):
         if len(self._data) == 0:
             return True
 
@@ -537,16 +537,15 @@ class NumpyArray(Content):
                 negaxis,
                 starts,
                 parents,
-                outlength,
             )
         else:
-            out = self._unique(negaxis, starts, parents, outlength)
+            out = self._unique(negaxis, starts, parents)
             if isinstance(out, ak._v2.contents.ListOffsetArray):
                 return len(out.content) == len(self)
 
             return len(out._data) == len(self._data)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, parents):
         if self.shape[0] == 0:
             return self
 
@@ -607,7 +606,6 @@ class NumpyArray(Content):
                 negaxis,
                 starts,
                 parents,
-                outlength,
             )
         else:
             parents_length = len(parents)
