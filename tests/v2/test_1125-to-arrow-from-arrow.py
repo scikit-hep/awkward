@@ -195,12 +195,46 @@ def test_dictionary_encoding():
 
 @pytest.mark.parametrize("list_to32", [False, True])
 @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
-def test_listoffsetarray64(list_to32, dtype):
+def test_listoffsetarray(list_to32, dtype):
     akarray = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
         ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
     )
     paarray = akarray.to_arrow(list_to32=list_to32)
+    assert ak.to_list(akarray) == paarray.to_pylist()
+    akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
+    assert ak.to_list(akarray) == ak.to_list(akarray2)
+    assert akarray.form.type == akarray2.form.type
+
+
+@pytest.mark.parametrize("string_to32", [False, True])
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_listoffsetraray_string(string_to32, dtype):
+    akarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak._v2.contents.NumpyArray(
+            np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "char"}
+        ),
+        parameters={"__array__": "string"},
+    )
+    paarray = akarray.to_arrow(string_to32=string_to32)
+    assert ak.to_list(akarray) == paarray.to_pylist()
+    akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
+    assert ak.to_list(akarray) == ak.to_list(akarray2)
+    assert akarray.form.type == akarray2.form.type
+
+
+@pytest.mark.parametrize("bytestring_to32", [False, True])
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_listoffsetraray_bytestring(bytestring_to32, dtype):
+    akarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak._v2.contents.NumpyArray(
+            np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
+        ),
+        parameters={"__array__": "bytestring"},
+    )
+    paarray = akarray.to_arrow(bytestring_to32=bytestring_to32)
     assert ak.to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray) == ak.to_list(akarray2)

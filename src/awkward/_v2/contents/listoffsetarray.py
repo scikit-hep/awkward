@@ -1364,11 +1364,31 @@ class ListOffsetArray(Content):
             else:
                 next_offsets = next_offsets.astype(np.int64)
 
-        if is_string:
-            raise NotImplementedError
+        if is_string or is_bytestring:
+            assert isinstance(next_content, ak._v2.contents.NumpyArray)
 
-        elif is_bytestring:
-            raise NotImplementedError
+            if issubclass(next_offsets.dtype.type, np.int32):
+                if is_string:
+                    string_storage_type = pyarrow.string()
+                else:
+                    string_storage_type = pyarrow.binary()
+            else:
+                if is_string:
+                    string_storage_type = pyarrow.large_string()
+                else:
+                    string_storage_type = pyarrow.large_binary()
+
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.from_storage(
+                    string_storage_type, options["use_extensionarray"], mask_node, self
+                ),
+                len(next_offsets) - 1,
+                [
+                    None if validbits is None else pyarrow.py_buffer(validbits),
+                    pyarrow.py_buffer(next_offsets),
+                    pyarrow.py_buffer(next_content.data),
+                ],
+            )
 
         else:
             content_array = next_content._to_arrow(
@@ -1390,7 +1410,7 @@ class ListOffsetArray(Content):
 
             return pyarrow.Array.from_buffers(
                 ak._v2._connect.pyarrow.from_storage(
-                    list_storage_type, options["use_extensionarray"], mask_node, next
+                    list_storage_type, options["use_extensionarray"], mask_node, self
                 ),
                 len(next_offsets) - 1,
                 [

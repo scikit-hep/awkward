@@ -128,6 +128,14 @@ if pyarrow is not None:
         AwkwardArrowType(pyarrow.null(), None, None, None, None)
     )
 
+    # order is important; _string_like[:2] vs _string_like[::2]
+    _string_like = (
+        pyarrow.string(),
+        pyarrow.large_string(),
+        pyarrow.binary(),
+        pyarrow.large_binary(),
+    )
+
 
 if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVersion(
     "1.17.0"
@@ -301,26 +309,42 @@ def popbuffers(array, extension_type, storage_type, buffers):
         out = ak._v2.contents.ListOffsetArray(offsets, content, parameters=parameters)
         return mask_and_offset_correction(out, array, mask, extension_type)
 
-    elif isinstance(storage_type, pyarrow.lib.ListType):
-        raise NotImplementedError
-
     elif isinstance(storage_type, pyarrow.lib.MapType):
         raise NotImplementedError
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeBinaryType):
         raise NotImplementedError
 
-    elif storage_type == pyarrow.large_string():
-        raise NotImplementedError
+    elif storage_type in _string_like:
+        assert storage_type.num_buffers == 3
+        mask = buffers.pop(0)
+        offsets = buffers.pop(0)
+        content = buffers.pop(0)
 
-    elif storage_type == pyarrow.string():
-        raise NotImplementedError
+        if storage_type in _string_like[:2]:
+            parameters = {"__array__": "string"}
+            sub_parameters = {"__array__": "char"}
+        else:
+            parameters = {"__array__": "bytestring"}
+            sub_parameters = {"__array__": "byte"}
 
-    elif storage_type == pyarrow.large_binary():
-        raise NotImplementedError
+        if isinstance(extension_type, AwkwardArrowType):
+            parameters = extension_type.node_parameters
 
-    elif storage_type == pyarrow.binary():
-        raise NotImplementedError
+        if storage_type in _string_like[::2]:
+            offsets2 = ak._v2.index.Index32(numpy.frombuffer(offsets, dtype=np.int32))
+        else:
+            offsets2 = ak._v2.index.Index64(numpy.frombuffer(offsets, dtype=np.int64))
+
+        out = ak._v2.contents.ListOffsetArray(
+            offsets2,
+            ak._v2.contents.NumpyArray(
+                numpy.frombuffer(content, dtype=np.uint8),
+                parameters=sub_parameters,
+            ),
+            parameters=parameters,
+        )
+        return mask_and_offset_correction(out, array, mask, extension_type)
 
     elif isinstance(storage_type, pyarrow.lib.StructType):
         raise NotImplementedError
