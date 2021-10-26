@@ -159,6 +159,25 @@ else:
         )
 
 
+def to_validbits(bytemask, valid_when):
+    if bytemask is None:
+        return None
+    else:
+        out = packbits(bytemask.view(np.bool_))
+        if not valid_when:
+            numpy.bitwise_not(out, out=out)
+        return out
+
+
+def and_validbits(validbits1, validbits2):
+    if validbits1 is None:
+        return validbits2
+    elif validbits2 is None:
+        return validbits1
+    else:
+        return validbits1 & validbits2
+
+
 pyarrow_to_numpy_dtype = {
     "date32": (True, np.dtype("M8[D]")),
     "date64": (False, np.dtype("M8[ms]")),
@@ -263,7 +282,25 @@ def popbuffers(array, extension_type, storage_type, buffers):
         isinstance(storage_type, pyarrow.lib.DataType) and storage_type.num_buffers == 1
     ):
         # this is DataType(null)
-        raise NotImplementedError
+        mask = buffers.pop(0)
+        assert storage_type.num_fields == 0
+
+        node_parameters, mask_parameters = None, None
+        if isinstance(extension_type, AwkwardArrowType):
+            node_parameters = extension_type.node_parameters
+            mask_parameters = extension_type.mask_parameters
+
+        out = ak._v2.contents.IndexedOptionArray(
+            ak._v2.index.Index64(numpy.full(len(array), -1, dtype=np.int64)),
+            ak._v2.contents.EmptyArray(parameters=node_parameters),
+            parameters=mask_parameters,
+        )
+
+        if array.offset == 0 and len(array) == len(out):
+            return out
+        else:
+            return out[array.offset : array.offset + len(array)]
+        # RETURNED an option-type array with offsets corrected
 
     elif isinstance(storage_type, pyarrow.lib.DataType):
         assert storage_type.num_buffers == 2

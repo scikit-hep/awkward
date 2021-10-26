@@ -108,6 +108,15 @@ class ListArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return ListArray(
+            self._starts,
+            self._stops,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)

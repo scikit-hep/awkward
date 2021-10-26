@@ -102,6 +102,14 @@ class ListOffsetArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return ListOffsetArray(
+            self._offsets,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toListOffsetArray64(self, start_at_zero=False):
         if issubclass(self._offsets.dtype.type, np.int64):
             if not start_at_zero or self._offsets[0] == 0:

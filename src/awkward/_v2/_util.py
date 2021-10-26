@@ -1834,3 +1834,21 @@ def direct_Content_subclass_name(node):
         return None
     else:
         return out.__name__
+
+
+def merge_parameters(one, two):
+    if one is None and two is None:
+        return None
+
+    elif one is None:
+        return two
+
+    elif two is None:
+        return one
+
+    else:
+        out = dict(one)
+        for k, v in two.items():
+            if v is not None:
+                out[k] = v
+        return out

@@ -175,6 +175,15 @@ class RecordArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return RecordArray(
+            self._contents,
+            self._fields,
+            self._length,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def index_to_field(self, index):
         return self.Form.index_to_field(self, index)
 

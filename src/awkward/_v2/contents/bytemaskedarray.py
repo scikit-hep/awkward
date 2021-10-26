@@ -107,6 +107,15 @@ class ByteMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return ByteMaskedArray(
+            self._mask,
+            self._content,
+            self._valid_when,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toIndexedOptionArray64(self):
         nplike = self.nplike
         index = ak._v2.index.Index64.empty(len(self._mask), nplike)

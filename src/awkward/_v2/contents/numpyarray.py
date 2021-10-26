@@ -132,6 +132,14 @@ class NumpyArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return NumpyArray(
+            self._data,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+            self._nplike,
+        )
+
     def toRegularArray(self):
         if len(self._data.shape) == 1:
             return self
@@ -683,10 +691,10 @@ class NumpyArray(Content):
                 )
         return ""
 
-    def _to_arrow(self, pyarrow, mask_node, mask_array, options):
+    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
         if self._data.ndim != 1:
             return self.toRegularArray()._to_arrow(
-                pyarrow, mask_node, mask_array, options
+                pyarrow, mask_node, validbits, length, options
             )
 
         node_array = numpy.asarray(self._data)
@@ -704,15 +712,19 @@ class NumpyArray(Content):
         else:
             arrow_type = storage_type
 
-        length = len(node_array)
         if issubclass(node_array.dtype.type, (bool, np.bool_)):
             node_array = ak._v2._connect.pyarrow.packbits(node_array)
 
-        if mask_array is not None:
-            mask_buffer = pyarrow.py_buffer(mask_array)
-        else:
-            mask_buffer = None
+        null_count = -1
+        if length == 0 and validbits is not None:
+            null_count = length
 
         return pyarrow.Array.from_buffers(
-            arrow_type, length, [mask_buffer, pyarrow.py_buffer(node_array)]
+            arrow_type,
+            length,
+            [
+                None if validbits is None else pyarrow.py_buffer(validbits),
+                pyarrow.py_buffer(node_array),
+            ],
+            null_count=null_count,
         )

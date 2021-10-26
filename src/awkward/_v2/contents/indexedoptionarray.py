@@ -10,6 +10,7 @@ from awkward._v2.forms.indexedoptionform import IndexedOptionForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class IndexedOptionArray(Content):
@@ -91,6 +92,14 @@ class IndexedOptionArray(Content):
         out.append(indent + "</IndexedOptionArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return IndexedOptionArray(
+            self._index,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toIndexedOptionArray64(self):
         if self._index.dtype == np.dtype(np.int64):
@@ -1166,3 +1175,27 @@ class IndexedOptionArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+        index = numpy.array(self._index, copy=True)
+        nulls = index < 0
+        index[nulls] = 0
+
+        if self.parameter("__array__") == "categorical":
+            raise NotImplementedError
+
+        else:
+            this_validbits = ak._v2._connect.pyarrow.to_validbits(
+                nulls, valid_when=False
+            )
+
+            next = ak._v2.contents.IndexedArray(
+                ak._v2.index.Index(index), self._content
+            )
+            return next._to_arrow(
+                pyarrow,
+                self,
+                ak._v2._connect.pyarrow.and_validbits(validbits, this_validbits),
+                length,
+                options,
+            )

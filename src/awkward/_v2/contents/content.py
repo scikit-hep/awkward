@@ -1241,6 +1241,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             pyarrow,
             None,
             None,
+            len(self),
             {
                 "list_to32": list_to32,
                 "string_to32": string_to32,

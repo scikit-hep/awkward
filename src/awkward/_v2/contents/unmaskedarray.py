@@ -68,6 +68,13 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return UnmaskedArray(
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toByteMaskedArray(self):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
             ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
@@ -365,5 +372,5 @@ class UnmaskedArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    def _to_arrow(self, pyarrow, mask_node, mask_array, options):
-        return self._content._to_arrow(pyarrow, self, None, options)
+    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+        return self._content._to_arrow(pyarrow, self, None, length, options)

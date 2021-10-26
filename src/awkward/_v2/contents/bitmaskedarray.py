@@ -146,6 +146,17 @@ class BitMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return BitMaskedArray(
+            self._mask,
+            self._content,
+            self._valid_when,
+            self._length,
+            self._lsb_order,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toByteMaskedArray(self):
         nplike = self._mask.nplike
         bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)

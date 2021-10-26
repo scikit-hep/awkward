@@ -10,6 +10,7 @@ from awkward._v2.forms.indexedform import IndexedForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class IndexedArray(Content):
@@ -91,6 +92,14 @@ class IndexedArray(Content):
         out.append(indent + "</IndexedArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return IndexedArray(
+            self._index,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toIndexedOptionArray64(self):
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
@@ -263,6 +272,7 @@ class IndexedArray(Content):
                 nextindex, self.content, self.identifier, self.parameters
             )
             return next.project()
+
         else:
             nextcarry = ak._v2.index.Index64.empty(len(self), self.nplike)
             self._handle_error(
@@ -716,3 +726,23 @@ class IndexedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+        index = self._index.to(numpy)
+
+        if self.parameter("__array__") == "categorical":
+            raise NotImplementedError
+
+        else:
+            if len(self._content) == 0:
+                # we might have come from IndexedOptionArray, so index might have
+                # zeros in place of missing values; self._content[index] won't work
+                next = self._content.merge_parameters(self._parameters)
+                return next._to_arrow(pyarrow, mask_node, validbits, length, options)
+
+            elif isinstance(self._content, ak._v2.contents.RecordArray):
+                raise NotImplementedError
+
+            else:
+                next = self._content[index].merge_parameters(self._parameters)
+                return next._to_arrow(pyarrow, mask_node, validbits, length, options)

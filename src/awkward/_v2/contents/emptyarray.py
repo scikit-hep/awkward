@@ -19,20 +19,6 @@ class EmptyArray(Content):
     def __init__(self, identifier=None, parameters=None):
         self._init(identifier, parameters)
 
-    def __repr__(self):
-        return self._repr("", "", "")
-
-    def _repr(self, indent, pre, post):
-        extra = self._repr_extra(indent + "    ")
-        if len(extra) == 0:
-            return indent + pre + "<EmptyArray len='0'/>" + post
-        else:
-            out = [indent, pre, "<EmptyArray len='0'>"]
-            out.extend(extra)
-            out.append("\n" + indent + "</EmptyArray>")
-            out.append(post)
-            return "".join(out)
-
     Form = EmptyForm
 
     @property
@@ -51,12 +37,28 @@ class EmptyArray(Content):
     def nplike(self):
         return ak.nplike.Numpy.instance()
 
-    @property
-    def nonvirtual_nplike(self):
-        return None
-
     def __len__(self):
         return 0
+
+    def __repr__(self):
+        return self._repr("", "", "")
+
+    def _repr(self, indent, pre, post):
+        extra = self._repr_extra(indent + "    ")
+        if len(extra) == 0:
+            return indent + pre + "<EmptyArray len='0'/>" + post
+        else:
+            out = [indent, pre, "<EmptyArray len='0'>"]
+            out.extend(extra)
+            out.append("\n" + indent + "</EmptyArray>")
+            out.append(post)
+            return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return EmptyArray(
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toNumpyArray(self, dtype, nplike=None):
         return ak._v2.contents.numpyarray.NumpyArray(
@@ -202,3 +204,24 @@ class EmptyArray(Content):
 
     def _validityerror(self, path):
         return ""
+
+    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+        storage_type = pyarrow.null()
+
+        if options["use_extensionarray"]:
+            arrow_type = ak._v2._connect.pyarrow.AwkwardArrowType(
+                storage_type,
+                ak._v2._util.direct_Content_subclass_name(mask_node),
+                "EmptyArray",
+                None if mask_node is None else mask_node._parameters,
+                self._parameters,
+            )
+        else:
+            arrow_type = storage_type
+
+        return pyarrow.Array.from_buffers(
+            arrow_type,
+            length,
+            [None if validbits is None else pyarrow.py_buffer(validbits)],
+            null_count=length,
+        )
