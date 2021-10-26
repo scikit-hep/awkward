@@ -1217,3 +1217,24 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     @property
     def dimension_optiontype(self):
         return self.Form.dimension_optiontype.__get__(self)
+
+    def rpad_axis0(self, target, clip):
+        if not clip and target < len(self):
+            return self
+        index = ak._v2.content.index.Index64.empty(target)
+        self._handle_error(
+            self.nplike[
+                "awkward_index_rpad_and_clip_axis0",
+                index.dtype.type,
+            ](index.to(self.nplike), target, len(self))
+        )
+        next = ak._v2.content.indexedoptionarray.IndexedOptionArray(
+            None, self._parameters, index, self
+        )
+        return next.simplify_optiontype()
+
+    def rpad(self, length, axis):
+        return self._rpad(length, axis, 0)
+
+    def rpad_and_clip(self, length, axis):
+        return self._rpad_and_clip(length, axis, 0)
