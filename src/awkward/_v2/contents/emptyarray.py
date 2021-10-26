@@ -208,19 +208,13 @@ class EmptyArray(Content):
     def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
         storage_type = pyarrow.null()
 
-        if options["use_extensionarray"]:
-            arrow_type = ak._v2._connect.pyarrow.AwkwardArrowType(
-                storage_type,
-                ak._v2._util.direct_Content_subclass_name(mask_node),
-                "EmptyArray",
-                None if mask_node is None else mask_node._parameters,
-                self._parameters,
-            )
-        else:
-            arrow_type = storage_type
-
         return pyarrow.Array.from_buffers(
-            arrow_type,
+            ak._v2._connect.pyarrow.from_storage(
+                storage_type,
+                options["use_extensionarray"],
+                mask_node,
+                self,
+            ),
             length,
             [None if validbits is None else pyarrow.py_buffer(validbits)],
             null_count=length,

@@ -1181,21 +1181,20 @@ class IndexedOptionArray(Content):
         nulls = index < 0
         index[nulls] = 0
 
+        parameters = None
         if self.parameter("__array__") == "categorical":
-            raise NotImplementedError
+            # all other parameters will be on the ExtensionType
+            parameters = {"__array__": "categorical"}
 
-        else:
-            this_validbits = ak._v2._connect.pyarrow.to_validbits(
-                nulls, valid_when=False
-            )
+        this_validbits = ak._v2._connect.pyarrow.to_validbits(nulls, valid_when=False)
 
-            next = ak._v2.contents.IndexedArray(
-                ak._v2.index.Index(index), self._content
-            )
-            return next._to_arrow(
-                pyarrow,
-                self,
-                ak._v2._connect.pyarrow.and_validbits(validbits, this_validbits),
-                length,
-                options,
-            )
+        next = ak._v2.contents.IndexedArray(
+            ak._v2.index.Index(index), self._content, parameters=parameters
+        )
+        return next._to_arrow(
+            pyarrow,
+            self,
+            ak._v2._connect.pyarrow.and_validbits(validbits, this_validbits),
+            length,
+            options,
+        )

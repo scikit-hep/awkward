@@ -701,17 +701,6 @@ class NumpyArray(Content):
 
         storage_type = pyarrow.from_numpy_dtype(node_array.dtype)
 
-        if options["use_extensionarray"]:
-            arrow_type = ak._v2._connect.pyarrow.AwkwardArrowType(
-                storage_type,
-                ak._v2._util.direct_Content_subclass_name(mask_node),
-                "NumpyArray",
-                None if mask_node is None else mask_node._parameters,
-                self._parameters,
-            )
-        else:
-            arrow_type = storage_type
-
         if issubclass(node_array.dtype.type, (bool, np.bool_)):
             node_array = ak._v2._connect.pyarrow.packbits(node_array)
 
@@ -720,7 +709,12 @@ class NumpyArray(Content):
             null_count = length
 
         return pyarrow.Array.from_buffers(
-            arrow_type,
+            ak._v2._connect.pyarrow.from_storage(
+                storage_type,
+                options["use_extensionarray"],
+                mask_node,
+                self,
+            ),
             length,
             [
                 None if validbits is None else pyarrow.py_buffer(validbits),

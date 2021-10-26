@@ -10,6 +10,7 @@ from awkward._v2.forms.listoffsetform import ListOffsetForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class ListOffsetArray(Content):
@@ -1339,3 +1340,62 @@ class ListOffsetArray(Content):
                 return ""
             else:
                 return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+        is_string = self.parameter("__array__") == "string"
+        is_bytestring = self.parameter("__array__") == "bytestring"
+        if is_string:
+            downsize = options["string_to32"]
+        elif is_bytestring:
+            downsize = options["bytestring_to32"]
+        else:
+            downsize = options["list_to32"]
+
+        next_offsets = self._offsets.to(numpy)
+        next_content = self._content[next_offsets[0] : next_offsets[-1]]
+
+        if issubclass(next_offsets.dtype.type, np.int64):
+            if downsize and next_offsets[-1] < np.iinfo(np.int32).max:
+                next_offsets = next_offsets.astype(np.int32)
+
+        if issubclass(next_offsets.dtype.type, np.uint32):
+            if next_offsets[-1] < np.iinfo(np.int32).max:
+                next_offsets = next_offsets.astype(np.int32)
+            else:
+                next_offsets = next_offsets.astype(np.int64)
+
+        if is_string:
+            raise NotImplementedError
+
+        elif is_bytestring:
+            raise NotImplementedError
+
+        else:
+            content_array = next_content._to_arrow(
+                pyarrow, None, None, len(next_content), options
+            )
+            (
+                content_extension_type,
+                content_storage_type,
+            ) = ak._v2._connect.pyarrow.to_extension_storage(content_array.type)
+
+            content_storage_type = pyarrow.list_(
+                content_storage_type
+            ).value_field.with_nullable(type(next_content).is_OptionType)
+
+            if issubclass(next_offsets.dtype.type, np.int32):
+                list_storage_type = pyarrow.list_(content_storage_type)
+            else:
+                list_storage_type = pyarrow.large_list(content_storage_type)
+
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.from_storage(
+                    list_storage_type, options["use_extensionarray"], mask_node, next
+                ),
+                len(next_offsets) - 1,
+                [
+                    None if validbits is None else pyarrow.py_buffer(validbits),
+                    pyarrow.py_buffer(next_offsets),
+                ],
+                children=[content_array],
+            )

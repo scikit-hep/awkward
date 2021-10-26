@@ -318,7 +318,7 @@ class IndexedArray(Content):
                     ak._v2.contents.unmaskedarray.UnmaskedArray,
                 ),
             ):
-                rawcontent = self.contents.toIndexedOptionArray64()
+                rawcontent = self.content.toIndexedOptionArray64()
                 inner = rawcontent.index
                 result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
 
@@ -731,12 +731,23 @@ class IndexedArray(Content):
         index = self._index.to(numpy)
 
         if self.parameter("__array__") == "categorical":
-            raise NotImplementedError
+            dictionary = self._content._to_arrow(
+                pyarrow, self, None, len(self._content), options
+            )
+            if validbits is None:
+                maskedbytes = None
+            else:
+                maskedbytes = ak._v2._connect.pyarrow.unpackbits(
+                    ~validbits, length
+                ).view(np.bool_)
+
+            return pyarrow.DictionaryArray.from_arrays(index, dictionary, maskedbytes)
 
         else:
             if len(self._content) == 0:
-                # we might have come from IndexedOptionArray, so index might have
-                # zeros in place of missing values; self._content[index] won't work
+                # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+                # every masked value is self._content[0], unless len(self._content) == 0.
+                # In that case, don't call self._content[index]; it's empty anyway.
                 next = self._content.merge_parameters(self._parameters)
                 return next._to_arrow(pyarrow, mask_node, validbits, length, options)
 
