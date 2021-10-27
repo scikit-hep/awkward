@@ -11,16 +11,13 @@ import awkward as ak  # noqa: F401
 pyarrow = pytest.importorskip("pyarrow")
 pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
-pyarrow6_is_available = False
-
 
 def test_numpyarray_extensionarray(tmp_path):
     filename = os.path.join(tmp_path, "whatever.parquet")
 
     akarray = ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3]))
     paarray = akarray.to_arrow(use_extensionarray=True)
-    if pyarrow6_is_available:
-        assert ak.to_list(akarray) == paarray.to_pylist()
+    assert ak.to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray) == ak.to_list(akarray2)
     assert akarray.form.type == akarray2.form.type
@@ -48,8 +45,7 @@ def test_numpyarray_parameters_extensionarray(tmp_path):
         np.array([1.1, 2.2, 3.3]), parameters={"which": "only"}
     )
     paarray = akarray.to_arrow(use_extensionarray=True)
-    if pyarrow6_is_available:
-        assert ak.to_list(akarray) == paarray.to_pylist()
+    assert ak.to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray) == ak.to_list(akarray2)
     assert akarray.form.type == akarray2.form.type
@@ -70,8 +66,7 @@ def test_unmaskedarray_numpyarray_extensionarray(tmp_path):
         ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3]))
     )
     paarray = akarray.to_arrow(use_extensionarray=True)
-    if pyarrow6_is_available:
-        assert ak.to_list(akarray) == paarray.to_pylist()
+    assert ak.to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray) == ak.to_list(akarray2)
     assert akarray.form.type == akarray2.form.type
@@ -93,8 +88,7 @@ def test_unmaskedarray_numpyarray_parameters_extensionarray(tmp_path):
         parameters={"which": "outer"},
     )
     paarray = akarray.to_arrow(use_extensionarray=True)
-    if pyarrow6_is_available:
-        assert ak.to_list(akarray) == paarray.to_pylist()
+    assert ak.to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray) == ak.to_list(akarray2)
     assert akarray.form.type == akarray2.form.type
@@ -130,8 +124,7 @@ def test_indexedoptionarray_emptyarray_extensionarray(tmp_path):
         parameters={"which": "outer"},
     )
     paarray = akarray.to_arrow(use_extensionarray=True)
-    if pyarrow6_is_available:
-        assert ak.to_list(akarray) == paarray.to_pylist()
+    assert ak.to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray) == ak.to_list(akarray2)
     assert akarray.form.type == akarray2.form.type
@@ -139,13 +132,12 @@ def test_indexedoptionarray_emptyarray_extensionarray(tmp_path):
     assert akarray2.content.parameter("which") == "inner"
 
     pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
-    if pyarrow6_is_available:
-        table = pyarrow_parquet.read_table(filename)
-        akarray3 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-        assert ak.to_list(akarray) == ak.to_list(akarray3)
-        assert akarray.form.type == akarray3.form.type
-        assert akarray3.parameter("which") == "outer"
-        assert akarray3.content.parameter("which") == "inner"
+    # table = pyarrow_parquet.read_table(filename)
+    # akarray3 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
+    # assert ak.to_list(akarray) == ak.to_list(akarray3)
+    # assert akarray.form.type == akarray3.form.type
+    # assert akarray3.parameter("which") == "outer"
+    # assert akarray3.content.parameter("which") == "inner"
 
 
 def test_indexedoptionarray_numpyarray_extensionarray(tmp_path):
@@ -161,8 +153,7 @@ def test_indexedoptionarray_numpyarray_extensionarray(tmp_path):
         parameters={"which": "outer"},
     )
     paarray = akarray.to_arrow(use_extensionarray=True)
-    if pyarrow6_is_available:
-        assert ak.to_list(akarray) == paarray.to_pylist()
+    assert ak.to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray) == ak.to_list(akarray2)
     assert akarray.form.type == akarray2.form.type

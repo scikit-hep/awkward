@@ -32,13 +32,12 @@ or
     conda install -c conda-forge pyarrow
 """
 
-### FIXME!!!
-# else:
-#     if distutils.version.LooseVersion(
-#         pyarrow.__version__
-#     ) < distutils.version.LooseVersion("6.0.0"):
-#         pyarrow = None
-#         error_message = "pyarrow 6.0.0 or later required for {0}"
+else:
+    if distutils.version.LooseVersion(
+        pyarrow.__version__
+    ) < distutils.version.LooseVersion("6.0.0"):
+        pyarrow = None
+        error_message = "pyarrow 6.0.0 or later required for {0}"
 
 
 def import_pyarrow(name):
