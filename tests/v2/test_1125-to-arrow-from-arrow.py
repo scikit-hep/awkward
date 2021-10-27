@@ -230,3 +230,15 @@ def test_listoffsetraray_bytestring(bytestring_to32, dtype):
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray) == ak.to_list(akarray2)
     assert akarray.form.type == akarray2.form.type
+
+
+def test_listoffsetarray_extensionarray():
+    akarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 10], dtype=np.int32)),
+        ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+    )
+    paarray = akarray.to_arrow(use_extensionarray=True)
+    assert ak.to_list(akarray) == paarray.to_pylist()
+    # akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
+    # assert ak.to_list(akarray) == ak.to_list(akarray2)
+    # assert akarray.form.type == akarray2.form.type

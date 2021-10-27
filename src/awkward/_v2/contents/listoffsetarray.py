@@ -1399,19 +1399,26 @@ class ListOffsetArray(Content):
                 content_storage_type,
             ) = ak._v2._connect.pyarrow.to_extension_storage(content_array.type)
 
-            content_storage_type = pyarrow.list_(
-                content_storage_type
+            nullable_content_type = pyarrow.list_(
+                content_array.type
             ).value_field.with_nullable(type(next_content).is_OptionType)
 
             if issubclass(next_offsets.dtype.type, np.int32):
-                list_storage_type = pyarrow.list_(content_storage_type)
+                list_type = pyarrow.list_(nullable_content_type)
             else:
-                list_storage_type = pyarrow.large_list(content_storage_type)
+                list_type = pyarrow.large_list(nullable_content_type)
+
+            if options["use_extensionarray"]:
+                list_type = ak._v2._connect.pyarrow.AwkwardArrowType(
+                    list_type,
+                    ak._v2._util.direct_Content_subclass_name(mask_node),
+                    ak._v2._util.direct_Content_subclass_name(self),
+                    None if mask_node is None else mask_node.parameters,
+                    self.parameters,
+                )
 
             return pyarrow.Array.from_buffers(
-                ak._v2._connect.pyarrow.from_storage(
-                    list_storage_type, options["use_extensionarray"], mask_node, self
-                ),
+                list_type,
                 len(next_offsets) - 1,
                 [
                     None if validbits is None else pyarrow.py_buffer(validbits),
@@ -1419,3 +1426,15 @@ class ListOffsetArray(Content):
                 ],
                 children=[content_array],
             )
+
+            # return pyarrow.Array.from_buffers(
+            #     ak._v2._connect.pyarrow.from_storage(
+            #         list_storage_type, options["use_extensionarray"], mask_node, self
+            #     ),
+            #     len(next_offsets) - 1,
+            #     [
+            #         None if validbits is None else pyarrow.py_buffer(validbits),
+            #         pyarrow.py_buffer(next_offsets),
+            #     ],
+            #     children=[content_array],
+            # )
