@@ -512,13 +512,13 @@ class RecordArray(Content):
                 contents, self._keys, len(self), self._identifier, self._parameters
             )
 
-    def _is_unique(self, negaxis, starts, parents):
+    def _is_unique(self, negaxis, starts, parents, outlength):
         for content in self._contents:
-            if not content._is_unique(negaxis, starts, parents):
+            if not content._is_unique(negaxis, starts, parents, outlength):
                 return False
         return True
 
-    def _unique(self, negaxis, starts, parents):
+    def _unique(self, negaxis, starts, parents, outlength):
         raise NotImplementedError
 
     def _argsort_next(

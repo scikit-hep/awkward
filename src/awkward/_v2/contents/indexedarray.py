@@ -579,21 +579,21 @@ class IndexedArray(Content):
 
         return next[0 : length[0]]
 
-    def _is_unique(self, negaxis, starts, parents):
+    def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._index) == 0:
             return True
 
         nextindex = self._unique_index(self._index)
 
         next = self._content._carry(nextindex, False, NestedIndexError)
-        return next._is_unique(negaxis, starts, parents)
+        return next._is_unique(negaxis, starts, parents, outlength)
 
-    def _unique(self, negaxis, starts, parents):
+    def _unique(self, negaxis, starts, parents, outlength):
         if len(self._index) == 0:
             return self
 
         next = self._content._carry(self._index, False, NestedIndexError)
-        return next._unique(negaxis, starts, parents)
+        return next._unique(negaxis, starts, parents, outlength)
 
     def _argsort_next(
         self,

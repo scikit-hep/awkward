@@ -232,15 +232,15 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
-    def _is_unique(self, negaxis, starts, parents):
+    def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._content) == 0:
             return True
-        return self._content._is_unique(negaxis, starts, parents)
+        return self._content._is_unique(negaxis, starts, parents, outlength)
 
-    def _unique(self, negaxis, starts, parents):
+    def _unique(self, negaxis, starts, parents, outlength):
         if len(self._content) == 0:
             return self
-        return self._content._unique(negaxis, starts, parents)
+        return self._content._unique(negaxis, starts, parents, outlength)
 
     def _argsort_next(
         self,

@@ -570,7 +570,7 @@ class ListOffsetArray(Content):
                 self._parameters,
             )
 
-    def _is_unique(self, negaxis, starts, parents):
+    def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._offsets) - 1 == 0:
             return True
 
@@ -598,15 +598,15 @@ class ListOffsetArray(Content):
                 return len(out2) == len(self)
 
         if negaxis is None:
-            return self._content._is_unique(negaxis, starts, parents)
+            return self._content._is_unique(negaxis, starts, parents, outlength)
 
         if not branch and (negaxis == depth):
-            return self._content._is_unique(negaxis - 1, starts, parents)
+            return self._content._is_unique(negaxis - 1, starts, parents, outlength)
         else:
             starts, stops = self._offsets[:-1], self._offsets[1:]
             return not self._content._subranges_equal(starts, stops, stops[-1], False)
 
-    def _unique(self, negaxis, starts, parents):
+    def _unique(self, negaxis, starts, parents, outlength):
         nplike = self.nplike
         if len(self._offsets) - 1 == 0:
             return self
@@ -659,10 +659,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            # FIXME: a new kernel? distincts are not used in this function so far,
-            # to calculate them an 'outlength' is used in 'sort'
-            # that is always smaller than offsets length
-            distincts_length = len(self._offsets) * maxcount[0]
+            distincts_length = outlength * maxcount[0]
             nextcarry = ak._v2.index.Index64.empty(nextlen, nplike)
             nextparents = ak._v2.index.Index64.empty(nextlen, nplike)
             maxnextparents = ak._v2.index.Index64.empty(1, nplike)
@@ -710,6 +707,7 @@ class ListOffsetArray(Content):
                 negaxis - 1,
                 nextstarts,
                 nextparents,
+                outlength,
             )
 
             return outcontent
@@ -737,6 +735,7 @@ class ListOffsetArray(Content):
                 negaxis,
                 self._offsets[:-1],
                 nextparents,
+                outlength,
             )
 
     def _argsort_next(

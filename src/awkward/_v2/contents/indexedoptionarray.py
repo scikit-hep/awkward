@@ -578,44 +578,79 @@ class IndexedOptionArray(Content):
             )
             return out2
 
-    def _unique_index(self, index, sorted=True):
+    def _unique_sorted_index(self, index, starts, parents, outlength):
         nplike = self.nplike
         next = ak._v2.index.Index64.empty(len(self), nplike)
 
         length = ak._v2.index.Index64.empty(1, nplike)
-        if not sorted:
-            self._handle_error(
-                nplike["awkward_sort_ascending", next.dtype.type, index.dtype.type](
-                    next.to(nplike),
-                    index.to(nplike),
-                    len(next),
-                )
+        # if not sorted:
+        #     parents_length = len(parents)
+        #     offsets_length = ak._v2.index.Index64.empty(1, nplike)
+        #     self._handle_error(
+        #         nplike[
+        #             "awkward_sorting_ranges_length",
+        #             offsets_length.dtype.type,
+        #             parents.dtype.type,
+        #         ](
+        #             offsets_length.to(nplike),
+        #             parents.to(nplike),
+        #             parents_length,
+        #         )
+        #     )
+        #
+        #     offsets = ak._v2.index.Index64.zeros(offsets_length[0], nplike)
+        #
+        #     self._handle_error(
+        #         nplike[
+        #             "awkward_sorting_ranges",
+        #             offsets.dtype.type,
+        #             parents.dtype.type,
+        #         ](
+        #             offsets.to(nplike),
+        #             offsets_length[0],
+        #             parents.to(nplike),
+        #             parents_length,
+        #         )
+        #     )
+        #
+        #     self._handle_error(
+        #         nplike["awkward_sort_ascending", next.dtype.type, index.dtype.type, offsets.dtype.type, ](
+        #             next.to(nplike),
+        #             index.to(nplike),
+        #             len(next),
+        #             offsets.to(nplike),
+        #             offsets_length[0],
+        #             parents_length,
+        #         )
+        #     )
+        #     print("parents", parents)
+        #     print("offsets", offsets)
+        #     print("sorted in ranges", next)
+        #
+        #     self._handle_error(
+        #         nplike["awkward_unique", next.dtype.type, length.dtype.type](
+        #             next.to(nplike),
+        #             len(self._index),
+        #             length.to(nplike),
+        #         )
+        #     )
+        #
+        # else:
+        self._handle_error(
+            nplike[
+                "awkward_unique_copy",
+                self._index.dtype.type,
+                next.dtype.type,
+                length.dtype.type,
+            ](
+                self._index.to(nplike),
+                next.to(nplike),
+                len(self._index),
+                length.to(nplike),
             )
-
-            self._handle_error(
-                nplike["awkward_unique", next.dtype.type, length.dtype.type](
-                    next.to(nplike),
-                    len(self._index),
-                    length.to(nplike),
-                )
-            )
-
-        else:
-            self._handle_error(
-                nplike[
-                    "awkward_unique_copy",
-                    self._index.dtype.type,
-                    next.dtype.type,
-                    length.dtype.type,
-                ](
-                    self._index.to(nplike),
-                    next.to(nplike),
-                    len(self._index),
-                    length.to(nplike),
-                )
-            )
+        )
         # start from 1 to drop Nones
-        return next[1 : length[0]]
+        return next[: length[0] - 1]
 
     def _is_subrange_equal(self, starts, stops, length, sorted=True):
         nplike = self.nplike
@@ -667,20 +702,16 @@ class IndexedOptionArray(Content):
         else:
             return next._subranges_equal(nextstarts, nextstops, len(nextstarts), False)
 
-    def _is_unique(self, negaxis, starts, parents):
+    def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._index) == 0:
             return True
 
-        nextindex = self._unique_index(self._index, False)
-        next = self._content._carry(nextindex, False, NestedIndexError)
+        projected = self.project()
+        return projected._is_unique(negaxis, starts, parents, outlength)
 
-        return next._is_unique(negaxis, starts, parents)
-
-    def _unique(self, negaxis, starts, parents):
-        nextindex = self._unique_index(self._index, False)
-        next = self._content._carry(nextindex, False, NestedIndexError)
-
-        return next._unique(negaxis, starts, parents)
+    def _unique(self, negaxis, starts, parents, outlength):
+        projected = self.project()
+        return projected._unique(negaxis, None, None, outlength)
 
     def _argsort_next(
         self,

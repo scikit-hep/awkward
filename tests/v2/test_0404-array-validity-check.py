@@ -83,6 +83,7 @@ def test_BitMaskedArray():
     ]
     assert array.is_unique(axis=None) is True
     assert ak.to_list(array.unique(axis=None)) == [0, 1, 5, 7, 8, 9]
+    assert ak.to_list(array.unique(axis=-1)) == [0, 1, 5, 7, 8, 9]
 
 
 def test_ByteMaskedArray():
@@ -222,9 +223,8 @@ def test_2d_in_axis():
     ]
     assert ak.to_list(array.unique(axis=-1)) == [
         [1.1, 2.2, 3.3, 4.4, 5.5],
-        # FIXME: add a flag to keep identical ranges?
-        # [1.1, 2.2, 3.3, 4.4, 5.5],
-        # [1.1, 2.2, 3.3, 4.4, 5.5],
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+        [1.1, 2.2, 3.3, 4.4, 5.5],
     ]
 
     assert ak.to_list(array.unique(axis=0)) == [
@@ -441,6 +441,7 @@ def test_ListOffsetArray():
     assert listoffsetarray1.is_unique() is False
     assert ak.to_list(listoffsetarray1.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
+        [1.1, 2.2, 3.3],
         [0.0, 4.4],
         [9.9],
         [5.5],
@@ -461,12 +462,15 @@ def test_ListOffsetArray():
         [5.5],
         [5.5],
     ]
-    # assert listoffsetarray2.is_unique() is False
+    assert listoffsetarray2.is_unique() is False
     assert ak.to_list(listoffsetarray2.unique(axis=-1)) == [
+        [1.1, 2.2, 3.3],
         [1.1, 2.2, 3.3],
         [0.0, 4.4],
         [9.9],
         [5.5],
+        [],
+        # FIXME: do not drop it        [5.5],
     ]
 
     content2 = ak.layout.NumpyArray(
@@ -544,7 +548,7 @@ def test_RegularArray():
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
-    assert regular_array.is_unique() is True
+    assert regular_array.is_unique() is False
     assert ak.to_list(regular_array.unique(axis=None)) == [
         1.5,
         1.6,
@@ -566,7 +570,7 @@ def test_RegularArray():
         [3.9, 6.9, 6.9],
         [None, None, None],
     ]
-    assert regular_array2.is_unique() is True
+    assert regular_array2.is_unique() is False
     assert ak.to_list(regular_array2.unique(axis=None)) == [3.9, 6.9]
 
 
@@ -689,3 +693,11 @@ def test_UnionArray():
     ]
     assert array.is_unique() is False
     assert ak.to_list(array.unique(axis=None)) == [1.0, 1.1, 2.0, 2.2, 3.0, 3.3]
+    assert ak.to_list(array.unique(axis=-1)) == [
+        [3.3],
+        [1.0],
+        [2.2],
+        [2.0],
+        [1.1],
+        [3.0],
+    ]
