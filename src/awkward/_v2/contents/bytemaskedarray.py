@@ -12,6 +12,7 @@ from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class ByteMaskedArray(Content):
@@ -678,3 +679,15 @@ class ByteMaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+        npmask = self._mask.to(numpy)
+        this_validbits = ak._v2._connect.pyarrow.to_validbits(npmask, self._valid_when)
+
+        return self._content._to_arrow(
+            pyarrow,
+            self,
+            ak._v2._connect.pyarrow.and_validbits(validbits, this_validbits),
+            length,
+            options,
+        )

@@ -135,6 +135,22 @@ if pyarrow is not None:
         pyarrow.large_binary(),
     )
 
+    _pyarrow_to_numpy_dtype = {
+        pyarrow.date32(): (True, np.dtype("M8[D]")),
+        pyarrow.date64(): (False, np.dtype("M8[ms]")),
+        pyarrow.time32("s"): (True, np.dtype("M8[s]")),
+        pyarrow.time32("ms"): (True, np.dtype("M8[ms]")),
+        pyarrow.time64("us"): (False, np.dtype("M8[us]")),
+        pyarrow.time64("ns"): (False, np.dtype("M8[ns]")),
+        pyarrow.timestamp("s"): (False, np.dtype("M8[s]")),
+        pyarrow.timestamp("ms"): (False, np.dtype("M8[ms]")),
+        pyarrow.timestamp("us"): (False, np.dtype("M8[us]")),
+        pyarrow.timestamp("ns"): (False, np.dtype("M8[ns]")),
+        pyarrow.duration("s"): (False, np.dtype("m8[s]")),
+        pyarrow.duration("ms"): (False, np.dtype("m8[ms]")),
+        pyarrow.duration("us"): (False, np.dtype("m8[us]")),
+        pyarrow.duration("ns"): (False, np.dtype("m8[ns]")),
+    }
 
 if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVersion(
     "1.17.0"
@@ -193,120 +209,115 @@ def and_validbits(validbits1, validbits2):
         return validbits1 & validbits2
 
 
-pyarrow_to_numpy_dtype = {
-    "date32": (True, np.dtype("M8[D]")),
-    "date64": (False, np.dtype("M8[ms]")),
-    "date32[day]": (True, np.dtype("M8[D]")),
-    "date64[ms]": (False, np.dtype("M8[ms]")),
-    "time32[s]": (True, np.dtype("M8[s]")),
-    "time32[ms]": (True, np.dtype("M8[ms]")),
-    "time64[us]": (False, np.dtype("M8[us]")),
-    "time64[ns]": (False, np.dtype("M8[ns]")),
-    "timestamp[s]": (False, np.dtype("M8[s]")),
-    "timestamp[ms]": (False, np.dtype("M8[ms]")),
-    "timestamp[us]": (False, np.dtype("M8[us]")),
-    "timestamp[ns]": (False, np.dtype("M8[ns]")),
-    "duration[s]": (False, np.dtype("m8[s]")),
-    "duration[ms]": (False, np.dtype("m8[ms]")),
-    "duration[us]": (False, np.dtype("m8[us]")),
-    "duration[ns]": (False, np.dtype("m8[ns]")),
-}
-
-
-def mask_and_offset_correction(out, array, mask, extension_type):
-    parameters = None
-    if isinstance(extension_type, AwkwardArrowType):
-        parameters = extension_type.mask_parameters
-
-    # All 'no return yet' cases need to become option-type (even if the UnmaskedArray
-    # is just going to get stripped off in the recursive step that calls this one).
-    if mask is None:
-        out = ak._v2.contents.UnmaskedArray(out, parameters=parameters)
+def to_awkwardarrow_storage_types(arrowtype):
+    if isinstance(arrowtype, AwkwardArrowType):
+        return arrowtype, arrowtype.storage_type
     else:
-        mask = ak._v2.index.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-        out = ak._v2.contents.BitMaskedArray(
-            mask,
+        return None, arrowtype
+
+
+def node_parameters(awkwardarrow_type):
+    if isinstance(awkwardarrow_type, AwkwardArrowType):
+        return awkwardarrow_type.node_parameters
+    else:
+        return None
+
+
+def popbuffers_finalize(out, array, validbits, awkwardarrow_type):
+    # Every buffer from Arrow must be offsets-corrected.
+    if array.offset != 0 or len(array) != len(out):
+        out = out[array.offset : array.offset + len(array)]
+
+    if isinstance(awkwardarrow_type, AwkwardArrowType):
+        mask_parameters = awkwardarrow_type.mask_parameters
+    else:
+        mask_parameters = None
+
+    # Everything must leave popbuffers as option-type; the mask_node will be
+    # removed by the next level up in popbuffers recursion if appropriate.
+    if validbits is None:
+        return ak._v2.contents.UnmaskedArray(out, parameters=mask_parameters)
+    else:
+        return ak._v2.contents.BitMaskedArray(
+            ak._v2.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
             out,
             valid_when=True,
             length=len(out),
             lsb_order=True,
-            parameters=parameters,
+            parameters=mask_parameters,
         )
 
-    # All 'no return yet' cases need to be corrected for pyarrow's 'offset'.
-    if array.offset == 0 and len(array) == len(out):
-        return out
-    else:
-        return out[array.offset : array.offset + len(array)]
 
+def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
+    # Start by removing the ExtensionArray wrapper.
+    paarray = paarray.cast(storage_type)
 
-def popbuffers(array, extension_type, storage_type, buffers):
     if isinstance(storage_type, pyarrow.lib.ExtensionType):
-        return popbuffers(array, storage_type, storage_type.storage_type, buffers)
+        raise NotImplementedError
+        # return popbuffers(paarray, storage_type, storage_type.storage_type, buffers)
 
     elif isinstance(storage_type, pyarrow.lib.PyExtensionType):
         raise NotImplementedError
 
     elif isinstance(storage_type, pyarrow.lib.DictionaryType):
-        index = popbuffers(array.indices, None, storage_type.index_type, buffers)
-        content = handle_arrow(array.dictionary)
+        raise NotImplementedError
+        # index = popbuffers(paarray.indices, None, storage_type.index_type, buffers)
+        # content = handle_arrow(paarray.dictionary)
 
-        assert type(index).is_OptionType
+        # assert type(index).is_OptionType
 
-        if content.parameter("__array__") == "categorical":
-            assert type(content).is_OptionType
-            parameters = content.parameters
-            content = content.content
-        else:
-            assert not type(content).is_OptionType
-            parameters = {"__array__": "categorical"}
+        # if content.parameter("__array__") == "categorical":
+        #     assert type(content).is_OptionType
+        #     parameters = content.parameters
+        #     content = content.content
+        # else:
+        #     assert not type(content).is_OptionType
+        #     parameters = {"__array__": "categorical"}
 
-        # output is already an option-type with offsets corrected
-        if not_null(extension_type, index):
-            return ak._v2.contents.IndexedArray(
-                ak._v2.index.Index32(index.content),
-                content,
-                parameters=parameters,
-            ).simplify_optiontype()  # might or might not simplify, depending on content
-        else:
-            return ak._v2.contents.ByteMaskedArray(
-                ak._v2.index.Index8(index.mask_as_bool(valid_when=True).view(np.int8)),
-                ak._v2.contents.IndexedArray(
-                    ak._v2.index.Index32(index.content), content
-                ).simplify_optiontype(),
-                valid_when=True,
-                parameters=parameters,
-            ).simplify_optiontype()  # ByteMasked + Indexed will definitely simplify
+        # # output is already an option-type with offsets corrected
+        # if not_null(extension_type, index):
+        #     return ak._v2.contents.IndexedArray(
+        #         ak._v2.index.Index32(index.content),
+        #         content,
+        #         parameters=parameters,
+        #     ).simplify_optiontype()  # might or might not simplify, depending on content
+        # else:
+        #     return ak._v2.contents.ByteMaskedArray(
+        #         ak._v2.index.Index8(index.mask_as_bool(valid_when=True).view(np.int8)),
+        #         ak._v2.contents.IndexedArray(
+        #             ak._v2.index.Index32(index.content), content
+        #         ).simplify_optiontype(),
+        #         valid_when=True,
+        #         parameters=parameters,
+        #     ).simplify_optiontype()  # ByteMasked + Indexed will definitely simplify
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeListType):
         raise NotImplementedError
 
     elif isinstance(storage_type, (pyarrow.lib.LargeListType, pyarrow.lib.ListType)):
         assert storage_type.num_buffers == 2
-        mask = buffers.pop(0)
-        data = buffers.pop(0)
-
-        sub_extension_type, sub_storage_type = to_extension_storage(
-            storage_type.value_type
-        )
+        validbits = buffers.pop(0)
+        paoffsets = buffers.pop(0)
 
         if isinstance(storage_type, pyarrow.lib.LargeListType):
-            offsets = ak._v2.index.Index64(numpy.frombuffer(data, dtype=np.int64))
+            akoffsets = ak._v2.index.Index64(
+                numpy.frombuffer(paoffsets, dtype=np.int64)
+            )
         else:
-            offsets = ak._v2.index.Index32(numpy.frombuffer(data, dtype=np.int32))
+            akoffsets = ak._v2.index.Index32(
+                numpy.frombuffer(paoffsets, dtype=np.int32)
+            )
 
-        content = popbuffers(
-            array.values, sub_extension_type, sub_storage_type, buffers
-        )
+        a, b = to_awkwardarrow_storage_types(storage_type.value_type)
+        akcontent = popbuffers(paarray.values, a, b, buffers)
+
         if not storage_type.value_field.nullable:
-            content = content.content
+            akcontent = akcontent.content  # strip the dummy option-type node
 
-        parameters = None
-        if isinstance(extension_type, AwkwardArrowType):
-            parameters = extension_type.node_parameters
-
-        out = ak._v2.contents.ListOffsetArray(offsets, content, parameters=parameters)
-        return mask_and_offset_correction(out, array, mask, extension_type)
+        out = ak._v2.contents.ListOffsetArray(
+            akoffsets, akcontent, parameters=node_parameters(awkwardarrow_type)
+        )
+        return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.MapType):
         raise NotImplementedError
@@ -315,35 +326,36 @@ def popbuffers(array, extension_type, storage_type, buffers):
         raise NotImplementedError
 
     elif storage_type in _string_like:
-        assert storage_type.num_buffers == 3
-        mask = buffers.pop(0)
-        offsets = buffers.pop(0)
-        content = buffers.pop(0)
+        raise NotImplementedError
+        # assert storage_type.num_buffers == 3
+        # mask = buffers.pop(0)
+        # offsets = buffers.pop(0)
+        # content = buffers.pop(0)
 
-        if storage_type in _string_like[:2]:
-            parameters = {"__array__": "string"}
-            sub_parameters = {"__array__": "char"}
-        else:
-            parameters = {"__array__": "bytestring"}
-            sub_parameters = {"__array__": "byte"}
+        # if storage_type in _string_like[:2]:
+        #     parameters = {"__array__": "string"}
+        #     sub_parameters = {"__array__": "char"}
+        # else:
+        #     parameters = {"__array__": "bytestring"}
+        #     sub_parameters = {"__array__": "byte"}
 
-        if isinstance(extension_type, AwkwardArrowType):
-            parameters = extension_type.node_parameters
+        # if isinstance(extension_type, AwkwardArrowType):
+        #     parameters = extension_type.node_parameters
 
-        if storage_type in _string_like[::2]:
-            offsets2 = ak._v2.index.Index32(numpy.frombuffer(offsets, dtype=np.int32))
-        else:
-            offsets2 = ak._v2.index.Index64(numpy.frombuffer(offsets, dtype=np.int64))
+        # if storage_type in _string_like[::2]:
+        #     offsets2 = ak._v2.index.Index32(numpy.frombuffer(offsets, dtype=np.int32))
+        # else:
+        #     offsets2 = ak._v2.index.Index64(numpy.frombuffer(offsets, dtype=np.int64))
 
-        out = ak._v2.contents.ListOffsetArray(
-            offsets2,
-            ak._v2.contents.NumpyArray(
-                numpy.frombuffer(content, dtype=np.uint8),
-                parameters=sub_parameters,
-            ),
-            parameters=parameters,
-        )
-        return mask_and_offset_correction(out, array, mask, extension_type)
+        # out = ak._v2.contents.ListOffsetArray(
+        #     offsets2,
+        #     ak._v2.contents.NumpyArray(
+        #         numpy.frombuffer(content, dtype=np.uint8),
+        #         parameters=sub_parameters,
+        #     ),
+        #     parameters=parameters,
+        # )
+        # return mask_and_offset_correction(out, paarray, mask, extension_type)
 
     elif isinstance(storage_type, pyarrow.lib.StructType):
         raise NotImplementedError
@@ -373,77 +385,69 @@ def popbuffers(array, extension_type, storage_type, buffers):
         raise NotImplementedError
 
     elif storage_type == pyarrow.bool_():
-        assert storage_type.num_buffers == 2
-        mask = buffers.pop(0)
-        data = buffers.pop(0)
+        raise NotImplementedError
+        # assert storage_type.num_buffers == 2
+        # mask = buffers.pop(0)
+        # data = buffers.pop(0)
 
-        bytearray = unpackbits(numpy.frombuffer(data, dtype=np.uint8), len(array))
+        # bytearray = unpackbits(numpy.frombuffer(data, dtype=np.uint8), len(paarray))
 
-        parameters = None
-        if isinstance(extension_type, AwkwardArrowType):
-            parameters = extension_type.node_parameters
+        # parameters = None
+        # if isinstance(extension_type, AwkwardArrowType):
+        #     parameters = extension_type.node_parameters
 
-        out = ak._v2.contents.NumpyArray(
-            bytearray.view(np.bool_), parameters=parameters
-        )
-        return mask_and_offset_correction(out, array, mask, extension_type)
+        # out = ak._v2.contents.NumpyArray(
+        #     bytearray.view(np.bool_), parameters=parameters
+        # )
+        # return mask_and_offset_correction(out, paarray, mask, extension_type)
 
     elif (
         isinstance(storage_type, pyarrow.lib.DataType) and storage_type.num_buffers == 1
     ):
-        # this is DataType(null)
-        mask = buffers.pop(0)
-        assert storage_type.num_fields == 0
+        raise NotImplementedError
+        # # this is DataType(null)
+        # mask = buffers.pop(0)
+        # assert storage_type.num_fields == 0
 
-        node_parameters, mask_parameters = None, None
-        if isinstance(extension_type, AwkwardArrowType):
-            node_parameters = extension_type.node_parameters
-            mask_parameters = extension_type.mask_parameters
+        # node_parameters, mask_parameters = None, None
+        # if isinstance(extension_type, AwkwardArrowType):
+        #     node_parameters = extension_type.node_parameters
+        #     mask_parameters = extension_type.mask_parameters
 
-        out = ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index64(numpy.full(len(array), -1, dtype=np.int64)),
-            ak._v2.contents.EmptyArray(parameters=node_parameters),
-            parameters=mask_parameters,
-        )
+        # out = ak._v2.contents.IndexedOptionArray(
+        #     ak._v2.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
+        #     ak._v2.contents.EmptyArray(parameters=node_parameters),
+        #     parameters=mask_parameters,
+        # )
 
-        # output is already an option-type with offsets corrected
-        if array.offset == 0 and len(array) == len(out):
-            return out
-        else:
-            return out[array.offset : array.offset + len(array)]
+        # # output is already an option-type with offsets corrected
+        # if paarray.offset == 0 and len(paarray) == len(out):
+        #     return out
+        # else:
+        #     return out[paarray.offset : paarray.offset + len(paarray)]
 
     elif isinstance(storage_type, pyarrow.lib.DataType):
         assert storage_type.num_buffers == 2
-        mask = buffers.pop(0)
+        validbits = buffers.pop(0)
         data = buffers.pop(0)
 
-        to64, dt = pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
+        to64, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))
         if to64:
             data = numpy.frombuffer(data, dtype=np.int32).astype(np.int64)
         if dt is None:
             dt = storage_type.to_pandas_dtype()
 
-        parameters = None
-        if isinstance(extension_type, AwkwardArrowType):
-            parameters = extension_type.node_parameters
-
         out = ak._v2.contents.NumpyArray(
-            numpy.frombuffer(data, dtype=dt), parameters=parameters
+            numpy.frombuffer(data, dtype=dt),
+            parameters=node_parameters(awkwardarrow_type),
         )
-        return mask_and_offset_correction(out, array, mask, extension_type)
+        return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     else:
         raise TypeError("unrecognized Arrow array type: {0}".format(repr(storage_type)))
 
 
-def to_extension_storage(tpe):
-    if isinstance(tpe, pyarrow.lib.ExtensionType):
-        return tpe, tpe.storage_type
-    else:
-        return None, tpe
-
-
-def from_storage(storage_type, use_extensionarray, mask, node):
+def to_awkwardarrow_type(storage_type, use_extensionarray, mask, node):
     if use_extensionarray:
         return AwkwardArrowType(
             storage_type,
@@ -456,22 +460,24 @@ def from_storage(storage_type, use_extensionarray, mask, node):
         return storage_type
 
 
-def not_null(extension_type, array):
-    if isinstance(extension_type, AwkwardArrowType):
-        return extension_type.mask_type is None
+def not_null(awkwardarrow_type, akarray):
+    if awkwardarrow_type is None:
+        # option-type but not-containing-any-nulls could accidentally be stripped
+        return isinstance(akarray, ak._v2.contents.UnmaskedArray)
     else:
-        return isinstance(array, ak._v2.contents.UnmaskedArray)
+        # always gets option-typeness right
+        return awkwardarrow_type.mask_type is None
 
 
 def handle_arrow(obj, pass_empty_field=False):
     if isinstance(obj, pyarrow.lib.Array):
         buffers = obj.buffers()
-        extension_type, storage_type = to_extension_storage(obj.type)
 
-        out = popbuffers(obj, extension_type, storage_type, buffers)
+        awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(obj.type)
+        out = popbuffers(obj, awkwardarrow_type, storage_type, buffers)
         assert len(buffers) == 0
 
-        if not_null(extension_type, out):
+        if not_null(awkwardarrow_type, out):
             assert type(out).is_OptionType
             return out.content
         else:

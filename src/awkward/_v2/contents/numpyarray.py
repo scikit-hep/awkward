@@ -691,6 +691,27 @@ class NumpyArray(Content):
                 )
         return ""
 
+    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+        if self._data.ndim != 1:
+            raise NotImplementedError
+
+        nparray = self.to(numpy)
+        storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
+
+        if issubclass(nparray.dtype.type, (bool, np.bool_)):
+            raise NotImplementedError
+
+        return pyarrow.Array.from_buffers(
+            ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                storage_type, options["extensionarray"], mask_node, self
+            ),
+            length,
+            [
+                None if validbits is None else pyarrow.py_buffer(validbits),
+                pyarrow.py_buffer(nparray),
+            ],
+        )
+
     # def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
     #     if self._data.ndim != 1:
     #         return self.toRegularArray()._to_arrow(
