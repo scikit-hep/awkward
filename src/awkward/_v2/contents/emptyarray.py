@@ -205,7 +205,7 @@ class EmptyArray(Content):
     def _validityerror(self, path):
         return ""
 
-    # def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+    # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
     #     storage_type = pyarrow.null()
 
     #     return pyarrow.Array.from_buffers(

@@ -1341,7 +1341,7 @@ class ListOffsetArray(Content):
             else:
                 return self.content.validityerror(path + ".content")
 
-    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         is_string = self.parameter("__array__") == "string"
         is_bytestring = self.parameter("__array__") == "bytestring"
         if is_string:
@@ -1413,7 +1413,7 @@ class ListOffsetArray(Content):
                 ),
                 length,
                 [
-                    None if validbits is None else pyarrow.py_buffer(validbits),
+                    ak._v2._connect.pyarrow.to_validbits(validbytes),
                     pyarrow.py_buffer(npoffsets),
                 ],
                 children=[paarray],

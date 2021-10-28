@@ -680,14 +680,13 @@ class ByteMaskedArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
-        npmask = self._mask.to(numpy)
-        this_validbits = ak._v2._connect.pyarrow.to_validbits(npmask, self._valid_when)
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        this_validbytes = self.mask_as_bool(valid_when=True)
 
         return self._content._to_arrow(
             pyarrow,
             self,
-            ak._v2._connect.pyarrow.and_validbits(validbits, this_validbits),
+            ak._v2._connect.pyarrow.and_validbytes(validbytes, this_validbytes),
             length,
             options,
         )

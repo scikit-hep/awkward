@@ -727,7 +727,7 @@ class IndexedArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    # def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+    # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
     #     index = self._index.to(numpy)
 
     #     if self.parameter("__array__") == "categorical":

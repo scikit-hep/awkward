@@ -190,23 +190,30 @@ else:
         )
 
 
-def to_validbits(bytemask, valid_when):
-    if bytemask is None:
+# def to_validbits(bytemask, valid_when):
+#     if bytemask is None:
+#         return None
+#     else:
+#         out = packbits(bytemask.view(np.bool_))
+#         if not valid_when:
+#             numpy.bitwise_not(out, out=out)
+#         return out
+
+
+def and_validbytes(validbytes1, validbytes2):
+    if validbytes1 is None:
+        return validbytes2
+    elif validbytes2 is None:
+        return validbytes1
+    else:
+        return validbytes1 & validbytes2
+
+
+def to_validbits(validbytes):
+    if validbytes is None:
         return None
     else:
-        out = packbits(bytemask.view(np.bool_))
-        if not valid_when:
-            numpy.bitwise_not(out, out=out)
-        return out
-
-
-def and_validbits(validbits1, validbits2):
-    if validbits1 is None:
-        return validbits2
-    elif validbits2 is None:
-        return validbits1
-    else:
-        return validbits1 & validbits2
+        return pyarrow.py_buffer(packbits(validbytes))
 
 
 def to_awkwardarrow_storage_types(arrowtype):

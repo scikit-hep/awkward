@@ -1176,7 +1176,7 @@ class IndexedOptionArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    # def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+    # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
     #     index = numpy.array(self._index, copy=True)
     #     nulls = index < 0
     #     index[nulls] = 0

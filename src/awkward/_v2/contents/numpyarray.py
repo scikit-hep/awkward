@@ -691,7 +691,7 @@ class NumpyArray(Content):
                 )
         return ""
 
-    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self._data.ndim != 1:
             raise NotImplementedError
 
@@ -707,7 +707,7 @@ class NumpyArray(Content):
             ),
             length,
             [
-                None if validbits is None else pyarrow.py_buffer(validbits),
+                ak._v2._connect.pyarrow.to_validbits(validbytes),
                 pyarrow.py_buffer(nparray),
             ],
         )
