@@ -1341,100 +1341,88 @@ class ListOffsetArray(Content):
             else:
                 return self.content.validityerror(path + ".content")
 
-    def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
-        is_string = self.parameter("__array__") == "string"
-        is_bytestring = self.parameter("__array__") == "bytestring"
-        if is_string:
-            downsize = options["string_to32"]
-        elif is_bytestring:
-            downsize = options["bytestring_to32"]
-        else:
-            downsize = options["list_to32"]
+    # def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
+    #     is_string = self.parameter("__array__") == "string"
+    #     is_bytestring = self.parameter("__array__") == "bytestring"
+    #     if is_string:
+    #         downsize = options["string_to32"]
+    #     elif is_bytestring:
+    #         downsize = options["bytestring_to32"]
+    #     else:
+    #         downsize = options["list_to32"]
 
-        next_offsets = self._offsets.to(numpy)
-        next_content = self._content[next_offsets[0] : next_offsets[-1]]
+    #     next_offsets = self._offsets.to(numpy)
+    #     next_content = self._content[next_offsets[0] : next_offsets[-1]]
 
-        if issubclass(next_offsets.dtype.type, np.int64):
-            if downsize and next_offsets[-1] < np.iinfo(np.int32).max:
-                next_offsets = next_offsets.astype(np.int32)
+    #     if issubclass(next_offsets.dtype.type, np.int64):
+    #         if downsize and next_offsets[-1] < np.iinfo(np.int32).max:
+    #             next_offsets = next_offsets.astype(np.int32)
 
-        if issubclass(next_offsets.dtype.type, np.uint32):
-            if next_offsets[-1] < np.iinfo(np.int32).max:
-                next_offsets = next_offsets.astype(np.int32)
-            else:
-                next_offsets = next_offsets.astype(np.int64)
+    #     if issubclass(next_offsets.dtype.type, np.uint32):
+    #         if next_offsets[-1] < np.iinfo(np.int32).max:
+    #             next_offsets = next_offsets.astype(np.int32)
+    #         else:
+    #             next_offsets = next_offsets.astype(np.int64)
 
-        if is_string or is_bytestring:
-            assert isinstance(next_content, ak._v2.contents.NumpyArray)
+    #     if is_string or is_bytestring:
+    #         assert isinstance(next_content, ak._v2.contents.NumpyArray)
 
-            if issubclass(next_offsets.dtype.type, np.int32):
-                if is_string:
-                    string_storage_type = pyarrow.string()
-                else:
-                    string_storage_type = pyarrow.binary()
-            else:
-                if is_string:
-                    string_storage_type = pyarrow.large_string()
-                else:
-                    string_storage_type = pyarrow.large_binary()
+    #         if issubclass(next_offsets.dtype.type, np.int32):
+    #             if is_string:
+    #                 string_storage_type = pyarrow.string()
+    #             else:
+    #                 string_storage_type = pyarrow.binary()
+    #         else:
+    #             if is_string:
+    #                 string_storage_type = pyarrow.large_string()
+    #             else:
+    #                 string_storage_type = pyarrow.large_binary()
 
-            return pyarrow.Array.from_buffers(
-                ak._v2._connect.pyarrow.from_storage(
-                    string_storage_type, options["use_extensionarray"], mask_node, self
-                ),
-                len(next_offsets) - 1,
-                [
-                    None if validbits is None else pyarrow.py_buffer(validbits),
-                    pyarrow.py_buffer(next_offsets),
-                    pyarrow.py_buffer(next_content.data),
-                ],
-            )
+    #         return pyarrow.Array.from_buffers(
+    #             ak._v2._connect.pyarrow.from_storage(
+    #                 string_storage_type, options["use_extensionarray"], mask_node, self
+    #             ),
+    #             len(next_offsets) - 1,
+    #             [
+    #                 None if validbits is None else pyarrow.py_buffer(validbits),
+    #                 pyarrow.py_buffer(next_offsets),
+    #                 pyarrow.py_buffer(next_content.data),
+    #             ],
+    #         )
 
-        else:
-            content_array = next_content._to_arrow(
-                pyarrow, None, None, len(next_content), options
-            )
-            (
-                content_extension_type,
-                content_storage_type,
-            ) = ak._v2._connect.pyarrow.to_extension_storage(content_array.type)
+    #     else:
+    #         content_array = next_content._to_arrow(
+    #             pyarrow, None, None, len(next_content), options
+    #         )
+    #         (
+    #             content_extension_type,
+    #             content_storage_type,
+    #         ) = ak._v2._connect.pyarrow.to_extension_storage(content_array.type)
 
-            nullable_content_type = pyarrow.list_(
-                content_array.type
-            ).value_field.with_nullable(type(next_content).is_OptionType)
+    #         nullable_content_type = pyarrow.list_(
+    #             content_array.type
+    #         ).value_field.with_nullable(type(next_content).is_OptionType)
 
-            if issubclass(next_offsets.dtype.type, np.int32):
-                list_type = pyarrow.list_(nullable_content_type)
-            else:
-                list_type = pyarrow.large_list(nullable_content_type)
+    #         if issubclass(next_offsets.dtype.type, np.int32):
+    #             list_type = pyarrow.list_(nullable_content_type)
+    #         else:
+    #             list_type = pyarrow.large_list(nullable_content_type)
 
-            if options["use_extensionarray"]:
-                list_type = ak._v2._connect.pyarrow.AwkwardArrowType(
-                    list_type,
-                    ak._v2._util.direct_Content_subclass_name(mask_node),
-                    ak._v2._util.direct_Content_subclass_name(self),
-                    None if mask_node is None else mask_node.parameters,
-                    self.parameters,
-                )
+    #         if options["use_extensionarray"]:
+    #             list_type = ak._v2._connect.pyarrow.AwkwardArrowType(
+    #                 list_type,
+    #                 ak._v2._util.direct_Content_subclass_name(mask_node),
+    #                 ak._v2._util.direct_Content_subclass_name(self),
+    #                 None if mask_node is None else mask_node.parameters,
+    #                 self.parameters,
+    #             )
 
-            return pyarrow.Array.from_buffers(
-                list_type,
-                len(next_offsets) - 1,
-                [
-                    None if validbits is None else pyarrow.py_buffer(validbits),
-                    pyarrow.py_buffer(next_offsets),
-                ],
-                children=[content_array],
-            )
-
-            # return pyarrow.Array.from_buffers(
-            #     ak._v2._connect.pyarrow.from_storage(
-            #         list_storage_type, options["use_extensionarray"], mask_node, self
-            #     ),
-            #     len(next_offsets) - 1,
-            #     [
-            #         None if validbits is None else pyarrow.py_buffer(validbits),
-            #         pyarrow.py_buffer(next_offsets),
-            #     ],
-            #     children=[content_array],
-            # )
+    #         return pyarrow.Array.from_buffers(
+    #             list_type,
+    #             len(next_offsets) - 1,
+    #             [
+    #                 None if validbits is None else pyarrow.py_buffer(validbits),
+    #                 pyarrow.py_buffer(next_offsets),
+    #             ],
+    #             children=[content_array],
+    #         )

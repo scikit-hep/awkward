@@ -1232,7 +1232,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         list_to32=False,
         string_to32=False,
         bytestring_to32=False,
-        use_extensionarray=False,
+        use_extensionarray=True,
     ):
         import awkward._v2._connect.pyarrow
 
