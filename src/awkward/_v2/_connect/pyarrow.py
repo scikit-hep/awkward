@@ -291,36 +291,20 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         )
 
     elif isinstance(storage_type, pyarrow.lib.DictionaryType):
-        raise NotImplementedError
-        # index = popbuffers(paarray.indices, None, storage_type.index_type, buffers)
-        # content = handle_arrow(paarray.dictionary)
+        index = popbuffers(
+            paarray.indices, None, storage_type.index_type, buffers
+        ).content.data
+        content = handle_arrow(paarray.dictionary)
 
-        # assert type(index).is_OptionType
+        parameters = mask_parameters(paarray.dictionary.type)
+        if parameters is None:
+            parameters = {"__array__": "categorical"}
 
-        # if content.parameter("__array__") == "categorical":
-        #     assert type(content).is_OptionType
-        #     parameters = content.parameters
-        #     content = content.content
-        # else:
-        #     assert not type(content).is_OptionType
-        #     parameters = {"__array__": "categorical"}
-
-        # # output is already an option-type with offsets corrected
-        # if not_null(extension_type, index):
-        #     return ak._v2.contents.IndexedArray(
-        #         ak._v2.index.Index32(index.content),
-        #         content,
-        #         parameters=parameters,
-        #     ).simplify_optiontype()  # might or might not simplify, depending on content
-        # else:
-        #     return ak._v2.contents.ByteMaskedArray(
-        #         ak._v2.index.Index8(index.mask_as_bool(valid_when=True).view(np.int8)),
-        #         ak._v2.contents.IndexedArray(
-        #             ak._v2.index.Index32(index.content), content
-        #         ).simplify_optiontype(),
-        #         valid_when=True,
-        #         parameters=parameters,
-        #     ).simplify_optiontype()  # ByteMasked + Indexed will definitely simplify
+        return ak._v2.contents.IndexedOptionArray(
+            ak._v2.index.Index(index),
+            content,
+            parameters=parameters,
+        ).simplify_optiontype()
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeListType):
         raise NotImplementedError
@@ -343,7 +327,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         akcontent = popbuffers(paarray.values, a, b, buffers)
 
         if not storage_type.value_field.nullable:
-            akcontent = akcontent.content  # strip the dummy option-type node
+            akcontent = remove_optiontype(akcontent)  # strip the dummy option-type node
 
         out = ak._v2.contents.ListOffsetArray(
             akoffsets, akcontent, parameters=node_parameters(awkwardarrow_type)
@@ -467,7 +451,17 @@ def not_null(awkwardarrow_type, akarray):
         return isinstance(akarray, ak._v2.contents.UnmaskedArray)
     else:
         # always gets option-typeness right
-        return awkwardarrow_type.mask_type is None
+        return awkwardarrow_type.mask_type in (None, "IndexedArray")
+
+
+def remove_optiontype(akarray):
+    assert type(akarray).is_OptionType
+    if isinstance(akarray, ak._v2.contents.IndexedOptionArray):
+        return ak._v2.contents.IndexedArray(
+            akarray.index, akarray.content, akarray.identifier, akarray.parameters
+        )
+    else:
+        return akarray.content
 
 
 def handle_arrow(obj, pass_empty_field=False):
@@ -478,9 +472,13 @@ def handle_arrow(obj, pass_empty_field=False):
         out = popbuffers(obj, awkwardarrow_type, storage_type, buffers)
         assert len(buffers) == 0
 
+        if isinstance(storage_type, pyarrow.lib.DictionaryType):
+            awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(
+                obj.dictionary.type
+            )
+
         if not_null(awkwardarrow_type, out):
-            assert type(out).is_OptionType
-            return out.content
+            return remove_optiontype(out)
         else:
             return out
 

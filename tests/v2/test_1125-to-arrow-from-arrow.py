@@ -221,19 +221,16 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
-# def test_dictionary_encoding():
-#     akarray = ak._v2.contents.IndexedArray(
-#         ak._v2.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
-#         ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
-#         parameters={"__array__": "categorical", "which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(use_extensionarray=False)
-#     assert ak.to_list(akarray) == paarray.to_pylist()
-#     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-#     assert ak.to_list(akarray) == ak.to_list(akarray2)
-#     assert akarray2.parameter("__array__") == "categorical"
-#     assert akarray2.parameter("which") is None
-#     assert akarray2.content.parameter("which") is None
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_dictionary_encoding(tmp_path, extensionarray):
+    akarray = ak._v2.contents.IndexedArray(
+        ak._v2.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
+        ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
+        parameters={"__array__": "categorical", "which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
 # @pytest.mark.parametrize("list_to32", [False, True])

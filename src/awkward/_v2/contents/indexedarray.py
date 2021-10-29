@@ -731,7 +731,14 @@ class IndexedArray(Content):
         index = self._index.to(numpy)
 
         if self.parameter("__array__") == "categorical":
-            raise NotImplementedError
+            dictionary = self._content._to_arrow(
+                pyarrow, self, None, len(self._content), options
+            )
+            return pyarrow.DictionaryArray.from_arrays(
+                index,
+                dictionary,
+                None if validbytes is None else ~validbytes,
+            )
 
         else:
             if len(self._content) == 0:
