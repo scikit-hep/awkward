@@ -1176,25 +1176,25 @@ class IndexedOptionArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-    #     index = numpy.array(self._index, copy=True)
-    #     nulls = index < 0
-    #     index[nulls] = 0
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        index = numpy.array(self._index, copy=True)
+        this_validbytes = self.mask_as_bool(valid_when=True)
+        index[~this_validbytes] = 0
 
-    #     parameters = None
-    #     if self.parameter("__array__") == "categorical":
-    #         # all other parameters will be on the ExtensionType
-    #         parameters = {"__array__": "categorical"}
+        if self.parameter("__array__") == "categorical":
+            # The new IndexedArray will have this parameter, but the rest
+            # will be in the AwkwardArrowType.mask_parameters.
+            next_parameters = {"__array__": "categorical"}
+        else:
+            next_parameters = None
 
-    #     this_validbits = ak._v2._connect.pyarrow.to_validbits(nulls, valid_when=False)
-
-    #     next = ak._v2.contents.IndexedArray(
-    #         ak._v2.index.Index(index), self._content, parameters=parameters
-    #     )
-    #     return next._to_arrow(
-    #         pyarrow,
-    #         self,
-    #         ak._v2._connect.pyarrow.and_validbits(validbits, this_validbits),
-    #         length,
-    #         options,
-    #     )
+        next = ak._v2.contents.IndexedArray(
+            ak._v2.index.Index(index), self._content, parameters=next_parameters
+        )
+        return next._to_arrow(
+            pyarrow,
+            self,
+            ak._v2._connect.pyarrow.and_validbytes(validbytes, this_validbytes),
+            length,
+            options,
+        )

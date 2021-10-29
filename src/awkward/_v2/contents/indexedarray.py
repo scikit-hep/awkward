@@ -727,6 +727,27 @@ class IndexedArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        index = self._index.to(numpy)
+
+        if self.parameter("__array__") == "categorical":
+            raise NotImplementedError
+
+        else:
+            if len(self._content) == 0:
+                # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+                # every masked value is self._content[0], unless len(self._content) == 0.
+                # In that case, don't call self._content[index]; it's empty anyway.
+                next = self._content.merge_parameters(self._parameters)
+                return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+            elif isinstance(self._content, ak._v2.contents.RecordArray):
+                raise NotImplementedError
+
+            else:
+                next = self._content[index].merge_parameters(self._parameters)
+                return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
     # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
     #     index = self._index.to(numpy)
 
@@ -742,18 +763,3 @@ class IndexedArray(Content):
     #             ).view(np.bool_)
 
     #         return pyarrow.DictionaryArray.from_arrays(index, dictionary, maskedbytes)
-
-    #     else:
-    #         if len(self._content) == 0:
-    #             # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
-    #             # every masked value is self._content[0], unless len(self._content) == 0.
-    #             # In that case, don't call self._content[index]; it's empty anyway.
-    #             next = self._content.merge_parameters(self._parameters)
-    #             return next._to_arrow(pyarrow, mask_node, validbits, length, options)
-
-    #         elif isinstance(self._content, ak._v2.contents.RecordArray):
-    #             raise NotImplementedError
-
-    #         else:
-    #             next = self._content[index].merge_parameters(self._parameters)
-    #             return next._to_arrow(pyarrow, mask_node, validbits, length, options)

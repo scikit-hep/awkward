@@ -170,15 +170,31 @@ def test_numpyarray_bool(tmp_path, extensionarray):
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
-# def test_numpyarray_bool():
-#     akarray = ak._v2.contents.NumpyArray(
-#         np.array([1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1], dtype=np.bool_)
-#     )
-#     paarray = akarray.to_arrow()
-#     assert ak.to_list(akarray) == paarray.to_pylist()
-#     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-#     assert ak.to_list(akarray) == ak.to_list(akarray2)
-#     assert akarray.form.type == akarray2.form.type
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
+    akarray = ak._v2.contents.IndexedOptionArray(
+        ak._v2.index.Index64(np.array([2, 0, 0, -1, 3, 1, 5, -1, 2], dtype=np.int64)),
+        ak._v2.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]),
+            parameters={"which": "inner"},
+        ),
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.IndexedArray(
+        ak._v2.index.Index64(np.array([2, 0, 0, 3, 1, 5, 2], dtype=np.int64)),
+        ak._v2.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]),
+            parameters={"which": "inner"},
+        ),
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
 # def test_indexedoptionarray_emptyarray_extensionarray(tmp_path):
