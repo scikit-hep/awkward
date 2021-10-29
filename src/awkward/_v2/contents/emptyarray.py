@@ -205,6 +205,21 @@ class EmptyArray(Content):
     def _validityerror(self, path):
         return ""
 
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return pyarrow.Array.from_buffers(
+            ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                pyarrow.null(), options["extensionarray"], mask_node, self
+            ),
+            length,
+            [
+                ak._v2._connect.pyarrow.to_validbits(validbytes),
+            ],
+            null_count=length,
+        )
+
+
+
+
     # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
     #     storage_type = pyarrow.null()
 

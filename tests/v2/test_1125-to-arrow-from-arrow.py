@@ -197,6 +197,18 @@ def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
+    akarray = ak._v2.contents.IndexedOptionArray(
+        ak._v2.index.Index64(np.array([2, 0, 0, -1, 3, 1, 5, -1, 2], dtype=np.int64)),
+        ak._v2.contents.EmptyArray(parameters={"which": "inner"}),
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    # arrow_round_trip(akarray, paarray, extensionarray)
+    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+
 # def test_indexedoptionarray_emptyarray_extensionarray(tmp_path):
 #     filename = os.path.join(tmp_path, "whatever.parquet")
 
