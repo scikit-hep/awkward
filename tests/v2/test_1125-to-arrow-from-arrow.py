@@ -13,7 +13,6 @@ pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
 
 def arrow_round_trip(akarray, paarray, extensionarray):
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
     assert ak.to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
     assert ak.to_list(akarray2) == ak.to_list(akarray)
@@ -23,7 +22,6 @@ def arrow_round_trip(akarray, paarray, extensionarray):
 
 def parquet_round_trip(akarray, paarray, extensionarray, tmp_path):
     filename = os.path.join(tmp_path, "whatever.parquet")
-
     pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
     table = pyarrow_parquet.read_table(filename)
     akarray3 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
@@ -200,67 +198,27 @@ def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
     akarray = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index64(np.array([2, 0, 0, -1, 3, 1, 5, -1, 2], dtype=np.int64)),
+        ak._v2.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
         ak._v2.contents.EmptyArray(parameters={"which": "inner"}),
         parameters={"which": "outer"},
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
-    # arrow_round_trip(akarray, paarray, extensionarray)
-    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    arrow_round_trip(akarray, paarray, extensionarray)
 
+    # https://issues.apache.org/jira/browse/ARROW-14522
+    if extensionarray:
+        paarray = akarray.to_arrow(extensionarray=extensionarray, emptyarray_to="f8")
+        akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
+        assert ak.to_list(akarray2) == ak.to_list(akarray)
 
-# def test_indexedoptionarray_emptyarray_extensionarray(tmp_path):
-#     filename = os.path.join(tmp_path, "whatever.parquet")
+        filename = os.path.join(tmp_path, "whatever.parquet")
+        pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
+        table = pyarrow_parquet.read_table(filename)
+        akarray3 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
+        assert ak.to_list(akarray3) == ak.to_list(akarray)
 
-#     akarray = ak._v2.contents.IndexedOptionArray(
-#         ak._v2.index.Index64(np.full(14, -1, dtype=np.uint64)),
-#         ak._v2.contents.EmptyArray(parameters={"which": "inner"}),
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(use_extensionarray=True)
-#     assert ak.to_list(akarray) == paarray.to_pylist()
-#     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-#     assert ak.to_list(akarray) == ak.to_list(akarray2)
-#     assert akarray.form.type == akarray2.form.type
-#     assert akarray2.parameter("which") == "outer"
-#     assert akarray2.content.parameter("which") == "inner"
-
-#     pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
-#     # table = pyarrow_parquet.read_table(filename)
-#     # akarray3 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-#     # assert ak.to_list(akarray) == ak.to_list(akarray3)
-#     # assert akarray.form.type == akarray3.form.type
-#     # assert akarray3.parameter("which") == "outer"
-#     # assert akarray3.content.parameter("which") == "inner"
-
-
-# def test_indexedoptionarray_numpyarray_extensionarray(tmp_path):
-#     filename = os.path.join(tmp_path, "whatever.parquet")
-
-#     akarray = ak._v2.contents.IndexedOptionArray(
-#         ak._v2.index.Index64(
-#             np.array([-1, 5, -1, 4, 3, 2, 1, -1, 0, -1], dtype=np.uint64)
-#         ),
-#         ak._v2.contents.NumpyArray(
-#             [1.1, 2.2, 3.3, 4.4, 5.5, 6.6], parameters={"which": "inner"}
-#         ),
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(use_extensionarray=True)
-#     assert ak.to_list(akarray) == paarray.to_pylist()
-#     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-#     assert ak.to_list(akarray) == ak.to_list(akarray2)
-#     assert akarray.form.type == akarray2.form.type
-#     assert akarray2.parameter("which") == "outer"
-#     assert akarray2.content.parameter("which") == "inner"
-
-#     pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
-#     table = pyarrow_parquet.read_table(filename)
-#     akarray3 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-#     assert ak.to_list(akarray) == ak.to_list(akarray3)
-#     assert akarray.form.type == akarray3.form.type
-#     assert akarray3.parameter("which") == "outer"
-#     assert akarray3.content.parameter("which") == "inner"
+    else:
+        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
 # def test_dictionary_encoding():

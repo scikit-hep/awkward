@@ -60,9 +60,9 @@ class EmptyArray(Content):
             ak._v2._util.merge_parameters(self._parameters, parameters),
         )
 
-    def toNumpyArray(self, dtype, nplike=None):
+    def toNumpyArray(self, dtype, nplike=numpy):
         return ak._v2.contents.numpyarray.NumpyArray(
-            numpy.empty(0, dtype), self._identifier, self._parameters, nplike=nplike
+            nplike.empty(0, dtype), self._identifier, self._parameters, nplike=nplike
         )
 
     def _getitem_nothing(self):
@@ -206,31 +206,24 @@ class EmptyArray(Content):
         return ""
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        return pyarrow.Array.from_buffers(
-            ak._v2._connect.pyarrow.to_awkwardarrow_type(
-                pyarrow.null(), options["extensionarray"], mask_node, self
-            ),
-            length,
-            [
-                ak._v2._connect.pyarrow.to_validbits(validbytes),
-            ],
-            null_count=length,
-        )
+        if options["emptyarray_to"] is None:
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                    pyarrow.null(), options["extensionarray"], mask_node, self
+                ),
+                length,
+                [
+                    ak._v2._connect.pyarrow.to_validbits(validbytes),
+                ],
+                null_count=length,
+            )
 
-
-
-
-    # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-    #     storage_type = pyarrow.null()
-
-    #     return pyarrow.Array.from_buffers(
-    #         ak._v2._connect.pyarrow.from_storage(
-    #             storage_type,
-    #             options["use_extensionarray"],
-    #             mask_node,
-    #             self,
-    #         ),
-    #         length,
-    #         [None if validbits is None else pyarrow.py_buffer(validbits)],
-    #         null_count=length,
-    #     )
+        else:
+            dtype = np.dtype(options["emptyarray_to"])
+            next = ak._v2.contents.numpyarray.NumpyArray(
+                numpy.empty(length, dtype),
+                self._identifier,
+                self._parameters,
+                nplike=numpy,
+            )
+            return next._to_arrow(pyarrow, mask_node, validbytes, length, options)

@@ -210,7 +210,7 @@ def to_null_count(validbytes, count_nulls):
     if validbytes is None or not count_nulls:
         return -1
     else:
-        return numpy.count_nonzero(validbytes)
+        return len(validbytes) - numpy.count_nonzero(validbytes)
 
 
 def to_awkwardarrow_storage_types(arrowtype):
@@ -223,6 +223,13 @@ def to_awkwardarrow_storage_types(arrowtype):
 def node_parameters(awkwardarrow_type):
     if isinstance(awkwardarrow_type, AwkwardArrowType):
         return awkwardarrow_type.node_parameters
+    else:
+        return None
+
+
+def mask_parameters(awkwardarrow_type):
+    if isinstance(awkwardarrow_type, AwkwardArrowType):
+        return awkwardarrow_type.mask_parameters
     else:
         return None
 
@@ -253,15 +260,35 @@ def popbuffers_finalize(out, array, validbits, awkwardarrow_type):
 
 
 def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
-    # Start by removing the ExtensionArray wrapper.
-    paarray = paarray.cast(storage_type)
+    if storage_type == pyarrow.null():
+        validbits = buffers.pop(0)
+        assert storage_type.num_fields == 0
+
+        # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
+        return ak._v2.contents.IndexedOptionArray(
+            ak._v2.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
+            ak._v2.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
+            parameters=mask_parameters(awkwardarrow_type),
+        )
+
+    else:
+        # Start by removing the ExtensionArray wrapper (except for null type).
+        paarray = paarray.cast(storage_type)
+
+    ### Beginning of the big if-elif-elif chain!
 
     if isinstance(storage_type, pyarrow.lib.ExtensionType):
-        raise NotImplementedError
-        # return popbuffers(paarray, storage_type, storage_type.storage_type, buffers)
+        # AwkwardArrowType should already be unwrapped; this must be some other ExtensionType.
+        assert not isinstance(storage_type, AwkwardArrowType)
+        # In that case, just ignore its logical type and use its storage type.
+        return popbuffers(
+            paarray, awkwardarrow_type, storage_type.storage_type, buffers
+        )
 
     elif isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise NotImplementedError
+        raise ValueError(
+            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+        )
 
     elif isinstance(storage_type, pyarrow.lib.DictionaryType):
         raise NotImplementedError
@@ -399,31 +426,6 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
             bytedata.view(np.bool_), parameters=node_parameters(awkwardarrow_type)
         )
         return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
-
-    elif (
-        isinstance(storage_type, pyarrow.lib.DataType) and storage_type.num_buffers == 1
-    ):
-        raise NotImplementedError
-        # # this is DataType(null)
-        # mask = buffers.pop(0)
-        # assert storage_type.num_fields == 0
-
-        # node_parameters, mask_parameters = None, None
-        # if isinstance(extension_type, AwkwardArrowType):
-        #     node_parameters = extension_type.node_parameters
-        #     mask_parameters = extension_type.mask_parameters
-
-        # out = ak._v2.contents.IndexedOptionArray(
-        #     ak._v2.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
-        #     ak._v2.contents.EmptyArray(parameters=node_parameters),
-        #     parameters=mask_parameters,
-        # )
-
-        # # output is already an option-type with offsets corrected
-        # if paarray.offset == 0 and len(paarray) == len(out):
-        #     return out
-        # else:
-        #     return out[paarray.offset : paarray.offset + len(paarray)]
 
     elif isinstance(storage_type, pyarrow.lib.DataType):
         assert storage_type.num_buffers == 2
