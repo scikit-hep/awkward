@@ -1417,4 +1417,7 @@ class ListOffsetArray(Content):
                     pyarrow.py_buffer(npoffsets),
                 ],
                 children=[paarray],
+                null_count=ak._v2._connect.pyarrow.to_null_count(
+                    validbytes, options["count_nulls"]
+                ),
             )

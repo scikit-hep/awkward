@@ -1233,6 +1233,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         string_to32=False,
         bytestring_to32=False,
         extensionarray=True,
+        count_nulls=True,
     ):
         import awkward._v2._connect.pyarrow
 
@@ -1247,5 +1248,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 "string_to32": string_to32,
                 "bytestring_to32": bytestring_to32,
                 "extensionarray": extensionarray,
+                "count_nulls": count_nulls,
             },
         )

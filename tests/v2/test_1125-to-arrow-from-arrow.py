@@ -146,6 +146,30 @@ def test_listoffsetarray_numpyarray(tmp_path, extensionarray):
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_numpyarray_bool(tmp_path, extensionarray):
+    akarray = ak._v2.contents.NumpyArray(
+        np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_),
+        parameters={"which": "inner"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8(np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_)),
+        ak._v2.contents.NumpyArray(
+            np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_),
+            parameters={"which": "inner"},
+        ),
+        valid_when=False,
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+
 # def test_numpyarray_bool():
 #     akarray = ak._v2.contents.NumpyArray(
 #         np.array([1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1], dtype=np.bool_)

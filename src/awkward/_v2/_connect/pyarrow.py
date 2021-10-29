@@ -190,16 +190,6 @@ else:
         )
 
 
-# def to_validbits(bytemask, valid_when):
-#     if bytemask is None:
-#         return None
-#     else:
-#         out = packbits(bytemask.view(np.bool_))
-#         if not valid_when:
-#             numpy.bitwise_not(out, out=out)
-#         return out
-
-
 def and_validbytes(validbytes1, validbytes2):
     if validbytes1 is None:
         return validbytes2
@@ -214,6 +204,13 @@ def to_validbits(validbytes):
         return None
     else:
         return pyarrow.py_buffer(packbits(validbytes))
+
+
+def to_null_count(validbytes, count_nulls):
+    if validbytes is None or not count_nulls:
+        return -1
+    else:
+        return numpy.count_nonzero(validbytes)
 
 
 def to_awkwardarrow_storage_types(arrowtype):
@@ -392,21 +389,16 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         raise NotImplementedError
 
     elif storage_type == pyarrow.bool_():
-        raise NotImplementedError
-        # assert storage_type.num_buffers == 2
-        # mask = buffers.pop(0)
-        # data = buffers.pop(0)
+        assert storage_type.num_buffers == 2
+        validbits = buffers.pop(0)
+        bitdata = buffers.pop(0)
 
-        # bytearray = unpackbits(numpy.frombuffer(data, dtype=np.uint8), len(paarray))
+        bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=np.uint8), len(paarray))
 
-        # parameters = None
-        # if isinstance(extension_type, AwkwardArrowType):
-        #     parameters = extension_type.node_parameters
-
-        # out = ak._v2.contents.NumpyArray(
-        #     bytearray.view(np.bool_), parameters=parameters
-        # )
-        # return mask_and_offset_correction(out, paarray, mask, extension_type)
+        out = ak._v2.contents.NumpyArray(
+            bytedata.view(np.bool_), parameters=node_parameters(awkwardarrow_type)
+        )
+        return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     elif (
         isinstance(storage_type, pyarrow.lib.DataType) and storage_type.num_buffers == 1

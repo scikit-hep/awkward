@@ -693,13 +693,15 @@ class NumpyArray(Content):
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self._data.ndim != 1:
-            raise NotImplementedError
+            return self.toRegularArray()._to_arrow(
+                pyarrow, mask_node, validbytes, length, options
+            )
 
         nparray = self.to(numpy)
         storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
-            raise NotImplementedError
+            nparray = ak._v2._connect.pyarrow.packbits(nparray)
 
         return pyarrow.Array.from_buffers(
             ak._v2._connect.pyarrow.to_awkwardarrow_type(
@@ -710,36 +712,7 @@ class NumpyArray(Content):
                 ak._v2._connect.pyarrow.to_validbits(validbytes),
                 pyarrow.py_buffer(nparray),
             ],
+            null_count=ak._v2._connect.pyarrow.to_null_count(
+                validbytes, options["count_nulls"]
+            ),
         )
-
-    # def _to_arrow(self, pyarrow, mask_node, validbits, length, options):
-    #     if self._data.ndim != 1:
-    #         return self.toRegularArray()._to_arrow(
-    #             pyarrow, mask_node, validbits, length, options
-    #         )
-
-    #     node_array = numpy.asarray(self._data)
-
-    #     storage_type = pyarrow.from_numpy_dtype(node_array.dtype)
-
-    #     if issubclass(node_array.dtype.type, (bool, np.bool_)):
-    #         node_array = ak._v2._connect.pyarrow.packbits(node_array)
-
-    #     null_count = -1
-    #     if length == 0 and validbits is not None:
-    #         null_count = length
-
-    #     return pyarrow.Array.from_buffers(
-    #         ak._v2._connect.pyarrow.from_storage(
-    #             storage_type,
-    #             options["use_extensionarray"],
-    #             mask_node,
-    #             self,
-    #         ),
-    #         length,
-    #         [
-    #             None if validbits is None else pyarrow.py_buffer(validbits),
-    #             pyarrow.py_buffer(node_array),
-    #         ],
-    #         null_count=null_count,
-    #     )
