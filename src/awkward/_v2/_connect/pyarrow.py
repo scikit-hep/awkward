@@ -342,7 +342,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
     elif isinstance(
         storage_type, (pyarrow.lib.Decimal128Type, pyarrow.lib.Decimal256Type)
     ):
-        # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType
+        # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType.
+        # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
         raise ValueError(
             "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
         )
