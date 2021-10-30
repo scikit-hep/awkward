@@ -728,17 +728,37 @@ class IndexedArray(Content):
             return self.content.validityerror(path + ".content")
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        if (
+            not options["indexedarray_as_dictionary"]
+            and self.parameter("__array__") == "categorical"
+        ):
+            next_parameters = dict(self._parameters)
+            del next_parameters["__array__"]
+            next = IndexedArray(
+                self._index, self._content, self._identifier, next_parameters
+            )
+            return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
         index = self._index.to(numpy)
 
         if self.parameter("__array__") == "categorical":
             dictionary = self._content._to_arrow(
-                pyarrow, self, None, len(self._content), options
+                pyarrow, None, None, len(self._content), options
             )
-            return pyarrow.DictionaryArray.from_arrays(
+            out = pyarrow.DictionaryArray.from_arrays(
                 index,
                 dictionary,
                 None if validbytes is None else ~validbytes,
             )
+            if options["extensionarray"]:
+                return ak._v2._connect.pyarrow.AwkwardArrowArray.from_storage(
+                    ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                        out.type, options["extensionarray"], mask_node, self
+                    ),
+                    out,
+                )
+            else:
+                return out
 
         else:
             if len(self._content) == 0:
@@ -754,19 +774,3 @@ class IndexedArray(Content):
             else:
                 next = self._content[index].merge_parameters(self._parameters)
                 return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
-
-    # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-    #     index = self._index.to(numpy)
-
-    #     if self.parameter("__array__") == "categorical":
-    #         dictionary = self._content._to_arrow(
-    #             pyarrow, self, None, len(self._content), options
-    #         )
-    #         if validbits is None:
-    #             maskedbytes = None
-    #         else:
-    #             maskedbytes = ak._v2._connect.pyarrow.unpackbits(
-    #                 ~validbits, length
-    #             ).view(np.bool_)
-
-    #         return pyarrow.DictionaryArray.from_arrays(index, dictionary, maskedbytes)

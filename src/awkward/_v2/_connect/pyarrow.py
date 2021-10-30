@@ -296,7 +296,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         ).content.data
         content = handle_arrow(paarray.dictionary)
 
-        parameters = mask_parameters(paarray.dictionary.type)
+        parameters = ak._v2._util.merge_parameters(
+            mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
+        )
         if parameters is None:
             parameters = {"__array__": "categorical"}
 
@@ -471,11 +473,6 @@ def handle_arrow(obj, pass_empty_field=False):
         awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(obj.type)
         out = popbuffers(obj, awkwardarrow_type, storage_type, buffers)
         assert len(buffers) == 0
-
-        if isinstance(storage_type, pyarrow.lib.DictionaryType):
-            awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(
-                obj.dictionary.type
-            )
 
         if not_null(awkwardarrow_type, out):
             return remove_optiontype(out)
