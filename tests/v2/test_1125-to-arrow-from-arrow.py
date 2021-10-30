@@ -52,22 +52,24 @@ def test_numpyarray(tmp_path, extensionarray):
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("list_to32", [False, True])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_listoffsetarray_numpyarray(tmp_path, extensionarray):
+def test_listoffsetarray_numpyarray(tmp_path, dtype, list_to32, extensionarray):
     akarray = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64)),
+        ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
         ak._v2.contents.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
             parameters={"which": "inner"},
         ),
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
     akarray = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64)),
+        ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
         ak._v2.contents.ByteMaskedArray(
             ak._v2.index.Index8(
                 np.array(
@@ -84,14 +86,14 @@ def test_listoffsetarray_numpyarray(tmp_path, extensionarray):
         ),
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
         ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64)),
+            ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
             ak._v2.contents.NumpyArray(
                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
                 parameters={"which": "inner"},
@@ -101,14 +103,14 @@ def test_listoffsetarray_numpyarray(tmp_path, extensionarray):
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
         ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64)),
+            ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
             ak._v2.contents.ByteMaskedArray(
                 ak._v2.index.Index8(
                     np.array(
@@ -139,7 +141,7 @@ def test_listoffsetarray_numpyarray(tmp_path, extensionarray):
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
@@ -240,61 +242,35 @@ def test_dictionary_encoding(tmp_path, indexedarray_as_dictionary, extensionarra
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
-# @pytest.mark.parametrize("list_to32", [False, True])
-# @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
-# def test_listoffsetarray(list_to32, dtype):
-#     akarray = ak._v2.contents.ListOffsetArray(
-#         ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-#         ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-#     )
-#     paarray = akarray.to_arrow(list_to32=list_to32)
-#     assert ak.to_list(akarray) == paarray.to_pylist()
-#     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-#     assert ak.to_list(akarray) == ak.to_list(akarray2)
-#     assert akarray.form.type == akarray2.form.type
+@pytest.mark.parametrize("string_to32", [False, True])
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_listoffsetraray_string(tmp_path, dtype, string_to32, extensionarray):
+    akarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak._v2.contents.NumpyArray(
+            np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "char"}
+        ),
+        parameters={"__array__": "string", "something": "else"},
+    )
+    paarray = akarray.to_arrow(string_to32=string_to32, extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
-# @pytest.mark.parametrize("string_to32", [False, True])
-# @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
-# def test_listoffsetraray_string(string_to32, dtype):
-#     akarray = ak._v2.contents.ListOffsetArray(
-#         ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-#         ak._v2.contents.NumpyArray(
-#             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "char"}
-#         ),
-#         parameters={"__array__": "string"},
-#     )
-#     paarray = akarray.to_arrow(string_to32=string_to32)
-#     assert ak.to_list(akarray) == paarray.to_pylist()
-#     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-#     assert ak.to_list(akarray) == ak.to_list(akarray2)
-#     assert akarray.form.type == akarray2.form.type
-
-
-# @pytest.mark.parametrize("bytestring_to32", [False, True])
-# @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
-# def test_listoffsetraray_bytestring(bytestring_to32, dtype):
-#     akarray = ak._v2.contents.ListOffsetArray(
-#         ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-#         ak._v2.contents.NumpyArray(
-#             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
-#         ),
-#         parameters={"__array__": "bytestring"},
-#     )
-#     paarray = akarray.to_arrow(bytestring_to32=bytestring_to32)
-#     assert ak.to_list(akarray) == paarray.to_pylist()
-#     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-#     assert ak.to_list(akarray) == ak.to_list(akarray2)
-#     assert akarray.form.type == akarray2.form.type
-
-
-# def test_listoffsetarray_extensionarray():
-#     akarray = ak._v2.contents.ListOffsetArray(
-#         ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 10], dtype=np.int32)),
-#         ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-#     )
-#     paarray = akarray.to_arrow(use_extensionarray=True)
-#     assert ak.to_list(akarray) == paarray.to_pylist()
-#     # akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-#     # assert ak.to_list(akarray) == ak.to_list(akarray2)
-#     # assert akarray.form.type == akarray2.form.type
+@pytest.mark.parametrize("bytestring_to32", [False, True])
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_listoffsetraray_bytestring(tmp_path, dtype, bytestring_to32, extensionarray):
+    akarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak._v2.contents.NumpyArray(
+            np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
+        ),
+        parameters={"__array__": "bytestring", "something": "else"},
+    )
+    paarray = akarray.to_arrow(
+        bytestring_to32=bytestring_to32, extensionarray=extensionarray
+    )
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)

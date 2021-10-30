@@ -277,17 +277,17 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
 
     ### Beginning of the big if-elif-elif chain!
 
-    if isinstance(storage_type, pyarrow.lib.ExtensionType):
+    if isinstance(storage_type, pyarrow.lib.PyExtensionType):
+        raise ValueError(
+            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+        )
+
+    elif isinstance(storage_type, pyarrow.lib.ExtensionType):
         # AwkwardArrowType should already be unwrapped; this must be some other ExtensionType.
         assert not isinstance(storage_type, AwkwardArrowType)
         # In that case, just ignore its logical type and use its storage type.
         return popbuffers(
             paarray, awkwardarrow_type, storage_type.storage_type, buffers
-        )
-
-    elif isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
         )
 
     elif isinstance(storage_type, pyarrow.lib.DictionaryType):
@@ -339,67 +339,75 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
     elif isinstance(storage_type, pyarrow.lib.MapType):
         raise NotImplementedError
 
+    elif isinstance(
+        storage_type, (pyarrow.lib.Decimal128Type, pyarrow.lib.Decimal256Type)
+    ):
+        # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType
+        raise ValueError(
+            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+        )
+
     elif isinstance(storage_type, pyarrow.lib.FixedSizeBinaryType):
         raise NotImplementedError
 
     elif storage_type in _string_like:
-        raise NotImplementedError
-        # assert storage_type.num_buffers == 3
-        # mask = buffers.pop(0)
-        # offsets = buffers.pop(0)
-        # content = buffers.pop(0)
+        assert storage_type.num_buffers == 3
+        validbits = buffers.pop(0)
+        paoffsets = buffers.pop(0)
+        pacontent = buffers.pop(0)
 
-        # if storage_type in _string_like[:2]:
-        #     parameters = {"__array__": "string"}
-        #     sub_parameters = {"__array__": "char"}
-        # else:
-        #     parameters = {"__array__": "bytestring"}
-        #     sub_parameters = {"__array__": "byte"}
+        if storage_type in _string_like[::2]:
+            akoffsets = ak._v2.index.Index32(
+                numpy.frombuffer(paoffsets, dtype=np.int32)
+            )
+        else:
+            akoffsets = ak._v2.index.Index64(
+                numpy.frombuffer(paoffsets, dtype=np.int64)
+            )
 
-        # if isinstance(extension_type, AwkwardArrowType):
-        #     parameters = extension_type.node_parameters
+        parameters = node_parameters(awkwardarrow_type)
 
-        # if storage_type in _string_like[::2]:
-        #     offsets2 = ak._v2.index.Index32(numpy.frombuffer(offsets, dtype=np.int32))
-        # else:
-        #     offsets2 = ak._v2.index.Index64(numpy.frombuffer(offsets, dtype=np.int64))
+        if storage_type in _string_like[:2]:
+            if parameters is None:
+                parameters = {"__array__": "string"}
+            sub_parameters = {"__array__": "char"}
+        else:
+            if parameters is None:
+                parameters = {"__array__": "bytestring"}
+            sub_parameters = {"__array__": "byte"}
 
-        # out = ak._v2.contents.ListOffsetArray(
-        #     offsets2,
-        #     ak._v2.contents.NumpyArray(
-        #         numpy.frombuffer(content, dtype=np.uint8),
-        #         parameters=sub_parameters,
-        #     ),
-        #     parameters=parameters,
-        # )
-        # return mask_and_offset_correction(out, paarray, mask, extension_type)
+        out = ak._v2.contents.ListOffsetArray(
+            akoffsets,
+            ak._v2.contents.NumpyArray(
+                numpy.frombuffer(pacontent, dtype=np.uint8),
+                parameters=sub_parameters,
+                nplike=ak.nplike.Numpy.instance(),
+            ),
+            parameters=parameters,
+        )
+        return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.StructType):
         raise NotImplementedError
 
-    elif isinstance(storage_type, pyarrow.lib.DenseUnionType):
-        raise NotImplementedError
-
     elif isinstance(storage_type, pyarrow.lib.SparseUnionType):
+        # Turn it into a DenseUnionType and recurse.
         raise NotImplementedError
 
-    elif isinstance(storage_type, pyarrow.lib.TimestampType):
+    elif isinstance(storage_type, pyarrow.lib.UnionType):
         raise NotImplementedError
 
-    elif isinstance(storage_type, pyarrow.lib.Time64Type):
-        raise NotImplementedError
+    ### I think all of the datetime/duration cases are included with NumpyArray.
+    ### They just need to be tested.
 
-    elif isinstance(storage_type, pyarrow.lib.Time32Type):
-        raise NotImplementedError
-
-    elif isinstance(storage_type, pyarrow.lib.DurationType):
-        raise NotImplementedError
-
-    elif isinstance(storage_type, pyarrow.lib.Decimal256Type):
-        raise NotImplementedError
-
-    elif isinstance(storage_type, pyarrow.lib.Decimal128Type):
-        raise NotImplementedError
+    # elif isinstance(storage_type, pyarrow.lib.TimestampType):
+    #     raise NotImplementedError
+    # elif isinstance(storage_type, pyarrow.lib.Time64Type):
+    #     raise NotImplementedError
+    # elif isinstance(storage_type, pyarrow.lib.Time32Type):
+    #     raise NotImplementedError
+    # elif isinstance(storage_type, pyarrow.lib.DurationType):
+    #     raise NotImplementedError
 
     elif storage_type == pyarrow.bool_():
         assert storage_type.num_buffers == 2
@@ -409,7 +417,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=np.uint8), len(paarray))
 
         out = ak._v2.contents.NumpyArray(
-            bytedata.view(np.bool_), parameters=node_parameters(awkwardarrow_type)
+            bytedata.view(np.bool_),
+            parameters=node_parameters(awkwardarrow_type),
+            nplike=ak.nplike.Numpy.instance(),
         )
         return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
@@ -427,6 +437,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         out = ak._v2.contents.NumpyArray(
             numpy.frombuffer(data, dtype=dt),
             parameters=node_parameters(awkwardarrow_type),
+            nplike=ak.nplike.Numpy.instance(),
         )
         return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 

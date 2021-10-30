@@ -1354,7 +1354,9 @@ class ListOffsetArray(Content):
         npoffsets = self._offsets.to(numpy)
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
 
-        # FIXME: ArrowNotImplementedError: Lists with non-zero length null components are not supported
+        # FIXME: ArrowNotImplementedError: Lists with non-zero length null
+        # components are not supported.
+        #
         # So if any missing lists have non-zero length, make starts & stops,
         # zero them out, and compact that down to a smaller ListOffsetArray.
 
@@ -1369,31 +1371,30 @@ class ListOffsetArray(Content):
                 npoffsets = npoffsets.astype(np.int64)
 
         if is_string or is_bytestring:
-            raise NotImplementedError
-        #         assert isinstance(next_content, ak._v2.contents.NumpyArray)
+            assert isinstance(akcontent, ak._v2.contents.NumpyArray)
 
-        #         if issubclass(npoffsets.dtype.type, np.int32):
-        #             if is_string:
-        #                 string_storage_type = pyarrow.string()
-        #             else:
-        #                 string_storage_type = pyarrow.binary()
-        #         else:
-        #             if is_string:
-        #                 string_storage_type = pyarrow.large_string()
-        #             else:
-        #                 string_storage_type = pyarrow.large_binary()
+            if issubclass(npoffsets.dtype.type, np.int32):
+                if is_string:
+                    string_type = pyarrow.string()
+                else:
+                    string_type = pyarrow.binary()
+            else:
+                if is_string:
+                    string_type = pyarrow.large_string()
+                else:
+                    string_type = pyarrow.large_binary()
 
-        #         return pyarrow.Array.from_buffers(
-        #             ak._v2._connect.pyarrow.from_storage(
-        #                 string_storage_type, options["use_extensionarray"], mask_node, self
-        #             ),
-        #             len(npoffsets) - 1,
-        #             [
-        #                 None if validbits is None else pyarrow.py_buffer(validbits),
-        #                 pyarrow.py_buffer(npoffsets),
-        #                 pyarrow.py_buffer(next_content.data),
-        #             ],
-        #         )
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                    string_type, options["extensionarray"], mask_node, self
+                ),
+                length,
+                [
+                    ak._v2._connect.pyarrow.to_validbits(validbytes),
+                    pyarrow.py_buffer(npoffsets),
+                    pyarrow.py_buffer(akcontent.to(numpy)),
+                ],
+            )
 
         else:
             paarray = akcontent._to_arrow(pyarrow, None, None, len(akcontent), options)
