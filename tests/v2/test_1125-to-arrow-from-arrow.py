@@ -274,3 +274,119 @@ def test_listoffsetraray_bytestring(tmp_path, dtype, bytestring_to32, extensiona
     )
     arrow_round_trip(akarray, paarray, extensionarray)
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+
+@pytest.mark.parametrize("size", [5])
+@pytest.mark.parametrize("list_to32", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_regulararray_numpyarray(tmp_path, size, list_to32, extensionarray):
+    akarray = ak._v2.contents.RegularArray(
+        ak._v2.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+            parameters={"which": "inner"},
+        ),
+        size,
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.RegularArray(
+        ak._v2.contents.ByteMaskedArray(
+            ak._v2.index.Index8(
+                np.array(
+                    [False, True, False, True, True, False, True, True, False, False],
+                    dtype=np.int8,
+                )
+            ),
+            ak._v2.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                parameters={"which": "inner"},
+            ),
+            valid_when=False,
+            parameters={"which": "middle"},
+        ),
+        size,
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
+        ak._v2.contents.RegularArray(
+            ak._v2.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                parameters={"which": "inner"},
+            ),
+            size,
+            parameters={"which": "middle"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+
+    # https://issues.apache.org/jira/browse/ARROW-14547
+    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
+        ak._v2.contents.RegularArray(
+            ak._v2.contents.ByteMaskedArray(
+                ak._v2.index.Index8(
+                    np.array(
+                        [
+                            False,
+                            True,
+                            False,
+                            True,
+                            True,
+                            False,
+                            True,
+                            True,
+                            False,
+                            False,
+                        ],
+                        dtype=np.int8,
+                    )
+                ),
+                ak._v2.contents.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                    parameters={"which": "inner"},
+                ),
+                valid_when=False,
+                parameters={"which": "middle-1"},
+            ),
+            size,
+            parameters={"which": "middle-2"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+
+    # https://issues.apache.org/jira/browse/ARROW-14547
+    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+
+@pytest.mark.parametrize("size", [5])
+@pytest.mark.parametrize("bytestring_to32", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_regularaarray_bytestring(tmp_path, size, bytestring_to32, extensionarray):
+    akarray = ak._v2.contents.RegularArray(
+        ak._v2.contents.NumpyArray(
+            np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
+        ),
+        size,
+        parameters={"__array__": "bytestring", "something": "else"},
+    )
+    paarray = akarray.to_arrow(
+        bytestring_to32=bytestring_to32, extensionarray=extensionarray
+    )
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)

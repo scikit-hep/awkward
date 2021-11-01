@@ -309,7 +309,21 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         ).simplify_optiontype()
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeListType):
-        raise NotImplementedError
+        assert storage_type.num_buffers == 1
+        validbits = buffers.pop(0)
+
+        a, b = to_awkwardarrow_storage_types(storage_type.value_type)
+        akcontent = popbuffers(paarray.values, a, b, buffers)
+
+        if not storage_type.value_field.nullable:
+            akcontent = remove_optiontype(akcontent)  # strip the dummy option-type node
+
+        out = ak._v2.contents.RegularArray(
+            akcontent,
+            storage_type.list_size,
+            parameters=node_parameters(awkwardarrow_type),
+        )
+        return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     elif isinstance(storage_type, (pyarrow.lib.LargeListType, pyarrow.lib.ListType)):
         assert storage_type.num_buffers == 2
@@ -349,7 +363,25 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         )
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeBinaryType):
-        raise NotImplementedError
+        assert storage_type.num_buffers == 2
+        validbits = buffers.pop(0)
+        pacontent = buffers.pop(0)
+
+        parameters = node_parameters(awkwardarrow_type)
+        if parameters is None:
+            parameters = {"__array__": "bytestring"}
+        sub_parameters = {"__array__": "byte"}
+
+        out = ak._v2.contents.RegularArray(
+            ak._v2.contents.NumpyArray(
+                numpy.frombuffer(pacontent, dtype=np.uint8),
+                parameters=sub_parameters,
+                nplike=ak.nplike.Numpy.instance(),
+            ),
+            storage_type.byte_width,
+            parameters=parameters,
+        )
+        return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     elif storage_type in _string_like:
         assert storage_type.num_buffers == 3

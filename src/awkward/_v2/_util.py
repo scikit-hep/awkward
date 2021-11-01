@@ -64,6 +64,13 @@ def isstr(x):
     return isinstance(x, str)
 
 
+def tobytes(array):
+    if hasattr(array, "tobytes"):
+        return array.tobytes()
+    else:
+        return array.tostring()
+
+
 ###############################################################################
 
 # # Enable warnings for the Awkward package
