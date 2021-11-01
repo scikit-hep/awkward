@@ -18,16 +18,21 @@ def arrow_round_trip(akarray, paarray, extensionarray):
     assert ak.to_list(akarray2) == ak.to_list(akarray)
     if extensionarray:
         assert akarray2.form.type == akarray.form.type
+    akarray3 = ak._v2._connect.pyarrow.handle_arrow(
+        akarray2.to_arrow(extensionarray=extensionarray)
+    )
+    if extensionarray:
+        assert akarray3.form.type == akarray.form.type
 
 
 def parquet_round_trip(akarray, paarray, extensionarray, tmp_path):
     filename = os.path.join(tmp_path, "whatever.parquet")
     pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
     table = pyarrow_parquet.read_table(filename)
-    akarray3 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-    assert ak.to_list(akarray3) == ak.to_list(akarray)
+    akarray4 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
+    assert ak.to_list(akarray4) == ak.to_list(akarray)
     if extensionarray:
-        assert akarray3.form.type == akarray.form.type
+        assert akarray4.form.type == akarray.form.type
 
 
 @pytest.mark.parametrize("extensionarray", [False, True])
@@ -46,6 +51,13 @@ def test_numpyarray(tmp_path, extensionarray):
         ),
         valid_when=False,
         parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.NumpyArray(
+        np.arange(2 * 3 * 5).reshape(2, 3, 5), parameters={"which": "inner"}
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
@@ -216,8 +228,8 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
         filename = os.path.join(tmp_path, "whatever.parquet")
         pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
         table = pyarrow_parquet.read_table(filename)
-        akarray3 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-        assert ak.to_list(akarray3) == ak.to_list(akarray)
+        akarray4 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
+        assert ak.to_list(akarray4) == ak.to_list(akarray)
 
     else:
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
@@ -390,3 +402,14 @@ def test_regularaarray_bytestring(tmp_path, size, bytestring_to32, extensionarra
     )
     arrow_round_trip(akarray, paarray, extensionarray)
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+
+def test_unmaskedarray_numpyarray(tmp_path):
+    akarray = ak._v2.contents.UnmaskedArray(
+        ak._v2.contents.NumpyArray(
+            np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}
+        )
+    )
+    paarray = akarray.to_arrow()
+    arrow_round_trip(akarray, paarray, True)
+    parquet_round_trip(akarray, paarray, True, tmp_path)

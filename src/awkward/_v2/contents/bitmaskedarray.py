@@ -446,3 +446,8 @@ class BitMaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return self.toByteMaskedArray()._to_arrow(
+            pyarrow, mask_node, validbytes, length, options
+        )

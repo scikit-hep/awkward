@@ -372,5 +372,5 @@ class UnmaskedArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    # def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-    #     return self._content._to_arrow(pyarrow, self, None, length, options)
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return self._content._to_arrow(pyarrow, self, None, length, options)
