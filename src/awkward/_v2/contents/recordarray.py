@@ -194,7 +194,11 @@ class RecordArray(Content):
         return self.Form.has_field(self, field)
 
     def content(self, index_or_field):
-        return self.Form.content(self, index_or_field)[: self._length]
+        out = self.Form.content(self, index_or_field)
+        if len(out) == self._length:
+            return out
+        else:
+            return out[: self._length]
 
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
@@ -625,3 +629,29 @@ class RecordArray(Content):
             if sub != "":
                 return sub
         return ""
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        values = [
+            (x if len(x) == self._length else x[: self._length])._to_arrow(
+                pyarrow, mask_node, validbytes, length, options
+            )
+            for x in self._contents
+        ]
+
+        types = pyarrow.struct(
+            [
+                pyarrow.field(self.index_to_field(i), values[i].type).with_nullable(
+                    x.is_OptionType
+                )
+                for i, x in enumerate(self._contents)
+            ]
+        )
+
+        return pyarrow.Array.from_buffers(
+            ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                types, options["extensionarray"], mask_node, self
+            ),
+            self._length,
+            [ak._v2._connect.pyarrow.to_validbits(validbytes)],
+            children=values,
+        )

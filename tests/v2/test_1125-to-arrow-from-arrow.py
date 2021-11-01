@@ -413,3 +413,27 @@ def test_unmaskedarray_numpyarray(tmp_path):
     paarray = akarray.to_arrow()
     arrow_round_trip(akarray, paarray, True)
     parquet_round_trip(akarray, paarray, True, tmp_path)
+
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_recordarray(tmp_path, is_tuple, extensionarray):
+    akarray = ak._v2.contents.RecordArray(
+        [
+            ak._v2.contents.NumpyArray(
+                np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+            ),
+            ak._v2.contents.ListOffsetArray(
+                ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"which": "inner2"}
+                ),
+            ),
+        ],
+        None if is_tuple else ["x", "y"],
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    if not is_tuple or extensionarray:
+        arrow_round_trip(akarray, paarray, extensionarray)
+        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)

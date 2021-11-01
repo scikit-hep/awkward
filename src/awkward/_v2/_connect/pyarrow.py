@@ -58,7 +58,16 @@ def import_pyarrow_parquet(name):
 if pyarrow is not None:
 
     class AwkwardArrowArray(pyarrow.ExtensionArray):
-        pass
+        def to_pylist(self):
+            out = super().to_pylist()
+            if (
+                isinstance(self.type, AwkwardArrowType)
+                and self.type.node_type == "RecordArray"
+                and self.type.record_is_tuple is True
+            ):
+                for i, x in enumerate(out):
+                    out[i] = tuple(x[str(j)] for j in range(len(x)))
+            return out
 
     class AwkwardArrowType(pyarrow.ExtensionType):
         def __init__(
@@ -68,11 +77,13 @@ if pyarrow is not None:
             node_type,
             mask_parameters,
             node_parameters,
+            record_is_tuple,
         ):
             self._mask_type = mask_type
             self._node_type = node_type
             self._mask_parameters = mask_parameters
             self._node_parameters = node_parameters
+            self._record_is_tuple = record_is_tuple
             super(AwkwardArrowType, self).__init__(storage_type, "awkward")
 
         @property
@@ -91,6 +102,10 @@ if pyarrow is not None:
         def node_parameters(self):
             return self._node_parameters
 
+        @property
+        def record_is_tuple(self):
+            return self._record_is_tuple
+
         def __arrow_ext_class__(self):
             return AwkwardArrowArray
 
@@ -101,6 +116,7 @@ if pyarrow is not None:
                     "node_type": self._node_type,
                     "mask_parameters": self._mask_parameters,
                     "node_parameters": self._node_parameters,
+                    "record_is_tuple": self._record_is_tuple,
                 }
             ).encode(errors="surrogatescape")
 
@@ -113,6 +129,7 @@ if pyarrow is not None:
                 metadata["node_type"],
                 metadata["mask_parameters"],
                 metadata["node_parameters"],
+                metadata["record_is_tuple"],
             )
 
         @property
@@ -124,7 +141,7 @@ if pyarrow is not None:
             return self.storage_type.num_fields
 
     pyarrow.register_extension_type(
-        AwkwardArrowType(pyarrow.null(), None, None, None, None)
+        AwkwardArrowType(pyarrow.null(), None, None, None, None, None)
     )
 
     # order is important; _string_like[:2] vs _string_like[::2]
@@ -421,7 +438,34 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.StructType):
-        raise NotImplementedError
+        assert storage_type.num_buffers == 1
+        validbits = buffers.pop(0)
+
+        keys = []
+        contents = []
+        for i in range(storage_type.num_fields):
+            field = storage_type[i]
+            field_name = field.name
+            keys.append(field_name)
+
+            a, b = to_awkwardarrow_storage_types(field.type)
+            akcontent = popbuffers(paarray.field(field_name), a, b, buffers)
+            if not field.nullable:
+                akcontent = remove_optiontype(
+                    akcontent
+                )  # strip the dummy option-type node
+            contents.append(akcontent)
+
+        if awkwardarrow_type is not None and awkwardarrow_type.record_is_tuple:
+            keys = None
+
+        out = ak._v2.contents.RecordArray(
+            contents,
+            keys,
+            length=len(paarray),
+            parameters=node_parameters(awkwardarrow_type),
+        )
+        return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.SparseUnionType):
         # Turn it into a DenseUnionType and recurse.
@@ -486,6 +530,7 @@ def to_awkwardarrow_type(storage_type, use_extensionarray, mask, node):
             ak._v2._util.direct_Content_subclass_name(node),
             None if mask is None else mask.parameters,
             None if node is None else node.parameters,
+            node.is_tuple if isinstance(node, ak._v2.contents.RecordArray) else None,
         )
     else:
         return storage_type
