@@ -1354,11 +1354,25 @@ class ListOffsetArray(Content):
         npoffsets = self._offsets.to(numpy)
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
 
-        # FIXME: ArrowNotImplementedError: Lists with non-zero length null
-        # components are not supported.
-        #
-        # So if any missing lists have non-zero length, make starts & stops,
-        # zero them out, and compact that down to a smaller ListOffsetArray.
+        # ArrowNotImplementedError: Lists with non-zero length null components
+        # are not supported. So make the null'ed lists empty.
+        if validbytes is not None:
+            nonzeros = npoffsets[1:] != npoffsets[:-1]
+            maskedbytes = ~validbytes
+            if numpy.any(maskedbytes & nonzeros):  # null and count > 0
+                new_starts = numpy.array(npoffsets[:-1], copy=True)
+                new_stops = numpy.array(npoffsets[1:], copy=True)
+                new_starts[maskedbytes] = 0
+                new_stops[maskedbytes] = 0
+                next = ak._v2.contents.ListArray(
+                    ak._v2.index.Index(new_starts),
+                    ak._v2.index.Index(new_stops),
+                    self._content,
+                    parameters=self._parameters,
+                )
+                return next.toListOffsetArray64(True)._to_arrow(
+                    pyarrow, mask_node, validbytes, length, options
+                )
 
         if issubclass(npoffsets.dtype.type, np.int64):
             if downsize and npoffsets[-1] < np.iinfo(np.int32).max:

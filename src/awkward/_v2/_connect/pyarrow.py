@@ -66,7 +66,8 @@ if pyarrow is not None:
                 and self.type.record_is_tuple is True
             ):
                 for i, x in enumerate(out):
-                    out[i] = tuple(x[str(j)] for j in range(len(x)))
+                    if x is not None:
+                        out[i] = tuple(x[str(j)] for j in range(len(x)))
             return out
 
     class AwkwardArrowType(pyarrow.ExtensionType):
@@ -368,6 +369,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.MapType):
+        # FIXME: make a ListOffsetArray of 2-tuples with __array__ == "sorted_map".
+        # (Make sure the keys are sorted).
         raise NotImplementedError
 
     elif isinstance(

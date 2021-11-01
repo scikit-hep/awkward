@@ -765,12 +765,12 @@ class IndexedArray(Content):
                 # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
                 # every masked value is self._content[0], unless len(self._content) == 0.
                 # In that case, don't call self._content[index]; it's empty anyway.
-                next = self._content.merge_parameters(self._parameters)
-                return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
-
-            elif isinstance(self._content, ak._v2.contents.RecordArray):
-                raise NotImplementedError
-
+                next = self._content
             else:
-                next = self._content[index].merge_parameters(self._parameters)
-                return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+                next = self._content._carry(
+                    ak._v2.index.Index(index), False, IndexError
+                )
+
+            return next.merge_parameters(self._parameters)._to_arrow(
+                pyarrow, mask_node, validbytes, length, options
+            )

@@ -158,6 +158,28 @@ def test_listoffsetarray_numpyarray(tmp_path, dtype, list_to32, extensionarray):
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("list_to32", [False, True])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_listoffsetarray_numpyarray_2(tmp_path, dtype, list_to32, extensionarray):
+    akarray = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8(np.array([True, False, True, False, True], dtype=np.int8)),
+        ak._v2.contents.ListOffsetArray(
+            ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+            ak._v2.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                parameters={"which": "inner"},
+            ),
+            parameters={"which": "middle"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_numpyarray_bool(tmp_path, extensionarray):
     akarray = ak._v2.contents.NumpyArray(
@@ -432,6 +454,109 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         ],
         None if is_tuple else ["x", "y"],
         parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    if not is_tuple or extensionarray:
+        arrow_round_trip(akarray, paarray, extensionarray)
+        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.RecordArray(
+        [
+            ak._v2.contents.ByteMaskedArray(
+                ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+                ),
+                valid_when=False,
+            ),
+            ak._v2.contents.ListOffsetArray(
+                ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"which": "inner2"}
+                ),
+            ),
+        ],
+        None if is_tuple else ["x", "y"],
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    if not is_tuple or extensionarray:
+        arrow_round_trip(akarray, paarray, extensionarray)
+        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.RecordArray(
+        [
+            ak._v2.contents.ByteMaskedArray(
+                ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+                ),
+                valid_when=False,
+            ),
+            ak._v2.contents.UnmaskedArray(
+                ak._v2.contents.ListOffsetArray(
+                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak._v2.contents.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+                        parameters={"which": "inner2"},
+                    ),
+                ),
+            ),
+        ],
+        None if is_tuple else ["x", "y"],
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    if not is_tuple or extensionarray:
+        arrow_round_trip(akarray, paarray, extensionarray)
+        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.IndexedOptionArray(
+        ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
+        ak._v2.contents.RecordArray(
+            [
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+                ),
+                ak._v2.contents.ListOffsetArray(
+                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak._v2.contents.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+                        parameters={"which": "inner2"},
+                    ),
+                ),
+            ],
+            None if is_tuple else ["x", "y"],
+            parameters={"which": "outer"},
+        ),
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    if not is_tuple or extensionarray:
+        arrow_round_trip(akarray, paarray, extensionarray)
+        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.IndexedOptionArray(
+        ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
+        ak._v2.contents.RecordArray(
+            [
+                ak._v2.contents.ByteMaskedArray(
+                    ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
+                    ak._v2.contents.NumpyArray(
+                        np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+                    ),
+                    valid_when=False,
+                ),
+                ak._v2.contents.ListOffsetArray(
+                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak._v2.contents.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+                        parameters={"which": "inner2"},
+                    ),
+                ),
+            ],
+            None if is_tuple else ["x", "y"],
+            parameters={"which": "outer"},
+        ),
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     if not is_tuple or extensionarray:
