@@ -477,18 +477,6 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
     elif isinstance(storage_type, pyarrow.lib.UnionType):
         raise NotImplementedError
 
-    ### I think all of the datetime/duration cases are included with NumpyArray.
-    ### They just need to be tested.
-
-    # elif isinstance(storage_type, pyarrow.lib.TimestampType):
-    #     raise NotImplementedError
-    # elif isinstance(storage_type, pyarrow.lib.Time64Type):
-    #     raise NotImplementedError
-    # elif isinstance(storage_type, pyarrow.lib.Time32Type):
-    #     raise NotImplementedError
-    # elif isinstance(storage_type, pyarrow.lib.DurationType):
-    #     raise NotImplementedError
-
     elif storage_type == pyarrow.bool_():
         assert storage_type.num_buffers == 2
         validbits = buffers.pop(0)

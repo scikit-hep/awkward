@@ -562,3 +562,25 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
     if not is_tuple or extensionarray:
         arrow_round_trip(akarray, paarray, extensionarray)
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_numpyarray_datetime(tmp_path, extensionarray):
+    # pyarrow doesn't yet support datetime/duration conversions to Parquet.
+    # (FIXME: find or create a JIRA ticket.)
+
+    akarray = ak._v2.contents.NumpyArray(
+        np.array(
+            ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], dtype="datetime64[s]"
+        )
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.NumpyArray(
+        np.array(["41", "1", "20"], dtype="timedelta64[s]")
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
