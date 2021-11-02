@@ -586,7 +586,6 @@ class RegularArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         if self._length == 0:
             return self
-
         out = self.toListOffsetArray64(True)._unique(
             negaxis,
             starts,

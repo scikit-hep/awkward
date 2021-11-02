@@ -437,7 +437,6 @@ class NumpyArray(Content):
                     ak._util.kMaxLevels,
                 )
             )
-
         self._handle_error(
             nplike[
                 "awkward_NumpyArray_subrange_equal",
@@ -582,23 +581,20 @@ class NumpyArray(Content):
                 )
             )
 
-            nextoffsets = ak._v2.index.Index64.zeros(2, nplike)
+            nextlength = ak._v2.index.Index64.zeros(1, nplike)
             self._handle_error(
-                nplike[
-                    "awkward_unique_ranges",
+                nplike[  # noqa: E231
+                    "awkward_unique",
                     out._data.dtype.type,
-                    offsets.dtype.type,
-                    nextoffsets.dtype.type,
+                    nextlength.dtype.type,
                 ](
                     out._data,
                     len(out._data),
-                    offsets.to(nplike),
-                    2,
-                    nextoffsets.to(nplike),
+                    nextlength.to(nplike),
                 )
             )
 
-            return out[nextoffsets[0] : nextoffsets[1]]
+            return out[: nextlength[0]]
 
         # axis is non None
         if len(self.shape) != 1 or (not self.iscontiguous()):
@@ -656,7 +652,8 @@ class NumpyArray(Content):
                     False,
                 )
             )
-            nextoffsets = ak._v2.index.Index64.zeros(offsets_length[0], nplike)
+
+            nextoffsets = ak._v2.index.Index64.zeros(len(offsets), nplike)
             self._handle_error(
                 nplike[
                     "awkward_unique_ranges",
@@ -667,45 +664,18 @@ class NumpyArray(Content):
                     out._data,
                     len(out._data),
                     offsets.to(nplike),
-                    offsets_length[0],
+                    len(offsets),
                     nextoffsets.to(nplike),
                 )
             )
-            out = out[0 : nextoffsets[-1]]
-            return ak._v2.contents.ListOffsetArray(
+
+            out2 = ak._v2.contents.ListOffsetArray(
                 nextoffsets,
                 out,
                 None,
                 self._parameters,
             )
-            # FIXME
-            #
-            # out, offsets = out._as_unique_subranges(offsets, offsets_length[0])
-            #
-            # outlength = ak._v2.index.Index64.empty(1, nplike)
-            # nextoffsets = ak._v2.index.Index64.zeros(offsets_length[0], nplike)
-            # self._handle_error(
-            #     nplike[
-            #         "awkward_NumpyArray_unique_ranges",
-            #         out._data.dtype.type,
-            #         offsets.dtype.type,
-            #         nextoffsets.dtype.type,
-            #         outlength.dtype.type,
-            #     ](
-            #         out._data,
-            #         offsets.to(nplike),
-            #         len(offsets),
-            #         nextoffsets.to(nplike),
-            #         outlength.to(nplike),
-            #     )
-            # )
-            #
-            # return ak._v2.contents.ListOffsetArray(
-            #     nextoffsets[: outlength[0]],
-            #     out,
-            #     None,
-            #     self._parameters,
-            # )
+            return out2
 
     def _argsort_next(
         self,

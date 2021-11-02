@@ -177,7 +177,6 @@ def test_NumpyArray():
 
 
 def test_2d():
-    # array = ak.from_iter(
     array = ak.layout.NumpyArray(
         np.array(
             [
@@ -185,17 +184,35 @@ def test_2d():
                 [4.4, 2.2, 1.1, 3.3, 5.5],
                 [2.2, 1.1, 4.4, 3.3, 5.5],
             ]
-        )  # ,
-        #     highlevel=False,
+        )
     )
     array = v1_to_v2(array)
 
     assert array.is_unique() is False
+    assert array.is_unique(axis=-1) is True
+
     assert ak.to_list(array.unique()) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(array.unique(axis=-1)) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+    ]
+    assert ak.to_list(array.unique(axis=-2)) == [
+        [2.2, 3.3, 4.4],
+        [1.1, 2.2],
+        [1.1, 4.4, 5.5],
+        [1.1, 3.3],
+        [4.4, 5.5],
+    ]
+    with pytest.raises(ValueError) as err:
+        array.unique(axis=-3)
+        assert (
+            str(err.value)
+            == "ValueError: axis=-3 exceeds the depth of the nested list structure (which is 2)"
+        )
 
 
 def test_2d_in_axis():
-    # array = ak.from_iter(
     array = ak.layout.NumpyArray(
         np.array(
             [
@@ -203,8 +220,7 @@ def test_2d_in_axis():
                 [4.4, 2.2, 1.1, 3.3, 5.5, 3.3],
                 [2.2, 2.2, 1.1, 4.4, 3.3, 5.5],
             ]
-        )  # ,
-        #     highlevel=False,
+        )
     )
     assert ak.to_list(ak.sort(array, axis=-1)) == [
         [1.1, 1.1, 2.2, 3.3, 4.4, 5.5],
@@ -291,27 +307,27 @@ def test_3d():
         15.15,
     ]
 
-    assert ak.to_list(array.unique(axis=-1)) == [
-        [1.1, 2.2, 3.3, 4.4, 5.5],
-        [6.6, 7.7, 8.8, 9.9, 10.1],
-        [11.11, 12.12, 13.13, 14.14, 15.15],
-        [-5.5, -4.4, -3.3, -2.2, -1.1],
-        [-10.1, -9.9, -8.8, -7.7, -6.6],
-        [-15.15, -14.14, -13.13, -12.12, -11.11],
-    ]
-
-    assert ak.to_list(array.unique(axis=-2)) == [
-        [1.1, 6.6, 11.11],
-        [-11.11, -6.6, -1.1],
-        [2.2, 7.7, 12.12],
-        [-12.12, -7.7, -2.2],
-        [3.3, 8.8, 13.13],
-        [-13.13, -8.8, -3.3],
-        [4.4, 9.9, 14.14],
-        [-14.14, -9.9, -4.4],
-        [5.5, 10.1, 15.15],
-        [-15.15, -10.1, -5.5],
-    ]
+    # assert ak.to_list(array.unique(axis=-1)) == [
+    #     [1.1, 2.2, 3.3, 4.4, 5.5],
+    #     [6.6, 7.7, 8.8, 9.9, 10.1],
+    #     [11.11, 12.12, 13.13, 14.14, 15.15],
+    #     [-5.5, -4.4, -3.3, -2.2, -1.1],
+    #     [-10.1, -9.9, -8.8, -7.7, -6.6],
+    #     [-15.15, -14.14, -13.13, -12.12, -11.11],
+    # ]
+    #
+    # assert ak.to_list(array.unique(axis=-2)) == [
+    #     [1.1, 6.6, 11.11],
+    #     [-11.11, -6.6, -1.1],
+    #     [2.2, 7.7, 12.12],
+    #     [-12.12, -7.7, -2.2],
+    #     [3.3, 8.8, 13.13],
+    #     [-13.13, -8.8, -3.3],
+    #     [4.4, 9.9, 14.14],
+    #     [-14.14, -9.9, -4.4],
+    #     [5.5, 10.1, 15.15],
+    #     [-15.15, -10.1, -5.5],
+    # ]
 
     assert ak.to_list(array.unique(axis=-3)) == [
         [-1.1, 1.1],
@@ -384,9 +400,11 @@ def test_ListOffsetArray():
     assert listoffsetarray.is_unique() is True
     assert ak.to_list(listoffsetarray.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
+        [],
         [0.0, 4.4],
         [9.9],
         [5.5, 6.6, 7.7, 8.8],
+        [],
     ]
     assert ak.to_list(listoffsetarray.unique()) == [
         0.0,
@@ -418,6 +436,7 @@ def test_ListOffsetArray():
     assert listoffsetarray.is_unique() is False
     assert ak.to_list(listoffsetarray.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
+        [],
         [0.0, 4.4],
         [9.9],
         [1.1, 2.2, 3.3],
@@ -442,6 +461,7 @@ def test_ListOffsetArray():
     assert ak.to_list(listoffsetarray1.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
         [1.1, 2.2, 3.3],
+        [],
         [0.0, 4.4],
         [9.9],
         [5.5],
@@ -466,11 +486,11 @@ def test_ListOffsetArray():
     assert ak.to_list(listoffsetarray2.unique(axis=-1)) == [
         [1.1, 2.2, 3.3],
         [1.1, 2.2, 3.3],
+        [],
         [0.0, 4.4],
         [9.9],
         [5.5],
-        [],
-        # FIXME: do not drop it        [5.5],
+        [5.5],
     ]
 
     content2 = ak.layout.NumpyArray(
@@ -496,12 +516,13 @@ def test_ListOffsetArray():
         [],
     ]
     assert listoffsetarray2.is_unique(axis=-1) is True
-    # FIXME: keep empty lists? or one list at the end?
     assert ak.to_list(listoffsetarray2.unique(axis=-1)) == [
         [0.0, 1.1, 2.2],
+        [],
         [1.1, 3.3],
         [5.5],
         [2.2, 6.6, 7.7, 9.9],
+        [],
     ]
     assert ak.to_list(listoffsetarray2.unique(axis=-2)) == [
         [0.0, 3.3, 5.5, 6.6],
@@ -694,10 +715,12 @@ def test_UnionArray():
     assert array.is_unique() is False
     assert ak.to_list(array.unique(axis=None)) == [1.0, 1.1, 2.0, 2.2, 3.0, 3.3]
     assert ak.to_list(array.unique(axis=-1)) == [
+        [],
         [3.3],
         [1.0],
         [2.2],
         [2.0],
         [1.1],
         [3.0],
+        [],
     ]

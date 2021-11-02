@@ -11,18 +11,52 @@ ERROR awkward_unique_ranges(
   const int64_t* fromoffsets,
   int64_t offsetslength,
   int64_t* tooffsets) {
-
   int64_t m = 0;
-  tooffsets[m] = m;
-  for (int64_t k = 1; k < offsetslength; k++) {
-    for (int64_t l = fromoffsets[k - 1]; l < fromoffsets[k]; l++) {
-      if (toptr[m] != toptr[l]) {
-        m++;
-        toptr[m] = toptr[l];
+  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+    auto start = fromoffsets[i];
+    auto stop = fromoffsets[i + 1];
+    tooffsets[i] = m;
+    toptr[m++] = toptr[start];
+    for (int64_t k = start; k < stop; k++) {
+      if (toptr[m - 1] != toptr[k]) {
+        toptr[m++] = toptr[k];
       }
     }
-    tooffsets[k] = m + 1;
   }
+  tooffsets[offsetslength - 1] = m;
+  //
+  // std::cout << "offsetslength " << offsetslength << ", length " << length << "\n";
+  // int64_t m = 0;
+  // int64_t i = 0;
+  // int64_t k = 0;
+  // tooffsets[k++] = fromoffsets[m];
+  // for (; k < offsetslength; k++) {
+  //   std::cout << k << ": " << fromoffsets[k] << "(";
+  //   if (fromoffsets[k - 1] == fromoffsets[k]) {
+  //     tooffsets[k] = m;
+  //   }
+  //   for (int64_t l = fromoffsets[k - 1]; l < fromoffsets[k]; l++) {
+  //     std::cout << "[" << toptr[l] << "], "; i++;
+  //     if (toptr[m] != toptr[l]) {
+  //       m++;
+  //       toptr[m] = toptr[l];
+  //       std::cout << toptr[m] << ", ";
+  //     }
+  //   }
+  //   std::cout << ")\n";
+  //   tooffsets[k] = m + 1;
+  // }
+  // std::cout << offsetslength << ": " << length << "(" << m << ", "<< i << ")\n";
+  // for (; i < length; i++) {
+  //   std::cout << "[" << toptr[i] << "], ";
+  //   if (toptr[m] != toptr[i]) {
+  //     m++;
+  //     toptr[m] = toptr[i];
+  //     std::cout << toptr[m] << ", ";
+  //   }
+  // }
+  // std::cout << ")\nk=" << k << "\n";
+  // tooffsets[k] = m + 1;
   return success();
 }
 

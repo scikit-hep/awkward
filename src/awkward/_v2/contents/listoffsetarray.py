@@ -603,8 +603,26 @@ class ListOffsetArray(Content):
         if not branch and (negaxis == depth):
             return self._content._is_unique(negaxis - 1, starts, parents, outlength)
         else:
-            starts, stops = self._offsets[:-1], self._offsets[1:]
-            return not self._content._subranges_equal(starts, stops, stops[-1], False)
+            nplike = self.nplike
+
+            nextparents = ak._v2.index.Index64.empty(
+                self._offsets[-1] - self._offsets[0], nplike
+            )
+
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_reduce_local_nextparents_64",
+                    nextparents.dtype.type,
+                    self._offsets.dtype.type,
+                ](
+                    nextparents.to(nplike),
+                    self._offsets.to(nplike),
+                    len(self._offsets) - 1,
+                )
+            )
+            starts = self._offsets[:-1]
+
+            return self._content._is_unique(negaxis, starts, nextparents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
         nplike = self.nplike
@@ -709,7 +727,6 @@ class ListOffsetArray(Content):
                 nextparents,
                 outlength,
             )
-
             return outcontent
 
         else:
@@ -731,12 +748,39 @@ class ListOffsetArray(Content):
 
             trimmed = self._content[self._offsets[0] : self._offsets[-1]]
 
-            return trimmed._unique(
+            out = trimmed._unique(
                 negaxis,
                 self._offsets[:-1],
                 nextparents,
                 outlength,
             )
+
+            # FIXME:
+            if negaxis is not None and negaxis < depth:
+                if isinstance(out, ak._v2.contents.ListOffsetArray) and not (
+                    len(out._offsets) == len(self._offsets)
+                ):
+                    outoffsets = ak._v2.index.Index64.zeros(len(self._offsets), nplike)
+                    j = 0
+                    for i in range(len(out._offsets)):
+                        outoffsets[j] = out._offsets[i]
+                        if (
+                            j < len(self._offsets) - 1
+                            and self._offsets[j] == self._offsets[j + 1]
+                        ):
+                            outoffsets[j + 1] = out._offsets[i]
+                            j = j + 1
+                        j = j + 1
+
+                    out2 = ak._v2.contents.ListOffsetArray(
+                        outoffsets,
+                        out._content,
+                        None,
+                        self._parameters,
+                    )
+                    return out2
+
+            return out
 
     def _argsort_next(
         self,

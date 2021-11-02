@@ -592,8 +592,84 @@ class IndexedArray(Content):
         if len(self._index) == 0:
             return self
 
-        next = self._content._carry(self._index, False, NestedIndexError)
-        return next._unique(negaxis, starts, parents, outlength)
+        nplike = self.nplike
+        branch, depth = self.branch_depth
+
+        index_length = len(self._index)
+
+        nextcarry = ak._v2.index.Index64.zeros(index_length, nplike)
+        nextparents = ak._v2.index.Index64.zeros(index_length, nplike)
+        outindex = ak._v2.index.Index64.zeros(index_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._index.to(nplike),
+                parents.to(nplike),
+                index_length,
+            )
+        )
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        out = next._unique(
+            negaxis,
+            starts,
+            nextparents,
+            outlength,
+        )
+
+        if not branch and negaxis == depth:
+            return out
+        else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
+
+            elif isinstance(out, ak._v2.contents.ListOffsetArray):
+                if len(starts) > 0 and starts[0] != 0:
+                    raise AssertionError(
+                        "reduce_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray64 whose offsets start at zero ({0})".format(
+                            starts[0]
+                        )
+                    )
+
+                outoffsets = ak._v2.index.Index64.empty(len(starts) + 1, nplike)
+                self._handle_error(
+                    nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.to(nplike),
+                        starts.to(nplike),
+                        len(starts),
+                        len(self._index),
+                    )
+                )
+
+                tmp = ak._v2.contents.IndexedArray(
+                    outindex,
+                    out._content,
+                    None,
+                    None,
+                )
+
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    tmp,
+                    None,
+                    None,
+                )
+
+            else:
+                return out
 
     def _argsort_next(
         self,
