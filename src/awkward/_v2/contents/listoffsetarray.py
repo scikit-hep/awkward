@@ -748,39 +748,12 @@ class ListOffsetArray(Content):
 
             trimmed = self._content[self._offsets[0] : self._offsets[-1]]
 
-            out = trimmed._unique(
+            return trimmed._unique(
                 negaxis,
                 self._offsets[:-1],
                 nextparents,
                 outlength,
             )
-
-            # FIXME:
-            if negaxis is not None and negaxis < depth:
-                if isinstance(out, ak._v2.contents.ListOffsetArray) and not (
-                    len(out._offsets) == len(self._offsets)
-                ):
-                    outoffsets = ak._v2.index.Index64.zeros(len(self._offsets), nplike)
-                    j = 0
-                    for i in range(len(out._offsets)):
-                        outoffsets[j] = out._offsets[i]
-                        if (
-                            j < len(self._offsets) - 1
-                            and self._offsets[j] == self._offsets[j + 1]
-                        ):
-                            outoffsets[j + 1] = out._offsets[i]
-                            j = j + 1
-                        j = j + 1
-
-                    out2 = ak._v2.contents.ListOffsetArray(
-                        outoffsets,
-                        out._content,
-                        None,
-                        self._parameters,
-                    )
-                    return out2
-
-            return out
 
     def _argsort_next(
         self,

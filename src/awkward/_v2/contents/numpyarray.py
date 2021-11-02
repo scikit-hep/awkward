@@ -669,13 +669,24 @@ class NumpyArray(Content):
                 )
             )
 
-            out2 = ak._v2.contents.ListOffsetArray(
-                nextoffsets,
+            outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+
+            # FIXME: move it to a kernel
+            j = 0
+            for i in range(len(nextoffsets)):
+                outoffsets[j] = nextoffsets[i]
+                while j < len(starts) - 1 and starts[j] == starts[j + 1]:
+                    outoffsets[j + 1] = nextoffsets[i]
+                    j = j + 1
+                j = j + 1
+            outoffsets[-1] = nextoffsets[-1]
+
+            return ak._v2.contents.ListOffsetArray(
+                outoffsets,
                 out,
                 None,
                 self._parameters,
             )
-            return out2
 
     def _argsort_next(
         self,
