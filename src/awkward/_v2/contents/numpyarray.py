@@ -710,7 +710,7 @@ class NumpyArray(Content):
             length,
             [
                 ak._v2._connect.pyarrow.to_validbits(validbytes),
-                pyarrow.py_buffer(nparray),
+                ak._v2._connect.pyarrow.to_length(nparray, length),
             ],
             null_count=ak._v2._connect.pyarrow.to_null_count(
                 validbytes, options["count_nulls"]

@@ -187,12 +187,12 @@ if not ak._v2._util.numpy_at_least("1.17.0"):
         else:
             return numpy.packbits(bytearray)
 
-    def unpackbits(bitarray, length, lsb_order=True):
+    def unpackbits(bitarray, lsb_order=True):
         ready_to_bitswap = numpy.unpackbits(bitarray)
         if lsb_order:
-            return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)[:length]
+            return ready_to_bitswap.reshape(-1, 8)[:, ::-1].reshape(-1)
         else:
-            return ready_to_bitswap[:length]
+            return ready_to_bitswap
 
 
 else:
@@ -200,10 +200,8 @@ else:
     def packbits(bytearray, lsb_order=True):
         return numpy.packbits(bytearray, bitorder=("little" if lsb_order else "big"))
 
-    def unpackbits(bitarray, length, lsb_order=True):
-        return numpy.unpackbits(
-            bitarray, count=length, bitorder=("little" if lsb_order else "big")
-        )
+    def unpackbits(bitarray, lsb_order=True):
+        return numpy.unpackbits(bitarray, bitorder=("little" if lsb_order else "big"))
 
 
 def and_validbytes(validbytes1, validbytes2):
@@ -220,6 +218,15 @@ def to_validbits(validbytes):
         return None
     else:
         return pyarrow.py_buffer(packbits(validbytes))
+
+
+def to_length(nparray, length):
+    if len(nparray) < length:
+        out = numpy.empty(length, dtype=nparray.dtype)
+        out[: len(nparray)] = nparray
+    else:
+        out = nparray
+    return pyarrow.py_buffer(out)
 
 
 def to_null_count(validbytes, count_nulls):
@@ -250,9 +257,9 @@ def mask_parameters(awkwardarrow_type):
         return None
 
 
-def popbuffers_finalize(out, array, validbits, awkwardarrow_type):
+def popbuffers_finalize(out, array, validbits, awkwardarrow_type, fix_offsets=True):
     # Every buffer from Arrow must be offsets-corrected.
-    if array.offset != 0 or len(array) != len(out):
+    if fix_offsets and (array.offset != 0 or len(array) != len(out)):
         out = out[array.offset : array.offset + len(array)]
 
     if isinstance(awkwardarrow_type, AwkwardArrowType):
@@ -296,9 +303,16 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         )
 
     elif isinstance(storage_type, pyarrow.lib.DictionaryType):
-        index = popbuffers(
+        masked_index = popbuffers(
             paarray.indices, None, storage_type.index_type, buffers
-        ).content.data
+        )
+        index = masked_index.content.data
+        if not isinstance(masked_index, ak._v2.contents.UnmaskedArray):
+            mask = masked_index.mask_as_bool(valid_when=False)
+            if mask.any():
+                index = numpy.array(index, copy=True)
+                index[mask] = -1
+
         content = handle_arrow(paarray.dictionary)
 
         parameters = ak._v2._util.merge_parameters(
@@ -456,7 +470,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
             length=len(paarray),
             parameters=node_parameters(awkwardarrow_type),
         )
-        return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
+        return popbuffers_finalize(
+            out, paarray, validbits, awkwardarrow_type, fix_offsets=False
+        )
 
     elif isinstance(storage_type, pyarrow.lib.UnionType):
         if isinstance(storage_type, pyarrow.lib.SparseUnionType):
@@ -505,7 +521,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         validbits = buffers.pop(0)
         bitdata = buffers.pop(0)
 
-        bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=np.uint8), len(paarray))
+        bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=np.uint8))
 
         out = ak._v2.contents.NumpyArray(
             bytedata.view(np.bool_),
@@ -588,15 +604,16 @@ def handle_arrow(obj, pass_empty_field=False):
         if len(layouts) == 1:
             return layouts[0]
         else:
+            raise NotImplementedError(
+                "FIXME: need ak._v2.operations.structure.concatenate"
+            )
             return ak._v2.operations.structure.concatenate(layouts, highlevel=False)
 
     elif isinstance(obj, pyarrow.lib.RecordBatch):
         child_array = []
         for i in range(obj.num_columns):
             layout = handle_arrow(obj.column(i))
-            if obj.schema.field(i).nullable and not isinstance(
-                layout, ak._v2._util.optiontypes
-            ):
+            if obj.schema.field(i).nullable and not layout.is_OptionType:
                 layout = ak._v2.contents.UnmaskedArray(layout)
             child_array.append(layout)
 
@@ -618,6 +635,9 @@ def handle_arrow(obj, pass_empty_field=False):
                 for batch in batches
                 if len(batch) > 0
             ]
+            raise NotImplementedError(
+                "FIXME: need ak._v2.operations.structure.concatenate"
+            )
             return ak._v2.operations.structure.concatenate(arrays, highlevel=False)
 
     elif (
@@ -635,6 +655,9 @@ def handle_arrow(obj, pass_empty_field=False):
         if len(chunks) == 1:
             return chunks[0]
         else:
+            raise NotImplementedError(
+                "FIXME: need ak._v2.operations.structure.concatenate"
+            )
             return ak._v2.operations.structure.concatenate(chunks, highlevel=False)
 
     else:

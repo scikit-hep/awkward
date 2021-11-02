@@ -1353,12 +1353,14 @@ class ListOffsetArray(Content):
 
         npoffsets = self._offsets.to(numpy)
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
+        if len(npoffsets) > length + 1:
+            npoffsets = npoffsets[: length + 1]
 
         # ArrowNotImplementedError: Lists with non-zero length null components
         # are not supported. So make the null'ed lists empty.
         if validbytes is not None:
             nonzeros = npoffsets[1:] != npoffsets[:-1]
-            maskedbytes = ~validbytes
+            maskedbytes = validbytes == 0
             if numpy.any(maskedbytes & nonzeros):  # null and count > 0
                 new_starts = numpy.array(npoffsets[:-1], copy=True)
                 new_stops = numpy.array(npoffsets[1:], copy=True)

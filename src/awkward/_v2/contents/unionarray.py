@@ -834,6 +834,10 @@ class UnionArray(Content):
                 types, options["extensionarray"], None, self
             ),
             len(nptags),
-            [None, pyarrow.py_buffer(nptags), pyarrow.py_buffer(npindex)],
+            [
+                None,
+                ak._v2._connect.pyarrow.to_length(nptags, length),
+                ak._v2._connect.pyarrow.to_length(npindex, length),
+            ],
             children=values,
         )

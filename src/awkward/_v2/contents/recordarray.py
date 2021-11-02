@@ -632,7 +632,7 @@ class RecordArray(Content):
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         values = [
-            (x if len(x) == self._length else x[: self._length])._to_arrow(
+            (x if len(x) == length else x[:length])._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
             for x in self._contents
@@ -651,7 +651,7 @@ class RecordArray(Content):
             ak._v2._connect.pyarrow.to_awkwardarrow_type(
                 types, options["extensionarray"], mask_node, self
             ),
-            self._length,
+            length,
             [ak._v2._connect.pyarrow.to_validbits(validbytes)],
             children=values,
         )
