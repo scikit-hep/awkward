@@ -2,39 +2,48 @@
 
 from __future__ import absolute_import
 
-# import datetime
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-# def test_date_time():
+def test_date_time():
+    numpy_array = np.array(
+        ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
+    )
 
-#     numpy_array = np.array(
-#         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
-#     )
+    array = ak._v2.contents.NumpyArray(numpy_array)
+    assert str(array.form.type) == "datetime64[s]"
+    assert ak.to_list(array) == [
+        np.datetime64("2020-07-27T10:41:11"),
+        np.datetime64("2019-01-01T00:00:00"),
+        np.datetime64("2020-01-01T00:00:00"),
+    ]
+    for i in range(len(array)):
+        assert array[i] == numpy_array[i]
 
-#     array = ak.Array(numpy_array)
-#     assert str(array.type) == "3 * datetime64"
-#     assert array.tolist() == [
-#         np.datetime64("2020-07-27T10:41:11"),
-#         np.datetime64("2019-01-01T00:00:00"),
-#         np.datetime64("2020-01-01T00:00:00"),
-#     ]
-#     for i in range(len(array)):
-#         assert ak.to_numpy(array)[i] == numpy_array[i]
+    date_time = np.datetime64("2020-07-27T10:41:11.200000011", "us")
+    array1 = ak._v2.contents.NumpyArray(
+        np.array(["2020-07-27T10:41:11.200000011"], "datetime64[us]")
+    )
+    assert np.datetime64(array1[0], "us") == date_time
 
-#     date_time = np.datetime64("2020-07-27T10:41:11.200000011", "us")
-#     array1 = ak.Array(np.array(["2020-07-27T10:41:11.200000011"], "datetime64[us]"))
-#     assert np.datetime64(array1[0], "us") == date_time
+    assert ak.to_list(ak.from_iter(array1)) == [
+        np.datetime64("2020-07-27T10:41:11.200000")
+    ]
 
-#     assert ak.to_list(ak.from_iter(array1)) == [
-#         np.datetime64("2020-07-27T10:41:11.200000")
-#     ]
 
-#     assert ak.max(array) == numpy_array[0]
-#     assert ak.min(array) == numpy_array[1]
+@pytest.mark.skip("FIXME: need min and max for datetime")
+def test_date_time_minmax():
+    numpy_array = np.array(
+        ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
+    )
+    array = ak._v2.contents.NumpyArray(numpy_array)
+    assert array.max() == numpy_array[0]
+    assert array.min() == numpy_array[1]
+
+
+# FIXME: and all the following as well.
 
 
 # def test_time_delta():
@@ -134,10 +143,6 @@ import awkward as ak  # noqa: F401
 #     ]
 
 
-# @pytest.mark.skipif(
-#     ak._util.py27,
-#     reason="Python 2.7 to_list returns datetime.timedelta see the test above",
-# )
 # def test_timedelta64_ArrayBuilder_py3():
 #     builder = ak.layout.ArrayBuilder()
 #     builder.timedelta(np.timedelta64(5, "W"))
@@ -443,10 +448,6 @@ import awkward as ak  # noqa: F401
 #     assert ak.sum(akarray[1:] - akarray[:-1], axis=0) == [np.timedelta64(60, "m")]
 
 
-# @pytest.mark.skipif(
-#     ak._util.py27 or np.__version__ <= "1.13.1",
-#     reason="Python 2.7 module 'numpy.core' has no attribute '_exceptions'",
-# )
 # def test_ufunc_sum():
 #     nparray = np.array(
 #         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
@@ -492,184 +493,4 @@ import awkward as ak  # noqa: F401
 #         np.datetime64("2019-09-02T09:30:00"),
 #         np.datetime64("2019-09-13T09:30:00"),
 #         np.datetime64("2019-09-21T20:00:00"),
-#     ]
-
-
-# pandas = pytest.importorskip("pandas")
-
-
-# def test_from_pandas():
-#     values = {"time": ["20190902093000", "20190913093000", "20190921200000"]}
-#     df = pandas.DataFrame(values, columns=["time"])
-#     df["time"] = pandas.to_datetime(df["time"], format="%Y%m%d%H%M%S")
-#     array = ak.layout.NumpyArray(df)
-#     assert ak.to_list(array) == [
-#         np.datetime64("2019-09-02T09:30:00"),
-#         np.datetime64("2019-09-13T09:30:00"),
-#         np.datetime64("2019-09-21T20:00:00"),
-#     ]
-#     array2 = ak.Array(df.values)
-#     assert ak.to_list(array2) == [
-#         np.datetime64("2019-09-02T09:30:00"),
-#         np.datetime64("2019-09-13T09:30:00"),
-#         np.datetime64("2019-09-21T20:00:00"),
-#     ]
-
-
-# pyarrow = pytest.importorskip("pyarrow")
-
-
-# def test_from_arrow():
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
-#             type=pyarrow.date64(),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("2002-01-23T00:00:00.000"),
-#         np.datetime64("2019-02-20T00:00:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
-#             type=pyarrow.date32(),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("2002-01-23T00:00:00.000"),
-#         np.datetime64("2019-02-20T00:00:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.time(1, 0, 0), datetime.time(2, 30, 0)],
-#             type=pyarrow.time64("us"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("1970-01-01T01:00:00.000"),
-#         np.datetime64("1970-01-01T02:30:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.time(1, 0, 0), datetime.time(2, 30, 0)],
-#             type=pyarrow.time64("ns"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("1970-01-01T01:00:00.000"),
-#         np.datetime64("1970-01-01T02:30:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.time(1, 0, 0), datetime.time(2, 30, 0)],
-#             type=pyarrow.time32("s"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("1970-01-01T01:00:00.000"),
-#         np.datetime64("1970-01-01T02:30:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.time(1, 0, 0), datetime.time(2, 30, 0)],
-#             type=pyarrow.time32("ms"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("1970-01-01T01:00:00.000"),
-#         np.datetime64("1970-01-01T02:30:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
-#             type=pyarrow.timestamp("s"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("2002-01-23T00:00:00.000"),
-#         np.datetime64("2019-02-20T00:00:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
-#             type=pyarrow.timestamp("ms"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("2002-01-23T00:00:00.000"),
-#         np.datetime64("2019-02-20T00:00:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
-#             type=pyarrow.timestamp("us"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("2002-01-23T00:00:00.000"),
-#         np.datetime64("2019-02-20T00:00:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
-#             type=pyarrow.timestamp("ns"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.datetime64("2002-01-23T00:00:00.000"),
-#         np.datetime64("2019-02-20T00:00:00.000"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.timedelta(5), datetime.timedelta(10)],
-#             type=pyarrow.duration("s"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.timedelta64(5, "D"),
-#         np.timedelta64(10, "D"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.timedelta(5), datetime.timedelta(10)],
-#             type=pyarrow.duration("ms"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.timedelta64(5, "D"),
-#         np.timedelta64(10, "D"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.timedelta(5), datetime.timedelta(10)],
-#             type=pyarrow.duration("us"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.timedelta64(5, "D"),
-#         np.timedelta64(10, "D"),
-#     ]
-
-#     array = ak.from_arrow(
-#         pyarrow.array(
-#             [datetime.timedelta(5), datetime.timedelta(10)],
-#             type=pyarrow.duration("ns"),
-#         )
-#     )
-#     assert array.tolist() == [
-#         np.timedelta64(5, "D"),
-#         np.timedelta64(10, "D"),
 #     ]
