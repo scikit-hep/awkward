@@ -564,6 +564,9 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
+@pytest.mark.skipif(
+    not ak._v2._util.numpy_at_least("1.20"), reason="NumPy >= 1.20 required for dates"
+)
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_numpyarray_datetime(tmp_path, extensionarray):
     # pyarrow doesn't yet support datetime/duration conversions to Parquet.

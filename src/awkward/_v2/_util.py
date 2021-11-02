@@ -7,11 +7,11 @@ from __future__ import absolute_import
 
 # import re
 # import sys
-import os
-
 # import os.path
 # import warnings
 # import itertools
+import distutils
+import os
 import numbers
 
 try:
@@ -34,6 +34,14 @@ kMaxUInt32 = 4294967295  # 2**32 - 1
 kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
+
+
+def numpy_at_least(version):
+    import numpy
+
+    return distutils.version.LooseVersion(
+        numpy.__version__
+    ) >= distutils.version.LooseVersion(version)
 
 
 def in_module(obj, modulename):

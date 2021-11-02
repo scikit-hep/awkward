@@ -170,9 +170,7 @@ if pyarrow is not None:
         pyarrow.duration("ns"): (False, np.dtype("m8[ns]")),
     }
 
-if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVersion(
-    "1.17.0"
-):
+if not ak._v2._util.numpy_at_least("1.17.0"):
 
     def packbits(bytearray, lsb_order=True):
         if lsb_order:
