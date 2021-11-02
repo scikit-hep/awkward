@@ -10,10 +10,16 @@ import awkward as ak  # noqa: F401
 pyarrow = pytest.importorskip("pyarrow")
 
 
-# def test():
-#     assert ak.from_arrow(
-#         pyarrow.Table.from_pydict({"x": [None, None, None]})
-#     ).tolist() == [{"x": None}, {"x": None}, {"x": None}]
-#     assert ak.from_arrow(
-#         pyarrow.Table.from_pydict({"x": [[None, None], [], [None]]})
-#     ).tolist() == [{"x": [None, None]}, {"x": []}, {"x": [None]}]
+def test():
+    import awkward._v2._connect.pyarrow
+
+    assert ak.to_list(
+        awkward._v2._connect.pyarrow.handle_arrow(
+            pyarrow.Table.from_pydict({"x": [None, None, None]})
+        )
+    ) == [{"x": None}, {"x": None}, {"x": None}]
+    assert ak.to_list(
+        awkward._v2._connect.pyarrow.handle_arrow(
+            pyarrow.Table.from_pydict({"x": [[None, None], [], [None]]})
+        )
+    ) == [{"x": [None, None]}, {"x": []}, {"x": [None]}]
