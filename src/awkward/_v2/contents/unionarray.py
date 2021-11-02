@@ -779,7 +779,7 @@ class UnionArray(Content):
 
         values = []
         for tag, content in enumerate(self._contents):
-            selected_tags = (nptags == tag) | True
+            selected_tags = nptags == tag
             this_index = npindex[selected_tags]
 
             # Arrow unions can't have masks; propagate validbytes down to the content.
@@ -822,7 +822,7 @@ class UnionArray(Content):
                 )
                 for i in range(len(values))
             ],
-            "sparse",
+            "dense",
             list(range(len(values))),
         )
 
@@ -834,6 +834,6 @@ class UnionArray(Content):
                 types, options["extensionarray"], None, self
             ),
             len(nptags),
-            [None, pyarrow.py_buffer(nptags)],
+            [None, pyarrow.py_buffer(nptags), pyarrow.py_buffer(npindex)],
             children=values,
         )

@@ -593,17 +593,16 @@ def test_numpyarray_datetime(tmp_path, extensionarray):
 def test_unionarray(tmp_path, extensionarray):
     akarray = ak._v2.contents.UnionArray(
         ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
-        # ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
-        ak._v2.index.Index64(np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.int64)),
+        ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
         [
-            ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 99, 99, 99, 2.2, 99])),
-            ak._v2.contents.NumpyArray(
-                np.array([99, 99, 0, 10, 20, 99, 30], dtype=np.int32)
-            ),
+            ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2])),
+            ak._v2.contents.NumpyArray(np.array([0, 10, 20, 30], dtype=np.int32)),
         ],
         parameters={"which": "outer"},
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
 
+    # pyarrow doesn't yet support union array conversions to Parquet.
+    # (FIXME: find or create a JIRA ticket.)
     # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
