@@ -14,6 +14,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class ListArray(Content):
+    is_ListType = True
+
     def __init__(self, starts, stops, content, identifier=None, parameters=None):
         if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),
@@ -105,6 +107,15 @@ class ListArray(Content):
         out.append(indent + "</ListArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return ListArray(
+            self._starts,
+            self._stops,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
@@ -945,3 +956,8 @@ class ListArray(Content):
                 return ""
             else:
                 return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return self.toListOffsetArray64(False)._to_arrow(
+            pyarrow, mask_node, validbytes, length, options
+        )

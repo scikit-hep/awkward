@@ -46,7 +46,7 @@ class UnmaskedForm(Form):
             self._content._type(typestrs),
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
-        )
+        ).simplify_option_union()
 
     def __eq__(self, other):
         if isinstance(other, UnmaskedForm):

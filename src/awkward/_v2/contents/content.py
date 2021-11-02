@@ -16,6 +16,15 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Content(object):
+    is_NumpyType = False
+    is_UnknownType = False
+    is_ListType = False
+    is_RegularType = False
+    is_OptionType = False
+    is_IndexedType = False
+    is_RecordType = False
+    is_UnionType = False
+
     def _init(self, identifier, parameters):
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
@@ -944,6 +953,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def fields(self):
         return self.Form.fields.__get__(self)
 
+    @property
+    def dimension_optiontype(self):
+        return self.Form.dimension_optiontype.__get__(self)
+
     # WIP
     def simplify_uniontype(self, merge, mergebool):
         nplike = self.nplike
@@ -1214,6 +1227,31 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 tags, index, contents, self._identifier, self._contents
             )
 
-    @property
-    def dimension_optiontype(self):
-        return self.Form.dimension_optiontype.__get__(self)
+    def to_arrow(
+        self,
+        list_to32=False,
+        string_to32=False,
+        bytestring_to32=False,
+        emptyarray_to=None,
+        indexedarray_as_dictionary=False,
+        extensionarray=True,
+        count_nulls=True,
+    ):
+        import awkward._v2._connect.pyarrow
+
+        pyarrow = awkward._v2._connect.pyarrow.import_pyarrow("to_arrow")
+        return self._to_arrow(
+            pyarrow,
+            None,
+            None,
+            len(self),
+            {
+                "list_to32": list_to32,
+                "string_to32": string_to32,
+                "bytestring_to32": bytestring_to32,
+                "emptyarray_to": emptyarray_to,
+                "indexedarray_as_dictionary": indexedarray_as_dictionary,
+                "extensionarray": extensionarray,
+                "count_nulls": count_nulls,
+            },
+        )

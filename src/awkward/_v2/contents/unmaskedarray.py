@@ -11,6 +11,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class UnmaskedArray(Content):
+    is_OptionType = True
+
     def __init__(self, content, identifier=None, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
@@ -65,6 +67,13 @@ class UnmaskedArray(Content):
         out.append(indent + "</UnmaskedArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return UnmaskedArray(
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toByteMaskedArray(self):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
@@ -362,3 +371,6 @@ class UnmaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return self._content._to_arrow(pyarrow, self, None, length, options)

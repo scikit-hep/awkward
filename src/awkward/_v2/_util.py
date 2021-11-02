@@ -7,11 +7,11 @@ from __future__ import absolute_import
 
 # import re
 # import sys
-import os
-
 # import os.path
 # import warnings
 # import itertools
+import distutils
+import os
 import numbers
 
 try:
@@ -34,6 +34,14 @@ kMaxUInt32 = 4294967295  # 2**32 - 1
 kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
+
+
+def numpy_at_least(version):
+    import numpy
+
+    return distutils.version.LooseVersion(
+        numpy.__version__
+    ) >= distutils.version.LooseVersion(version)
 
 
 def in_module(obj, modulename):
@@ -62,6 +70,13 @@ def isnum(x):
 
 def isstr(x):
     return isinstance(x, str)
+
+
+def tobytes(array):
+    if hasattr(array, "tobytes"):
+        return array.tobytes()
+    else:
+        return array.tostring()
 
 
 ###############################################################################
@@ -1818,3 +1833,37 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         highlevel=False,
 #         behavior=behavior,
 #     )
+
+
+def direct_Content_subclass(node):
+    if node is None:
+        return None
+    else:
+        mro = type(node).mro()
+        return mro[mro.index(ak._v2.contents.Content) - 1]
+
+
+def direct_Content_subclass_name(node):
+    out = direct_Content_subclass(node)
+    if out is None:
+        return None
+    else:
+        return out.__name__
+
+
+def merge_parameters(one, two):
+    if one is None and two is None:
+        return None
+
+    elif one is None:
+        return two
+
+    elif two is None:
+        return one
+
+    else:
+        out = dict(one)
+        for k, v in two.items():
+            if v is not None:
+                out[k] = v
+        return out

@@ -2,35 +2,9 @@
 
 from __future__ import absolute_import
 
-import distutils
-
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
-
-
-def _import_pyarrow(name):  # move this to _util
-    try:
-        import pyarrow
-    except ImportError:
-        raise ImportError(
-            """to use {0}, you must install pyarrow:
-
-    pip install pyarrow
-
-or
-
-    conda install -c conda-forge pyarrow
-""".format(
-                name
-            )
-        )
-    else:
-        if distutils.version.LooseVersion(
-            pyarrow.__version__
-        ) < distutils.version.LooseVersion("5.0.0"):
-            raise ImportError("pyarrow 5.0.0 or later required for {0}".format(name))
-        return pyarrow
 
 
 def to_arrow(

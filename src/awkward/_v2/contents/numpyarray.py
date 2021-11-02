@@ -9,9 +9,12 @@ from awkward._v2.forms.numpyform import NumpyForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class NumpyArray(Content):
+    is_NumpyType = True
+
     def __init__(self, data, identifier=None, parameters=None, nplike=None):
         self._nplike = ak.nplike.of(data) if nplike is None else nplike
         self._data = self._nplike.asarray(data)
@@ -128,6 +131,14 @@ class NumpyArray(Content):
 
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return NumpyArray(
+            self._data,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+            self._nplike,
+        )
 
     def toRegularArray(self):
         if len(self._data.shape) == 1:
@@ -679,3 +690,29 @@ class NumpyArray(Content):
                     path, type(self), i
                 )
         return ""
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        if self._data.ndim != 1:
+            return self.toRegularArray()._to_arrow(
+                pyarrow, mask_node, validbytes, length, options
+            )
+
+        nparray = self.to(numpy)
+        storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
+
+        if issubclass(nparray.dtype.type, (bool, np.bool_)):
+            nparray = ak._v2._connect.pyarrow.packbits(nparray)
+
+        return pyarrow.Array.from_buffers(
+            ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                storage_type, options["extensionarray"], mask_node, self
+            ),
+            length,
+            [
+                ak._v2._connect.pyarrow.to_validbits(validbytes),
+                ak._v2._connect.pyarrow.to_length(nparray, length),
+            ],
+            null_count=ak._v2._connect.pyarrow.to_null_count(
+                validbytes, options["count_nulls"]
+            ),
+        )

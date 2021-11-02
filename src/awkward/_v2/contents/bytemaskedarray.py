@@ -12,9 +12,12 @@ from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class ByteMaskedArray(Content):
+    is_OptionType = True
+
     def __init__(self, mask, content, valid_when, identifier=None, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(
@@ -104,6 +107,15 @@ class ByteMaskedArray(Content):
         out.append(indent + "</ByteMaskedArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return ByteMaskedArray(
+            self._mask,
+            self._content,
+            self._valid_when,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toIndexedOptionArray64(self):
         nplike = self.nplike
@@ -667,3 +679,14 @@ class ByteMaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        this_validbytes = self.mask_as_bool(valid_when=True)
+
+        return self._content._to_arrow(
+            pyarrow,
+            self,
+            ak._v2._connect.pyarrow.and_validbytes(validbytes, this_validbytes),
+            length,
+            options,
+        )
