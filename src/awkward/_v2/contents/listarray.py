@@ -945,3 +945,81 @@ class ListArray(Content):
                 return ""
             else:
                 return self.content.validityerror(path + ".content")
+
+    def _rpad(self, target, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, False)
+        elif posaxis == depth + 1:
+            min = ak._v2.index.Index64.empty(1)
+            self._handle_error(
+                self.nplike[
+                    "awkward_ListArray_min_range",
+                    min.dtype.type,
+                    self._starts.dtype.type,
+                    self._stops.dtype.type,
+                ](
+                    min.to(self.nplike),
+                    self._starts.to(self.nplike),
+                    self._stops.to(self.nplike),
+                    len(self._starts),
+                )
+            )
+            if target < min[0]:
+                return self
+            else:
+                tolength = ak._v2.index.Index64.zeros(1)
+                self._handle_error(
+                    self.nplike[
+                        "awkward_ListArray_rpad_and_clip_axis1",
+                        tolength.dtype.type,
+                        self._starts.dtype.type,
+                        self._stops.dtype.type,
+                    ](
+                        tolength.to(self.nplike),
+                        self._starts.to(self.nplike),
+                        self._stops.to(self.nplike),
+                        target,
+                        len(self._starts),
+                    )
+                )
+
+                index = ak._v2.index.Index64.empty(tolength)
+                starts_ = ak._v2.index.Index64.empty(len(self._starts))
+                stops_ = ak._v2.index.Index64.empty(len(self._stops))
+                self._handle_error(
+                    self.nplike[
+                        "awkward_ListArray_rpad_and_clip_axis1_64",
+                        index.dtype.type,
+                        self._starts.dtype.type,
+                        self._stops.dtype.type,
+                        starts_.dtype.type,
+                        stops_.dtype.type,
+                    ](
+                        index.to(self.nplike),
+                        self._starts.to(self.nplike),
+                        self._stops.to(self.nplike),
+                        starts_.to(self.nplike),
+                        stops_.to(self.nplike),
+                        target,
+                        len(self._starts),
+                    )
+                )
+                next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                    None, self._parameters, index.self._content
+                )
+
+                return ak._v2.contents.listarray.ListArray(
+                    None, self._parameters, starts_, stops_, next.simplify_optiontype()
+                )
+        else:
+            return ak._v2.contents.listarray.ListArray(
+                None,
+                self._parameters,
+                self._starts,
+                self._stops,
+                self._content.rpad(target, posaxis, depth + 1),
+            )
+
+    def _rpad_and_clip(self, target, axis, depth):
+        return self.toListOffsetArray64(True).rpad_and_clip(target, axis, depth)

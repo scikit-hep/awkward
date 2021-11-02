@@ -612,3 +612,45 @@ class RecordArray(Content):
             if sub != "":
                 return sub
         return ""
+
+    def _rpad(self, target, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, False)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content.rpad(target, posaxis, depth))
+            if len(contents) == 0:
+                return ak._v2.contents.recordarray.RecordArray(
+                    self._identifier,
+                    self._parameters,
+                    contents,
+                    self.recordlookup,
+                    len(self),
+                )
+            else:
+                return ak._v2.contents.recordarray.RecordArray(
+                    self._identifier, self._parameters, contents, self.recordlookup
+                )
+
+    def _rpad_and_clip(self, target, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, True)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content.rpad(target, posaxis, depth))
+            if len(contents) == 0:
+                return ak._v2.contents.recordarray.RecordArray(
+                    self._identifier,
+                    self._parameters,
+                    contents,
+                    self.recordlookup,
+                    len(self),
+                )
+            else:
+                return ak._v2.contents.recordarray.RecordArray(
+                    self._identifier, self._parameters, contents, self.recordlookup
+                )

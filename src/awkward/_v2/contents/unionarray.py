@@ -759,3 +759,29 @@ class UnionArray(Content):
                 if sub != "":
                     return sub
             return ""
+
+    def _rpad(self, target, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, False)
+        else:
+            contents = []
+            for content in self._contents:
+                content.append(content.rpad(target, posaxis, depth))
+            out = ak._v2.unionarray.UnionArray(
+                self.identifier, self.parameter, self.tags, self.index, contents
+            )
+            return out.simplify_uniontype(True, False)
+
+    def _rpad_and_clip(self, target, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, True)
+        else:
+            contents = []
+            for content in self._contents:
+                content.append(content.rpad_and_clip(target, posaxis, depth))
+            out = ak._v2.unionarray.UnionArray(
+                self.identifier, self.parameter, self.tags, self.index, contents
+            )
+            return out.simplify_uniontype(True, False)

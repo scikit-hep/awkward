@@ -362,3 +362,27 @@ class UnmaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _rpad(self, target, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, False)
+        elif posaxis == depth + 1:
+            return self._content.rpad(target, posaxis, depth)
+        else:
+            return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                None, self._parameters, self._content.rpad(target, posaxis, depth)
+            )
+
+    def _rpad_and_clip(self, target, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, True)
+        elif posaxis == depth + 1:
+            return self._content.rpad_and_clip(target, posaxis, depth)
+        else:
+            return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                None,
+                self._parameters,
+                self._content.rpad_and_clip(target, posaxis, depth),
+            )
