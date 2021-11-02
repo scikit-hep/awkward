@@ -15,6 +15,7 @@ from awkward._v2.forms.unionform import UnionForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class UnionArray(Content):
@@ -770,3 +771,69 @@ class UnionArray(Content):
                 if sub != "":
                     return sub
             return ""
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        nptags = self._tags.to(numpy)
+        npindex = self._index.to(numpy)
+        copied_index = False
+
+        values = []
+        for tag, content in enumerate(self._contents):
+            selected_tags = (nptags == tag) | True
+            this_index = npindex[selected_tags]
+
+            # Arrow unions can't have masks; propagate validbytes down to the content.
+            if validbytes is not None:
+                # If this_index is a filtered permutation, we can just filter-permute
+                # the mask to have the same order the content.
+                if len(numpy.unique(this_index)) == len(this_index):
+                    this_validbytes = numpy.zeros(len(this_index), dtype=np.int8)
+                    this_validbytes[this_index] = validbytes[selected_tags]
+
+                # If this_index is not a filtered permutation, then we can't modify
+                # the mask to fit the content. The same element in the content array
+                # will appear multiple times in the union array, and it *might* be
+                # presented as valid in some union array elements and masked in others.
+                # The validbytes that recurses down to the next level can't have an
+                # element that is both 0 (masked) and 1 (valid).
+                else:
+                    this_validbytes = validbytes[selected_tags]
+                    content = content[this_index]
+                    if not copied_index:
+                        copied_index = True
+                        npindex = numpy.array(npindex, copy=True)
+                    npindex[selected_tags] = numpy.arange(
+                        len(this_index), dtype=npindex.dtype
+                    )
+
+            else:
+                this_validbytes = None
+
+            values.append(
+                content._to_arrow(
+                    pyarrow, mask_node, this_validbytes, len(this_index), options
+                )
+            )
+
+        types = pyarrow.union(
+            [
+                pyarrow.field(str(i), values[i].type).with_nullable(
+                    mask_node is not None or self._contents[i].is_OptionType
+                )
+                for i in range(len(values))
+            ],
+            "sparse",
+            list(range(len(values))),
+        )
+
+        if not issubclass(npindex.dtype.type, np.int32):
+            npindex = npindex.astype(np.int32)
+
+        return pyarrow.Array.from_buffers(
+            ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                types, options["extensionarray"], None, self
+            ),
+            len(nptags),
+            [None, pyarrow.py_buffer(nptags)],
+            children=values,
+        )

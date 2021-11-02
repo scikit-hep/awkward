@@ -276,20 +276,9 @@ def popbuffers_finalize(out, array, validbits, awkwardarrow_type):
 
 
 def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
-    if storage_type == pyarrow.null():
-        validbits = buffers.pop(0)
-        assert storage_type.num_fields == 0
-
-        # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
-        return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
-            ak._v2.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
-            parameters=mask_parameters(awkwardarrow_type),
-        )
-
-    else:
-        # Start by removing the ExtensionArray wrapper (except for null type).
-        paarray = paarray.cast(storage_type)
+    # Start by removing the ExtensionArray wrapper.
+    if awkwardarrow_type is not None:
+        paarray = paarray.storage
 
     ### Beginning of the big if-elif-elif chain!
 
@@ -332,7 +321,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         akcontent = popbuffers(paarray.values, a, b, buffers)
 
         if not storage_type.value_field.nullable:
-            akcontent = remove_optiontype(akcontent)  # strip the dummy option-type node
+            # strip the dummy option-type node
+            akcontent = remove_optiontype(akcontent)
 
         out = ak._v2.contents.RegularArray(
             akcontent,
@@ -359,7 +349,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         akcontent = popbuffers(paarray.values, a, b, buffers)
 
         if not storage_type.value_field.nullable:
-            akcontent = remove_optiontype(akcontent)  # strip the dummy option-type node
+            # strip the dummy option-type node
+            akcontent = remove_optiontype(akcontent)
 
         out = ak._v2.contents.ListOffsetArray(
             akoffsets, akcontent, parameters=node_parameters(awkwardarrow_type)
@@ -452,9 +443,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = popbuffers(paarray.field(field_name), a, b, buffers)
             if not field.nullable:
-                akcontent = remove_optiontype(
-                    akcontent
-                )  # strip the dummy option-type node
+                # strip the dummy option-type node
+                akcontent = remove_optiontype(akcontent)
             contents.append(akcontent)
 
         if awkwardarrow_type is not None and awkwardarrow_type.record_is_tuple:
@@ -468,12 +458,47 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         )
         return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
-    elif isinstance(storage_type, pyarrow.lib.SparseUnionType):
-        # Turn it into a DenseUnionType and recurse.
-        raise NotImplementedError
-
     elif isinstance(storage_type, pyarrow.lib.UnionType):
-        raise NotImplementedError
+        if isinstance(storage_type, pyarrow.lib.SparseUnionType):
+            assert storage_type.num_buffers == 2
+            validbits = buffers.pop(0)
+            nptags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
+            npindex = numpy.arange(len(nptags), dtype=np.int32)
+        else:
+            assert storage_type.num_buffers == 3
+            validbits = buffers.pop(0)
+            nptags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
+            npindex = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+
+        akcontents = []
+        for i in range(storage_type.num_fields):
+            field = storage_type[i]
+            a, b = to_awkwardarrow_storage_types(field.type)
+            akcontent = popbuffers(paarray.field(i), a, b, buffers)
+
+            if not field.nullable:
+                # strip the dummy option-type node
+                akcontent = remove_optiontype(akcontent)
+            akcontents.append(akcontent)
+
+        out = ak._v2.contents.UnionArray(
+            ak._v2.index.Index8(nptags),
+            ak._v2.index.Index32(npindex),
+            akcontents,
+            parameters=node_parameters(awkwardarrow_type),
+        )
+        return popbuffers_finalize(out, paarray, None, awkwardarrow_type)
+
+    elif storage_type == pyarrow.null():
+        validbits = buffers.pop(0)
+        assert storage_type.num_fields == 0
+
+        # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
+        return ak._v2.contents.IndexedOptionArray(
+            ak._v2.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
+            ak._v2.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
+            parameters=mask_parameters(awkwardarrow_type),
+        )
 
     elif storage_type == pyarrow.bool_():
         assert storage_type.num_buffers == 2
