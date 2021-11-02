@@ -87,6 +87,12 @@ if pyarrow is not None:
             self._record_is_tuple = record_is_tuple
             super(AwkwardArrowType, self).__init__(storage_type, "awkward")
 
+        def __str__(self):
+            return "ak:" + str(self.storage_type)
+
+        def __repr__(self):
+            return "awkward<{0}>".format(repr(self.storage_type))
+
         @property
         def mask_type(self):
             return self._mask_type
