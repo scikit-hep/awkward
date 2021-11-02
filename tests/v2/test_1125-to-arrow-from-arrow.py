@@ -595,8 +595,14 @@ def test_unionarray(tmp_path, extensionarray):
         ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
         ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
         [
-            ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2])),
-            ak._v2.contents.NumpyArray(np.array([0, 10, 20, 30], dtype=np.int32)),
+            ak._v2.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2]),
+                parameters={"which": "inner1"},
+            ),
+            ak._v2.contents.NumpyArray(
+                np.array([0, 10, 20, 30], dtype=np.int32),
+                parameters={"which": "inner2"},
+            ),
         ],
         parameters={"which": "outer"},
     )
@@ -606,3 +612,83 @@ def test_unionarray(tmp_path, extensionarray):
     # pyarrow doesn't yet support union array conversions to Parquet.
     # (FIXME: find or create a JIRA ticket.)
     # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    akarray = ak._v2.contents.UnionArray(
+        ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
+        ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
+        [
+            ak._v2.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2]),
+                parameters={"which": "inner1"},
+            ),
+            ak._v2.contents.ByteMaskedArray(
+                ak._v2.index.Index8(
+                    np.array([False, False, True, False]).view(np.int8)
+                ),
+                ak._v2.contents.NumpyArray(
+                    np.array([0, 10, 20, 30], dtype=np.int32),
+                    parameters={"which": "inner2"},
+                ),
+                valid_when=False,
+                parameters={"which": "middle"},
+            ),
+        ],
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+
+    akarray = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8(
+            np.array([False, True, False, True, False, True, True]).view(np.int8)
+        ),
+        ak._v2.contents.UnionArray(
+            ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
+            ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
+            [
+                ak._v2.contents.NumpyArray(
+                    np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
+                ),
+                ak._v2.contents.NumpyArray(
+                    np.array([0, 10, 20, 30], dtype=np.int32),
+                    parameters={"which": "inner2"},
+                ),
+            ],
+            parameters={"which": "middle"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)
+
+    akarray = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8(
+            np.array([False, True, False, True, False, True, True]).view(np.int8)
+        ),
+        ak._v2.contents.UnionArray(
+            ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
+            ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
+            [
+                ak._v2.contents.NumpyArray(
+                    np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
+                ),
+                ak._v2.contents.ByteMaskedArray(
+                    ak._v2.index.Index8(
+                        np.array([False, False, True, False]).view(np.int8)
+                    ),
+                    ak._v2.contents.NumpyArray(
+                        np.array([0, 10, 20, 30], dtype=np.int32),
+                        parameters={"which": "inner2"},
+                    ),
+                    valid_when=False,
+                    parameters={"which": "middle1"},
+                ),
+            ],
+            parameters={"which": "middle2"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
+    paarray = akarray.to_arrow(extensionarray=extensionarray)
+    arrow_round_trip(akarray, paarray, extensionarray)

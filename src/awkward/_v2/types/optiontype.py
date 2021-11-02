@@ -6,6 +6,7 @@ import awkward as ak
 from awkward._v2.types.type import Type
 from awkward._v2.types.regulartype import RegularType
 from awkward._v2.types.listtype import ListType
+from awkward._v2.types.uniontype import UnionType
 from awkward._v2.forms.form import _parameters_equal
 
 
@@ -66,3 +67,30 @@ class OptionType(Type):
             )
         else:
             return False
+
+    def simplify_option_union(self):
+        if isinstance(self._content, UnionType):
+            contents = []
+            for content in self._content.contents:
+                if isinstance(content, OptionType):
+                    contents.append(
+                        OptionType(
+                            content.content,
+                            ak._v2._util.merge_parameters(
+                                self._parameters, content._parameters
+                            ),
+                            content._typestr
+                            if self._typestr is None
+                            else self._typestr,
+                        )
+                    )
+
+                else:
+                    contents.append(
+                        OptionType(content, self._parameters, self._typestr)
+                    )
+
+            return UnionType(contents, self._content.parameters, self._content.typestr)
+
+        else:
+            return self
