@@ -16,6 +16,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class BitMaskedArray(Content):
+    is_OptionType = True
+
     def __init__(
         self,
         mask,
@@ -143,6 +145,17 @@ class BitMaskedArray(Content):
         out.append(indent + "</BitMaskedArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return BitMaskedArray(
+            self._mask,
+            self._content,
+            self._valid_when,
+            self._length,
+            self._lsb_order,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toByteMaskedArray(self):
         nplike = self._mask.nplike
@@ -433,3 +446,8 @@ class BitMaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return self.toByteMaskedArray()._to_arrow(
+            pyarrow, mask_node, validbytes, length, options
+        )

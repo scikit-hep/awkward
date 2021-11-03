@@ -68,7 +68,6 @@ class IndexedForm(Form):
                 if out._parameters is self._parameters:
                     out._parameters = dict(out._parameters)
                 del out._parameters["__array__"]
-                out._parameters["__categorical__"] = True
 
         return out
 

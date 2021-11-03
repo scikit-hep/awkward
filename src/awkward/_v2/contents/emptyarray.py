@@ -13,22 +13,11 @@ numpy = ak.nplike.Numpy.instance()
 
 
 class EmptyArray(Content):
+    is_NumpyType = True
+    is_UnknownType = True
+
     def __init__(self, identifier=None, parameters=None):
         self._init(identifier, parameters)
-
-    def __repr__(self):
-        return self._repr("", "", "")
-
-    def _repr(self, indent, pre, post):
-        extra = self._repr_extra(indent + "    ")
-        if len(extra) == 0:
-            return indent + pre + "<EmptyArray len='0'/>" + post
-        else:
-            out = [indent, pre, "<EmptyArray len='0'>"]
-            out.extend(extra)
-            out.append("\n" + indent + "</EmptyArray>")
-            out.append(post)
-            return "".join(out)
 
     Form = EmptyForm
 
@@ -48,16 +37,32 @@ class EmptyArray(Content):
     def nplike(self):
         return ak.nplike.Numpy.instance()
 
-    @property
-    def nonvirtual_nplike(self):
-        return None
-
     def __len__(self):
         return 0
 
-    def toNumpyArray(self, dtype, nplike=None):
+    def __repr__(self):
+        return self._repr("", "", "")
+
+    def _repr(self, indent, pre, post):
+        extra = self._repr_extra(indent + "    ")
+        if len(extra) == 0:
+            return indent + pre + "<EmptyArray len='0'/>" + post
+        else:
+            out = [indent, pre, "<EmptyArray len='0'>"]
+            out.extend(extra)
+            out.append("\n" + indent + "</EmptyArray>")
+            out.append(post)
+            return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return EmptyArray(
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
+    def toNumpyArray(self, dtype, nplike=numpy):
         return ak._v2.contents.numpyarray.NumpyArray(
-            numpy.empty(0, dtype), self._identifier, self._parameters, nplike=nplike
+            nplike.empty(0, dtype), self._identifier, self._parameters, nplike=nplike
         )
 
     def _getitem_nothing(self):
@@ -199,3 +204,26 @@ class EmptyArray(Content):
 
     def _validityerror(self, path):
         return ""
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        if options["emptyarray_to"] is None:
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                    pyarrow.null(), options["extensionarray"], mask_node, self
+                ),
+                length,
+                [
+                    ak._v2._connect.pyarrow.to_validbits(validbytes),
+                ],
+                null_count=length,
+            )
+
+        else:
+            dtype = np.dtype(options["emptyarray_to"])
+            next = ak._v2.contents.numpyarray.NumpyArray(
+                numpy.empty(length, dtype),
+                self._identifier,
+                self._parameters,
+                nplike=numpy,
+            )
+            return next._to_arrow(pyarrow, mask_node, validbytes, length, options)

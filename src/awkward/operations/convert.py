@@ -3333,6 +3333,8 @@ class _LazyDatasetGenerator(object):
             if column is None:
                 out = out.content
             else:
+                if isinstance(out, ak.layout.UnmaskedArray):
+                    out = out.content
                 out = out.field(column)
         if masked:
             if isinstance(out, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)):

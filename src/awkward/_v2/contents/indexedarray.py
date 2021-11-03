@@ -10,9 +10,12 @@ from awkward._v2.forms.indexedform import IndexedForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class IndexedArray(Content):
+    is_IndexedType = True
+
     def __init__(self, index, content, identifier=None, parameters=None):
         if not (
             isinstance(index, Index)
@@ -89,6 +92,14 @@ class IndexedArray(Content):
         out.append(indent + "</IndexedArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return IndexedArray(
+            self._index,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toIndexedOptionArray64(self):
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
@@ -261,6 +272,7 @@ class IndexedArray(Content):
                 nextindex, self.content, self.identifier, self.parameters
             )
             return next.project()
+
         else:
             nextcarry = ak._v2.index.Index64.empty(len(self), self.nplike)
             self._handle_error(
@@ -306,7 +318,7 @@ class IndexedArray(Content):
                     ak._v2.contents.unmaskedarray.UnmaskedArray,
                 ),
             ):
-                rawcontent = self.contents.toIndexedOptionArray64()
+                rawcontent = self.content.toIndexedOptionArray64()
                 inner = rawcontent.index
                 result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
 
@@ -714,3 +726,51 @@ class IndexedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        if (
+            not options["categorical_as_dictionary"]
+            and self.parameter("__array__") == "categorical"
+        ):
+            next_parameters = dict(self._parameters)
+            del next_parameters["__array__"]
+            next = IndexedArray(
+                self._index, self._content, self._identifier, next_parameters
+            )
+            return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+        index = self._index.to(numpy)
+
+        if self.parameter("__array__") == "categorical":
+            dictionary = self._content._to_arrow(
+                pyarrow, None, None, len(self._content), options
+            )
+            out = pyarrow.DictionaryArray.from_arrays(
+                index,
+                dictionary,
+                None if validbytes is None else ~validbytes,
+            )
+            if options["extensionarray"]:
+                return ak._v2._connect.pyarrow.AwkwardArrowArray.from_storage(
+                    ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                        out.type, options["extensionarray"], mask_node, self
+                    ),
+                    out,
+                )
+            else:
+                return out
+
+        else:
+            if len(self._content) == 0:
+                # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+                # every masked value is self._content[0], unless len(self._content) == 0.
+                # In that case, don't call self._content[index]; it's empty anyway.
+                next = self._content
+            else:
+                next = self._content._carry(
+                    ak._v2.index.Index(index), False, IndexError
+                )
+
+            return next.merge_parameters(self._parameters)._to_arrow(
+                pyarrow, mask_node, validbytes, length, options
+            )

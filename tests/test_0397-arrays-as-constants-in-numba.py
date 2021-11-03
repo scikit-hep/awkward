@@ -32,8 +32,6 @@ def test_refcount():
 
     del f1
     assert sys.getrefcount(array) == 4
-    del f2
-    assert sys.getrefcount(array) == 2
 
 
 def test_Array():

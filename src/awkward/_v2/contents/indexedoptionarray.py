@@ -10,9 +10,13 @@ from awkward._v2.forms.indexedoptionform import IndexedOptionForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class IndexedOptionArray(Content):
+    is_OptionType = True
+    is_IndexedType = True
+
     def __init__(self, index, content, identifier=None, parameters=None):
         if not (
             isinstance(index, Index)
@@ -88,6 +92,14 @@ class IndexedOptionArray(Content):
         out.append(indent + "</IndexedOptionArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return IndexedOptionArray(
+            self._index,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toIndexedOptionArray64(self):
         if self._index.dtype == np.dtype(np.int64):
@@ -1163,3 +1175,26 @@ class IndexedOptionArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        index = numpy.array(self._index, copy=True)
+        this_validbytes = self.mask_as_bool(valid_when=True)
+        index[~this_validbytes] = 0
+
+        if self.parameter("__array__") == "categorical":
+            # The new IndexedArray will have this parameter, but the rest
+            # will be in the AwkwardArrowType.mask_parameters.
+            next_parameters = {"__array__": "categorical"}
+        else:
+            next_parameters = None
+
+        next = ak._v2.contents.IndexedArray(
+            ak._v2.index.Index(index), self._content, parameters=next_parameters
+        )
+        return next._to_arrow(
+            pyarrow,
+            self,
+            ak._v2._connect.pyarrow.and_validbytes(validbytes, this_validbytes),
+            length,
+            options,
+        )
