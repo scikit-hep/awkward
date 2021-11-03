@@ -383,18 +383,7 @@ class UnmaskedArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
-        result = action(
-            self,
-            depth=depth,
-            depth_context=depth_context,
-            lateral_context=lateral_context,
-            options=options,
-        )
-
-        if isinstance(result, Content):
-            return result
-
-        elif result is None:
+        def continuation():
             return UnmaskedArray(
                 self._content._recursively_apply(
                     action,
@@ -407,5 +396,18 @@ class UnmaskedArray(Content):
                 self._parameters if options["keep_parameters"] else None,
             )
 
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
         else:
             raise AssertionError(result)
