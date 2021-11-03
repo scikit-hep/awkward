@@ -727,7 +727,26 @@ class ListOffsetArray(Content):
                 nextparents,
                 outlength,
             )
-            return outcontent
+
+            outcarry = ak._v2.index.Index64.empty(nextlen, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_ListOffsetArray_local_preparenext_64",
+                    outcarry.dtype.type,
+                    nextcarry.dtype.type,
+                ](
+                    outcarry.to(nplike),
+                    nextcarry.to(nplike),
+                    nextlen,
+                )
+            )
+
+            return ak._v2.contents.ListOffsetArray(
+                outcontent._compact_offsets64(True),
+                outcontent._content._carry(outcarry, False, NestedIndexError),
+                None,
+                self._parameters,
+            )
 
         else:
             nextparents = ak._v2.index.Index64.empty(
@@ -984,7 +1003,6 @@ class ListOffsetArray(Content):
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         nplike = self.nplike
-
         branch, depth = self.branch_depth
 
         if (

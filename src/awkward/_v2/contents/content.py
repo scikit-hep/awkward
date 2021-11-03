@@ -931,37 +931,43 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return self._is_unique(negaxis, starts, parents, 1)
 
     def unique(self, axis=None):
-        negaxis = axis if axis is None else -axis
-        if negaxis is not None:
-            branch, depth = self.branch_depth
-            if branch:
-                if negaxis <= 0:
-                    raise ValueError(
-                        "cannot use non-negative axis on a nested list structure "
-                        "of variable depth (negative axis counts from the leaves "
-                        "of the tree; non-negative from the root)"
-                    )
-                if negaxis > depth:
-                    raise ValueError(
-                        "cannot use axis={0} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={1} from the leaves".format(
-                            axis, depth
+        if axis == -1 or axis is None:
+            negaxis = axis if axis is None else -axis
+            if negaxis is not None:
+                branch, depth = self.branch_depth
+                if branch:
+                    if negaxis <= 0:
+                        raise ValueError(
+                            "cannot use non-negative axis on a nested list structure "
+                            "of variable depth (negative axis counts from the leaves "
+                            "of the tree; non-negative from the root)"
                         )
-                    )
-            else:
-                if negaxis <= 0:
-                    negaxis = negaxis + depth
-                if not (0 < negaxis and negaxis <= depth):
-                    raise ValueError(
-                        "axis={0} exceeds the depth of the nested list structure "
-                        "(which is {1})".format(axis, depth)
-                    )
+                    if negaxis > depth:
+                        raise ValueError(
+                            "cannot use axis={0} on a nested list structure that splits into "
+                            "different depths, the minimum of which is depth={1} from the leaves".format(
+                                axis, depth
+                            )
+                        )
+                else:
+                    if negaxis <= 0:
+                        negaxis = negaxis + depth
+                    if not (0 < negaxis and negaxis <= depth):
+                        raise ValueError(
+                            "axis={0} exceeds the depth of the nested list structure "
+                            "(which is {1})".format(axis, depth)
+                        )
 
-        starts = ak._v2.index.Index64.zeros(1, self.nplike)
-        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
-        mindepth, maxdepth = self.minmax_depth
+            starts = ak._v2.index.Index64.zeros(1, self.nplike)
+            parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
 
-        return self._unique(negaxis, starts, parents, 1)
+            return self._unique(negaxis, starts, parents, 1)
+
+        raise ValueError(
+            "unique expects axis 'None' or '-1', got axis={0} that is not supported yet".format(
+                axis
+            )
+        )
 
     @property
     def purelist_isregular(self):

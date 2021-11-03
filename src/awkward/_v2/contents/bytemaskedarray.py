@@ -457,9 +457,11 @@ class ByteMaskedArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         if len(self._mask) == 0:
             return self
-        return self.toIndexedOptionArray64()._unique(
-            negaxis, starts, parents, outlength
-        )
+        out = self.toIndexedOptionArray64()._unique(negaxis, starts, parents, outlength)
+        if negaxis is None:
+            return out
+        else:
+            return out._content
 
     def _argsort_next(
         self,

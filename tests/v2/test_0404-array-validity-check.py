@@ -82,8 +82,8 @@ def test_BitMaskedArray():
         None,
     ]
     assert array.is_unique(axis=None) is True
-    assert ak.to_list(array.unique(axis=None)) == [0, 1, 5, 7, 8, 9]
-    assert ak.to_list(array.unique(axis=-1)) == [0, 1, 5, 7, 8, 9]
+    assert ak.to_list(array.unique(axis=None)) == [0, 1, 5, 7, 8, 9, None]
+    assert ak.to_list(array.unique(axis=-1)) == [0, 1, 5, 7, 8, 9, None]
 
 
 def test_ByteMaskedArray():
@@ -95,7 +95,23 @@ def test_ByteMaskedArray():
     array = v1_to_v2(array)
     assert ak.to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
     assert array.is_unique(axis=None) is True
-    assert ak.to_list(array.unique(axis=None)) == [0.0, 1.1, 2.2, 6.6, 7.7, 8.8, 9.9]
+    assert ak.to_list(array.unique(axis=None)) == [
+        0.0,
+        1.1,
+        2.2,
+        6.6,
+        7.7,
+        8.8,
+        9.9,
+        None,
+    ]
+    assert ak.to_list(array.unique(axis=-1)) == [
+        [0.0, 1.1, 2.2],
+        [],
+        [6.6, 7.7, 8.8, 9.9],
+        None,
+        None,
+    ]
 
     content = ak.from_iter(
         [[0.0, 1.1, 2.2], [], [1.1, 2.2], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
@@ -105,7 +121,23 @@ def test_ByteMaskedArray():
     array = v1_to_v2(array)
     assert ak.to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
     assert array.is_unique(axis=None) is True
-    assert ak.to_list(array.unique(axis=None)) == [0.0, 1.1, 2.2, 6.6, 7.7, 8.8, 9.9]
+    assert ak.to_list(array.unique(axis=None)) == [
+        0.0,
+        1.1,
+        2.2,
+        6.6,
+        7.7,
+        8.8,
+        9.9,
+        None,
+    ]
+    assert ak.to_list(array.unique(axis=-1)) == [
+        [0.0, 1.1, 2.2],
+        [],
+        [6.6, 7.7, 8.8, 9.9],
+        None,
+        None,
+    ]
 
     content = ak.from_iter(
         [[1.1, 1.1, 2.2], [], [1.1, 2.2], [5.5], [1.1, 7.7, 8.8, 9.9]], highlevel=False
@@ -115,7 +147,14 @@ def test_ByteMaskedArray():
     array = v1_to_v2(array)
     assert ak.to_list(array) == [[1.1, 1.1, 2.2], [], None, None, [1.1, 7.7, 8.8, 9.9]]
     assert array.is_unique(axis=None) is False
-    assert ak.to_list(array.unique(axis=None)) == [1.1, 2.2, 7.7, 8.8, 9.9]
+    assert ak.to_list(array.unique(axis=None)) == [1.1, 2.2, 7.7, 8.8, 9.9, None]
+    assert ak.to_list(array.unique(axis=-1)) == [
+        [1.1, 2.2],
+        [],
+        [1.1, 7.7, 8.8, 9.9],
+        None,
+        None,
+    ]
 
 
 def test_UnmaskedArray():
@@ -177,6 +216,36 @@ def test_NumpyArray():
 
 
 def test_2d():
+    nparray = np.array(
+        [
+            [3.3, 2.2, 5.5, 1.1, 4.4],
+            [4.4, 2.2, 1.1, 3.3, 5.5],
+            [2.2, 1.1, 4.4, 3.3, 5.5],
+        ]
+    )
+
+    assert ak.to_list(np.unique(nparray)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(np.unique(nparray, axis=0)) == [
+        [2.2, 1.1, 4.4, 3.3, 5.5],
+        [3.3, 2.2, 5.5, 1.1, 4.4],
+        [4.4, 2.2, 1.1, 3.3, 5.5],
+    ]
+    assert ak.to_list(np.unique(nparray, axis=1)) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+        [3.3, 2.2, 4.4, 5.5, 1.1],
+        [3.3, 1.1, 2.2, 5.5, 4.4],
+    ]
+    assert ak.to_list(np.unique(nparray, axis=-1)) == [
+        [1.1, 2.2, 3.3, 4.4, 5.5],
+        [3.3, 2.2, 4.4, 5.5, 1.1],
+        [3.3, 1.1, 2.2, 5.5, 4.4],
+    ]
+    assert ak.to_list(np.unique(nparray, axis=-2)) == [
+        [2.2, 1.1, 4.4, 3.3, 5.5],
+        [3.3, 2.2, 5.5, 1.1, 4.4],
+        [4.4, 2.2, 1.1, 3.3, 5.5],
+    ]
+
     array = ak.layout.NumpyArray(
         np.array(
             [
@@ -197,19 +266,6 @@ def test_2d():
         [1.1, 2.2, 3.3, 4.4, 5.5],
         [1.1, 2.2, 3.3, 4.4, 5.5],
     ]
-    assert ak.to_list(array.unique(axis=-2)) == [
-        [2.2, 3.3, 4.4],
-        [1.1, 2.2],
-        [1.1, 4.4, 5.5],
-        [1.1, 3.3],
-        [4.4, 5.5],
-    ]
-    with pytest.raises(ValueError) as err:
-        array.unique(axis=-3)
-        assert (
-            str(err.value)
-            == "ValueError: axis=-3 exceeds the depth of the nested list structure (which is 2)"
-        )
 
 
 def test_2d_in_axis():
@@ -241,15 +297,6 @@ def test_2d_in_axis():
         [1.1, 2.2, 3.3, 4.4, 5.5],
         [1.1, 2.2, 3.3, 4.4, 5.5],
         [1.1, 2.2, 3.3, 4.4, 5.5],
-    ]
-
-    assert ak.to_list(array.unique(axis=0)) == [
-        [2.2, 3.3, 4.4],
-        [2.2],
-        [1.1, 5.5],
-        [1.1, 3.3, 4.4],
-        [3.3, 4.4, 5.5],
-        [1.1, 3.3, 5.5],
     ]
 
 
@@ -314,37 +361,6 @@ def test_3d():
         [-5.5, -4.4, -3.3, -2.2, -1.1],
         [-10.1, -9.9, -8.8, -7.7, -6.6],
         [-15.15, -14.14, -13.13, -12.12, -11.11],
-    ]
-
-    assert ak.to_list(array.unique(axis=-2)) == [
-        [1.1, 6.6, 11.11],
-        [-11.11, -6.6, -1.1],
-        [2.2, 7.7, 12.12],
-        [-12.12, -7.7, -2.2],
-        [3.3, 8.8, 13.13],
-        [-13.13, -8.8, -3.3],
-        [4.4, 9.9, 14.14],
-        [-14.14, -9.9, -4.4],
-        [5.5, 10.1, 15.15],
-        [-15.15, -10.1, -5.5],
-    ]
-
-    assert ak.to_list(array.unique(axis=-3)) == [
-        [-1.1, 1.1],
-        [-6.6, 6.6],
-        [-11.11, 11.11],
-        [-2.2, 2.2],
-        [-7.7, 7.7],
-        [-12.12, 12.12],
-        [-3.3, 3.3],
-        [-8.8, 8.8],
-        [-13.13, 13.13],
-        [-4.4, 4.4],
-        [-9.9, 9.9],
-        [-14.14, 14.14],
-        [-5.5, 5.5],
-        [-10.1, 10.1],
-        [-15.15, 15.15],
     ]
 
 
@@ -524,12 +540,6 @@ def test_ListOffsetArray():
         [2.2, 6.6, 7.7, 9.9],
         [],
     ]
-    assert ak.to_list(listoffsetarray2.unique(axis=-2)) == [
-        [0.0, 3.3, 5.5, 6.6],
-        [1.1, 7.7],
-        [2.2],
-        [9.9],
-    ]
     content = ak.layout.NumpyArray(
         np.array([3.3, 1.1, 2.2, 0.0, 4.4, 9.9, 6.6, 7.7, 8.8, 5.5])
     )
@@ -603,6 +613,12 @@ def test_RegularArray():
         [3.6, None, 6.7],
     ]
     assert regular_array.is_unique() is False
+    assert ak.to_list(regular_array.unique(axis=-1)) == [
+        [3.9, 6.9],
+        [1.5, 1.6, 2.2],
+        [3.6, 6.7, None],
+    ]
+
     assert ak.to_list(regular_array.unique(axis=None)) == [
         1.5,
         1.6,
@@ -611,6 +627,7 @@ def test_RegularArray():
         3.9,
         6.7,
         6.9,
+        None,
     ]
 
     index2 = ak.layout.Index64(
@@ -625,7 +642,7 @@ def test_RegularArray():
         [None, None, None],
     ]
     assert regular_array2.is_unique() is False
-    assert ak.to_list(regular_array2.unique(axis=None)) == [3.9, 6.9]
+    assert ak.to_list(regular_array2.unique(axis=None)) == [3.9, 6.9, None]
 
 
 def test_IndexedArray():

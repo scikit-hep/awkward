@@ -578,80 +578,6 @@ class IndexedOptionArray(Content):
             )
             return out2
 
-    def _unique_sorted_index(self, index, starts, parents, outlength):
-        nplike = self.nplike
-        next = ak._v2.index.Index64.empty(len(self), nplike)
-
-        length = ak._v2.index.Index64.empty(1, nplike)
-        # if not sorted:
-        #     parents_length = len(parents)
-        #     offsets_length = ak._v2.index.Index64.empty(1, nplike)
-        #     self._handle_error(
-        #         nplike[
-        #             "awkward_sorting_ranges_length",
-        #             offsets_length.dtype.type,
-        #             parents.dtype.type,
-        #         ](
-        #             offsets_length.to(nplike),
-        #             parents.to(nplike),
-        #             parents_length,
-        #         )
-        #     )
-        #
-        #     offsets = ak._v2.index.Index64.zeros(offsets_length[0], nplike)
-        #
-        #     self._handle_error(
-        #         nplike[
-        #             "awkward_sorting_ranges",
-        #             offsets.dtype.type,
-        #             parents.dtype.type,
-        #         ](
-        #             offsets.to(nplike),
-        #             offsets_length[0],
-        #             parents.to(nplike),
-        #             parents_length,
-        #         )
-        #     )
-        #
-        #     self._handle_error(
-        #         nplike["awkward_sort_ascending", next.dtype.type, index.dtype.type, offsets.dtype.type, ](
-        #             next.to(nplike),
-        #             index.to(nplike),
-        #             len(next),
-        #             offsets.to(nplike),
-        #             offsets_length[0],
-        #             parents_length,
-        #         )
-        #     )
-        #     print("parents", parents)
-        #     print("offsets", offsets)
-        #     print("sorted in ranges", next)
-        #
-        #     self._handle_error(
-        #         nplike["awkward_unique", next.dtype.type, length.dtype.type](
-        #             next.to(nplike),
-        #             len(self._index),
-        #             length.to(nplike),
-        #         )
-        #     )
-        #
-        # else:
-        self._handle_error(
-            nplike[
-                "awkward_unique_copy",
-                self._index.dtype.type,
-                next.dtype.type,
-                length.dtype.type,
-            ](
-                self._index.to(nplike),
-                next.to(nplike),
-                len(self._index),
-                length.to(nplike),
-            )
-        )
-        # start from 1 to drop Nones
-        return next[: length[0] - 1]
-
     def _is_subrange_equal(self, starts, stops, length, sorted=True):
         nplike = self.nplike
 
@@ -710,8 +636,150 @@ class IndexedOptionArray(Content):
         return projected._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
-        projected = self.project()
-        return projected._unique(negaxis, None, None, outlength)
+        nplike = self.nplike
+        branch, depth = self.branch_depth
+
+        index_length = len(self._index)
+        parents_length = len(parents)
+
+        numnull = ak._v2.index.Index64.empty(1, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_numnull",
+                numnull.dtype.type,
+                self._index.dtype.type,
+            ](
+                numnull.to(nplike),
+                self._index.to(nplike),
+                index_length,
+            )
+        )
+
+        next_length = index_length - numnull[0]
+        nextparents = ak._v2.index.Index64.empty(next_length, nplike)
+        nextcarry = ak._v2.index.Index64.empty(next_length, nplike)
+        outindex = ak._v2.index.Index64.empty(index_length, nplike)
+        self._handle_error(
+            nplike[
+                "awkward_IndexedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.to(nplike),
+                nextparents.to(nplike),
+                outindex.to(nplike),
+                self._index.to(nplike),
+                parents.to(nplike),
+                index_length,
+            )
+        )
+        next = self._content._carry(nextcarry, False, NestedIndexError)
+        unique = next._unique(
+            negaxis,
+            starts,
+            nextparents,
+            outlength,
+        )
+
+        if branch or (negaxis is not None and negaxis != depth):
+            nextoutindex = ak._v2.index.Index64.empty(parents_length, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_IndexedArray_local_preparenext_64",
+                    nextoutindex.dtype.type,
+                    starts.dtype.type,
+                    parents.dtype.type,
+                    nextparents.dtype.type,
+                ](
+                    nextoutindex.to(nplike),
+                    starts.to(nplike),
+                    parents.to(nplike),
+                    parents_length,
+                    nextparents.to(nplike),
+                    next_length,
+                )
+            )
+
+            out = ak._v2.contents.IndexedOptionArray(
+                nextoutindex,
+                unique,
+                None,
+                self._parameters,
+            ).simplify_optiontype()
+
+            out = ak._v2.contents.RegularArray(
+                out,
+                len(nextoutindex),
+                0,
+                None,
+                self._parameters,
+            )
+
+            return out
+
+        if isinstance(unique, ak._v2.contents.ListOffsetArray):
+            # FIXME: move to kernel
+            nulls = []
+            for i in range(len(self._index)):
+                if self._index[i] < 0:
+                    nulls.append(parents[i])
+
+            newindex = ak._v2.index.Index64.zeros(
+                unique._offsets[-1] + len(nulls), nplike
+            )
+            newoffsets = ak._v2.index.Index64.zeros(len(unique._offsets), nplike)
+            k = 0
+            ll = 0
+            shift = 0
+            newindex[0] = ll
+            newoffsets[0] = unique._offsets[0]
+            for i in range(len(starts)):
+                for _j in range(unique._offsets[i], unique._offsets[i + 1]):
+                    newindex[k] = ll
+                    k += 1
+                    ll += 1
+                if parents[starts[i]] in nulls:
+                    newindex[k] = -1
+                    k += 1
+                    shift += 1
+                newoffsets[i + 1] = unique._offsets[i + 1] + shift
+
+            out = ak._v2.contents.IndexedOptionArray(
+                newindex[: newoffsets[-1]],
+                unique._content,  # sorted,
+                None,
+                self._parameters,
+            ).simplify_optiontype()
+
+            out = ak._v2.contents.ListOffsetArray(
+                newoffsets,
+                out,
+                None,
+                self._parameters,
+            )
+
+            return out
+
+        if isinstance(unique, ak._v2.contents.NumpyArray):
+            nextoutindex = ak._v2.index.Index64.empty(len(unique) + 1, nplike)
+            # FIXME: move to kernel
+            for i in range(len(unique)):
+                nextoutindex[i] = i
+            nextoutindex[-1] = -1
+
+            out = ak._v2.contents.IndexedOptionArray(
+                nextoutindex,
+                unique,
+                None,
+                self._parameters,
+            ).simplify_optiontype()
+
+            return out
+
+        raise NotImplementedError
 
     def _argsort_next(
         self,
