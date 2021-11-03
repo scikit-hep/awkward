@@ -257,22 +257,22 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
-@pytest.mark.parametrize("indexedarray_as_dictionary", [False, True])
+@pytest.mark.parametrize("categorical_as_dictionary", [False, True])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_dictionary_encoding(tmp_path, indexedarray_as_dictionary, extensionarray):
+def test_dictionary_encoding(tmp_path, categorical_as_dictionary, extensionarray):
     akarray = ak._v2.contents.IndexedArray(
         ak._v2.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
         ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
         parameters={"__array__": "categorical", "which": "outer"},
     )
     paarray = akarray.to_arrow(
-        indexedarray_as_dictionary=indexedarray_as_dictionary,
+        categorical_as_dictionary=categorical_as_dictionary,
         extensionarray=extensionarray,
     )
     arrow_round_trip(akarray, paarray, extensionarray)
 
     # https://issues.apache.org/jira/browse/ARROW-14525
-    if not (extensionarray and indexedarray_as_dictionary):
+    if not (extensionarray and categorical_as_dictionary):
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
