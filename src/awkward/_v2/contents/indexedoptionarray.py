@@ -1198,3 +1198,6 @@ class IndexedOptionArray(Content):
             length,
             options,
         )
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)

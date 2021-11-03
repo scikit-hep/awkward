@@ -841,3 +841,9 @@ class UnionArray(Content):
             ],
             children=values,
         )
+
+    def _completely_flatten(self, nplike, options):
+        out = []
+        for content in self._contents:
+            out.extend(content[: self._length]._completely_flatten(nplike, options))
+        return out

@@ -1255,3 +1255,17 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 "count_nulls": count_nulls,
             },
         )
+
+    def completely_flatten(
+        self, nplike=None, flatten_records=False, function_name=None
+    ):
+        if nplike is None:
+            nplike = self.nplike
+        arrays = self._completely_flatten(
+            nplike,
+            {
+                "flatten_records": flatten_records,
+                "function_name": function_name,
+            },
+        )
+        return nplike.concatenate(arrays)

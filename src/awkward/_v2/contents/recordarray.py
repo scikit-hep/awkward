@@ -655,3 +655,17 @@ class RecordArray(Content):
             [ak._v2._connect.pyarrow.to_validbits(validbytes)],
             children=values,
         )
+
+    def _completely_flatten(self, nplike, options):
+        if options["flatten_records"]:
+            out = []
+            for content in self._contents:
+                out.extend(content[: self._length]._completely_flatten(nplike, options))
+            return out
+        else:
+            in_function = ""
+            if options["function_name"] is not None:
+                in_function = "in " + options["function_name"]
+            raise TypeError(
+                "cannot flatten record fields into the same array" + in_function
+            )

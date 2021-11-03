@@ -961,3 +961,14 @@ class ListArray(Content):
         return self.toListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
+
+    def _completely_flatten(self, nplike, options):
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            return [ak._v2.operations.convert.to_numpy(self)]
+        else:
+            next = self.toListOffsetArray64(False)
+            flat = next.content[next.offsets[0] : next.offsets[-1]]
+            return flat._completely_flatten(nplike, options)

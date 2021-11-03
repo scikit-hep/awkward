@@ -716,3 +716,6 @@ class NumpyArray(Content):
                 validbytes, options["count_nulls"]
             ),
         )
+
+    def _completely_flatten(self, nplike, options):
+        return [self.to(nplike).reshape(-1)]

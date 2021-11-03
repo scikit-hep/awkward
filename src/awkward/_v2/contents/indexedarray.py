@@ -774,3 +774,6 @@ class IndexedArray(Content):
             return next.merge_parameters(self._parameters)._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)

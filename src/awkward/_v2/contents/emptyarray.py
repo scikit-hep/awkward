@@ -227,3 +227,6 @@ class EmptyArray(Content):
                 nplike=numpy,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+    def _completely_flatten(self, nplike, options):
+        return []

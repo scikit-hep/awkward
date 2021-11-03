@@ -867,3 +867,13 @@ class RegularArray(Content):
                     validbytes, options["count_nulls"]
                 ),
             )
+
+    def _completely_flatten(self, nplike, options):
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            return [ak._v2.operations.convert.to_numpy(self)]
+        else:
+            flat = self._content[: self._length * self._size]
+            return flat._completely_flatten(nplike, options)

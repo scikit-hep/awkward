@@ -374,3 +374,6 @@ class UnmaskedArray(Content):
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self._content._to_arrow(pyarrow, self, None, length, options)
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)
