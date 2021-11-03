@@ -1398,7 +1398,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #     def __getstate__(self):
     #         packed = ak._v2.operations.structure.packed(self.layout, highlevel=False)
     #         form, length, container = ak._v2.operations.convert.to_buffers(packed)
-    #         if self._behavior is ak.behavior:
+    #         if self._behavior is ak._v2.behavior:
     #             behavior = None
     #         else:
     #             behavior = self._behavior
@@ -1982,7 +1982,7 @@ class Record(NDArrayOperatorsMixin):
     #     def __getstate__(self):
     #         packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
     #         form, length, container = ak._v2.operations.convert.to_buffers(packed.array)
-    #         if self._behavior is ak.behavior:
+    #         if self._behavior is ak._v2.behavior:
     #             behavior = None
     #         else:
     #             behavior = self._behavior

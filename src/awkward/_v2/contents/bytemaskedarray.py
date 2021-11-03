@@ -138,13 +138,16 @@ class ByteMaskedArray(Content):
             index, self._content, self._identifier, self._parameters
         )
 
-    def mask_as_bool(self, valid_when=None):
+    def mask_as_bool(self, valid_when=None, nplike=None):
         if valid_when is None:
             valid_when = self._valid_when
+        if nplike is None:
+            nplike = self._mask.nplike
+
         if valid_when == self._valid_when:
-            return self._mask.data != 0
+            return self._mask.to(nplike) != 0
         else:
-            return self._mask.data != 1
+            return self._mask.to(nplike) != 1
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -335,7 +338,7 @@ class ByteMaskedArray(Content):
             if mask_length != len(mask):
                 raise ValueError(
                     "mask length ({0}) is not equal to {1} length ({2})".format(
-                        mask.length(), type(self).__name__, mask_length
+                        len(mask), type(self).__name__, mask_length
                     )
                 )
 

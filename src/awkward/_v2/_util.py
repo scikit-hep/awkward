@@ -216,7 +216,7 @@ class Behavior(Mapping):
 
 
 def arrayclass(layout, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = Behavior(ak._v2.behavior, behavior)
     arr = layout.parameter("__array__")
     if isstr(arr):
         cls = behavior[arr]
@@ -236,7 +236,7 @@ def arrayclass(layout, behavior):
 
 
 # def custom_cast(obj, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     for key, fcn in behavior.items():
 #         if (
 #             isinstance(key, tuple)
@@ -248,28 +248,27 @@ def arrayclass(layout, behavior):
 #     return None
 
 
-# def custom_broadcast(layout, behavior):
-#     layout = ak.partition.first(layout)
-#     behavior = Behavior(ak.behavior, behavior)
-#     custom = layout.parameter("__array__")
-#     if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
-#         custom = layout.parameter("__record__")
-#     if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
-#         custom = layout.purelist_parameter("__record__")
-#     if isinstance(custom, str) or (py27 and isinstance(custom, unicode)):
-#         for key, fcn in behavior.items():
-#             if (
-#                 isinstance(key, tuple)
-#                 and len(key) == 2
-#                 and key[0] == "__broadcast__"
-#                 and key[1] == custom
-#             ):
-#                 return fcn
-#     return None
+def custom_broadcast(layout, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    custom = layout.parameter("__array__")
+    if not isstr(custom):
+        custom = layout.parameter("__record__")
+    if not isstr(custom):
+        custom = layout.purelist_parameter("__record__")
+    if isstr(custom):
+        for key, fcn in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 2
+                and key[0] == "__broadcast__"
+                and key[1] == custom
+            ):
+                return fcn
+    return None
 
 
 # def numba_array_typer(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     arr = layouttype.parameters.get("__array__")
 #     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
 #         typer = behavior["__numba_typer__", arr]
@@ -289,7 +288,7 @@ def arrayclass(layout, behavior):
 
 
 # def numba_array_lower(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     arr = layouttype.parameters.get("__array__")
 #     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
 #         lower = behavior["__numba_lower__", arr]
@@ -309,7 +308,7 @@ def arrayclass(layout, behavior):
 
 
 def recordclass(layout, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = Behavior(ak._v2.behavior, behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
         cls = behavior[rec]
@@ -319,7 +318,7 @@ def recordclass(layout, behavior):
 
 
 # def typestrs(behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     out = {}
 #     for key, typestr in behavior.items():
 #         if (
@@ -349,7 +348,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_record_typer(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     rec = layouttype.parameters.get("__record__")
 #     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
 #         typer = behavior["__numba_typer__", rec]
@@ -359,7 +358,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_record_lower(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     rec = layouttype.parameters.get("__record__")
 #     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
 #         lower = behavior["__numba_lower__", rec]
@@ -370,7 +369,7 @@ def recordclass(layout, behavior):
 
 # def overload(behavior, signature):
 #     if not any(s is None for s in signature):
-#         behavior = Behavior(ak.behavior, behavior)
+#         behavior = Behavior(ak._v2.behavior, behavior)
 #         for key, custom in behavior.items():
 #             if (
 #                 isinstance(key, tuple)
@@ -388,7 +387,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_attrs(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     rec = layouttype.parameters.get("__record__")
 #     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
 #         for key, typer in behavior.items():
@@ -403,7 +402,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_methods(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     rec = layouttype.parameters.get("__record__")
 #     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
 #         for key, typer in behavior.items():
@@ -419,7 +418,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_unaryops(unaryop, left, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     done = False
 
 #     if isinstance(left, ak._v2._connect.numba.layout.ContentType):
@@ -441,7 +440,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_binops(binop, left, right, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     done = False
 
 #     if isinstance(left, ak._v2._connect.numba.layout.ContentType):

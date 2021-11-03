@@ -205,10 +205,12 @@ class BitMaskedArray(Content):
             self._parameters,
         )
 
-    def mask_as_bool(self, valid_when=None):
+    def mask_as_bool(self, valid_when=None, nplike=None):
         if valid_when is None:
             valid_when = self._valid_when
-        nplike = self._mask.nplike
+        if nplike is None:
+            nplike = self._mask.nplike
+
         bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
         self._handle_error(
             nplike[

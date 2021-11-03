@@ -94,10 +94,10 @@ class CharBehavior(Array):
 #             raise TypeError("can only concatenate str to str")
 
 
-# ak.behavior["byte"] = ByteBehavior
-# ak.behavior["__typestr__", "byte"] = "byte"
-# ak.behavior["char"] = CharBehavior
-# ak.behavior["__typestr__", "char"] = "char"
+# ak._v2.behavior["byte"] = ByteBehavior
+# ak._v2.behavior["__typestr__", "byte"] = "byte"
+# ak._v2.behavior["char"] = CharBehavior
+# ak._v2.behavior["__typestr__", "char"] = "char"
 
 
 # class ByteStringBehavior(ak._v2.highlevel.Array):
@@ -116,10 +116,10 @@ class CharBehavior(Array):
 #             yield x.__str__()
 
 
-# ak.behavior["bytestring"] = ByteStringBehavior
-# ak.behavior["__typestr__", "bytestring"] = "bytes"
-# ak.behavior["string"] = StringBehavior
-# ak.behavior["__typestr__", "string"] = "string"
+# ak._v2.behavior["bytestring"] = ByteStringBehavior
+# ak._v2.behavior["__typestr__", "bytestring"] = "bytes"
+# ak._v2.behavior["string"] = StringBehavior
+# ak._v2.behavior["__typestr__", "string"] = "string"
 
 
 # def _string_equal(one, two):

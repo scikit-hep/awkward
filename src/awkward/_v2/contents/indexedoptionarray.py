@@ -114,11 +114,14 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when=True, nplike=None):
+        if nplike is None:
+            nplike = self._content.nplike
+
         if valid_when:
-            return self._index.data >= 0
+            return self._index.to(nplike) >= 0
         else:
-            return self._index.data < 0
+            return self._index.to(nplike) < 0
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))

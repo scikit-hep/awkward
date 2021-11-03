@@ -1010,6 +1010,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         lateral_context=None,
         keep_parameters=True,
         numpy_to_regular=True,
+        function_name=None,
     ):
         return self._recursively_apply(
             action,
@@ -1019,5 +1020,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             {
                 "keep_parameters": keep_parameters,
                 "numpy_to_regular": numpy_to_regular,
+                "function_name": function_name,
             },
         )

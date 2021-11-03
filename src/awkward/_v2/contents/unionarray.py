@@ -264,7 +264,7 @@ class UnionArray(Content):
         return outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        simplified = self.simplify_uniontype(True, False)
+        simplified = self.simplify_uniontype()
         if (
             simplified.index.dtype == np.dtype(np.int32)
             or simplified.index.dtype == np.dtype(np.uint32)
@@ -304,7 +304,7 @@ class UnionArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out.simplify_uniontype(True, False)
+            return out.simplify_uniontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -324,7 +324,7 @@ class UnionArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def simplify_uniontype(self, merge, mergebool):
+    def simplify_uniontype(self, merge=True, mergebool=False):
         tags = ak._v2.index.Index8.empty(len(self), self.nplike)
         index = ak._v2.index.Index64.empty(len(self), self.nplike)
         contents = []
@@ -687,7 +687,7 @@ class UnionArray(Content):
         kind,
         order,
     ):
-        simplified = self.simplify_uniontype(True, True)
+        simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
@@ -698,7 +698,7 @@ class UnionArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        simplified = self.simplify_uniontype(True, True)
+        simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot sort an irreducible UnionArray")
 
@@ -717,7 +717,7 @@ class UnionArray(Content):
         mask,
         keepdims,
     ):
-        simplified = self.simplify_uniontype(True, True)
+        simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, UnionArray):
             raise ValueError(
                 "cannot call ak.{0} on an irreducible UnionArray".format(reducer.name)
