@@ -1269,3 +1269,22 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             },
         )
         return nplike.concatenate(arrays)
+
+    def recursively_apply(
+        self,
+        action,
+        depth_context=None,
+        lateral_context=None,
+        keep_parameters=True,
+        numpy_to_regular=True,
+    ):
+        return self._recursively_apply(
+            action,
+            1,
+            depth_context,
+            lateral_context,
+            {
+                "keep_parameters": keep_parameters,
+                "numpy_to_regular": numpy_to_regular,
+            },
+        )

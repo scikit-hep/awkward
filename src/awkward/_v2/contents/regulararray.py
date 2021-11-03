@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
@@ -877,3 +879,35 @@ class RegularArray(Content):
         else:
             flat = self._content[: self._length * self._size]
             return flat._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+
+        elif result is None:
+            return RegularArray(
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                ),
+                self._size,
+                self._length,
+                self._identifier,
+                self._parameters if options["keep_parameters"] else None,
+            )
+
+        else:
+            raise AssertionError(result)

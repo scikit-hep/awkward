@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -847,3 +849,38 @@ class UnionArray(Content):
         for content in self._contents:
             out.extend(content[: self._length]._completely_flatten(nplike, options))
         return out
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+
+        elif result is None:
+            return UnionArray(
+                self._tags,
+                self._index,
+                [
+                    content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    )
+                    for content in self._contents
+                ],
+                self._identifier,
+                self._parameters if options["keep_parameters"] else None,
+            )
+
+        else:
+            raise AssertionError(result)

@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -1448,3 +1450,34 @@ class ListOffsetArray(Content):
         else:
             flat = self._content[self._offsets[0] : self._offsets[-1]]
             return flat._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+
+        elif result is None:
+            return ListOffsetArray(
+                self._offsets,
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                ),
+                self._identifier,
+                self._parameters if options["keep_parameters"] else None,
+            )
+
+        else:
+            raise AssertionError(result)

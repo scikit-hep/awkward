@@ -230,3 +230,26 @@ class EmptyArray(Content):
 
     def _completely_flatten(self, nplike, options):
         return []
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+
+        elif result is None:
+            if options["keep_parameters"]:
+                return self
+            else:
+                return EmptyArray(self._identifier, None)
+
+        else:
+            raise AssertionError(result)

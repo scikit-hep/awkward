@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import json
+import copy
 
 import awkward as ak
 from awkward._v2.index import Index
@@ -693,3 +694,35 @@ class ByteMaskedArray(Content):
 
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+
+        elif result is None:
+            return ByteMaskedArray(
+                self._mask,
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                ),
+                self._valid_when,
+                self._identifier,
+                self._parameters if options["keep_parameters"] else None,
+            )
+
+        else:
+            raise AssertionError(result)
