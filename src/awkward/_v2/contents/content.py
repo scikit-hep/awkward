@@ -1233,7 +1233,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         string_to32=False,
         bytestring_to32=False,
         emptyarray_to=None,
-        indexedarray_as_dictionary=False,
+        categorical_as_dictionary=False,
         extensionarray=True,
         count_nulls=True,
     ):
@@ -1250,7 +1250,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 "string_to32": string_to32,
                 "bytestring_to32": bytestring_to32,
                 "emptyarray_to": emptyarray_to,
-                "indexedarray_as_dictionary": indexedarray_as_dictionary,
+                "categorical_as_dictionary": categorical_as_dictionary,
                 "extensionarray": extensionarray,
                 "count_nulls": count_nulls,
             },
