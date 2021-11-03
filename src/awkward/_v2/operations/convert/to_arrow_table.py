@@ -9,68 +9,103 @@ np = ak.nplike.NumpyMetadata.instance()
 
 def to_arrow_table(
     array,
-    explode_records=False,
     list_to32=False,
-    string_to32=True,
-    bytestring_to32=True,
+    string_to32=False,
+    bytestring_to32=False,
+    emptyarray_to=None,
+    categorical_as_dictionary=False,
+    extensionarray=True,
+    count_nulls=True,
 ):
-    pass
+    u"""
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
+            if they're small enough, even if it means an extra conversion. Otherwise,
+            signed 32-bit #ak.types.ListType maps to Arrow `ListType`,
+            signed 64-bit #ak.types.ListType maps to Arrow `LargeListType`,
+            and unsigned 32-bit #ak.types.ListType picks whichever Arrow type its
+            values fit into.
+        string_to32 (bool): Same as the above for Arrow `string` and `large_string`.
+        bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
+        emptyarray_to (None or dtype): If None, #ak.types.UnknownType maps to Arrow's
+            null type; otherwise, it is converted a given numeric dtype.
+        categorical_as_dictionary (bool): If True, #ak.layout.IndexedArray and
+            #ak.layout.IndexedOptionArray labeled with `__array__ = "categorical"`
+            are mapped to Arrow `DictionaryArray`; otherwise, the projection is
+            evaluated before conversion (always the case without
+            `__array__ = "categorical"`).
+        extensionarray (bool): If True, this function returns extended Arrow arrays
+            (at all levels of nesting), which preserve metadata so that Awkward \u2192
+            Arrow \u2192 Awkward preserves the array's #ak.types.Type (though not
+            the #ak.forms.Form). If False, this function returns generic Arrow arrays
+            that might be needed for third-party tools that don't recognize Arrow's
+            extensions. Even with `extensionarray=False`, the values produced by
+            Arrow's `to_pylist` method are the same as the values produced by Awkward's
+            #ak.to_list.
+        count_nulls (bool): If True, count the number of missing values at each level
+            and include these in the resulting Arrow array, which makes some downstream
+            applications faster. If False, skip the up-front cost of counting them.
 
+    Converts an Awkward Array into an Apache Arrow table.
 
-#     """
-#     Args:
-#         array: Data to convert to an Apache Arrow table.
-#         explode_records (bool): If True, lists of records are written as
-#             records of lists, so that nested fields become top-level fields
-#             (which can be zipped when read back).
-#         list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
-#             if they're small enough, even if it means an extra conversion. Otherwise,
-#             signed 32-bit #ak.layout.ListOffsetArray maps to Arrow `ListType` and
-#             all others map to Arrow `LargeListType`.
-#         string_to32 (bool): Same as the above for Arrow `string` and `large_string`.
-#         bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
+    This produces arrays of type `pyarrow.Table`. If you want an Arrow array,
+    see #ak.to_arrow.
 
-#     Converts an Awkward Array into an Apache Arrow table (`pyarrow.Table`).
+    This function always preserves the values of a dataset; i.e. the Python objects
+    returned by #ak.to_list are identical to the Python objects returned by Arrow's
+    `to_pylist` method. With `extensionarray=True`, this function also preserves the
+    data type (high-level #ak.types.Type, though not the low-level #ak.forms.Form),
+    even through Parquet, making Parquet a good way to save Awkward Arrays for later
+    use. If any third-party tools don't recognize Arrow's extension arrays, set this
+    option to False for plain Arrow arrays.
 
-#     If the `array` does not contain records at top-level, the Arrow table will consist
-#     of one field whose name is `""`.
+    See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
+    """
+    from awkward._v2._connect.pyarrow import pyarrow
 
-#     Arrow tables can maintain the distinction between "option-type but no elements are
-#     missing" and "not option-type" at all levels, including the top level. However,
-#     there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
-#     Be aware of these type distinctions when passing data through Arrow or Parquet.
+    layout = ak._v2.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
 
-#     See also #ak.to_arrow, #ak.from_arrow, #ak.to_parquet.
-#     """
-#     pyarrow = _import_pyarrow("ak.to_arrow_table")
+    check = layout
+    while check.is_OptionType or check.is_IndexedType:
+        check = check.content
 
-#     layout = to_layout(array, allow_record=False, allow_other=False)
+    paarrays, pafields = [], []
+    if check.is_RecordType and not check.is_tuple:
+        for name in check.fields:
+            paarrays.append(
+                layout[name].to_arrow(
+                    list_to32=list_to32,
+                    string_to32=string_to32,
+                    bytestring_to32=bytestring_to32,
+                    emptyarray_to=emptyarray_to,
+                    categorical_as_dictionary=categorical_as_dictionary,
+                    extensionarray=extensionarray,
+                    count_nulls=count_nulls,
+                )
+            )
+            pafields.append(
+                pyarrow.field(name, paarrays[-1].type).with_nullable(
+                    layout.is_OptionType
+                )
+            )
+    else:
+        paarrays.append(
+            layout.to_arrow(
+                list_to32=list_to32,
+                string_to32=string_to32,
+                bytestring_to32=bytestring_to32,
+                emptyarray_to=emptyarray_to,
+                categorical_as_dictionary=categorical_as_dictionary,
+                extensionarray=extensionarray,
+                count_nulls=count_nulls,
+            )
+        )
+        pafields.append(
+            pyarrow.field("", paarrays[-1].type).with_nullable(layout.is_OptionType)
+        )
 
-#     if explode_records or isinstance(
-#         ak._v2.operations.describe.type(layout), ak._v2.types.RecordType
-#     ):
-#         names = layout.keys()
-#         contents = [layout[name] for name in names]
-#     else:
-#         names = [""]
-#         contents = [layout]
-
-#     pa_arrays = []
-#     pa_fields = []
-#     for name, content in zip(names, contents):
-#         pa_arrays.append(
-#             to_arrow(
-#                 content,
-#                 list_to32=list_to32,
-#                 string_to32=string_to32,
-#                 bytestring_to32=bytestring_to32,
-#             )
-#         )
-#         pa_fields.append(
-#             pyarrow.field(name, pa_arrays[-1].type).with_nullable(
-#                 isinstance(ak._v2.operations.describe.type(content), ak._v2.types.OptionType)
-#             )
-#         )
-
-#     batch = pyarrow.RecordBatch.from_arrays(pa_arrays, schema=pyarrow.schema(pa_fields))
-#     return pyarrow.Table.from_batches([batch])
+    batch = pyarrow.RecordBatch.from_arrays(paarrays, schema=pyarrow.schema(pafields))
+    return pyarrow.Table.from_batches([batch])

@@ -731,7 +731,7 @@ class IndexedArray(Content):
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if (
-            not options["indexedarray_as_dictionary"]
+            not options["categorical_as_dictionary"]
             and self.parameter("__array__") == "categorical"
         ):
             next_parameters = dict(self._parameters)
