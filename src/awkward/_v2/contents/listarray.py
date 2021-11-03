@@ -995,7 +995,7 @@ class ListArray(Content):
                 self._stops,
                 self._content._recursively_apply(
                     action,
-                    depth,
+                    depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
                     options,
