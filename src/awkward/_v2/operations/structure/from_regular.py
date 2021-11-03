@@ -47,7 +47,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
         out = layout.recursively_apply(action, numpy_to_regular=True)
 
     elif posaxis == 0:
-        out = layout
+        out = layout  # the top-level is already regular (ArrayType)
 
     else:
 
@@ -61,8 +61,8 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
                 raise np.AxisError(
                     "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
                 )
-            else:
-                depth_context["posaxis"] = posaxis
+
+            depth_context["posaxis"] = posaxis
 
         depth_context = {"posaxis": posaxis}
         out = layout.recursively_apply(action, depth_context, numpy_to_regular=True)

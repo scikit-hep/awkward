@@ -8,65 +8,68 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def to_regular(array, axis=1, highlevel=True, behavior=None):
-    pass
+    """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        axis (int or None): The dimension at which this operation is applied.
+            The outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc. If None, convert all
+            variable dimensions into regular ones or raise a ValueError if that
+            is not possible.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
+    Converts a variable-length axis into a regular one, if possible.
 
-#     """
-#     Args:
-#         array: Array to convert.
-#         axis (int): The dimension at which this operation is applied. The
-#             outermost dimension is `0`, followed by `1`, etc., and negative
-#             values count backward from the innermost: `-1` is the innermost
-#             dimension, `-2` is the next level up, etc.
-#         highlevel (bool): If True, return an #ak.Array; otherwise, return
-#             a low-level #ak.layout.Content subclass.
-#         behavior (None or dict): Custom #ak.behavior for the output array, if
-#             high-level.
+        >>> irregular = ak.from_iter(np.arange(2*3*5).reshape(2, 3, 5))
+        >>> print(irregular.type)
+        2 * var * var * int64
+        >>> print(ak.to_regular(irregular).type)
+        2 * 3 * var * int64
+        >>> print(ak.to_regular(irregular, axis=2).type)
+        2 * var * 5 * int64
+        >>> print(ak.to_regular(irregular, axis=-1).type)
+        2 * var * 5 * int64
 
-#     Converts a variable-length axis into a regular one, if possible.
+    But truly irregular data cannot be converted.
 
-#         >>> irregular = ak.from_iter(np.arange(2*3*5).reshape(2, 3, 5))
-#         >>> ak.type(irregular)
-#         2 * var * var * int64
-#         >>> ak.type(ak.to_regular(irregular))
-#         2 * 3 * var * int64
-#         >>> ak.type(ak.to_regular(irregular, axis=2))
-#         2 * var * 5 * int64
-#         >>> ak.type(ak.to_regular(irregular, axis=-1))
-#         2 * var * 5 * int64
+        >>> ak.to_regular(ak.Array([[1, 2, 3], [], [4, 5]]))
+        ValueError: in ListOffsetArray64, cannot convert to RegularArray because
+        subarray lengths are not regular
 
-#     But truly irregular data cannot be converted.
+    See also #ak.from_regular.
+    """
+    layout = ak._v2.operations.convert.to_layout(array)
+    posaxis = layout.axis_wrap_if_negative(axis)
 
-#         >>> ak.to_regular(ak.Array([[1, 2, 3], [], [4, 5]]))
-#         ValueError: in ListOffsetArray64, cannot convert to RegularArray because
-#         subarray lengths are not regular
+    if axis is None:
 
-#     See also #ak.from_regular.
-#     """
+        def action(layout, continuation, **kwargs):
+            if layout.is_ListType:
+                return continuation().toRegularArray()
 
-#     def getfunction(layout, depth, posaxis):
-#         posaxis = layout.axis_wrap_if_negative(posaxis)
-#         if posaxis == depth and isinstance(layout, ak._v2.contents.RegularArray):
-#             return lambda: layout
-#         elif posaxis == depth and isinstance(layout, ak._v2._util.listtypes):
-#             return lambda: layout.toRegularArray()
-#         elif posaxis == 0:
-#             raise ValueError(
-#                 "array has no axis {0}".format(axis)
-#
-#             )
-#         else:
-#             return posaxis
+        out = layout.recursively_apply(action)
 
-#     out = ak._v2.operations.convert.to_layout(array)
-#     if axis != 0:
-#         out = ak._v2._util.recursively_apply(
-#             out,
-#             getfunction,
-#             pass_depth=True,
-#             pass_user=True,
-#             user=axis,
-#             numpy_to_regular=True,
-#         )
+    elif posaxis == 0:
+        out = layout  # the top-level can only be regular (ArrayType)
 
-#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)
+    else:
+
+        def action(layout, depth, depth_context, **kwargs):
+            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            if posaxis == depth and layout.is_ListType:
+                return layout.toRegularArray()
+            elif posaxis == 0:
+                raise np.AxisError(
+                    "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
+                )
+
+            depth_context["posaxis"] = posaxis
+
+        depth_context = {"posaxis": posaxis}
+        out = layout.recursively_apply(action, depth_context)
+
+    return ak._v2._util.wrap(out, behavior, highlevel)
