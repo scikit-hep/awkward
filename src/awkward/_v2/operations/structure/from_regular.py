@@ -54,31 +54,3 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
     else:
         out = layout.recursively_apply(action, depth_context, numpy_to_regular=True)
     return ak._v2._util.wrap(out, behavior, highlevel)
-
-
-#     def getfunction(layout, depth, posaxis):
-#         posaxis = layout.axis_wrap_if_negative(posaxis)
-#         if posaxis == depth and isinstance(layout, ak._v2.contents.RegularArray):
-#             return lambda: layout.toListOffsetArray64(False)
-#         elif posaxis == depth and isinstance(layout, ak._v2._util.listtypes):
-#             return lambda: layout
-#         elif posaxis == 0:
-#             raise ValueError(
-#                 "array has no axis {0}".format(axis)
-#
-#             )
-#         else:
-#             return posaxis
-
-#     out = ak._v2.operations.convert.to_layout(array)
-#     if axis != 0:
-#         out = ak._v2._util.recursively_apply(
-#             out,
-#             getfunction,
-#             pass_depth=True,
-#             pass_user=True,
-#             user=axis,
-#             numpy_to_regular=True,
-#         )
-
-#     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)
