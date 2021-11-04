@@ -6,6 +6,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+from awkward._v2.tmp_for_testing import v1_to_v2
+
 
 def test_from_regular():
     array = ak._v2.contents.NumpyArray(
@@ -149,3 +151,33 @@ def test_to_regular():
     assert str(regular1.form.type) == "option[3 * option[var * int64]]"
     assert str(regular2.form.type) == "option[var * option[5 * int64]]"
     assert str(regularNone.form.type) == "option[3 * option[5 * int64]]"
+
+
+def test_isclose():
+    one = v1_to_v2(ak.from_iter([0.99999, 1.99999, 2.99999], highlevel=False))
+    two = v1_to_v2(ak.from_iter([1.00001, 2.00001, 3.00001], highlevel=False))
+    assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
+        False,
+        True,
+        True,
+    ]
+
+    one = v1_to_v2(ak.from_iter([[0.99999, 1.99999], [], [2.99999]], highlevel=False))
+    two = v1_to_v2(ak.from_iter([[1.00001, 2.00001], [], [3.00001]], highlevel=False))
+    assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
+        [False, True],
+        [],
+        [True],
+    ]
+
+    one = v1_to_v2(
+        ak.from_iter([[0.99999, 1.99999, None], [], [2.99999]], highlevel=False)
+    )
+    two = v1_to_v2(
+        ak.from_iter([[1.00001, 2.00001, None], [], [3.00001]], highlevel=False)
+    )
+    assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
+        [False, True, None],
+        [],
+        [True],
+    ]
