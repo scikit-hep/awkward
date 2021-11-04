@@ -716,3 +716,43 @@ class NumpyArray(Content):
                 validbytes, options["count_nulls"]
             ),
         )
+
+    def _completely_flatten(self, nplike, options):
+        return [self.to(nplike).reshape(-1)]
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if self._data.ndim != 1 and options["numpy_to_regular"]:
+            return self.toRegularArray()._recursively_apply(
+                action, depth, depth_context, lateral_context, options
+            )
+
+        if options["return_array"]:
+
+            def continuation():
+                if options["keep_parameters"]:
+                    return self
+                else:
+                    return NumpyArray(self._data, self._identifier, None, self._nplike)
+
+        else:
+
+            def continuation():
+                pass
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

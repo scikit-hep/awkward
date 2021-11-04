@@ -11,7 +11,7 @@
 #     __name__ = "Array"
 
 
-# ak.behavior["categorical"] = CategoricalBehavior
+# ak._v2.behavior["categorical"] = CategoricalBehavior
 
 
 # class _HashableDict(object):
@@ -92,7 +92,7 @@
 #     return ak._v2._util.wrap(ak._v2.contents.NumpyArray(out), ak._v2._util.behaviorof(one, two))
 
 
-# ak.behavior[ak.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
+# ak._v2.behavior[ak.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
 
 
 # def _apply_ufunc(ufunc, method, inputs, kwargs):
@@ -110,7 +110,7 @@
 #     return getattr(ufunc, method)(*nextinputs, **kwargs)
 
 
-# ak.behavior[ak.nplike.numpy.ufunc, "categorical"] = _apply_ufunc
+# ak._v2.behavior[ak.nplike.numpy.ufunc, "categorical"] = _apply_ufunc
 
 
 # def is_categorical(array):

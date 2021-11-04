@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -961,3 +963,61 @@ class ListArray(Content):
         return self.toListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
+
+    def _completely_flatten(self, nplike, options):
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            return [ak._v2.operations.convert.to_numpy(self)]
+        else:
+            next = self.toListOffsetArray64(False)
+            flat = next.content[next.offsets[0] : next.offsets[-1]]
+            return flat._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return ListArray(
+                    self._starts,
+                    self._stops,
+                    self._content._recursively_apply(
+                        action,
+                        depth + 1,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth + 1,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

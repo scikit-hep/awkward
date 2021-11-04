@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -774,3 +776,52 @@ class IndexedArray(Content):
             return next.merge_parameters(self._parameters)._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return IndexedArray(
+                    self._index,
+                    self._content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

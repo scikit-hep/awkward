@@ -227,3 +227,38 @@ class EmptyArray(Content):
                 nplike=numpy,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+    def _completely_flatten(self, nplike, options):
+        return []
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                if options["keep_parameters"]:
+                    return self
+                else:
+                    return EmptyArray(self._identifier, None)
+
+        else:
+
+            def continuation():
+                pass
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

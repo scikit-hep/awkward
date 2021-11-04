@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -112,11 +114,14 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when=True, nplike=None):
+        if nplike is None:
+            nplike = self._content.nplike
+
         if valid_when:
-            return self._index.data >= 0
+            return self._index.to(nplike) >= 0
         else:
-            return self._index.data < 0
+            return self._index.to(nplike) < 0
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -1198,3 +1203,52 @@ class IndexedOptionArray(Content):
             length,
             options,
         )
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return IndexedOptionArray(
+                    self._index,
+                    self._content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

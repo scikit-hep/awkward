@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import json
+import copy
 
 try:
     from collections.abc import Iterable
@@ -655,3 +656,68 @@ class RecordArray(Content):
             [ak._v2._connect.pyarrow.to_validbits(validbytes)],
             children=values,
         )
+
+    def _completely_flatten(self, nplike, options):
+        if options["flatten_records"]:
+            out = []
+            for content in self._contents:
+                out.extend(content[: self._length]._completely_flatten(nplike, options))
+            return out
+        else:
+            in_function = ""
+            if options["function_name"] is not None:
+                in_function = "in " + options["function_name"]
+            raise TypeError(
+                "cannot flatten record fields into the same array" + in_function
+            )
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return RecordArray(
+                    [
+                        content._recursively_apply(
+                            action,
+                            depth,
+                            copy.copy(depth_context),
+                            lateral_context,
+                            options,
+                        )
+                        for content in self._contents
+                    ],
+                    self._fields,
+                    self._length,
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                for content in self._contents:
+                    content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)
