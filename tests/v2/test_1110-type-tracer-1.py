@@ -7,6 +7,10 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 from awkward._v2._typetracer import Interval
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 typetracer = ak._v2._typetracer.TypeTracer.instance()
 
 

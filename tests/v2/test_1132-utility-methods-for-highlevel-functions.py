@@ -8,6 +8,10 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 
 def test_from_regular():
     array = ak._v2.contents.NumpyArray(
@@ -154,42 +158,30 @@ def test_to_regular():
 
 
 def test_isclose():
-    one = v1_to_v2(
-        ak.from_iter([0.999999999, 1.999999999, 2.999999999], highlevel=False)
-    )
-    two = v1_to_v2(
-        ak.from_iter([1.000000001, 2.000000001, 3.000000001], highlevel=False)
-    )
+    one = v1_to_v2(ak.from_iter([0.99999, 1.99999, 2.99999], highlevel=False))
+    two = v1_to_v2(ak.from_iter([1.00001, 2.00001, 3.00001], highlevel=False))
     assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
-        True,
+        False,
         True,
         True,
     ]
 
-    one = v1_to_v2(
-        ak.from_iter([[0.999999999, 1.999999999], [], [2.999999999]], highlevel=False)
-    )
-    two = v1_to_v2(
-        ak.from_iter([[1.000000001, 2.000000001], [], [3.000000001]], highlevel=False)
-    )
+    one = v1_to_v2(ak.from_iter([[0.99999, 1.99999], [], [2.99999]], highlevel=False))
+    two = v1_to_v2(ak.from_iter([[1.00001, 2.00001], [], [3.00001]], highlevel=False))
     assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
-        [True, True],
+        [False, True],
         [],
         [True],
     ]
 
     one = v1_to_v2(
-        ak.from_iter(
-            [[0.999999999, 1.999999999, None], [], [2.999999999]], highlevel=False
-        )
+        ak.from_iter([[0.99999, 1.99999, None], [], [2.99999]], highlevel=False)
     )
     two = v1_to_v2(
-        ak.from_iter(
-            [[1.000000001, 2.000000001, None], [], [3.000000001]], highlevel=False
-        )
+        ak.from_iter([[1.00001, 2.00001, None], [], [3.00001]], highlevel=False)
     )
     assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
-        [True, True, None],
+        [False, True, None],
         [],
         [True],
     ]
