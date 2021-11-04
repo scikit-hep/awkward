@@ -596,6 +596,8 @@ class IndexedArray(Content):
         branch, depth = self.branch_depth
 
         index_length = len(self._index)
+        parents_length = len(parents)
+        next_length = index_length
 
         nextcarry = ak._v2.index.Index64.zeros(index_length, nplike)
         nextparents = ak._v2.index.Index64.zeros(index_length, nplike)
@@ -618,20 +620,49 @@ class IndexedArray(Content):
             )
         )
         next = self._content._carry(nextcarry, False, NestedIndexError)
-        out = next._unique(
+        unique = next._unique(
             negaxis,
             starts,
             nextparents,
             outlength,
         )
 
-        if not branch and negaxis == depth:
-            return out
-        else:
-            if isinstance(out, ak._v2.contents.RegularArray):
-                out = out.toListOffsetArray64(True)
+        if branch or (negaxis is not None and negaxis != depth):
+            nextoutindex = ak._v2.index.Index64.empty(parents_length, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_IndexedArray_local_preparenext_64",
+                    nextoutindex.dtype.type,
+                    starts.dtype.type,
+                    parents.dtype.type,
+                    nextparents.dtype.type,
+                ](
+                    nextoutindex.to(nplike),
+                    starts.to(nplike),
+                    parents.to(nplike),
+                    parents_length,
+                    nextparents.to(nplike),
+                    next_length,
+                )
+            )
 
-            elif isinstance(out, ak._v2.contents.ListOffsetArray):
+            out = ak._v2.contents.IndexedOptionArray(
+                nextoutindex,
+                unique,
+                None,
+                self._parameters,
+            ).simplify_optiontype()
+
+            return out
+
+        if not branch and negaxis == depth:
+            return unique
+        else:
+
+            if isinstance(unique, ak._v2.contents.RegularArray):
+                unique = unique.toListOffsetArray64(True)
+
+            elif isinstance(unique, ak._v2.contents.ListOffsetArray):
                 if len(starts) > 0 and starts[0] != 0:
                     raise AssertionError(
                         "reduce_next with unbranching depth > negaxis expects a "
@@ -656,7 +687,7 @@ class IndexedArray(Content):
 
                 tmp = ak._v2.contents.IndexedArray(
                     outindex,
-                    out._content,
+                    unique._content,
                     None,
                     None,
                 )
@@ -668,8 +699,22 @@ class IndexedArray(Content):
                     None,
                 )
 
-            else:
+            elif isinstance(unique, ak._v2.contents.NumpyArray):
+                nextoutindex = ak._v2.index.Index64.empty(len(unique), nplike)
+                # FIXME: move to kernel
+                for i in range(len(unique)):
+                    nextoutindex[i] = i
+
+                out = ak._v2.contents.IndexedOptionArray(
+                    nextoutindex,
+                    unique,
+                    None,
+                    self._parameters,
+                ).simplify_optiontype()
+
                 return out
+
+        raise NotImplementedError
 
     def _argsort_next(
         self,

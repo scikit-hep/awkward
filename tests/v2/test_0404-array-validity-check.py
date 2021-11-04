@@ -192,6 +192,17 @@ def test_subranges_equal():
 
     assert array.sort(axis=-1).content._subranges_equal(starts, stops, 15) is False
 
+    starts = ak._v2.index.Index64(np.array([0]))
+    stops = ak._v2.index.Index64(np.array([15]))
+
+    assert array.sort(axis=-1).content._subranges_equal(starts, stops, 15) is False
+
+    # FIXME:
+    # starts = ak._v2.index.Index64(np.array([0]))
+    # stops = ak._v2.index.Index64(np.array([5]))
+    #
+    # assert array.sort(axis=-1).content._subranges_equal(starts, stops, 15) is True
+
 
 def test_categorical():
     array = ak.Array(["1chchc", "1chchc", "2sss", "3", "4", "5"])
@@ -646,24 +657,64 @@ def test_RegularArray():
 
 
 def test_IndexedArray():
-    content = ak.layout.NumpyArray(
-        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    listoffsetarray = ak.from_iter(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    index = ak.layout.Index64(np.array([0, 2, 4, 6, 8, 9], dtype=np.int64))
-    indexedarray = ak.layout.IndexedArray64(index, content)
-    indexedarray = v1_to_v2(indexedarray)
 
-    assert ak.to_list(indexedarray) == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9]
+    index = ak.layout.Index64(np.array([4, 3, 2, 1, 0], dtype=np.int64))
+    indexedarray = ak.layout.IndexedArray64(index, listoffsetarray)
+    assert ak.to_list(indexedarray) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        [],
+        [0.0, 1.1, 2.2],
+    ]
     assert indexedarray.is_unique() is True
-    assert ak.to_list(indexedarray.unique(axis=None)) == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9]
+    indexedarray = v1_to_v2(indexedarray)
+    assert indexedarray.is_unique() is True
+    assert ak.to_list(indexedarray.unique()) == [
+        0.0,
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+        6.6,
+        7.7,
+        8.8,
+        9.9,
+    ]
+    assert ak.to_list(indexedarray.unique(axis=-1)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        [],
+        [0.0, 1.1, 2.2],
+    ]
 
-    index2 = ak.layout.Index64(np.array([0, 2, 9, 6, 0, 9], dtype=np.int64))
-    indexedarray2 = ak.layout.IndexedArray64(index2, content)
-    indexedarray2 = v1_to_v2(indexedarray2)
-
-    assert ak.to_list(indexedarray2) == [0.0, 2.2, 9.9, 6.6, 0.0, 9.9]
-    assert indexedarray2.is_unique() is False
-    assert ak.to_list(indexedarray2.unique(axis=None)) == [0.0, 2.2, 6.6, 9.9]
+    index = ak.layout.Index64(np.array([4, 4, 3, 2, -1, 0], dtype=np.int64))
+    indexedarray = ak.layout.IndexedOptionArray64(index, listoffsetarray)
+    assert ak.to_list(indexedarray) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, 1.1, 2.2],
+    ]
+    assert indexedarray.is_unique() is False
+    indexedarray = v1_to_v2(indexedarray)
+    assert indexedarray.is_unique() is False
+    assert indexedarray.is_unique(axis=-1) is True
+    assert ak.to_list(indexedarray.unique(axis=-1)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        [0.0, 1.1, 2.2],
+        None,
+    ]
 
 
 def test_RecordArray():

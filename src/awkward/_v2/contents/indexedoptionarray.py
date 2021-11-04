@@ -639,6 +639,10 @@ class IndexedOptionArray(Content):
         nplike = self.nplike
         branch, depth = self.branch_depth
 
+        inject_nones = (
+            True if not branch and (negaxis is not None and negaxis != depth) else False
+        )
+
         index_length = len(self._index)
         parents_length = len(parents)
 
@@ -677,7 +681,7 @@ class IndexedOptionArray(Content):
             )
         )
         next = self._content._carry(nextcarry, False, NestedIndexError)
-        unique = next._unique(
+        out = next._unique(
             negaxis,
             starts,
             nextparents,
@@ -705,39 +709,29 @@ class IndexedOptionArray(Content):
 
             out = ak._v2.contents.IndexedOptionArray(
                 nextoutindex,
-                unique,
+                out,
                 None,
                 self._parameters,
             ).simplify_optiontype()
 
-            out = ak._v2.contents.RegularArray(
-                out,
-                len(nextoutindex),
-                0,
-                None,
-                self._parameters,
-            )
-
             return out
 
-        if isinstance(unique, ak._v2.contents.ListOffsetArray):
+        if isinstance(out, ak._v2.contents.ListOffsetArray):
             # FIXME: move to kernel
             nulls = []
             for i in range(len(self._index)):
                 if self._index[i] < 0:
                     nulls.append(parents[i])
 
-            newindex = ak._v2.index.Index64.zeros(
-                unique._offsets[-1] + len(nulls), nplike
-            )
-            newoffsets = ak._v2.index.Index64.zeros(len(unique._offsets), nplike)
+            newindex = ak._v2.index.Index64.zeros(out._offsets[-1] + len(nulls), nplike)
+            newoffsets = ak._v2.index.Index64.zeros(len(out._offsets), nplike)
             k = 0
             ll = 0
             shift = 0
             newindex[0] = ll
-            newoffsets[0] = unique._offsets[0]
+            newoffsets[0] = out._offsets[0]
             for i in range(len(starts)):
-                for _j in range(unique._offsets[i], unique._offsets[i + 1]):
+                for _j in range(out._offsets[i], out._offsets[i + 1]):
                     newindex[k] = ll
                     k += 1
                     ll += 1
@@ -745,11 +739,11 @@ class IndexedOptionArray(Content):
                     newindex[k] = -1
                     k += 1
                     shift += 1
-                newoffsets[i + 1] = unique._offsets[i + 1] + shift
+                newoffsets[i + 1] = out._offsets[i + 1] + shift
 
             out = ak._v2.contents.IndexedOptionArray(
                 newindex[: newoffsets[-1]],
-                unique._content,  # sorted,
+                out._content,
                 None,
                 self._parameters,
             ).simplify_optiontype()
@@ -760,26 +754,38 @@ class IndexedOptionArray(Content):
                 None,
                 self._parameters,
             )
-
             return out
 
-        if isinstance(unique, ak._v2.contents.NumpyArray):
-            nextoutindex = ak._v2.index.Index64.empty(len(unique) + 1, nplike)
+        if isinstance(out, ak._v2.contents.NumpyArray):
+            nextoutindex = ak._v2.index.Index64.empty(len(out) + 1, nplike)
             # FIXME: move to kernel
-            for i in range(len(unique)):
+            for i in range(len(out)):
                 nextoutindex[i] = i
             nextoutindex[-1] = -1
 
             out = ak._v2.contents.IndexedOptionArray(
                 nextoutindex,
-                unique,
+                out,
                 None,
                 self._parameters,
             ).simplify_optiontype()
-
             return out
 
-        raise NotImplementedError
+        if inject_nones:
+            out = ak._v2.contents.RegularArray(
+                out,
+                len(nextoutindex),
+                0,
+                None,
+                self._parameters,
+            )
+
+        return out
+
+        if negaxis is None:
+            return out
+        else:
+            return out._content
 
     def _argsort_next(
         self,
