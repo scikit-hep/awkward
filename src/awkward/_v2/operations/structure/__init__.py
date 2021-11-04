@@ -10,9 +10,9 @@ from awkward._v2.operations.structure.ak_to_regular import to_regular  # noqa: F
 from awkward._v2.operations.structure.ak_from_regular import from_regular  # noqa: F401
 from awkward._v2.operations.structure.ak_with_name import with_name  # noqa: F401
 from awkward._v2.operations.structure.ak_with_field import with_field  # noqa: F401
-from awkward._v2.operations.structure.ak_with_parameter import (
+from awkward._v2.operations.structure.ak_with_parameter import (  # noqa: F401
     with_parameter,
-)  # noqa: F401
+)
 from awkward._v2.operations.structure.ak_without_parameters import (  # noqa: F401
     without_parameters,
 )
@@ -44,9 +44,9 @@ from awkward._v2.operations.structure.ak_argcombinations import (  # noqa: F401
 )
 from awkward._v2.operations.structure.ak_nan_to_num import nan_to_num  # noqa: F401
 from awkward._v2.operations.structure.ak_isclose import isclose  # noqa: F401
-from awkward._v2.operations.structure.ak_values_astype import (
+from awkward._v2.operations.structure.ak_values_astype import (  # noqa: F401
     values_astype,
-)  # noqa: F401
-from awkward._v2.operations.structure.ak_strings_astype import (
+)
+from awkward._v2.operations.structure.ak_strings_astype import (  # noqa: F401
     strings_astype,
-)  # noqa: F401
+)

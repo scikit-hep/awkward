@@ -12,9 +12,9 @@ from awkward._v2.operations.convert.ak_from_json import from_json  # noqa: F401
 from awkward._v2.operations.convert.ak_to_json import to_json  # noqa: F401
 from awkward._v2.operations.convert.ak_to_layout import to_layout  # noqa: F401
 from awkward._v2.operations.convert.ak_to_arrow import to_arrow  # noqa: F401
-from awkward._v2.operations.convert.ak_to_arrow_table import (
+from awkward._v2.operations.convert.ak_to_arrow_table import (  # noqa: F401
     to_arrow_table,
-)  # noqa: F401
+)
 from awkward._v2.operations.convert.ak_from_arrow import from_arrow  # noqa: F401
 from awkward._v2.operations.convert.ak_to_buffers import to_buffers  # noqa: F401
 from awkward._v2.operations.convert.ak_from_buffers import from_buffers  # noqa: F401
