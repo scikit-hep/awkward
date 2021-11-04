@@ -21,12 +21,11 @@ class EmptyArray(Content):
 
     Form = EmptyForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
         return self.Form(
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=getkey(self),
         )
 
     @property

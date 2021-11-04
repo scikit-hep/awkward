@@ -60,6 +60,41 @@ class Content(object):
         else:
             return self._parameters.get(key)
 
+    @property
+    def form(self):
+        return self.form_with_key(None)
+
+    def form_with_key(self, form_key="node{id}", id_start=0):
+        hold_id = [id_start]
+
+        if form_key is None:
+
+            def getkey(layout):
+                return None
+
+        elif ak._v2._util.isstr(form_key):
+
+            def getkey(layout):
+                out = form_key.format(id=hold_id[0])
+                hold_id[0] += 1
+                return out
+
+        elif callable(form_key):
+
+            def getkey(layout):
+                out = form_key(id=hold_id[0], layout=layout)
+                hold_id[0] += 1
+                return out
+
+        else:
+            raise TypeError(
+                "form_key must be None, a string, or a callable for form_with_key, not {0}".format(
+                    type(form_key)
+                )
+            )
+
+        return self._form_with_key(getkey)
+
     def _repr_extra(self, indent):
         out = []
         if self._parameters is not None:

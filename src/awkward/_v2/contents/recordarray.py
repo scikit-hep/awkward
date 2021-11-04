@@ -122,14 +122,14 @@ class RecordArray(Content):
 
     Form = RecordForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
-            [x.form for x in self._contents],
+            [x._form_with_key(getkey) for x in self._contents],
             self._fields,
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
 
     @property

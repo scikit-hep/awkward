@@ -68,15 +68,15 @@ class ByteMaskedArray(Content):
 
     Form = ByteMaskedForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
             self._mask.form,
-            self._content.form,
+            self._content._form_with_key(getkey),
             self._valid_when,
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
 
     @property

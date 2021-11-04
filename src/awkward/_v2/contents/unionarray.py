@@ -90,15 +90,15 @@ class UnionArray(Content):
 
     Form = UnionForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
             self._tags.form,
             self._index.form,
-            [x.form for x in self._contents],
+            [x._form_with_key(getkey) for x in self._contents],
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
 
     @property

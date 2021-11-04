@@ -71,14 +71,13 @@ class NumpyArray(Content):
 
     Form = NumpyForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
         return self.Form(
             ak._v2.types.numpytype._dtype_to_primitive[self._data.dtype],
             self._data.shape[1:],
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=getkey(self),
         )
 
     @property
