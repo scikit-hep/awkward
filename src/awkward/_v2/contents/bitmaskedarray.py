@@ -461,22 +461,35 @@ class BitMaskedArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
-        def continuation():
-            return BitMaskedArray(
-                self._mask,
+        if options["return_array"]:
+
+            def continuation():
+                return BitMaskedArray(
+                    self._mask,
+                    self._content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._valid_when,
+                    self._length,
+                    self._lsb_order,
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
                 self._content._recursively_apply(
                     action,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
                     options,
-                ),
-                self._valid_when,
-                self._length,
-                self._lsb_order,
-                self._identifier,
-                self._parameters if options["keep_parameters"] else None,
-            )
+                )
 
         result = action(
             self,

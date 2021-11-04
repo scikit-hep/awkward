@@ -853,11 +853,30 @@ class UnionArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
-        def continuation():
-            return UnionArray(
-                self._tags,
-                self._index,
-                [
+        if options["return_array"]:
+
+            def continuation():
+                return UnionArray(
+                    self._tags,
+                    self._index,
+                    [
+                        content._recursively_apply(
+                            action,
+                            depth,
+                            copy.copy(depth_context),
+                            lateral_context,
+                            options,
+                        )
+                        for content in self._contents
+                    ],
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                for content in self._contents:
                     content._recursively_apply(
                         action,
                         depth,
@@ -865,11 +884,6 @@ class UnionArray(Content):
                         lateral_context,
                         options,
                     )
-                    for content in self._contents
-                ],
-                self._identifier,
-                self._parameters if options["keep_parameters"] else None,
-            )
 
         result = action(
             self,

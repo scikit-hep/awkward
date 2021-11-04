@@ -674,9 +674,30 @@ class RecordArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
-        def continuation():
-            return RecordArray(
-                [
+        if options["return_array"]:
+
+            def continuation():
+                return RecordArray(
+                    [
+                        content._recursively_apply(
+                            action,
+                            depth,
+                            copy.copy(depth_context),
+                            lateral_context,
+                            options,
+                        )
+                        for content in self._contents
+                    ],
+                    self._fields,
+                    self._length,
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                for content in self._contents:
                     content._recursively_apply(
                         action,
                         depth,
@@ -684,13 +705,6 @@ class RecordArray(Content):
                         lateral_context,
                         options,
                     )
-                    for content in self._contents
-                ],
-                self._fields,
-                self._length,
-                self._identifier,
-                self._parameters if options["keep_parameters"] else None,
-            )
 
         result = action(
             self,

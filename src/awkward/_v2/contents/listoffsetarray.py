@@ -1454,19 +1454,32 @@ class ListOffsetArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
-        def continuation():
-            return ListOffsetArray(
-                self._offsets,
+        if options["return_array"]:
+
+            def continuation():
+                return ListOffsetArray(
+                    self._offsets,
+                    self._content._recursively_apply(
+                        action,
+                        depth + 1,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
                 self._content._recursively_apply(
                     action,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
                     options,
-                ),
-                self._identifier,
-                self._parameters if options["keep_parameters"] else None,
-            )
+                )
 
         result = action(
             self,

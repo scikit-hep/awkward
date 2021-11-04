@@ -883,20 +883,33 @@ class RegularArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
-        def continuation():
-            return RegularArray(
+        if options["return_array"]:
+
+            def continuation():
+                return RegularArray(
+                    self._content._recursively_apply(
+                        action,
+                        depth + 1,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._size,
+                    self._length,
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
                 self._content._recursively_apply(
                     action,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
                     options,
-                ),
-                self._size,
-                self._length,
-                self._identifier,
-                self._parameters if options["keep_parameters"] else None,
-            )
+                )
 
         result = action(
             self,

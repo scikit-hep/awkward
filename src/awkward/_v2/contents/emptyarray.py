@@ -234,11 +234,18 @@ class EmptyArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
-        def continuation():
-            if options["keep_parameters"]:
-                return self
-            else:
-                return EmptyArray(self._identifier, None)
+        if options["return_array"]:
+
+            def continuation():
+                if options["keep_parameters"]:
+                    return self
+                else:
+                    return EmptyArray(self._identifier, None)
+
+        else:
+
+            def continuation():
+                pass
 
         result = action(
             self,

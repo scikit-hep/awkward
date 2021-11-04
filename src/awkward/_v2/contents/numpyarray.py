@@ -728,11 +728,18 @@ class NumpyArray(Content):
                 action, depth, depth_context, lateral_context, options
             )
 
-        def continuation():
-            if options["keep_parameters"]:
-                return self
-            else:
-                return NumpyArray(self._data, self._identifier, None, self._nplike)
+        if options["return_array"]:
+
+            def continuation():
+                if options["keep_parameters"]:
+                    return self
+                else:
+                    return NumpyArray(self._data, self._identifier, None, self._nplike)
+
+        else:
+
+            def continuation():
+                pass
 
         result = action(
             self,
