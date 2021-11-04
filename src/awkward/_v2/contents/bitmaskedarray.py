@@ -113,6 +113,12 @@ class BitMaskedArray(Content):
             form_key=form_key,
         )
 
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        key = getkey(self, form, "mask")
+        container[key] = ak._v2._util.little_endian(self._mask.to(nplike))
+        self._content._to_buffers(form.content, getkey, container, nplike)
+
     @property
     def typetracer(self):
         return BitMaskedArray(

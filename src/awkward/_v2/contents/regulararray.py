@@ -70,6 +70,10 @@ class RegularArray(Content):
             form_key=form_key,
         )
 
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        self._content._to_buffers(form.content, getkey, container, nplike)
+
     @property
     def typetracer(self):
         return RegularArray(

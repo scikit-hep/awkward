@@ -28,6 +28,9 @@ class EmptyArray(Content):
             form_key=getkey(self),
         )
 
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+
     @property
     def typetracer(self):
         return EmptyArray(self._typetracer_identifier(), self._parameters)

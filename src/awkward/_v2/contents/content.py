@@ -13,6 +13,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class Content(object):
@@ -88,12 +89,51 @@ class Content(object):
 
         else:
             raise TypeError(
-                "form_key must be None, a string, or a callable for form_with_key, not {0}".format(
+                "form_key must be None, a string, or a callable, not {0}".format(
                     type(form_key)
                 )
             )
 
         return self._form_with_key(getkey)
+
+    def to_buffers(
+        self,
+        container=None,
+        buffer_key="{form_key}-{attribute}",
+        form_key="node{id}",
+        id_start=0,
+        nplike=numpy,
+    ):
+        if container is None:
+            container = {}
+
+        if ak._v2._util.isstr(buffer_key):
+
+            def getkey(layout, form, attribute):
+                return buffer_key.format(form_key=form.form_key, attribute=attribute)
+
+        elif callable(buffer_key):
+
+            def getkey(layout, form, attribute):
+                return buffer_key(
+                    form_key=form.form_key,
+                    attribute=attribute,
+                    layout=layout,
+                    form=form,
+                )
+
+        else:
+            raise TypeError(
+                "buffer_key must be a string or a callable, not {0}".format(
+                    type(form_key)
+                )
+            )
+
+        form = self.form_with_key(form_key=form_key, id_start=id_start)
+
+        self._to_buffers(form, getkey, container, nplike)
+
+        return form, len(self), container
 
     def _repr_extra(self, indent):
         out = []

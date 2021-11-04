@@ -79,6 +79,10 @@ def tobytes(array):
         return array.tostring()
 
 
+def little_endian(array):
+    return array.astype(array.dtype.newbyteorder("<"), copy=False)
+
+
 ###############################################################################
 
 # # Enable warnings for the Awkward package

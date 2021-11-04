@@ -101,6 +101,15 @@ class UnionArray(Content):
             form_key=form_key,
         )
 
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        key1 = getkey(self, form, "tags")
+        key2 = getkey(self, form, "index")
+        container[key1] = ak._v2._util.little_endian(self._tags.to(nplike))
+        container[key2] = ak._v2._util.little_endian(self._index.to(nplike))
+        for content in self._contents:
+            content._to_buffers(form.content, getkey, container, nplike)
+
     @property
     def typetracer(self):
         tt = ak._v2._typetracer.TypeTracer.instance()

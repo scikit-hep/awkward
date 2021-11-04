@@ -80,6 +80,11 @@ class NumpyArray(Content):
             form_key=getkey(self),
         )
 
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        key = getkey(self, form, "data")
+        container[key] = ak._v2._util.little_endian(self.to(nplike))
+
     @property
     def typetracer(self):
         return NumpyArray(
