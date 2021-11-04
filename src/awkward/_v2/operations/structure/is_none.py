@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def is_none(array, axis=0, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

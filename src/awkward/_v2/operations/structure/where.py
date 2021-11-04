@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("where")
 def where(condition, *args, **kwargs):
-    pass
+    raise NotImplementedError
 
 
 #     """

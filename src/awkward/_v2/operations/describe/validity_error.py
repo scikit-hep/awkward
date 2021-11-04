@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def validity_error(array, exception=False):
-    pass
+    raise NotImplementedError
 
 
 #     """

@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
-    pass
+    raise NotImplementedError
 
 
 #     """

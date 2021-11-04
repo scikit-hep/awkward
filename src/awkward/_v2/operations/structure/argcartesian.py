@@ -16,7 +16,7 @@ def argcartesian(
     highlevel=True,
     behavior=None,
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

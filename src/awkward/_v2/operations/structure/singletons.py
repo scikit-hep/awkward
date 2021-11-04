@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def singletons(array, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

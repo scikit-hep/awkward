@@ -16,7 +16,7 @@ def zip(
     behavior=None,
     right_broadcast=False,
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

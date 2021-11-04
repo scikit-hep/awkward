@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def to_library(
     array, kernels, highlevel=True, behavior=None
 ):  # note: convert.py's 'to_kernels'
-    pass
+    raise NotImplementedError
 
 
 #     """

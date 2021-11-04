@@ -23,7 +23,7 @@ def from_json(  # note: move ability to read from file into from_json_file
     resize=1.5,
     buffersize=65536,
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

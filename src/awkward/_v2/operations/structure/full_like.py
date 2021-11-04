@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("full_like")
 def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("ravel")
 def ravel(array, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

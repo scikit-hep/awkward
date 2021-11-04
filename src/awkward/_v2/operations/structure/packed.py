@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def packed(array, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

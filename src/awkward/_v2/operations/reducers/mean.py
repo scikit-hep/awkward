@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("mean")
 def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
-    pass
+    raise NotImplementedError
 
 
 #     """

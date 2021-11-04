@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def from_numpy(
     array, regulararray=False, recordarray=True, highlevel=True, behavior=None
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

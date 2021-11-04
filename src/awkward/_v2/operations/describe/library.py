@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def library(*arrays):  # note: convert.py's 'kernels'
-    pass
+    raise NotImplementedError
 
 
 #     """

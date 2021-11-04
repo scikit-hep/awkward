@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def local_index(array, axis=-1, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def run_lengths(array, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

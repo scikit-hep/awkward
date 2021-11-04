@@ -15,7 +15,7 @@ def to_buffers(
     key_format="part{partition}-{form_key}-{attribute}",
     virtual="materialize",
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

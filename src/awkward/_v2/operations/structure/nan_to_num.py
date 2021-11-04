@@ -11,7 +11,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def nan_to_num(
     array, copy=True, nan=0.0, posinf=None, neginf=None, highlevel=True, behavior=None
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

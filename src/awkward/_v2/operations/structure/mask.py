@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

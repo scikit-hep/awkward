@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("sort")
 def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def softmax(x, axis=None, keepdims=False, mask_identity=False):
-    pass
+    raise NotImplementedError
 
 
 #     """

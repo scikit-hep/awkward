@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def to_jax(array):
-    pass
+    raise NotImplementedError
 
 
 #     """

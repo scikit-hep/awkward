@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def corr(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
-    pass
+    raise NotImplementedError
 
 
 #     """

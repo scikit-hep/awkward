@@ -16,7 +16,7 @@ def cartesian(
     highlevel=True,
     behavior=None,
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

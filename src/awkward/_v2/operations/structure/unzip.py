@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def unzip(array):
-    pass
+    raise NotImplementedError
 
 
 #     """

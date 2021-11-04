@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("var")
 def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
-    pass
+    raise NotImplementedError
 
 
 #     """

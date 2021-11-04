@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def with_field(base, what, where=None, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def to_pandas(
     array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

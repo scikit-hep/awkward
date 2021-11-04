@@ -18,7 +18,7 @@ def argcombinations(
     highlevel=True,
     behavior=None,
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

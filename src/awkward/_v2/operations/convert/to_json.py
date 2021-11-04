@@ -18,7 +18,7 @@ def to_json(
     complex_record_fields=None,
     buffersize=65536,
 ):  # note: move ability to write to file into to_json_file
-    pass
+    raise NotImplementedError
 
 
 #     """

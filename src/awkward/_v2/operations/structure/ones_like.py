@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("ones_like")
 def ones_like(array, highlevel=True, behavior=None, dtype=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

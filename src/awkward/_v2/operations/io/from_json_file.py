@@ -8,4 +8,4 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def from_json_file():
-    pass
+    raise NotImplementedError

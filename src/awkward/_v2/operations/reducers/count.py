@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def count(array, axis=None, keepdims=False, mask_identity=False):
-    pass
+    raise NotImplementedError
 
 
 #     """

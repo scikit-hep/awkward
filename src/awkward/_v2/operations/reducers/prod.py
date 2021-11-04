@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("prod")
 def prod(array, axis=None, keepdims=False, mask_identity=False):
-    pass
+    raise NotImplementedError
 
 
 #     """

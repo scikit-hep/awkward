@@ -20,7 +20,7 @@ def from_parquet(  # this will be going through Awkward-Dask
     behavior=None,
     **options  # NOTE: a comma after **options breaks Python 2
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
-    pass
+    raise NotImplementedError
 
 
 #     """

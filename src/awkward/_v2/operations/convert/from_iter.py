@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def from_iter(
     iterable, highlevel=True, behavior=None, allow_record=True, initial=1024, resize=1.5
 ):
-    pass
+    raise NotImplementedError
 
 
 #     """

@@ -9,7 +9,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("copy")
 def copy(array):
-    pass
+    raise NotImplementedError
 
 
 #     """
