@@ -154,16 +154,24 @@ def test_to_regular():
 
 
 def test_isclose():
-    one = v1_to_v2(ak.from_iter([0.999999999, 1.999999999, 2.999999999], highlevel=False))
-    two = v1_to_v2(ak.from_iter([1.000000001, 2.000000001, 3.000000001], highlevel=False))
+    one = v1_to_v2(
+        ak.from_iter([0.999999999, 1.999999999, 2.999999999], highlevel=False)
+    )
+    two = v1_to_v2(
+        ak.from_iter([1.000000001, 2.000000001, 3.000000001], highlevel=False)
+    )
     assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
         True,
         True,
         True,
     ]
 
-    one = v1_to_v2(ak.from_iter([[0.999999999, 1.999999999], [], [2.999999999]], highlevel=False))
-    two = v1_to_v2(ak.from_iter([[1.000000001, 2.000000001], [], [3.000000001]], highlevel=False))
+    one = v1_to_v2(
+        ak.from_iter([[0.999999999, 1.999999999], [], [2.999999999]], highlevel=False)
+    )
+    two = v1_to_v2(
+        ak.from_iter([[1.000000001, 2.000000001], [], [3.000000001]], highlevel=False)
+    )
     assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
         [True, True],
         [],
@@ -171,10 +179,14 @@ def test_isclose():
     ]
 
     one = v1_to_v2(
-        ak.from_iter([[0.999999999, 1.999999999, None], [], [2.999999999]], highlevel=False)
+        ak.from_iter(
+            [[0.999999999, 1.999999999, None], [], [2.999999999]], highlevel=False
+        )
     )
     two = v1_to_v2(
-        ak.from_iter([[1.000000001, 2.000000001, None], [], [3.000000001]], highlevel=False)
+        ak.from_iter(
+            [[1.000000001, 2.000000001, None], [], [3.000000001]], highlevel=False
+        )
     )
     assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
         [True, True, None],
