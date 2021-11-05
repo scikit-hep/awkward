@@ -125,8 +125,13 @@ class Content(object):
         else:
             raise TypeError(
                 "buffer_key must be a string or a callable, not {0}".format(
-                    type(form_key)
+                    type(buffer_key)
                 )
+            )
+
+        if form_key is None:
+            raise TypeError(
+                "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
             )
 
         form = self.form_with_key(form_key=form_key, id_start=id_start)
