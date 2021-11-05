@@ -723,10 +723,10 @@ class IndexedArray(Content):
             return self.project().rpad(target, posaxis, depth)
         else:
             return ak._v2.contents.indexedarray.IndexedArray(
-                None,
-                self._parameters,
                 self._index,
                 self._content.rpad(target, posaxis, depth),
+                None,
+                self._parameters,
             )
 
     def _rpad_and_clip(self, target, axis, depth):
@@ -737,8 +737,8 @@ class IndexedArray(Content):
             return self.project().rpad(target, posaxis, depth)
         else:
             return ak._v2.contents.indexedarray.IndexedArray(
-                None,
-                self._parameters,
                 self._index,
                 self._content.rpad(target, posaxis, depth),
+                None,
+                self._parameters,
             )

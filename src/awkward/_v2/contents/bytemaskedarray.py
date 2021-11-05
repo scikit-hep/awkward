@@ -691,32 +691,8 @@ class ByteMaskedArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self.rpad_axis0(target, False)
-        elif posaxis == depth + 1:
-            mask = self.bytemask()
-            index = ak._v2.index.Index64.empty(len(mask))
-            self._handle_error(
-                self.nplike[
-                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64",
-                    index.dtype.type,
-                    self._mask.dtype.type,
-                ](
-                    index.to(self.nplike),
-                    self._mask.to(self.nplike),
-                    len(self._mask),
-                )
-            )
-            next = self.project().rpad(target, posaxis, depth)
-            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                None, self._parameters, index, next.simplify_optiontype()
-            )
         else:
-            return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-                None,
-                self._parameters,
-                self._mask,
-                self._content.rpad(target, posaxis, depth),
-                self._valid_when,
-            )
+            return self._rpad_and_clip(target, axis, depth)
 
     def _rpad_and_clip(self, target, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -738,13 +714,16 @@ class ByteMaskedArray(Content):
             )
             next = self.project().rpad(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                None, self._parameters, index, next.simplify_optiontype()
+                index,
+                next.simplify_optiontype(),
+                None,
+                self._parameters,
             )
         else:
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-                None,
-                self._parameters,
                 self._mask,
                 self._content.rpad_and_clip(target, posaxis, depth),
                 self._valid_when,
+                None,
+                self._parameters,
             )

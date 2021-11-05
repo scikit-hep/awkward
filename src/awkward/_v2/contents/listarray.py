@@ -951,27 +951,28 @@ class ListArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, False)
         elif posaxis == depth + 1:
-            min = ak._v2.index.Index64.empty(1)
-            self._handle_error(
-                self.nplike[
-                    "awkward_ListArray_min_range",
-                    min.dtype.type,
-                    self._starts.dtype.type,
-                    self._stops.dtype.type,
-                ](
-                    min.to(self.nplike),
-                    self._starts.to(self.nplike),
-                    self._stops.to(self.nplike),
-                    len(self._starts),
-                )
-            )
-            if target < min[0]:
+            # min = ak._v2.index.Index64.empty(1, self.nplike)
+            # self._handle_error(
+            #     self.nplike[
+            #         "awkward_ListArray_min_range",
+            #         min.dtype.type,
+            #         self._starts.dtype.type,
+            #         self._stops.dtype.type,
+            #     ](
+            #         min.to(self.nplike),
+            #         self._starts.to(self.nplike),
+            #         self._stops.to(self.nplike),
+            #         len(self._starts),
+            #     )
+            # )
+            min_ = self.nplike.min(self._stops - self._starts)
+            if target < min_:
                 return self
             else:
-                tolength = ak._v2.index.Index64.zeros(1)
+                tolength = ak._v2.index.Index64.zeros(1, self.nplike)
                 self._handle_error(
                     self.nplike[
-                        "awkward_ListArray_rpad_and_clip_axis1",
+                        "awkward_ListArray_rpad_and_clip_length_axis1",
                         tolength.dtype.type,
                         self._starts.dtype.type,
                         self._stops.dtype.type,
@@ -984,12 +985,12 @@ class ListArray(Content):
                     )
                 )
 
-                index = ak._v2.index.Index64.empty(tolength)
-                starts_ = ak._v2.index.Index64.empty(len(self._starts))
-                stops_ = ak._v2.index.Index64.empty(len(self._stops))
+                index = ak._v2.index.Index64.empty(tolength, self.nplike)
+                starts_ = ak._v2.index.Index64.empty(len(self._starts), self.nplike)
+                stops_ = ak._v2.index.Index64.empty(len(self._stops), self.nplike)
                 self._handle_error(
                     self.nplike[
-                        "awkward_ListArray_rpad_and_clip_axis1_64",
+                        "awkward_ListOffsetArray_rpad_axis1",
                         index.dtype.type,
                         self._starts.dtype.type,
                         self._stops.dtype.type,
@@ -1006,20 +1007,27 @@ class ListArray(Content):
                     )
                 )
                 next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                    None, self._parameters, index.self._content
+                    index.self._content,
+                    self._content,
+                    None,
+                    self._parameters,
                 )
 
                 return ak._v2.contents.listarray.ListArray(
-                    None, self._parameters, starts_, stops_, next.simplify_optiontype()
+                    starts_,
+                    stops_,
+                    next.simplify_optiontype(),
+                    None,
+                    self._parameters,
                 )
         else:
             return ak._v2.contents.listarray.ListArray(
-                None,
-                self._parameters,
                 self._starts,
                 self._stops,
-                self._content.rpad(target, posaxis, depth + 1),
+                self._content._rpad(target, posaxis, depth + 1),
+                None,
+                self._parameters,
             )
 
     def _rpad_and_clip(self, target, axis, depth):
-        return self.toListOffsetArray64(True).rpad_and_clip(target, axis, depth)
+        return self.toListOffsetArray64(True)._rpad_and_clip(target, axis, depth)

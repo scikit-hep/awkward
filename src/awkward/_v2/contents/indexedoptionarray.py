@@ -1170,17 +1170,20 @@ class IndexedOptionArray(Content):
             return self.rpad_axis0(target, False)
         elif posaxis == depth + 1:
             mask = self.bytemask()
-            index = ak._v2.index.Index64.empty(len(self.mask))
+            index = ak._v2.index.Index64.empty(len(self.mask), self.nplike)
             self._handle_error(
                 self.nplike[
-                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64",
+                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,
                     mask.dtype.type,
                 ](index.to(self.nplike), mask.to(self.nplike), len(self.mask))
             )
             next = self.project().rpad_and_clip(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                None, self._parameters, index, next.simplify_optiontype()
+                index,
+                next.simplify_optiontype(),
+                None,
+                self._parameters,
             )
         else:
             return self.project().rpad_and_clip(target, posaxis, depth)
@@ -1191,17 +1194,20 @@ class IndexedOptionArray(Content):
             return self.rpad_axis0(target, True)
         elif posaxis == depth + 1:
             mask = self.bytemask()
-            index = ak._v2.index.Index64.empty(len(self.mask))
+            index = ak._v2.index.Index64.empty(len(self.mask), self.nplike)
             self._handle_error(
                 self.nplike[
-                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64",
+                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,
                     mask.dtype.type,
                 ](index.to(self.nplike), mask.to(self.nplike), len(self.mask))
             )
             next = self.project().rpad_and_clip(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                None, self._parameters, index, next.simplify_optiontype()
+                index,
+                next.simplify_optiontype(),
+                None,
+                self._parameters,
             )
         else:
             return self.project().rpad_and_clip(target, posaxis, depth)

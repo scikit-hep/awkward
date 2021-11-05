@@ -1335,26 +1335,28 @@ class ListOffsetArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, False)
         if posaxis == depth + 1:
-            tolength = ak._v2.index.Index64.zeros(1)
-            offsets_ = ak._v2.index.Index64.empty(len(self._offsets))
+            tolength = ak._v2.index.Index64.zeros(1, self.nplike)
+            offsets_ = ak._v2.index.Index64.empty(len(self._offsets), self.nplike)
             self._handle_error(
                 self.nplike[
                     "awkward_ListOffsetArray_rpad_length_axis1",
                     offsets_.dtype.type,
                     self._offsets.dtype.type,
+                    tolength.dtype.type,
                 ](
                     offsets_.to(self.nplike),
                     self._offsets.to(self.nplike),
                     len(self._offsets) - 1,
+                    target,
                     tolength.to(self.nplike),
                 )
             )
 
-            outindex = ak._v2.index.Index64.empty(tolength)
+            outindex = ak._v2.index.Index64.empty(tolength, self.nplike)
             self._handle_error(
                 self.nplike[
                     "awkward_ListOffsetArray_rpad_axis1",
-                    outindex.dytpe.type,
+                    outindex.dtype.type,
                     self._offsets.dtype.type,
                 ](
                     outindex.to(self.nplike),
@@ -1364,17 +1366,20 @@ class ListOffsetArray(Content):
                 )
             )
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                self._identifier, self._parameters, outindex, self._content
+                outindex, self._content, self._identifier, self._parameters
             )
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
-                self._identifier, self._parameters, offsets_, next.simplify_optiontype()
+                offsets_,
+                next.simplify_optiontype(),
+                self._identifier,
+                self._parameters,
             )
         else:
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
-                None,
-                self._parameters,
                 self._offsets,
                 self._content.rpad(target, posaxis, depth + 1),
+                None,
+                self._parameters,
             )
 
     def _rpad_and_clip(self, target, axis, depth):
@@ -1382,20 +1387,22 @@ class ListOffsetArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, True)
         if posaxis == depth + 1:
-            starts_ = ak._v2.index.Index64.empty(self._offsets - 1)
-            stops_ = ak._v2.index.Index64.empty(self._offsets - 1)
+            starts_ = ak._v2.index.Index64.empty(self._offsets - 1, self.nplike)
+            stops_ = ak._v2.index.Index64.empty(self._offsets - 1, self.nplike)
             self._handle_error(
                 self.nplike[
-                    "awkward_ListOffsetArray_rpad_and_clip_axis1_64",
+                    "awkward_index_rpad_and_clip_axis1",
                     starts_.dtype.type,
                     stops_.dtype.type,
                 ](starts_.to(self.nplike), stops_.to(self.nplike), target, len(starts_))
             )
 
-            outindex = ak._v2.index.Index64.empty(target * (len(self._offsets) - 1))
+            outindex = ak._v2.index.Index64.empty(
+                target * (len(self._offsets) - 1), self.nplike
+            )
             self._handle_error(
                 self.nplike[
-                    "awkward_ListOffsetArray_rpad_and_clip_axis1_64",
+                    "awkward_ListOffsetArray_rpad_and_clip_axis1",
                     outindex.dytpe.type,
                     self._offsets.dtype.type,
                 ](
@@ -1406,15 +1413,22 @@ class ListOffsetArray(Content):
                 )
             )
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                self._identifier, self._parameters, outindex, self._content
+                outindex,
+                self._content,
+                self._identifier,
+                self._parameters,
             )
             return ak._v2.contents.regulararray.RegularArray(
-                None, self._parameters, next.simplify_optiontype(), target, len(self)
+                next.simplify_optiontype(),
+                target,
+                len(self),
+                None,
+                self._parameters,
             )
         else:
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
-                None,
-                self._parameters,
                 self._offsets,
                 self._content.rpad_and_clip(target, posaxis, depth + 1),
+                None,
+                self._parameters,
             )
