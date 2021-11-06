@@ -368,10 +368,12 @@ class UnmaskedArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, False)
         elif posaxis == depth + 1:
-            return self._content.rpad(target, posaxis, depth)
+            return self._content._rpad(target, posaxis, depth)
         else:
             return ak._v2.contents.unmaskedarray.UnmaskedArray(
-                None, self._parameters, self._content.rpad(target, posaxis, depth)
+                self._content._rpad(target, posaxis, depth),
+                None,
+                self._parameters,
             )
 
     def _rpad_and_clip(self, target, axis, depth):
@@ -379,10 +381,10 @@ class UnmaskedArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, True)
         elif posaxis == depth + 1:
-            return self._content.rpad_and_clip(target, posaxis, depth)
+            return self._content._rpad_and_clip(target, posaxis, depth)
         else:
             return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                self._content._rpad_and_clip(target, posaxis, depth),
                 None,
                 self._parameters,
-                self._content.rpad_and_clip(target, posaxis, depth),
             )

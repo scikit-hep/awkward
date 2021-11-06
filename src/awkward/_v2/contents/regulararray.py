@@ -810,14 +810,14 @@ class RegularArray(Content):
             if target < self._size:
                 return self
             else:
-                return self.rpad_and_clip(target, posaxis, depth + 1)
+                return self._rpad_and_clip(target, posaxis, depth + 1)
         else:
             return ak._v2.contents.regulararray.RegularArray(
-                None,
-                self._parameters,
-                self._content.rpad(target, posaxis, depth + 1),
+                self._content._rpad(target, posaxis, depth + 1),
                 self._size,
                 len(self),
+                None,
+                self._parameters,
             )
 
     def _rpad_and_clip(self, target, axis, depth):
@@ -825,23 +825,30 @@ class RegularArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, True)
         elif posaxis == depth + 1:
-            index = ak._v2.index.Index64.empty(len(self) * target)
+            index = ak._v2.index.Index64.empty(len(self) * target, self.nplike)
             self._handle_error(
                 self.nplike[
-                    "awkward_RegularArray_rpad_and_clip_axis1_64", index.dtype.type
+                    "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
                 ](index, target, self._size, len(self))
             )
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                None, self._parameters, index, self._content
+                index,
+                self._content,
+                None,
+                self._parameters,
             )
             return self._v2.contents.regulararray.RegularArray(
-                None, self._parameters, next.simplify_optiontype(), target, len(self)
+                next.simplify_optiontype(),
+                target,
+                len(self),
+                None,
+                self._parameters,
             )
         else:
             return ak._v2.contents.regulararray.RegularArray(
-                None,
-                self._parameters,
-                self._content.rpad(target, posaxis, depth + 1),
+                self._content._rpad_and_clip(target, posaxis, depth + 1),
                 self._size,
                 len(self),
+                None,
+                self._parameters,
             )

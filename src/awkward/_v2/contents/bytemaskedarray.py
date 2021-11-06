@@ -672,10 +672,10 @@ class ByteMaskedArray(Content):
         if not self._valid_when:
             return self._mask
         else:
-            out = ak._v2.index.Index64.empty(len(self))
+            out = ak._v2.index.Index64.empty(len(self), self.nplike)
             self._handle_error(
                 self.nplike[
-                    "awkward_ByteMaskedArray_mask8",
+                    "awkward_ByteMaskedArray_mask",
                     out.dtype.type,
                     self._mask.dtype.type,
                 ](
@@ -700,10 +700,10 @@ class ByteMaskedArray(Content):
             return self.rpad_axis0(target, True)
         elif posaxis == depth + 1:
             mask = self.bytemask()
-            index = ak._v2.index.Index64.empty(len(mask))
+            index = ak._v2.index.Index64.empty(len(mask), self.nplike)
             self._handle_error(
                 self.nplike[
-                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64",
+                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,
                     self._mask.dtype.type,
                 ](
@@ -712,7 +712,7 @@ class ByteMaskedArray(Content):
                     len(self._mask),
                 )
             )
-            next = self.project().rpad(target, posaxis, depth)
+            next = self.project()._rpad(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
                 next.simplify_optiontype(),

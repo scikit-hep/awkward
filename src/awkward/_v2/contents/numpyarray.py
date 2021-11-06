@@ -684,20 +684,20 @@ class NumpyArray(Content):
         if len(self.shape) == 0:
             raise ValueError("cannot rpad a scalar")
         elif len(self.shape > 1) or not self.iscontiguous():
-            return self.toRegularArray().rpad(target, axis, depth)
+            return self.toRegularArray()._rpad(target, axis, depth)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ValueError("axis exceeds the depth of this array")
         if target < len(self):
             return self
         else:
-            return self.rpad_and_clip(target, posaxis, depth)
+            return self._rpad_and_clip(target, posaxis, depth)
 
     def _rpad_and_clip(self, target, axis, depth):
         if len(self.shape) == 0:
             raise ValueError("cannot rpad a scalar")
         elif len(self.shape > 1) or not self.iscontiguous():
-            return self.toRegularArray().rpad(target, axis, depth)
+            return self.toRegularArray()._rpad_and_clip(target, axis, depth)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ValueError("axis exceeds the depth of this array")

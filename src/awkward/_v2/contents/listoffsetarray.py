@@ -1377,7 +1377,7 @@ class ListOffsetArray(Content):
         else:
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 self._offsets,
-                self._content.rpad(target, posaxis, depth + 1),
+                self._content._rpad(target, posaxis, depth + 1),
                 None,
                 self._parameters,
             )
@@ -1428,7 +1428,7 @@ class ListOffsetArray(Content):
         else:
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 self._offsets,
-                self._content.rpad_and_clip(target, posaxis, depth + 1),
+                self._content._rpad_and_clip(target, posaxis, depth + 1),
                 None,
                 self._parameters,
             )

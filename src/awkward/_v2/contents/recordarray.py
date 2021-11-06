@@ -620,18 +620,21 @@ class RecordArray(Content):
         else:
             contents = []
             for content in self._contents:
-                contents.append(content.rpad(target, posaxis, depth))
+                contents.append(content._rpad(target, posaxis, depth))
             if len(contents) == 0:
                 return ak._v2.contents.recordarray.RecordArray(
-                    self._identifier,
-                    self._parameters,
                     contents,
                     self.recordlookup,
                     len(self),
+                    self._identifier,
+                    self._parameters,
                 )
             else:
                 return ak._v2.contents.recordarray.RecordArray(
-                    self._identifier, self._parameters, contents, self.recordlookup
+                    contents,
+                    self.recordlookup,
+                    self._identifier,
+                    self._parameters,
                 )
 
     def _rpad_and_clip(self, target, axis, depth):
@@ -641,16 +644,19 @@ class RecordArray(Content):
         else:
             contents = []
             for content in self._contents:
-                contents.append(content.rpad(target, posaxis, depth))
+                contents.append(content._rpad_and_clip(target, posaxis, depth))
             if len(contents) == 0:
                 return ak._v2.contents.recordarray.RecordArray(
-                    self._identifier,
-                    self._parameters,
                     contents,
                     self.recordlookup,
                     len(self),
+                    self._identifier,
+                    self._parameters,
                 )
             else:
                 return ak._v2.contents.recordarray.RecordArray(
-                    self._identifier, self._parameters, contents, self.recordlookup
+                    contents,
+                    self.recordlookup,
+                    self._identifier,
+                    self._parameters,
                 )

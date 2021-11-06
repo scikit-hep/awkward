@@ -1178,7 +1178,9 @@ class IndexedOptionArray(Content):
                     mask.dtype.type,
                 ](index.to(self.nplike), mask.to(self.nplike), len(self.mask))
             )
-            next = self.project().rpad_and_clip(target, posaxis, depth)
+            # index = self.nplike.full(len(self.mask), -1)
+            # index[self.mask  == 1] = self.nplike.arange(len(index[self.mask  == 1]))
+            next = self.project()._rpad(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
                 next.simplify_optiontype(),
@@ -1186,7 +1188,7 @@ class IndexedOptionArray(Content):
                 self._parameters,
             )
         else:
-            return self.project().rpad_and_clip(target, posaxis, depth)
+            return self.project()._rpad(target, posaxis, depth)
 
     def _rpad_and_clip(self, target, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -1202,7 +1204,7 @@ class IndexedOptionArray(Content):
                     mask.dtype.type,
                 ](index.to(self.nplike), mask.to(self.nplike), len(self.mask))
             )
-            next = self.project().rpad_and_clip(target, posaxis, depth)
+            next = self.project()._rpad_and_clip(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
                 next.simplify_optiontype(),
@@ -1210,4 +1212,4 @@ class IndexedOptionArray(Content):
                 self._parameters,
             )
         else:
-            return self.project().rpad_and_clip(target, posaxis, depth)
+            return self.project()._rpad_and_clip(target, posaxis, depth)

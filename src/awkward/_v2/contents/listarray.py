@@ -1007,7 +1007,7 @@ class ListArray(Content):
                     )
                 )
                 next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                    index.self._content,
+                    index,
                     self._content,
                     None,
                     self._parameters,
