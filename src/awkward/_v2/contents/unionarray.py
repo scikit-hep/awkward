@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -15,9 +17,12 @@ from awkward._v2.forms.unionform import UnionForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class UnionArray(Content):
+    is_UnionType = True
+
     def __init__(self, tags, index, contents, identifier=None, parameters=None):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise TypeError(
@@ -130,6 +135,15 @@ class UnionArray(Content):
         out.append(indent + "</UnionArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return UnionArray(
+            self._tags,
+            self._index,
+            self._contents,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def _getitem_nothing(self):
         return self._getitem_range(slice(0, 0))
@@ -250,7 +264,7 @@ class UnionArray(Content):
         return outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        simplified = self.simplify_uniontype(True, False)
+        simplified = self.simplify_uniontype()
         if (
             simplified.index.dtype == np.dtype(np.int32)
             or simplified.index.dtype == np.dtype(np.uint32)
@@ -290,7 +304,7 @@ class UnionArray(Content):
                 self._identifier,
                 self._parameters,
             )
-            return out.simplify_uniontype(True, False)
+            return out.simplify_uniontype()
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -310,7 +324,7 @@ class UnionArray(Content):
         else:
             raise AssertionError(repr(head))
 
-    def simplify_uniontype(self, merge, mergebool):
+    def simplify_uniontype(self, merge=True, mergebool=False):
         tags = ak._v2.index.Index8.empty(len(self), self.nplike)
         index = ak._v2.index.Index64.empty(len(self), self.nplike)
         contents = []
@@ -673,7 +687,7 @@ class UnionArray(Content):
         kind,
         order,
     ):
-        simplified = self.simplify_uniontype(True, True)
+        simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
@@ -684,7 +698,7 @@ class UnionArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        simplified = self.simplify_uniontype(True, True)
+        simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot sort an irreducible UnionArray")
 
@@ -703,7 +717,7 @@ class UnionArray(Content):
         mask,
         keepdims,
     ):
-        simplified = self.simplify_uniontype(True, True)
+        simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, UnionArray):
             raise ValueError(
                 "cannot call ak.{0} on an irreducible UnionArray".format(reducer.name)
@@ -793,3 +807,129 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
             return out.simplify_uniontype(True, False)
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        nptags = self._tags.to(numpy)
+        npindex = self._index.to(numpy)
+        copied_index = False
+
+        values = []
+        for tag, content in enumerate(self._contents):
+            selected_tags = nptags == tag
+            this_index = npindex[selected_tags]
+
+            # Arrow unions can't have masks; propagate validbytes down to the content.
+            if validbytes is not None:
+                # If this_index is a filtered permutation, we can just filter-permute
+                # the mask to have the same order the content.
+                if len(numpy.unique(this_index)) == len(this_index):
+                    this_validbytes = numpy.zeros(len(this_index), dtype=np.int8)
+                    this_validbytes[this_index] = validbytes[selected_tags]
+
+                # If this_index is not a filtered permutation, then we can't modify
+                # the mask to fit the content. The same element in the content array
+                # will appear multiple times in the union array, and it *might* be
+                # presented as valid in some union array elements and masked in others.
+                # The validbytes that recurses down to the next level can't have an
+                # element that is both 0 (masked) and 1 (valid).
+                else:
+                    this_validbytes = validbytes[selected_tags]
+                    content = content[this_index]
+                    if not copied_index:
+                        copied_index = True
+                        npindex = numpy.array(npindex, copy=True)
+                    npindex[selected_tags] = numpy.arange(
+                        len(this_index), dtype=npindex.dtype
+                    )
+
+            else:
+                this_validbytes = None
+
+            values.append(
+                content._to_arrow(
+                    pyarrow, mask_node, this_validbytes, len(this_index), options
+                )
+            )
+
+        types = pyarrow.union(
+            [
+                pyarrow.field(str(i), values[i].type).with_nullable(
+                    mask_node is not None or self._contents[i].is_OptionType
+                )
+                for i in range(len(values))
+            ],
+            "dense",
+            list(range(len(values))),
+        )
+
+        if not issubclass(npindex.dtype.type, np.int32):
+            npindex = npindex.astype(np.int32)
+
+        return pyarrow.Array.from_buffers(
+            ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                types, options["extensionarray"], None, self
+            ),
+            len(nptags),
+            [
+                None,
+                ak._v2._connect.pyarrow.to_length(nptags, length),
+                ak._v2._connect.pyarrow.to_length(npindex, length),
+            ],
+            children=values,
+        )
+
+    def _completely_flatten(self, nplike, options):
+        out = []
+        for content in self._contents:
+            out.extend(content[: self._length]._completely_flatten(nplike, options))
+        return out
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return UnionArray(
+                    self._tags,
+                    self._index,
+                    [
+                        content._recursively_apply(
+                            action,
+                            depth,
+                            copy.copy(depth_context),
+                            lateral_context,
+                            options,
+                        )
+                        for content in self._contents
+                    ],
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                for content in self._contents:
+                    content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -10,9 +12,13 @@ from awkward._v2.forms.indexedoptionform import IndexedOptionForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class IndexedOptionArray(Content):
+    is_OptionType = True
+    is_IndexedType = True
+
     def __init__(self, index, content, identifier=None, parameters=None):
         if not (
             isinstance(index, Index)
@@ -89,6 +95,14 @@ class IndexedOptionArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return IndexedOptionArray(
+            self._index,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toIndexedOptionArray64(self):
         if self._index.dtype == np.dtype(np.int64):
             return self
@@ -100,11 +114,14 @@ class IndexedOptionArray(Content):
                 parameters=self._parameters,
             )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when=True, nplike=None):
+        if nplike is None:
+            nplike = self._content.nplike
+
         if valid_when:
-            return self._index.data >= 0
+            return self._index.to(nplike) >= 0
         else:
-            return self._index.data < 0
+            return self._index.to(nplike) < 0
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -1222,3 +1239,74 @@ class IndexedOptionArray(Content):
             ).simplify_optiontype()
         else:
             return self.project()._rpad_and_clip(target, posaxis, depth)
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        index = numpy.array(self._index, copy=True)
+        this_validbytes = self.mask_as_bool(valid_when=True)
+        index[~this_validbytes] = 0
+
+        if self.parameter("__array__") == "categorical":
+            # The new IndexedArray will have this parameter, but the rest
+            # will be in the AwkwardArrowType.mask_parameters.
+            next_parameters = {"__array__": "categorical"}
+        else:
+            next_parameters = None
+
+        next = ak._v2.contents.IndexedArray(
+            ak._v2.index.Index(index), self._content, parameters=next_parameters
+        )
+        return next._to_arrow(
+            pyarrow,
+            self,
+            ak._v2._connect.pyarrow.and_validbytes(validbytes, this_validbytes),
+            length,
+            options,
+        )
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return IndexedOptionArray(
+                    self._index,
+                    self._content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

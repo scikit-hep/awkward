@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import json
+import copy
 
 import awkward as ak
 from awkward._v2.index import Index
@@ -12,9 +13,12 @@ from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class ByteMaskedArray(Content):
+    is_OptionType = True
+
     def __init__(self, mask, content, valid_when, identifier=None, parameters=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(
@@ -105,6 +109,15 @@ class ByteMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return ByteMaskedArray(
+            self._mask,
+            self._content,
+            self._valid_when,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toIndexedOptionArray64(self):
         nplike = self.nplike
         index = ak._v2.index.Index64.empty(len(self._mask), nplike)
@@ -125,13 +138,16 @@ class ByteMaskedArray(Content):
             index, self._content, self._identifier, self._parameters
         )
 
-    def mask_as_bool(self, valid_when=None):
+    def mask_as_bool(self, valid_when=None, nplike=None):
         if valid_when is None:
             valid_when = self._valid_when
+        if nplike is None:
+            nplike = self._mask.nplike
+
         if valid_when == self._valid_when:
-            return self._mask.data != 0
+            return self._mask.to(nplike) != 0
         else:
-            return self._mask.data != 1
+            return self._mask.to(nplike) != 1
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -322,7 +338,7 @@ class ByteMaskedArray(Content):
             if mask_length != len(mask):
                 raise ValueError(
                     "mask length ({0}) is not equal to {1} length ({2})".format(
-                        mask.length(), type(self).__name__, mask_length
+                        len(mask), type(self).__name__, mask_length
                     )
                 )
 
@@ -727,3 +743,63 @@ class ByteMaskedArray(Content):
                 None,
                 self._parameters,
             )
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        this_validbytes = self.mask_as_bool(valid_when=True)
+
+        return self._content._to_arrow(
+            pyarrow,
+            self,
+            ak._v2._connect.pyarrow.and_validbytes(validbytes, this_validbytes),
+            length,
+            options,
+        )
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return ByteMaskedArray(
+                    self._mask,
+                    self._content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._valid_when,
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

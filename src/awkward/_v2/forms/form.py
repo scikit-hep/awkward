@@ -67,16 +67,16 @@ def from_iter(input):
     elif input["class"] == "RecordArray":
         if isinstance(input["contents"], dict):
             contents = []
-            keys = []
+            fields = []
             for key, content in input["contents"].items():
                 contents.append(from_iter(content))
-                keys.append(key)
+                fields.append(key)
         else:
             contents = [from_iter(content) for content in input["contents"]]
-            keys = None
+            fields = None
         return ak._v2.forms.recordform.RecordForm(
             contents=contents,
-            keys=keys,
+            fields=fields,
             has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,

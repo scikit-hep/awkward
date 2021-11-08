@@ -54,7 +54,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 # def _suffix(array):
-#     out = ak.operations.convert.kernels(array)
+#     out = ak._v2.operations.convert.kernels(array)
 #     if out is None or out == "cpu":
 #         return ""
 #     else:
@@ -64,7 +64,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
     u"""
     Args:
-        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
+        data (#ak.layout.Content, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
                - If a NumPy array, the regularity of its dimensions is preserved
                  and the data are viewed, not copied.
@@ -248,14 +248,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = ak._v2.operations.convert.from_cupy(data, highlevel=False)
 
         elif ak._v2._util.in_module(data, "pyarrow"):
-            layout = ak.operations.convert.from_arrow(data, highlevel=False)
+            layout = ak._v2.operations.convert.from_arrow(data, highlevel=False)
 
         elif isinstance(data, dict):
-            keys = []
+            fields = []
             contents = []
             length = None
             for k, v in data.items():
-                keys.append(k)
+                fields.append(k)
                 contents.append(Array(v).layout)
                 if length is None:
                     length = len(contents[-1])
@@ -264,7 +264,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         "dict of arrays in ak.Array constructor must have arrays "
                         "of equal length ({0} vs {1})".format(length, len(contents[-1]))
                     )
-            layout = ak._v2.contents.RecordArray(contents, keys)
+            layout = ak._v2.contents.RecordArray(contents, fields)
 
         elif isinstance(data, str):
             layout = ak._v2.operations.convert.from_json(data, highlevel=False)
@@ -395,7 +395,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #             suffix = _suffix(self)
     #             limit_value -= len(suffix)
 
-    #             value = ak._util.minimally_touching_string(
+    #             value = ak._v2._util.minimally_touching_string(
     #                 limit_value, self._array.layout, self._array._behavior
     #             )
 
@@ -406,7 +406,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
     #             typestr = repr(
     #                 str(
-    #                     ak._util.highlevel_type(
+    #                     ak._v2._util.highlevel_type(
     #                         self._array.layout, self._array._behavior, True
     #                     )
     #                 )
@@ -417,7 +417,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #             return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     #         def __getitem__(self, where):
-    #             return ak.operations.structure.mask(self._array, where, self._valid_when)
+    #             return ak._v2.operations.structure.mask(self._array, where, self._valid_when)
 
     #     @property
     #     def mask(self, valid_when=True):
@@ -508,10 +508,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #ak.fields.
         """
-        return self._layout.keys
+        return self._layout.fields
 
     def _ipython_key_completions_(self):
-        return self._layout.keys
+        return self._layout.fields
 
     @property
     def type(self):
@@ -1108,7 +1108,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if where in dir(type(self)):
             return super(Array, self).__getattribute__(where)
         else:
-            if where in self._layout.keys:
+            if where in self._layout.fields:
                 try:
                     return self[where]
                 except Exception as err:
@@ -1130,7 +1130,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 + dir(super(Array, self))
                 + [
                     x
-                    for x in self._layout.keys
+                    for x in self._layout.fields
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )
@@ -1291,7 +1291,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         nested lists in a NumPy `"O"` array are severed from the array and
     #         cannot be sliced as dimensions.
     #         """
-    #         return ak._connect._numpy.convert_to_array(self.layout, args, kwargs)
+    #         return ak._v2._connect.numpy.convert_to_array(self.layout, args, kwargs)
 
     #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
     #         """
@@ -1351,9 +1351,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         See also #__array_function__.
     #         """
     #         if not hasattr(self, "_tracers"):
-    #             return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+    #             return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
     #         else:
-    #             return ak._connect._jax.jax_utils.array_ufunc(
+    #             return ak._v2._connect.jax.jax_utils.array_ufunc(
     #                 self, ufunc, method, inputs, kwargs
     #             )
 
@@ -1374,7 +1374,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     #         See also #__array_ufunc__.
     #         """
-    #         return ak._connect._numpy.array_function(func, types, args, kwargs)
+    #         return ak._v2._connect.numpy.array_function(func, types, args, kwargs)
 
     #     @property
     #     def numba_type(self):
@@ -1386,19 +1386,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
     #         on types and signatures.
     #         """
-    #         import awkward._connect._numba  # noqa: F401
+    #         import awkward._v2._connect.numba  # noqa: F401
 
-    #         ak._connect._numba.register_and_check()
+    #         ak._v2._connect.numba.register_and_check()
     #         if self._numbaview is None:
-    #             self._numbaview = ak._connect._numba.arrayview.ArrayView.fromarray(self)
+    #             self._numbaview = ak._v2._connect.numba.arrayview.ArrayView.fromarray(self)
     #         import numba
 
     #         return numba.typeof(self._numbaview)
 
     #     def __getstate__(self):
-    #         packed = ak.operations.structure.packed(self.layout, highlevel=False)
-    #         form, length, container = ak.operations.convert.to_buffers(packed)
-    #         if self._behavior is ak.behavior:
+    #         packed = ak._v2.operations.structure.packed(self.layout, highlevel=False)
+    #         form, length, container = ak._v2.operations.convert.to_buffers(packed)
+    #         if self._behavior is ak._v2.behavior:
     #             behavior = None
     #         else:
     #             behavior = self._behavior
@@ -1407,19 +1407,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #     def __setstate__(self, state):
     #         if isinstance(state[1], dict):
     #             form, container, num_partitions, behavior = state
-    #             layout = ak._util.adjust_old_pickle(
+    #             layout = ak._v2._util.adjust_old_pickle(
     #                 form, container, num_partitions, behavior
     #             )
     #         else:
     #             form, length, container, behavior = state
-    #             layout = ak.operations.convert.from_buffers(
+    #             layout = ak._v2.operations.convert.from_buffers(
     #                 form, length, container, highlevel=False, behavior=behavior
     #             )
     #         if self.__class__ is Array:
-    #             self.__class__ = ak._util.arrayclass(layout, behavior)
+    #             self.__class__ = ak._v2._util.arrayclass(layout, behavior)
     #         self.layout = layout
     #         self.behavior = behavior
-    #         self._caches = ak._util.find_caches(self.layout)
+    #         self._caches = ak._v2._util.find_caches(self.layout)
 
     #     def __copy__(self):
     #         return Array(self.layout, behavior=self._behavior)
@@ -1438,7 +1438,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
 
 #     def __contains__(self, element):
-#         for test in ak._util.completely_flatten(self.layout):
+#         for test in ak._v2._util.completely_flatten(self.layout):
 #             if element in test:
 #                 return True
 #         return False
@@ -1493,10 +1493,10 @@ class Record(NDArrayOperatorsMixin):
             layout = data._layout
 
         elif isinstance(data, str):
-            layout = ak.operations.convert.from_json(data, highlevel=False)
+            layout = ak._v2.operations.convert.from_json(data, highlevel=False)
 
         elif isinstance(data, dict):
-            layout = ak.operations.convert.from_iter([data], highlevel=False)[0]
+            layout = ak._v2.operations.convert.from_iter([data], highlevel=False)[0]
 
         elif isinstance(data, Iterable):
             raise TypeError(
@@ -1649,13 +1649,13 @@ class Record(NDArrayOperatorsMixin):
 
         See also #ak.fields.
         """
-        return self._layout.array.keys
+        return self._layout.array.fields
 
     def _ipython_key_completions_(self):
-        return self._layout.array.keys
+        return self._layout.array.fields
 
     def __iter__(self):
-        for x in self._layout.array.keys:
+        for x in self._layout.array.fields:
             yield x
 
     @property
@@ -1772,7 +1772,7 @@ class Record(NDArrayOperatorsMixin):
         if where in dir(type(self)):
             return super(Record, self).__getattribute__(where)
         else:
-            if where in self._layout.keys:
+            if where in self._layout.fields:
                 try:
                     return self[where]
                 except Exception as err:
@@ -1794,7 +1794,7 @@ class Record(NDArrayOperatorsMixin):
                 + dir(super(Record, self))
                 + [
                     x
-                    for x in self.layout.keys
+                    for x in self.layout.fields
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )
@@ -1958,7 +1958,7 @@ class Record(NDArrayOperatorsMixin):
 
     #         See #ak.Array.__array_ufunc__ for a more complete description.
     #         """
-    #         return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+    #         return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     #     @property
     #     def numba_type(self):
@@ -1970,19 +1970,19 @@ class Record(NDArrayOperatorsMixin):
     #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
     #         on types and signatures.
     #         """
-    #         import awkward._connect._numba  # noqa: F401
+    #         import awkward._v2._connect.numba  # noqa: F401
 
-    #         ak._connect._numba.register_and_check()
+    #         ak._v2._connect.numba.register_and_check()
     #         if self._numbaview is None:
-    #             self._numbaview = ak._connect._numba.arrayview.RecordView.fromrecord(self)
+    #             self._numbaview = ak._v2._connect.numba.arrayview.RecordView.fromrecord(self)
     #         import numba
 
     #         return numba.typeof(self._numbaview)
 
     #     def __getstate__(self):
-    #         packed = ak.operations.structure.packed(self._layout, highlevel=False)
-    #         form, length, container = ak.operations.convert.to_buffers(packed.array)
-    #         if self._behavior is ak.behavior:
+    #         packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
+    #         form, length, container = ak._v2.operations.convert.to_buffers(packed.array)
+    #         if self._behavior is ak._v2.behavior:
     #             behavior = None
     #         else:
     #             behavior = self._behavior
@@ -1991,20 +1991,20 @@ class Record(NDArrayOperatorsMixin):
     #     def __setstate__(self, state):
     #         if isinstance(state[1], dict):
     #             form, container, num_partitions, behavior, at = state
-    #             layout = ak._util.adjust_old_pickle(
+    #             layout = ak._v2._util.adjust_old_pickle(
     #                 form, container, num_partitions, behavior
     #             )
     #         else:
     #             form, length, container, behavior, at = state
-    #             layout = ak.operations.convert.from_buffers(
+    #             layout = ak._v2.operations.convert.from_buffers(
     #                 form, length, container, highlevel=False, behavior=behavior
     #             )
-    #         layout = ak.layout.Record(layout, at)
+    #         layout = ak._v2.record.Record(layout, at)
     #         if self.__class__ is Record:
-    #             self.__class__ = ak._util.recordclass(layout, behavior)
+    #             self.__class__ = ak._v2._util.recordclass(layout, behavior)
     #         self.layout = layout
     #         self.behavior = behavior
-    #         self._caches = ak._util.find_caches(self.layout)
+    #         self._caches = ak._v2._util.find_caches(self.layout)
 
     #     def __copy__(self):
     #         return Record(self.layout, behavior=self._behavior)
@@ -2020,7 +2020,7 @@ class Record(NDArrayOperatorsMixin):
 
 
 #     def __contains__(self, element):
-#         for test in ak._util.completely_flatten(self.layout):
+#         for test in ak._v2._util.completely_flatten(self.layout):
 #             if element in test:
 #                 return True
 #         return False
@@ -2200,7 +2200,7 @@ class Record(NDArrayOperatorsMixin):
 #             self._behavior = behavior
 #         else:
 #             raise TypeError(
-#                 "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
+#                 "behavior must be None or a dict"
 #             )
 
 #     @property
@@ -2214,7 +2214,7 @@ class Record(NDArrayOperatorsMixin):
 #         The type of a #ak.layout.Content (from #ak.Array.layout) is not
 #         wrapped by an #ak.types.ArrayType.
 #         """
-#         return ak.operations.describe.type(self)
+#         return ak._v2.operations.describe.type(self)
 
 #     def __len__(self):
 #         """
@@ -2232,12 +2232,12 @@ class Record(NDArrayOperatorsMixin):
 
 #         See #ak.Array.__getitem__ for a more complete description.
 #         """
-#         tmp = ak._util.wrap(self._layout[where], self._behavior)
+#         tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
 
-#         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
+#         if isinstance(tmp, ak._v2.behaviors.string.ByteBehavior):
 #             return bytes(tmp)
-#         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-#             return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+#         elif isinstance(tmp, ak._v2.behaviors.string.CharBehavior):
+#             return ak._v2._util.unicode(tmp) if ak._v2._util.py27 else str(tmp)
 #         else:
 #             return tmp
 
@@ -2288,9 +2288,9 @@ class Record(NDArrayOperatorsMixin):
 #         value = self._str(limit_value=limit_value, snapshot=snapshot)
 
 #         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
-#         typestrs = ak._util.typestrs(self._behavior)
+#         typestrs = ak._v2._util.typestrs(self._behavior)
 #         typestr = repr(
-#             str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
+#             str(ak._v2.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
 #         )
 #         if len(typestr) > limit_type:
 #             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
@@ -2305,7 +2305,7 @@ class Record(NDArrayOperatorsMixin):
 
 #         See #ak.Array.__array__ for a more complete description.
 #         """
-#         return ak._connect._numpy.convert_to_array(self.snapshot(), args, kwargs)
+#         return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
 #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 #         """
@@ -2315,7 +2315,7 @@ class Record(NDArrayOperatorsMixin):
 
 #         See #ak.Array.__array_ufunc__ for a more complete description.
 #         """
-#         return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+#         return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
 #     def __array_function__(self, func, types, args, kwargs):
 #         """
@@ -2324,7 +2324,7 @@ class Record(NDArrayOperatorsMixin):
 
 #         See #ak.ArrayBuilder.__array_ufunc__ for a more complete description.
 #         """
-#         return ak._connect._numpy.array_function(func, types, args, kwargs)
+#         return ak._v2._connect.numpy.array_function(func, types, args, kwargs)
 
 #     @property
 #     def numba_type(self):
@@ -2336,12 +2336,12 @@ class Record(NDArrayOperatorsMixin):
 #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
 #         on types and signatures.
 #         """
-#         import awkward._connect._numba
+#         import awkward._v2._connect.numba
 
-#         ak._connect._numba.register_and_check()
-#         import awkward._connect._numba.builder  # noqa: F401
+#         ak._v2._connect.numba.register_and_check()
+#         import awkward._v2._connect.numba.builder  # noqa: F401
 
-#         return ak._connect._numba.builder.ArrayBuilderType(self._behavior)
+#         return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
 
 #     def __bool__(self):
 #         if len(self) == 1:
@@ -2369,7 +2369,7 @@ class Record(NDArrayOperatorsMixin):
 #         buffers are deleted exactly once.
 #         """
 #         layout = self._layout.snapshot()
-#         return ak._util.wrap(layout, self._behavior)
+#         return ak._v2._util.wrap(layout, self._behavior)
 
 #     def null(self):
 #         """
@@ -2605,7 +2605,7 @@ class Record(NDArrayOperatorsMixin):
 #             else:
 #                 raise TypeError(
 #                     "'append' method can only be used with 'at' when "
-#                     "'obj' is an ak.Array" + ak._util.exception_suffix(__file__)
+#                     "'obj' is an ak.Array"
 #                 )
 
 #     def extend(self, obj):
@@ -2621,7 +2621,7 @@ class Record(NDArrayOperatorsMixin):
 #         else:
 #             raise TypeError(
 #                 "'extend' method requires an ak.Array"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     class _Nested(object):
@@ -2638,9 +2638,9 @@ class Record(NDArrayOperatorsMixin):
 #                 - len("<ArrayBuilder.  type=>")
 #                 - len(self._name)
 #             )
-#             typestrs = ak._util.typestrs(self._arraybuilder._behavior)
+#             typestrs = ak._v2._util.typestrs(self._arraybuilder._behavior)
 #             typestr = repr(
-#                 str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
+#                 str(ak._v2.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
 #             )
 #             if len(typestr) > limit_type:
 #                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]

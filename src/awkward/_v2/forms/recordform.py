@@ -16,7 +16,7 @@ class RecordForm(Form):
     def __init__(
         self,
         contents,
-        keys,
+        fields,
         has_identifier=False,
         parameters=None,
         form_key=None,
@@ -34,42 +34,42 @@ class RecordForm(Form):
                         type(self).__name__, repr(content)
                     )
                 )
-        if keys is not None and not isinstance(keys, Iterable):
+        if fields is not None and not isinstance(fields, Iterable):
             raise TypeError(
-                "{0} 'keys' must be iterable, not {1}".format(
+                "{0} 'fields' must be iterable, not {1}".format(
                     type(self).__name__, repr(contents)
                 )
             )
 
-        self._keys = keys
+        self._fields = fields
         self._contents = list(contents)
         self._init(has_identifier, parameters, form_key)
 
     @property
-    def keys(self):
-        if self._keys is None:
+    def fields(self):
+        if self._fields is None:
             return [str(i) for i in range(len(self._contents))]
         else:
-            return self._keys
+            return self._fields
 
     @property
     def is_tuple(self):
-        return self._keys is None
+        return self._fields is None
 
     @property
     def contents(self):
         return self._contents
 
     def __repr__(self):
-        args = [repr(self._contents), repr(self._keys)] + self._repr_args()
+        args = [repr(self._contents), repr(self._fields)] + self._repr_args()
         return "{0}({1})".format(type(self).__name__, ", ".join(args))
 
-    def index_to_key(self, index):
+    def index_to_field(self, index):
         if 0 <= index < len(self._contents):
-            if self._keys is None:
+            if self._fields is None:
                 return str(index)
             else:
-                return self._keys[index]
+                return self._fields[index]
         else:
             raise IndexError(
                 "no index {0} in record with {1} fields".format(
@@ -77,10 +77,10 @@ class RecordForm(Form):
                 )
             )
 
-    def key_to_index(self, key):
-        if self._keys is None:
+    def field_to_index(self, field):
+        if self._fields is None:
             try:
-                i = int(key)
+                i = int(field)
             except ValueError:
                 pass
             else:
@@ -88,37 +88,37 @@ class RecordForm(Form):
                     return i
         else:
             try:
-                i = self._keys.index(key)
+                i = self._fields.index(field)
             except ValueError:
                 pass
             else:
                 return i
         raise IndexError(
             "no field {0} in record with {1} fields".format(
-                repr(key), len(self._contents)
+                repr(field), len(self._contents)
             )
         )
 
-    def haskey(self, key):
-        if self._keys is None:
+    def has_field(self, field):
+        if self._fields is None:
             try:
-                i = int(key)
+                i = int(field)
             except ValueError:
                 return False
             else:
                 return 0 <= i < len(self._contents)
         else:
-            return key in self._keys
+            return field in self._fields
 
-    def content(self, index_or_key):
-        if ak._util.isint(index_or_key):
-            index = index_or_key
-        elif ak._util.isstr(index_or_key):
-            index = self.key_to_index(index_or_key)
+    def content(self, index_or_field):
+        if ak._util.isint(index_or_field):
+            index = index_or_field
+        elif ak._util.isstr(index_or_field):
+            index = self.field_to_index(index_or_field)
         else:
             raise TypeError(
-                "index_or_key must be an integer (index) or string (key), not {0}".format(
-                    repr(index_or_key)
+                "index_or_field must be an integer (index) or string (field), not {0}".format(
+                    repr(index_or_field)
                 )
             )
         return self._contents[index]
@@ -129,8 +129,8 @@ class RecordForm(Form):
         contents_tolist = [
             content._tolist_part(verbose, toplevel=False) for content in self._contents
         ]
-        if self._keys is not None:
-            out["contents"] = dict(zip(self._keys, contents_tolist))
+        if self._fields is not None:
+            out["contents"] = dict(zip(self._fields, contents_tolist))
         else:
             out["contents"] = contents_tolist
 
@@ -139,7 +139,7 @@ class RecordForm(Form):
     def _type(self, typestrs):
         return ak._v2.types.recordtype.RecordType(
             [x._type(typestrs) for x in self._contents],
-            self._keys,
+            self._fields,
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
         )
@@ -160,11 +160,11 @@ class RecordForm(Form):
                     else:
                         return True
                 else:
-                    if set(self._keys) != set(other._keys):
+                    if set(self._fields) != set(other._fields):
                         return False
                     else:
-                        for key, content in zip(self._keys, self._contents):
-                            if content != other.content(key):
+                        for field, content in zip(self._fields, self._contents):
+                            if content != other.content(field):
                                 return False
                         else:
                             return True
@@ -179,14 +179,14 @@ class RecordForm(Form):
 
         elif isinstance(other, RecordForm):
             if self.is_tuple == other.is_tuple:
-                self_keys = set(self.keys)
-                other_keys = set(other.keys)
-                if self_keys == other_keys:
+                self_fields = set(self._fields)
+                other_fields = set(other._fields)
+                if self_fields == other_fields:
                     return _parameters_equal(
                         self._parameters, other._parameters
                     ) and all(
                         self.content(x).generated_compatibility(other.content(x))
-                        for x in self_keys
+                        for x in self_fields
                     )
                 else:
                     return False
@@ -199,7 +199,7 @@ class RecordForm(Form):
     def _getitem_range(self):
         return RecordForm(
             self._contents,
-            self._keys,
+            self._fields,
             has_identifier=self._has_identifier,
             parameters=self._parameters,
             form_key=None,
@@ -217,11 +217,11 @@ class RecordForm(Form):
                 return self.content(where)._getitem_fields(nexthead, nexttail)
 
     def _getitem_fields(self, where, only_fields=()):
-        indexes = [self.key_to_index(key) for key in where]
-        if self._keys is None:
-            keys = None
+        indexes = [self.field_to_index(field) for field in where]
+        if self._fields is None:
+            fields = None
         else:
-            keys = [self._keys[i] for i in indexes]
+            fields = [self._fields[i] for i in indexes]
 
         if len(only_fields) == 0:
             contents = [self.content(i) for i in indexes]
@@ -238,7 +238,7 @@ class RecordForm(Form):
 
         return RecordForm(
             contents,
-            keys,
+            fields,
             has_identifier=self._has_identifier,
             parameters=None,
             form_key=None,
@@ -256,7 +256,7 @@ class RecordForm(Form):
         else:
             return RecordForm(
                 self._contents,
-                self._keys,
+                self._fields,
                 has_identifier=self._has_identifier,
                 parameters=self._parameters,
                 form_key=None,

@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import json
+import copy
 
 import awkward as ak
 from awkward._v2.index import Index
@@ -16,6 +17,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class BitMaskedArray(Content):
+    is_OptionType = True
+
     def __init__(
         self,
         mask,
@@ -144,6 +147,17 @@ class BitMaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return BitMaskedArray(
+            self._mask,
+            self._content,
+            self._valid_when,
+            self._length,
+            self._lsb_order,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toByteMaskedArray(self):
         nplike = self._mask.nplike
         bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
@@ -191,10 +205,12 @@ class BitMaskedArray(Content):
             self._parameters,
         )
 
-    def mask_as_bool(self, valid_when=None):
+    def mask_as_bool(self, valid_when=None, nplike=None):
         if valid_when is None:
             valid_when = self._valid_when
-        nplike = self._mask.nplike
+        if nplike is None:
+            nplike = self._mask.nplike
+
         bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
         self._handle_error(
             nplike[
@@ -439,3 +455,59 @@ class BitMaskedArray(Content):
 
     def _rpad_and_clip(self, target, axis, depth):
         return self.toByteMaskedArray()._rpad_and_clip(target, axis, depth)
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return self.toByteMaskedArray()._to_arrow(
+            pyarrow, mask_node, validbytes, length, options
+        )
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return BitMaskedArray(
+                    self._mask,
+                    self._content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._valid_when,
+                    self._length,
+                    self._lsb_order,
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

@@ -7,11 +7,11 @@ from __future__ import absolute_import
 
 # import re
 # import sys
-import os
-
 # import os.path
 # import warnings
 # import itertools
+import distutils
+import os
 import numbers
 
 try:
@@ -34,6 +34,14 @@ kMaxUInt32 = 4294967295  # 2**32 - 1
 kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
+
+
+def numpy_at_least(version):
+    import numpy
+
+    return distutils.version.LooseVersion(
+        numpy.__version__
+    ) >= distutils.version.LooseVersion(version)
 
 
 def in_module(obj, modulename):
@@ -62,6 +70,13 @@ def isnum(x):
 
 def isstr(x):
     return isinstance(x, str)
+
+
+def tobytes(array):
+    if hasattr(array, "tobytes"):
+        return array.tobytes()
+    else:
+        return array.tostring()
 
 
 ###############################################################################
@@ -102,46 +117,46 @@ def isstr(x):
 #     pass
 
 
-# virtualtypes = (ak.layout.VirtualArray,)
+# virtualtypes = (ak._v2.contents.VirtualArray,)
 
-# unknowntypes = (ak.layout.EmptyArray,)
+# unknowntypes = (ak._v2.contents.EmptyArray,)
 
 # indexedtypes = (
-#     ak.layout.IndexedArray32,
-#     ak.layout.IndexedArrayU32,
-#     ak.layout.IndexedArray64,
+#     ak._v2.contents.IndexedArray32,
+#     ak._v2.contents.IndexedArrayU32,
+#     ak._v2.contents.IndexedArray64,
 # )
 
 # uniontypes = (
-#     ak.layout.UnionArray8_32,
-#     ak.layout.UnionArray8_U32,
-#     ak.layout.UnionArray8_64,
+#     ak._v2.contents.UnionArray8_32,
+#     ak._v2.contents.UnionArray8_U32,
+#     ak._v2.contents.UnionArray8_64,
 # )
 
 # indexedoptiontypes = (
-#     ak.layout.IndexedOptionArray32,
-#     ak.layout.IndexedOptionArray64,
+#     ak._v2.contents.IndexedOptionArray32,
+#     ak._v2.contents.IndexedOptionArray64,
 # )
 
 # optiontypes = (
-#     ak.layout.IndexedOptionArray32,
-#     ak.layout.IndexedOptionArray64,
-#     ak.layout.ByteMaskedArray,
-#     ak.layout.BitMaskedArray,
-#     ak.layout.UnmaskedArray,
+#     ak._v2.contents.IndexedOptionArray32,
+#     ak._v2.contents.IndexedOptionArray64,
+#     ak._v2.contents.ByteMaskedArray,
+#     ak._v2.contents.BitMaskedArray,
+#     ak._v2.contents.UnmaskedArray,
 # )
 
 # listtypes = (
-#     ak.layout.RegularArray,
-#     ak.layout.ListArray32,
-#     ak.layout.ListArrayU32,
-#     ak.layout.ListArray64,
-#     ak.layout.ListOffsetArray32,
-#     ak.layout.ListOffsetArrayU32,
-#     ak.layout.ListOffsetArray64,
+#     ak._v2.contents.RegularArray,
+#     ak._v2.contents.ListArray32,
+#     ak._v2.contents.ListArrayU32,
+#     ak._v2.contents.ListArray64,
+#     ak._v2.contents.ListOffsetArray32,
+#     ak._v2.contents.ListOffsetArrayU32,
+#     ak._v2.contents.ListOffsetArray64,
 # )
 
-# recordtypes = (ak.layout.RecordArray,)
+# recordtypes = (ak._v2.contents.RecordArray,)
 
 
 # def regularize_path(path):
@@ -201,7 +216,7 @@ class Behavior(Mapping):
 
 
 def arrayclass(layout, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = Behavior(ak._v2.behavior, behavior)
     arr = layout.parameter("__array__")
     if isstr(arr):
         cls = behavior[arr]
@@ -221,7 +236,7 @@ def arrayclass(layout, behavior):
 
 
 # def custom_cast(obj, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     for key, fcn in behavior.items():
 #         if (
 #             isinstance(key, tuple)
@@ -233,28 +248,27 @@ def arrayclass(layout, behavior):
 #     return None
 
 
-# def custom_broadcast(layout, behavior):
-#     layout = ak.partition.first(layout)
-#     behavior = Behavior(ak.behavior, behavior)
-#     custom = layout.parameter("__array__")
-#     if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
-#         custom = layout.parameter("__record__")
-#     if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
-#         custom = layout.purelist_parameter("__record__")
-#     if isinstance(custom, str) or (py27 and isinstance(custom, unicode)):
-#         for key, fcn in behavior.items():
-#             if (
-#                 isinstance(key, tuple)
-#                 and len(key) == 2
-#                 and key[0] == "__broadcast__"
-#                 and key[1] == custom
-#             ):
-#                 return fcn
-#     return None
+def custom_broadcast(layout, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    custom = layout.parameter("__array__")
+    if not isstr(custom):
+        custom = layout.parameter("__record__")
+    if not isstr(custom):
+        custom = layout.purelist_parameter("__record__")
+    if isstr(custom):
+        for key, fcn in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 2
+                and key[0] == "__broadcast__"
+                and key[1] == custom
+            ):
+                return fcn
+    return None
 
 
 # def numba_array_typer(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     arr = layouttype.parameters.get("__array__")
 #     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
 #         typer = behavior["__numba_typer__", arr]
@@ -274,7 +288,7 @@ def arrayclass(layout, behavior):
 
 
 # def numba_array_lower(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     arr = layouttype.parameters.get("__array__")
 #     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
 #         lower = behavior["__numba_lower__", arr]
@@ -294,7 +308,7 @@ def arrayclass(layout, behavior):
 
 
 def recordclass(layout, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = Behavior(ak._v2.behavior, behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
         cls = behavior[rec]
@@ -304,7 +318,7 @@ def recordclass(layout, behavior):
 
 
 # def typestrs(behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     out = {}
 #     for key, typestr in behavior.items():
 #         if (
@@ -334,7 +348,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_record_typer(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     rec = layouttype.parameters.get("__record__")
 #     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
 #         typer = behavior["__numba_typer__", rec]
@@ -344,7 +358,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_record_lower(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     rec = layouttype.parameters.get("__record__")
 #     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
 #         lower = behavior["__numba_lower__", rec]
@@ -355,7 +369,7 @@ def recordclass(layout, behavior):
 
 # def overload(behavior, signature):
 #     if not any(s is None for s in signature):
-#         behavior = Behavior(ak.behavior, behavior)
+#         behavior = Behavior(ak._v2.behavior, behavior)
 #         for key, custom in behavior.items():
 #             if (
 #                 isinstance(key, tuple)
@@ -373,7 +387,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_attrs(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     rec = layouttype.parameters.get("__record__")
 #     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
 #         for key, typer in behavior.items():
@@ -388,7 +402,7 @@ def recordclass(layout, behavior):
 
 
 # def numba_methods(layouttype, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     rec = layouttype.parameters.get("__record__")
 #     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
 #         for key, typer in behavior.items():
@@ -404,10 +418,10 @@ def recordclass(layout, behavior):
 
 
 # def numba_unaryops(unaryop, left, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     done = False
 
-#     if isinstance(left, ak._connect._numba.layout.ContentType):
+#     if isinstance(left, ak._v2._connect.numba.layout.ContentType):
 #         left = left.parameters.get("__record__")
 #         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
 #             done = True
@@ -426,15 +440,15 @@ def recordclass(layout, behavior):
 
 
 # def numba_binops(binop, left, right, behavior):
-#     behavior = Behavior(ak.behavior, behavior)
+#     behavior = Behavior(ak._v2.behavior, behavior)
 #     done = False
 
-#     if isinstance(left, ak._connect._numba.layout.ContentType):
+#     if isinstance(left, ak._v2._connect.numba.layout.ContentType):
 #         left = left.parameters.get("__record__")
 #         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
 #             done = True
 
-#     if isinstance(right, ak._connect._numba.layout.ContentType):
+#     if isinstance(right, ak._v2._connect.numba.layout.ContentType):
 #         right = right.parameters.get("__record__")
 #         if not isinstance(right, str) and not (py27 and isinstance(right, unicode)):
 #             done = True
@@ -463,7 +477,7 @@ def behavior_of(*arrays, **kwargs):
     highs = (
         ak._v2.highlevel.Array,
         ak._v2.highlevel.Record,
-        ak._v2.highlevel.ArrayBuilder,
+        #        ak._v2.highlevel.ArrayBuilder,
     )
     for x in arrays[::-1]:
         if isinstance(x, highs) and x.behavior is not None:
@@ -523,7 +537,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 #     if attempt is None:
 #         raise ValueError(
-#             "key {0} not found in record".format(repr(key)) + exception_suffix(__file__)
+#             "key {0} not found in record".format(repr(key))
 #         )
 #     else:
 #         return attempt
@@ -533,7 +547,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 
 # def completely_flatten(array):
-#     if isinstance(array, ak.partition.PartitionedArray):
+#     if isinstance(array, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         out = []
 #         for partition in array.partitions:
 #             for outi in completely_flatten(partition):
@@ -570,7 +584,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             out.extend(completely_flatten(array.field(i)))
 #         return tuple(out)
 
-#     elif isinstance(array, ak.layout.NumpyArray):
+#     elif isinstance(array, ak._v2.contents.NumpyArray):
 #         if array.format.upper().startswith("M"):
 #             return (
 #                 ak.nplike.of(array)
@@ -584,7 +598,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #     else:
 #         raise RuntimeError(
 #             "cannot completely flatten: {0}".format(type(array))
-#             + exception_suffix(__file__)
+#
 #         )
 
 
@@ -610,7 +624,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     "length {3}".format(
 #                         type(inputs[0]).__name__, length, type(x).__name__, len(x)
 #                     )
-#                     + exception_suffix(__file__)
+#
 #                 )
 
 #     def all_same_offsets(nplike, inputs):
@@ -619,9 +633,9 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             if isinstance(
 #                 x,
 #                 (
-#                     ak.layout.ListOffsetArray32,
-#                     ak.layout.ListOffsetArrayU32,
-#                     ak.layout.ListOffsetArray64,
+#                     ak._v2.contents.ListOffsetArray32,
+#                     ak._v2.contents.ListOffsetArrayU32,
+#                     ak._v2.contents.ListOffsetArray64,
 #                 ),
 #             ):
 #                 if offsets is None:
@@ -631,9 +645,9 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             elif isinstance(
 #                 x,
 #                 (
-#                     ak.layout.ListArray32,
-#                     ak.layout.ListArrayU32,
-#                     ak.layout.ListArray64,
+#                     ak._v2.contents.ListArray32,
+#                     ak._v2.contents.ListArrayU32,
+#                     ak._v2.contents.ListArray64,
 #                 ),
 #             ):
 #                 starts = nplike.asarray(x.starts)
@@ -651,7 +665,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     len(stops) != 0 and offsets[-1] != stops[-1]
 #                 ):
 #                     return False
-#             elif isinstance(x, ak.layout.RegularArray):
+#             elif isinstance(x, ak._v2.contents.RegularArray):
 #                 if x.size == 0:
 #                     my_offsets = nplike.empty(0, dtype=np.int64)
 #                 else:
@@ -660,7 +674,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     offsets = my_offsets
 #                 elif not nplike.array_equal(offsets, my_offsets):
 #                     return False
-#             elif isinstance(x, ak.layout.Content):
+#             elif isinstance(x, ak._v2.contents.Content):
 #                 return False
 #         else:
 #             return True
@@ -670,14 +684,14 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 #         if numpy_to_regular:
 #             inputs = [
-#                 x.toRegularArray() if isinstance(x, ak.layout.NumpyArray) else x
+#                 x.toRegularArray() if isinstance(x, ak._v2.contents.NumpyArray) else x
 #                 for x in inputs
 #             ]
 
 #         if regular_to_jagged:
 #             inputs = [
 #                 x.toListOffsetArray64(False)
-#                 if isinstance(x, ak.layout.RegularArray)
+#                 if isinstance(x, ak._v2.contents.RegularArray)
 #                 else x
 #                 for x in inputs
 #             ]
@@ -685,23 +699,23 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         # handle implicit right-broadcasting (i.e. NumPy-like)
 #         if right_broadcast and any(isinstance(x, listtypes) for x in inputs):
 #             maxdepth = max(
-#                 x.purelist_depth for x in inputs if isinstance(x, ak.layout.Content)
+#                 x.purelist_depth for x in inputs if isinstance(x, ak._v2.contents.Content)
 #             )
 
 #             if maxdepth > 0 and all(
-#                 x.purelist_isregular for x in inputs if isinstance(x, ak.layout.Content)
+#                 x.purelist_isregular for x in inputs if isinstance(x, ak._v2.contents.Content)
 #             ):
 #                 nextinputs = []
 #                 for obj in inputs:
-#                     if isinstance(obj, ak.layout.Content):
+#                     if isinstance(obj, ak._v2.contents.Content):
 #                         while obj.purelist_depth < maxdepth:
-#                             obj = ak.layout.RegularArray(obj, 1, len(obj))
+#                             obj = ak._v2.contents.RegularArray(obj, 1, len(obj))
 #                     nextinputs.append(obj)
 #                 if any(x is not y for x, y in zip(inputs, nextinputs)):
 #                     return apply(nextinputs, depth, user)
 
 #         # now all lengths must agree
-#         checklength([x for x in inputs if isinstance(x, ak.layout.Content)])
+#         checklength([x for x in inputs if isinstance(x, ak._v2.contents.Content)])
 
 #         args = ()
 #         if pass_depth:
@@ -730,16 +744,16 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             for x in inputs:
 #                 if isinstance(x, unknowntypes):
 #                     nextinputs.append(
-#                         ak.layout.NumpyArray(nplike.array([], dtype=np.bool_))
+#                         ak._v2.contents.NumpyArray(nplike.array([], dtype=np.bool_))
 #                     )
 #                 else:
 #                     nextinputs.append(x)
 #             return apply(nextinputs, depth, user)
 
-#         elif any(isinstance(x, ak.layout.NumpyArray) and x.ndim > 1 for x in inputs):
+#         elif any(isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1 for x in inputs):
 #             nextinputs = []
 #             for x in inputs:
-#                 if isinstance(x, ak.layout.NumpyArray) and x.ndim > 1:
+#                 if isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1:
 #                     nextinputs.append(x.toRegularArray())
 #                 else:
 #                     nextinputs.append(x)
@@ -770,7 +784,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                             "with UnionArray of length {1}".format(
 #                                 length, len(tagslist[-1])
 #                             )
-#                             + exception_suffix(__file__)
+#
 #                         )
 
 #             combos = nplike.stack(tagslist, axis=-1)
@@ -798,7 +812,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     if isinstance(x, uniontypes):
 #                         nextinputs.append(x[mask].project(combo[str(i)]))
 #                         i += 1
-#                     elif isinstance(x, ak.layout.Content):
+#                     elif isinstance(x, ak._v2.contents.Content):
 #                         nextinputs.append(x[mask])
 #                     else:
 #                         nextinputs.append(x)
@@ -810,10 +824,10 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 #             assert numoutputs is not None
 
-#             tags = ak.layout.Index8(tags)
-#             index = ak.layout.Index64(index)
+#             tags = ak._v2.contents.Index8(tags)
+#             index = ak._v2.contents.Index64(index)
 #             return tuple(
-#                 ak.layout.UnionArray8_64(
+#                 ak._v2.contents.UnionArray8_64(
 #                     tags, index, [x[i] for x in outcontents]
 #                 ).simplify()
 #                 for i in range(numoutputs)
@@ -829,24 +843,24 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     else:
 #                         nplike.bitwise_or(mask, m, out=mask)
 
-#             nextmask = ak.layout.Index8(mask.view(np.int8))
+#             nextmask = ak._v2.contents.Index8(mask.view(np.int8))
 #             index = nplike.full(len(mask), -1, dtype=np.int64)
 #             index[~mask] = nplike.arange(
 #                 len(mask) - nplike.count_nonzero(mask), dtype=np.int64
 #             )
-#             index = ak.layout.Index64(index)
+#             index = ak._v2.contents.Index64(index)
 #             if any(not isinstance(x, optiontypes) for x in inputs):
 #                 nextindex = nplike.arange(len(mask), dtype=np.int64)
 #                 nextindex[mask] = -1
-#                 nextindex = ak.layout.Index64(nextindex)
+#                 nextindex = ak._v2.contents.Index64(nextindex)
 
 #             nextinputs = []
 #             for x in inputs:
 #                 if isinstance(x, optiontypes):
 #                     nextinputs.append(x.project(nextmask))
-#                 elif isinstance(x, ak.layout.Content):
+#                 elif isinstance(x, ak._v2.contents.Content):
 #                     nextinputs.append(
-#                         ak.layout.IndexedOptionArray64(nextindex, x).project(nextmask)
+#                         ak._v2.contents.IndexedOptionArray64(nextindex, x).project(nextmask)
 #                     )
 #                 else:
 #                     nextinputs.append(x)
@@ -854,31 +868,31 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             outcontent = apply(nextinputs, depth, user)
 #             assert isinstance(outcontent, tuple)
 #             return tuple(
-#                 ak.layout.IndexedOptionArray64(index, x).simplify() for x in outcontent
+#                 ak._v2.contents.IndexedOptionArray64(index, x).simplify() for x in outcontent
 #             )
 
 #         elif any(isinstance(x, listtypes) for x in inputs):
 #             if all(
-#                 isinstance(x, ak.layout.RegularArray) or not isinstance(x, listtypes)
+#                 isinstance(x, ak._v2.contents.RegularArray) or not isinstance(x, listtypes)
 #                 for x in inputs
 #             ):
 #                 maxsize = max(
-#                     [x.size for x in inputs if isinstance(x, ak.layout.RegularArray)]
+#                     [x.size for x in inputs if isinstance(x, ak._v2.contents.RegularArray)]
 #                 )
 #                 for x in inputs:
-#                     if isinstance(x, ak.layout.RegularArray):
+#                     if isinstance(x, ak._v2.contents.RegularArray):
 #                         if maxsize > 1 and x.size == 1:
-#                             tmpindex = ak.layout.Index64(
+#                             tmpindex = ak._v2.contents.Index64(
 #                                 nplike.repeat(
 #                                     nplike.arange(len(x), dtype=np.int64), maxsize
 #                                 )
 #                             )
 #                 nextinputs = []
 #                 for x in inputs:
-#                     if isinstance(x, ak.layout.RegularArray):
+#                     if isinstance(x, ak._v2.contents.RegularArray):
 #                         if maxsize > 1 and x.size == 1:
 #                             nextinputs.append(
-#                                 ak.layout.IndexedArray64(
+#                                 ak._v2.contents.IndexedArray64(
 #                                     tmpindex, x.content[: len(x) * x.size]
 #                                 ).project()
 #                             )
@@ -890,25 +904,25 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                                 "{0} with RegularArray of size {1}".format(
 #                                     x.size, maxsize
 #                                 )
-#                                 + exception_suffix(__file__)
+#
 #                             )
 #                     else:
 #                         nextinputs.append(x)
 
 #                 maxlen = max(
-#                     [len(x) for x in nextinputs if isinstance(x, ak.layout.Content)]
+#                     [len(x) for x in nextinputs if isinstance(x, ak._v2.contents.Content)]
 #                 )
 #                 outcontent = apply(nextinputs, depth + 1, user)
 #                 assert isinstance(outcontent, tuple)
 
 #                 return tuple(
-#                     ak.layout.RegularArray(x, maxsize, maxlen) for x in outcontent
+#                     ak._v2.contents.RegularArray(x, maxsize, maxlen) for x in outcontent
 #                 )
 
 #             elif not all_same_offsets(nplike, inputs):
 #                 fcns = [
 #                     custom_broadcast(x, behavior)
-#                     if isinstance(x, ak.layout.Content)
+#                     if isinstance(x, ak._v2.contents.Content)
 #                     else None
 #                     for x in inputs
 #                 ]
@@ -917,7 +931,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                 for x, fcn in zip(inputs, fcns):
 #                     if (
 #                         isinstance(x, listtypes)
-#                         and not isinstance(x, ak.layout.RegularArray)
+#                         and not isinstance(x, ak._v2.contents.RegularArray)
 #                         and fcn is None
 #                     ):
 #                         first = x
@@ -927,7 +941,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     secondround = True
 #                     for x in inputs:
 #                         if isinstance(x, listtypes) and not isinstance(
-#                             x, ak.layout.RegularArray
+#                             x, ak._v2.contents.RegularArray
 #                         ):
 #                             first = x
 #                             break
@@ -941,9 +955,9 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     elif isinstance(x, listtypes):
 #                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)
 #                     # handle implicit left-broadcasting (unlike NumPy)
-#                     elif left_broadcast and isinstance(x, ak.layout.Content):
+#                     elif left_broadcast and isinstance(x, ak._v2.contents.Content):
 #                         nextinputs.append(
-#                             ak.layout.RegularArray(x, 1, len(x))
+#                             ak._v2.contents.RegularArray(x, 1, len(x))
 #                             .broadcast_tooffsets64(offsets)
 #                             .content
 #                         )
@@ -954,7 +968,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                 assert isinstance(outcontent, tuple)
 
 #                 return tuple(
-#                     ak.layout.ListOffsetArray64(offsets, x) for x in outcontent
+#                     ak._v2.contents.ListOffsetArray64(offsets, x) for x in outcontent
 #                 )
 
 #             else:
@@ -965,9 +979,9 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     if isinstance(
 #                         x,
 #                         (
-#                             ak.layout.ListOffsetArray32,
-#                             ak.layout.ListOffsetArrayU32,
-#                             ak.layout.ListOffsetArray64,
+#                             ak._v2.contents.ListOffsetArray32,
+#                             ak._v2.contents.ListOffsetArrayU32,
+#                             ak._v2.contents.ListOffsetArray64,
 #                         ),
 #                     ):
 #                         offsets = x.offsets
@@ -977,9 +991,9 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     elif isinstance(
 #                         x,
 #                         (
-#                             ak.layout.ListArray32,
-#                             ak.layout.ListArrayU32,
-#                             ak.layout.ListArray64,
+#                             ak._v2.contents.ListArray32,
+#                             ak._v2.contents.ListArrayU32,
+#                             ak._v2.contents.ListArray64,
 #                         ),
 #                     ):
 #                         starts, stops = x.starts, x.stops
@@ -994,43 +1008,43 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 #                 outcontent = apply(nextinputs, depth + 1, user)
 
-#                 if isinstance(offsets, ak.layout.Index32):
+#                 if isinstance(offsets, ak._v2.contents.Index32):
 #                     return tuple(
-#                         ak.layout.ListOffsetArray32(offsets, x) for x in outcontent
+#                         ak._v2.contents.ListOffsetArray32(offsets, x) for x in outcontent
 #                     )
-#                 elif isinstance(offsets, ak.layout.IndexU32):
+#                 elif isinstance(offsets, ak._v2.contents.IndexU32):
 #                     return tuple(
-#                         ak.layout.ListOffsetArrayU32(offsets, x) for x in outcontent
+#                         ak._v2.contents.ListOffsetArrayU32(offsets, x) for x in outcontent
 #                     )
-#                 elif isinstance(offsets, ak.layout.Index64):
+#                 elif isinstance(offsets, ak._v2.contents.Index64):
 #                     return tuple(
-#                         ak.layout.ListOffsetArray64(offsets, x) for x in outcontent
+#                         ak._v2.contents.ListOffsetArray64(offsets, x) for x in outcontent
 #                     )
-#                 elif isinstance(starts, ak.layout.Index32):
+#                 elif isinstance(starts, ak._v2.contents.Index32):
 #                     return tuple(
-#                         ak.layout.ListArray32(starts, stops, x) for x in outcontent
+#                         ak._v2.contents.ListArray32(starts, stops, x) for x in outcontent
 #                     )
-#                 elif isinstance(starts, ak.layout.IndexU32):
+#                 elif isinstance(starts, ak._v2.contents.IndexU32):
 #                     return tuple(
-#                         ak.layout.ListArrayU32(starts, stops, x) for x in outcontent
+#                         ak._v2.contents.ListArrayU32(starts, stops, x) for x in outcontent
 #                     )
-#                 elif isinstance(starts, ak.layout.Index64):
+#                 elif isinstance(starts, ak._v2.contents.Index64):
 #                     return tuple(
-#                         ak.layout.ListArray64(starts, stops, x) for x in outcontent
+#                         ak._v2.contents.ListArray64(starts, stops, x) for x in outcontent
 #                     )
 #                 else:
 #                     raise AssertionError(
 #                         "unexpected offsets, starts: {0} {1}".format(
 #                             type(offsets), type(starts)
 #                         )
-#                         + exception_suffix(__file__)
+#
 #                     )
 
 #         elif any(isinstance(x, recordtypes) for x in inputs):
 #             if not allow_records:
 #                 raise ValueError(
 #                     "cannot broadcast records in this type of operation"
-#                     + exception_suffix(__file__)
+#
 #                 )
 
 #             keys = None
@@ -1046,7 +1060,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                             "match:\n    {0}\n    {1}".format(
 #                                 ", ".join(sorted(keys)), ", ".join(sorted(x.keys()))
 #                             )
-#                             + exception_suffix(__file__)
+#
 #                         )
 #                     if length is None:
 #                         length = len(x)
@@ -1054,7 +1068,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                         raise ValueError(
 #                             "cannot broadcast RecordArray of length {0} "
 #                             "with RecordArray of length {1}".format(length, len(x))
-#                             + exception_suffix(__file__)
+#
 #                         )
 #                     if not x.istuple:
 #                         istuple = False
@@ -1077,7 +1091,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     assert numoutputs == len(outcontents[-1])
 #                 numoutputs = len(outcontents[-1])
 #             return tuple(
-#                 ak.layout.RecordArray(
+#                 ak._v2.contents.RecordArray(
 #                     [x[i] for x in outcontents], None if istuple else keys, length
 #                 )
 #                 for i in range(numoutputs)
@@ -1086,14 +1100,14 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         else:
 #             raise ValueError(
 #                 "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
-#                 + exception_suffix(__file__)
+#
 #             )
 
-#     if any(isinstance(x, ak.partition.PartitionedArray) for x in inputs):
+#     if any(isinstance(x, ak.partition.PartitionedArray) for x in inputs):   # NO PARTITIONED ARRAY
 #         purelist_isregular = True
 #         purelist_depths = set()
 #         for x in inputs:
-#             if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
+#             if isinstance(x, (ak._v2.contents.Content, ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
 #                 if not x.purelist_isregular:
 #                     purelist_isregular = False
 #                     break
@@ -1102,7 +1116,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         if purelist_isregular and len(purelist_depths) > 1:
 #             nextinputs = []
 #             for x in inputs:
-#                 if isinstance(x, ak.partition.PartitionedArray):
+#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     nextinputs.append(x.toContent())
 #                 else:
 #                     nextinputs.append(x)
@@ -1115,7 +1129,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         else:
 #             sample = None
 #             for x in inputs:
-#                 if isinstance(x, ak.partition.PartitionedArray):
+#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #                     sample = x
 #                     break
 #             nextinputs = ak.partition.partition_as(sample, inputs)
@@ -1130,7 +1144,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             out = ()
 #             for i in range(len(part)):
 #                 out = out + (
-#                     ak.partition.IrregularlyPartitionedArray([x[i] for x in outputs]),
+#                     ak.partition.IrregularlyPartitionedArray([x[i] for x in outputs]),   # NO PARTITIONED ARRAY
 #                 )
 #             return out
 
@@ -1144,19 +1158,19 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 # def broadcast_pack(inputs, isscalar):
 #     maxlen = -1
 #     for x in inputs:
-#         if isinstance(x, ak.layout.Content):
+#         if isinstance(x, ak._v2.contents.Content):
 #             maxlen = max(maxlen, len(x))
 #     if maxlen < 0:
 #         maxlen = 1
 
 #     nextinputs = []
 #     for x in inputs:
-#         if isinstance(x, ak.layout.Record):
+#         if isinstance(x, ak._v2.record.Record):
 #             index = ak.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
-#             nextinputs.append(ak.layout.RegularArray(x.array[index], maxlen, 1))
+#             nextinputs.append(ak._v2.contents.RegularArray(x.array[index], maxlen, 1))
 #             isscalar.append(True)
-#         elif isinstance(x, ak.layout.Content):
-#             nextinputs.append(ak.layout.RegularArray(x, len(x), 1))
+#         elif isinstance(x, ak._v2.contents.Content):
+#             nextinputs.append(ak._v2.contents.RegularArray(x, len(x), 1))
 #             isscalar.append(False)
 #         else:
 #             nextinputs.append(x)
@@ -1188,7 +1202,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #     numpy_to_regular=False,
 # ):
 #     def transform(layout, depth, user):
-#         if numpy_to_regular and isinstance(layout, ak.layout.NumpyArray):
+#         if numpy_to_regular and isinstance(layout, ak._v2.contents.NumpyArray):
 #             layout = layout.toRegularArray()
 
 #         args = ()
@@ -1212,26 +1226,26 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 # def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
 #     apply(layout, depth, *args)
 
-#     if isinstance(layout, ak.partition.PartitionedArray):
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         for x in layout.partitions:
 #             recursive_walk(x, apply, args, depth, materialize)
 
-#     elif isinstance(layout, ak.layout.NumpyArray):
+#     elif isinstance(layout, ak._v2.contents.NumpyArray):
 #         pass
 
-#     elif isinstance(layout, ak.layout.EmptyArray):
+#     elif isinstance(layout, ak._v2.contents.EmptyArray):
 #         pass
 
 #     elif isinstance(
 #         layout,
 #         (
-#             ak.layout.RegularArray,
-#             ak.layout.ListArray32,
-#             ak.layout.ListArrayU32,
-#             ak.layout.ListArray64,
-#             ak.layout.ListOffsetArray32,
-#             ak.layout.ListOffsetArrayU32,
-#             ak.layout.ListOffsetArray64,
+#             ak._v2.contents.RegularArray,
+#             ak._v2.contents.ListArray32,
+#             ak._v2.contents.ListArrayU32,
+#             ak._v2.contents.ListArray64,
+#             ak._v2.contents.ListOffsetArray32,
+#             ak._v2.contents.ListOffsetArrayU32,
+#             ak._v2.contents.ListOffsetArray64,
 #         ),
 #     ):
 #         recursive_walk(layout.content, apply, args, depth + 1, materialize)
@@ -1239,14 +1253,14 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #     elif isinstance(
 #         layout,
 #         (
-#             ak.layout.IndexedArray32,
-#             ak.layout.IndexedArrayU32,
-#             ak.layout.IndexedArray64,
-#             ak.layout.IndexedOptionArray32,
-#             ak.layout.IndexedOptionArray64,
-#             ak.layout.ByteMaskedArray,
-#             ak.layout.BitMaskedArray,
-#             ak.layout.UnmaskedArray,
+#             ak._v2.contents.IndexedArray32,
+#             ak._v2.contents.IndexedArrayU32,
+#             ak._v2.contents.IndexedArray64,
+#             ak._v2.contents.IndexedOptionArray32,
+#             ak._v2.contents.IndexedOptionArray64,
+#             ak._v2.contents.ByteMaskedArray,
+#             ak._v2.contents.BitMaskedArray,
+#             ak._v2.contents.UnmaskedArray,
 #         ),
 #     ):
 #         recursive_walk(layout.content, apply, args, depth, materialize)
@@ -1254,52 +1268,52 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #     elif isinstance(
 #         layout,
 #         (
-#             ak.layout.RecordArray,
-#             ak.layout.UnionArray8_32,
-#             ak.layout.UnionArray8_U32,
-#             ak.layout.UnionArray8_64,
+#             ak._v2.contents.RecordArray,
+#             ak._v2.contents.UnionArray8_32,
+#             ak._v2.contents.UnionArray8_U32,
+#             ak._v2.contents.UnionArray8_64,
 #         ),
 #     ):
 #         for x in layout.contents:
 #             recursive_walk(x, apply, args, depth, materialize)
 
-#     elif isinstance(layout, ak.layout.Record):
+#     elif isinstance(layout, ak._v2.record.Record):
 #         recursive_walk(layout.array, apply, args, depth, materialize)
 
-#     elif isinstance(layout, ak.layout.VirtualArray):
+#     elif isinstance(layout, ak._v2.contents.VirtualArray):
 #         if materialize:
 #             recursive_walk(layout.array, apply, args, depth, materialize)
 
 #     else:
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(layout))
-#             + exception_suffix(__file__)
+#
 #         )
 
 
 # def transform_child_layouts(transform, layout, depth, user=None, keep_parameters=True):
 #     # the rest of this is one switch statement
-#     if isinstance(layout, ak.partition.PartitionedArray):
-#         return ak.partition.IrregularlyPartitionedArray(
+#     if isinstance(layout, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
+#         return ak.partition.IrregularlyPartitionedArray(   # NO PARTITIONED ARRAY
 #             [transform(x, depth, user) for x in layout.partitions]
 #         )
 
-#     elif isinstance(layout, ak.layout.NumpyArray):
+#     elif isinstance(layout, ak._v2.contents.NumpyArray):
 #         if keep_parameters:
 #             return layout
 #         else:
-#             return ak.layout.NumpyArray(
+#             return ak._v2.contents.NumpyArray(
 #                 ak.nplike.of(layout).asarray(layout), layout.identities, None
 #             )
 
-#     elif isinstance(layout, ak.layout.EmptyArray):
+#     elif isinstance(layout, ak._v2.contents.EmptyArray):
 #         if keep_parameters:
 #             return layout
 #         else:
-#             return ak.layout.EmptyArray(layout.identities, None)
+#             return ak._v2.contents.EmptyArray(layout.identities, None)
 
-#     elif isinstance(layout, ak.layout.RegularArray):
-#         return ak.layout.RegularArray(
+#     elif isinstance(layout, ak._v2.contents.RegularArray):
+#         return ak._v2.contents.RegularArray(
 #             transform(layout.content, depth + 1, user),
 #             layout.size,
 #             len(layout),
@@ -1307,8 +1321,8 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.ListArray32):
-#         return ak.layout.ListArray32(
+#     elif isinstance(layout, ak._v2.contents.ListArray32):
+#         return ak._v2.contents.ListArray32(
 #             layout.starts,
 #             layout.stops,
 #             transform(layout.content, depth + 1, user),
@@ -1316,8 +1330,8 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.ListArrayU32):
-#         return ak.layout.ListArrayU32(
+#     elif isinstance(layout, ak._v2.contents.ListArrayU32):
+#         return ak._v2.contents.ListArrayU32(
 #             layout.starts,
 #             layout.stops,
 #             transform(layout.content, depth + 1, user),
@@ -1325,8 +1339,8 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.ListArray64):
-#         return ak.layout.ListArray64(
+#     elif isinstance(layout, ak._v2.contents.ListArray64):
+#         return ak._v2.contents.ListArray64(
 #             layout.starts,
 #             layout.stops,
 #             transform(layout.content, depth + 1, user),
@@ -1334,72 +1348,72 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.ListOffsetArray32):
-#         return ak.layout.ListOffsetArray32(
+#     elif isinstance(layout, ak._v2.contents.ListOffsetArray32):
+#         return ak._v2.contents.ListOffsetArray32(
 #             layout.offsets,
 #             transform(layout.content, depth + 1, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.ListOffsetArrayU32):
-#         return ak.layout.ListOffsetArrayU32(
+#     elif isinstance(layout, ak._v2.contents.ListOffsetArrayU32):
+#         return ak._v2.contents.ListOffsetArrayU32(
 #             layout.offsets,
 #             transform(layout.content, depth + 1, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.ListOffsetArray64):
-#         return ak.layout.ListOffsetArray64(
+#     elif isinstance(layout, ak._v2.contents.ListOffsetArray64):
+#         return ak._v2.contents.ListOffsetArray64(
 #             layout.offsets,
 #             transform(layout.content, depth + 1, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.IndexedArray32):
-#         return ak.layout.IndexedArray32(
+#     elif isinstance(layout, ak._v2.contents.IndexedArray32):
+#         return ak._v2.contents.IndexedArray32(
 #             layout.index,
 #             transform(layout.content, depth, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.IndexedArrayU32):
-#         return ak.layout.IndexedArrayU32(
+#     elif isinstance(layout, ak._v2.contents.IndexedArrayU32):
+#         return ak._v2.contents.IndexedArrayU32(
 #             layout.index,
 #             transform(layout.content, depth, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.IndexedArray64):
-#         return ak.layout.IndexedArray64(
+#     elif isinstance(layout, ak._v2.contents.IndexedArray64):
+#         return ak._v2.contents.IndexedArray64(
 #             layout.index,
 #             transform(layout.content, depth, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.IndexedOptionArray32):
-#         return ak.layout.IndexedOptionArray32(
+#     elif isinstance(layout, ak._v2.contents.IndexedOptionArray32):
+#         return ak._v2.contents.IndexedOptionArray32(
 #             layout.index,
 #             transform(layout.content, depth, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.IndexedOptionArray64):
-#         return ak.layout.IndexedOptionArray64(
+#     elif isinstance(layout, ak._v2.contents.IndexedOptionArray64):
+#         return ak._v2.contents.IndexedOptionArray64(
 #             layout.index,
 #             transform(layout.content, depth, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.ByteMaskedArray):
-#         return ak.layout.ByteMaskedArray(
+#     elif isinstance(layout, ak._v2.contents.ByteMaskedArray):
+#         return ak._v2.contents.ByteMaskedArray(
 #             layout.mask,
 #             transform(layout.content, depth, user),
 #             layout.valid_when,
@@ -1407,8 +1421,8 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.BitMaskedArray):
-#         return ak.layout.BitMaskedArray(
+#     elif isinstance(layout, ak._v2.contents.BitMaskedArray):
+#         return ak._v2.contents.BitMaskedArray(
 #             layout.mask,
 #             transform(layout.content, depth, user),
 #             layout.valid_when,
@@ -1418,15 +1432,15 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.UnmaskedArray):
-#         return ak.layout.UnmaskedArray(
+#     elif isinstance(layout, ak._v2.contents.UnmaskedArray):
+#         return ak._v2.contents.UnmaskedArray(
 #             transform(layout.content, depth, user),
 #             layout.identities,
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.RecordArray):
-#         return ak.layout.RecordArray(
+#     elif isinstance(layout, ak._v2.contents.RecordArray):
+#         return ak._v2.contents.RecordArray(
 #             [transform(x, depth, user) for x in layout.contents],
 #             layout.recordlookup,
 #             len(layout),
@@ -1434,14 +1448,14 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.Record):
-#         return ak.layout.Record(
+#     elif isinstance(layout, ak._v2.record.Record):
+#         return ak._v2.record.Record(
 #             transform(layout.array, depth, user),
 #             layout.at,
 #         )
 
-#     elif isinstance(layout, ak.layout.UnionArray8_32):
-#         return ak.layout.UnionArray8_32(
+#     elif isinstance(layout, ak._v2.contents.UnionArray8_32):
+#         return ak._v2.contents.UnionArray8_32(
 #             layout.tags,
 #             layout.index,
 #             [transform(x, depth, user) for x in layout.contents],
@@ -1449,8 +1463,8 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.UnionArray8_U32):
-#         return ak.layout.UnionArray8_U32(
+#     elif isinstance(layout, ak._v2.contents.UnionArray8_U32):
+#         return ak._v2.contents.UnionArray8_U32(
 #             layout.tags,
 #             layout.index,
 #             [transform(x, depth, user) for x in layout.contents],
@@ -1458,8 +1472,8 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.UnionArray8_64):
-#         return ak.layout.UnionArray8_64(
+#     elif isinstance(layout, ak._v2.contents.UnionArray8_64):
+#         return ak._v2.contents.UnionArray8_64(
 #             layout.tags,
 #             layout.index,
 #             [transform(x, depth, user) for x in layout.contents],
@@ -1467,13 +1481,13 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             layout.parameters if keep_parameters else None,
 #         )
 
-#     elif isinstance(layout, ak.layout.VirtualArray):
+#     elif isinstance(layout, ak._v2.contents.VirtualArray):
 #         return transform(layout.array, depth, user)
 
 #     else:
 #         raise AssertionError(
 #             "unrecognized Content type: {0}".format(type(layout))
-#             + exception_suffix(__file__)
+#
 #         )
 
 
@@ -1503,7 +1517,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                 if "__repr__" in type(y).__dict__:
 #                     yield space + repr(y)
 #                     done = True
-#         if wrap and isinstance(x, ak.layout.Record):
+#         if wrap and isinstance(x, ak._v2.record.Record):
 #             cls = recordclass(x, behavior)
 #             if cls is not ak._v2.highlevel.Record:
 #                 y = cls(x, behavior=behavior)
@@ -1521,7 +1535,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     sp = ", "
 #                 if brackets:
 #                     yield "]"
-#             elif isinstance(x, ak.layout.Record) and x.istuple:
+#             elif isinstance(x, ak._v2.record.Record) and x.istuple:
 #                 yield space + "("
 #                 sp = ""
 #                 for i in range(x.numfields):
@@ -1531,7 +1545,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                         key = ""
 #                     sp = ", "
 #                 yield ")"
-#             elif isinstance(x, ak.layout.Record):
+#             elif isinstance(x, ak._v2.record.Record):
 #                 yield space + "{"
 #                 sp = ""
 #                 for k in x.keys():
@@ -1563,7 +1577,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                 if "__repr__" in type(y).__dict__:
 #                     yield repr(y) + space
 #                     done = True
-#         if wrap and isinstance(x, ak.layout.Record):
+#         if wrap and isinstance(x, ak._v2.record.Record):
 #             cls = recordclass(x, behavior)
 #             if cls is not ak._v2.highlevel.Record:
 #                 y = cls(x, behavior=behavior)
@@ -1581,7 +1595,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     sp = ", "
 #                 if brackets:
 #                     yield "["
-#             elif isinstance(x, ak.layout.Record) and x.istuple:
+#             elif isinstance(x, ak._v2.record.Record) and x.istuple:
 #                 yield ")" + space
 #                 for i in range(x.numfields - 1, -1, -1):
 #                     last = None
@@ -1594,7 +1608,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     if i != 0:
 #                         yield ", "
 #                 yield "("
-#             elif isinstance(x, ak.layout.Record):
+#             elif isinstance(x, ak._v2.record.Record):
 #                 yield "}" + space
 #                 keys = x.keys()
 #                 for i in range(len(keys) - 1, -1, -1):
@@ -1704,12 +1718,12 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 
 # def make_union(tags, index, contents, identities, parameters):
-#     if isinstance(index, ak.layout.Index32):
-#         return ak.layout.UnionArray8_32(tags, index, contents, identities, parameters)
-#     elif isinstance(index, ak.layout.IndexU32):
-#         return ak.layout.UnionArray8_U32(tags, index, contents, identities, parameters)
-#     elif isinstance(index, ak.layout.Index64):
-#         return ak.layout.UnionArray8_64(tags, index, contents, identities, parameters)
+#     if isinstance(index, ak._v2.contents.Index32):
+#         return ak._v2.contents.UnionArray8_32(tags, index, contents, identities, parameters)
+#     elif isinstance(index, ak._v2.contents.IndexU32):
+#         return ak._v2.contents.UnionArray8_U32(tags, index, contents, identities, parameters)
+#     elif isinstance(index, ak._v2.contents.Index64):
+#         return ak._v2.contents.UnionArray8_64(tags, index, contents, identities, parameters)
 #     else:
 #         raise AssertionError(index)
 
@@ -1727,14 +1741,14 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             contents.append(union_to_record(layout, anonymous))
 #         elif isinstance(layout, optiontypes):
 #             contents.append(
-#                 ak.operations.structure.fill_none(
+#                 ak._v2.operations.structure.fill_none(
 #                     layout, np.nan, axis=0, highlevel=False
 #                 )
 #             )
 #         else:
 #             contents.append(layout)
 
-#     if not any(isinstance(x, ak.layout.RecordArray) for x in contents):
+#     if not any(isinstance(x, ak._v2.contents.RecordArray) for x in contents):
 #         return make_union(
 #             unionarray.tags,
 #             unionarray.index,
@@ -1747,7 +1761,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         seen = set()
 #         all_names = []
 #         for layout in contents:
-#             if isinstance(layout, ak.layout.RecordArray):
+#             if isinstance(layout, ak._v2.contents.RecordArray):
 #                 for key in layout.keys():
 #                     if key not in seen:
 #                         seen.add(key)
@@ -1757,16 +1771,16 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                     seen.add(anonymous)
 #                     all_names.append(anonymous)
 
-#         missingarray = ak.layout.IndexedOptionArray64(
-#             ak.layout.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
-#             ak.layout.EmptyArray(),
+#         missingarray = ak._v2.contents.IndexedOptionArray64(
+#             ak._v2.contents.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
+#             ak._v2.contents.EmptyArray(),
 #         )
 
 #         all_fields = []
 #         for name in all_names:
 #             union_contents = []
 #             for layout in contents:
-#                 if isinstance(layout, ak.layout.RecordArray):
+#                 if isinstance(layout, ak._v2.contents.RecordArray):
 #                     for key in layout.keys():
 #                         if name == key:
 #                             union_contents.append(layout.field(key))
@@ -1789,7 +1803,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #                 ).simplify()
 #             )
 
-#         return ak.layout.RecordArray(all_fields, all_names, len(unionarray))
+#         return ak._v2.contents.RecordArray(all_fields, all_names, len(unionarray))
 
 
 # def adjust_old_pickle(form, container, num_partitions, behavior):
@@ -1806,7 +1820,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #             else:
 #                 return "{form_key}-{attribute}-part{partition}".format(**v)
 
-#     return ak.operations.convert.from_buffers(
+#     return ak._v2.operations.convert.from_buffers(
 #         form,
 #         None,
 #         container,
@@ -1818,3 +1832,37 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         highlevel=False,
 #         behavior=behavior,
 #     )
+
+
+def direct_Content_subclass(node):
+    if node is None:
+        return None
+    else:
+        mro = type(node).mro()
+        return mro[mro.index(ak._v2.contents.Content) - 1]
+
+
+def direct_Content_subclass_name(node):
+    out = direct_Content_subclass(node)
+    if out is None:
+        return None
+    else:
+        return out.__name__
+
+
+def merge_parameters(one, two):
+    if one is None and two is None:
+        return None
+
+    elif one is None:
+        return two
+
+    elif two is None:
+        return one
+
+    else:
+        out = dict(one)
+        for k, v in two.items():
+            if v is not None:
+                out[k] = v
+        return out

@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-import numpy as np
+import copy
 
 import awkward as ak
 from awkward._v2._slicing import NestedIndexError
@@ -10,8 +10,14 @@ from awkward._v2.contents.content import Content
 from awkward._v2.forms.regularform import RegularForm
 from awkward._v2.forms.form import _parameters_equal
 
+np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
+
 
 class RegularArray(Content):
+    is_ListType = True
+    is_RegularType = True
+
     def __init__(self, content, size, zeros_length=0, identifier=None, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
@@ -92,6 +98,15 @@ class RegularArray(Content):
         out.append(indent + "</RegularArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return RegularArray(
+            self._content,
+            self._size,
+            self._length,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
@@ -585,7 +600,7 @@ class RegularArray(Content):
         order,
     ):
         if self._length == 0:
-            return ak._v2.contents.NumpyArray(np.empty(0, np.int64))
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
 
         next = self.toListOffsetArray64(True)
         out = next._argsort_next(
@@ -852,3 +867,112 @@ class RegularArray(Content):
                 None,
                 self._parameters,
             )
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        if self.parameter("__array__") == "string":
+            return self.toListOffsetArray64(False)._to_arrow(
+                pyarrow, mask_node, validbytes, length, options
+            )
+
+        is_bytestring = self.parameter("__array__") == "bytestring"
+
+        akcontent = self._content[: self._length * self._size]
+
+        if is_bytestring:
+            assert isinstance(akcontent, ak._v2.contents.NumpyArray)
+
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                    pyarrow.binary(self._size),
+                    options["extensionarray"],
+                    mask_node,
+                    self,
+                ),
+                self._length,
+                [
+                    ak._v2._connect.pyarrow.to_validbits(validbytes),
+                    pyarrow.py_buffer(akcontent.to(numpy)),
+                ],
+            )
+
+        else:
+            paarray = akcontent._to_arrow(
+                pyarrow, None, None, self._length * self._size, options
+            )
+
+            content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
+                akcontent.is_OptionType
+            )
+
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                    pyarrow.list_(content_type, self._size),
+                    options["extensionarray"],
+                    mask_node,
+                    self,
+                ),
+                self._length,
+                [
+                    ak._v2._connect.pyarrow.to_validbits(validbytes),
+                ],
+                children=[paarray],
+                null_count=ak._v2._connect.pyarrow.to_null_count(
+                    validbytes, options["count_nulls"]
+                ),
+            )
+
+    def _completely_flatten(self, nplike, options):
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            return [ak._v2.operations.convert.to_numpy(self)]
+        else:
+            flat = self._content[: self._length * self._size]
+            return flat._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return RegularArray(
+                    self._content._recursively_apply(
+                        action,
+                        depth + 1,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._size,
+                    self._length,
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth + 1,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

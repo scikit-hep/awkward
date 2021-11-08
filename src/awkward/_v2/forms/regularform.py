@@ -153,8 +153,8 @@ class RegularForm(Form):
             return (branch, depth + 1)
 
     @property
-    def keys(self):
-        return self._content.keys
+    def fields(self):
+        return self._content.fields
 
     @property
     def dimension_optiontype(self):

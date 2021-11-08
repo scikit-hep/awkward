@@ -31,7 +31,7 @@
 #     def __init__(self, behavior):
 #         super(ArrayBuilderType, self).__init__(
 #             name="ak.ArrayBuilderType({0})".format(
-#                 ak._connect._numba.repr_behavior(behavior)
+#                 ak._v2._connect.numba.repr_behavior(behavior)
 #             )
 #         )
 #         self.behavior = behavior
@@ -77,7 +77,7 @@
 # @numba.extending.box(ArrayBuilderType)
 # def box_ArrayBuilder(arraybuildertype, arraybuilderval, c):
 #     ArrayBuilder_obj = c.pyapi.unserialize(
-#         c.pyapi.serialize_object(ak.highlevel.ArrayBuilder)
+#         c.pyapi.serialize_object(ak._v2.highlevel.ArrayBuilder)
 #     )
 #     behavior_obj = c.pyapi.unserialize(
 #         c.pyapi.serialize_object(arraybuildertype.behavior)
@@ -135,7 +135,7 @@
 #         ak._libawkward.ArrayBuilder_length,
 #         (proxyin.rawptr, result),
 #     )
-#     return ak._connect._numba.castint(
+#     return ak._v2._connect.numba.castint(
 #         context, builder, numba.int64, numba.intp, builder.load(result)
 #     )
 
@@ -151,7 +151,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.clear"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("null")
@@ -161,7 +161,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.null"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("boolean")
@@ -175,7 +175,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.boolean"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("integer")
@@ -189,7 +189,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.integer"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("real")
@@ -203,7 +203,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.real"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("begin_list")
@@ -213,7 +213,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.begin_list"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("end_list")
@@ -223,7 +223,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.end_list"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("begin_tuple")
@@ -237,7 +237,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.begin_tuple"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("index")
@@ -251,7 +251,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.index"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("end_tuple")
@@ -261,7 +261,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.end_tuple"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("begin_record")
@@ -277,7 +277,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.begin_record"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("field")
@@ -291,7 +291,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.field"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("end_record")
@@ -301,7 +301,7 @@
 #         else:
 #             raise TypeError(
 #                 "wrong number of arguments for ArrayBuilder.end_record"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("append")
@@ -312,8 +312,8 @@
 #             and isinstance(
 #                 args[0],
 #                 (
-#                     ak._connect._numba.arrayview.ArrayViewType,
-#                     ak._connect._numba.arrayview.RecordViewType,
+#                     ak._v2._connect.numba.arrayview.ArrayViewType,
+#                     ak._v2._connect.numba.arrayview.RecordViewType,
 #                     numba.types.Boolean,
 #                     numba.types.Integer,
 #                     numba.types.Float,
@@ -340,7 +340,7 @@
 #         elif (
 #             len(args) == 2
 #             and len(kwargs) == 0
-#             and isinstance(args[0], ak._connect._numba.arrayview.ArrayViewType)
+#             and isinstance(args[0], ak._v2._connect.numba.arrayview.ArrayViewType)
 #             and isinstance(args[1], numba.types.Integer)
 #         ):
 #             return numba.types.none(args[0], args[1])
@@ -351,7 +351,7 @@
 #                         isinstance(key, tuple)
 #                         and len(key) == 3
 #                         and key[0] == "__numba_lower__"
-#                         and key[1] == ak.highlevel.ArrayBuilder.append
+#                         and key[1] == ak._v2.highlevel.ArrayBuilder.append
 #                         and (
 #                             args[0] == key[2]
 #                             or (
@@ -366,7 +366,7 @@
 
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.append"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 #     @numba.core.typing.templates.bound_function("extend")
@@ -374,13 +374,13 @@
 #         if (
 #             len(args) == 1
 #             and len(kwargs) == 0
-#             and isinstance(args[0], ak._connect._numba.arrayview.ArrayViewType)
+#             and isinstance(args[0], ak._v2._connect.numba.arrayview.ArrayViewType)
 #         ):
 #             return numba.types.none(args[0])
 #         else:
 #             raise TypeError(
 #                 "wrong number or types of arguments for ArrayBuilder.extend"
-#                 + ak._util.exception_suffix(__file__)
+#
 #             )
 
 
@@ -417,7 +417,7 @@
 #     arraybuildertype, xtype = sig.args
 #     arraybuilderval, xval = args
 #     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-#     x = ak._connect._numba.castint(context, builder, xtype, numba.int64, xval)
+#     x = ak._v2._connect.numba.castint(context, builder, xtype, numba.int64, xval)
 #     call(context, builder, ak._libawkward.ArrayBuilder_integer, (proxyin.rawptr, x))
 #     return context.get_dummy_value()
 
@@ -465,7 +465,7 @@
 #     arraybuildertype, numfieldstype = sig.args
 #     arraybuilderval, numfieldsval = args
 #     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-#     numfields = ak._connect._numba.castint(
+#     numfields = ak._v2._connect.numba.castint(
 #         context, builder, numfieldstype, numba.int64, numfieldsval
 #     )
 #     call(
@@ -482,7 +482,7 @@
 #     arraybuildertype, indextype = sig.args
 #     arraybuilderval, indexval = args
 #     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-#     index = ak._connect._numba.castint(
+#     index = ak._v2._connect.numba.castint(
 #         context, builder, indextype, numba.int64, indexval
 #     )
 #     call(
@@ -561,7 +561,7 @@
 # @numba.extending.lower_builtin(
 #     "append",
 #     ArrayBuilderType,
-#     ak._connect._numba.arrayview.ArrayViewType,
+#     ak._v2._connect.numba.arrayview.ArrayViewType,
 #     numba.types.Integer,
 # )
 # def lower_append_array_at(context, builder, sig, args):
@@ -569,12 +569,12 @@
 #     arraybuilderval, viewval, atval = args
 
 #     viewproxy = context.make_helper(builder, viewtype, viewval)
-#     atval = ak._connect._numba.layout.regularize_atval(
+#     atval = ak._v2._connect.numba.layout.regularize_atval(
 #         context, builder, viewproxy, attype, atval, True, True
 #     )
-#     atval = ak._connect._numba.castint(context, builder, numba.intp, numba.int64, atval)
+#     atval = ak._v2._connect.numba.castint(context, builder, numba.intp, numba.int64, atval)
 
-#     sharedptr = ak._connect._numba.layout.getat(
+#     sharedptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.sharedptrs, viewproxy.pos
 #     )
 
@@ -593,7 +593,7 @@
 
 
 # @numba.extending.lower_builtin(
-#     "append", ArrayBuilderType, ak._connect._numba.arrayview.ArrayViewType
+#     "append", ArrayBuilderType, ak._v2._connect.numba.arrayview.ArrayViewType
 # )
 # def lower_append_array(context, builder, sig, args):
 #     arraybuildertype, viewtype = sig.args
@@ -610,7 +610,7 @@
 
 
 # @numba.extending.lower_builtin(
-#     "append", ArrayBuilderType, ak._connect._numba.arrayview.RecordViewType
+#     "append", ArrayBuilderType, ak._v2._connect.numba.arrayview.RecordViewType
 # )
 # def lower_append_record(context, builder, sig, args):
 #     arraybuildertype, recordviewtype = sig.args
@@ -621,11 +621,11 @@
 #     arrayviewproxy = context.make_helper(
 #         builder, recordviewtype.arrayviewtype, recordviewproxy.arrayview
 #     )
-#     atval = ak._connect._numba.castint(
+#     atval = ak._v2._connect.numba.castint(
 #         context, builder, numba.intp, numba.int64, recordviewproxy.at
 #     )
 
-#     sharedptr = ak._connect._numba.layout.getat(
+#     sharedptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, arrayviewproxy.sharedptrs, arrayviewproxy.pos
 #     )
 
@@ -691,7 +691,7 @@
 #                 )
 #             else:
 #                 raise AssertionError(
-#                     repr(opttype.type) + ak._util.exception_suffix(__file__)
+#                     repr(opttype.type)
 #                 )
 
 #         with is_not_valid:
@@ -713,7 +713,7 @@
 
 
 # @numba.extending.lower_builtin(
-#     "extend", ArrayBuilderType, ak._connect._numba.arrayview.ArrayViewType
+#     "extend", ArrayBuilderType, ak._v2._connect.numba.arrayview.ArrayViewType
 # )
 # def lower_extend_array(context, builder, sig, args):
 #     arraybuildertype, viewtype = sig.args
@@ -721,13 +721,13 @@
 
 #     viewproxy = context.make_helper(builder, viewtype, viewval)
 
-#     sharedptr = ak._connect._numba.layout.getat(
+#     sharedptr = ak._v2._connect.numba.layout.getat(
 #         context, builder, viewproxy.sharedptrs, viewproxy.pos
 #     )
 
 #     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
 #     with numba.core.cgutils.for_range(builder, viewproxy.stop, viewproxy.start) as loop:
-#         atval = ak._connect._numba.castint(
+#         atval = ak._v2._connect.numba.castint(
 #             context, builder, numba.intp, numba.int64, loop.index
 #         )
 #         call(

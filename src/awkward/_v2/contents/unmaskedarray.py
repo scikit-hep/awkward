@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.unmaskedform import UnmaskedForm
@@ -11,6 +13,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class UnmaskedArray(Content):
+    is_OptionType = True
+
     def __init__(self, content, identifier=None, parameters=None):
         if not isinstance(content, Content):
             raise TypeError(
@@ -66,6 +70,13 @@ class UnmaskedArray(Content):
         out.append(post)
         return "".join(out)
 
+    def merge_parameters(self, parameters):
+        return UnmaskedArray(
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
+
     def toByteMaskedArray(self):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
             ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
@@ -84,11 +95,14 @@ class UnmaskedArray(Content):
             self._parameters,
         )
 
-    def mask_as_bool(self, valid_when=True):
+    def mask_as_bool(self, valid_when=True, nplike=None):
+        if nplike is None:
+            nplike = self._content.nplike
+
         if valid_when:
-            return self._content.nplike.ones(len(self._content), dtype=np.bool_)
+            return nplike.ones(len(self._content), dtype=np.bool_)
         else:
-            return self._content.nplike.zeros(len(self._content), dtype=np.bool_)
+            return nplike.zeros(len(self._content), dtype=np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -388,3 +402,53 @@ class UnmaskedArray(Content):
                 None,
                 self._parameters,
             )
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        return self._content._to_arrow(pyarrow, self, None, length, options)
+
+    def _completely_flatten(self, nplike, options):
+        return self.project()._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return UnmaskedArray(
+                    self._content._recursively_apply(
+                        action,
+                        depth,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

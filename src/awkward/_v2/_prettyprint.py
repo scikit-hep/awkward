@@ -94,8 +94,8 @@ def valuestr_horiz(data, limit_cols):
         limit_cols -= 5  # anticipate the ", ..."
 
         which = 0
-        keys = data.fields
-        for key in keys:
+        fields = data.fields
+        for key in fields:
             for_comma = 0 if which == 0 else 2
             if is_tuple:
                 key_str = ""
@@ -115,7 +115,7 @@ def valuestr_horiz(data, limit_cols):
                 limit_cols -= len(key_str)
                 which += 1
 
-                target = limit_cols if len(keys) == 1 else half(limit_cols)
+                target = limit_cols if len(fields) == 1 else half(limit_cols)
                 cols_taken, strs = valuestr_horiz(data[key], target)
                 if limit_cols - cols_taken >= 0:
                     front.extend(strs)
@@ -130,11 +130,11 @@ def valuestr_horiz(data, limit_cols):
 
             which += 1
 
-        if len(keys) != 0:
+        if len(fields) != 0:
             if which == 0:
                 front.append("...")
                 limit_cols -= 3
-            elif which != 2 * len(keys):
+            elif which != 2 * len(fields):
                 front.append(", ...")
                 limit_cols -= 5
 
@@ -197,8 +197,8 @@ def valuestr(data, limit_rows, limit_cols):
         front = []
 
         which = 0
-        keys = data.fields
-        for key in keys:
+        fields = data.fields
+        for key in fields:
             if is_tuple:
                 key_str = ""
             else:
@@ -216,7 +216,7 @@ def valuestr(data, limit_rows, limit_cols):
             if which >= limit_rows:
                 break
 
-        if len(keys) != 0 and which != len(keys):
+        if len(fields) != 0 and which != len(fields):
             front[-1] = "..."
 
         out = front

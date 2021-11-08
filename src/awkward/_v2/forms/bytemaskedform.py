@@ -76,7 +76,7 @@ class ByteMaskedForm(Form):
             self._content._type(typestrs),
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
-        )
+        ).simplify_option_union()
 
     def __eq__(self, other):
         if isinstance(other, ByteMaskedForm):
@@ -169,8 +169,8 @@ class ByteMaskedForm(Form):
         return self._content.branch_depth
 
     @property
-    def keys(self):
-        return self._content.keys
+    def fields(self):
+        return self._content.fields
 
     @property
     def dimension_optiontype(self):

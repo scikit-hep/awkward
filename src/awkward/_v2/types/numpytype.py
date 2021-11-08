@@ -26,7 +26,15 @@ _primitive_to_dtype = {
     "complex64": np.dtype(np.complex64),
     "complex128": np.dtype(np.complex128),
     "datetime64": np.dtype(np.datetime64),
+    "datetime64[s]": np.dtype("datetime64[s]"),
+    "datetime64[ms]": np.dtype("datetime64[ms]"),
+    "datetime64[us]": np.dtype("datetime64[us]"),
+    "datetime64[ns]": np.dtype("datetime64[ns]"),
     "timedelta64": np.dtype(np.timedelta64),
+    "timedelta64[s]": np.dtype("timedelta64[s]"),
+    "timedelta64[ms]": np.dtype("timedelta64[ms]"),
+    "timedelta64[us]": np.dtype("timedelta64[us]"),
+    "timedelta64[ns]": np.dtype("timedelta64[ns]"),
 }
 
 if hasattr(np, "float16"):

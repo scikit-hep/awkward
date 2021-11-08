@@ -121,11 +121,12 @@ class NumpyForm(Form):
     def _type(self, typestrs):
         out = ak._v2.types.numpytype.NumpyType(
             self._primitive,
-            self._parameters,
+            None,
             ak._util.gettypestr(self._parameters, typestrs),
         )
         for x in self._inner_shape[::-1]:
             out = ak._v2.types.regulartype.RegularType(out, x)
+        out._parameters = self._parameters
         return out
 
     def __eq__(self, other):
@@ -203,7 +204,7 @@ class NumpyForm(Form):
         return (False, len(self.inner_shape) + 1)
 
     @property
-    def keys(self):
+    def fields(self):
         return []
 
     @property

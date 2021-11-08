@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import copy
+
 import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2._slicing import NestedIndexError
@@ -10,9 +12,12 @@ from awkward._v2.forms.listoffsetform import ListOffsetForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class ListOffsetArray(Content):
+    is_ListType = True
+
     def __init__(self, offsets, content, identifier=None, parameters=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
             np.dtype(np.int32),
@@ -99,6 +104,14 @@ class ListOffsetArray(Content):
         out.append(indent + "</ListOffsetArray>")
         out.append(post)
         return "".join(out)
+
+    def merge_parameters(self, parameters):
+        return ListOffsetArray(
+            self._offsets,
+            self._content,
+            self._identifier,
+            ak._v2._util.merge_parameters(self._parameters, parameters),
+        )
 
     def toListOffsetArray64(self, start_at_zero=False):
         if issubclass(self._offsets.dtype.type, np.int64):
@@ -1432,3 +1445,156 @@ class ListOffsetArray(Content):
                 None,
                 self._parameters,
             )
+    def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
+        is_string = self.parameter("__array__") == "string"
+        is_bytestring = self.parameter("__array__") == "bytestring"
+        if is_string:
+            downsize = options["string_to32"]
+        elif is_bytestring:
+            downsize = options["bytestring_to32"]
+        else:
+            downsize = options["list_to32"]
+
+        npoffsets = self._offsets.to(numpy)
+        akcontent = self._content[npoffsets[0] : npoffsets[length]]
+        if len(npoffsets) > length + 1:
+            npoffsets = npoffsets[: length + 1]
+
+        # ArrowNotImplementedError: Lists with non-zero length null components
+        # are not supported. So make the null'ed lists empty.
+        if validbytes is not None:
+            nonzeros = npoffsets[1:] != npoffsets[:-1]
+            maskedbytes = validbytes == 0
+            if numpy.any(maskedbytes & nonzeros):  # null and count > 0
+                new_starts = numpy.array(npoffsets[:-1], copy=True)
+                new_stops = numpy.array(npoffsets[1:], copy=True)
+                new_starts[maskedbytes] = 0
+                new_stops[maskedbytes] = 0
+                next = ak._v2.contents.ListArray(
+                    ak._v2.index.Index(new_starts),
+                    ak._v2.index.Index(new_stops),
+                    self._content,
+                    parameters=self._parameters,
+                )
+                return next.toListOffsetArray64(True)._to_arrow(
+                    pyarrow, mask_node, validbytes, length, options
+                )
+
+        if issubclass(npoffsets.dtype.type, np.int64):
+            if downsize and npoffsets[-1] < np.iinfo(np.int32).max:
+                npoffsets = npoffsets.astype(np.int32)
+
+        if issubclass(npoffsets.dtype.type, np.uint32):
+            if npoffsets[-1] < np.iinfo(np.int32).max:
+                npoffsets = npoffsets.astype(np.int32)
+            else:
+                npoffsets = npoffsets.astype(np.int64)
+
+        if is_string or is_bytestring:
+            assert isinstance(akcontent, ak._v2.contents.NumpyArray)
+
+            if issubclass(npoffsets.dtype.type, np.int32):
+                if is_string:
+                    string_type = pyarrow.string()
+                else:
+                    string_type = pyarrow.binary()
+            else:
+                if is_string:
+                    string_type = pyarrow.large_string()
+                else:
+                    string_type = pyarrow.large_binary()
+
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                    string_type, options["extensionarray"], mask_node, self
+                ),
+                length,
+                [
+                    ak._v2._connect.pyarrow.to_validbits(validbytes),
+                    pyarrow.py_buffer(npoffsets),
+                    pyarrow.py_buffer(akcontent.to(numpy)),
+                ],
+            )
+
+        else:
+            paarray = akcontent._to_arrow(pyarrow, None, None, len(akcontent), options)
+
+            content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
+                akcontent.is_OptionType
+            )
+
+            if issubclass(npoffsets.dtype.type, np.int32):
+                list_type = pyarrow.list_(content_type)
+            else:
+                list_type = pyarrow.large_list(content_type)
+
+            return pyarrow.Array.from_buffers(
+                ak._v2._connect.pyarrow.to_awkwardarrow_type(
+                    list_type, options["extensionarray"], mask_node, self
+                ),
+                length,
+                [
+                    ak._v2._connect.pyarrow.to_validbits(validbytes),
+                    pyarrow.py_buffer(npoffsets),
+                ],
+                children=[paarray],
+                null_count=ak._v2._connect.pyarrow.to_null_count(
+                    validbytes, options["count_nulls"]
+                ),
+            )
+
+    def _completely_flatten(self, nplike, options):
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+        ):
+            return [ak._v2.operations.convert.to_numpy(self)]
+        else:
+            flat = self._content[self._offsets[0] : self._offsets[-1]]
+            return flat._completely_flatten(nplike, options)
+
+    def _recursively_apply(
+        self, action, depth, depth_context, lateral_context, options
+    ):
+        if options["return_array"]:
+
+            def continuation():
+                return ListOffsetArray(
+                    self._offsets,
+                    self._content._recursively_apply(
+                        action,
+                        depth + 1,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._identifier,
+                    self._parameters if options["keep_parameters"] else None,
+                )
+
+        else:
+
+            def continuation():
+                self._content._recursively_apply(
+                    action,
+                    depth + 1,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=depth,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Content):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise AssertionError(result)

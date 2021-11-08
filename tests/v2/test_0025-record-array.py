@@ -98,25 +98,25 @@ def test_basic():
     )
 
     assert len(recordarray) == 5
-    assert recordarray.index_to_key(0) == "one"
-    assert recordarray.index_to_key(1) == "two"
-    assert recordarray.index_to_key(2) == "2"
-    assert recordarray.index_to_key(3) == "wonky"
-    assert recordarray.key_to_index("wonky") == 3
-    assert recordarray.key_to_index("one") == 0
+    assert recordarray.index_to_field(0) == "one"
+    assert recordarray.index_to_field(1) == "two"
+    assert recordarray.index_to_field(2) == "2"
+    assert recordarray.index_to_field(3) == "wonky"
+    assert recordarray.field_to_index("wonky") == 3
+    assert recordarray.field_to_index("one") == 0
     # FIXME
-    # assert recordarray.key_to_index("0") == 0
-    assert recordarray.key_to_index("two") == 1
-    # assert recordarray.key_to_index("1") == 1
-    assert recordarray.key_to_index("2") == 2
-    assert recordarray.haskey("wonky")
-    assert recordarray.haskey("one")
-    # assert recordarray.haskey("0")
-    assert recordarray.haskey("two")
-    # assert recordarray.haskey("1")
-    assert recordarray.haskey("2")
+    # assert recordarray.field_to_index("0") == 0
+    assert recordarray.field_to_index("two") == 1
+    # assert recordarray.field_to_index("1") == 1
+    assert recordarray.field_to_index("2") == 2
+    assert recordarray.has_field("wonky")
+    assert recordarray.has_field("one")
+    # assert recordarray.has_field("0")
+    assert recordarray.has_field("two")
+    # assert recordarray.has_field("1")
+    assert recordarray.has_field("2")
 
-    assert recordarray.keys == ["one", "two", "2", "wonky"]
+    assert recordarray.fields == ["one", "two", "2", "wonky"]
     assert [ak.to_list(x) for x in recordarray.contents] == [
         [1, 2, 3, 4, 5],
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]],
@@ -124,7 +124,7 @@ def test_basic():
         [1, 2, 3, 4, 5],
     ]
 
-    pairs = list(zip(recordarray.keys, recordarray.contents))
+    pairs = list(zip(recordarray.fields, recordarray.contents))
     assert pairs[0][0] == "one"
     assert pairs[1][0] == "two"
     assert pairs[2][0] == "2"
@@ -214,9 +214,9 @@ def test_scalar_record():
     str(recordarray[2])
     assert recordarray.typetracer[2].array.form == recordarray[2].array.form
 
-    assert recordarray[2].keys == ["one", "two"]
+    assert recordarray[2].fields == ["one", "two"]
     assert [ak.to_list(x) for x in recordarray[2].contents] == [3, [4.4, 5.5]]
-    pairs = [(key, recordarray[2].content(key)) for key in recordarray[2].keys]
+    pairs = [(field, recordarray[2].content(field)) for field in recordarray[2].fields]
     assert pairs[0][0] == "one"
     assert pairs[1][0] == "two"
     assert pairs[0][1] == 3

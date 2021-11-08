@@ -9,6 +9,7 @@ import awkward._v2.record  # noqa: F401
 import awkward._v2.types  # noqa: F401
 import awkward._v2.forms  # noqa: F401
 import awkward._v2._slicing  # noqa: F401
+import awkward._v2._broadcasting  # noqa: F401
 import awkward._v2._typetracer  # noqa: F401
 
 import awkward._v2._util  # noqa: F401
@@ -18,7 +19,8 @@ import awkward._v2.operations.describe  # noqa: F401
 import awkward._v2.operations.structure  # noqa: F401
 import awkward._v2.operations.reducers  # noqa: F401
 
-import awkward._v2.highlevel  # noqa: F401
-import awkward._v2.behaviors.categorical  # noqa: F401
-import awkward._v2.behaviors.mixins  # noqa: F401
-import awkward._v2.behaviors.string  # noqa: F401
+behavior = {}
+import awkward._v2.highlevel  # noqa: F401, E402
+import awkward._v2.behaviors.categorical  # noqa: F401, E402
+import awkward._v2.behaviors.mixins  # noqa: F401, E402
+import awkward._v2.behaviors.string  # noqa: F401, E402

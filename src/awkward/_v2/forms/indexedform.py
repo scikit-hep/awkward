@@ -68,7 +68,6 @@ class IndexedForm(Form):
                 if out._parameters is self._parameters:
                     out._parameters = dict(out._parameters)
                 del out._parameters["__array__"]
-                out._parameters["__categorical__"] = True
 
         return out
 
@@ -157,8 +156,8 @@ class IndexedForm(Form):
         return self._content.branch_depth
 
     @property
-    def keys(self):
-        return self._content.keys
+    def fields(self):
+        return self._content.fields
 
     @property
     def dimension_optiontype(self):
