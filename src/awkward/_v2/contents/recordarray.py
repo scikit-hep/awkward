@@ -134,8 +134,12 @@ class RecordArray(Content):
 
     def _to_buffers(self, form, getkey, container, nplike):
         assert isinstance(form, self.Form)
-        for content in self._contents:
-            content._to_buffers(form.content, getkey, container, nplike)
+        if self._fields is None:
+            for i, content in enumerate(self._contents):
+                content._to_buffers(form.content(i), getkey, container, nplike)
+        else:
+            for field, content in zip(self._fields, self._contents):
+                content._to_buffers(form.content(field), getkey, container, nplike)
 
     @property
     def typetracer(self):

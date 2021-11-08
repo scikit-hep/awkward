@@ -68,7 +68,7 @@ def from_buffers(
     elif isinstance(form, dict):
         form = ak._v2.forms.from_iter(form)
 
-    if not (ak._v2.isint(length) and length >= 0):
+    if not (ak._v2._util.isint(length) and length >= 0):
         raise TypeError("'length' argument must be a non-negative integer")
 
     if not isinstance(form, ak._v2.forms.Form):
@@ -122,7 +122,10 @@ def reconstitute(form, length, container, getkey, nplike):
     elif isinstance(form, ak._v2.forms.NumpyForm):
         dtype = ak._v2.types.numpytype._primitive_to_dtype[form.primitive]
         raw_array = container[getkey(form, "data")]
-        data = nplike.frombuffer(raw_array, dtype=dtype, count=length)
+        real_length = length
+        for x in form.inner_shape:
+            real_length *= x
+        data = nplike.frombuffer(raw_array, dtype=dtype, count=real_length)
         if form.inner_shape != ():
             data = data.reshape((-1,) + form.inner_shape)
         return ak._v2.contents.NumpyArray(data, identifier, form.parameters, nplike)
@@ -221,9 +224,9 @@ def reconstitute(form, length, container, getkey, nplike):
     elif isinstance(form, ak._v2.forms.RegularForm):
         next_length = length * form.size
         return ak._v2.contents.RegularArray(
-            ak._v2.index.Index(content),
-            form.size,
             reconstitute(form.content, next_length, container, getkey, nplike),
+            form.size,
+            length,
             identifier,
             form.parameters,
         )
@@ -234,7 +237,7 @@ def reconstitute(form, length, container, getkey, nplike):
                 reconstitute(content, length, container, getkey, nplike)
                 for content in form.contents
             ],
-            form.fields,
+            None if form.is_tuple else form.fields,
             length,
             identifier,
             form.parameters,
@@ -249,12 +252,19 @@ def reconstitute(form, length, container, getkey, nplike):
         index = nplike.frombuffer(
             raw_array2, dtype=_index_to_dtype[form.index], count=length
         )
+        lengths = []
+        for tag in range(len(form.contents)):
+            selected_index = index[tags == tag]
+            if len(selected_index) == 0:
+                lengths.append(0)
+            else:
+                lengths.append(nplike.max(selected_index) + 1)
         return ak._v2.contents.UnionArray(
             ak._v2.index.Index(tags),
             ak._v2.index.Index(index),
             [
-                reconstitute(content, length, container, getkey, nplike)
-                for content in form.contents
+                reconstitute(content, lengths[i], container, getkey, nplike)
+                for i, content in enumerate(form.contents)
             ],
             identifier,
             form.parameters,

@@ -1002,6 +1002,15 @@ def to_list(array):
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         return [to_list(x) for x in array]
 
+    elif isinstance(array, ak._v2.highlevel.Array):
+        return [to_list(x) for x in array]
+
+    elif isinstance(array, ak._v2.highlevel.Record):
+        return to_list(array.layout)
+
+    # elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
+    #     return to_list(array.snapshot())
+
     elif isinstance(array, ak._v2.contents.Content):
         import awkward._v2.tmp_for_testing
 
