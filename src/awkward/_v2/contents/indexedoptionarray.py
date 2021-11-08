@@ -782,11 +782,6 @@ class IndexedOptionArray(Content):
 
         return out
 
-        if negaxis is None:
-            return out
-        else:
-            return out._content
-
     def _argsort_next(
         self,
         negaxis,

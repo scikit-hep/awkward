@@ -725,7 +725,7 @@ class ListOffsetArray(Content):
                 negaxis - 1,
                 nextstarts,
                 nextparents,
-                outlength,
+                maxnextparents[0] + 1,
             )
 
             outcarry = ak._v2.index.Index64.empty(nextlen, nplike)
@@ -766,12 +766,22 @@ class ListOffsetArray(Content):
             )
 
             trimmed = self._content[self._offsets[0] : self._offsets[-1]]
-
-            return trimmed._unique(
+            outcontent = trimmed._unique(
                 negaxis,
                 self._offsets[:-1],
                 nextparents,
-                outlength,
+                len(self._offsets) - 1,
+            )
+
+            if negaxis is None or negaxis == depth - 1:
+                return outcontent
+
+            outoffsets = self._compact_offsets64(True)
+            return ak._v2.contents.ListOffsetArray(
+                outoffsets,
+                outcontent,
+                None,
+                self._parameters,
             )
 
     def _argsort_next(

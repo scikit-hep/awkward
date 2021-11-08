@@ -554,10 +554,10 @@ class NumpyArray(Content):
 
         nplike = self.nplike
 
-        if negaxis is None or parents is None:
+        if negaxis is None:
             contiguous_self = self if self.iscontiguous() else self.contiguous()
             flattened_shape = 1
-            for i in range(len(self.shape)):
+            for i in range(len(contiguous_self.shape)):
                 flattened_shape = flattened_shape * self.shape[i]
 
             offsets = ak._v2.index.Index64.zeros(2, nplike)
@@ -596,7 +596,7 @@ class NumpyArray(Content):
 
             return out[: nextlength[0]]
 
-        # axis is non None
+        # axis is not None
         if len(self.shape) != 1 or (not self.iscontiguous()):
             contiguous_self = self if self.iscontiguous() else self.contiguous()
             return contiguous_self.toRegularArray()._unique(
@@ -606,6 +606,7 @@ class NumpyArray(Content):
                 outlength,
             )
         else:
+
             parents_length = len(parents)
             offsets_length = ak._v2.index.Index64.empty(1, nplike)
             self._handle_error(
