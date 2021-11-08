@@ -807,6 +807,7 @@ class UnionArray(Content):
                 parameters=self._parameters,
             )
             return out.simplify_uniontype(True, False)
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         nptags = self._tags.to(numpy)
         npindex = self._index.to(numpy)

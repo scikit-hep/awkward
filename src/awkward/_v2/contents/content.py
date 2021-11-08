@@ -991,6 +991,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def rpad_and_clip(self, length, axis):
         return self._rpad_and_clip(length, axis, 0)
+
     def to_arrow(
         self,
         list_to32=False,

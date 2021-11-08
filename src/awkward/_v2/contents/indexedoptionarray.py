@@ -1239,6 +1239,7 @@ class IndexedOptionArray(Content):
             ).simplify_optiontype()
         else:
             return self.project()._rpad_and_clip(target, posaxis, depth)
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         index = numpy.array(self._index, copy=True)
         this_validbytes = self.mask_as_bool(valid_when=True)

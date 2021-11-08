@@ -867,6 +867,7 @@ class RegularArray(Content):
                 None,
                 self._parameters,
             )
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":
             return self.toListOffsetArray64(False)._to_arrow(

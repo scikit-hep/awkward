@@ -1044,6 +1044,7 @@ class ListArray(Content):
 
     def _rpad_and_clip(self, target, axis, depth):
         return self.toListOffsetArray64(True)._rpad_and_clip(target, axis, depth)
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options

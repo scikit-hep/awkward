@@ -455,6 +455,7 @@ class BitMaskedArray(Content):
 
     def _rpad_and_clip(self, target, axis, depth):
         return self.toByteMaskedArray()._rpad_and_clip(target, axis, depth)
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toByteMaskedArray()._to_arrow(
             pyarrow, mask_node, validbytes, length, options

@@ -642,7 +642,7 @@ class RecordArray(Content):
             if len(contents) == 0:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
-                    self._keys,
+                    self._fields,
                     len(self),
                     identifier=self._identifier,
                     parameters=self._parameters,
@@ -650,7 +650,7 @@ class RecordArray(Content):
             else:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
-                    self._keys,
+                    self._fields,
                     identifier=self._identifier,
                     parameters=self._parameters,
                 )
@@ -678,6 +678,7 @@ class RecordArray(Content):
                     identifier=self._identifier,
                     parameters=self._parameters,
                 )
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         values = [
             (x if len(x) == length else x[:length])._to_arrow(

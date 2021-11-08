@@ -1445,6 +1445,7 @@ class ListOffsetArray(Content):
                 None,
                 self._parameters,
             )
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         is_string = self.parameter("__array__") == "string"
         is_bytestring = self.parameter("__array__") == "bytestring"

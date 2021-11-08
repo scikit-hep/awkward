@@ -713,6 +713,7 @@ class NumpyArray(Content):
         if posaxis != depth:
             raise ValueError("axis exceeds the depth of this array")
         return self.rpad_axis0(target, True)
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self._data.ndim != 1:
             return self.toRegularArray()._to_arrow(

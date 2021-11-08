@@ -743,6 +743,7 @@ class ByteMaskedArray(Content):
                 None,
                 self._parameters,
             )
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         this_validbytes = self.mask_as_bool(valid_when=True)
 

@@ -402,6 +402,7 @@ class UnmaskedArray(Content):
                 None,
                 self._parameters,
             )
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self._content._to_arrow(pyarrow, self, None, length, options)
 

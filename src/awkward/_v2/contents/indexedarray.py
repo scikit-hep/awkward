@@ -756,6 +756,7 @@ class IndexedArray(Content):
                 None,
                 self._parameters,
             )
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if (
             not options["categorical_as_dictionary"]

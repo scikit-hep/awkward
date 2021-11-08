@@ -218,6 +218,7 @@ class EmptyArray(Content):
             raise ValueError("axis exceeds the depth of this array")
         else:
             return self.rpad_axis0(target, True)
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
