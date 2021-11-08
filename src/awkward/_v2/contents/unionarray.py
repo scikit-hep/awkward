@@ -767,13 +767,13 @@ class UnionArray(Content):
         else:
             contents = []
             for content in self._contents:
-                content.append(content._rpad(target, posaxis, depth))
-            out = ak._v2.unionarray.UnionArray(
+                contents.append(content._rpad(target, posaxis, depth))
+            out = ak._v2.contents.unionarray.UnionArray(
                 self.tags,
                 self.index,
                 contents,
-                self.identifier,
-                self.parameter,
+                identifier=self._identifier,
+                parameters=self._parameters,
             )
             return out.simplify_uniontype(True, False)
 
@@ -784,12 +784,12 @@ class UnionArray(Content):
         else:
             contents = []
             for content in self._contents:
-                content.append(content._rpad_and_clip(target, posaxis, depth))
-            out = ak._v2.unionarray.UnionArray(
+                contents.append(content._rpad_and_clip(target, posaxis, depth))
+            out = ak._v2.contents.unionarray.UnionArray(
                 self.tags,
                 self.index,
                 contents,
-                self.identifier,
-                self.parameter,
+                identifier=self._identifier,
+                parameters=self._parameters,
             )
             return out.simplify_uniontype(True, False)

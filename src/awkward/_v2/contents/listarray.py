@@ -965,7 +965,7 @@ class ListArray(Content):
             #         len(self._starts),
             #     )
             # )
-            min_ = self.nplike.min(self._stops - self._starts)
+            min_ = self.nplike.min(self._stops.data - self._starts.data)
             if target < min_:
                 return self
             else:
@@ -990,7 +990,7 @@ class ListArray(Content):
                 stops_ = ak._v2.index.Index64.empty(len(self._stops), self.nplike)
                 self._handle_error(
                     self.nplike[
-                        "awkward_ListOffsetArray_rpad_axis1",
+                        "awkward_ListArray_rpad_axis1",
                         index.dtype.type,
                         self._starts.dtype.type,
                         self._stops.dtype.type,
@@ -1010,7 +1010,7 @@ class ListArray(Content):
                     index,
                     self._content,
                     None,
-                    self._parameters,
+                    None,
                 )
 
                 return ak._v2.contents.listarray.ListArray(

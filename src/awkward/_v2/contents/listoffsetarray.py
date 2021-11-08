@@ -1387,8 +1387,8 @@ class ListOffsetArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, True)
         if posaxis == depth + 1:
-            starts_ = ak._v2.index.Index64.empty(self._offsets - 1, self.nplike)
-            stops_ = ak._v2.index.Index64.empty(self._offsets - 1, self.nplike)
+            starts_ = ak._v2.index.Index64.empty(len(self._offsets) - 1, self.nplike)
+            stops_ = ak._v2.index.Index64.empty(len(self._offsets) - 1, self.nplike)
             self._handle_error(
                 self.nplike[
                     "awkward_index_rpad_and_clip_axis1",
@@ -1403,7 +1403,7 @@ class ListOffsetArray(Content):
             self._handle_error(
                 self.nplike[
                     "awkward_ListOffsetArray_rpad_and_clip_axis1",
-                    outindex.dytpe.type,
+                    outindex.dtype.type,
                     self._offsets.dtype.type,
                 ](
                     outindex.to(self.nplike),

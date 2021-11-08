@@ -683,7 +683,7 @@ class NumpyArray(Content):
     def _rpad(self, target, axis, depth):
         if len(self.shape) == 0:
             raise ValueError("cannot rpad a scalar")
-        elif len(self.shape > 1) or not self.iscontiguous():
+        elif len(self.shape) > 1 or not self.iscontiguous():
             return self.toRegularArray()._rpad(target, axis, depth)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
@@ -696,10 +696,9 @@ class NumpyArray(Content):
     def _rpad_and_clip(self, target, axis, depth):
         if len(self.shape) == 0:
             raise ValueError("cannot rpad a scalar")
-        elif len(self.shape > 1) or not self.iscontiguous():
+        elif len(self.shape) > 1 or not self.iscontiguous():
             return self.toRegularArray()._rpad_and_clip(target, axis, depth)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ValueError("axis exceeds the depth of this array")
-        else:
-            return self.rpad_axis0(target, True)
+        return self.rpad_axis0(target, True)

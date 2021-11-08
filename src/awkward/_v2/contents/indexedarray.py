@@ -734,11 +734,11 @@ class IndexedArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, True)
         elif posaxis == depth + 1:
-            return self.project()._rpad(target, posaxis, depth)
+            return self.project()._rpad_and_clip(target, posaxis, depth)
         else:
             return ak._v2.contents.indexedarray.IndexedArray(
                 self._index,
-                self._content._rpad(target, posaxis, depth),
+                self._content._rpad_and_clip(target, posaxis, depth),
                 None,
                 self._parameters,
             )

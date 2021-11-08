@@ -624,17 +624,17 @@ class RecordArray(Content):
             if len(contents) == 0:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
-                    self.recordlookup,
+                    self._keys,
                     len(self),
-                    self._identifier,
-                    self._parameters,
+                    identifier=self._identifier,
+                    parameters=self._parameters,
                 )
             else:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
-                    self.recordlookup,
-                    self._identifier,
-                    self._parameters,
+                    self._keys,
+                    identifier=self._identifier,
+                    parameters=self._parameters,
                 )
 
     def _rpad_and_clip(self, target, axis, depth):
@@ -648,15 +648,15 @@ class RecordArray(Content):
             if len(contents) == 0:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
-                    self.recordlookup,
+                    self._keys,
                     len(self),
-                    self._identifier,
-                    self._parameters,
+                    identifier=self._identifier,
+                    parameters=self._parameters,
                 )
             else:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
-                    self.recordlookup,
-                    self._identifier,
-                    self._parameters,
+                    self._keys,
+                    identifier=self._identifier,
+                    parameters=self._parameters,
                 )

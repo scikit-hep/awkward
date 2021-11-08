@@ -1221,7 +1221,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def rpad_axis0(self, target, clip):
         if not clip and target < len(self):
             return self
-        # index = ak._v2.content.index.Index64.empty(target, self.nplike)
+        # index = ak._v2.index.Index64.empty(target, self.nplike)
 
         # self._handle_error(
         #     self.nplike[
@@ -1230,11 +1230,13 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         #     ](index.to(self.nplike), target, len(self))
         # )
         shorter = min(target, len(self))
-        index = self.nplike.append(
-            self.nplike.arange(shorter), self.nplike.full(target - shorter, -1)
+        index = ak._v2.index.Index64(
+            self.nplike.append(
+                self.nplike.arange(shorter), self.nplike.full(target - shorter, -1)
+            )
         )
 
-        next = ak._v2.content.indexedoptionarray.IndexedOptionArray(
+        next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             index,
             self,
             None,

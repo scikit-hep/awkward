@@ -395,7 +395,7 @@ class IndexedOptionArray(Content):
         if isinstance(
             other,
             (
-                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.emptyarray.EmptyArray,
                 ak._v2.contents.unionarray.UnionArray,
             ),
         ):
@@ -1164,6 +1164,15 @@ class IndexedOptionArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
+    def bytemask(self):
+        out = ak._v2.index.Index64(len(self.index))
+        self._handle_error(
+            self.nplike[
+                "awkward_IndexedArray_mask", out.dtype.type, self._index.dtype.type
+            ](out.to(self.nplike), self._index.to(self.nplike), len(self._index))
+        )
+        return out
+
     def _rpad(self, target, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -1176,17 +1185,17 @@ class IndexedOptionArray(Content):
                     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,
                     mask.dtype.type,
-                ](index.to(self.nplike), mask.to(self.nplike), len(self.mask))
+                ](index.to(self.nplike), mask.to(self.nplike), len(mask))
             )
             # index = self.nplike.full(len(self.mask), -1)
             # index[self.mask  == 1] = self.nplike.arange(len(index[self.mask  == 1]))
             next = self.project()._rpad(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
-                next.simplify_optiontype(),
+                next,
                 None,
                 self._parameters,
-            )
+            ).simplify_optiontype()
         else:
             return self.project()._rpad(target, posaxis, depth)
 
@@ -1207,9 +1216,9 @@ class IndexedOptionArray(Content):
             next = self.project()._rpad_and_clip(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
-                next.simplify_optiontype(),
+                next,
                 None,
                 self._parameters,
-            )
+            ).simplify_optiontype()
         else:
             return self.project()._rpad_and_clip(target, posaxis, depth)

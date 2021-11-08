@@ -810,7 +810,7 @@ class RegularArray(Content):
             if target < self._size:
                 return self
             else:
-                return self._rpad_and_clip(target, posaxis, depth + 1)
+                return self._rpad_and_clip(target, posaxis, depth)
         else:
             return ak._v2.contents.regulararray.RegularArray(
                 self._content._rpad(target, posaxis, depth + 1),
@@ -829,7 +829,7 @@ class RegularArray(Content):
             self._handle_error(
                 self.nplike[
                     "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
-                ](index, target, self._size, len(self))
+                ](index.to(self.nplike), target, self._size, len(self))
             )
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
@@ -837,7 +837,7 @@ class RegularArray(Content):
                 None,
                 self._parameters,
             )
-            return self._v2.contents.regulararray.RegularArray(
+            return ak._v2.contents.regulararray.RegularArray(
                 next.simplify_optiontype(),
                 target,
                 len(self),
