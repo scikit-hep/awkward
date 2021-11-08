@@ -12,6 +12,7 @@ pytestmark = pytest.mark.skipif(
 
 ak_to_buffers = ak._v2.operations.convert.to_buffers
 ak_from_buffers = ak._v2.operations.convert.from_buffers
+ak_from_iter = ak._v2.operations.convert.from_iter
 
 
 def test_EmptyArray():
@@ -654,3 +655,46 @@ def test_UnionArray_RecordArray_NumpyArray():
         ],
     )
     assert ak.to_list(ak_from_buffers(*ak_to_buffers(v2a))) == ak.to_list(v2a)
+
+
+def test_fromiter():
+    # Float64Builder
+    assert ak.to_list(ak_from_iter([1.1, 2.2, 3.3])) == [1.1, 2.2, 3.3]
+
+    # BoolBuilder
+    assert ak.to_list(ak_from_iter([True, False, True])) == [True, False, True]
+
+    # Complex128Builder
+    assert ak.to_list(ak_from_iter([1, 2 + 2j, 3j])) == [1, 2 + 2j, 3j]
+
+    # DatetimeBuilder
+    assert ak.to_list(ak_from_iter([np.datetime64("2021-11-08T01:02:03")])) == [
+        np.datetime64("2021-11-08T01:02:03")
+    ]
+
+    # Int64Builder
+    assert ak.to_list(ak_from_iter([1, 2, 3])) == [1, 2, 3]
+
+    # ListBuilder
+    assert ak.to_list(ak_from_iter([[1, 2, 3], [], [4, 5]])) == [[1, 2, 3], [], [4, 5]]
+
+    # OptionBuilder
+    assert ak.to_list(ak_from_iter([1, 2, None, 3])) == [1, 2, None, 3]
+
+    # StringBuilder
+    assert ak.to_list(ak_from_iter(["hello", "there"])) == ["hello", "there"]
+
+    # TupleBuilder
+    assert ak.to_list(ak_from_iter([(1, 1.1), (2, 2.2)])) == [(1, 1.1), (2, 2.2)]
+
+    # RecordBuilder
+    assert ak.to_list(ak_from_iter([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}])) == [
+        {"x": 1, "y": 1.1},
+        {"x": 2, "y": 2.2},
+    ]
+
+    # UnionBuilder
+    assert ak.to_list(ak_from_iter([1, 2, [1, 2, 3]])) == [1, 2, [1, 2, 3]]
+
+    # UnknownBuilder
+    assert ak.to_list(ak_from_iter([])) == []

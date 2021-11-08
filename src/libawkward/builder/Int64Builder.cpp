@@ -34,6 +34,19 @@ namespace awkward {
     return "Int64Builder";
   };
 
+  const std::string
+  Int64Builder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(form_key.str() + "-data",
+                          buffer_.ptr().get(),
+                          buffer_.length() * sizeof(int64_t));
+
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"int64\", \"form_key\": \""
+           + form_key.str() + "\"}";
+  }
+
   int64_t
   Int64Builder::length() const {
     return buffer_.length();

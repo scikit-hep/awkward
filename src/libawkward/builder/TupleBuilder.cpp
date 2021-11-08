@@ -42,6 +42,23 @@ namespace awkward {
     return "TupleBuilder";
   };
 
+  const std::string
+  TupleBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    std::stringstream out;
+    out << "{\"class\": \"RecordArray\", \"contents\": [";
+    for (int64_t i = 0;  i < contents_.size();  i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      out << contents_[i].get()->to_buffers(container, form_key_id);
+    }
+    out << "], " << "\"form_key\": \"" + form_key.str() + "\"}";
+    return out.str();
+  }
+
   int64_t
   TupleBuilder::length() const {
     return length_;

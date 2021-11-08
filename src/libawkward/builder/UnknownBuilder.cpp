@@ -35,6 +35,15 @@ namespace awkward {
     return "UnknownBuilder";
   };
 
+  const std::string
+  UnknownBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    return "{\"class\": \"EmptyArray\", \"form_key\": \""
+           + form_key.str() + "\"}";
+  }
+
   int64_t
   UnknownBuilder::length() const {
     return nullcount_;

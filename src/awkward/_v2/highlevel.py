@@ -48,7 +48,7 @@ import awkward as ak
 from awkward._v2._connect.numpy import NDArrayOperatorsMixin
 
 np = ak.nplike.NumpyMetadata.instance()
-# numpy = ak.nplike.Numpy.instance()
+numpy = ak.nplike.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -581,8 +581,32 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #ak.to_list.
         """
-        for x in self.layout:
-            yield ak._v2._util.wrap(x, self._behavior)
+        if isinstance(self._layout, ak._v2.contents.NumpyArray):
+            array = self._layout.to(numpy)
+            array_param = self._layout.parameter("__array__")
+            if array_param == "byte":
+                for x in ak._v2._util.tobytes(array):
+                    yield x
+            elif array_param == "char":
+                for x in ak._v2._util.tobytes(array).decode(errors="surrogateescape"):
+                    yield x
+            else:
+                for x in array:
+                    yield x
+        else:
+            for x in self._layout:
+                if isinstance(x, ak._v2.contents.NumpyArray):
+                    array_param = x.parameter("__array__")
+                    if array_param == "byte":
+                        yield ak._v2._util.tobytes(x.to(numpy))
+                    elif array_param == "char":
+                        yield ak._v2._util.tobytes(x.to(numpy)).decode(
+                            errors="surrogateescape"
+                        )
+                    else:
+                        yield x
+                else:
+                    yield ak._v2._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
         """
@@ -996,13 +1020,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
-        if isinstance(tmp, ak._v2.behaviors.string.ByteBehavior):
-            return bytes(tmp)
-        elif isinstance(tmp, ak._v2.behaviors.string.CharBehavior):
-            return str(tmp)
-        else:
-            return tmp
+        out = self._layout[where]
+        if isinstance(out, ak._v2.contents.NumpyArray):
+            array_param = out.parameter("__array__")
+            if array_param == "byte":
+                return ak._v2._util.tobytes(out.to(numpy))
+            elif array_param == "char":
+                return ak._v2._util.tobytes(out.to(numpy)).decode(
+                    errors="surrogateescape"
+                )
+        return ak._v2._util.wrap(out, self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1704,13 +1731,16 @@ class Record(NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
-        if isinstance(tmp, ak._v2.behaviors.string.ByteBehavior):
-            return bytes(tmp)
-        elif isinstance(tmp, ak._v2.behaviors.string.CharBehavior):
-            return str(tmp)
-        else:
-            return tmp
+        out = self._layout[where]
+        if isinstance(out, ak._v2.contents.NumpyArray):
+            array_param = out.parameter("__array__")
+            if array_param == "byte":
+                return ak._v2._util.tobytes(out.to(numpy))
+            elif array_param == "char":
+                return ak._v2._util.tobytes(out.to(numpy)).decode(
+                    errors="surrogateescape"
+                )
+        return ak._v2._util.wrap(out, self._behavior)
 
     def __setitem__(self, where, what):
         """

@@ -42,6 +42,27 @@ namespace awkward {
     return encoding_;
   }
 
+  const std::string
+  StringBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream outer_form_key;
+    std::stringstream inner_form_key;
+    outer_form_key << "node" << (form_key_id++);
+    inner_form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(outer_form_key.str() + "-offsets",
+                          offsets_.ptr().get(),
+                          offsets_.length() * sizeof(int64_t));
+
+    container.copy_buffer(inner_form_key.str() + "-data",
+                          content_.ptr().get(),
+                          content_.length() * sizeof(uint8_t));
+
+    return std::string("{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": ")
+           + "{\"class\": \"NumpyArray\", \"primitive\": \"uint8\", \"parameters\": {\"__array__\": \"char\"}, \"form_key\": \"" + inner_form_key.str() + "\"}"
+           + ", \"parameters\": {\"__array__\": \"string\"}"
+           + ", \"form_key\": \"" + outer_form_key.str() + "\"}";
+  }
+
   int64_t
   StringBuilder::length() const {
     return offsets_.length() - 1;

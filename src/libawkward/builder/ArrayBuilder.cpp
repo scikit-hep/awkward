@@ -17,6 +17,11 @@ namespace awkward {
   ArrayBuilder::ArrayBuilder(const ArrayBuilderOptions& options)
       : builder_(UnknownBuilder::fromempty(options)) { }
 
+  const std::string
+  ArrayBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    return builder_.get()->to_buffers(container, form_key_id);
+  }
+
   int64_t
   ArrayBuilder::length() const {
     return builder_.get()->length();

@@ -989,6 +989,27 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
 }
 
 namespace {
+  /// @brief Turns the accumulated data into the JSON string of a Form, a
+  /// length, and a dict of NumPy arrays container for ak.from_buffers.
+  class NumpyBuffersContainer: public ak::BuffersContainer {
+  public:
+    py::dict container() {
+      return container_;
+    }
+
+    void
+      copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override {
+        py::object pyarray = py::module::import("numpy").attr("empty")(num_bytes, "u1");
+        py::array_t<uint8_t> rawarray = pyarray.cast<py::array_t<uint8_t>>();
+        py::buffer_info rawinfo = rawarray.request();
+        std::memcpy(rawinfo.ptr, source, num_bytes);
+        container_[py::str(name)] = pyarray;
+      }
+
+  private:
+    py::dict container_;
+  };
+
   /// @brief Turns the accumulated data into a Content array.
   ///
   /// This operation only converts Builder nodes into Content nodes; the
@@ -1665,6 +1686,16 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       .def("clear", &ak::ArrayBuilder::clear)
       .def("type", [](const ak::ArrayBuilder& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
         return unbox_content(::builder_snapshot(self.builder()))->type(typestrs);
+      })
+      .def("to_buffers", [](const ak::ArrayBuilder& self) -> py::object {
+        ::NumpyBuffersContainer container;
+        int64_t form_key_id = 0;
+        std::string form = self.to_buffers(container, form_key_id);
+        py::tuple out(3);
+        out[0] = py::str(form);
+        out[1] = py::int_(self.length());
+        out[2] = container.container();
+        return out;
       })
       .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
         return ::builder_snapshot(self.builder());

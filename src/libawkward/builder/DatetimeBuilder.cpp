@@ -35,6 +35,20 @@ namespace awkward {
     return "DatetimeBuilder";
   };
 
+  const std::string
+  DatetimeBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(form_key.str() + "-data",
+                          content_.ptr().get(),
+                          content_.length() * sizeof(int64_t));
+
+    return "{\"class\": \"NumpyArray\", \"primitive\": \""
+           + unit() + "\", \"form_key\": \""
+           + form_key.str() + "\"}";
+  }
+
   int64_t
   DatetimeBuilder::length() const {
     return content_.length();

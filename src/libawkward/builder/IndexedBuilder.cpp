@@ -27,6 +27,12 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::string
+  IndexedBuilder<T>::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    throw std::runtime_error("not implemented: IndexedBuilder::to_buffers");
+  }
+
+  template <typename T>
   int64_t
   IndexedBuilder<T>::length() const {
     return index_.length();

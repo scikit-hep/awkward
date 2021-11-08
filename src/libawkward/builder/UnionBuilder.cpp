@@ -49,6 +49,31 @@ namespace awkward {
     return "UnionBuilder";
   };
 
+  const std::string
+  UnionBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(form_key.str() + "-tags",
+                          tags_.ptr().get(),
+                          tags_.length() * sizeof(int8_t));
+
+    container.copy_buffer(form_key.str() + "-index",
+                          index_.ptr().get(),
+                          index_.length() * sizeof(int64_t));
+
+    std::stringstream out;
+    out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
+    for (int64_t i = 0;  i < contents_.size();  i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      out << contents_[i].get()->to_buffers(container, form_key_id);
+    }
+    out << "], \"form_key\": \"" << form_key.str() + "\"}";
+    return out.str();
+  }
+
   int64_t
   UnionBuilder::length() const {
     return tags_.length();

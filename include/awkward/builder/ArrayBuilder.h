@@ -31,6 +31,11 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     ArrayBuilder(const ArrayBuilderOptions& options);
 
+    /// @brief Copy the current snapshot into the BuffersContainer and
+    /// return a Form as a std::string (JSON).
+    const std::string
+      to_buffers(BuffersContainer& container, int64_t& form_key_id) const;
+
     /// @brief Current length of the accumulated array.
     int64_t
       length() const;
