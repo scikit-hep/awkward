@@ -729,30 +729,16 @@ class IndexedArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    def _rpad(self, target, axis, depth):
+    def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, False)
+            return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
-            return self.project()._rpad(target, posaxis, depth)
+            return self.project()._rpad(target, posaxis, depth, clip)
         else:
             return ak._v2.contents.indexedarray.IndexedArray(
                 self._index,
-                self._content._rpad(target, posaxis, depth),
-                None,
-                self._parameters,
-            )
-
-    def _rpad_and_clip(self, target, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
-            return self.rpad_axis0(target, True)
-        elif posaxis == depth + 1:
-            return self.project()._rpad_and_clip(target, posaxis, depth)
-        else:
-            return ak._v2.contents.indexedarray.IndexedArray(
-                self._index,
-                self._content._rpad_and_clip(target, posaxis, depth),
+                self._content._rpad(target, posaxis, depth, clip),
                 None,
                 self._parameters,
             )

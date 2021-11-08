@@ -631,14 +631,14 @@ class RecordArray(Content):
                 return sub
         return ""
 
-    def _rpad(self, target, axis, depth):
+    def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, False)
+            return self.rpad_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._rpad(target, posaxis, depth))
+                contents.append(content._rpad(target, posaxis, depth, clip))
             if len(contents) == 0:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
@@ -651,30 +651,6 @@ class RecordArray(Content):
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
                     self._fields,
-                    identifier=self._identifier,
-                    parameters=self._parameters,
-                )
-
-    def _rpad_and_clip(self, target, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
-            return self.rpad_axis0(target, True)
-        else:
-            contents = []
-            for content in self._contents:
-                contents.append(content._rpad_and_clip(target, posaxis, depth))
-            if len(contents) == 0:
-                return ak._v2.contents.recordarray.RecordArray(
-                    contents,
-                    self._keys,
-                    len(self),
-                    identifier=self._identifier,
-                    parameters=self._parameters,
-                )
-            else:
-                return ak._v2.contents.recordarray.RecordArray(
-                    contents,
-                    self._keys,
                     identifier=self._identifier,
                     parameters=self._parameters,
                 )

@@ -817,51 +817,39 @@ class RegularArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    def _rpad(self, target, axis, depth):
+    def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, False)
+            return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
-            if target < self._size:
-                return self
+            if not clip:
+                if target < self._size:
+                    return self
+                else:
+                    return self._rpad(target, posaxis, depth, True)
             else:
-                return self._rpad_and_clip(target, posaxis, depth)
+                index = ak._v2.index.Index64.empty(len(self) * target, self.nplike)
+                self._handle_error(
+                    self.nplike[
+                        "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
+                    ](index.to(self.nplike), target, self._size, len(self))
+                )
+                next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                    index,
+                    self._content,
+                    None,
+                    self._parameters,
+                )
+                return ak._v2.contents.regulararray.RegularArray(
+                    next.simplify_optiontype(),
+                    target,
+                    len(self),
+                    None,
+                    self._parameters,
+                )
         else:
             return ak._v2.contents.regulararray.RegularArray(
-                self._content._rpad(target, posaxis, depth + 1),
-                self._size,
-                len(self),
-                None,
-                self._parameters,
-            )
-
-    def _rpad_and_clip(self, target, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
-            return self.rpad_axis0(target, True)
-        elif posaxis == depth + 1:
-            index = ak._v2.index.Index64.empty(len(self) * target, self.nplike)
-            self._handle_error(
-                self.nplike[
-                    "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
-                ](index.to(self.nplike), target, self._size, len(self))
-            )
-            next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                index,
-                self._content,
-                None,
-                self._parameters,
-            )
-            return ak._v2.contents.regulararray.RegularArray(
-                next.simplify_optiontype(),
-                target,
-                len(self),
-                None,
-                self._parameters,
-            )
-        else:
-            return ak._v2.contents.regulararray.RegularArray(
-                self._content._rpad_and_clip(target, posaxis, depth + 1),
+                self._content._rpad(target, posaxis, depth + 1, clip),
                 self._size,
                 len(self),
                 None,

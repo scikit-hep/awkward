@@ -450,11 +450,8 @@ class BitMaskedArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
-    def _rpad(self, target, axis, depth):
-        return self.toByteMaskedArray()._rpad(target, axis, depth)
-
-    def _rpad_and_clip(self, target, axis, depth):
-        return self.toByteMaskedArray()._rpad_and_clip(target, axis, depth)
+    def _rpad(self, target, axis, depth, clip):
+        return self.toByteMaskedArray()._rpad(target, axis, depth, clip)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toByteMaskedArray()._to_arrow(

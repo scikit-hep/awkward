@@ -703,17 +703,10 @@ class ByteMaskedArray(Content):
             )
             return out
 
-    def _rpad(self, target, axis, depth):
+    def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, False)
-        else:
-            return self._rpad_and_clip(target, axis, depth)
-
-    def _rpad_and_clip(self, target, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
-            return self.rpad_axis0(target, True)
+            return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
             mask = self.bytemask()
             index = ak._v2.index.Index64.empty(len(mask), self.nplike)
@@ -728,7 +721,7 @@ class ByteMaskedArray(Content):
                     len(self._mask),
                 )
             )
-            next = self.project()._rpad(target, posaxis, depth)
+            next = self.project()._rpad(target, posaxis, depth, clip)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
                 next.simplify_optiontype(),
@@ -738,7 +731,7 @@ class ByteMaskedArray(Content):
         else:
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
                 self._mask,
-                self._content.rpad_and_clip(target, posaxis, depth),
+                self._content._rpad(target, posaxis, depth, clip),
                 self._valid_when,
                 None,
                 self._parameters,

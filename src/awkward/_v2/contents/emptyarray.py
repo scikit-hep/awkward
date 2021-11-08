@@ -205,14 +205,7 @@ class EmptyArray(Content):
     def _validityerror(self, path):
         return ""
 
-    def _rpad(self, target, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis != depth:
-            raise ValueError("axis exceeds the depth of this array")
-        else:
-            return self._rpad_and_clip(target, posaxis, depth)
-
-    def _rpad_and_clip(self, target, axis, depth):
+    def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ValueError("axis exceeds the depth of this array")

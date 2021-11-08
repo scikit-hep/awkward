@@ -1190,10 +1190,10 @@ class IndexedOptionArray(Content):
         )
         return out
 
-    def _rpad(self, target, axis, depth):
+    def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, False)
+            return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
             mask = self.bytemask()
             index = ak._v2.index.Index64.empty(len(mask), self.nplike)
@@ -1206,7 +1206,7 @@ class IndexedOptionArray(Content):
             )
             # index = self.nplike.full(len(self.mask), -1)
             # index[self.mask  == 1] = self.nplike.arange(len(index[self.mask  == 1]))
-            next = self.project()._rpad(target, posaxis, depth)
+            next = self.project()._rpad(target, posaxis, depth, clip)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
                 next,
@@ -1214,31 +1214,7 @@ class IndexedOptionArray(Content):
                 self._parameters,
             ).simplify_optiontype()
         else:
-            return self.project()._rpad(target, posaxis, depth)
-
-    def _rpad_and_clip(self, target, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
-            return self.rpad_axis0(target, True)
-        elif posaxis == depth + 1:
-            mask = self.bytemask()
-            index = ak._v2.index.Index64.empty(len(mask), self.nplike)
-            self._handle_error(
-                self.nplike[
-                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
-                    index.dtype.type,
-                    mask.dtype.type,
-                ](index.to(self.nplike), mask.to(self.nplike), len(mask))
-            )
-            next = self.project()._rpad_and_clip(target, posaxis, depth)
-            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                index,
-                next,
-                None,
-                self._parameters,
-            ).simplify_optiontype()
-        else:
-            return self.project()._rpad_and_clip(target, posaxis, depth)
+            return self.project()._rpad(target, posaxis, depth, clip)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         index = numpy.array(self._index, copy=True)
