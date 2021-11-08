@@ -1182,7 +1182,7 @@ class IndexedOptionArray(Content):
             return self.content.validityerror(path + ".content")
 
     def bytemask(self):
-        out = ak._v2.index.Index64(len(self.index))
+        out = ak._v2.index.Index8.empty(len(self.index), self.nplike)
         self._handle_error(
             self.nplike[
                 "awkward_IndexedArray_mask", out.dtype.type, self._index.dtype.type
@@ -1196,7 +1196,7 @@ class IndexedOptionArray(Content):
             return self.rpad_axis0(target, False)
         elif posaxis == depth + 1:
             mask = self.bytemask()
-            index = ak._v2.index.Index64.empty(len(self.mask), self.nplike)
+            index = ak._v2.index.Index64.empty(len(mask), self.nplike)
             self._handle_error(
                 self.nplike[
                     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
@@ -1222,13 +1222,13 @@ class IndexedOptionArray(Content):
             return self.rpad_axis0(target, True)
         elif posaxis == depth + 1:
             mask = self.bytemask()
-            index = ak._v2.index.Index64.empty(len(self.mask), self.nplike)
+            index = ak._v2.index.Index64.empty(len(mask), self.nplike)
             self._handle_error(
                 self.nplike[
                     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,
                     mask.dtype.type,
-                ](index.to(self.nplike), mask.to(self.nplike), len(self.mask))
+                ](index.to(self.nplike), mask.to(self.nplike), len(mask))
             )
             next = self.project()._rpad_and_clip(target, posaxis, depth)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(

@@ -1101,106 +1101,138 @@ def test_rpad_and_clip_indexed_array():
     ]
 
 
-# def test_rpad_indexed_option_array():
-#     content = ak._v2.contents.numpyarray.NumpyArray(np.asarray([0.0, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
-#     index = ak._v2.index.Index64(np.asarray([0, -1, -1, 1, 2, 3, 4, 5, 6 , 7]))
-#     offsets = ak._v2.index.Index64(np.asarray([0, 3, 5, 6, 10]))
-#     indexedarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(index, content)
-#     listoffsetarray = ak._v2.contents.listoffsetarray.ListOffsetArray(offsets, indexedarray)
-#     index = ak._v2.index.Index64(np.asarray([0, -1, 1, 2, 3,]))
-#     listoffsetarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(index, listoffsetarray)
-#
-#     content = ak._v2.contents.numpyarray.NumpyArray(np.asarray([6.6, 7.7, 8.8, 9.9, 5.5, 3.3, 4.4, 0.0]))
-#     index = ak._v2.index.Index64(np.asarray([0, 1, 2, 3, 4, 5, 6 , 7, -1, -1]))
-#     offsets = ak._v2.index.Index64(np.asarray([0, 4, 5, 7, 10]))
-#     indexedarray = ak._v2.contents.indexedarray.IndexedArray(index, content)
-#     listoffsetarray = ak._v2.contents.listoffsetarray.ListOffsetArray(offsets, indexedarray)
-#     index = ak._v2.index.Index64(np.asarray([0, 1, 2, -1, 3,]))
-#     backward = ak._v2.contents.indexedoptionarray.IndexedOptionArray(index, listoffsetarray)
-#     print(ak.to_list(backward))
-#
-#     index = ak._v2.index.Index64(np.array([4, 3, 2, -1, 0], dtype=np.int64))
-#     indexedarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(index, listoffsetarray)
-#     assert ak.to_list(indexedarray) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5],
-#         [3.3, 4.4],
-#         None,
-#         [0.0, None, None],
-#     ]
-#
-#     assert ak.to_list(backward.rpad(4, 1)) == ak.to_list(indexedarray.rpad(4, 1))
-#     assert ak.to_list(indexedarray.rpad(1, 0)) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5],
-#         [3.3, 4.4],
-#         None,
-#         [0.0, None, None],
-#     ]
-#     assert ak.to_list(indexedarray.rpad(1, 1)) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5],
-#         [3.3, 4.4],
-#         None,
-#         [0.0, None, None],
-#     ]
-#     assert ak.to_list(indexedarray.rpad(3, 1)) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5, None, None],
-#         [3.3, 4.4, None],
-#         None,
-#         [0.0, None, None],
-#     ]
-#     assert ak.to_list(indexedarray.rpad(4, 0)) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5],
-#         [3.3, 4.4],
-#         None,
-#         [0.0, None, None],
-#     ]
-#     assert ak.to_list(indexedarray.rpad(5, 0)) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5],
-#         [3.3, 4.4],
-#         None,
-#         [0.0, None, None],
-#     ]
-#     assert ak.to_list(indexedarray.rpad(6, 0)) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5],
-#         [3.3, 4.4],
-#         None,
-#         [0.0, None, None],
-#         None,
-#     ]
-#     assert ak.to_list(indexedarray.rpad(7, 0)) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5],
-#         [3.3, 4.4],
-#         None,
-#         [0.0, None, None],
-#         None,
-#         None,
-#     ]
-#     assert ak.to_list(indexedarray.rpad(8, 0)) == [
-#         [6.6, 7.7, 8.8, 9.9],
-#         [5.5],
-#         [3.3, 4.4],
-#         None,
-#         [0.0, None, None],
-#         None,
-#         None,
-#         None,
-#     ]
-#
-#     assert ak.to_list(indexedarray.rpad_and_clip(1, 0)) == [[6.6, 7.7, 8.8, 9.9]]
-#     assert ak.to_list(indexedarray.rpad_and_clip(1, 1)) == [
-#         [6.6],
-#         [5.5],
-#         [3.3],
-#         None,
-#         [0.0],
-#     ]
+def test_rpad_indexed_option_array():
+    content = ak._v2.contents.numpyarray.NumpyArray(
+        np.asarray([0.0, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    index = ak._v2.index.Index64(np.asarray([0, -1, -1, 1, 2, 3, 4, 5, 6, 7]))
+    offsets = ak._v2.index.Index64(np.asarray([0, 3, 5, 6, 10]))
+    indexedarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(index, content)
+    listoffsetarray = ak._v2.contents.listoffsetarray.ListOffsetArray(
+        offsets, indexedarray
+    )
+    index = ak._v2.index.Index64(
+        np.asarray(
+            [
+                0,
+                -1,
+                1,
+                2,
+                3,
+            ]
+        )
+    )
+    listoffsetarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+        index, listoffsetarray
+    )
+    content = ak._v2.contents.numpyarray.NumpyArray(
+        np.asarray([6.6, 7.7, 8.8, 9.9, 5.5, 3.3, 4.4, 0.0])
+    )
+    index = ak._v2.index.Index64(np.asarray([0, 1, 2, 3, 4, 5, 6, 7, -1, -1]))
+    offsets = ak._v2.index.Index64(np.asarray([0, 4, 5, 7, 10]))
+    indexedarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(index, content)
+    listoffsetarray_ = ak._v2.contents.listoffsetarray.ListOffsetArray(
+        offsets, indexedarray
+    )
+    index = ak._v2.index.Index64(
+        np.asarray(
+            [
+                0,
+                1,
+                2,
+                -1,
+                3,
+            ]
+        )
+    )
+    backward = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+        index, listoffsetarray_
+    )
+
+    index = ak._v2.index.Index64(np.array([4, 3, 2, -1, 0], dtype=np.int64))
+    indexedarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+        index, listoffsetarray
+    )
+    assert ak.to_list(indexedarray) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+    ]
+
+    assert ak.to_list(backward.rpad(4, 1)) == ak.to_list(indexedarray.rpad(4, 1))
+    assert ak.to_list(indexedarray.rpad(1, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+    ]
+    assert ak.to_list(indexedarray.rpad(1, 1)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+    ]
+    assert ak.to_list(indexedarray.rpad(3, 1)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5, None, None],
+        [3.3, 4.4, None],
+        None,
+        [0.0, None, None],
+    ]
+    assert ak.to_list(indexedarray.rpad(4, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+    ]
+    assert ak.to_list(indexedarray.rpad(5, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+    ]
+    assert ak.to_list(indexedarray.rpad(6, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+        None,
+    ]
+    assert ak.to_list(indexedarray.rpad(7, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+        None,
+        None,
+    ]
+    assert ak.to_list(indexedarray.rpad(8, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+        None,
+        None,
+        None,
+    ]
+
+    assert ak.to_list(indexedarray.rpad_and_clip(1, 0)) == [[6.6, 7.7, 8.8, 9.9]]
+    assert ak.to_list(indexedarray.rpad_and_clip(1, 1)) == [
+        [6.6],
+        [5.5],
+        [3.3],
+        None,
+        [0.0],
+    ]
 
 
 def test_rpad_recordarray():
