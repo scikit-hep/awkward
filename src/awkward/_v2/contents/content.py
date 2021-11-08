@@ -987,10 +987,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return next.simplify_optiontype()
 
     def rpad(self, length, axis):
-        return self._rpad(length, axis, 0, clip = False)
+        return self._rpad(length, axis, 0, clip=False)
 
     def rpad_and_clip(self, length, axis):
-        return self._rpad(length, axis, 0, clip = True)
+        return self._rpad(length, axis, 0, clip=True)
 
     def to_arrow(
         self,

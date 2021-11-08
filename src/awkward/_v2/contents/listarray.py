@@ -1043,7 +1043,7 @@ class ListArray(Content):
                     self._parameters,
                 )
         else:
-            return self.toListOffsetArray64(True)._rpad(target, axis, depth, clip = True)
+            return self.toListOffsetArray64(True)._rpad(target, axis, depth, clip=True)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toListOffsetArray64(False)._to_arrow(

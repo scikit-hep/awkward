@@ -1389,14 +1389,21 @@ class ListOffsetArray(Content):
                     self._parameters,
                 )
             else:
-                starts_ = ak._v2.index.Index64.empty(len(self._offsets) - 1, self.nplike)
+                starts_ = ak._v2.index.Index64.empty(
+                    len(self._offsets) - 1, self.nplike
+                )
                 stops_ = ak._v2.index.Index64.empty(len(self._offsets) - 1, self.nplike)
                 self._handle_error(
                     self.nplike[
                         "awkward_index_rpad_and_clip_axis1",
                         starts_.dtype.type,
                         stops_.dtype.type,
-                    ](starts_.to(self.nplike), stops_.to(self.nplike), target, len(starts_))
+                    ](
+                        starts_.to(self.nplike),
+                        stops_.to(self.nplike),
+                        target,
+                        len(starts_),
+                    )
                 )
 
                 outindex = ak._v2.index.Index64.empty(

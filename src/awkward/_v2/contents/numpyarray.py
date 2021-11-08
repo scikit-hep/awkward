@@ -705,7 +705,7 @@ class NumpyArray(Content):
             else:
                 return self._rpad(target, posaxis, depth, True)
         else:
-            return self.rpad_axis0(target, clip = True)
+            return self.rpad_axis0(target, clip=True)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self._data.ndim != 1:
