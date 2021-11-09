@@ -146,6 +146,12 @@ class EmptyArray(Content):
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        return True
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        return self
+
     def _argsort_next(
         self,
         negaxis,

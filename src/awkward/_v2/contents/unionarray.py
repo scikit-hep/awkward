@@ -675,6 +675,20 @@ class UnionArray(Content):
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        simplified = self.simplify_uniontype(True, True)
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ValueError("cannot check if an irreducible UnionArray is unique")
+
+        return simplified._is_unique(negaxis, starts, parents, outlength)
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        simplified = self.simplify_uniontype(True, True)
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ValueError("cannot make a unique irreducible UnionArray")
+
+        return simplified._unique(negaxis, starts, parents, outlength)
+
     def _argsort_next(
         self,
         negaxis,

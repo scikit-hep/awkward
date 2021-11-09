@@ -587,6 +587,39 @@ class RegularArray(Content):
                 self._parameters,
             )
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if self._length == 0:
+            return True
+
+        return self.toListOffsetArray64(True)._is_unique(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+        )
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if self._length == 0:
+            return self
+        out = self.toListOffsetArray64(True)._unique(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+        )
+
+        if isinstance(out, ak._v2.contents.RegularArray):
+            if isinstance(out._content, ak._v2.contents.ListOffsetArray):
+                return ak._v2.contents.RegularArray(
+                    out._content.toRegularArray(),
+                    out._size,
+                    out._length,
+                    None,
+                    out._parameters,
+                )
+
+        return out
+
     def _argsort_next(
         self,
         negaxis,

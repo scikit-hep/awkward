@@ -463,6 +463,20 @@ class ByteMaskedArray(Content):
             )
             return out2.simplify_optiontype()
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if len(self._mask) == 0:
+            return True
+        return self.toIndexedOptionArray64()._is_unique(
+            negaxis, starts, parents, outlength
+        )
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if len(self._mask) == 0:
+            return self
+        return self.toIndexedOptionArray64()._unique(
+            negaxis, starts, parents, outlength
+        )
+
     def _argsort_next(
         self,
         negaxis,
