@@ -455,29 +455,6 @@ class NumpyArray(Content):
 
         return True if is_equal[0] == 1 else False
 
-    def _as_unique_subranges(self, offsets, length):
-        nplike = self.nplike
-
-        nextoffsets = ak._v2.index.Index64.zeros(length, nplike)
-        self._handle_error(
-            nplike[
-                "awkward_unique_ranges",
-                self._data.dtype.type,
-                offsets.dtype.type,
-                nextoffsets.dtype.type,
-            ](
-                self._data,
-                len(self._data),
-                offsets.to(nplike),
-                length,
-                nextoffsets.to(nplike),
-            )
-        )
-
-        out2 = self[0 : nextoffsets[-1]]
-        # FIXME: trim nextoffsets
-        return out2, nextoffsets
-
     def _as_unique_strings(self, offsets):
         nplike = self.nplike
 
