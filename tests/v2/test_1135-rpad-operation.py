@@ -8,7 +8,6 @@ import awkward as ak  # noqa: F401
 from awkward._v2.tmp_for_testing import v1_to_v2  # noqa: F401
 
 
-
 def test_rpad_and_clip_empty_array():
     empty = ak._v2.contents.emptyarray.EmptyArray()
 
