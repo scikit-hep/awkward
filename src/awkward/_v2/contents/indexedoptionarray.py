@@ -1204,8 +1204,6 @@ class IndexedOptionArray(Content):
                     mask.dtype.type,
                 ](index.to(self.nplike), mask.to(self.nplike), len(mask))
             )
-            # index = self.nplike.full(len(self.mask), -1)
-            # index[self.mask  == 1] = self.nplike.arange(len(index[self.mask  == 1]))
             next = self.project()._rpad(target, posaxis, depth, clip)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,

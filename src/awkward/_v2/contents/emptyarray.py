@@ -208,7 +208,9 @@ class EmptyArray(Content):
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise ValueError("axis exceeds the depth of this array")
+            raise np.AxisError(
+                "axis={0} exceeds the depth of this array({1})".format(axis, depth)
+            )
         else:
             return self.rpad_axis0(target, True)
 

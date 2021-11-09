@@ -963,20 +963,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def rpad_axis0(self, target, clip):
         if not clip and target < len(self):
             return self
-        # index = ak._v2.index.Index64.empty(target, self.nplike)
-
-        # self._handle_error(
-        #     self.nplike[
-        #         "awkward_index_rpad_and_clip_axis0",
-        #         index.dtype.type,
-        #     ](index.to(self.nplike), target, len(self))
-        # )
         shorter = min(target, len(self))
-        index = ak._v2.index.Index64(
-            self.nplike.append(
-                self.nplike.arange(shorter), self.nplike.full(target - shorter, -1)
-            )
-        )
+        npindex = self.nplike.full(target, -1, dtype=np.int64)
+        npindex[:shorter] = self.nplike.arange(shorter, dtype=np.int64)
+        index = ak._v2.index.Index64(npindex)
 
         next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             index,
@@ -986,11 +976,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
         return next.simplify_optiontype()
 
-    def rpad(self, length, axis):
-        return self._rpad(length, axis, 0, clip=False)
-
-    def rpad_and_clip(self, length, axis):
-        return self._rpad(length, axis, 0, clip=True)
+    def rpad(self, length, axis, clip=False):
+        return self._rpad(length, axis, 0, clip)
 
     def to_arrow(
         self,

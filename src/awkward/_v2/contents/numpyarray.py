@@ -698,12 +698,14 @@ class NumpyArray(Content):
             return self.toRegularArray()._rpad(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise ValueError("axis exceeds the depth of this array")
+            raise np.AxisError(
+                "axis={0} exceeds the depth of this array({1})".format(axis, depth)
+            )
         if not clip:
             if target < len(self):
                 return self
             else:
-                return self._rpad(target, posaxis, depth, True)
+                return self._rpad(target, posaxis, depth, clip=True)
         else:
             return self.rpad_axis0(target, clip=True)
 
