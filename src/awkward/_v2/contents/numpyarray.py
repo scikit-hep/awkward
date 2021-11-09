@@ -297,6 +297,32 @@ class NumpyArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def num(self, axis, depth=0):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out[0] = len(self)
+            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+        shape = []
+        reps = 1
+        size = len(self)
+        i = 0
+        while i < self._data.ndim - 1 and depth < posaxis:
+            shape.append(self.shape[i])
+            reps *= self.shape[i]
+            size = self.shape[i + 1]
+            i += 1
+            depth += 1
+        if posaxis > depth:
+            raise ValueError("'axis' out of range for 'num'")
+        tonum = ak._v2.index.Index64.empty(reps, self.nplike)
+        self._handle_error(
+            self.nplike["awkward_RegularArray_num", tonum.dtype.type](
+                tonum.to(self.nplike), size, reps
+            )
+        )
+        return ak._v2.contents.numpyarray.NumpyArray(tonum, None, self.parameters)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

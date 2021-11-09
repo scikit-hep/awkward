@@ -324,6 +324,9 @@ class BitMaskedArray(Content):
         else:
             return self
 
+    def num(self, axis, depth=0):
+        return self.toByteMaskedArray.num(axis, depth)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

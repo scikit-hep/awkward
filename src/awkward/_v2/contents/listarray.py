@@ -671,6 +671,31 @@ class ListArray(Content):
         else:
             raise AssertionError(repr(head))
 
+    def num(self, axis, depth=0):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out[0] = len(self)
+            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+        elif posaxis == depth + 1:
+            tonum = ak._v2.index.Index64.empty(len(self), self.nplike)
+            self._handle_error(
+                self.nplike[
+                    "awkward_ListArray_num",
+                    tonum.dtype.type,
+                    self._starts.dtype.type,
+                    self._stops.dtype.type,
+                ](
+                    tonum.to(self.nplike),
+                    self._starts.to(self.nplike),
+                    self._stops.to(self.nplike),
+                    len(self),
+                )
+            )
+            return ak._v2.contents.numpyarray.NumpyArray(tonum)
+        else:
+            return self.toListOffsetArray64(True).num(posaxis, depth)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

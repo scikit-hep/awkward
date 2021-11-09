@@ -371,6 +371,27 @@ class RecordArray(Content):
             )
             return next._getitem_next(nexthead, nexttail, advanced)
 
+    def num(self, axis, depth=0):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            single = ak._v2.index.Index64.empty(1, self.nplike)
+            single[0] = len(self)
+            singleton = ak._v2.contents.numpyarray.NumpyArray(single)
+            contents = [singleton] * len(self._contents)
+
+            record = ak._v2.contents.recordarray.RecordArray(
+                contents, self._fields, 1, None, self._parameters
+            )
+            return record[0]
+
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content.num(posaxis, depth))
+            return ak._v2.contents.recordarray.RecordArray(
+                contents, self._fields, self._length, None, self._parameters
+            )
+
     def mergeable(self, other, mergebool=True):
         if not _parameters_equal(self._parameters, other._parameters):
             return False
