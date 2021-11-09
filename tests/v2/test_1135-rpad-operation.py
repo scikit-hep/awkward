@@ -11,7 +11,6 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
-
 def test_rpad_and_clip_empty_array():
     empty = ak._v2.contents.emptyarray.EmptyArray()
     assert ak.to_list(empty) == []
