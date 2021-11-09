@@ -1027,7 +1027,6 @@ class ListArray(Content):
                         None,
                         None,
                     )
-                    print(next)
 
                     return ak._v2.contents.listarray.ListArray(
                         starts_,
