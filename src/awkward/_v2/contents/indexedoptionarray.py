@@ -715,29 +715,41 @@ class IndexedOptionArray(Content):
             ).simplify_optiontype()
 
         if isinstance(out, ak._v2.contents.ListOffsetArray):
-            # FIXME: move to kernel
-            nulls = []
-            for i in range(len(self._index)):
-                if self._index[i] < 0:
-                    nulls.append(parents[i])
+            newnulls = ak._v2.index.Index64.zeros(len(self._index), nplike)
+            len_newnulls = ak._v2.index.Index64.empty(1, nplike)
+            self._handle_error(
+                nplike[
+                    "awkward_IndexedArray_numnull_parents",
+                    newnulls.dtype.type,
+                    len_newnulls.dtype.type,
+                    self._index.dtype.type,
+                ](
+                    newnulls.to(nplike),
+                    len_newnulls.to(nplike),
+                    self._index.to(nplike),
+                    index_length,
+                )
+            )
 
-            newindex = ak._v2.index.Index64.zeros(out._offsets[-1] + len(nulls), nplike)
+            newindex = ak._v2.index.Index64.zeros(
+                out._offsets[-1] + len_newnulls[0], nplike
+            )
             newoffsets = ak._v2.index.Index64.zeros(len(out._offsets), nplike)
-            k = 0
-            ll = 0
-            shift = 0
-            newindex[0] = ll
-            newoffsets[0] = out._offsets[0]
-            for i in range(len(starts)):
-                for _j in range(out._offsets[i], out._offsets[i + 1]):
-                    newindex[k] = ll
-                    k += 1
-                    ll += 1
-                if parents[starts[i]] in nulls:
-                    newindex[k] = -1
-                    k += 1
-                    shift += 1
-                newoffsets[i + 1] = out._offsets[i + 1] + shift
+            self._handle_error(
+                nplike[
+                    "awkward_IndexedArray_unique_next_index_and_offsets_64",
+                    newindex.dtype.type,
+                    newoffsets.dtype.type,
+                    out._offsets.dtype.type,
+                    newnulls.dtype.type,
+                ](
+                    newindex.to(nplike),
+                    newoffsets.to(nplike),
+                    out._offsets.to(nplike),
+                    newnulls.to(nplike),
+                    len(starts),
+                )
+            )
 
             out = ak._v2.contents.IndexedOptionArray(
                 newindex[: newoffsets[-1]],
@@ -755,10 +767,15 @@ class IndexedOptionArray(Content):
 
         if isinstance(out, ak._v2.contents.NumpyArray):
             nextoutindex = ak._v2.index.Index64.empty(len(out) + 1, nplike)
-            # FIXME: move to kernel
-            for i in range(len(out)):
-                nextoutindex[i] = i
-            nextoutindex[-1] = -1
+            self._handle_error(
+                nplike[
+                    "awkward_IndexedArray_numnull_unique_64",
+                    nextoutindex.dtype.type,
+                ](
+                    nextoutindex.to(nplike),
+                    len(out),
+                )
+            )
 
             return ak._v2.contents.IndexedOptionArray(
                 nextoutindex,

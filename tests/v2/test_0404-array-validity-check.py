@@ -20,22 +20,21 @@ def test_BitMaskedArray():
         mask, content, valid_when=False, length=13, lsb_order=False
     )
     array = v1_to_v2(array)
-    # FIXME: 'BitMaskedArray' object has no attribute 'bytemask'
-    # assert np.asarray(array.bytemask()).tolist() == [
-    #     0,
-    #     0,
-    #     1,
-    #     1,
-    #     1,
-    #     0,
-    #     1,
-    #     0,
-    #     0,
-    #     0,
-    #     1,
-    #     1,
-    #     1,
-    # ]
+    assert np.asarray(array.mask_as_bool()).tolist() == [
+        True,
+        True,
+        False,
+        False,
+        False,
+        True,
+        False,
+        True,
+        True,
+        True,
+        False,
+        False,
+        False,
+    ]
     assert np.asarray(array.toByteMaskedArray().mask).tolist() == [
         0,
         0,

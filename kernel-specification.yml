@@ -1303,6 +1303,52 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_IndexedArray_numnull_parents
+    specializations:
+      - name: awkward_IndexedArray32_numnull_parents
+        args:
+          - {name: numnull, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+      - name: awkward_IndexedArray64_numnull_parents
+        args:
+          - {name: numnull, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+      - name: awkward_IndexedArrayU32_numnull_parents
+        args:
+          - {name: numnull, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_IndexedArray_numnull_parents(numnull, fromindex, lenindex):
+          tolength[0] = 0
+          for i in range(lenindex):
+              if fromindex[i] < 0:
+                  numnull[i] = 1
+                  tolength[0] = tolength[0] + 1
+    automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_IndexedArray_numnull_unique_64
+    specializations:
+      - name: awkward_IndexedArray_numnull_unique_64
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: lenindex, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_IndexedArray_numnull_unique(numnull, fromindex, lenindex):
+          for i in range(lenindex):
+              toindex[i] = i
+          toindex[-1] = -1
+    automatic-tests: true
+    manual-tests: []
+
   - name: awkward_IndexedArray_index_of_nulls
     specializations:
       - name: awkward_IndexedArray32_index_of_nulls
@@ -1428,6 +1474,38 @@ kernels:
               outoffsets[i] = starts[i]
           outoffsets[startslength] = outindexlength
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_IndexedArray_unique_next_index_and_offsets_64
+    specializations:
+      - name: awkward_IndexedArray_unique_next_index_and_offsets_64
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: tooffsets, type: "List[int64_t]", dir: out}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
+          - {name: fromnulls, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
+          - {name: startslength, type: "int64_t", dir: in, role: reducer-startslength}
+    description: null
+    definition: |
+      def awkward_IndexedArray_unique_next_index_and_offsets_64(
+          toindex, tooffsets, fromoffsets, fromnulls, startslength
+      ):
+          k = 0
+          ll = 0
+          shift = 0
+          toindex[0] = ll
+          tooffsets[0] = fromoffsets[0]
+          for i in range(startslength):
+              for _j in range(fromoffsets[i], fromoffsets[i + 1]):
+                  toindex[k] = ll
+                  k += 1
+                  ll += 1
+                  if fromnulls[k] == 1:
+                      toindex[k] = -1
+                      k += 1
+                      shift += 1
+                  tooffsets[i + 1] = fromoffsets[i + 1] + shift
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64
