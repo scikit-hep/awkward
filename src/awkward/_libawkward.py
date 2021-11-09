@@ -129,11 +129,3 @@ ArrayBuilder_endrecord = lib.awkward_ArrayBuilder_endrecord
 ArrayBuilder_endrecord.name = "ArrayBuilder.endrecord"
 ArrayBuilder_endrecord.argtypes = [ctypes.c_voidp]
 ArrayBuilder_endrecord.restype = ctypes.c_uint8
-
-# uint8_t awkward_ArrayBuilder_append_nowrap(void* fillablearray,
-#                                            const void* shared_ptr_ptr,
-#                                            int64_t at);
-ArrayBuilder_append_nowrap = lib.awkward_ArrayBuilder_append_nowrap
-ArrayBuilder_append_nowrap.name = "ArrayBuilder.append_nowrap"
-ArrayBuilder_append_nowrap.argtypes = [ctypes.c_voidp, ctypes.c_voidp, ctypes.c_int64]
-ArrayBuilder_append_nowrap.restype = ctypes.c_uint8

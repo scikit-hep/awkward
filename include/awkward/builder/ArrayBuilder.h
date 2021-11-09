@@ -364,13 +364,6 @@ extern "C" {
   /// {@link awkward::ArrayBuilder#endrecord ArrayBuilder::endrecord}.
   LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_endrecord(void* arraybuilder);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#append_nowrap ArrayBuilder::append_nowrap}.
-  LIBAWKWARD_EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_append_nowrap(void* arraybuilder,
-                                       const void* shared_ptr_ptr,
-                                       int64_t at);
 }
 
 #endif // AWKWARD_ARRAYBUILDER_H_
