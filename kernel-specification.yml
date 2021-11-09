@@ -1325,7 +1325,7 @@ kernels:
           - {name: lenindex, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      def awkward_IndexedArray_numnull_parents(numnull, fromindex, lenindex):
+      def awkward_IndexedArray_numnull_parents(numnull, tolength, fromindex, lenindex):
           tolength[0] = 0
           for i in range(lenindex):
               if fromindex[i] < 0:
