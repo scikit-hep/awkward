@@ -672,15 +672,20 @@ class NumpyArray(Content):
 
             outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
 
-            # FIXME: move it to a kernel
-            j = 0
-            for i in range(len(nextoffsets)):
-                outoffsets[j] = nextoffsets[i]
-                while j < len(starts) - 1 and starts[j] == starts[j + 1]:
-                    outoffsets[j + 1] = nextoffsets[i]
-                    j = j + 1
-                j = j + 1
-            outoffsets[-1] = nextoffsets[-1]
+            self._handle_error(
+                nplike[
+                    "awkward_unique_offsets",
+                    outoffsets.dtype.type,
+                    nextoffsets.dtype.type,
+                    starts.dtype.type,
+                ](
+                    outoffsets.to(nplike),
+                    len(nextoffsets),
+                    nextoffsets.to(nplike),
+                    starts.to(nplike),
+                    len(starts),
+                )
+            )
 
             return ak._v2.contents.ListOffsetArray(
                 outoffsets,

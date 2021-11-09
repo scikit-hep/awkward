@@ -937,13 +937,13 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 branch, depth = self.branch_depth
                 if branch:
                     if negaxis <= 0:
-                        raise ValueError(
+                        raise np.AxisError(
                             "cannot use non-negative axis on a nested list structure "
                             "of variable depth (negative axis counts from the leaves "
                             "of the tree; non-negative from the root)"
                         )
                     if negaxis > depth:
-                        raise ValueError(
+                        raise np.AxisError(
                             "cannot use axis={0} on a nested list structure that splits into "
                             "different depths, the minimum of which is depth={1} from the leaves".format(
                                 axis, depth
@@ -953,9 +953,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     if negaxis <= 0:
                         negaxis = negaxis + depth
                     if not (0 < negaxis and negaxis <= depth):
-                        raise ValueError(
-                            "axis={0} exceeds the depth of the nested list structure "
-                            "(which is {1})".format(axis, depth)
+                        raise np.AxisError(
+                            "axis={0} exceeds the depth of this array ({1})".format(
+                                axis, depth
+                            )
                         )
 
             starts = ak._v2.index.Index64.zeros(1, self.nplike)
@@ -963,7 +964,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
             return self._unique(negaxis, starts, parents, 1)
 
-        raise ValueError(
+        raise np.AxisError(
             "unique expects axis 'None' or '-1', got axis={0} that is not supported yet".format(
                 axis
             )

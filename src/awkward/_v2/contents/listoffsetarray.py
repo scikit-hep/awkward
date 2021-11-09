@@ -654,11 +654,9 @@ class ListOffsetArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ValueError("array with strings can only be sorted with axis=-1")
-            if len(self._offsets) - 1 != len(parents):
-                raise ValueError(
-                    "length of self._offsets_ - 1 is not equal to parents length"
-                )
+                raise np.AxisError("array with strings can only be sorted with axis=-1")
+
+            assert len(self._offsets) - 1 == len(parents)
 
             nextlen = self._offsets[-1] - self._offsets[0]
             maxcount = ak._v2.index.Index64.empty(1, nplike)

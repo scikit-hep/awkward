@@ -707,14 +707,12 @@ class IndexedOptionArray(Content):
                 )
             )
 
-            out = ak._v2.contents.IndexedOptionArray(
+            return ak._v2.contents.IndexedOptionArray(
                 nextoutindex,
                 out,
                 None,
                 self._parameters,
             ).simplify_optiontype()
-
-            return out
 
         if isinstance(out, ak._v2.contents.ListOffsetArray):
             # FIXME: move to kernel
@@ -748,13 +746,12 @@ class IndexedOptionArray(Content):
                 self._parameters,
             ).simplify_optiontype()
 
-            out = ak._v2.contents.ListOffsetArray(
+            return ak._v2.contents.ListOffsetArray(
                 newoffsets,
                 out,
                 None,
                 self._parameters,
             )
-            return out
 
         if isinstance(out, ak._v2.contents.NumpyArray):
             nextoutindex = ak._v2.index.Index64.empty(len(out) + 1, nplike)
@@ -763,13 +760,12 @@ class IndexedOptionArray(Content):
                 nextoutindex[i] = i
             nextoutindex[-1] = -1
 
-            out = ak._v2.contents.IndexedOptionArray(
+            return ak._v2.contents.IndexedOptionArray(
                 nextoutindex,
                 out,
                 None,
                 self._parameters,
             ).simplify_optiontype()
-            return out
 
         if inject_nones:
             out = ak._v2.contents.RegularArray(
