@@ -989,6 +989,22 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
 }
 
 namespace {
+  /// @brief Wraps a Python-based array to be referenced by IndexedBuilder.
+  class PyReferencedArray: public ak::ReferencedArray {
+  public:
+    PyReferencedArray(py::object array)
+      : ak::ReferencedArray(array.attr("id").cast<int64_t>())
+      , array_(array) { }
+
+    const py::object
+      array() const {
+        return array_;
+      }
+
+  private:
+    py::object array_;
+  };
+
   /// @brief Turns the accumulated data into the JSON string of a Form, a
   /// length, and a dict of NumPy arrays container for ak.from_buffers.
   class NumpyBuffersContainer: public ak::BuffersContainer {
@@ -1004,6 +1020,11 @@ namespace {
         py::buffer_info rawinfo = rawarray.request();
         std::memcpy(rawinfo.ptr, source, num_bytes);
         container_[py::str(name)] = pyarray;
+      }
+
+    std::string
+      include_buffers_of(const ak::ReferencedArray& array, const std::string& form_key) override {
+        return "";
       }
 
   private:
