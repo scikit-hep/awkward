@@ -470,6 +470,19 @@ class UnionArray(Content):
         else:
             return UnionArray(tags, index, contents, self.identifier, self.parameters)
 
+    def num(self, axis, depth=0):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out[0] = len(self)
+            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content.num(posaxis, depth))
+            out = UnionArray(self._tags, self._index, contents, None, self._parameters)
+            return out.simplify_uniontype(True, False)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

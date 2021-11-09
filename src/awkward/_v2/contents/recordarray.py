@@ -383,7 +383,6 @@ class RecordArray(Content):
                 contents, self._fields, 1, None, self._parameters
             )
             return record[0]
-
         else:
             contents = []
             for content in self._contents:

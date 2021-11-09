@@ -534,7 +534,7 @@ class ListOffsetArray(Content):
             next = self._content.num(posaxis, depth + 1)
             offsets = self._compact_offsets64(True)
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
-                next, offsets, None, self.parameters
+                offsets, next, None, self.parameters
             )
 
     def mergeable(self, other, mergebool):

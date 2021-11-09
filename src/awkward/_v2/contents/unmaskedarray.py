@@ -199,6 +199,17 @@ class UnmaskedArray(Content):
         else:
             return self
 
+    def num(self, axis, depth=0):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out[0] = len(self)
+            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+        else:
+            return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                self._content.num(posaxis, depth), None, self._parameters
+            )
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

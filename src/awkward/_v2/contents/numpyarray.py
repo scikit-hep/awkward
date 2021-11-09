@@ -315,13 +315,16 @@ class NumpyArray(Content):
             depth += 1
         if posaxis > depth:
             raise ValueError("'axis' out of range for 'num'")
+
         tonum = ak._v2.index.Index64.empty(reps, self.nplike)
         self._handle_error(
             self.nplike["awkward_RegularArray_num", tonum.dtype.type](
                 tonum.to(self.nplike), size, reps
             )
         )
-        return ak._v2.contents.numpyarray.NumpyArray(tonum, None, self.parameters)
+        return ak._v2.contents.numpyarray.NumpyArray(
+            tonum.data.reshape(shape), None, self.parameters
+        )
 
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):

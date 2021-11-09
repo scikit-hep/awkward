@@ -407,13 +407,13 @@ class IndexedOptionArray(Content):
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
-
-        numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
-        nextcarry, outindex = self._nextcarry_outindex(numnull)
-
+        if posaxis == depth:
+            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out[0] = len(self)
+            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+        _, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
         next = self._content._carry(nextcarry, False, NestedIndexError)
         out = next.num(posaxis, depth)
-
         out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             outindex, out, parameters=self.parameters
         )
