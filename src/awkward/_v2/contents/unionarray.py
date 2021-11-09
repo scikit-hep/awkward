@@ -788,6 +788,23 @@ class UnionArray(Content):
                     return sub
             return ""
 
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content._rpad(target, posaxis, depth, clip))
+            out = ak._v2.contents.unionarray.UnionArray(
+                self.tags,
+                self.index,
+                contents,
+                identifier=self._identifier,
+                parameters=self._parameters,
+            )
+            return out.simplify_uniontype(True, False)
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         nptags = self._tags.to(numpy)
         npindex = self._index.to(numpy)

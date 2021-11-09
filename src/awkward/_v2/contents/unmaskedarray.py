@@ -387,6 +387,19 @@ class UnmaskedArray(Content):
         else:
             return self.content.validityerror(path + ".content")
 
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        elif posaxis == depth + 1:
+            return self._content._rpad(target, posaxis, depth, clip)
+        else:
+            return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                self._content._rpad(target, posaxis, depth, clip),
+                None,
+                self._parameters,
+            )
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self._content._to_arrow(pyarrow, self, None, length, options)
 

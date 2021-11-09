@@ -412,7 +412,7 @@ class IndexedOptionArray(Content):
         if isinstance(
             other,
             (
-                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.emptyarray.EmptyArray,
                 ak._v2.contents.unionarray.UnionArray,
             ),
         ):
@@ -1397,6 +1397,39 @@ class IndexedOptionArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self.content.validityerror(path + ".content")
+
+    def bytemask(self):
+        out = ak._v2.index.Index8.empty(len(self.index), self.nplike)
+        self._handle_error(
+            self.nplike[
+                "awkward_IndexedArray_mask", out.dtype.type, self._index.dtype.type
+            ](out.to(self.nplike), self._index.to(self.nplike), len(self._index))
+        )
+        return out
+
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        elif posaxis == depth + 1:
+            mask = self.bytemask()
+            index = ak._v2.index.Index64.empty(len(mask), self.nplike)
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+                    index.dtype.type,
+                    mask.dtype.type,
+                ](index.to(self.nplike), mask.to(self.nplike), len(mask))
+            )
+            next = self.project()._rpad(target, posaxis, depth, clip)
+            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                index,
+                next,
+                None,
+                self._parameters,
+            ).simplify_optiontype()
+        else:
+            return self.project()._rpad(target, posaxis, depth, clip)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         index = numpy.array(self._index, copy=True)

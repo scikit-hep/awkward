@@ -211,6 +211,15 @@ class EmptyArray(Content):
     def _validityerror(self, path):
         return ""
 
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis != depth:
+            raise np.AxisError(
+                "axis={0} exceeds the depth of this array({1})".format(axis, depth)
+            )
+        else:
+            return self.rpad_axis0(target, True)
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(

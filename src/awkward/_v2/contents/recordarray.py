@@ -640,6 +640,30 @@ class RecordArray(Content):
                 return sub
         return ""
 
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content._rpad(target, posaxis, depth, clip))
+            if len(contents) == 0:
+                return ak._v2.contents.recordarray.RecordArray(
+                    contents,
+                    self._fields,
+                    len(self),
+                    identifier=self._identifier,
+                    parameters=self._parameters,
+                )
+            else:
+                return ak._v2.contents.recordarray.RecordArray(
+                    contents,
+                    self._fields,
+                    identifier=self._identifier,
+                    parameters=self._parameters,
+                )
+
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         values = [
             (x if len(x) == length else x[:length])._to_arrow(

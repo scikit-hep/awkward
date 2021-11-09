@@ -1006,6 +1006,34 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def dimension_optiontype(self):
         return self.Form.dimension_optiontype.__get__(self)
 
+    def rpad_axis0(self, target, clip):
+        if not clip and target < len(self):
+            return self
+        index = ak._v2.index.Index64.empty(target, self.nplike)
+
+        self._handle_error(
+            self.nplike[
+                "awkward_index_rpad_and_clip_axis0",
+                index.dtype.type,
+            ](index.to(self.nplike), target, len(self))
+        )
+        # TODO: Replace the kernel call with below code once typtracer supports arange
+        # shorter = min(target, len(self))
+        # npindex = self.nplike.full(target, -1, dtype=np.int64)
+        # npindex[:shorter] = self.nplike.arange(shorter, dtype=np.int64)
+        # index = ak._v2.index.Index64(npindex)
+
+        next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            index,
+            self,
+            None,
+            self._parameters,
+        )
+        return next.simplify_optiontype()
+
+    def rpad(self, length, axis, clip=False):
+        return self._rpad(length, axis, 0, clip)
+
     def to_arrow(
         self,
         list_to32=False,

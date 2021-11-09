@@ -42,6 +42,7 @@ GTAGS
 GPATH
 GRTAGS
 .vscode
+pyrightconfig.json
 # ...
 
 ############################################################# LaTeX
