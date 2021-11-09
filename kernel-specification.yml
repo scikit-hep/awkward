@@ -1342,7 +1342,7 @@ kernels:
           - {name: lenindex, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      def awkward_IndexedArray_numnull_unique(numnull, fromindex, lenindex):
+      def awkward_IndexedArray_numnull_unique_64(toindex, lenindex):
           for i in range(lenindex):
               toindex[i] = i
           toindex[-1] = -1
