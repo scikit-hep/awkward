@@ -18,7 +18,6 @@
 #include "awkward/builder/ListBuilder.h"
 #include "awkward/builder/TupleBuilder.h"
 #include "awkward/builder/RecordBuilder.h"
-#include "awkward/builder/IndexedBuilder.h"
 #include "awkward/builder/Complex128Builder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
@@ -989,22 +988,6 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
 }
 
 namespace {
-  /// @brief Wraps a Python-based array to be referenced by IndexedBuilder.
-  class PyReferencedArray: public ak::ReferencedArray {
-  public:
-    PyReferencedArray(py::object array)
-      : ak::ReferencedArray(array.attr("id").cast<int64_t>())
-      , array_(array) { }
-
-    const py::object
-      array() const {
-        return array_;
-      }
-
-  private:
-    py::object array_;
-  };
-
   /// @brief Turns the accumulated data into the JSON string of a Form, a
   /// length, and a dict of NumPy arrays container for ak.from_buffers.
   class NumpyBuffersContainer: public ak::BuffersContainer {
@@ -1020,11 +1003,6 @@ namespace {
         py::buffer_info rawinfo = rawarray.request();
         std::memcpy(rawinfo.ptr, source, num_bytes);
         container_[py::str(name)] = pyarray;
-      }
-
-    std::string
-      include_buffers_of(const ak::ReferencedArray& array, const std::string& form_key) override {
-        return "";
       }
 
   private:
@@ -1111,122 +1089,6 @@ namespace {
             ndim,
             shape,
             strides)));
-    }
-    else if (builder.get()->classname() == "IndexedGenericBuilder") {
-      const std::shared_ptr<const ak::IndexedGenericBuilder> raw = std::dynamic_pointer_cast<const ak::IndexedGenericBuilder>(builder);
-
-      if (raw.get()->hasnull()) {
-        return py::module::import("awkward").attr("layout").attr("IndexedOptionArray64")(
-          py::module::import("awkward").attr("layout").attr("Index64")(
-            py::array_t<int64_t>(
-              raw.get()->buffer().length(),
-              reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-          box(raw.get()->array()));
-      }
-      else {
-        return py::module::import("awkward").attr("layout").attr("IndexedArray64")(
-          py::module::import("awkward").attr("layout").attr("Index64")(
-            py::array_t<int64_t>(
-              raw.get()->buffer().length(),
-              reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-          box(raw.get()->array()));
-      }
-    }
-    else if (builder.get()->classname() == "IndexedI32Builder") {
-      const std::shared_ptr<const ak::IndexedI32Builder> raw = std::dynamic_pointer_cast<const ak::IndexedI32Builder>(builder);
-
-      if (raw.get()->hasnull()) {
-        return py::module::import("awkward").attr("layout").attr("IndexedOptionArray64")(
-          py::module::import("awkward").attr("layout").attr("Index64")(
-            py::array_t<int64_t>(
-              raw.get()->buffer().length(),
-              reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-          box(raw.get()->array().get()->content()),
-          py::none(),
-          parameters2dict(raw.get()->array().get()->content().get()->parameters()));
-      }
-      else {
-        return py::module::import("awkward").attr("layout").attr("IndexedArray64")(
-          py::module::import("awkward").attr("layout").attr("Index64")(
-            py::array_t<int64_t>(
-              raw.get()->buffer().length(),
-              reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-          box(raw.get()->array()),
-          py::none(),
-          parameters2dict(raw.get()->array().get()->content().get()->parameters()));
-      }
-    }
-    else if (builder.get()->classname() == "IndexedIU32Builder") {
-      const std::shared_ptr<const ak::IndexedIU32Builder> raw = std::dynamic_pointer_cast<const ak::IndexedIU32Builder>(builder);
-
-      if (raw.get()->hasnull()) {
-        return py::module::import("awkward").attr("layout").attr("IndexedOptionArray64")(
-          py::module::import("awkward").attr("layout").attr("Index64")(
-            py::array_t<int64_t>(
-              raw.get()->buffer().length(),
-              reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-          box(raw.get()->array().get()->content()),
-          py::none(),
-          parameters2dict(raw.get()->array().get()->content().get()->parameters()));
-      }
-      else {
-        return py::module::import("awkward").attr("layout").attr("IndexedArray64")(
-          py::module::import("awkward").attr("layout").attr("Index64")(
-            py::array_t<int64_t>(
-              raw.get()->buffer().length(),
-              reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-          box(raw.get()->array()),
-          py::none(),
-          parameters2dict(raw.get()->array().get()->content().get()->parameters()));
-      }
-    }
-    else if (builder.get()->classname() == "IndexedI64Builder") {
-      const std::shared_ptr<const ak::IndexedI64Builder> raw = std::dynamic_pointer_cast<const ak::IndexedI64Builder>(builder);
-
-      if (raw.get()->hasnull()) {
-        return py::module::import("awkward").attr("layout").attr("IndexedOptionArray64")(
-          py::module::import("awkward").attr("layout").attr("Index64")(
-            py::array_t<int64_t>(
-              raw.get()->buffer().length(),
-              reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-          box(raw.get()->array().get()->content()),
-          py::none(),
-          parameters2dict(raw.get()->array().get()->content().get()->parameters()));
-      }
-      else {
-        return py::module::import("awkward").attr("layout").attr("IndexedArray64")(
-          py::module::import("awkward").attr("layout").attr("Index64")(
-            py::array_t<int64_t>(
-              raw.get()->buffer().length(),
-              reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-          box(raw.get()->array().get()->content()),
-          py::none(),
-          parameters2dict(raw.get()->array().get()->content().get()->parameters()));
-      }
-    }
-    else if (builder.get()->classname() == "IndexedIO32Builder") {
-      const std::shared_ptr<const ak::IndexedI64Builder> raw = std::dynamic_pointer_cast<const ak::IndexedI64Builder>(builder);
-
-      return py::module::import("awkward").attr("layout").attr("IndexedOptionArray64")(
-        py::module::import("awkward").attr("layout").attr("Index64")(
-          py::array_t<int64_t>(
-            raw.get()->buffer().length(),
-            reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-        box(raw.get()->array().get()->content()),
-        py::none(),
-        parameters2dict(raw.get()->array().get()->content().get()->parameters()));
-    }
-    else if (builder.get()->classname() == "IndexedIO64Builder") {
-      const std::shared_ptr<const ak::IndexedIO64Builder> raw = std::dynamic_pointer_cast<const ak::IndexedIO64Builder>(builder);
-
-      return py::module::import("awkward").attr("layout").attr("IndexedOptionArray64")(
-        py::module::import("awkward").attr("layout").attr("Index64")(
-          py::array_t<int64_t>(
-            raw.get()->buffer().length(),
-            reinterpret_cast<int64_t*>(raw.get()->buffer().ptr().get()))),
-        box(raw.get()->array().get()->content()),
-        py::none(),
-        parameters2dict(raw.get()->array().get()->content().get()->parameters()));
     }
     else if (builder.get()->classname() == "Int64Builder") {
       const std::shared_ptr<const ak::Int64Builder> raw = std::dynamic_pointer_cast<const ak::Int64Builder>(builder);

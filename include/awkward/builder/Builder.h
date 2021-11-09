@@ -15,21 +15,6 @@ namespace awkward {
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
 
-  /// @class ReferencedArray
-  ///
-  /// @brief Wraps the array that is referenced by an IndexedBuilder,
-  /// so that the array can be purely defined in Python.
-  class ReferencedArray {
-  public:
-    ReferencedArray(int64_t array_id): array_id_(array_id) { };
-
-    const int64_t
-      array_id() const { return array_id_; }
-
-  private:
-    int64_t array_id_;
-  };
-
   /// @class BuffersContainer
   ///
   /// @brief Abstract class to represent the output of ak.to_buffers.
@@ -42,9 +27,6 @@ namespace awkward {
     /// In Python, this allocates a NumPy array and copies data into it.
     virtual void
       copy_buffer(const std::string& name, const void* source, int64_t num_bytes) = 0;
-
-    virtual std::string
-      include_buffers_of(const ReferencedArray& array, const std::string& form_key) = 0;
   };
 
   /// @class Builder
@@ -173,14 +155,6 @@ namespace awkward {
     /// @brief Ends a record.
     virtual const BuilderPtr
       endrecord() = 0;
-
-    /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    virtual const BuilderPtr
-      append(const ContentPtr& array, int64_t at) = 0;
   };
 }
 

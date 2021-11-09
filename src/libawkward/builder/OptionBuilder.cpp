@@ -285,19 +285,6 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
-  OptionBuilder::append(const ContentPtr& array, int64_t at) {
-    if (!content_.get()->active()) {
-      int64_t length = content_.get()->length();
-      maybeupdate(content_.get()->append(array, at));
-      index_.append(length);
-    }
-    else {
-      content_.get()->append(array, at);
-    }
-    return shared_from_this();
-  }
-
   void
   OptionBuilder::maybeupdate(const BuilderPtr& tmp) {
     if (tmp.get() != content_.get()) {

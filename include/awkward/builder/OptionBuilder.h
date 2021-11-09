@@ -114,9 +114,6 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const BuilderPtr
-      append(const ContentPtr& array, int64_t at) override;
-
     const GrowableBuffer<int64_t>& buffer() const { return index_; }
 
     GrowableBuffer<int64_t>& index() { return index_; }

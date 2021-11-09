@@ -14,7 +14,6 @@
 #include "awkward/builder/ListBuilder.h"
 #include "awkward/builder/TupleBuilder.h"
 #include "awkward/builder/RecordBuilder.h"
-#include "awkward/builder/IndexedBuilder.h"
 #include "awkward/builder/Complex128Builder.h"
 
 #include "awkward/builder/UnionBuilder.h"
@@ -513,68 +512,4 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
-  UnionBuilder::append(const ContentPtr& array, int64_t at) {
-    if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (IndexedGenericBuilder* raw =
-          dynamic_cast<IndexedGenericBuilder*>(content.get())) {
-          if (raw->arrayptr() == array.get()) {
-            tofill = content;
-            break;
-          }
-        }
-        else if (IndexedI32Builder* raw =
-          dynamic_cast<IndexedI32Builder*>(content.get())) {
-          if (raw->arrayptr() == array.get()) {
-            tofill = content;
-            break;
-          }
-        }
-        else if (IndexedIU32Builder* raw =
-          dynamic_cast<IndexedIU32Builder*>(content.get())) {
-          if (raw->arrayptr() == array.get()) {
-            tofill = content;
-            break;
-          }
-        }
-        else if (IndexedI64Builder* raw =
-          dynamic_cast<IndexedI64Builder*>(content.get())) {
-          if (raw->arrayptr() == array.get()) {
-            tofill = content;
-            break;
-          }
-        }
-        else if (IndexedIO32Builder* raw =
-          dynamic_cast<IndexedIO32Builder*>(content.get())) {
-          if (raw->arrayptr() == array.get()) {
-            tofill = content;
-            break;
-          }
-        }
-        else if (IndexedIO64Builder* raw =
-          dynamic_cast<IndexedIO64Builder*>(content.get())) {
-          if (raw->arrayptr() == array.get()) {
-            tofill = content;
-            break;
-          }
-        }
-        i++;
-      }
-      if (tofill.get() == nullptr) {
-        tofill = IndexedGenericBuilder::fromnulls(options_, 0, array);
-        contents_.push_back(tofill);
-      }
-      int64_t length = tofill.get()->length();
-      tofill.get()->append(array, at);
-      tags_.append(i);
-      index_.append(length);
-    }
-    else {
-      contents_[(size_t)current_].get()->append(array, at);
-    }
-    return shared_from_this();
-  }
 }

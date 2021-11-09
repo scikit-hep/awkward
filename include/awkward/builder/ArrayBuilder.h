@@ -230,15 +230,6 @@ namespace awkward {
 
     void builder_update(BuilderPtr builder) { builder_ = builder; }
 
-    /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data, without
-    /// handling negative indexing or bounds-checking.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    void
-      append_nowrap(const ContentPtr& array, int64_t at);
-
     /// @brief Internal function to replace the root node of the ArrayBuilder's
     /// Builder tree with a new root.
     void

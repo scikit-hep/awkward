@@ -15,7 +15,6 @@
 #include "awkward/builder/ListBuilder.h"
 #include "awkward/builder/TupleBuilder.h"
 #include "awkward/builder/RecordBuilder.h"
-#include "awkward/builder/IndexedBuilder.h"
 
 #include "awkward/builder/UnknownBuilder.h"
 
@@ -200,12 +199,4 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  const BuilderPtr
-  UnknownBuilder::append(const ContentPtr& array, int64_t at) {
-    BuilderPtr out = IndexedGenericBuilder::fromnulls(options_,
-                                                      nullcount_,
-                                                      array);
-    out.get()->append(array, at);
-    return out;
-  }
 }
