@@ -12,7 +12,10 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
-@pytest.mark.skip(reason="ListOffsetArray 'offsets' must be an Index with dtype in (int32, uint32, int64)")
+
+@pytest.mark.skip(
+    reason="ListOffsetArray 'offsets' must be an Index with dtype in (int32, uint32, int64)"
+)
 def test_ByteMaskedArray_num():
     content = ak.from_iter(
         [
@@ -51,6 +54,7 @@ def test_emptyarray():
     assert ak.to_list(array.num(1)) == []
     assert ak.to_list(array.num(2)) == []
 
+
 @pytest.mark.skip(reason="unimplemented")
 def test_numpyarray():
     array = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
@@ -64,6 +68,7 @@ def test_numpyarray():
     with pytest.raises(ValueError) as err:
         array.num(4)
     assert str(err.value).startswith("'axis' out of range for 'num'")
+
 
 @pytest.mark.skip(reason="unimplemented")
 def test_regulararray():
@@ -82,7 +87,10 @@ def test_regulararray():
         array.num(4)
     assert str(err.value).startswith("'axis' out of range for 'num'")
 
-@pytest.mark.skip(reason="ListOffsetArray 'offsets' must be an Index with dtype in (int32, uint32, int64)")
+
+@pytest.mark.skip(
+    reason="ListOffsetArray 'offsets' must be an Index with dtype in (int32, uint32, int64)"
+)
 def test_listarray():
     content = ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
     starts = ak.layout.Index64(np.array([0, 3, 3], dtype=np.int64))
@@ -113,7 +121,10 @@ def test_listarray():
         array.num(4)
     assert str(err.value).startswith("'axis' out of range for 'num'")
 
-@pytest.mark.skip(reason="ListOffsetArray 'offsets' must be an Index with dtype in (int32, uint32, int64)")
+
+@pytest.mark.skip(
+    reason="ListOffsetArray 'offsets' must be an Index with dtype in (int32, uint32, int64)"
+)
 def test_listoffsetarray():
     content = ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
@@ -143,7 +154,10 @@ def test_listoffsetarray():
         array.num(4)
     assert str(err.value).startswith("'axis' out of range for 'num'")
 
-@pytest.mark.skip(reason="ListOffsetArray 'offsets' must be an Index with dtype in (int32, uint32, int64)")
+
+@pytest.mark.skip(
+    reason="ListOffsetArray 'offsets' must be an Index with dtype in (int32, uint32, int64)"
+)
 def test_indexedarray():
     content = ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
@@ -177,6 +191,7 @@ def test_indexedarray():
     with pytest.raises(ValueError) as err:
         array.num(4)
     assert str(err.value).startswith("'axis' out of range for 'num'")
+
 
 @pytest.mark.skip(reason="unimplemented")
 def test_indexedoptionarray():
@@ -244,7 +259,7 @@ def test_recordarray():
     )
 
     array = v1_to_v2(array)
-    
+
     assert ak.to_list(array.num(0)) == {"x": 4, "y": 4}
     assert ak.to_list(array.num(1)) == [
         {"x": 3, "y": 0},
@@ -274,6 +289,7 @@ def test_recordarray():
         {"x": 1, "y": 3},
     ]
     assert ak.to_list(array.num(1)[2]) == {"x": 1, "y": 2}
+
 
 @pytest.mark.skip(reason="unimplemented")
 def test_unionarray():
@@ -335,6 +351,7 @@ def test_array_3d():
         assert ak.num(array, axis=-4)
     assert str(err.value).startswith("axis == -4 exceeds the depth == 3 of this array")
 
+
 @pytest.mark.skip(reason="unimplemented")
 def test_list_array():
     array = ak.Array(np.arange(3 * 5 * 2).reshape(3, 5, 2).tolist())
@@ -361,6 +378,7 @@ def test_list_array():
         assert ak.num(array, axis=-4)
     assert str(err.value).startswith("axis == -4 exceeds the depth == 3 of this array")
 
+
 @pytest.mark.skip(reason="unimplemented")
 def test_record_array():
     array = ak.Array(
@@ -386,6 +404,7 @@ def test_record_array():
         {"x": 2, "y": [0, 1, 2]},
         {"x": 3, "y": [0, 1, 2, 3]},
     ]
+
 
 @pytest.mark.skip(reason="unimplemented")
 def test_record_array_axis_out_of_range():
