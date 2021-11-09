@@ -965,8 +965,23 @@ class ListArray(Content):
             if posaxis == depth:
                 return self.rpad_axis0(target, clip)
             elif posaxis == depth + 1:
-                min_ = self.nplike.min(self._stops.data - self._starts.data)
-                if target < min_:
+                min_ = ak._v2.index.Index64.empty(1, self.nplike)
+                self._handle_error(
+                    self.nplike[
+                        "awkward_ListArray_min_range",
+                        min_.dtype.type,
+                        self._starts.dtype.type,
+                        self._stops.dtype.type,
+                    ](
+                        min_.to(self.nplike),
+                        self._starts.to(self.nplike),
+                        self._stops.to(self.nplike),
+                        len(self._starts),
+                    )
+                )
+                # TODO: Replace the kernel call with below code once typtracer supports '-'
+                # min_ = self.nplike.min(self._stops.data - self._starts.data)
+                if target < min_[0]:
                     return self
                 else:
                     tolength = ak._v2.index.Index64.zeros(1, self.nplike)
