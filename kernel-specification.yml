@@ -1331,7 +1331,7 @@ kernels:
               if fromindex[i] < 0:
                   numnull[i] = 1
                   tolength[0] = tolength[0] + 1
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_IndexedArray_numnull_unique_64
@@ -1346,7 +1346,7 @@ kernels:
           for i in range(lenindex):
               toindex[i] = i
           toindex[-1] = -1
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_IndexedArray_index_of_nulls
