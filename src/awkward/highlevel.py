@@ -2644,66 +2644,17 @@ class ArrayBuilder(Iterable, Sized):
         """
         self._layout.endrecord()
 
-    def append(self, obj, at=None):
+    def append(self, obj):
         """
         Args:
-            obj: The object to append.
+            obj (anything #ak.from_iter recognizes): The object to append.
             at (None or int): which value to select from `obj` if `obj` is
                 an #ak.Array.
 
-        Appends any type of object, which can be a shorthand for #null,
-        #boolean, #integer, #real, #bytestring, or #string, but also
-        an #ak.Array or #ak.Record to *reference* values from an existing
-        dataset, or any Python object to *convert* to Awkward Array.
-
-        If `obj` is an #ak.Array or #ak.Record, the output will be an
-        #ak.layout.IndexedArray64 (or #ak.layout.IndexedOptionArray64 if
-        there are any None values) that references the existing data. This
-        can be a more time and memory-efficient way to put old data in a
-        new structure, since it avoids copying and even walking over the
-        old data structure (matters more when the structures are large).
-
-        If `obj` is an arbitrary Python object, this is equivalent to
-        #ak.from_iter except that it fills an existing #ak.ArrayBuilder,
-        rather than creating a new one.
-
-        If `obj` is an #ak.Array and `at` is an int, this method fills the
-        ArrayBuilder with a reference to `obj[at]` instead of `obj`.
+        Appends a Python object. This method can be used as a shorthand for #null,
+        #boolean, #integer, #real, #bytestring, or #string.
         """
-        if at is None:
-            if isinstance(obj, Record):
-                self._layout.append(obj.layout.array, obj.layout.at)
-            elif isinstance(obj, Array):
-                self._layout.beginlist()
-                self._layout.extend(obj.layout)
-                self._layout.endlist()
-            else:
-                self._layout.fromiter(obj)
-
-        else:
-            if isinstance(obj, Array):
-                self._layout.append(obj.layout, at)
-            else:
-                raise TypeError(
-                    "'append' method can only be used with 'at' when "
-                    "'obj' is an ak.Array" + ak._util.exception_suffix(__file__)
-                )
-
-    def extend(self, obj):
-        """
-        Args:
-            obj (#ak.Array): The Array to concatenate with the data in this
-                ArrayBuilder.
-
-        Appends every value from `obj`, by reference (see #append).
-        """
-        if isinstance(obj, Array):
-            self._layout.extend(obj.layout)
-        else:
-            raise TypeError(
-                "'extend' method requires an ak.Array"
-                + ak._util.exception_suffix(__file__)
-            )
+        self._layout.fromiter(obj)
 
     class _Nested(object):
         def __init__(self, arraybuilder):

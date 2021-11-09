@@ -1758,42 +1758,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         self.field_check(x);
       })
       .def("endrecord", &ak::ArrayBuilder::endrecord)
-      .def("append",
-           [](ak::ArrayBuilder& self,
-              const std::shared_ptr<ak::Content>& array,
-              int64_t at) {
-        int64_t length = array.get()->length();
-        int64_t regular_at = at;
-        if (regular_at < 0) {
-          regular_at += length;
-        }
-        if (!(0 <= regular_at  &&  regular_at < length)) {
-          throw std::invalid_argument(
-            std::string("'append' index (")
-            + std::to_string(at) + std::string(") out of bounds (")
-            + std::to_string(length) + std::string(")")
-            + FILENAME(__LINE__));
-        }
-        ak::BuilderPtr tmp = ::builder_append(self.builder(), array, regular_at);
-        if (tmp.get() != self.builder().get()) {
-          self.builder_update(tmp);
-        }
-      })
-      .def("append_nowrap",
-           [](ak::ArrayBuilder& self,
-              const std::shared_ptr<ak::Content>& array,
-              int64_t at) {
-        self.maybeupdate(::builder_append(self.builder(), array, at));
-      })
-      .def("extend",
-           [](ak::ArrayBuilder& self,
-              const std::shared_ptr<ak::Content>& array) {
-        ak::BuilderPtr tmp = self.builder();
-        for (int64_t i = 0;  i < array.get()->length();  i++) {
-          tmp = ::builder_append(self.builder(), array, i);
-          self.maybeupdate(tmp);
-        }
-      })
       .def("fromiter", &builder_fromiter)
   );
 }
