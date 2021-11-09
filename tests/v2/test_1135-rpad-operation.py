@@ -11,6 +11,7 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
+
 def test_rpad_and_clip_empty_array():
     empty = ak._v2.contents.emptyarray.EmptyArray()
     assert ak.to_list(empty) == []
@@ -617,25 +618,25 @@ def test_rpad_regular_array():
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], [None]],
     ]
-    # assert regulararray.typetracer.rpad(1, 2).form == regulararray.rpad(1, 2).form
-    # assert ak.to_list(regulararray.rpad(2, 2)) == [
-    #     [[0.0, 1.1, 2.2], [None, None]],
-    #     [[3.3, 4.4], [5.5, None]],
-    #     [[6.6, 7.7, 8.8, 9.9], [None, None]],
-    # ]
-    # assert regulararray.typetracer.rpad(2, 2).form == regulararray.rpad(2, 2).form
-    # assert ak.to_list(regulararray.rpad(3, 2)) == [
-    #     [[0.0, 1.1, 2.2], [None, None, None]],
-    #     [[3.3, 4.4, None], [5.5, None, None]],
-    #     [[6.6, 7.7, 8.8, 9.9], [None, None, None]],
-    # ]
-    # assert regulararray.typetracer.rpad(3, 2).form == regulararray.rpad(3, 2).form
-    # assert ak.to_list(regulararray.rpad(4, 2)) == [
-    #     [[0.0, 1.1, 2.2, None], [None, None, None, None]],
-    #     [[3.3, 4.4, None, None], [5.5, None, None, None]],
-    #     [[6.6, 7.7, 8.8, 9.9], [None, None, None, None]],
-    # ]
-    # assert regulararray.typetracer.rpad(4, 2).form == regulararray.rpad(4, 2).form
+    assert regulararray.typetracer.rpad(1, 2).form == regulararray.rpad(1, 2).form
+    assert ak.to_list(regulararray.rpad(2, 2)) == [
+        [[0.0, 1.1, 2.2], [None, None]],
+        [[3.3, 4.4], [5.5, None]],
+        [[6.6, 7.7, 8.8, 9.9], [None, None]],
+    ]
+    assert regulararray.typetracer.rpad(2, 2).form == regulararray.rpad(2, 2).form
+    assert ak.to_list(regulararray.rpad(3, 2)) == [
+        [[0.0, 1.1, 2.2], [None, None, None]],
+        [[3.3, 4.4, None], [5.5, None, None]],
+        [[6.6, 7.7, 8.8, 9.9], [None, None, None]],
+    ]
+    assert regulararray.typetracer.rpad(3, 2).form == regulararray.rpad(3, 2).form
+    assert ak.to_list(regulararray.rpad(4, 2)) == [
+        [[0.0, 1.1, 2.2, None], [None, None, None, None]],
+        [[3.3, 4.4, None, None], [5.5, None, None, None]],
+        [[6.6, 7.7, 8.8, 9.9], [None, None, None, None]],
+    ]
+    assert regulararray.typetracer.rpad(4, 2).form == regulararray.rpad(4, 2).form
 
 
 def test_rpad_and_clip_listoffset_array():
@@ -1015,13 +1016,13 @@ def test_rpad_list_array():
     #     ak.type(array.rpad(7, 0))
     # )
 
-    assert ak.to_list(array.rpad(1, 1)) == [
-        [0.0, 1.1, 2.2],
-        [None],
-        [4.4, 5.5],
-        [5.5, 6.6, 7.7],
-        [8.8],
-    ]
+    # assert ak.to_list(array.rpad(1, 1)) == [
+    #     [0.0, 1.1, 2.2],
+    #     [None],
+    #     [4.4, 5.5],
+    #     [5.5, 6.6, 7.7],
+    #     [8.8],
+    # ]
     assert array.typetracer.rpad(1, 1).form == array.rpad(1, 1).form
 
     assert ak.to_list(array.rpad(2, 1)) == [

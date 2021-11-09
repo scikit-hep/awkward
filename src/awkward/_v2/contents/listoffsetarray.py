@@ -1366,7 +1366,7 @@ class ListOffsetArray(Content):
                     )
                 )
 
-                outindex = ak._v2.index.Index64.empty(tolength, self.nplike)
+                outindex = ak._v2.index.Index64.empty(tolength[0], self.nplike)
                 self._handle_error(
                     self.nplike[
                         "awkward_ListOffsetArray_rpad_axis1",

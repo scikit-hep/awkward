@@ -1000,7 +1000,7 @@ class ListArray(Content):
                         )
                     )
 
-                    index = ak._v2.index.Index64.empty(tolength, self.nplike)
+                    index = ak._v2.index.Index64.empty(tolength[0], self.nplike)
                     starts_ = ak._v2.index.Index64.empty(len(self._starts), self.nplike)
                     stops_ = ak._v2.index.Index64.empty(len(self._stops), self.nplike)
                     self._handle_error(
@@ -1027,6 +1027,7 @@ class ListArray(Content):
                         None,
                         None,
                     )
+                    print(next)
 
                     return ak._v2.contents.listarray.ListArray(
                         starts_,
