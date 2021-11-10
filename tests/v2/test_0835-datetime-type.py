@@ -536,7 +536,6 @@ def test_date_time_units():
         assert (np_ar1[0] + np.timedelta64(25, "s")) >= np_ar2[0]
 
 
-@pytest.mark.skip(reason="awkward/_v2/contents/numpyarray.py:77: KeyError")
 def test_sum():
 
     dtypes = ["datetime64[s]", "timedelta64[D]"]

@@ -144,15 +144,13 @@ class Sum(Reducer):
     def apply(cls, array, parents, outlength):
         dtype = (
             np.dtype(np.int64)
-            if str(array.form.type).startswith("timedelta64")
-            else array.dtype
+            if str(array._data.dtype).startswith("timedelta64")
+            else np.dtype(cls.return_dtype(array.dtype))
         )
-        if str(array.form.type).startswith("datetime64"):
+        if str(array._data.dtype).startswith("datetime64"):
             raise ValueError("reducer sum: cannot apply `sum` to datetime")
 
-        result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=cls.return_dtype(dtype))
-        )
+        result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype))
         if array.dtype == np.bool_:
             if result.dtype == np.int64 or result.dtype == np.uint64:
                 array._handle_error(
@@ -187,6 +185,11 @@ class Sum(Reducer):
             else:
                 raise NotImplementedError
         else:
+            dtype = (
+                dtype
+                if str(array._data.dtype).startswith("timedelta64")
+                else array.dtype
+            )
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_sum",
@@ -201,9 +204,13 @@ class Sum(Reducer):
                     outlength,
                 )
             )
-        return ak._v2.contents.NumpyArray(
-            result.nplike.array(result._data, array.dtype)
-        )
+
+        if str(array._data.dtype).startswith("timedelta64"):
+            return ak._v2.contents.NumpyArray(
+                result.nplike.array(result._data, array.dtype)
+            )
+        else:
+            return ak._v2.contents.NumpyArray(result)
 
 
 class Prod(Reducer):
