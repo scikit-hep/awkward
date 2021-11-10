@@ -142,8 +142,16 @@ class Sum(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
+        dtype = (
+            np.dtype(np.int64)
+            if str(array.form.type).startswith("timedelta64")
+            else array.dtype
+        )
+        if str(array.form.type).startswith("datetime64"):
+            raise ValueError("reducer sum: cannot apply `sum` to datetime")
+
         result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
+            array.nplike.empty(outlength, dtype=cls.return_dtype(dtype))
         )
         if array.dtype == np.bool_:
             if result.dtype == np.int64 or result.dtype == np.uint64:
@@ -183,7 +191,7 @@ class Sum(Reducer):
                 array.nplike[
                     "awkward_reduce_sum",
                     result.dtype.type,
-                    array.dtype.type,
+                    dtype.type,
                     parents.dtype.type,
                 ](
                     result._data,
@@ -193,7 +201,9 @@ class Sum(Reducer):
                     outlength,
                 )
             )
-        return ak._v2.contents.NumpyArray(result)
+        return ak._v2.contents.NumpyArray(
+            result.nplike.array(result._data, array.dtype)
+        )
 
 
 class Prod(Reducer):
@@ -322,7 +332,14 @@ class Min(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        dtype = array.dtype
+        dtype = (
+            np.dtype(np.int64)
+            if (
+                str(array.form.type).startswith("datetime64")
+                or str(array.form.type).startswith("timedelta64")
+            )
+            else array.dtype
+        )
         result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype))
 
         if array.dtype == np.bool_:
@@ -345,7 +362,7 @@ class Min(Reducer):
                 array.nplike[
                     "awkward_reduce_min",
                     result.dtype.type,
-                    array.dtype.type,
+                    dtype.type,
                     parents.dtype.type,
                 ](
                     result._data,
@@ -357,7 +374,9 @@ class Min(Reducer):
                 )
             )
 
-        return ak._v2.contents.NumpyArray(result)
+        return ak._v2.contents.NumpyArray(
+            result.nplike.array(result._data, array.dtype)
+        )
 
 
 class Max(Reducer):
@@ -392,7 +411,14 @@ class Max(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        dtype = array.dtype
+        dtype = (
+            np.dtype(np.int64)
+            if (
+                str(array.form.type).startswith("datetime64")
+                or str(array.form.type).startswith("timedelta64")
+            )
+            else array.dtype
+        )
         result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype))
 
         if array.dtype == np.bool_:
@@ -415,7 +441,7 @@ class Max(Reducer):
                 array.nplike[
                     "awkward_reduce_max",
                     result.dtype.type,
-                    array.dtype.type,
+                    dtype.type,
                     parents.dtype.type,
                 ](
                     result._data,
@@ -426,4 +452,6 @@ class Max(Reducer):
                     cls._max_initial(cls.initial, dtype.type),
                 )
             )
-        return ak._v2.contents.NumpyArray(result)
+        return ak._v2.contents.NumpyArray(
+            result.nplike.array(result._data, array.dtype)
+        )
