@@ -1137,3 +1137,6 @@ class ListArray(Content):
 
     def packed(self):
         return self.toListOffsetArray64(True).packed()
+
+    def _to_list(self, behavior):
+        return ListOffsetArray._to_list(self, behavior)

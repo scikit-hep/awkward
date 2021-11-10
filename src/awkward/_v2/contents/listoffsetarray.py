@@ -1817,3 +1817,33 @@ class ListOffsetArray(Content):
         return ListOffsetArray(
             next._offsets, content, next._identifier, next._parameters
         )
+
+    def _to_list(self, behavior):
+        if self.parameter("__array__") == "bytestring":
+            content = ak._v2._util.tobytes(self._content.data)
+            starts, stops = self.starts, self.stops
+            out = [None] * len(starts)
+            for i in range(len(starts)):
+                out[i] = content[starts[i] : stops[i]]
+            return out
+
+        elif self.parameter("__array__") == "string":
+            content = ak._v2._util.tobytes(self._content.data)
+            starts, stops = self.starts, self.stops
+            out = [None] * len(starts)
+            for i in range(len(starts)):
+                out[i] = content[starts[i] : stops[i]].decode(errors="surrogateescape")
+            return out
+
+        else:
+            out = self._to_list_custom(behavior)
+            if out is not None:
+                return out
+
+            content = self._content._to_list(behavior)
+            starts, stops = self.starts, self.stops
+            out = [None] * len(starts)
+
+            for i in range(len(starts)):
+                out[i] = content[starts[i] : stops[i]]
+            return out

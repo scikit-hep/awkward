@@ -1537,3 +1537,16 @@ class IndexedOptionArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        index = self._index.to(numpy)
+        content = self._content._to_list(behavior)
+        out = [None] * len(index)
+        for i, ind in enumerate(index):
+            if ind >= 0:
+                out[i] = content[ind]
+        return out

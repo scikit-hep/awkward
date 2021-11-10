@@ -1002,28 +1002,16 @@ def to_list(array):
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         return [to_list(x) for x in array]
 
-    elif isinstance(array, ak._v2.highlevel.Array):
-        return [to_list(x) for x in array]
-
-    elif isinstance(array, ak._v2.highlevel.Record):
-        return to_list(array.layout)
-
-    # elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
-    #     return to_list(array.snapshot())
-
-    elif isinstance(array, ak._v2.contents.Content):
-        import awkward._v2.tmp_for_testing
-
-        return to_list(awkward._v2.tmp_for_testing.v2_to_v1(array))
-
-    elif isinstance(array, ak._v2.record.Record):
-        import awkward._v2.tmp_for_testing
-
-        return to_list(
-            awkward._v2.tmp_for_testing.v2_to_v1(array.array[array.at : array.at + 1])[
-                0
-            ]
-        )
+    elif isinstance(
+        array,
+        (
+            ak._v2.highlevel.Array,
+            ak._v2.highlevel.Record,
+            ak._v2.contents.Content,
+            ak._v2.record.Record,
+        ),
+    ):
+        return array.to_list()
 
     elif isinstance(array, dict):
         return dict((n, to_list(x)) for n, x in array.items())

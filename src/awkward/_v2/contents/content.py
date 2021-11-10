@@ -1179,3 +1179,18 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 "function_name": function_name,
             },
         )
+
+    def tolist(self, behavior=None):
+        return self.to_list(behavior)
+
+    def to_list(self, behavior=None):
+        return self.packed()._to_list(behavior)
+
+    def _to_list_custom(self, behavior):
+        cls = ak._v2._util.arrayclass(self, behavior)
+        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
+            array = cls(self)
+            out = [None] * len(self)
+            for i in range(len(self)):
+                out[i] = array[i]
+            return out

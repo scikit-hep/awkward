@@ -1040,3 +1040,15 @@ class IndexedArray(Content):
 
     def packed(self):
         return self.project().packed()
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        index = self._index.to(numpy)
+        content = self._content._to_list(behavior)
+        out = [None] * len(index)
+        for i, ind in enumerate(index):
+            out[i] = content[ind]
+        return out

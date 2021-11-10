@@ -15,6 +15,7 @@ from awkward._v2.forms.bitmaskedform import BitMaskedForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class BitMaskedArray(Content):
@@ -228,7 +229,7 @@ class BitMaskedArray(Content):
                 bytemask.to(nplike),
                 self._mask.to(nplike),
                 len(self._mask),
-                0 if valid_when else 1,
+                0 if valid_when == self._valid_when else 1,
                 self._lsb_order,
             )
         )
@@ -568,3 +569,16 @@ class BitMaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        mask = self.mask_as_bool(valid_when=True, nplike=numpy)[: self._length]
+        content = self._content._to_list(behavior)
+        out = [None] * self._length
+        for i, isvalid in enumerate(mask):
+            if isvalid:
+                out[i] = content[i]
+        return out

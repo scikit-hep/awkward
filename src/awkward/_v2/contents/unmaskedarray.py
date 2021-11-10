@@ -457,3 +457,10 @@ class UnmaskedArray(Content):
 
     def packed(self):
         return UnmaskedArray(self._content.packed(), self._identifier, self._parameters)
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        return self._content._to_list(behavior)

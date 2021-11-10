@@ -165,3 +165,10 @@ class Record(object):
             return Record(self._array.packed(), self._at)
         else:
             return Record(self._array[self._at : self._at + 1].packed(), 0)
+
+    def to_list(self, behavior=None):
+        cls = ak._v2._util.recordclass(self._array, behavior)
+        if cls is not ak._v2.highlevel.Record:
+            return cls(self)
+
+        return self._array[self._at : self._at + 1].to_list(behavior)[0]

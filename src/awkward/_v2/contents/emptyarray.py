@@ -282,3 +282,6 @@ class EmptyArray(Content):
 
     def packed(self):
         return self
+
+    def _to_list(self, behavior):
+        return []

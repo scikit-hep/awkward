@@ -777,3 +777,33 @@ class RecordArray(Content):
             self._identifier,
             self._parameters,
         )
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        cls = ak._v2._util.recordclass(self, behavior)
+        if cls is not ak._v2.highlevel.Record:
+            length = self._length
+            out = [None] * length
+            for i in range(length):
+                out[i] = cls(self[i])
+            return out
+
+        if self.is_tuple:
+            contents = [x._to_list(behavior) for x in self._contents]
+            length = self._length
+            out = [None] * length
+            for i in range(length):
+                out[i] = tuple(x[i] for x in contents)
+            return out
+
+        else:
+            fields = self._fields
+            contents = [x._to_list(behavior) for x in self._contents]
+            length = self._length
+            out = [None] * length
+            for i in range(length):
+                out[i] = dict(zip(fields, [x[i] for x in contents]))
+            return out

@@ -19,14 +19,18 @@ ak_from_buffers = ak._v2.operations.convert.from_buffers
 
 
 # def test_numpyarray():
-#     assert ak.from_buffers(*ak.to_buffers([1, 2, 3, 4, 5])).tolist() == [
+#     assert ak.from_buffers(
+#         *ak.to_buffers(ak._v2.highlevel.Array([1, 2, 3, 4, 5]))
+#     ).tolist() == [
 #         1,
 #         2,
 #         3,
 #         4,
 #         5,
 #     ]
-#     assert pickle.loads(pickle.dumps(ak.Array([1, 2, 3, 4, 5]), -1)).tolist() == [
+#     assert pickle.loads(
+#         pickle.dumps(ak._v2.highlevel.Array([1, 2, 3, 4, 5]), -1)
+#     ).tolist() == [
 #         1,
 #         2,
 #         3,

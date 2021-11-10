@@ -217,7 +217,7 @@ class UnionArray(Content):
     def project(self, index):
         nplike = self.nplike
         lentags = len(self._tags)
-        assert len(self._index) == lentags
+        assert len(self._index) >= lentags
         lenout = ak._v2.index.Index64.empty(1, nplike)
         tmpcarry = ak._v2.index.Index64.empty(lentags, nplike)
         self._handle_error(
@@ -958,17 +958,18 @@ class UnionArray(Content):
         nplike = self._tags.nplike
 
         tags = self._tags.to(nplike)
-        original_index = index = self._index.to(nplike)
+        original_index = index = self._index.to(nplike)[: len(tags)]
 
         contents = list(self._contents)
 
         for tag in range(len(self._contents)):
             is_tag = tags == tag
             num_tag = nplike.count_nonzero(is_tag)
+
             if len(contents[tag]) > num_tag:
                 if original_index is index:
                     index = index.copy()
-                index[is_tag] = nplike.arange(num_tag)
+                index[is_tag] = nplike.arange(num_tag, dtype=index.dtype)
                 contents[tag] = self.project(tag)
 
             contents[tag] = contents[tag].packed()
@@ -980,3 +981,17 @@ class UnionArray(Content):
             self._identifier,
             self._parameters,
         )
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        tags = self._tags.to(numpy)
+        index = self._index.to(numpy)
+        contents = [x._to_list(behavior) for x in self._contents]
+
+        out = [None] * len(tags)
+        for i, tag in enumerate(tags):
+            out[i] = contents[tag][index[i]]
+        return out

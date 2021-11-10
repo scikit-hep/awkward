@@ -69,8 +69,10 @@ def from_iter(
     builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
         builder.fromiter(x)
+
     formstr, length, buffers = builder.to_buffers()
     form = ak._v2.forms.from_json(formstr)
 
-    out = ak._v2.operations.convert.from_buffers(form, length, buffers)
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._v2.operations.convert.from_buffers(
+        form, length, buffers, highlevel=highlevel
+    )
