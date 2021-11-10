@@ -43,18 +43,12 @@ def test_keep_None_in_place_test():
     )
 
 
-@pytest.mark.skip(
-    reason="FIXME: probably broken because of missing simplify_optiontype"
-)
 def test_keep_None_in_place_test_2():
     v1_array = ak.Array([[3, 2, 1], [], None, [4, 5]])
     v2_array = v1_to_v2(v1_array.layout)
     assert v2_array.typetracer.argsort(axis=1).form == v2_array.argsort(axis=1).form
 
 
-@pytest.mark.skip(
-    reason="FIXME: AttributeError: 'ListOffsetArray' object has no attribute 'pt'"
-)
 def test_empty_slice():
     electron = ak.Array([[], [{"pt": 1.0}]], with_name="electron")
 
@@ -72,9 +66,6 @@ def test_empty_slice():
     assert v2_electron.typetracer[id].form == v2_electron[id].form
 
 
-@pytest.mark.skip(
-    reason="FIXME: AttributeError: 'ListOffsetArray' object has no attribute 'mask'"
-)
 def test_masked():
     v1_array = ak.Array([[0, 1, 2, 3], [3, 3, 3, 2, 1]])
     is_valid = v1_array != 3
@@ -274,7 +265,6 @@ def test_numpyarray_sort():
     assert v2_array.typetracer.sort().form == v2_array.sort().form
 
 
-@pytest.mark.skip(reason="FIXME: has not been converted from v1 to v2 yet")
 def test_3d():
     array = ak.layout.NumpyArray(
         np.array(
@@ -659,7 +649,6 @@ def test_unmaskedarray_sort():
     assert v2_array.typetracer.sort().form == v2_array.sort().form
 
 
-@pytest.mark.skip(reason="FIXME: Sort does not throw ValueError")
 def test_unionarray_sort():
     v2_array = ak._v2.contents.unionarray.UnionArray(
         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
@@ -671,13 +660,9 @@ def test_unionarray_sort():
     )
 
     assert ak.to_list(v2_array) == [5.5, 4.4, 1, 2, 3.3, 3, 5.5]
-
-    with pytest.raises(ValueError) as err:
-        v2_array.sort()
-    assert str(err.value).startswith("cannot sort an irreducible UnionArray")
+    assert ak.to_list(v2_array.sort()) == [1.0, 2.0, 3.0, 3.3, 4.4, 5.5, 5.5]
 
 
-@pytest.mark.skip(reason="FIXME: needs simplify_uniontype")
 def test_unionarray_sort_2():
     v2_array = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
@@ -689,7 +674,7 @@ def test_unionarray_sort_2():
     )
 
     assert ak.to_list(v2_array) == [5, 4, 1, 2, 3, 3, 5]
-    assert ak.to_list(v2_array.sort()) == [5, 4, 1, 2, 3, 3, 5]
+    assert ak.to_list(v2_array.sort()) == [1, 2, 3, 3, 4, 5, 5]
 
 
 def test_indexedarray_sort():
@@ -803,7 +788,6 @@ def test_indexedoptionarray_sort():
     )
 
 
-@pytest.mark.skip(reason="FIXME: has not been converted from v1 to v2 yet")
 def test_sort_zero_length_arrays():
     array = ak.layout.IndexedArray64(
         ak.layout.Index64([]), ak.layout.NumpyArray([1, 2, 3])

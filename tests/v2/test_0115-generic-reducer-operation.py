@@ -1055,7 +1055,6 @@ def test_IndexedOptionArray():
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
 
-@pytest.mark.skip(reason="FIXME: UnionArray _reduce_next is not implemented yet")
 def test_UnionArray():
     content1 = ak.from_iter(
         [[[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]]],
