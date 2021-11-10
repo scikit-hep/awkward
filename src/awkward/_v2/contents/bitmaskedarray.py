@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import json
 import copy
+import math
 
 import awkward as ak
 from awkward._v2.index import Index
@@ -317,7 +318,7 @@ class BitMaskedArray(Content):
 
     def simplify_optiontype(self):
         if isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
@@ -353,10 +354,10 @@ class BitMaskedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            self.content.mergeable(other.content, mergebool)
+            self._content.mergeable(other.content, mergebool)
 
         else:
-            return self.content.mergeable(other, mergebool)
+            return self._content.mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.toIndexedOptionArray64()._reverse_merge(other)
@@ -440,10 +441,10 @@ class BitMaskedArray(Content):
     def _validityerror(self, path):
         if len(self.mask) * 8 < len(self):
             return 'at {0} ("{1}"): len(mask) * 8 < length'.format(path, type(self))
-        elif len(self.content) < len(self):
+        elif len(self._content) < len(self):
             return 'at {0} ("{1}"): len(content) < length'.format(path, type(self))
         elif isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.bitmaskedarray.BitMaskedArray,
                 ak._v2.contents.bytemaskedarray.ByteMaskedArray,
@@ -454,7 +455,7 @@ class BitMaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self.content.validityerror(path + ".content")
+            return self._content.validityerror(path + ".content")
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toByteMaskedArray()._to_arrow(
@@ -512,3 +513,39 @@ class BitMaskedArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        if self._content.is_RecordType:
+            next = self.toIndexedOptionArray64()
+
+            content = next._content.packed()
+            if len(content) > self._length:
+                content = content[: self._length]
+
+            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                next._index,
+                content,
+                next._identifier,
+                next._parameters,
+            )
+
+        else:
+            excess_length = int(math.ceil(self._length / 8.0))
+            if len(self._mask) == excess_length:
+                mask = self._mask
+            else:
+                mask = self._mask[:excess_length]
+
+            content = self._content.packed()
+            if len(content) > self._length:
+                content = content[: self._length]
+
+            return BitMaskedArray(
+                mask,
+                content,
+                self._valid_when,
+                self._length,
+                self._lsb_order,
+                self._identifier,
+                self._parameters,
+            )

@@ -443,7 +443,9 @@ class RecordArray(Content):
 
         if self.is_tuple:
             for array in headless:
-                parameters = dict(self.parameters.items() & array.parameters.items())
+                parameters = ak._v2._util.merge_parameters(
+                    self._parameters, array._parameters
+                )
 
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
                     if self.is_tuple:
@@ -730,3 +732,15 @@ class RecordArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return RecordArray(
+            [
+                x.packed() if len(x) == self._length else x[: self._length].packed()
+                for x in self._contents
+            ],
+            self._fields,
+            self._length,
+            self._identifier,
+            self._parameters,
+        )

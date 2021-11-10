@@ -547,7 +547,7 @@ class ListOffsetArray(Content):
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ),
         ):
-            return self.content.mergeable(other.content, mergebool)
+            return self._content.mergeable(other.content, mergebool)
 
         else:
             return False
@@ -556,7 +556,7 @@ class ListOffsetArray(Content):
         if len(others) == 0:
             return self
         listarray = ak._v2.contents.listarray.ListArray(
-            self.starts, self.stops, self.content, None, self.parameters
+            self.starts, self.stops, self._content, None, self._parameters
         )
         return listarray.mergemany(others)
 
@@ -1327,7 +1327,7 @@ class ListOffsetArray(Content):
             self.starts.to(self.nplike),
             self.stops.to(self.nplike),
             len(self.starts),
-            len(self.content),
+            len(self._content),
         )
         if error.str is not None:
             if error.filename is None:
@@ -1347,7 +1347,7 @@ class ListOffsetArray(Content):
             ):
                 return ""
             else:
-                return self.content.validityerror(path + ".content")
+                return self._content.validityerror(path + ".content")
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         is_string = self.parameter("__array__") == "string"
@@ -1502,3 +1502,12 @@ class ListOffsetArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        next = self.toListOffsetArray64(True)
+        content = next._content.packed()
+        if len(content) != next._offsets[-1]:
+            content = content[: next._offsets[-1]]
+        return ListOffsetArray(
+            next._offsets, content, next._identifier, next._parameters
+        )

@@ -263,7 +263,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self.parameters, nplike=nplike)
+            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
             return out2
 
         elif ak._util.isstr(head):
@@ -283,7 +283,7 @@ class NumpyArray(Content):
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
-            return NumpyArray(out, None, self.parameters, nplike=nplike)
+            return NumpyArray(out, None, self._parameters, nplike=nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             where = (slice(None), head) + tail
@@ -291,7 +291,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self.parameters, nplike=nplike)
+            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
             return out2
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
@@ -358,7 +358,9 @@ class NumpyArray(Content):
         contiguous_arrays = []
 
         for array in head:
-            parameters = dict(self.parameters.items() & array.parameters.items())
+            parameters = ak._v2._util.merge_parameters(
+                self._parameters, array._parameters
+            )
             if isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                 pass
             elif isinstance(array, ak._v2.contents.numpyarray.NumpyArray):
@@ -373,7 +375,7 @@ class NumpyArray(Content):
 
         contiguous_arrays = self.nplike.concatenate(contiguous_arrays)
 
-        next = NumpyArray(contiguous_arrays, self.identifier, parameters)
+        next = NumpyArray(contiguous_arrays, self._identifier, parameters)
 
         if len(tail) == 0:
             return next
@@ -394,19 +396,31 @@ class NumpyArray(Content):
             return self.toRegularArray()._localindex(posaxis, depth)
 
     def contiguous(self):
-        if self._data.ndim >= 1:
-            return ak._v2.contents.NumpyArray(self.nplike.ascontiguousarray(self))
-        else:
+        if self.is_contiguous:
             return self
+        else:
+            return ak._v2.contents.NumpyArray(
+                self._nplike.ascontiguousarray(self._data),
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
 
-    def iscontiguous(self):
+    @property
+    def is_contiguous(self):
+        if isinstance(self._nplike, ak._v2._typetracer.TypeTracer):
+            return True
+
+        # Alternatively, self._data.flags["C_CONTIGUOUS"], but the following assumes
+        # less of the nplike.
+
         x = self._data.dtype.itemsize
 
-        for i in range(len(self.shape), 0, -1):  # FIXME: more Pythonic way to do it?
-            if x != self.strides[i - 1]:
+        for i in range(len(self._data.shape), 0, -1):
+            if x != self._data.strides[i - 1]:
                 return False
             else:
-                x = x * self.shape[i - 1]
+                x = x * self._data.shape[i - 1]
 
         return True
 
@@ -429,8 +443,8 @@ class NumpyArray(Content):
             raise TypeError(
                 "{0} attempting to argsort a scalar ".format(type(self).__name__)
             )
-        elif len(self.shape) != 1 or not self.iscontiguous():
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+        elif len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._argsort_next(
                 negaxis,
                 starts,
@@ -525,8 +539,8 @@ class NumpyArray(Content):
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
 
-        elif len(self.shape) != 1 or not self.iscontiguous():
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+        elif len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._sort_next(
                 negaxis,
                 starts,
@@ -760,3 +774,6 @@ class NumpyArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return self.contiguous().toRegularArray()

@@ -139,7 +139,7 @@ class UnmaskedArray(Content):
 
     def _carry(self, carry, allow_lazy, exception):
         return UnmaskedArray(
-            self.content._carry(carry, allow_lazy, exception),
+            self._content._carry(carry, allow_lazy, exception),
             self._carry_identifier(carry, exception),
             self._parameters,
         )
@@ -150,7 +150,7 @@ class UnmaskedArray(Content):
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             return UnmaskedArray(
-                self.content._getitem_next(head, tail, advanced),
+                self._content._getitem_next(head, tail, advanced),
                 self._identifier,
                 self._parameters,
             ).simplify_optiontype()
@@ -180,17 +180,17 @@ class UnmaskedArray(Content):
         if mask is not None:
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
                 mask,
-                self.content,
+                self._content,
                 valid_when=False,
                 identifier=None,
-                parameters=self.parameters,
+                parameters=self._parameters,
             ).project()
         else:
-            return self.content
+            return self._content
 
     def simplify_optiontype(self):
         if isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
@@ -199,7 +199,7 @@ class UnmaskedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            return self.content
+            return self._content
         else:
             return self
 
@@ -226,10 +226,10 @@ class UnmaskedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            self.content.mergeable(other.content, mergebool)
+            self._content.mergeable(other.content, mergebool)
 
         else:
-            return self.content.mergeable(other, mergebool)
+            return self._content.mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.toIndexedOptionArray64()._reverse_merge(other)
@@ -368,7 +368,7 @@ class UnmaskedArray(Content):
 
     def _validityerror(self, path):
         if isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.bitmaskedarray.BitMaskedArray,
                 ak._v2.contents.bytemaskedarray.ByteMaskedArray,
@@ -379,7 +379,7 @@ class UnmaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self.content.validityerror(path + ".content")
+            return self._content.validityerror(path + ".content")
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self._content._to_arrow(pyarrow, self, None, length, options)
@@ -431,3 +431,6 @@ class UnmaskedArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return UnmaskedArray(self._content.packed(), self._identifier, self._parameters)

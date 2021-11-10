@@ -711,7 +711,7 @@ class ListArray(Content):
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ),
         ):
-            self.content.mergeable(other.content, mergebool)
+            self._content.mergeable(other.content, mergebool)
 
         else:
             return False
@@ -729,7 +729,9 @@ class ListArray(Content):
         contents = []
 
         for array in head:
-            parameters = dict(self.parameters.items() & array.parameters.items())
+            parameters = ak._v2._util.merge_parameters(
+                self._parameters, array._parameters
+            )
 
             if isinstance(
                 array,
@@ -945,7 +947,7 @@ class ListArray(Content):
             self.starts.to(self.nplike),
             self.stops.to(self.nplike),
             len(self.starts),
-            len(self.content),
+            len(self._content),
         )
         if error.str is not None:
             if error.filename is None:
@@ -965,7 +967,7 @@ class ListArray(Content):
             ):
                 return ""
             else:
-                return self.content.validityerror(path + ".content")
+                return self._content.validityerror(path + ".content")
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toListOffsetArray64(False)._to_arrow(
@@ -1029,3 +1031,6 @@ class ListArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return self.toListOffsetArray64(True).packed()

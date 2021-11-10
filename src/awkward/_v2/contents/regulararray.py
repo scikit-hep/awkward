@@ -550,7 +550,7 @@ class RegularArray(Content):
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ),
         ):
-            return self.content.mergeable(other.content, mergebool)
+            return self._content.mergeable(other.content, mergebool)
 
         else:
             return False
@@ -774,32 +774,32 @@ class RegularArray(Content):
                 if isinstance(out, ak._v2.contents.ListOffsetArray):
                     if isinstance(out.content, ak._v2.contents.ListOffsetArray):
                         out = ak._v2.contents.ListOffsetArray(
-                            out.offsets,
-                            out.content.toRegularArray(),
-                            out.identifier,
-                            out.parameters,
+                            out._offsets,
+                            out._content.toRegularArray(),
+                            out._identifier,
+                            out._parameters,
                         )
                     elif isinstance(out.content, ak._v2.contents.ListArray):
                         out = ak._v2.contents.ListOffsetArray(
-                            out.offsets,
-                            out.content.toRegularArray(),
-                            out.identifier,
-                            out.parameters,
+                            out._offsets,
+                            out._content.toRegularArray(),
+                            out._identifier,
+                            out._parameters,
                         )
                 elif isinstance(out, ak._v2.contents.ListArray):
                     if isinstance(out.content, ak._v2.contents.ListOffsetArray):
                         out = ak._v2.contents.ListOffsetArray(
-                            out.offsets,
-                            out.content.toRegularArray(),
-                            out.identifier,
-                            out.parameters,
+                            out._offsets,
+                            out._content.toRegularArray(),
+                            out._identifier,
+                            out._parameters,
                         )
                     elif isinstance(out.content, ak._v2.contents.ListArray):
                         out = ak._v2.contents.ListOffsetArray(
-                            out.offsets,
-                            out.content.toRegularArray(),
-                            out.identifier,
-                            out.parameters,
+                            out._offsets,
+                            out._content.toRegularArray(),
+                            out._identifier,
+                            out._parameters,
                         )
 
             if convert_shallow:
@@ -819,7 +819,7 @@ class RegularArray(Content):
         ):
             return ""
         else:
-            return self.content.validityerror(path + ".content")
+            return self._content.validityerror(path + ".content")
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":
@@ -930,3 +930,14 @@ class RegularArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        length = self._length * self._size
+        if len(self._content) == length:
+            content = self._content.packed()
+        else:
+            content = self._content[:length].packed()
+
+        return RegularArray(
+            content, self._size, self._length, self._identifier, self._parameters
+        )

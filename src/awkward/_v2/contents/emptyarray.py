@@ -264,3 +264,6 @@ class EmptyArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return self

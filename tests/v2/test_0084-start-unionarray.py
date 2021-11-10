@@ -79,10 +79,10 @@ def test_getitem():
     assert array.typetracer.content(0).form == array.content(0).form
     assert ak.to_list(array.content(1)) == ["one", "two", "three", "four", "five"]
     assert array.typetracer.content(1).form == array.content(1).form
-    assert ak.to_list(array._project(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    assert array.typetracer._project(0).form == array._project(0).form
-    assert ak.to_list(array._project(1)) == ["one", "two", "three", "five", "four"]
-    assert array.typetracer._project(1).form == array._project(1).form
+    assert ak.to_list(array.project(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert array.typetracer.project(0).form == array.project(0).form
+    assert ak.to_list(array.project(1)) == ["one", "two", "three", "five", "four"]
+    assert array.typetracer.project(1).form == array.project(1).form
     repr(array)
 
     assert ak.to_list(array[0]) == "one"

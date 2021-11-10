@@ -214,7 +214,7 @@ class UnionArray(Content):
             self._parameters,
         )
 
-    def _project(self, index):
+    def project(self, index):
         nplike = self.nplike
         lentags = len(self._tags)
         assert len(self._index) == lentags
@@ -302,7 +302,7 @@ class UnionArray(Content):
         ):
             outcontents = []
             for i in range(len(self._contents)):
-                projection = self._project(i)
+                projection = self.project(i)
                 outcontents.append(projection._getitem_next(head, tail, advanced))
             outindex = self._regular_index(self._tags)
 
@@ -477,7 +477,7 @@ class UnionArray(Content):
             return contents[0]._carry(index, True, NestedIndexError)
 
         else:
-            return UnionArray(tags, index, contents, self.identifier, self.parameters)
+            return UnionArray(tags, index, contents, self._identifier, self._parameters)
 
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
@@ -556,8 +556,7 @@ class UnionArray(Content):
         if len(contents) > 2 ** 7:
             raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
 
-        parameters = {}
-        parameters = dict(self.parameters.items() & other.parameters.items())
+        parameters = ak._v2._util.merge_parameters(self._parameters, other._parameters)
         return ak._v2.contents.unionarray.UnionArray(
             tags, index, contents, None, parameters
         )
@@ -580,7 +579,9 @@ class UnionArray(Content):
         parameters = {}
 
         for array in head:
-            parameters = dict(self.parameters.items() & array.parameters.items())
+            parameters = ak._v2._util.merge_parameters(
+                self._parameters, array._parameters
+            )
             if isinstance(array, ak._v2.contents.unionarray.UnionArray):
                 union_tags = ak._v2.index.Index(array.tags)
                 union_index = ak._v2.index.Index(array.index)
@@ -909,3 +910,30 @@ class UnionArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        nplike = self._tags.nplike
+
+        tags = self._tags.to(nplike)
+        original_index = index = self._index.to(nplike)
+
+        contents = list(self._contents)
+
+        for tag in range(len(self._contents)):
+            is_tag = tags == tag
+            num_tag = nplike.count_nonzero(is_tag)
+            if len(contents[tag]) > num_tag:
+                if original_index is index:
+                    index = index.copy()
+                index[is_tag] = nplike.arange(num_tag)
+                contents[tag] = self.project(tag)
+
+            contents[tag] = contents[tag].packed()
+
+        return UnionArray(
+            ak._v2.index.Index8(tags),
+            ak._v2.index.Index(index),
+            contents,
+            self._identifier,
+            self._parameters,
+        )
