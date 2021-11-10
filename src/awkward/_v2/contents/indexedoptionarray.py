@@ -943,39 +943,9 @@ class IndexedOptionArray(Content):
 
         ind = ak._v2.contents.NumpyArray(nulls_index)
 
-        # # FIXME: work around for if mergeable: test it on two 1D arrays
-        if isinstance(out, ak._v2.contents.NumpyArray):
-            full_index = ak._v2.index.Index64.empty(len(out) + len(ind), nplike)
-            self._handle_error(
-                nplike[
-                    "awkward_NumpyArray_fill",
-                    full_index.dtype.type,
-                    out._data.dtype.type,
-                ](
-                    full_index.to(nplike),
-                    0,
-                    out._data,
-                    len(out),
-                )
-            )
-            self._handle_error(
-                nplike[
-                    "awkward_NumpyArray_fill",
-                    full_index.dtype.type,
-                    ind._data.dtype.type,
-                ](
-                    full_index.to(nplike),
-                    len(out),
-                    ind._data,
-                    len(ind),
-                )
-            )
+        if self.mergeable(ind, True):
+            out = out.merge(ind)
             nulls_merged = True
-            out = ak._v2.contents.NumpyArray(full_index, nplike=self.nplike)
-        #
-        # # if self._mergeable(ind, True):
-        # #     out.merge(ind)
-        # #     nulls_merged = True
 
         nextoutindex = ak._v2.index.Index64.empty(parents_length, nplike)
         self._handle_error(
