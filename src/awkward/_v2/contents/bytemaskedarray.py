@@ -469,6 +469,20 @@ class ByteMaskedArray(Content):
             )
             return out2.simplify_optiontype()
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if len(self._mask) == 0:
+            return True
+        return self.toIndexedOptionArray64()._is_unique(
+            negaxis, starts, parents, outlength
+        )
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if len(self._mask) == 0:
+            return self
+        return self.toIndexedOptionArray64()._unique(
+            negaxis, starts, parents, outlength
+        )
+
     def _argsort_next(
         self,
         negaxis,
@@ -689,6 +703,59 @@ class ByteMaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self._content.validityerror(path + ".content")
+
+    def bytemask(self):
+        if not self._valid_when:
+            return self._mask
+        else:
+            out = ak._v2.index.Index64.empty(len(self), self.nplike)
+            self._handle_error(
+                self.nplike[
+                    "awkward_ByteMaskedArray_mask",
+                    out.dtype.type,
+                    self._mask.dtype.type,
+                ](
+                    out.to(self.nplike),
+                    self._mask.to(self.nplike),
+                    len(self._mask),
+                    self._valid_when,
+                )
+            )
+            return out
+
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        elif posaxis == depth + 1:
+            mask = self.bytemask()
+            index = ak._v2.index.Index64.empty(len(mask), self.nplike)
+            self._handle_error(
+                self.nplike[
+                    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+                    index.dtype.type,
+                    self._mask.dtype.type,
+                ](
+                    index.to(self.nplike),
+                    self._mask.to(self.nplike),
+                    len(self._mask),
+                )
+            )
+            next = self.project()._rpad(target, posaxis, depth, clip)
+            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                index,
+                next.simplify_optiontype(),
+                None,
+                self._parameters,
+            )
+        else:
+            return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+                self._mask,
+                self._content._rpad(target, posaxis, depth, clip),
+                self._valid_when,
+                None,
+                self._parameters,
+            )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         this_validbytes = self.mask_as_bool(valid_when=True)

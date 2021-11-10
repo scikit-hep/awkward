@@ -868,6 +868,22 @@ class ListArray(Content):
                 self._parameters,
             )
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if len(self._starts) == 0:
+            return True
+
+        return self.toListOffsetArray64(True)._is_unique(
+            negaxis, starts, parents, outlength
+        )
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if len(self._starts) == 0:
+            return self
+
+        return self.toListOffsetArray64(True)._unique(
+            negaxis, starts, parents, outlength
+        )
+
     def _argsort_next(
         self,
         negaxis,
@@ -968,6 +984,93 @@ class ListArray(Content):
                 return ""
             else:
                 return self._content.validityerror(path + ".content")
+
+    def _rpad(self, target, axis, depth, clip):
+        if not clip:
+            posaxis = self.axis_wrap_if_negative(axis)
+            if posaxis == depth:
+                return self.rpad_axis0(target, clip)
+            elif posaxis == depth + 1:
+                min_ = ak._v2.index.Index64.empty(1, self.nplike)
+                self._handle_error(
+                    self.nplike[
+                        "awkward_ListArray_min_range",
+                        min_.dtype.type,
+                        self._starts.dtype.type,
+                        self._stops.dtype.type,
+                    ](
+                        min_.to(self.nplike),
+                        self._starts.to(self.nplike),
+                        self._stops.to(self.nplike),
+                        len(self._starts),
+                    )
+                )
+                # TODO: Replace the kernel call with below code once typtracer supports '-'
+                # min_ = self.nplike.min(self._stops.data - self._starts.data)
+                if target < min_[0]:
+                    return self
+                else:
+                    tolength = ak._v2.index.Index64.zeros(1, self.nplike)
+                    self._handle_error(
+                        self.nplike[
+                            "awkward_ListArray_rpad_and_clip_length_axis1",
+                            tolength.dtype.type,
+                            self._starts.dtype.type,
+                            self._stops.dtype.type,
+                        ](
+                            tolength.to(self.nplike),
+                            self._starts.to(self.nplike),
+                            self._stops.to(self.nplike),
+                            target,
+                            len(self._starts),
+                        )
+                    )
+
+                    index = ak._v2.index.Index64.empty(tolength[0], self.nplike)
+                    starts_ = ak._v2.index.Index64.empty(len(self._starts), self.nplike)
+                    stops_ = ak._v2.index.Index64.empty(len(self._stops), self.nplike)
+                    self._handle_error(
+                        self.nplike[
+                            "awkward_ListArray_rpad_axis1",
+                            index.dtype.type,
+                            self._starts.dtype.type,
+                            self._stops.dtype.type,
+                            starts_.dtype.type,
+                            stops_.dtype.type,
+                        ](
+                            index.to(self.nplike),
+                            self._starts.to(self.nplike),
+                            self._stops.to(self.nplike),
+                            starts_.to(self.nplike),
+                            stops_.to(self.nplike),
+                            target,
+                            len(self._starts),
+                        )
+                    )
+                    next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                        index,
+                        self._content,
+                        None,
+                        None,
+                    )
+
+                    return ak._v2.contents.listarray.ListArray(
+                        starts_,
+                        stops_,
+                        next.simplify_optiontype(),
+                        None,
+                        self._parameters,
+                    )
+            else:
+                return ak._v2.contents.listarray.ListArray(
+                    self._starts,
+                    self._stops,
+                    self._content._rpad(target, posaxis, depth + 1),
+                    None,
+                    self._parameters,
+                )
+        else:
+            return self.toListOffsetArray64(True)._rpad(target, axis, depth, clip=True)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toListOffsetArray64(False)._to_arrow(

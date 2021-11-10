@@ -591,6 +591,39 @@ class RegularArray(Content):
                 self._parameters,
             )
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if self._length == 0:
+            return True
+
+        return self.toListOffsetArray64(True)._is_unique(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+        )
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if self._length == 0:
+            return self
+        out = self.toListOffsetArray64(True)._unique(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+        )
+
+        if isinstance(out, ak._v2.contents.RegularArray):
+            if isinstance(out._content, ak._v2.contents.ListOffsetArray):
+                return ak._v2.contents.RegularArray(
+                    out._content.toRegularArray(),
+                    out._size,
+                    out._length,
+                    None,
+                    out._parameters,
+                )
+
+        return out
+
     def _argsort_next(
         self,
         negaxis,
@@ -820,6 +853,45 @@ class RegularArray(Content):
             return ""
         else:
             return self._content.validityerror(path + ".content")
+
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        elif posaxis == depth + 1:
+            if not clip:
+                if target < self._size:
+                    return self
+                else:
+                    return self._rpad(target, posaxis, depth, True)
+            else:
+                index = ak._v2.index.Index64.empty(len(self) * target, self.nplike)
+                self._handle_error(
+                    self.nplike[
+                        "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
+                    ](index.to(self.nplike), target, self._size, len(self))
+                )
+                next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                    index,
+                    self._content,
+                    None,
+                    self._parameters,
+                )
+                return ak._v2.contents.regulararray.RegularArray(
+                    next.simplify_optiontype(),
+                    target,
+                    len(self),
+                    None,
+                    self._parameters,
+                )
+        else:
+            return ak._v2.contents.regulararray.RegularArray(
+                self._content._rpad(target, posaxis, depth + 1, clip),
+                self._size,
+                len(self),
+                None,
+                self._parameters,
+            )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":

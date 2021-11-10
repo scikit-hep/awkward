@@ -685,6 +685,20 @@ class UnionArray(Content):
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        simplified = self.simplify_uniontype(True, True)
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ValueError("cannot check if an irreducible UnionArray is unique")
+
+        return simplified._is_unique(negaxis, starts, parents, outlength)
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        simplified = self.simplify_uniontype(True, True)
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ValueError("cannot make a unique irreducible UnionArray")
+
+        return simplified._unique(negaxis, starts, parents, outlength)
+
     def _argsort_next(
         self,
         negaxis,
@@ -697,7 +711,13 @@ class UnionArray(Content):
         kind,
         order,
     ):
+        if len(self) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
         simplified = self.simplify_uniontype(mergebool=True)
+        if len(simplified) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
@@ -708,7 +728,13 @@ class UnionArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
+        if len(self) == 0:
+            return self
+
         simplified = self.simplify_uniontype(mergebool=True)
+        if len(simplified) == 0:
+            return simplified
+
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot sort an irreducible UnionArray")
 
@@ -783,6 +809,23 @@ class UnionArray(Content):
                 if sub != "":
                     return sub
             return ""
+
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content._rpad(target, posaxis, depth, clip))
+            out = ak._v2.contents.unionarray.UnionArray(
+                self.tags,
+                self.index,
+                contents,
+                identifier=self._identifier,
+                parameters=self._parameters,
+            )
+            return out.simplify_uniontype(True, False)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         nptags = self._tags.to(numpy)

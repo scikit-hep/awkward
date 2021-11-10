@@ -541,6 +541,15 @@ class RecordArray(Content):
                 contents, self._fields, len(self), self._identifier, self._parameters
             )
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        for content in self._contents:
+            if not content._is_unique(negaxis, starts, parents, outlength):
+                return False
+        return True
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        raise NotImplementedError
+
     def _argsort_next(
         self,
         negaxis,
@@ -641,6 +650,30 @@ class RecordArray(Content):
             if sub != "":
                 return sub
         return ""
+
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        else:
+            contents = []
+            for content in self._contents:
+                contents.append(content._rpad(target, posaxis, depth, clip))
+            if len(contents) == 0:
+                return ak._v2.contents.recordarray.RecordArray(
+                    contents,
+                    self._fields,
+                    len(self),
+                    identifier=self._identifier,
+                    parameters=self._parameters,
+                )
+            else:
+                return ak._v2.contents.recordarray.RecordArray(
+                    contents,
+                    self._fields,
+                    identifier=self._identifier,
+                    parameters=self._parameters,
+                )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         values = [

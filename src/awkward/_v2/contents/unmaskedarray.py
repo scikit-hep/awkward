@@ -250,6 +250,16 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
+    def _is_unique(self, negaxis, starts, parents, outlength):
+        if len(self._content) == 0:
+            return True
+        return self._content._is_unique(negaxis, starts, parents, outlength)
+
+    def _unique(self, negaxis, starts, parents, outlength):
+        if len(self._content) == 0:
+            return self
+        return self._content._unique(negaxis, starts, parents, outlength)
+
     def _argsort_next(
         self,
         negaxis,
@@ -380,6 +390,19 @@ class UnmaskedArray(Content):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
             return self._content.validityerror(path + ".content")
+
+    def _rpad(self, target, axis, depth, clip):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self.rpad_axis0(target, clip)
+        elif posaxis == depth + 1:
+            return self._content._rpad(target, posaxis, depth, clip)
+        else:
+            return ak._v2.contents.unmaskedarray.UnmaskedArray(
+                self._content._rpad(target, posaxis, depth, clip),
+                None,
+                self._parameters,
+            )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self._content._to_arrow(pyarrow, self, None, length, options)
