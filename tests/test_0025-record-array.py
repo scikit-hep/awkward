@@ -628,7 +628,8 @@ def test_builder_record():
     builder.real(3.3)
     builder.endrecord()
 
-    assert str(builder.type(typestrs)) == '{"one": int64, "two": float64}'
+    if not ak._util.py27:
+        assert str(builder.type(typestrs)) == '{"one": int64, "two": float64}'
     assert ak.to_list(builder.snapshot()) == [
         {"one": 1, "two": 1.1},
         {"one": 2, "two": 2.2},
