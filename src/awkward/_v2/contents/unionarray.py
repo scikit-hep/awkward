@@ -701,7 +701,13 @@ class UnionArray(Content):
         kind,
         order,
     ):
+        if len(self) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
         simplified = self.simplify_uniontype(mergebool=True)
+        if len(simplified) == 0:
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
@@ -712,7 +718,13 @@ class UnionArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
+        if len(self) == 0:
+            return self
+
         simplified = self.simplify_uniontype(mergebool=True)
+        if len(simplified) == 0:
+            return simplified
+
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot sort an irreducible UnionArray")
 

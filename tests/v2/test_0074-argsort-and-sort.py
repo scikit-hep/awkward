@@ -44,9 +44,6 @@ def test_keep_None_in_place_test():
     ]
 
 
-@pytest.mark.skip(
-    reason="FIXME: slicing might infinite-loop before simplify_optiontype is implemented"
-)
 def test_slicing_FIXME():
     # awkward/_v2/_slicing.py:218:
     array = ak.Array([[3, 2, 1], [], None, [4, 5]])
@@ -68,17 +65,16 @@ def test_EmptyArray():
     assert ak.to_list(array2.argsort()) == [[], [], []]
 
 
-@pytest.mark.skip(reason="FIXME: 'NumpyForm' object has no attribute 'type'")
 def test_EmptyArray_type_FIXME():
     array = ak.layout.EmptyArray()
     array = v1_to_v2(array)
 
-    assert str(array.sort().form.type) == "0 * float64"
-    assert str(array.argsort().form.type) == "0 * int64"
+    assert str(array.sort().form.type) == "unknown"
+    assert str(array.argsort().form.type) == "int64"
 
     array2 = ak.Array([[], [], []])
     array2 = v1_to_v2(array2.layout)
-    assert str(array2.argsort().form.type) == "3 * var * int64"
+    assert str(array2.argsort().form.type) == "var * int64"
 
 
 def test_NumpyArray():
@@ -532,7 +528,6 @@ def test_sort_zero_length_arrays():
     assert ak.to_list(array.argsort()) == []
 
 
-@pytest.mark.skip(reason="FIXME: cannot sort an irreducible UnionArray")
 def test_UnionArray_FIXME():
     content0 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
     content1 = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
