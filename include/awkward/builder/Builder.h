@@ -27,6 +27,10 @@ namespace awkward {
     /// In Python, this allocates a NumPy array and copies data into it.
     virtual void
       copy_buffer(const std::string& name, const void* source, int64_t num_bytes) = 0;
+
+    /// @brief Create an array initialized to a given fill value.
+    virtual void
+      full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) = 0;
   };
 
   /// @class Builder

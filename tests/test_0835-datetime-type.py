@@ -67,26 +67,15 @@ def test_datetime64_ArrayBuilder():
     builder.datetime("2020-07-27T10:41:11.200000")
 
     assert ak.to_list(builder.snapshot()) == [
-        datetime.datetime(2020, 3, 27, 10, 41),
-        datetime.datetime(2020, 3, 27, 10, 41, 11),
-        datetime.datetime(2020, 3, 27, 10, 41, 12),
-        datetime.datetime(2021, 3, 27, 0, 0),
-        datetime.datetime(2020, 3, 27, 10, 41, 13),
-        datetime.datetime(2020, 5, 1, 20, 56, 24),
-        datetime.datetime(2020, 5, 1, 0, 0),
-        datetime.datetime(2020, 7, 27, 10, 41, 11, 200000),
+        np.datetime64("2020-03-27T10:41:00", "15s"),
+        np.datetime64("2020-03-27T10:41:11"),
+        np.datetime64("2020-03-27T10:41:12.000000", "25us"),
+        np.datetime64("2021-03-27"),
+        np.datetime64("2020-03-27T10:41:13"),
+        np.datetime64("2020-05"),
+        np.datetime64("2020-05-01T00:00:00.000000"),
+        np.datetime64("2020-07-27T10:41:11.200000"),
     ]
-    # FIXME?: the above works with both 2.7 and 3, the comparison beneath works in Python 3, but not in 2.7
-    # [
-    #     np.datetime64("2020-03-27T10:41:00.000000"),
-    #     np.datetime64("2020-03-27T10:41:11.000000"),
-    #     np.datetime64("2020-03-27T10:41:12.000000"),
-    #     np.datetime64("2021-03-27T00:00:00.000000"),
-    #     np.datetime64("2020-03-27T10:41:13.000000"),
-    #     np.datetime64("2020-05-01T20:56:24.000000"),  # FIXME? precision
-    #     np.datetime64("2020-05-01T00:00:00.000000"),
-    #     np.datetime64("2020-07-27T10:41:11.200000"),
-    # ]
 
 
 def test_highlevel_datetime64_ArrayBuilder():
@@ -107,13 +96,13 @@ def test_highlevel_datetime64_ArrayBuilder():
     builder.timedelta(np.timedelta64(5, "s"))
 
     assert ak.to_list(builder.snapshot()) == [
-        np.datetime64("2020-03-27T10:41:00.000000"),
-        np.datetime64("2020-03-27T10:41:11.000000"),
-        np.datetime64("2020-03-27T10:41:12.000000"),
-        np.datetime64("2021-03-27T00:00:00.000000"),
-        np.datetime64("2020-03-27T10:41:13.000000"),
+        np.datetime64("2020-03-27T10:41:00", "15s"),
+        np.datetime64("2020-03-27T10:41:11"),
+        np.datetime64("2020-03-27T10:41:12.000000", "25us"),
+        np.datetime64("2021-03-27"),
+        np.datetime64("2020-03-27T10:41:13"),
         np.timedelta64(5, "s"),
-        np.datetime64("2020-05-01T20:56:24.000000"),
+        np.datetime64("2020-05"),
         np.datetime64("2020-05-01T00:00:00.000000"),
         np.datetime64("2020-07-27T10:41:11.200000"),
         1,
@@ -325,16 +314,17 @@ def test_min_max():
             ],
         ]
     )
+
     assert ak.to_list(array) == [
         [
             np.datetime64("2020-03-27T10:41:11"),
             np.datetime64("2020-01-27T10:41:11"),
-            np.datetime64("2020-05-01T20:56:24"),
+            np.datetime64("2020-05"),
             np.datetime64("2020-01-27T10:41:11"),
             np.datetime64("2020-04-27T10:41:11"),
         ],
         [
-            np.datetime64("2020-04-27T00:00:00"),
+            np.datetime64("2020-04-27"),
             np.datetime64("2020-02-27T10:41:11"),
             np.datetime64("2020-01-27T10:41:11"),
             np.datetime64("2020-06-27T10:41:11"),
@@ -345,6 +335,7 @@ def test_min_max():
             np.datetime64("2020-01-27T10:41:11"),
         ],
     ]
+
     assert ak.min(array) == np.datetime64("2020-01-27T10:41:11")
     assert ak.max(array) == np.datetime64("2020-06-27T10:41:11")
     assert ak.to_list(ak.min(array, axis=0)) == [

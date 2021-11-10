@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <set>
+#include <regex>
 
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -211,10 +212,10 @@ namespace awkward {
       else if (fmt == std::string("Zg")) {
         return dtype::complex256;
       }
-      else if (fmt == std::string("M")) {
+      else if (fmt.substr(0, 2) == std::string("M8")) {
         return dtype::datetime64;
       }
-      else if (fmt == std::string("m")) {
+      else if (fmt.substr(0, 2) == std::string("m8")) {
         return dtype::timedelta64;
       }
       else {

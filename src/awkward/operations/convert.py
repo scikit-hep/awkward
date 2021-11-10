@@ -4757,6 +4757,7 @@ def _form_to_layout(
         raw_array = _asbuf(
             container[key_format(form_key=fk, attribute="data", partition=partnum)]
         )
+
         dtype_inner_shape = form.to_numpy()
         if dtype_inner_shape.subdtype is None:
             dtype, inner_shape = dtype_inner_shape, ()
@@ -5070,7 +5071,6 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
-
     if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
         form = ak.forms.Form.fromjson(form)
     elif isinstance(form, dict):

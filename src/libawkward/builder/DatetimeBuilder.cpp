@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/DatetimeBuilder.cpp", line)
 
 #include <stdexcept>
+#include <regex>
 
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Complex128Builder.h"
@@ -44,9 +45,22 @@ namespace awkward {
                           content_.ptr().get(),
                           content_.length() * sizeof(int64_t));
 
-    return "{\"class\": \"NumpyArray\", \"primitive\": \""
-           + unit() + "\", \"form_key\": \""
-           + form_key.str() + "\"}";
+    std::string primitive(units_);
+    std::string format = std::regex_replace(
+                           std::regex_replace(primitive, std::regex("datetime64"), "M8"),
+                         std::regex("timedelta64"), "m8");
+
+    if (primitive == format) {
+      return "{\"class\": \"NumpyArray\", \"primitive\": \""
+             + primitive + "\", \"form_key\": \""
+             + form_key.str() + "\"}";
+    }
+    else {
+      return "{\"class\": \"NumpyArray\", \"primitive\": \""
+             + primitive + "\", \"format\": \""
+             + format + "\", \"form_key\": \""
+             + form_key.str() + "\"}";
+    }
   }
 
   int64_t

@@ -514,10 +514,10 @@ make_NumpyForm(const py::handle& m, const std::string& name) {
           dt = "c32";
           break;
         case ak::util::dtype::datetime64:
-          dt = "?";
+          dt = self.format();
           break;
         case ak::util::dtype::timedelta64:
-          dt = "?";
+          dt = self.format();
           break;
         default:
           // FIXME: record arrays; need to parse 'format'

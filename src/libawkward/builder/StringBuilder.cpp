@@ -7,6 +7,7 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
+#include "awkward/util.h"
 
 #include "awkward/builder/StringBuilder.h"
 
@@ -57,9 +58,25 @@ namespace awkward {
                           content_.ptr().get(),
                           content_.length() * sizeof(uint8_t));
 
+    std::string char_parameter;
+    std::string string_parameter;
+    if (encoding_ == nullptr) {
+      char_parameter = std::string("\"byte\"");
+      string_parameter = std::string("\"bytestring\"");
+    }
+    else if (std::string(encoding_) == std::string("utf-8")) {
+      char_parameter = std::string("\"char\"");
+      string_parameter = std::string("\"string\"");
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("unsupported encoding: ") + util::quote(encoding_));
+    }
+
     return std::string("{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": ")
-           + "{\"class\": \"NumpyArray\", \"primitive\": \"uint8\", \"parameters\": {\"__array__\": \"char\"}, \"form_key\": \"" + inner_form_key.str() + "\"}"
-           + ", \"parameters\": {\"__array__\": \"string\"}"
+           + "{\"class\": \"NumpyArray\", \"primitive\": \"uint8\", \"parameters\": {\"__array__\": "
+           + char_parameter + "}, \"form_key\": \"" + inner_form_key.str() + "\"}"
+           + ", \"parameters\": {\"__array__\": " + string_parameter + "}"
            + ", \"form_key\": \"" + outer_form_key.str() + "\"}";
   }
 

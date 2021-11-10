@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Content.cpp", line)
 
 #include <sstream>
+#include <regex>
 
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -237,17 +238,37 @@ namespace awkward {
   FormPtr
   fromjson_part(const JSON& json) {
     if (json.IsString()) {
-      util::dtype dtype = util::name_to_dtype(json.GetString());
-      int64_t itemsize = util::dtype_to_itemsize(dtype);
-      std::string format = util::dtype_to_format(dtype);
-      if (dtype != util::dtype::NOT_PRIMITIVE) {
+      std::string primitive(json.GetString());
+      if (primitive.find("datetime64") != std::string::npos) {
         return std::make_shared<NumpyForm>(false,
                                            util::Parameters(),
                                            FormKey(nullptr),
                                            std::vector<int64_t>(),
-                                           itemsize,
-                                           format,
-                                           dtype);
+                                           8,
+                                           std::regex_replace(primitive, std::regex("datetime64"), "M8"),
+                                           util::dtype::datetime64);
+      }
+      else if (primitive.find("timedelta64") != std::string::npos) {
+        return std::make_shared<NumpyForm>(false,
+                                           util::Parameters(),
+                                           FormKey(nullptr),
+                                           std::vector<int64_t>(),
+                                           8,
+                                           std::regex_replace(primitive, std::regex("timedelta64"), "M8"),
+                                           util::dtype::timedelta64);
+      }
+      else {
+        util::dtype dtype = util::name_to_dtype(primitive);
+        int64_t itemsize = util::dtype_to_itemsize(dtype);
+        if (dtype != util::dtype::NOT_PRIMITIVE) {
+          return std::make_shared<NumpyForm>(false,
+                                             util::Parameters(),
+                                             FormKey(nullptr),
+                                             std::vector<int64_t>(),
+                                             itemsize,
+                                             util::dtype_to_format(dtype),
+                                             dtype);
+        }
       }
     }
 
@@ -319,6 +340,11 @@ namespace awkward {
           format = raw->format();
           itemsize = raw->itemsize();
           dtype = util::format_to_dtype(format, itemsize);
+          if ((raw->dtype() == util::dtype::datetime64 ||
+               raw->dtype() == util::dtype::timedelta64)
+              && json.HasMember("format")  &&  json["format"].IsString()) {
+            format = json["format"].GetString();
+          }
         }
         else if (json.HasMember("format")  &&  json["format"].IsString()  &&
                  json.HasMember("itemsize")  &&  json["itemsize"].IsInt()) {

@@ -8,9 +8,9 @@
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
+#include "awkward/util.h"
 
 #include "awkward/builder/RecordBuilder.h"
-#include "awkward/util.h"
 
 namespace awkward {
   const BuilderPtr
