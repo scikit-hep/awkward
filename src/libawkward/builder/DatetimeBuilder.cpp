@@ -3,7 +3,6 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/DatetimeBuilder.cpp", line)
 
 #include <stdexcept>
-#include <regex>
 
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Complex128Builder.h"
@@ -46,19 +45,22 @@ namespace awkward {
                           content_.length() * sizeof(int64_t));
 
     std::string primitive(units_);
-    std::string format = std::regex_replace(
-                           std::regex_replace(primitive, std::regex("datetime64"), "M8"),
-                         std::regex("timedelta64"), "m8");
 
-    if (primitive == format) {
+    if (primitive.find("datetime64") == 0) {
       return "{\"class\": \"NumpyArray\", \"primitive\": \""
-             + primitive + "\", \"form_key\": \""
+             + primitive + "\", \"format\": \""
+             + "M8" + primitive.substr(10, -1) + "\", \"form_key\": \""
+             + form_key.str() + "\"}";
+    }
+    else if (primitive.find("timedelta64") == 0) {
+      return "{\"class\": \"NumpyArray\", \"primitive\": \""
+             + primitive + "\", \"format\": \""
+             + "m8" + primitive.substr(11, -1) + "\", \"form_key\": \""
              + form_key.str() + "\"}";
     }
     else {
       return "{\"class\": \"NumpyArray\", \"primitive\": \""
-             + primitive + "\", \"format\": \""
-             + format + "\", \"form_key\": \""
+             + primitive + "\", \"form_key\": \""
              + form_key.str() + "\"}";
     }
   }

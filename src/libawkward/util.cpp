@@ -4,7 +4,6 @@
 
 #include <sstream>
 #include <set>
-#include <regex>
 
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"

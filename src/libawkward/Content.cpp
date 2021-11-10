@@ -3,7 +3,6 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Content.cpp", line)
 
 #include <sstream>
-#include <regex>
 
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -239,22 +238,22 @@ namespace awkward {
   fromjson_part(const JSON& json) {
     if (json.IsString()) {
       std::string primitive(json.GetString());
-      if (primitive.find("datetime64") != std::string::npos) {
+      if (primitive.find("datetime64") == 0) {
         return std::make_shared<NumpyForm>(false,
                                            util::Parameters(),
                                            FormKey(nullptr),
                                            std::vector<int64_t>(),
                                            8,
-                                           std::regex_replace(primitive, std::regex("datetime64"), "M8"),
+                                           "M8" + primitive.substr(10, -1),
                                            util::dtype::datetime64);
       }
-      else if (primitive.find("timedelta64") != std::string::npos) {
+      else if (primitive.find("timedelta64") == 0) {
         return std::make_shared<NumpyForm>(false,
                                            util::Parameters(),
                                            FormKey(nullptr),
                                            std::vector<int64_t>(),
                                            8,
-                                           std::regex_replace(primitive, std::regex("timedelta64"), "M8"),
+                                           "m8" + primitive.substr(11, -1),
                                            util::dtype::timedelta64);
       }
       else {

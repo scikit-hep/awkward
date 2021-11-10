@@ -5076,7 +5076,7 @@ def from_buffers(
     elif isinstance(form, dict):
         form = ak.forms.Form.fromjson(json.dumps(form))
 
-    if isinstance(key_format, str):
+    if ak._util.isstr(key_format):
 
         def generate_key_format(key_format):
             def kf(**v):
