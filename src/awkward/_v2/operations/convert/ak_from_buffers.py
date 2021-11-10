@@ -127,7 +127,10 @@ def reconstitute(form, length, container, getkey, nplike):
             real_length *= x
         data = nplike.frombuffer(raw_array, dtype=dtype, count=real_length)
         if form.inner_shape != ():
-            data = data.reshape((-1,) + form.inner_shape)
+            if len(data) == 0:
+                data = data.reshape((length,) + form.inner_shape)
+            else:
+                data = data.reshape((-1,) + form.inner_shape)
         return ak._v2.contents.NumpyArray(data, identifier, form.parameters, nplike)
 
     elif isinstance(form, ak._v2.forms.UnmaskedForm):
@@ -199,7 +202,7 @@ def reconstitute(form, length, container, getkey, nplike):
             raw_array2, dtype=_index_to_dtype[form.stops], count=length
         )
         reduced_stops = stops[starts != stops]
-        next_length = 0 if len(starts) == 0 else nplike.max(reduced_stops) + 1
+        next_length = 0 if len(starts) == 0 else nplike.max(reduced_stops)
         return ak._v2.contents.ListArray(
             ak._v2.index.Index(starts),
             ak._v2.index.Index(stops),

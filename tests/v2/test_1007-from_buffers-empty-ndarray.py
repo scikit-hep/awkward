@@ -11,9 +11,9 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-# def test():
-#     array = ak.from_numpy(np.zeros((3, 0), dtype=np.int32))
-#     buffs = ak.to_buffers(array)
-#     new_array = ak.from_buffers(*buffs)
+def test():
+    array = ak._v2.contents.NumpyArray(np.zeros((3, 0), dtype=np.int32))
+    buffs = ak._v2.operations.convert.to_buffers(array)
+    new_array = ak._v2.operations.convert.from_buffers(*buffs)
 
-#     assert ak.to_list(new_array) == [[], [], []]
+    assert ak.to_list(new_array) == [[], [], []]
