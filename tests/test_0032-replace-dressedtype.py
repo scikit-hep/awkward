@@ -107,7 +107,7 @@ def test_record_name():
     builder.endrecord()
 
     a = builder.snapshot()
-    if not ak._util.py27:
+    if not (ak._util.py27 or ak._util.py35):
         assert repr(a.type(typestrs)) == 'Dummy["one": int64, "two": float64]'
     assert a.type(typestrs).parameters == {"__record__": "Dummy"}
 
