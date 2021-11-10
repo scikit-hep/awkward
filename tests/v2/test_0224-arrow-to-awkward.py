@@ -10,6 +10,10 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 
 pyarrow = pytest.importorskip("pyarrow")
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 
 def test_toarrow_BitMaskedArray():
     content = v1_to_v2(
