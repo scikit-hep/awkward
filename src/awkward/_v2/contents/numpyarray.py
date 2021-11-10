@@ -536,8 +536,8 @@ class NumpyArray(Content):
         if len(self.shape) == 0:
             return True
 
-        elif len(self.shape) != 1 or not self.iscontiguous():
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+        elif len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._is_unique(
                 negaxis,
                 starts,
@@ -561,7 +561,7 @@ class NumpyArray(Content):
         nplike = self.nplike
 
         if negaxis is None:
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             flattened_shape = 1
             for i in range(len(contiguous_self.shape)):
                 flattened_shape = flattened_shape * self.shape[i]
@@ -603,8 +603,8 @@ class NumpyArray(Content):
             return out[: nextlength[0]]
 
         # axis is not None
-        if len(self.shape) != 1 or (not self.iscontiguous()):
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+        if len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._unique(
                 negaxis,
                 starts,
@@ -988,7 +988,7 @@ class NumpyArray(Content):
     def _rpad(self, target, axis, depth, clip):
         if len(self.shape) == 0:
             raise ValueError("cannot rpad a scalar")
-        elif len(self.shape) > 1 or not self.iscontiguous():
+        elif len(self.shape) > 1 or not self.is_contiguous:
             return self.toRegularArray()._rpad(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
