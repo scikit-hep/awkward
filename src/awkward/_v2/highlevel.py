@@ -9,8 +9,6 @@
 #    - [ ] `__array_ufunc__`
 #    - [ ] `__array_function__`
 #    - [ ] `numba_type`
-#    - [ ] `__getstate__`
-#    - [ ] `__setstate__`
 #    - [ ] `__copy__`
 #    - [ ] `__deepcopy__`
 #    - [ ] `__contains__`
@@ -21,8 +19,6 @@
 #    - [ ] 'nbytes' and maybe 'nbytes_held'
 #    - [ ] `__array_ufunc__`
 #    - [ ] `numba_type`
-#    - [ ] `__getstate__`
-#    - [ ] `__setstate__`
 #    - [ ] `__copy__`
 #    - [ ] `__deepcopy__`
 #    - [ ] `__contains__`
@@ -48,7 +44,7 @@ import awkward as ak
 from awkward._v2._connect.numpy import NDArrayOperatorsMixin
 
 np = ak.nplike.NumpyMetadata.instance()
-# numpy = ak.nplike.Numpy.instance()
+numpy = ak.nplike.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -445,13 +441,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         (but without the underscore, like NumPy's
         [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
         """
-        return ak._v2.operations.convert.to_list(self)
+        return self.to_list()
 
     def to_list(self):
         """
         Converts this Array into Python objects; same as #ak.to_list.
         """
-        return ak._v2.operations.convert.to_list(self)
+        return self._layout.to_list(self._behavior)
 
     def to_numpy(self, allow_missing=True):
         """
@@ -581,8 +577,32 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #ak.to_list.
         """
-        for x in self.layout:
-            yield ak._v2._util.wrap(x, self._behavior)
+        if isinstance(self._layout, ak._v2.contents.NumpyArray):
+            array = self._layout.to(numpy)
+            array_param = self._layout.parameter("__array__")
+            if array_param == "byte":
+                for x in ak._v2._util.tobytes(array):
+                    yield x
+            elif array_param == "char":
+                for x in ak._v2._util.tobytes(array).decode(errors="surrogateescape"):
+                    yield x
+            else:
+                for x in array:
+                    yield x
+        else:
+            for x in self._layout:
+                if isinstance(x, ak._v2.contents.NumpyArray):
+                    array_param = x.parameter("__array__")
+                    if array_param == "byte":
+                        yield ak._v2._util.tobytes(x.to(numpy))
+                    elif array_param == "char":
+                        yield ak._v2._util.tobytes(x.to(numpy)).decode(
+                            errors="surrogateescape"
+                        )
+                    else:
+                        yield x
+                else:
+                    yield ak._v2._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
         """
@@ -996,13 +1016,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
-        if isinstance(tmp, ak._v2.behaviors.string.ByteBehavior):
-            return bytes(tmp)
-        elif isinstance(tmp, ak._v2.behaviors.string.CharBehavior):
-            return str(tmp)
-        else:
-            return tmp
+        out = self._layout[where]
+        if isinstance(out, ak._v2.contents.NumpyArray):
+            array_param = out.parameter("__array__")
+            if array_param == "byte":
+                return ak._v2._util.tobytes(out.to(numpy))
+            elif array_param == "char":
+                return ak._v2._util.tobytes(out.to(numpy)).decode(
+                    errors="surrogateescape"
+                )
+        return ak._v2._util.wrap(out, self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1291,7 +1314,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         nested lists in a NumPy `"O"` array are severed from the array and
     #         cannot be sliced as dimensions.
     #         """
-    #         return ak._v2._connect.numpy.convert_to_array(self.layout, args, kwargs)
+    #         return ak._v2._connect.numpy.convert_to_array(self._layout, args, kwargs)
 
     #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
     #         """
@@ -1395,37 +1418,56 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     #         return numba.typeof(self._numbaview)
 
-    #     def __getstate__(self):
-    #         packed = ak._v2.operations.structure.packed(self.layout, highlevel=False)
-    #         form, length, container = ak._v2.operations.convert.to_buffers(packed)
-    #         if self._behavior is ak._v2.behavior:
-    #             behavior = None
-    #         else:
-    #             behavior = self._behavior
-    #         return form, length, container, behavior
+    def __getstate__(self):
+        packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
+        form, length, container = ak._v2.operations.convert.to_buffers(
+            packed, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
+        )
+        if self._behavior is ak._v2.behavior:
+            behavior = None
+        else:
+            behavior = self._behavior
+        return form, length, container, behavior
 
-    #     def __setstate__(self, state):
-    #         if isinstance(state[1], dict):
-    #             form, container, num_partitions, behavior = state
-    #             layout = ak._v2._util.adjust_old_pickle(
-    #                 form, container, num_partitions, behavior
-    #             )
-    #         else:
-    #             form, length, container, behavior = state
-    #             layout = ak._v2.operations.convert.from_buffers(
-    #                 form, length, container, highlevel=False, behavior=behavior
-    #             )
-    #         if self.__class__ is Array:
-    #             self.__class__ = ak._v2._util.arrayclass(layout, behavior)
-    #         self.layout = layout
-    #         self.behavior = behavior
-    #         self._caches = ak._v2._util.find_caches(self.layout)
+    def __setstate__(self, state):
+        if isinstance(state[1], dict):
+            raise ValueError(
+                "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
+            )
+        else:
+            form, length, container, behavior = state
+            if ak._v2._util.isint(length):
+                layout = ak._v2.operations.convert.from_buffers(
+                    form,
+                    length,
+                    container,
+                    highlevel=False,
+                    buffer_key="part0-{form_key}-{attribute}",
+                )
+            else:
+                layouts = [
+                    ak._v2.operations.convert.from_buffers(
+                        form,
+                        length,
+                        container,
+                        highlevel=False,
+                        buffer_key="part{0}-{{form_key}}-{{attribute}}".format(i),
+                    )
+                    for i in length
+                ]
+                layout = ak._v2.operations.structure.concatenate(
+                    layouts, highlevel=False
+                )
+        if self.__class__ is Array:
+            self.__class__ = ak._v2._util.arrayclass(layout, behavior)
+        self.layout = layout
+        self.behavior = behavior
 
     #     def __copy__(self):
-    #         return Array(self.layout, behavior=self._behavior)
+    #         return Array(self._layout, behavior=self._behavior)
 
     #     def __deepcopy__(self, memo):
-    #         return Array(self.layout.deep_copy(), behavior=self._behavior)
+    #         return Array(self._layout.deep_copy(), behavior=self._behavior)
 
     def __bool__(self):
         if len(self) == 1:
@@ -1438,7 +1480,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
 
 #     def __contains__(self, element):
-#         for test in ak._v2._util.completely_flatten(self.layout):
+#         for test in ak._v2._util.completely_flatten(self._layout):
 #             if element in test:
 #                 return True
 #         return False
@@ -1611,13 +1653,13 @@ class Record(NDArrayOperatorsMixin):
         (but without the underscore, like NumPy's
         [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
         """
-        return ak._v2.operations.convert.to_list(self)
+        return self.to_list()
 
     def to_list(self):
         """
         Converts this Record into Python objects; same as #ak.to_list.
         """
-        return ak._v2.operations.convert.to_list(self)
+        return self._layout.to_list(self._behavior)
 
     #     @property
     #     def nbytes(self):
@@ -1637,7 +1679,7 @@ class Record(NDArrayOperatorsMixin):
     #         the (small) C++ nodes or Python objects that reference the (large)
     #         array buffers.
     #         """
-    #         return self.layout.nbytes
+    #         return self._layout.nbytes
 
     @property
     def fields(self):
@@ -1704,13 +1746,16 @@ class Record(NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
-        if isinstance(tmp, ak._v2.behaviors.string.ByteBehavior):
-            return bytes(tmp)
-        elif isinstance(tmp, ak._v2.behaviors.string.CharBehavior):
-            return str(tmp)
-        else:
-            return tmp
+        out = self._layout[where]
+        if isinstance(out, ak._v2.contents.NumpyArray):
+            array_param = out.parameter("__array__")
+            if array_param == "byte":
+                return ak._v2._util.tobytes(out.to(numpy))
+            elif array_param == "char":
+                return ak._v2._util.tobytes(out.to(numpy)).decode(
+                    errors="surrogateescape"
+                )
+        return ak._v2._util.wrap(out, self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1794,7 +1839,7 @@ class Record(NDArrayOperatorsMixin):
                 + dir(super(Record, self))
                 + [
                     x
-                    for x in self.layout.fields
+                    for x in self._layout.fields
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )
@@ -1979,38 +2024,57 @@ class Record(NDArrayOperatorsMixin):
 
     #         return numba.typeof(self._numbaview)
 
-    #     def __getstate__(self):
-    #         packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
-    #         form, length, container = ak._v2.operations.convert.to_buffers(packed.array)
-    #         if self._behavior is ak._v2.behavior:
-    #             behavior = None
-    #         else:
-    #             behavior = self._behavior
-    #         return form, length, container, behavior, packed.at
+    def __getstate__(self):
+        packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
+        form, length, container = ak._v2.operations.convert.to_buffers(
+            packed.array, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
+        )
+        if self._behavior is ak._v2.behavior:
+            behavior = None
+        else:
+            behavior = self._behavior
+        return form, length, container, behavior, packed.at
 
-    #     def __setstate__(self, state):
-    #         if isinstance(state[1], dict):
-    #             form, container, num_partitions, behavior, at = state
-    #             layout = ak._v2._util.adjust_old_pickle(
-    #                 form, container, num_partitions, behavior
-    #             )
-    #         else:
-    #             form, length, container, behavior, at = state
-    #             layout = ak._v2.operations.convert.from_buffers(
-    #                 form, length, container, highlevel=False, behavior=behavior
-    #             )
-    #         layout = ak._v2.record.Record(layout, at)
-    #         if self.__class__ is Record:
-    #             self.__class__ = ak._v2._util.recordclass(layout, behavior)
-    #         self.layout = layout
-    #         self.behavior = behavior
-    #         self._caches = ak._v2._util.find_caches(self.layout)
+    def __setstate__(self, state):
+        if isinstance(state[1], dict):
+            raise ValueError(
+                "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
+            )
+        else:
+            form, length, container, behavior, at = state
+            if ak._v2._util.isint(length):
+                layout = ak._v2.operations.convert.from_buffers(
+                    form,
+                    length,
+                    container,
+                    highlevel=False,
+                    buffer_key="part0-{form_key}-{attribute}",
+                )
+            else:
+                layouts = [
+                    ak._v2.operations.convert.from_buffers(
+                        form,
+                        length,
+                        container,
+                        highlevel=False,
+                        buffer_key="part{0}-{{form_key}}-{{attribute}}".format(i),
+                    )
+                    for i in length
+                ]
+                layout = ak._v2.operations.structure.concatenate(
+                    layouts, highlevel=False
+                )
+        layout = ak._v2.record.Record(layout, at)
+        if self.__class__ is Record:
+            self.__class__ = ak._v2._util.recordclass(layout, behavior)
+        self.layout = layout
+        self.behavior = behavior
 
     #     def __copy__(self):
-    #         return Record(self.layout, behavior=self._behavior)
+    #         return Record(self._layout, behavior=self._behavior)
 
     #     def __deepcopy__(self, memo):
-    #         return Record(self.layout.deep_copy(), behavior=self._behavior)
+    #         return Record(self._layout.deep_copy(), behavior=self._behavior)
 
     def __bool__(self):
         raise ValueError(
@@ -2020,7 +2084,7 @@ class Record(NDArrayOperatorsMixin):
 
 
 #     def __contains__(self, element):
-#         for test in ak._v2._util.completely_flatten(self.layout):
+#         for test in ak._v2._util.completely_flatten(self._layout):
 #             if element in test:
 #                 return True
 #         return False

@@ -27,6 +27,19 @@ namespace awkward {
     return "BoolBuilder";
   };
 
+  const std::string
+  BoolBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(form_key.str() + "-data",
+                          buffer_.ptr().get(),
+                          buffer_.length() * sizeof(bool));
+
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"bool\", \"form_key\": \""
+           + form_key.str() + "\"}";
+  }
+
   int64_t
   BoolBuilder::length() const {
     return buffer_.length();
@@ -151,13 +164,6 @@ namespace awkward {
     throw std::invalid_argument(
       std::string("called 'endrecord' without 'beginrecord' at the same level before it")
       + FILENAME(__LINE__));
-  }
-
-  const BuilderPtr
-  BoolBuilder::append(const ContentPtr& array, int64_t at) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->append(array, at);
-    return out;
   }
 
 }

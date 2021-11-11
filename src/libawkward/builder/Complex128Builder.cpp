@@ -54,6 +54,19 @@ namespace awkward {
     return "Complex128Builder";
   }
 
+  const std::string
+  Complex128Builder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(form_key.str() + "-data",
+                          buffer_.ptr().get(),
+                          buffer_.length() * sizeof(double) * 2);
+
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
+           + form_key.str() + "\"}";
+  }
+
   int64_t
   Complex128Builder::length() const {
     return buffer_.length();
@@ -176,10 +189,4 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
-  Complex128Builder::append(const ContentPtr& array, int64_t at) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->append(array, at);
-    return out;
-  }
 }

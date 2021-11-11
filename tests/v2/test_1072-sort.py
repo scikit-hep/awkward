@@ -233,11 +233,11 @@ def test_numpy_array_iscontiguous():
 
     assert not layout.iscontiguous
     v2_layout = v1_to_v2(layout)
-    assert not v2_layout.iscontiguous()
+    assert not v2_layout.is_contiguous
 
     matrix2 = np.arange(64).reshape(8, -1)
     v2_array = ak._v2.contents.NumpyArray(matrix2[:, 0])
-    assert not v2_array.iscontiguous()
+    assert not v2_array.is_contiguous
 
     assert ak.to_list(v2_array.sort()) == [0, 8, 16, 24, 32, 40, 48, 56]
     assert v2_array.typetracer.sort().form == v2_array.sort().form

@@ -71,15 +71,19 @@ class NumpyArray(Content):
 
     Form = NumpyForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
         return self.Form(
             ak._v2.types.numpytype._dtype_to_primitive[self._data.dtype],
             self._data.shape[1:],
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=getkey(self),
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        key = getkey(self, form, "data")
+        container[key] = ak._v2._util.little_endian(self.to(nplike))
 
     @property
     def typetracer(self):
@@ -259,7 +263,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self.parameters, nplike=nplike)
+            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
             return out2
 
         elif ak._util.isstr(head):
@@ -279,7 +283,7 @@ class NumpyArray(Content):
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
-            return NumpyArray(out, None, self.parameters, nplike=nplike)
+            return NumpyArray(out, None, self._parameters, nplike=nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             where = (slice(None), head) + tail
@@ -287,7 +291,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self.parameters, nplike=nplike)
+            out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
             return out2
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
@@ -354,7 +358,9 @@ class NumpyArray(Content):
         contiguous_arrays = []
 
         for array in head:
-            parameters = dict(self.parameters.items() & array.parameters.items())
+            parameters = ak._v2._util.merge_parameters(
+                self._parameters, array._parameters
+            )
             if isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                 pass
             elif isinstance(array, ak._v2.contents.numpyarray.NumpyArray):
@@ -369,7 +375,7 @@ class NumpyArray(Content):
 
         contiguous_arrays = self.nplike.concatenate(contiguous_arrays)
 
-        next = NumpyArray(contiguous_arrays, self.identifier, parameters)
+        next = NumpyArray(contiguous_arrays, self._identifier, parameters)
 
         if len(tail) == 0:
             return next
@@ -390,19 +396,31 @@ class NumpyArray(Content):
             return self.toRegularArray()._localindex(posaxis, depth)
 
     def contiguous(self):
-        if self._data.ndim >= 1:
-            return ak._v2.contents.NumpyArray(self.nplike.ascontiguousarray(self))
-        else:
+        if self.is_contiguous:
             return self
+        else:
+            return ak._v2.contents.NumpyArray(
+                self._nplike.ascontiguousarray(self._data),
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
 
-    def iscontiguous(self):
+    @property
+    def is_contiguous(self):
+        if isinstance(self._nplike, ak._v2._typetracer.TypeTracer):
+            return True
+
+        # Alternatively, self._data.flags["C_CONTIGUOUS"], but the following assumes
+        # less of the nplike.
+
         x = self._data.dtype.itemsize
 
-        for i in range(len(self.shape), 0, -1):  # FIXME: more Pythonic way to do it?
-            if x != self.strides[i - 1]:
+        for i in range(len(self._data.shape), 0, -1):
+            if x != self._data.strides[i - 1]:
                 return False
             else:
-                x = x * self.shape[i - 1]
+                x = x * self._data.shape[i - 1]
 
         return True
 
@@ -518,8 +536,8 @@ class NumpyArray(Content):
         if len(self.shape) == 0:
             return True
 
-        elif len(self.shape) != 1 or not self.iscontiguous():
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+        elif len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._is_unique(
                 negaxis,
                 starts,
@@ -543,7 +561,7 @@ class NumpyArray(Content):
         nplike = self.nplike
 
         if negaxis is None:
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             flattened_shape = 1
             for i in range(len(contiguous_self.shape)):
                 flattened_shape = flattened_shape * self.shape[i]
@@ -585,8 +603,8 @@ class NumpyArray(Content):
             return out[: nextlength[0]]
 
         # axis is not None
-        if len(self.shape) != 1 or (not self.iscontiguous()):
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+        if len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._unique(
                 negaxis,
                 starts,
@@ -701,8 +719,8 @@ class NumpyArray(Content):
             raise TypeError(
                 "{0} attempting to argsort a scalar ".format(type(self).__name__)
             )
-        elif len(self.shape) != 1 or not self.iscontiguous():
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+        elif len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._argsort_next(
                 negaxis,
                 starts,
@@ -797,8 +815,8 @@ class NumpyArray(Content):
                 "{0} attempting to sort a scalar ".format(type(self).__name__)
             )
 
-        elif len(self.shape) != 1 or not self.iscontiguous():
-            contiguous_self = self if self.iscontiguous() else self.contiguous()
+        elif len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._sort_next(
                 negaxis,
                 starts,
@@ -970,7 +988,7 @@ class NumpyArray(Content):
     def _rpad(self, target, axis, depth, clip):
         if len(self.shape) == 0:
             raise ValueError("cannot rpad a scalar")
-        elif len(self.shape) > 1 or not self.iscontiguous():
+        elif len(self.shape) > 1 or not self.is_contiguous:
             return self.toRegularArray()._rpad(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
@@ -1050,3 +1068,20 @@ class NumpyArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return self.contiguous().toRegularArray()
+
+    def _to_list(self, behavior):
+        if self.parameter("__array__") == "byte":
+            return ak._v2._util.tobytes(self._data)
+
+        elif self.parameter("__array__") == "char":
+            return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")
+
+        else:
+            out = self._to_list_custom(behavior)
+            if out is not None:
+                return out
+
+            return self._data.tolist()

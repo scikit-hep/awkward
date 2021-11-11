@@ -31,6 +31,11 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     ArrayBuilder(const ArrayBuilderOptions& options);
 
+    /// @brief Copy the current snapshot into the BuffersContainer and
+    /// return a Form as a std::string (JSON).
+    const std::string
+      to_buffers(BuffersContainer& container, int64_t& form_key_id) const;
+
     /// @brief Current length of the accumulated array.
     int64_t
       length() const;
@@ -225,15 +230,6 @@ namespace awkward {
 
     void builder_update(BuilderPtr builder) { builder_ = builder; }
 
-    /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data, without
-    /// handling negative indexing or bounds-checking.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    void
-      append_nowrap(const ContentPtr& array, int64_t at);
-
     /// @brief Internal function to replace the root node of the ArrayBuilder's
     /// Builder tree with a new root.
     void
@@ -359,13 +355,6 @@ extern "C" {
   /// {@link awkward::ArrayBuilder#endrecord ArrayBuilder::endrecord}.
   LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_endrecord(void* arraybuilder);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#append_nowrap ArrayBuilder::append_nowrap}.
-  LIBAWKWARD_EXPORT_SYMBOL uint8_t
-    awkward_ArrayBuilder_append_nowrap(void* arraybuilder,
-                                       const void* shared_ptr_ptr,
-                                       int64_t at);
 }
 
 #endif // AWKWARD_ARRAYBUILDER_H_

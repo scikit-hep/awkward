@@ -122,15 +122,24 @@ class RecordArray(Content):
 
     Form = RecordForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
-            [x.form for x in self._contents],
+            [x._form_with_key(getkey) for x in self._contents],
             self._fields,
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        if self._fields is None:
+            for i, content in enumerate(self._contents):
+                content._to_buffers(form.content(i), getkey, container, nplike)
+        else:
+            for field, content in zip(self._fields, self._contents):
+                content._to_buffers(form.content(field), getkey, container, nplike)
 
     @property
     def typetracer(self):
@@ -434,7 +443,9 @@ class RecordArray(Content):
 
         if self.is_tuple:
             for array in headless:
-                parameters = dict(self.parameters.items() & array.parameters.items())
+                parameters = ak._v2._util.merge_parameters(
+                    self._parameters, array._parameters
+                )
 
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
                     if self.is_tuple:
@@ -754,3 +765,45 @@ class RecordArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return RecordArray(
+            [
+                x.packed() if len(x) == self._length else x[: self._length].packed()
+                for x in self._contents
+            ],
+            self._fields,
+            self._length,
+            self._identifier,
+            self._parameters,
+        )
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        cls = ak._v2._util.recordclass(self, behavior)
+        if cls is not ak._v2.highlevel.Record:
+            length = self._length
+            out = [None] * length
+            for i in range(length):
+                out[i] = cls(self[i])
+            return out
+
+        if self.is_tuple:
+            contents = [x._to_list(behavior) for x in self._contents]
+            length = self._length
+            out = [None] * length
+            for i in range(length):
+                out[i] = tuple(x[i] for x in contents)
+            return out
+
+        else:
+            fields = self._fields
+            contents = [x._to_list(behavior) for x in self._contents]
+            length = self._length
+            out = [None] * length
+            for i in range(length):
+                out[i] = dict(zip(fields, [x[i] for x in contents]))
+            return out

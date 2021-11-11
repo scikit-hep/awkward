@@ -7,6 +7,7 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
+#include "awkward/util.h"
 
 #include "awkward/builder/StringBuilder.h"
 
@@ -40,6 +41,43 @@ namespace awkward {
   const char*
   StringBuilder::encoding() const {
     return encoding_;
+  }
+
+  const std::string
+  StringBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream outer_form_key;
+    std::stringstream inner_form_key;
+    outer_form_key << "node" << (form_key_id++);
+    inner_form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(outer_form_key.str() + "-offsets",
+                          offsets_.ptr().get(),
+                          offsets_.length() * sizeof(int64_t));
+
+    container.copy_buffer(inner_form_key.str() + "-data",
+                          content_.ptr().get(),
+                          content_.length() * sizeof(uint8_t));
+
+    std::string char_parameter;
+    std::string string_parameter;
+    if (encoding_ == nullptr) {
+      char_parameter = std::string("\"byte\"");
+      string_parameter = std::string("\"bytestring\"");
+    }
+    else if (std::string(encoding_) == std::string("utf-8")) {
+      char_parameter = std::string("\"char\"");
+      string_parameter = std::string("\"string\"");
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("unsupported encoding: ") + util::quote(encoding_));
+    }
+
+    return std::string("{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": ")
+           + "{\"class\": \"NumpyArray\", \"primitive\": \"uint8\", \"parameters\": {\"__array__\": "
+           + char_parameter + "}, \"form_key\": \"" + inner_form_key.str() + "\"}"
+           + ", \"parameters\": {\"__array__\": " + string_parameter + "}"
+           + ", \"form_key\": \"" + outer_form_key.str() + "\"}";
   }
 
   int64_t
@@ -180,10 +218,4 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  const BuilderPtr
-  StringBuilder::append(const ContentPtr& array, int64_t at) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->append(array, at);
-    return out;
-  }
 }

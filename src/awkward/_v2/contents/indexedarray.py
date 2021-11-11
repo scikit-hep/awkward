@@ -57,15 +57,21 @@ class IndexedArray(Content):
 
     Form = IndexedForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
             self._index.form,
-            self._content.form,
+            self._content._form_with_key(getkey),
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        key = getkey(self, form, "index")
+        container[key] = ak._v2._util.little_endian(self._index.to(nplike))
+        self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
@@ -271,7 +277,7 @@ class IndexedArray(Content):
                 )
             )
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                nextindex, self.content, self.identifier, self.parameters
+                nextindex, self._content, self._identifier, self._parameters
             )
             return next.project()
 
@@ -293,7 +299,7 @@ class IndexedArray(Content):
 
     def simplify_optiontype(self):
         if isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
@@ -304,23 +310,23 @@ class IndexedArray(Content):
         ):
 
             if isinstance(
-                self.content,
+                self._content,
                 (
                     ak._v2.contents.indexedarray.IndexedArray,
                     ak._v2.contents.indexedoptionarray.IndexedOptionArray,
                 ),
             ):
-                inner = self.content.index
+                inner = self._content.index
                 result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
             elif isinstance(
-                self.content,
+                self._content,
                 (
                     ak._v2.contents.bytemaskedarray.ByteMaskedArray,
                     ak._v2.contents.bitmaskedarray.BitMaskedArray,
                     ak._v2.contents.unmaskedarray.UnmaskedArray,
                 ),
             ):
-                rawcontent = self.content.toIndexedOptionArray64()
+                rawcontent = self._content.toIndexedOptionArray64()
                 inner = rawcontent.index
                 result = ak._v2.index.Index64.empty(len(self.index), self.nplike)
 
@@ -338,13 +344,13 @@ class IndexedArray(Content):
                     len(inner),
                 )
             )
-            if isinstance(self.content, ak._v2.contents.indexedarray.IndexedArray):
+            if isinstance(self._content, ak._v2.contents.indexedarray.IndexedArray):
                 return IndexedArray(
-                    result, self.content.content, self.identifier, self.parameters
+                    result, self._content.content, self._identifier, self._parameters
                 )
 
             if isinstance(
-                self.content,
+                self._content,
                 (
                     ak._v2.contents.indexedoptionarray.IndexedOptionArray,
                     ak._v2.contents.bytemaskedarray.ByteMaskedArray,
@@ -353,7 +359,7 @@ class IndexedArray(Content):
                 ),
             ):
                 return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                    result, self.content.content, self.identifier, self.parameters
+                    result, self._content.content, self._identifier, self._parameters
                 )
 
         else:
@@ -382,10 +388,10 @@ class IndexedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            self.content.mergeable(other.content, mergebool)
+            self._content.mergeable(other.content, mergebool)
 
         else:
-            return self.content.mergeable(other, mergebool)
+            return self._content.mergeable(other, mergebool)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -415,7 +421,7 @@ class IndexedArray(Content):
         mylength = len(self)
         index = ak._v2.index.Index64.empty((theirlength + mylength), self.nplike)
 
-        content = other.merge(self.content)
+        content = other.merge(self._content)
 
         self._handle_error(
             self.nplike["awkward_IndexedArray_fill_to64_count", index.dtype.type](
@@ -442,7 +448,7 @@ class IndexedArray(Content):
                 theirlength,
             )
         )
-        parameters = dict(self.parameters.items() & other.parameters.items())
+        parameters = ak._v2._util.merge_parameters(self._parameters, other._parameters)
 
         return ak._v2.contents.indexedarray.IndexedArray(
             index, content, None, parameters
@@ -465,7 +471,9 @@ class IndexedArray(Content):
         parameters = {}
 
         for array in head:
-            parameters = dict(self.parameters.items() & array.parameters.items())
+            parameters = ak._v2._util.merge_parameters(
+                self._parameters, array._parameters
+            )
 
             if isinstance(
                 array,
@@ -891,7 +899,7 @@ class IndexedArray(Content):
 
     def _validityerror(self, path):
         error = self.nplike["awkward_IndexedArray_validity", self.index.dtype.type](
-            self.index.to(self.nplike), len(self.index), len(self.content), False
+            self.index.to(self.nplike), len(self.index), len(self._content), False
         )
         if error.str is not None:
             if error.filename is None:
@@ -906,7 +914,7 @@ class IndexedArray(Content):
             )
 
         elif isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.bitmaskedarray.BitMaskedArray,
                 ak._v2.contents.bytemaskedarray.ByteMaskedArray,
@@ -917,7 +925,7 @@ class IndexedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self.content.validityerror(path + ".content")
+            return self._content.validityerror(path + ".content")
 
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -1029,3 +1037,18 @@ class IndexedArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return self.project().packed()
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        index = self._index.to(numpy)
+        content = self._content._to_list(behavior)
+        out = [None] * len(index)
+        for i, ind in enumerate(index):
+            out[i] = content[ind]
+        return out

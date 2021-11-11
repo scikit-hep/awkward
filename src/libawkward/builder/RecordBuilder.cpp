@@ -8,9 +8,9 @@
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
+#include "awkward/util.h"
 
 #include "awkward/builder/RecordBuilder.h"
-#include "awkward/util.h"
 
 namespace awkward {
   const BuilderPtr
@@ -63,6 +63,28 @@ namespace awkward {
   RecordBuilder::classname() const {
     return "RecordBuilder";
   };
+
+  const std::string
+  RecordBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    std::stringstream out;
+    out << "{\"class\": \"RecordArray\", \"contents\": {";
+    for (int64_t i = 0;  i < contents_.size();  i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      out << "" + util::quote(keys_[i]) + ": ";
+      out << contents_[i].get()->to_buffers(container, form_key_id);
+    }
+    out << "}, ";
+    if (!name_.empty()) {
+      out << "\"parameters\": {\"__record__\": " + util::quote(name_) + "}, ";
+    }
+    out << "\"form_key\": \"" + form_key.str() + "\"}";
+    return out.str();
+  }
 
   int64_t
   RecordBuilder::length() const {
@@ -530,28 +552,6 @@ namespace awkward {
     }
     else {
       contents_[(size_t)nextindex_].get()->endrecord();
-    }
-    return shared_from_this();
-  }
-
-  const BuilderPtr
-  RecordBuilder::append(const ContentPtr& array, int64_t at) {
-    if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-      out.get()->append(array, at);
-      return out;
-    }
-    else if (nextindex_ == -1) {
-      throw std::invalid_argument(
-        std::string("called 'append' immediately after 'begin_record'; "
-                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
-    }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->append(array, at));
-    }
-    else {
-      contents_[(size_t)nextindex_].get()->append(array, at);
     }
     return shared_from_this();
   }

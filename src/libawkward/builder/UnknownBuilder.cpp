@@ -15,7 +15,6 @@
 #include "awkward/builder/ListBuilder.h"
 #include "awkward/builder/TupleBuilder.h"
 #include "awkward/builder/RecordBuilder.h"
-#include "awkward/builder/IndexedBuilder.h"
 
 #include "awkward/builder/UnknownBuilder.h"
 
@@ -34,6 +33,30 @@ namespace awkward {
   UnknownBuilder::classname() const {
     return "UnknownBuilder";
   };
+
+  const std::string
+  UnknownBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    if (nullcount_ == 0) {
+      std::stringstream form_key;
+      form_key << "node" << (form_key_id++);
+
+      return "{\"class\": \"EmptyArray\", \"form_key\": \""
+             + form_key.str() + "\"}";
+    }
+    else {
+      std::stringstream outer_form_key;
+      std::stringstream inner_form_key;
+      outer_form_key << "node" << (form_key_id++);
+      inner_form_key << "node" << (form_key_id++);
+
+      container.full_buffer(outer_form_key.str() + "-index", nullcount_, -1, "i8");
+
+      return std::string("{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": ")
+             + "{\"class\": \"EmptyArray\", \"form_key\": \""
+             + inner_form_key.str() + "\"}, \"form_key\": \""
+             + outer_form_key.str() + "\"}";
+    }
+  }
 
   int64_t
   UnknownBuilder::length() const {
@@ -191,12 +214,4 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  const BuilderPtr
-  UnknownBuilder::append(const ContentPtr& array, int64_t at) {
-    BuilderPtr out = IndexedGenericBuilder::fromnulls(options_,
-                                                      nullcount_,
-                                                      array);
-    out.get()->append(array, at);
-    return out;
-  }
 }

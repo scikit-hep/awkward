@@ -285,44 +285,28 @@ def test_11(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z:x[0]"])
+    assert len(set(array.caches[0].keys())) == 1
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z:x[0]"])
+    assert len(set(array.caches[0].keys())) == 1
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z:x[0]"])
+    assert len(set(array.caches[0].keys())) == 1
     array.layout.field("x").array.content.field("y").array.field("q").array
-    assert set(array.caches[0].keys()) == set(
-        ["tmp:off:x.list.item.z:x[0]", "tmp:col:x.list.item.y.q[0]"]
-    )
+    assert len(set(array.caches[0].keys())) == 2
     array.layout.field("x").array.content.field("z").array
-    assert set(array.caches[0].keys()) == set(
-        [
-            "tmp:off:x.list.item.z:x[0]",
-            "tmp:col:x.list.item.y.q[0]",
-            "tmp:col:x.list.item.z[0]",
-        ]
-    )
+    assert len(set(array.caches[0].keys())) == 3
     assert array.tolist() == data
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z:x[0]"])
+    assert len(set(array.caches[0].keys())) == 1
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z:x[0]"])
+    assert len(set(array.caches[0].keys())) == 1
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z:x[0]"])
+    assert len(set(array.caches[0].keys())) == 1
     array.layout.field("x").array.content.field("z").array
-    assert set(array.caches[0].keys()) == set(
-        ["tmp:off:x.list.item.z:x[0]", "tmp:col:x.list.item.z[0]"]
-    )
+    assert len(set(array.caches[0].keys())) == 2
     array.layout.field("x").array.content.field("y").array.field("q").array
-    assert set(array.caches[0].keys()) == set(
-        [
-            "tmp:off:x.list.item.z:x[0]",
-            "tmp:col:x.list.item.y.q[0]",
-            "tmp:col:x.list.item.z[0]",
-        ]
-    )
+    assert len(set(array.caches[0].keys())) == 3
     assert array.tolist() == data
 
 

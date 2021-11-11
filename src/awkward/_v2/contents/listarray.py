@@ -69,16 +69,24 @@ class ListArray(Content):
 
     Form = ListForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
             self._starts.form,
             self._stops.form,
-            self._content.form,
+            self._content._form_with_key(getkey),
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        key1 = getkey(self, form, "starts")
+        key2 = getkey(self, form, "stops")
+        container[key1] = ak._v2._util.little_endian(self._starts.to(nplike))
+        container[key2] = ak._v2._util.little_endian(self._stops.to(nplike))
+        self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
@@ -703,7 +711,7 @@ class ListArray(Content):
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ),
         ):
-            self.content.mergeable(other.content, mergebool)
+            self._content.mergeable(other.content, mergebool)
 
         else:
             return False
@@ -721,7 +729,9 @@ class ListArray(Content):
         contents = []
 
         for array in head:
-            parameters = dict(self.parameters.items() & array.parameters.items())
+            parameters = ak._v2._util.merge_parameters(
+                self._parameters, array._parameters
+            )
 
             if isinstance(
                 array,
@@ -953,7 +963,7 @@ class ListArray(Content):
             self.starts.to(self.nplike),
             self.stops.to(self.nplike),
             len(self.starts),
-            len(self.content),
+            len(self._content),
         )
         if error.str is not None:
             if error.filename is None:
@@ -973,7 +983,7 @@ class ListArray(Content):
             ):
                 return ""
             else:
-                return self.content.validityerror(path + ".content")
+                return self._content.validityerror(path + ".content")
 
     def _rpad(self, target, axis, depth, clip):
         if not clip:
@@ -1124,3 +1134,9 @@ class ListArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return self.toListOffsetArray64(True).packed()
+
+    def _to_list(self, behavior):
+        return ListOffsetArray._to_list(self, behavior)

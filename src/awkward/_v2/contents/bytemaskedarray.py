@@ -68,16 +68,22 @@ class ByteMaskedArray(Content):
 
     Form = ByteMaskedForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
             self._mask.form,
-            self._content.form,
+            self._content._form_with_key(getkey),
             self._valid_when,
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        key = getkey(self, form, "mask")
+        container[key] = ak._v2._util.little_endian(self._mask.to(nplike))
+        self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
@@ -359,7 +365,7 @@ class ByteMaskedArray(Content):
             )
             valid_when = False
             next = ByteMaskedArray(
-                nextmask, self.content, valid_when, self.identifier, self.parameters
+                nextmask, self._content, valid_when, self._identifier, self._parameters
             )
             return next.project()
 
@@ -392,11 +398,11 @@ class ByteMaskedArray(Content):
                 )
             )
 
-            return self.content._carry(nextcarry, False, NestedIndexError)
+            return self._content._carry(nextcarry, False, NestedIndexError)
 
     def simplify_optiontype(self):
         if isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
@@ -432,10 +438,10 @@ class ByteMaskedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            self.content.mergeable(other.content, mergebool)
+            self._content.mergeable(other.content, mergebool)
 
         else:
-            return self.content.mergeable(other, mergebool)
+            return self._content.mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.toIndexedOptionArray64()._reverse_merge(other)
@@ -453,7 +459,7 @@ class ByteMaskedArray(Content):
             numnull = ak._v2.index.Index64.empty(1, self.nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-            next = self.content._carry(nextcarry, False, NestedIndexError)
+            next = self._content._carry(nextcarry, False, NestedIndexError)
             out = next._localindex(posaxis, depth)
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
@@ -682,10 +688,10 @@ class ByteMaskedArray(Content):
                 )
 
     def _validityerror(self, path):
-        if len(self.content) < len(self.mask):
+        if len(self._content) < len(self.mask):
             return 'at {0} ("{1}"): len(content) < len(mask)'.format(path, type(self))
         elif isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.bitmaskedarray.BitMaskedArray,
                 ak._v2.contents.bytemaskedarray.ByteMaskedArray,
@@ -696,7 +702,7 @@ class ByteMaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self.content.validityerror(path + ".content")
+            return self._content.validityerror(path + ".content")
 
     def bytemask(self):
         if not self._valid_when:
@@ -811,3 +817,43 @@ class ByteMaskedArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        if self._content.is_RecordType:
+            next = self.toIndexedOptionArray64()
+            content = next._content.packed()
+            if len(content) > len(self._mask):
+                content = content[: len(self._mask)]
+
+            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                next._index,
+                content,
+                next._identifier,
+                next._parameters,
+            )
+
+        else:
+            content = self._content.packed()
+            if len(content) > len(self._mask):
+                content = content[: len(self._mask)]
+
+            return ByteMaskedArray(
+                self._mask,
+                content,
+                self._valid_when,
+                self._identifier,
+                self._parameters,
+            )
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        mask = self.mask_as_bool(valid_when=True, nplike=numpy)
+        content = self._content._to_list(behavior)
+        out = [None] * len(self._mask)
+        for i, isvalid in enumerate(mask):
+            if isvalid:
+                out[i] = content[i]
+        return out

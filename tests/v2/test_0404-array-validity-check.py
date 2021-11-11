@@ -20,7 +20,7 @@ def test_BitMaskedArray():
         mask, content, valid_when=False, length=13, lsb_order=False
     )
     array = v1_to_v2(array)
-    assert np.asarray(array.mask_as_bool()).tolist() == [
+    assert np.asarray(array.mask_as_bool(valid_when=True)).tolist() == [
         True,
         True,
         False,

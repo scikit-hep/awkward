@@ -17,6 +17,11 @@ namespace awkward {
   ArrayBuilder::ArrayBuilder(const ArrayBuilderOptions& options)
       : builder_(UnknownBuilder::fromempty(options)) { }
 
+  const std::string
+  ArrayBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    return builder_.get()->to_buffers(container, form_key_id);
+  }
+
   int64_t
   ArrayBuilder::length() const {
     return builder_.get()->length();
@@ -161,11 +166,6 @@ namespace awkward {
   void
   ArrayBuilder::endrecord() {
     maybeupdate(builder_.get()->endrecord());
-  }
-
-  void
-  ArrayBuilder::append_nowrap(const ContentPtr& array, int64_t at) {
-    maybeupdate(builder_.get()->append(array, at));
   }
 
   void
@@ -442,22 +442,6 @@ uint8_t awkward_ArrayBuilder_endrecord(void* arraybuilder) {
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
     obj->endrecord();
-  }
-  catch (...) {
-    return 1;
-  }
-  return 0;
-}
-
-uint8_t awkward_ArrayBuilder_append_nowrap(void* arraybuilder,
-                                           const void* shared_ptr_ptr,
-                                           int64_t at) {
-  awkward::ArrayBuilder* obj =
-    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
-  const std::shared_ptr<awkward::Content>* array =
-    reinterpret_cast<const std::shared_ptr<awkward::Content>*>(shared_ptr_ptr);
-  try {
-    obj->append_nowrap(*array, at);
   }
   catch (...) {
     return 1;

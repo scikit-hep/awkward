@@ -13,7 +13,6 @@
 #include "awkward/builder/ListBuilder.h"
 #include "awkward/builder/TupleBuilder.h"
 #include "awkward/builder/RecordBuilder.h"
-#include "awkward/builder/IndexedBuilder.h"
 #include "awkward/builder/Complex128Builder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
@@ -107,96 +106,6 @@ namespace {
                                              ak::util::dtype::float64,
                                              ak::kernel::lib::cpu);
     }
-    else if (builder.get()->classname() == "IndexedGenericBuilder") {
-      const std::shared_ptr<const ak::IndexedGenericBuilder> raw = std::dynamic_pointer_cast<const ak::IndexedGenericBuilder>(builder);
-      ak::Index64 index(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), ak::kernel::lib::cpu);
-      if (raw.get()->hasnull()) {
-        return std::make_shared<ak::IndexedOptionArray64>(
-          ak::Identities::none(),
-          ak::util::Parameters(),
-          index,
-          raw.get()->array());
-      }
-      else {
-        return std::make_shared<ak::IndexedArray64>(
-          ak::Identities::none(),
-          ak::util::Parameters(),
-          index,
-          raw.get()->array());
-      }
-    }
-    else if (builder.get()->classname() == "IndexedI32Builder") {
-      const std::shared_ptr<const ak::IndexedI32Builder> raw = std::dynamic_pointer_cast<const ak::IndexedI32Builder>(builder);
-      ak::Index64 index(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), ak::kernel::lib::cpu);
-      if (raw.get()->hasnull()) {
-        return std::make_shared<ak::IndexedOptionArray64>(
-          ak::Identities::none(),
-          raw.get()->array().get()->content().get()->parameters(),
-          index,
-          raw.get()->array().get()->content());
-      }
-      else {
-        return std::make_shared<ak::IndexedArray64>(
-          ak::Identities::none(),
-          raw.get()->array().get()->content().get()->parameters(),
-          index,
-          raw.get()->array().get()->content());
-      }
-    }
-    else if (builder.get()->classname() == "IndexedIU32Builder") {
-      const std::shared_ptr<const ak::IndexedIU32Builder> raw = std::dynamic_pointer_cast<const ak::IndexedIU32Builder>(builder);
-      ak::Index64 index(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), ak::kernel::lib::cpu);
-      if (raw.get()->hasnull()) {
-        return std::make_shared<ak::IndexedOptionArray64>(
-            ak::Identities::none(),
-            raw.get()->array().get()->content().get()->parameters(),
-            index,
-            raw.get()->array().get()->content());
-      }
-      else {
-        return std::make_shared<ak::IndexedArray64>(
-          ak::Identities::none(),
-            raw.get()->array().get()->content().get()->parameters(),
-            index,
-            raw.get()->array().get()->content());
-      }
-    }
-    else if (builder.get()->classname() == "IndexedI64Builder") {
-      const std::shared_ptr<const ak::IndexedI64Builder> raw = std::dynamic_pointer_cast<const ak::IndexedI64Builder>(builder);
-        ak::Index64 index(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), ak::kernel::lib::cpu);
-        if (raw.get()->hasnull()) {
-          return std::make_shared<ak::IndexedOptionArray64>(
-            ak::Identities::none(),
-            raw.get()->array().get()->content().get()->parameters(),
-            index,
-            raw.get()->array().get()->content());
-        }
-        else {
-          return std::make_shared<ak::IndexedArray64>(
-            ak::Identities::none(),
-            raw.get()->array().get()->content().get()->parameters(),
-            index,
-            raw.get()->array().get()->content());
-        }
-      }
-      else if (builder.get()->classname() == "IndexedIO32Builder") {
-        const std::shared_ptr<const ak::IndexedI64Builder> raw = std::dynamic_pointer_cast<const ak::IndexedI64Builder>(builder);
-        ak::Index64 index(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), ak::kernel::lib::cpu);
-        return std::make_shared<ak::IndexedOptionArray64>(
-          ak::Identities::none(),
-          raw.get()->array().get()->content().get()->parameters(),
-          index,
-          raw.get()->array().get()->content());
-      }
-      else if (builder.get()->classname() == "IndexedIO64Builder") {
-        const std::shared_ptr<const ak::IndexedIO64Builder> raw = std::dynamic_pointer_cast<const ak::IndexedIO64Builder>(builder);
-        ak::Index64 index(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), ak::kernel::lib::cpu);
-        return std::make_shared<ak::IndexedOptionArray64>(
-          ak::Identities::none(),
-          raw.get()->array().get()->content().get()->parameters(),
-          index,
-          raw.get()->array().get()->content());
-      }
       else if (builder.get()->classname() == "Int64Builder") {
         const std::shared_ptr<const ak::Int64Builder> raw = std::dynamic_pointer_cast<const ak::Int64Builder>(builder);
         std::vector<ssize_t> shape = { (ssize_t)raw.get()->buffer().length() };

@@ -11,6 +11,8 @@ import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
+# FIXME: this dict must become two functions (is_primitive and primitive_to_dtype)
+# because NumPy takes ARBITRARY intervals, such as "15s".
 _primitive_to_dtype = {
     "bool": np.dtype(np.bool_),
     "int8": np.dtype(np.int8),
@@ -26,15 +28,33 @@ _primitive_to_dtype = {
     "complex64": np.dtype(np.complex64),
     "complex128": np.dtype(np.complex128),
     "datetime64": np.dtype(np.datetime64),
+    "datetime64[Y]": np.dtype("datetime64[Y]"),
+    "datetime64[M]": np.dtype("datetime64[M]"),
+    "datetime64[W]": np.dtype("datetime64[W]"),
+    "datetime64[D]": np.dtype("datetime64[D]"),
+    "datetime64[h]": np.dtype("datetime64[h]"),
+    "datetime64[m]": np.dtype("datetime64[m]"),
     "datetime64[s]": np.dtype("datetime64[s]"),
     "datetime64[ms]": np.dtype("datetime64[ms]"),
     "datetime64[us]": np.dtype("datetime64[us]"),
     "datetime64[ns]": np.dtype("datetime64[ns]"),
+    "datetime64[ps]": np.dtype("datetime64[ps]"),
+    "datetime64[fs]": np.dtype("datetime64[fs]"),
+    "datetime64[as]": np.dtype("datetime64[as]"),
     "timedelta64": np.dtype(np.timedelta64),
+    "timedelta64[Y]": np.dtype("timedelta64[Y]"),
+    "timedelta64[M]": np.dtype("timedelta64[M]"),
+    "timedelta64[W]": np.dtype("timedelta64[W]"),
+    "timedelta64[D]": np.dtype("timedelta64[D]"),
+    "timedelta64[h]": np.dtype("timedelta64[h]"),
+    "timedelta64[m]": np.dtype("timedelta64[m]"),
     "timedelta64[s]": np.dtype("timedelta64[s]"),
     "timedelta64[ms]": np.dtype("timedelta64[ms]"),
     "timedelta64[us]": np.dtype("timedelta64[us]"),
     "timedelta64[ns]": np.dtype("timedelta64[ns]"),
+    "timedelta64[ps]": np.dtype("timedelta64[ps]"),
+    "timedelta64[fs]": np.dtype("timedelta64[fs]"),
+    "timedelta64[as]": np.dtype("timedelta64[as]"),
 }
 
 if hasattr(np, "float16"):

@@ -21,13 +21,15 @@ class EmptyArray(Content):
 
     Form = EmptyForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
         return self.Form(
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=getkey(self),
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
 
     @property
     def typetracer(self):
@@ -277,3 +279,9 @@ class EmptyArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return self
+
+    def _to_list(self, behavior):
+        return []

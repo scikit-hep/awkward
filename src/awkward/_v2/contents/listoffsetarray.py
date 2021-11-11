@@ -67,15 +67,21 @@ class ListOffsetArray(Content):
 
     Form = ListOffsetForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
             self._offsets.form,
-            self._content.form,
+            self._content._form_with_key(getkey),
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        key = getkey(self, form, "offsets")
+        container[key] = ak._v2._util.little_endian(self._offsets.to(nplike))
+        self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
@@ -541,7 +547,7 @@ class ListOffsetArray(Content):
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ),
         ):
-            return self.content.mergeable(other.content, mergebool)
+            return self._content.mergeable(other.content, mergebool)
 
         else:
             return False
@@ -550,7 +556,7 @@ class ListOffsetArray(Content):
         if len(others) == 0:
             return self
         listarray = ak._v2.contents.listarray.ListArray(
-            self.starts, self.stops, self.content, None, self.parameters
+            self.starts, self.stops, self._content, None, self._parameters
         )
         return listarray.mergemany(others)
 
@@ -1528,7 +1534,7 @@ class ListOffsetArray(Content):
             self.starts.to(self.nplike),
             self.stops.to(self.nplike),
             len(self.starts),
-            len(self.content),
+            len(self._content),
         )
         if error.str is not None:
             if error.filename is None:
@@ -1548,7 +1554,7 @@ class ListOffsetArray(Content):
             ):
                 return ""
             else:
-                return self.content.validityerror(path + ".content")
+                return self._content.validityerror(path + ".content")
 
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -1802,3 +1808,42 @@ class ListOffsetArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        next = self.toListOffsetArray64(True)
+        content = next._content.packed()
+        if len(content) != next._offsets[-1]:
+            content = content[: next._offsets[-1]]
+        return ListOffsetArray(
+            next._offsets, content, next._identifier, next._parameters
+        )
+
+    def _to_list(self, behavior):
+        if self.parameter("__array__") == "bytestring":
+            content = ak._v2._util.tobytes(self._content.data)
+            starts, stops = self.starts, self.stops
+            out = [None] * len(starts)
+            for i in range(len(starts)):
+                out[i] = content[starts[i] : stops[i]]
+            return out
+
+        elif self.parameter("__array__") == "string":
+            content = ak._v2._util.tobytes(self._content.data)
+            starts, stops = self.starts, self.stops
+            out = [None] * len(starts)
+            for i in range(len(starts)):
+                out[i] = content[starts[i] : stops[i]].decode(errors="surrogateescape")
+            return out
+
+        else:
+            out = self._to_list_custom(behavior)
+            if out is not None:
+                return out
+
+            content = self._content._to_list(behavior)
+            starts, stops = self.starts, self.stops
+            out = [None] * len(starts)
+
+            for i in range(len(starts)):
+                out[i] = content[starts[i] : stops[i]]
+            return out

@@ -10,6 +10,10 @@ import awkward as ak  # noqa: F401
 
 pyarrow = pytest.importorskip("pyarrow")
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 
 def test_from_arrow():
     import awkward._v2._connect.pyarrow
@@ -32,8 +36,8 @@ def test_from_arrow():
         )
     )
     assert ak.to_list(array) == [
-        np.datetime64("2002-01-23T00:00:00.000"),
-        np.datetime64("2019-02-20T00:00:00.000"),
+        np.datetime64("2002-01-23"),
+        np.datetime64("2019-02-20"),
     ]
 
     array = awkward._v2._connect.pyarrow.handle_arrow(
@@ -53,10 +57,7 @@ def test_from_arrow():
             type=pyarrow.time64("ns"),
         )
     )
-    assert ak.to_list(array) == [
-        np.datetime64("1970-01-01T01:00:00.000"),
-        np.datetime64("1970-01-01T02:30:00.000"),
-    ]
+    assert ak.to_list(array) == [3600000000000, 9000000000000]
 
     array = awkward._v2._connect.pyarrow.handle_arrow(
         pyarrow.array(
@@ -119,10 +120,7 @@ def test_from_arrow():
             type=pyarrow.timestamp("ns"),
         )
     )
-    assert ak.to_list(array) == [
-        np.datetime64("2002-01-23T00:00:00.000"),
-        np.datetime64("2019-02-20T00:00:00.000"),
-    ]
+    assert ak.to_list(array) == [1011744000000000000, 1550620800000000000]
 
     array = awkward._v2._connect.pyarrow.handle_arrow(
         pyarrow.array(
@@ -163,7 +161,4 @@ def test_from_arrow():
             type=pyarrow.duration("ns"),
         )
     )
-    assert ak.to_list(array) == [
-        np.timedelta64(5, "D"),
-        np.timedelta64(10, "D"),
-    ]
+    assert ak.to_list(array) == [432000000000000, 864000000000000]

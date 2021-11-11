@@ -314,8 +314,6 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
             and isinstance(
                 args[0],
                 (
-                    ak._connect._numba.arrayview.ArrayViewType,
-                    ak._connect._numba.arrayview.RecordViewType,
                     numba.types.Boolean,
                     numba.types.Integer,
                     numba.types.Float,
@@ -339,51 +337,8 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
             and isinstance(args[0], numba.types.NoneType)
         ):
             return numba.types.none(args[0])
-        elif (
-            len(args) == 2
-            and len(kwargs) == 0
-            and isinstance(args[0], ak._connect._numba.arrayview.ArrayViewType)
-            and isinstance(args[1], numba.types.Integer)
-        ):
-            return numba.types.none(args[0], args[1])
         else:
-            if len(args) == 1 and arraybuildertype.behavior is not None:
-                for key, lower in arraybuildertype.behavior.items():
-                    if (
-                        isinstance(key, tuple)
-                        and len(key) == 3
-                        and key[0] == "__numba_lower__"
-                        and key[1] == ak.highlevel.ArrayBuilder.append
-                        and (
-                            args[0] == key[2]
-                            or (
-                                isinstance(key[2], type) and isinstance(args[0], key[2])
-                            )
-                        )
-                    ):
-                        numba.extending.lower_builtin(
-                            "append", ArrayBuilderType, args[0]
-                        )(lower)
-                        return numba.types.none(args[0])
-
-            raise TypeError(
-                "wrong number or types of arguments for ArrayBuilder.append"
-                + ak._util.exception_suffix(__file__)
-            )
-
-    @numba.core.typing.templates.bound_function("extend")
-    def resolve_extend(self, arraybuildertype, args, kwargs):
-        if (
-            len(args) == 1
-            and len(kwargs) == 0
-            and isinstance(args[0], ak._connect._numba.arrayview.ArrayViewType)
-        ):
-            return numba.types.none(args[0])
-        else:
-            raise TypeError(
-                "wrong number or types of arguments for ArrayBuilder.extend"
-                + ak._util.exception_suffix(__file__)
-            )
+            raise AssertionError(args[0])
 
 
 @numba.extending.lower_builtin("clear", ArrayBuilderType)
@@ -560,91 +515,6 @@ def lower_endrecord(context, builder, sig, args):
     return context.get_dummy_value()
 
 
-@numba.extending.lower_builtin(
-    "append",
-    ArrayBuilderType,
-    ak._connect._numba.arrayview.ArrayViewType,
-    numba.types.Integer,
-)
-def lower_append_array_at(context, builder, sig, args):
-    arraybuildertype, viewtype, attype = sig.args
-    arraybuilderval, viewval, atval = args
-
-    viewproxy = context.make_helper(builder, viewtype, viewval)
-    atval = ak._connect._numba.layout.regularize_atval(
-        context, builder, viewproxy, attype, atval, True, True
-    )
-    atval = ak._connect._numba.castint(context, builder, numba.intp, numba.int64, atval)
-
-    sharedptr = ak._connect._numba.layout.getat(
-        context, builder, viewproxy.sharedptrs, viewproxy.pos
-    )
-
-    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(
-        context,
-        builder,
-        ak._libawkward.ArrayBuilder_append_nowrap,
-        (
-            proxyin.rawptr,
-            builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)),
-            atval,
-        ),
-    )
-    return context.get_dummy_value()
-
-
-@numba.extending.lower_builtin(
-    "append", ArrayBuilderType, ak._connect._numba.arrayview.ArrayViewType
-)
-def lower_append_array(context, builder, sig, args):
-    arraybuildertype, viewtype = sig.args
-    arraybuilderval, viewval = args
-
-    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,))
-
-    lower_extend_array(context, builder, sig, args)
-
-    call(context, builder, ak._libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
-
-    return context.get_dummy_value()
-
-
-@numba.extending.lower_builtin(
-    "append", ArrayBuilderType, ak._connect._numba.arrayview.RecordViewType
-)
-def lower_append_record(context, builder, sig, args):
-    arraybuildertype, recordviewtype = sig.args
-    arraybuilderval, recordviewval = args
-
-    recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
-
-    arrayviewproxy = context.make_helper(
-        builder, recordviewtype.arrayviewtype, recordviewproxy.arrayview
-    )
-    atval = ak._connect._numba.castint(
-        context, builder, numba.intp, numba.int64, recordviewproxy.at
-    )
-
-    sharedptr = ak._connect._numba.layout.getat(
-        context, builder, arrayviewproxy.sharedptrs, arrayviewproxy.pos
-    )
-
-    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(
-        context,
-        builder,
-        ak._libawkward.ArrayBuilder_append_nowrap,
-        (
-            proxyin.rawptr,
-            builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)),
-            atval,
-        ),
-    )
-    return context.get_dummy_value()
-
-
 @numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.Boolean)
 def lower_append_bool(context, builder, sig, args):
     return lower_boolean(context, builder, sig, args)
@@ -712,37 +582,3 @@ def lower_append_optional(context, builder, sig, args):
 @numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.NoneType)
 def lower_append_none(context, builder, sig, args):
     return lower_null(context, builder, sig.return_type(sig.args[0]), (args[0],))
-
-
-@numba.extending.lower_builtin(
-    "extend", ArrayBuilderType, ak._connect._numba.arrayview.ArrayViewType
-)
-def lower_extend_array(context, builder, sig, args):
-    arraybuildertype, viewtype = sig.args
-    arraybuilderval, viewval = args
-
-    viewproxy = context.make_helper(builder, viewtype, viewval)
-
-    sharedptr = ak._connect._numba.layout.getat(
-        context, builder, viewproxy.sharedptrs, viewproxy.pos
-    )
-
-    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    with numba.core.cgutils.for_range(builder, viewproxy.stop, viewproxy.start) as loop:
-        atval = ak._connect._numba.castint(
-            context, builder, numba.intp, numba.int64, loop.index
-        )
-        call(
-            context,
-            builder,
-            ak._libawkward.ArrayBuilder_append_nowrap,
-            (
-                proxyin.rawptr,
-                builder.inttoptr(
-                    sharedptr, context.get_value_type(numba.types.voidptr)
-                ),
-                atval,
-            ),
-        )
-
-    return context.get_dummy_value()

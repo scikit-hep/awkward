@@ -36,6 +36,20 @@ namespace awkward {
     return "ListBuilder";
   };
 
+  const std::string
+  ListBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(form_key.str() + "-offsets",
+                          offsets_.ptr().get(),
+                          offsets_.length() * sizeof(int64_t));
+
+    return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
+           + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""
+           + form_key.str() + "\"}";
+  }
+
   int64_t
   ListBuilder::length() const {
     return offsets_.length() - 1;
@@ -259,19 +273,6 @@ namespace awkward {
     }
     else {
       content_.get()->endrecord();
-      return shared_from_this();
-    }
-  }
-
-  const BuilderPtr
-  ListBuilder::append(const ContentPtr& array, int64_t at) {
-    if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-      out.get()->append(array, at);
-      return out;
-    }
-    else {
-      maybeupdate(content_.get()->append(array, at));
       return shared_from_this();
     }
   }

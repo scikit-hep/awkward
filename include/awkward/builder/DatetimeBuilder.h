@@ -34,6 +34,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
+    const std::string
+      to_buffers(BuffersContainer& container, int64_t& form_key_id) const override;
+
     int64_t
       length() const override;
 
@@ -93,9 +96,6 @@ namespace awkward {
 
     const BuilderPtr
       endrecord() override;
-
-    const BuilderPtr
-      append(const ContentPtr& array, int64_t at) override;
 
     const ArrayBuilderOptions&
       options() const { return options_; }

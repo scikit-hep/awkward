@@ -26,7 +26,7 @@ class UnmaskedForm(Form):
 
     @property
     def content(self):
-        return self._contentr
+        return self._content
 
     def __repr__(self):
         args = [repr(self._content)] + self._repr_args()

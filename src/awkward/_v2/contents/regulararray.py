@@ -60,15 +60,19 @@ class RegularArray(Content):
 
     Form = RegularForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
-            self._content.form,
+            self._content._form_with_key(getkey),
             self._size,
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
@@ -546,7 +550,7 @@ class RegularArray(Content):
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ),
         ):
-            return self.content.mergeable(other.content, mergebool)
+            return self._content.mergeable(other.content, mergebool)
 
         else:
             return False
@@ -803,32 +807,32 @@ class RegularArray(Content):
                 if isinstance(out, ak._v2.contents.ListOffsetArray):
                     if isinstance(out.content, ak._v2.contents.ListOffsetArray):
                         out = ak._v2.contents.ListOffsetArray(
-                            out.offsets,
-                            out.content.toRegularArray(),
-                            out.identifier,
-                            out.parameters,
+                            out._offsets,
+                            out._content.toRegularArray(),
+                            out._identifier,
+                            out._parameters,
                         )
                     elif isinstance(out.content, ak._v2.contents.ListArray):
                         out = ak._v2.contents.ListOffsetArray(
-                            out.offsets,
-                            out.content.toRegularArray(),
-                            out.identifier,
-                            out.parameters,
+                            out._offsets,
+                            out._content.toRegularArray(),
+                            out._identifier,
+                            out._parameters,
                         )
                 elif isinstance(out, ak._v2.contents.ListArray):
                     if isinstance(out.content, ak._v2.contents.ListOffsetArray):
                         out = ak._v2.contents.ListOffsetArray(
-                            out.offsets,
-                            out.content.toRegularArray(),
-                            out.identifier,
-                            out.parameters,
+                            out._offsets,
+                            out._content.toRegularArray(),
+                            out._identifier,
+                            out._parameters,
                         )
                     elif isinstance(out.content, ak._v2.contents.ListArray):
                         out = ak._v2.contents.ListOffsetArray(
-                            out.offsets,
-                            out.content.toRegularArray(),
-                            out.identifier,
-                            out.parameters,
+                            out._offsets,
+                            out._content.toRegularArray(),
+                            out._identifier,
+                            out._parameters,
                         )
 
             if convert_shallow:
@@ -848,7 +852,7 @@ class RegularArray(Content):
         ):
             return ""
         else:
-            return self.content.validityerror(path + ".content")
+            return self._content.validityerror(path + ".content")
 
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -998,3 +1002,45 @@ class RegularArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        length = self._length * self._size
+        if len(self._content) == length:
+            content = self._content.packed()
+        else:
+            content = self._content[:length].packed()
+
+        return RegularArray(
+            content, self._size, self._length, self._identifier, self._parameters
+        )
+
+    def _to_list(self, behavior):
+        if self.parameter("__array__") == "bytestring":
+            content = ak._v2._util.tobytes(self._content.data)
+            length, size = self._length, self._size
+            out = [None] * length
+            for i in range(length):
+                out[i] = content[(i) * size : (i + 1) * size]
+            return out
+
+        elif self.parameter("__array__") == "string":
+            content = ak._v2._util.tobytes(self._content.data)
+            length, size = self._length, self._size
+            out = [None] * length
+            for i in range(length):
+                out[i] = content[(i) * size : (i + 1) * size].decode(
+                    errors="surrogateescape"
+                )
+            return out
+
+        else:
+            out = self._to_list_custom(behavior)
+            if out is not None:
+                return out
+
+            content = self._content._to_list(behavior)
+            length, size = self._length, self._size
+            out = [None] * length
+            for i in range(length):
+                out[i] = content[(i) * size : (i + 1) * size]
+            return out

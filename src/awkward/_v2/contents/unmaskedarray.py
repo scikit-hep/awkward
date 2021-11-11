@@ -36,14 +36,18 @@ class UnmaskedArray(Content):
 
     Form = UnmaskedForm
 
-    @property
-    def form(self):
+    def _form_with_key(self, getkey):
+        form_key = getkey(self)
         return self.Form(
-            self._content.form,
+            self._content._form_with_key(getkey),
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
-            form_key=None,
+            form_key=form_key,
         )
+
+    def _to_buffers(self, form, getkey, container, nplike):
+        assert isinstance(form, self.Form)
+        self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
@@ -135,7 +139,7 @@ class UnmaskedArray(Content):
 
     def _carry(self, carry, allow_lazy, exception):
         return UnmaskedArray(
-            self.content._carry(carry, allow_lazy, exception),
+            self._content._carry(carry, allow_lazy, exception),
             self._carry_identifier(carry, exception),
             self._parameters,
         )
@@ -146,7 +150,7 @@ class UnmaskedArray(Content):
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             return UnmaskedArray(
-                self.content._getitem_next(head, tail, advanced),
+                self._content._getitem_next(head, tail, advanced),
                 self._identifier,
                 self._parameters,
             ).simplify_optiontype()
@@ -176,17 +180,17 @@ class UnmaskedArray(Content):
         if mask is not None:
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
                 mask,
-                self.content,
+                self._content,
                 valid_when=False,
                 identifier=None,
-                parameters=self.parameters,
+                parameters=self._parameters,
             ).project()
         else:
-            return self.content
+            return self._content
 
     def simplify_optiontype(self):
         if isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
@@ -195,7 +199,7 @@ class UnmaskedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            return self.content
+            return self._content
         else:
             return self
 
@@ -222,10 +226,10 @@ class UnmaskedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            self.content.mergeable(other.content, mergebool)
+            self._content.mergeable(other.content, mergebool)
 
         else:
-            return self.content.mergeable(other, mergebool)
+            return self._content.mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
         return self.toIndexedOptionArray64()._reverse_merge(other)
@@ -374,7 +378,7 @@ class UnmaskedArray(Content):
 
     def _validityerror(self, path):
         if isinstance(
-            self.content,
+            self._content,
             (
                 ak._v2.contents.bitmaskedarray.BitMaskedArray,
                 ak._v2.contents.bytemaskedarray.ByteMaskedArray,
@@ -385,7 +389,7 @@ class UnmaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self.content.validityerror(path + ".content")
+            return self._content.validityerror(path + ".content")
 
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -450,3 +454,13 @@ class UnmaskedArray(Content):
             return continuation()
         else:
             raise AssertionError(result)
+
+    def packed(self):
+        return UnmaskedArray(self._content.packed(), self._identifier, self._parameters)
+
+    def _to_list(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        return self._content._to_list(behavior)

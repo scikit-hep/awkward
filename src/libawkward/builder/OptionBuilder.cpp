@@ -43,6 +43,20 @@ namespace awkward {
     return "OptionBuilder";
   };
 
+  const std::string
+  OptionBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(form_key.str() + "-index",
+                          index_.ptr().get(),
+                          index_.length() * sizeof(int64_t));
+
+    return "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
+           + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""
+           + form_key.str() + "\"}";
+  }
+
   int64_t
   OptionBuilder::length() const {
     return index_.length();
@@ -267,19 +281,6 @@ namespace awkward {
       if (length != content_.get()->length()) {
         index_.append(length);
       }
-    }
-    return shared_from_this();
-  }
-
-  const BuilderPtr
-  OptionBuilder::append(const ContentPtr& array, int64_t at) {
-    if (!content_.get()->active()) {
-      int64_t length = content_.get()->length();
-      maybeupdate(content_.get()->append(array, at));
-      index_.append(length);
-    }
-    else {
-      content_.get()->append(array, at);
     }
     return shared_from_this();
   }

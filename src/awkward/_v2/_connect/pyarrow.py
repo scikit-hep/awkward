@@ -313,6 +313,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
             paarray.indices, None, storage_type.index_type, buffers
         )
         index = masked_index.content.data
+
         if not isinstance(masked_index, ak._v2.contents.UnmaskedArray):
             mask = masked_index.mask_as_bool(valid_when=False)
             if mask.any():

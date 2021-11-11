@@ -35,6 +35,36 @@ namespace awkward {
     return "DatetimeBuilder";
   };
 
+  const std::string
+  DatetimeBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    std::stringstream form_key;
+    form_key << "node" << (form_key_id++);
+
+    container.copy_buffer(form_key.str() + "-data",
+                          content_.ptr().get(),
+                          content_.length() * sizeof(int64_t));
+
+    std::string primitive(units_);
+
+    if (primitive.find("datetime64") == 0) {
+      return "{\"class\": \"NumpyArray\", \"primitive\": \""
+             + primitive + "\", \"format\": \""
+             + "M8" + primitive.substr(10, -1) + "\", \"form_key\": \""
+             + form_key.str() + "\"}";
+    }
+    else if (primitive.find("timedelta64") == 0) {
+      return "{\"class\": \"NumpyArray\", \"primitive\": \""
+             + primitive + "\", \"format\": \""
+             + "m8" + primitive.substr(11, -1) + "\", \"form_key\": \""
+             + form_key.str() + "\"}";
+    }
+    else {
+      return "{\"class\": \"NumpyArray\", \"primitive\": \""
+             + primitive + "\", \"form_key\": \""
+             + form_key.str() + "\"}";
+    }
+  }
+
   int64_t
   DatetimeBuilder::length() const {
     return content_.length();
@@ -172,13 +202,6 @@ namespace awkward {
     throw std::invalid_argument(
       std::string("called 'end_record' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));
-  }
-
-  const BuilderPtr
-  DatetimeBuilder::append(const ContentPtr& array, int64_t at) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
-    out.get()->append(array, at);
-    return out;
   }
 
   const std::string&

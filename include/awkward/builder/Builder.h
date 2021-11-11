@@ -15,6 +15,24 @@ namespace awkward {
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
 
+  /// @class BuffersContainer
+  ///
+  /// @brief Abstract class to represent the output of ak.to_buffers.
+  /// In Python, this would be a dict of NumPy arrays.
+  class BuffersContainer {
+  public:
+    /// @brief Copy data at `source` with `num_bytes` into the BuffersContainer
+    /// with `name`.
+    ///
+    /// In Python, this allocates a NumPy array and copies data into it.
+    virtual void
+      copy_buffer(const std::string& name, const void* source, int64_t num_bytes) = 0;
+
+    /// @brief Create an array initialized to a given fill value.
+    virtual void
+      full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) = 0;
+  };
+
   /// @class Builder
   ///
   /// @brief Abstract base class for nodes within an ArrayBuilder that
@@ -29,6 +47,11 @@ namespace awkward {
     /// @brief User-friendly name of this class.
     virtual const std::string
       classname() const = 0;
+
+    /// @brief Copy the current snapshot into the BuffersContainer and
+    /// return a Form as a std::string (JSON).
+    virtual const std::string
+      to_buffers(BuffersContainer& container, int64_t& form_key_id) const = 0;
 
     /// @brief Current length of the accumulated array.
     virtual int64_t
@@ -136,14 +159,6 @@ namespace awkward {
     /// @brief Ends a record.
     virtual const BuilderPtr
       endrecord() = 0;
-
-    /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    virtual const BuilderPtr
-      append(const ContentPtr& array, int64_t at) = 0;
   };
 }
 

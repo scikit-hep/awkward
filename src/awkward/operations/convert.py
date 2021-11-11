@@ -1002,19 +1002,16 @@ def to_list(array):
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         return [to_list(x) for x in array]
 
-    elif isinstance(array, ak._v2.contents.Content):
-        import awkward._v2.tmp_for_testing
-
-        return to_list(awkward._v2.tmp_for_testing.v2_to_v1(array))
-
-    elif isinstance(array, ak._v2.record.Record):
-        import awkward._v2.tmp_for_testing
-
-        return to_list(
-            awkward._v2.tmp_for_testing.v2_to_v1(array.array[array.at : array.at + 1])[
-                0
-            ]
-        )
+    elif isinstance(
+        array,
+        (
+            ak._v2.highlevel.Array,
+            ak._v2.highlevel.Record,
+            ak._v2.contents.Content,
+            ak._v2.record.Record,
+        ),
+    ):
+        return array.to_list()
 
     elif isinstance(array, dict):
         return dict((n, to_list(x)) for n, x in array.items())
@@ -4748,6 +4745,7 @@ def _form_to_layout(
         raw_array = _asbuf(
             container[key_format(form_key=fk, attribute="data", partition=partnum)]
         )
+
         dtype_inner_shape = form.to_numpy()
         if dtype_inner_shape.subdtype is None:
             dtype, inner_shape = dtype_inner_shape, ()
@@ -5061,13 +5059,12 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
-
     if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
         form = ak.forms.Form.fromjson(form)
     elif isinstance(form, dict):
         form = ak.forms.Form.fromjson(json.dumps(form))
 
-    if isinstance(key_format, str):
+    if ak._util.isstr(key_format):
 
         def generate_key_format(key_format):
             def kf(**v):

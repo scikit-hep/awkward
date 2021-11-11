@@ -8,6 +8,10 @@ import awkward as ak  # noqa: F401
 
 pandas = pytest.importorskip("pandas")
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
+)
+
 
 def test_from_pandas():
     values = {"time": ["20190902093000", "20190913093000", "20190921200000"]}

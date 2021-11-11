@@ -13,6 +13,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class Content(object):
@@ -59,6 +60,85 @@ class Content(object):
             return None
         else:
             return self._parameters.get(key)
+
+    @property
+    def form(self):
+        return self.form_with_key(None)
+
+    def form_with_key(self, form_key="node{id}", id_start=0):
+        hold_id = [id_start]
+
+        if form_key is None:
+
+            def getkey(layout):
+                return None
+
+        elif ak._v2._util.isstr(form_key):
+
+            def getkey(layout):
+                out = form_key.format(id=hold_id[0])
+                hold_id[0] += 1
+                return out
+
+        elif callable(form_key):
+
+            def getkey(layout):
+                out = form_key(id=hold_id[0], layout=layout)
+                hold_id[0] += 1
+                return out
+
+        else:
+            raise TypeError(
+                "form_key must be None, a string, or a callable, not {0}".format(
+                    type(form_key)
+                )
+            )
+
+        return self._form_with_key(getkey)
+
+    def to_buffers(
+        self,
+        container=None,
+        buffer_key="{form_key}-{attribute}",
+        form_key="node{id}",
+        id_start=0,
+        nplike=numpy,
+    ):
+        if container is None:
+            container = {}
+
+        if ak._v2._util.isstr(buffer_key):
+
+            def getkey(layout, form, attribute):
+                return buffer_key.format(form_key=form.form_key, attribute=attribute)
+
+        elif callable(buffer_key):
+
+            def getkey(layout, form, attribute):
+                return buffer_key(
+                    form_key=form.form_key,
+                    attribute=attribute,
+                    layout=layout,
+                    form=form,
+                )
+
+        else:
+            raise TypeError(
+                "buffer_key must be a string or a callable, not {0}".format(
+                    type(buffer_key)
+                )
+            )
+
+        if form_key is None:
+            raise TypeError(
+                "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
+            )
+
+        form = self.form_with_key(form_key=form_key, id_start=id_start)
+
+        self._to_buffers(form, getkey, container, nplike)
+
+        return form, len(self), container
 
     def _repr_extra(self, indent):
         out = []
@@ -572,7 +652,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
 
         return ak._v2.contents.unionarray.UnionArray(
-            tags, index, contents, None, self.parameters
+            tags, index, contents, None, self._parameters
         )
 
     def _merging_strategy(self, others):
@@ -1099,3 +1179,18 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 "function_name": function_name,
             },
         )
+
+    def tolist(self, behavior=None):
+        return self.to_list(behavior)
+
+    def to_list(self, behavior=None):
+        return self.packed()._to_list(behavior)
+
+    def _to_list_custom(self, behavior):
+        cls = ak._v2._util.arrayclass(self, behavior)
+        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
+            array = cls(self)
+            out = [None] * len(self)
+            for i in range(len(self)):
+                out[i] = array[i]
+            return out
