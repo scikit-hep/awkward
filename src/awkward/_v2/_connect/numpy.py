@@ -6,7 +6,8 @@ import sys
 
 import numpy
 
-# import awkward as ak
+import awkward as ak
+from awkward._v2.contents.numpyarray import NumpyArray
 
 
 # def convert_to_array(layout, args, kwargs):
@@ -63,207 +64,165 @@ import numpy
 #     return decorator
 
 
-# def array_ufunc(ufunc, method, inputs, kwargs):
-#     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
-#         return NotImplemented
+def _array_ufunc_custom_cast(inputs, behavior):
+    nextinputs = []
+    for x in inputs:
+        cast_fcn = ak._v2._util.custom_cast(x, behavior)
+        if cast_fcn is not None:
+            x = cast_fcn(x)
+        nextinputs.append(
+            ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        )
+    return nextinputs
 
-#     behavior = ak._v2._util.behaviorof(*inputs)
 
-#     nextinputs = []
-#     for x in inputs:
-#         cast_fcn = ak._v2._util.custom_cast(x, behavior)
-#         if cast_fcn is not None:
-#             x = cast_fcn(x)
-#         nextinputs.append(
-#             ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
-#         )
-#     inputs = nextinputs
+def _array_ufunc_adjust(custom, inputs, kwargs, behavior):
+    args = [
+        ak._v2._util.wrap(x, behavior)
+        if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
+        else x
+        for x in inputs
+    ]
+    out = custom(*args, **kwargs)
+    if not isinstance(out, tuple):
+        out = (out,)
 
-#     def adjust(custom, inputs, kwargs):
-#         args = [
-#             ak._v2._util.wrap(x, behavior)
-#             if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
-#             else x
-#             for x in inputs
-#         ]
-#         out = custom(*args, **kwargs)
-#         if not isinstance(out, tuple):
-#             out = (out,)
+    return tuple(
+        x.layout
+        if isinstance(x, (ak._v2.highlevel.Array, ak._v2.highlevel.Record))
+        else x
+        for x in out
+    )
 
-#         return tuple(
-#             x.layout if isinstance(x, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)) else x
-#             for x in out
-#         )
 
-#     def adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs):
-#         nextinputs = [
-#             ak._v2._util.wrap(x, behavior)
-#             if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
-#             else x
-#             for x in inputs
-#         ]
+def _array_ufunc_adjust_apply(apply_ufunc, ufunc, method, inputs, kwargs, behavior):
+    nextinputs = [
+        ak._v2._util.wrap(x, behavior)
+        if isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record))
+        else x
+        for x in inputs
+    ]
 
-#         out = apply_ufunc(ufunc, method, nextinputs, kwargs)
+    out = apply_ufunc(ufunc, method, nextinputs, kwargs)
 
-#         if out is NotImplemented:
-#             return None
-#         else:
-#             if not isinstance(out, tuple):
-#                 out = (out,)
-#             out = tuple(
-#                 x.layout
-#                 if isinstance(x, (ak._v2.highlevel.Array, ak._v2.highlevel.Record))
-#                 else x
-#                 for x in out
-#             )
-#             return lambda: out
+    if out is NotImplemented:
+        return None
+    else:
+        if not isinstance(out, tuple):
+            out = (out,)
+        return tuple(
+            x.layout
+            if isinstance(x, (ak._v2.highlevel.Array, ak._v2.highlevel.Record))
+            else x
+            for x in out
+        )
 
-#     def is_fully_regular(layout):
-#         if (
-#             isinstance(layout, ak._v2.contents.RegularArray)
-#             and layout.parameter("__record__") is None
-#             and layout.parameter("__array__") is None
-#         ):
-#             if isinstance(layout.content, ak._v2.contents.NumpyArray):
-#                 return True
-#             elif isinstance(layout.content, ak._v2.contents.RegularArray):
-#                 return is_fully_regular(layout.content)
-#             else:
-#                 return False
-#         else:
-#             return False
 
-#     def deregulate(layout):
-#         if not is_fully_regular(layout):
-#             return layout
-#         else:
-#             shape = [len(layout)]
-#             node = layout
-#             while isinstance(node, ak._v2.contents.RegularArray):
-#                 shape.append(node.size)
-#                 node = node.content
-#             if node.format.upper().startswith("M"):
-#                 nparray = ak.nplike.of(node).asarray(node.view_int64).view(node.format)
-#                 nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
-#                 return ak._v2.contents.NumpyArray(
-#                     nparray,
-#                     node.identities,
-#                     node.parameters,
-#                 )
-#             else:
-#                 nparray = ak.nplike.of(node).asarray(node)
-#                 nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
-#                 return ak._v2.contents.NumpyArray(
-#                     nparray,
-#                     node.identities,
-#                     node.parameters,
-#                 )
+def _array_ufunc_signature(ufunc, inputs):
+    signature = [ufunc]
+    for x in inputs:
+        if isinstance(x, ak._v2.contents.Content):
+            record, array = x.parameter("__record__"), x.parameter("__array__")
+            if record is not None:
+                signature.append(record)
+            elif array is not None:
+                signature.append(array)
+            elif isinstance(x, NumpyArray):
+                signature.append(x.dtype.type)
+            else:
+                signature.append(None)
+        else:
+            signature.append(type(x))
 
-#     def getfunction(inputs):
-#         signature = [ufunc]
-#         for x in inputs:
-#             if isinstance(x, ak._v2.contents.Content):
-#                 record = x.parameter("__record__")
-#                 array = x.parameter("__array__")
-#                 if record is not None:
-#                     signature.append(record)
-#                 elif array is not None:
-#                     signature.append(array)
-#                 elif isinstance(x, ak._v2.contents.NumpyArray):
-#                     if x.format.upper().startswith("M"):
-#                         signature.append(
-#                             ak.nplike.of(x)
-#                             .asarray(x.view_int64)
-#                             .view(x.format)
-#                             .dtype.type
-#                         )
-#                     else:
-#                         signature.append(ak.nplike.of(x).asarray(x).dtype.type)
-#                 else:
-#                     signature.append(None)
-#             else:
-#                 signature.append(type(x))
+    return signature
 
-#         custom = ak._v2._util.overload(behavior, signature)
-#         if custom is not None:
-#             return lambda: adjust(custom, inputs, kwargs)
 
-#         if ufunc is numpy.matmul:
-#             custom_matmul = getfunction_matmul(inputs)
-#             if custom_matmul is not None:
-#                 return custom_matmul
+def _array_ufunc_deregulate(inputs):
+    nextinputs = []
+    for x in inputs:
+        if isinstance(x, ak._v2.contents.RegularArray):
+            y = x.maybe_toNumpyArray()
+            if y is not None:
+                nextinputs.append(y)
+            else:
+                nextinputs.append(x)
+        else:
+            nextinputs.append(x)
 
-#         inputs = [deregulate(x) for x in inputs]
+    return nextinputs
 
-#         if all(
-#             (
-#                 isinstance(x, ak._v2.contents.NumpyArray)
-#                 and not (x.format.upper().startswith("M"))
-#             )
-#             or not isinstance(x, (ak._v2.contents.Content, ak.partition.PartitionedArray))   # NO PARTITIONED ARRAY
-#             for x in inputs
-#         ):
-#             nplike = ak.nplike.of(*inputs)
-#             result = getattr(ufunc, method)(
-#                 *[nplike.asarray(x) for x in inputs], **kwargs
-#             )
-#             return lambda: (ak._v2.operations.convert.from_numpy(result, highlevel=False),)
-#         elif all(
-#             isinstance(x, ak._v2.contents.NumpyArray) and (x.format.upper().startswith("M"))
-#             for x in inputs
-#         ):
-#             nplike = ak.nplike.of(*inputs)
-#             result = getattr(ufunc, method)(
-#                 *[nplike.asarray(x.view_int64).view(x.format) for x in inputs], **kwargs
-#             )
-#             return lambda: (ak._v2.operations.convert.from_numpy(result, highlevel=False),)
 
-#         for x in inputs:
-#             if isinstance(x, ak._v2.contents.Content):
-#                 chained_behavior = ak._v2._util.Behavior(ak.behavior, behavior)
-#                 apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__array__")]
-#                 if apply_ufunc is not None:
-#                     out = adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs)
-#                     if out is not None:
-#                         return out
-#                 apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__record__")]
-#                 if apply_ufunc is not None:
-#                     out = adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs)
-#                     if out is not None:
-#                         return out
+def array_ufunc(ufunc, method, inputs, kwargs):
+    if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
+        return NotImplemented
 
-#         if all(
-#             x.parameter("__array__") is not None
-#             or x.parameter("__record__") is not None
-#             for x in inputs
-#             if isinstance(x, ak._v2.contents.Content)
-#         ):
-#             custom_types = []
-#             for x in inputs:
-#                 if isinstance(x, ak._v2.contents.Content):
-#                     if x.parameter("__array__") is not None:
-#                         custom_types.append(x.parameter("__array__"))
-#                     elif x.parameter("__record__") is not None:
-#                         custom_types.append(x.parameter("__record__"))
-#                     else:
-#                         custom_types.append(type(x).__name__)
-#                 else:
-#                     custom_types.append(type(x).__name__)
-#             raise ValueError(
-#                 "no overloads for custom types: {0}({1})".format(
-#                     ufunc.__name__,
-#                     ", ".join(custom_types),
-#                 )
-#
-#             )
+    behavior = ak._v2._util.behavior_of(*inputs)
 
-#         return None
+    inputs = _array_ufunc_custom_cast(inputs, behavior)
 
-#     out = ak._v2._util.broadcast_and_apply(
-#         inputs, getfunction, behavior, allow_records=False, pass_depth=False
-#     )
-#     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._v2._util.wrap(out[0], behavior)
+    def action(inputs, **ignore):
+        signature = _array_ufunc_signature(ufunc, inputs)
+
+        custom = ak._v2._util.overload(behavior, signature)
+        if custom is not None:
+            return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
+
+        if ufunc is numpy.matmul:
+            custom_matmul = action_for_matmul(inputs)
+            if custom_matmul is not None:
+                return custom_matmul()
+
+        inputs = _array_ufunc_deregulate(inputs)
+
+        if all(
+            isinstance(x, NumpyArray) or not isinstance(x, ak._v2.contents.Content)
+            for x in inputs
+        ):
+            nplike = ak.nplike.of(*inputs)
+            args = [x.to(nplike) if isinstance(x, NumpyArray) else x for x in inputs]
+            result = getattr(ufunc, method)(*args, **kwargs)
+            return (NumpyArray(result, nplike=nplike),)
+
+        for x in inputs:
+            if isinstance(x, ak._v2.contents.Content):
+                apply_ufunc = ak._v2._util.custom_ufunc(ufunc, x, behavior)
+                if apply_ufunc is not None:
+                    out = _array_ufunc_adjust_apply(
+                        apply_ufunc, ufunc, method, inputs, kwargs, behavior
+                    )
+                    if out is not None:
+                        return out
+
+        if all(
+            x.parameter("__array__") is not None
+            or x.parameter("__record__") is not None
+            for x in inputs
+            if isinstance(x, ak._v2.contents.Content)
+        ):
+            error_message = []
+            for x in inputs:
+                if isinstance(x, ak._v2.contents.Content):
+                    if x.parameter("__array__") is not None:
+                        error_message.append(x.parameter("__array__"))
+                    elif x.parameter("__record__") is not None:
+                        error_message.append(x.parameter("__record__"))
+                    else:
+                        error_message.append(type(x).__name__)
+                else:
+                    error_message.append(type(x).__name__)
+            raise TypeError(
+                "no {0}.{1} overloads for custom types: {2}".format(
+                    type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
+                )
+            )
+
+        return None
+
+    out = ak._v2._broadcasting.broadcast_and_apply(
+        inputs, action, behavior, allow_records=False, function_name=ufunc.__name__
+    )
+    assert isinstance(out, tuple) and len(out) == 1
+    return ak._v2._util.wrap(out[0], behavior)
 
 
 # def matmul_for_numba(lefts, rights, dtype):
@@ -345,7 +304,11 @@ import numpy
 # matmul_for_numba.numbafied = None
 
 
-# def getfunction_matmul(inputs):
+def action_for_matmul(inputs):
+    raise NotImplementedError
+
+
+# def action_for_matmul(inputs):
 #     inputs = [
 #         ak._v2._util.recursively_apply(
 #             x, (lambda _: _), pass_depth=False, numpy_to_regular=True
@@ -358,7 +321,7 @@ import numpy
 #     if len(inputs) == 2 and all(
 #         isinstance(x, ak._v2._util.listtypes)
 #         and isinstance(x.content, ak._v2._util.listtypes)
-#         and isinstance(x.content.content, ak._v2.contents.NumpyArray)
+#         and isinstance(x.content.content, NumpyArray)
 #         for x in inputs
 #     ):
 #         ak._v2._connect.numba.register_and_check()
@@ -378,7 +341,7 @@ import numpy
 #                 ak._v2.index.Index64(outer),
 #                 ak._v2.contents.ListOffsetArray64(
 #                     ak._v2.index.Index64(inner),
-#                     ak._v2.contents.NumpyArray(content),
+#                     NumpyArray(content),
 #                 ),
 #             ),
 #         )

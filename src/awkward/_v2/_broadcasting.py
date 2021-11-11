@@ -62,12 +62,12 @@ def broadcast_pack(inputs, isscalar):
 def broadcast_unpack(x, isscalar):
     if all(isscalar):
         if len(x) == 0:
-            return x.getitem_nothing().getitem_nothing()
+            return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
         if len(x) == 0:
-            return x.getitem_nothing()
+            return x._getitem_nothing()
         else:
             return x[0]
 
