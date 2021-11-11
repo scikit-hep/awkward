@@ -1004,6 +1004,12 @@ class NumpyArray(Content):
         else:
             return self.rpad_axis0(target, clip=True)
 
+    def _nbytes_part(self, largest):
+        it = id(self.ptr)
+        if it not in largest or largest[it] < self.data.nbytes:
+            largest[it] = self.data.nbytes
+        if self.identifier is not None:
+            self.identifier._nbytes_part(largest)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self._data.ndim != 1:

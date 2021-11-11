@@ -115,3 +115,8 @@ class Identifier(object):
             and self._data.strides == other._data.strides
             and self._data.dtype == other._data.dtype
         )
+
+    def _nbytes_part(self, largest):
+        it = id(self.ref)
+        if it not in largest or largest[it] < self.data.nbytes:
+            largest[it] = self.data.nbytes
