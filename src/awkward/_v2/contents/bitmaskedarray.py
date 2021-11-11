@@ -474,6 +474,12 @@ class BitMaskedArray(Content):
         else:
             return self._content.validityerror(path + ".content")
 
+    def _nbytes_part(self, largest):
+        self.mask._nbytes_part(largest)
+        self.content._nbytes_part(largest)
+        if self.identifier is not None:
+            self.identifier._nbytes_part(largest)
+
     def _rpad(self, target, axis, depth, clip):
         return self.toByteMaskedArray()._rpad(target, axis, depth, clip)
 

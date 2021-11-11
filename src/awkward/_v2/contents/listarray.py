@@ -985,6 +985,13 @@ class ListArray(Content):
             else:
                 return self._content.validityerror(path + ".content")
 
+    def _nbytes_part(self, largest):
+        self.starts._nbytes_part(largest)
+        self.stops._nbytes_part(largest)
+        self.content._nbytes_part(largest)
+        if self.identifier is not None:
+            self.identifier._nbytes_part(largest)
+
     def _rpad(self, target, axis, depth, clip):
         if not clip:
             posaxis = self.axis_wrap_if_negative(axis)

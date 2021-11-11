@@ -810,6 +810,12 @@ class UnionArray(Content):
                     return sub
             return ""
 
+    def _nbytes_part(self, largest):
+        for content in self.contents:
+            content._nbytes_part(largest)
+        if self.identifier is not None:
+            self.identifier._nbytes_part(largest)
+
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

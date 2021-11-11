@@ -704,6 +704,12 @@ class ByteMaskedArray(Content):
         else:
             return self._content.validityerror(path + ".content")
 
+    def _nbytes_part(self, largest):
+        self.mask._nbytes_part(largest)
+        self.content._nbytes_part(largest)
+        if self.identifier is not None:
+            self.identifier._nbytes_part(largest)
+
     def bytemask(self):
         if not self._valid_when:
             return self._mask

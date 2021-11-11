@@ -985,7 +985,6 @@ class NumpyArray(Content):
                 )
         return ""
 
-
     def _rpad(self, target, axis, depth, clip):
         if len(self.shape) == 0:
             raise ValueError("cannot rpad a scalar")

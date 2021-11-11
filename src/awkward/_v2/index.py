@@ -150,6 +150,11 @@ class Index(object):
     def __copy__(self):
         return Index(self._data.copy())
 
+    def _nbytes_part(self, largest):
+        it = id(self.data)
+        if it not in largest or largest[it] < self.data.nbytes:
+            largest[it] = self.data.nbytes
+
 
 class Index8(Index):
     _expected_dtype = np.dtype(np.int8)

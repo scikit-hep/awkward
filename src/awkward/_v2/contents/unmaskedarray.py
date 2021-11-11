@@ -391,6 +391,12 @@ class UnmaskedArray(Content):
         else:
             return self._content.validityerror(path + ".content")
 
+    def _nbytes_part(self, largest):
+        self.content._nbytes_part(largest)
+        # FIXME: identifier is not counted in C++ code?
+        if self.identifier is not None:
+            self.identifier._nbytes_part(largest)
+
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

@@ -1376,6 +1376,12 @@ class IndexedOptionArray(Content):
         else:
             return self._content.validityerror(path + ".content")
 
+    def _nbytes_part(self, largest):
+        self.index._nbytes_part(largest)
+        self.content._nbytes_part(largest)
+        if self.identifier is not None:
+            self.identifier._nbytes_part(largest)
+
     def bytemask(self):
         out = ak._v2.index.Index8.empty(len(self.index), self.nplike)
         self._handle_error(
