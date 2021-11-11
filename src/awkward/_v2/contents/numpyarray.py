@@ -314,7 +314,9 @@ class NumpyArray(Content):
             i += 1
             depth += 1
         if posaxis > depth:
-            raise ValueError("'axis' out of range for 'num'")
+            raise np.AxisError(
+                "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
+            )
 
         tonum = ak._v2.index.Index64.empty(reps, self.nplike)
         self._handle_error(
