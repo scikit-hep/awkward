@@ -143,7 +143,9 @@ class NumpyType(Type):
             return (
                 self._typestr == other._typestr
                 and self._primitive == other._primitive
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
             )
         else:
             return False
