@@ -1013,6 +1013,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return paramcheck
         return self._validityerror(path)
 
+    @property
     def nbytes(self):
         largest = {0: 0}
         self._nbytes_part(largest)

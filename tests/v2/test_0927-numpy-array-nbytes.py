@@ -18,7 +18,7 @@ def test():
     array = ak.from_numpy(np_data, regulararray=False)
     array = v1_to_v2(array.layout)
 
-    assert np_data.nbytes == array.nbytes()
+    assert np_data.nbytes == array.nbytes
 
 
 def test_NumpyArray_nbytes():
@@ -33,7 +33,7 @@ def test_NumpyArray_nbytes():
     assert sum(largest.values()) == 8 * 5 * 10
 
     array = ak._v2.contents.numpyarray.NumpyArray(np_data, identifier)
-    assert array.nbytes() == np_data.nbytes + 8 * 5 * 10
+    assert array.nbytes == np_data.nbytes + 8 * 5 * 10
 
 
 def test_ByteMaskedArray_nbytes():
@@ -52,7 +52,7 @@ def test_ByteMaskedArray_nbytes():
     assert v1_array.nbytes == 221
     v2_array = v1_to_v2(v1_array)
 
-    assert v2_array.nbytes() == v1_array.nbytes
+    assert v2_array.nbytes == v1_array.nbytes
 
 
 def test_BitMaskedArray_nbytes():
@@ -87,4 +87,10 @@ def test_BitMaskedArray_nbytes():
     assert np_array.nbytes == 112
     assert np_index.nbytes == 13
     assert np.packbits(np_index).nbytes == 2
-    assert v2_array.nbytes() == 114
+    assert v2_array.nbytes == 114
+
+
+def test_highlevel():
+    ak_Array = ak._v2.highlevel.Array
+    array = ak_Array([0.0, 1.1, 2.2, 3.3, 4.4])
+    assert array.nbytes == array.layout.nbytes
