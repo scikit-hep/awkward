@@ -77,17 +77,161 @@ def test_BitMaskedArray_nbytes():
         ],
         dtype=np.uint8,
     )
-    v2_array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+    array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(np.packbits(np_index)),
         ak._v2.contents.numpyarray.NumpyArray(np_array),
         valid_when=True,
         length=13,
         lsb_order=False,
     )
+
     assert np_array.nbytes == 112
     assert np_index.nbytes == 13
     assert np.packbits(np_index).nbytes == 2
-    assert v2_array.nbytes == 114
+    assert array.nbytes == 114
+
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(np.packbits(np_index)),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np_array,
+            identifier,
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
+        identifier=identifier,
+    )
+    assert array.nbytes == 514
+
+
+def test_EmptyArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.emptyarray.EmptyArray(
+        identifier=identifier,
+    )
+    assert array.nbytes == 400
+
+
+def test_IndexedArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.indexedarray.IndexedArray(  # noqa: F841
+        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        identifier=identifier,
+    )
+    assert array.nbytes == 504
+
+
+def test_IndexedOptionArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
+        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        identifier=identifier,
+    )
+    assert array.nbytes == 504
+
+
+def test_ListArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.listarray.ListArray(  # noqa: F841
+        ak._v2.index.Index(np.array([4, 100, 1])),
+        ak._v2.index.Index(np.array([7, 100, 3, 200])),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8])
+        ),
+        identifier=identifier,
+    )
+    assert array.nbytes == 520
+
+
+def test_ListOffsetArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index(np.array([7, 10, 10, 200])),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8])
+        ),
+        identifier=identifier,
+    )
+    assert array.nbytes == 496
+
+
+def test_RecordArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.recordarray.RecordArray(
+        [
+            ak._v2.contents.numpyarray.NumpyArray(
+                np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+            )
+        ],
+        ["nest"],
+        identifier=identifier,
+    )
+    assert array.nbytes == 448
+
+
+def test_RegularArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 33.33, 4.4, 5.5, -6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        3,
+        identifier=identifier,
+    )
+    assert array.nbytes == 456
+
+
+def test_UnionArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.unionarray.UnionArray(
+        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
+        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+        [
+            ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3])),
+            ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
+        identifier=identifier,
+    )
+    assert array.nbytes == 440
+
+
+def test_UnmaskedArray_nbytes():
+    identifier = ak._v2.identifier.Identifier.zeros(
+        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
+    )
+    array = ak._v2.contents.unmaskedarray.UnmaskedArray(
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([0.0, 2.2, 1.1, 3.3], dtype=np.float64)
+        ),
+        identifier=identifier,
+    )
+    assert array.nbytes == 432
 
 
 def test_highlevel():
