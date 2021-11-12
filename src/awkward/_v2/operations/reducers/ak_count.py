@@ -10,7 +10,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def count(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
-        array: Data in which to count elements.
+        array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and

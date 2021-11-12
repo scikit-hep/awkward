@@ -14,8 +14,8 @@ def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
 
 #     """
 #     Args:
-#         x: the data on which to compute the mean.
-#         weight: data that can be broadcasted to `x` to give each value a
+#         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
+#         weight: Data that can be broadcasted to `x` to give each value a
 #             weight. Weighting values equally is the same as no weights;
 #             weighting some values higher increases the significance of those
 #             values. Weights can be zero or negative.

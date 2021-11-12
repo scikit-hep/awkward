@@ -13,9 +13,9 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 
 #     """
 #     Args:
-#         x: one coordinate to use in the linear fit.
-#         y: the other coordinate to use in the linear fit.
-#         weight: data that can be broadcasted to `x` and `y` to give each point
+#         x: One coordinate to use in the linear fit (anything #ak.to_layout recognizes).
+#         y: The other coordinate to use in the linear fit (anything #ak.to_layout recognizes).
+#         weight: Data that can be broadcasted to `x` and `y` to give each point
 #             a weight. Weighting points equally is the same as no weights;
 #             weighting some points higher increases the significance of those
 #             points. Weights can be zero or negative.

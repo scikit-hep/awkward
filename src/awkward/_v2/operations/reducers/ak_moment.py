@@ -13,10 +13,10 @@ def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
 
 #     """
 #     Args:
-#         x: the data on which to compute the moment.
-#         n (int): the choice of moment: `0` is a sum of weights, `1` is
+#         x: The data on which to compute the moment (anything #ak.to_layout recognizes).
+#         n (int): The choice of moment: `0` is a sum of weights, `1` is
 #             #ak.mean, `2` is #ak.var without subtracting the mean, etc.
-#         weight: data that can be broadcasted to `x` to give each value a
+#         weight: Data that can be broadcasted to `x` to give each value a
 #             weight. Weighting values equally is the same as no weights;
 #             weighting some values higher increases the significance of those
 #             values. Weights can be zero or negative.

@@ -14,7 +14,7 @@ def ptp(arr, axis=None, keepdims=False, mask_identity=True):
 
 #     """
 #     Args:
-#         array: Data from which to find the range of values.
+#         array: Array-like data (anything #ak.to_layout recognizes).
 #         axis (None or int): If None, combine all values from the array into
 #             a single scalar result; if an int, group by that axis: `0` is the
 #             outermost, `1` is the first level of nested lists, etc., and

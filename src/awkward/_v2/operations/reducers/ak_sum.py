@@ -14,6 +14,7 @@ def sum(array, axis=None, keepdims=False, mask_identity=False):
 
 #     """
 #     Args:
+#         array: Array-like data (anything #ak.to_layout recognizes).
 #         array: Data to sum over.
 #         axis (None or int): If None, combine all values from the array into
 #             a single scalar result; if an int, group by that axis: `0` is the
