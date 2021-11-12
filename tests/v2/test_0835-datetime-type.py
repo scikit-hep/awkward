@@ -7,6 +7,7 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 import datetime
+import numpy.core._exceptions as np_exception
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
@@ -82,14 +83,14 @@ def test_datetime64_ArrayBuilder():
     builder.datetime("2020-07-27T10:41:11.200000")
 
     assert ak.to_list(builder.snapshot()) == [
-        datetime.datetime(2020, 3, 27, 10, 41),
-        datetime.datetime(2020, 3, 27, 10, 41, 11),
-        datetime.datetime(2020, 3, 27, 10, 41, 12),
-        datetime.datetime(2021, 3, 27, 0, 0),
-        datetime.datetime(2020, 3, 27, 10, 41, 13),
-        datetime.datetime(2020, 5, 1, 20, 56, 24),
-        datetime.datetime(2020, 5, 1, 0, 0),
-        datetime.datetime(2020, 7, 27, 10, 41, 11, 200000),
+        np.datetime64("2020-03-27T10:41:00", "15s"),
+        np.datetime64("2020-03-27T10:41:11"),
+        np.datetime64("2020-03-27T10:41:12.000000", "25us"),
+        np.datetime64("2021-03-27"),
+        np.datetime64("2020-03-27T10:41:13"),
+        np.datetime64("2020-05"),
+        np.datetime64("2020-05-01T00:00:00.000000"),
+        np.datetime64("2020-07-27T10:41:11.200000"),
     ]
 
 
@@ -111,13 +112,13 @@ def test_highlevel_datetime64_ArrayBuilder():
     builder.timedelta(np.timedelta64(5, "s"))
 
     assert ak.to_list(builder.snapshot()) == [
-        np.datetime64("2020-03-27T10:41:00.000000"),
-        np.datetime64("2020-03-27T10:41:11.000000"),
-        np.datetime64("2020-03-27T10:41:12.000000"),
-        np.datetime64("2021-03-27T00:00:00.000000"),
-        np.datetime64("2020-03-27T10:41:13.000000"),
+        np.datetime64("2020-03-27T10:41", "15s"),
+        np.datetime64("2020-03-27T10:41:11"),
+        np.datetime64("2020-03-27T10:41:12", "25us"),
+        np.datetime64("2021-03-27"),
+        np.datetime64("2020-03-27T10:41:13"),
         np.timedelta64(5, "s"),
-        np.datetime64("2020-05-01T20:56:24.000000"),
+        np.datetime64("2020-05"),
         np.datetime64("2020-05-01T00:00:00.000000"),
         np.datetime64("2020-07-27T10:41:11.200000"),
         1,
@@ -403,22 +404,22 @@ def test_min_max():
 
     assert ak.to_list(array) == [
         [
-            np.datetime64("2020-03-27T10:41:11"),
-            np.datetime64("2020-01-27T10:41:11"),
-            np.datetime64("2020-05-01T20:56:24"),
-            np.datetime64("2020-01-27T10:41:11"),
-            np.datetime64("2020-04-27T10:41:11"),
+            datetime.datetime(2020, 3, 27, 10, 41, 11),
+            datetime.datetime(2020, 1, 27, 10, 41, 11),
+            datetime.date(2020, 5, 1),
+            datetime.datetime(2020, 1, 27, 10, 41, 11),
+            datetime.datetime(2020, 4, 27, 10, 41, 11),
         ],
         [
-            np.datetime64("2020-04-27T00:00:00"),
-            np.datetime64("2020-02-27T10:41:11"),
-            np.datetime64("2020-01-27T10:41:11"),
-            np.datetime64("2020-06-27T10:41:11"),
+            datetime.date(2020, 4, 27),
+            datetime.datetime(2020, 2, 27, 10, 41, 11),
+            datetime.datetime(2020, 1, 27, 10, 41, 11),
+            datetime.datetime(2020, 6, 27, 10, 41, 11),
         ],
         [
-            np.datetime64("2020-02-27T10:41:11"),
-            np.datetime64("2020-03-27T10:41:11"),
-            np.datetime64("2020-01-27T10:41:11"),
+            datetime.datetime(2020, 2, 27, 10, 41, 11),
+            datetime.datetime(2020, 3, 27, 10, 41, 11),
+            datetime.datetime(2020, 1, 27, 10, 41, 11),
         ],
     ]
     assert ak.to_list(array.min()) == [
@@ -429,9 +430,9 @@ def test_min_max():
     # FIXME: default axis is -1
     # np.datetime64("2020-01-27T10:41:11")
     assert ak.to_list(array.max()) == [
-        np.datetime64("2020-05-01T20:56:24"),
-        np.datetime64("2020-06-27T10:41:11"),
-        np.datetime64("2020-03-27T10:41:11"),
+        datetime.datetime(2020, 5, 1, 0, 0),
+        datetime.datetime(2020, 6, 27, 10, 41, 11),
+        datetime.datetime(2020, 3, 27, 10, 41, 11),
     ]
     # FIXME: default axis is -1
     # np.datetime64("2020-06-27T10:41:11")
@@ -577,9 +578,6 @@ def test_sum():
                 depth.sum(-1)
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_from_numpy.py:13: NotImplementedError"
-)
 def test_more():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
@@ -591,9 +589,6 @@ def test_more():
     assert ak.sum(akarray[1:] - akarray[:-1], axis=0) == [np.timedelta64(60, "m")]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_from_numpy.py:13: NotImplementedError"
-)
 def test_ufunc_sum():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
@@ -604,16 +599,13 @@ def test_ufunc_sum():
         akarray[1:] + akarray[:-1]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_from_numpy.py:13: NotImplementedError"
-)
 def test_ufunc_mul():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
     )
     akarray = ak._v2.highlevel.Array(nparray)
 
-    with pytest.raises(ValueError):  # FIXME?: np.core._exceptions.UFuncTypeError):
+    with pytest.raises(np_exception._UFuncBinaryResolutionError):
         akarray * 2
 
     assert ak._v2.highlevel.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
