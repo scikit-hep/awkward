@@ -106,7 +106,7 @@ class NumpyForm(Form):
         out = ak._v2.types.numpytype.NumpyType(
             self._primitive,
             None,
-            ak._util.gettypestr(self._parameters, typestrs),
+            ak._v2._util.gettypestr(self._parameters, typestrs),
         )
         for x in self._inner_shape[::-1]:
             out = ak._v2.types.regulartype.RegularType(out, x)

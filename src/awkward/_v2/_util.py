@@ -342,34 +342,34 @@ def recordclass(layout, behavior):
     return ak._v2.highlevel.Record
 
 
-# def typestrs(behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     out = {}
-#     for key, typestr in behavior.items():
-#         if (
-#             isinstance(key, tuple)
-#             and len(key) == 2
-#             and key[0] == "__typestr__"
-#             and (isinstance(key[1], str) or (py27 and isinstance(key[1], unicode)))
-#             and (isinstance(typestr, str) or (py27 and isinstance(typestr, unicode)))
-#         ):
-#             out[key[1]] = typestr
-#     return out
+def typestrs(behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    out = {}
+    for key, typestr in behavior.items():
+        if (
+            isinstance(key, tuple)
+            and len(key) == 2
+            and key[0] == "__typestr__"
+            and isstr(key[1])
+            and isstr(typestr)
+        ):
+            out[key[1]] = typestr
+    return out
 
 
-# def gettypestr(parameters, typestrs):
-#     if parameters is not None:
-#         record = parameters.get("__record__")
-#         if record is not None:
-#             typestr = typestrs.get(record)
-#             if typestr is not None:
-#                 return typestr
-#         array = parameters.get("__array__")
-#         if array is not None:
-#             typestr = typestrs.get(array)
-#             if typestr is not None:
-#                 return typestr
-#     return None
+def gettypestr(parameters, typestrs):
+    if parameters is not None:
+        record = parameters.get("__record__")
+        if record is not None:
+            typestr = typestrs.get(record)
+            if typestr is not None:
+                return typestr
+        array = parameters.get("__array__")
+        if array is not None:
+            typestr = typestrs.get(array)
+            if typestr is not None:
+                return typestr
+    return None
 
 
 # def numba_record_typer(layouttype, behavior):

@@ -512,7 +512,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         The type of a #ak.layout.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
-        return ak._v2.types.ArrayType(self._layout.form.type, len(self._layout))
+        return ak._v2.types.ArrayType(
+            self._layout.form.type_from_behavior(self._behavior), len(self._layout)
+        )
 
     @property
     def typestr(self):
@@ -525,7 +527,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         The type of a #ak.layout.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
-        return str(ak._v2.types.ArrayType(self._layout.form.type, len(self._layout)))
+        return str(self.type)
 
     def __len__(self):
         """
@@ -1689,7 +1691,7 @@ class Record(NDArrayOperatorsMixin):
         Note that the outermost element of a Record's type is always a
         #ak.types.RecordType.
         """
-        return self._layout.array.form.type
+        return self._layout.array.form.type_from_behavior(self._behavior)
 
     @property
     def typestr(self):
@@ -1699,7 +1701,7 @@ class Record(NDArrayOperatorsMixin):
         Note that the outermost element of a Record's type is always a
         #ak.types.RecordType.
         """
-        return str(self._layout.array.form.type)
+        return str(self.type)
 
     def __getitem__(self, where):
         """
@@ -2071,7 +2073,7 @@ class Record(NDArrayOperatorsMixin):
 #         return False
 
 
-class ArrayBuilder(Iterable, Sized):
+class ArrayBuilder(Sized):
     """
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by
@@ -2257,7 +2259,22 @@ class ArrayBuilder(Iterable, Sized):
         The type of a #ak.layout.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
-        return ak._v2.operations.describe.type(self)
+        return ak._v2.types.ArrayType(
+            self._layout.form.type_from_behavior(self._behavior), len(self._layout)
+        )
+
+    @property
+    def typestr(self):
+        """
+        The high-level type of this accumulated array, presented as a string.
+
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
+
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
+        """
+        return str(self.type)
 
     def __len__(self):
         """
@@ -2265,126 +2282,64 @@ class ArrayBuilder(Iterable, Sized):
         """
         return len(self._layout)
 
-    def __getitem__(self, where):
-        """
-        Args:
-            where (many types supported; see below): Index of positions to
-                select from the array.
-
-        Takes a #snapshot and selects items from the array.
-
-        See #ak.Array.__getitem__ for a more complete description.
-        """
-        tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
-
-        if isinstance(tmp, ak._v2.behaviors.string.ByteBehavior):
-            return bytes(tmp)
-        elif isinstance(tmp, ak._v2.behaviors.string.CharBehavior):
-            return ak._v2._util.unicode(tmp) if ak._v2._util.py27 else str(tmp)
-        else:
-            return tmp
-
-    def __iter__(self):
-        """
-        Iterates over a #snapshot of the array in Python.
-
-        See #ak.Array.__iter__ for performance considerations.
-        """
-        for x in self.snapshot():
-            yield x
-
     def __str__(self):
-        """
-        Args:
-            limit_value (int): Maximum number of characters to use when
-                presenting the ArrayBuilder as a string.
-
-        Presents this ArrayBuilder as a string without type or
-        `"<ArrayBuilder ...>"`.
-
-        See #ak.Array.__str__ for a more complete description.
-        """
-        return self._str()
+        return self.__repr__()
 
     def __repr__(self):
-        """
-        Args:
-            limit_value (int): Maximum number of characters to use when
-                presenting the data of the ArrayBuilder.
-            limit_total (int): Maximum number of characters to use for
-                the whole string (should be larger than `limit_value`).
+        typestr = repr(self.typestr)
 
-        Presents this ArrayBuilder as a string with its type and
-        `"<ArrayBuilder ...>"`.
-
-        See #ak.Array.__repr__ for a more complete description.
-        """
-        return self._repr()
-
-    def _str(self, limit_value=85, snapshot=None):
-        if snapshot is None:
-            snapshot = self.snapshot()
-        return snapshot._str(limit_value=limit_value)
-
-    def _repr(self, limit_value=40, limit_total=85):
-        snapshot = self.snapshot()
-        value = self._str(limit_value=limit_value, snapshot=snapshot)
-
-        limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
-        typestrs = ak._v2._util.typestrs(self._behavior)
-        typestr = repr(
-            str(ak._v2.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
-        )
+        limit_type = 80 - len("<ArrayBuilder type=>")
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<ArrayBuilder {0} type={1}>".format(value, typestr)
+        return "<ArrayBuilder type={0}>".format(typestr)
 
-    def __array__(self, *args, **kwargs):
+    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """
-        Intercepts attempts to convert a #snapshot of this array into a
-        NumPy array and either performs a zero-copy conversion or raises
-        an error.
+        Args:
+            limit_rows (int): Maximum number of rows (lines) to use in the output.
+            limit_cols (int): Maximum number of columns (characters wide).
+            type (bool): If True, print the type as well. (Doesn't count toward number
+                of rows/lines limit.)
+            stream (object with a ``write(str)`` method or None): Stream to write the
+                output to. If None, return a string instead of writing to a stream.
 
-        See #ak.Array.__array__ for a more complete description.
+        Display the contents of the array within `limit_rows` and `limit_cols`, using
+        ellipsis (`...`) for hidden nested data.
+
+        This method takes a snapshot of the data and calls show on it, and a snapshot
+        copies data.
         """
-        return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
+        return self.snapshot().show(
+            limit_rows=limit_rows, limit_cols=limit_cols, type=type, stream=stream
+        )
 
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """
-        Intercepts attempts to pass this ArrayBuilder to a NumPy
-        [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
-        (ufuncs) and passes it through the structure of the array's #snapshot.
+    # def __array__(self, *args, **kwargs):
+    #     """
+    #     Intercepts attempts to convert a #snapshot of this array into a
+    #     NumPy array and either performs a zero-copy conversion or raises
+    #     an error.
 
-        See #ak.Array.__array_ufunc__ for a more complete description.
-        """
-        return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
+    #     See #ak.Array.__array__ for a more complete description.
+    #     """
+    #     return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
-    def __array_function__(self, func, types, args, kwargs):
-        """
-        Intercepts attempts to pass this ArrayBuilder to those NumPy functions
-        other than universal functions that have an Awkward equivalent.
+    # @property
+    # def numba_type(self):
+    #     """
+    #     The type of this Array when it is used in Numba. It contains enough
+    #     information to generate low-level code for accessing any element,
+    #     down to the leaves.
 
-        See #ak.ArrayBuilder.__array_ufunc__ for a more complete description.
-        """
-        return ak._v2._connect.numpy.array_function(func, types, args, kwargs)
+    #     See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+    #     on types and signatures.
+    #     """
+    #     import awkward._v2._connect.numba
 
-    @property
-    def numba_type(self):
-        """
-        The type of this Array when it is used in Numba. It contains enough
-        information to generate low-level code for accessing any element,
-        down to the leaves.
+    #     ak._v2._connect.numba.register_and_check()
+    #     import awkward._v2._connect.numba.builder  # noqa: F401
 
-        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
-        on types and signatures.
-        """
-        import awkward._v2._connect.numba
-
-        ak._v2._connect.numba.register_and_check()
-        import awkward._v2._connect.numba.builder  # noqa: F401
-
-        return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
+    #     return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
 
     def __bool__(self):
         if len(self) == 1:
@@ -2399,17 +2354,8 @@ class ArrayBuilder(Iterable, Sized):
         """
         Converts the currently accumulated data into an #ak.Array.
 
-        This is almost always an *O(1)* operation (does not scale with the
-        size of the accumulated data, and therefore safe to call relatively
-        often).
-
-        The resulting #ak.Array shares memory with the accumulated data (it
-        is a zero-copy operation), but it is safe to continue filling the
-        ArrayBuilder because its append-only operations only affect data
-        outside the range viewed by old snapshots. If ArrayBuilder reallocates
-        an internal buffer, the data are no longer shared, but they're
-        reference-counted by the #ak.Array and the #ak.ArrayBuilder, so all
-        buffers are deleted exactly once.
+        The currently accumulated data are *copied* into the new array (using a
+        fast memory-copy).
         """
         layout = self._layout.snapshot()
         return ak._v2._util.wrap(layout, self._behavior)
@@ -2606,86 +2552,45 @@ class ArrayBuilder(Iterable, Sized):
         """
         self._layout.endrecord()
 
-    def append(self, obj, at=None):
+    def append(self, obj):
         """
         Args:
-            obj: The object to append.
-            at (None or int): which value to select from `obj` if `obj` is
-                an #ak.Array.
+            obj: The data to append (None, bool, int, float, bytes, str, or
+                anything recognized by #ak.from_iter).
 
-        Appends any type of object, which can be a shorthand for #null,
+        Appends any type, which can be a shorthand for #null,
         #boolean, #integer, #real, #bytestring, or #string, but also
         an #ak.Array or #ak.Record to *reference* values from an existing
         dataset, or any Python object to *convert* to Awkward Array.
 
-        If `obj` is an #ak.Array or #ak.Record, the output will be an
-        #ak.layout.IndexedArray64 (or #ak.layout.IndexedOptionArray64 if
-        there are any None values) that references the existing data. This
-        can be a more time and memory-efficient way to put old data in a
-        new structure, since it avoids copying and even walking over the
-        old data structure (matters more when the structures are large).
-
-        If `obj` is an arbitrary Python object, this is equivalent to
+        If `obj` is an iterable (including dict), this is equivalent to
         #ak.from_iter except that it fills an existing #ak.ArrayBuilder,
         rather than creating a new one.
-
-        If `obj` is an #ak.Array and `at` is an int, this method fills the
-        ArrayBuilder with a reference to `obj[at]` instead of `obj`.
         """
-        if at is None:
-            if isinstance(obj, Record):
-                self._layout.append(obj.layout.array, obj.layout.at)
-            elif isinstance(obj, Array):
-                self._layout.beginlist()
-                self._layout.extend(obj.layout)
-                self._layout.endlist()
-            else:
-                self._layout.fromiter(obj)
-
-        else:
-            if isinstance(obj, Array):
-                self._layout.append(obj.layout, at)
-            else:
-                raise TypeError(
-                    "'append' method can only be used with 'at' when "
-                    "'obj' is an ak.Array"
-                )
+        self._layout.fromiter(obj)
 
     def extend(self, obj):
         """
         Args:
-            obj (#ak.Array): The Array to concatenate with the data in this
-                ArrayBuilder.
+            obj (iterable): Iterable of data to extend this ArrayBuilder with.
 
-        Appends every value from `obj`, by reference (see #append).
+        Appends every value from `obj`.
         """
-        if isinstance(obj, Array):
-            self._layout.extend(obj.layout)
-        else:
-            raise TypeError("'extend' method requires an ak.Array")
+        for x in obj:
+            self._layout.fromiter(x)
 
     class _Nested(object):
         def __init__(self, arraybuilder):
             self._arraybuilder = arraybuilder
 
-        def __repr__(self, limit_value=40, limit_total=85):
-            snapshot = self._arraybuilder.snapshot()
-            value = self._arraybuilder._str(limit_value=limit_value, snapshot=snapshot)
+        def __repr__(self):
+            typestr = repr(self._arraybuilder.typestr)
 
-            limit_type = (
-                limit_total
-                - len(value)
-                - len("<ArrayBuilder.  type=>")
-                - len(self._name)
-            )
-            typestrs = ak._v2._util.typestrs(self._arraybuilder._behavior)
-            typestr = repr(
-                str(ak._v2.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
-            )
+            limit_type = 80 - len("<ArrayBuilder. type=>") - len(self._name)
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<ArrayBuilder.{0} {1} type={2}>".format(self._name, value, typestr)
+            return "<ArrayBuilder.{0} type={1}>".format(self._name, typestr)
 
     class List(_Nested):
         _name = "list"
