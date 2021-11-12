@@ -4,7 +4,6 @@
 #
 #    - [ ] all docstrings are old
 #    - [ ] 'Mask' nested class and 'mask' property
-#    - [ ] 'nbytes' and maybe 'nbytes_held'
 #    - [ ] `__array__`
 #    - [ ] `__array_ufunc__`
 #    - [ ] `__array_function__`
@@ -16,7 +15,6 @@
 # TODO in Array:
 #
 #    - [ ] all docstrings are old
-#    - [ ] 'nbytes' and maybe 'nbytes_held'
 #    - [ ] `__array_ufunc__`
 #    - [ ] `numba_type`
 #    - [ ] `__copy__`
@@ -455,25 +453,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         return ak._v2.operations.convert.to_numpy(self, allow_missing=allow_missing)
 
-    #     @property
-    #     def nbytes(self):
-    #         """
-    #         The total number of bytes in all the #ak.layout.Index,
-    #         #ak.layout.Identities, and #ak.layout.NumpyArray buffers in this
-    #         array tree.
+    @property
+    def nbytes(self):
+        """
+        The total number of bytes in all the #ak.layout.Index,
+        #ak.layout.Identifier, and #ak.layout.NumpyArray buffers in this
+        array tree.
 
-    #         Note: this calculation takes overlapping buffers into account, to the
-    #         extent that overlaps are not double-counted, but overlaps are currently
-    #         assumed to be complete subsets of one another, and so it is
-    #         theoretically possible (though unlikely) that this number is an
-    #         underestimate of the true usage.
-
-    #         It also does not count buffers that must be kept in memory because
-    #         of ownership, but are not directly used in the array. Nor does it count
-    #         the (small) C++ nodes or Python objects that reference the (large)
-    #         array buffers.
-    #         """
-    #         return self._layout.nbytes
+        It does not count buffers that must be kept in memory because
+        of ownership, but are not directly used in the array. Nor does it count
+        the (small) C++ nodes or Python objects that reference the (large)
+        array buffers.
+        """
+        return self._layout.nbytes
 
     @property
     def ndim(self):
@@ -1656,25 +1648,19 @@ class Record(NDArrayOperatorsMixin):
         """
         return self._layout.to_list(self._behavior)
 
-    #     @property
-    #     def nbytes(self):
-    #         """
-    #         The total number of bytes in all the #ak.layout.Index,
-    #         #ak.layout.Identities, and #ak.layout.NumpyArray buffers in this
-    #         array tree.
+    @property
+    def nbytes(self):
+        """
+        The total number of bytes in all the #ak.layout.Index,
+        #ak.layout.Identifier, and #ak.layout.NumpyArray buffers in this
+        array tree.
 
-    #         Note: this calculation takes overlapping buffers into account, to the
-    #         extent that overlaps are not double-counted, but overlaps are currently
-    #         assumed to be complete subsets of one another, and so it is
-    #         theoretically possible (though unlikely) that this number is an
-    #         underestimate of the true usage.
-
-    #         It also does not count buffers that must be kept in memory because
-    #         of ownership, but are not directly used in the array. Nor does it count
-    #         the (small) C++ nodes or Python objects that reference the (large)
-    #         array buffers.
-    #         """
-    #         return self._layout.nbytes
+        It does not count buffers that must be kept in memory because
+        of ownership, but are not directly used in the array. Nor does it count
+        the (small) C++ nodes or Python objects that reference the (large)
+        array buffers.
+        """
+        return self._layout.nbytes
 
     @property
     def fields(self):
