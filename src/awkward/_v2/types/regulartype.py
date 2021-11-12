@@ -74,7 +74,9 @@ class RegularType(Type):
             return (
                 self._typestr == other._typestr
                 and self._size == other._size
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:

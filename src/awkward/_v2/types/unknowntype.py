@@ -44,7 +44,7 @@ class UnknownType(Type):
     def __eq__(self, other):
         if isinstance(other, UnknownType):
             return self._typestr == other._typestr and _parameters_equal(
-                self._parameters, other._parameters
+                self._parameters, other._parameters, only_array_record=True
             )
         else:
             return False

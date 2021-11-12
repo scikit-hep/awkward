@@ -239,17 +239,17 @@ def arrayclass(layout, behavior):
     return ak._v2.highlevel.Array
 
 
-# def custom_cast(obj, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     for key, fcn in behavior.items():
-#         if (
-#             isinstance(key, tuple)
-#             and len(key) == 2
-#             and key[0] == "__cast__"
-#             and isinstance(obj, key[1])
-#         ):
-#             return fcn
-#     return None
+def custom_cast(obj, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    for key, fcn in behavior.items():
+        if (
+            isinstance(key, tuple)
+            and len(key) == 2
+            and key[0] == "__cast__"
+            and isinstance(obj, key[1])
+        ):
+            return fcn
+    return None
 
 
 def custom_broadcast(layout, behavior):
@@ -265,6 +265,27 @@ def custom_broadcast(layout, behavior):
                 isinstance(key, tuple)
                 and len(key) == 2
                 and key[0] == "__broadcast__"
+                and key[1] == custom
+            ):
+                return fcn
+    return None
+
+
+def custom_ufunc(ufunc, layout, behavior):
+    import numpy
+
+    behavior = Behavior(ak._v2.behavior, behavior)
+    custom = layout.parameter("__array__")
+    if not isstr(custom):
+        custom = layout.parameter("__record__")
+    if not isstr(custom):
+        custom = layout.purelist_parameter("__record__")
+    if isstr(custom):
+        for key, fcn in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 2
+                and (key[0] is ufunc or key[0] is numpy.ufunc)
                 and key[1] == custom
             ):
                 return fcn
@@ -371,23 +392,23 @@ def recordclass(layout, behavior):
 #     return None
 
 
-# def overload(behavior, signature):
-#     if not any(s is None for s in signature):
-#         behavior = Behavior(ak._v2.behavior, behavior)
-#         for key, custom in behavior.items():
-#             if (
-#                 isinstance(key, tuple)
-#                 and len(key) == len(signature)
-#                 and key[0] == signature[0]
-#                 and all(
-#                     k == s
-#                     or (
-#                         isinstance(k, type) and isinstance(s, type) and issubclass(s, k)
-#                     )
-#                     for k, s in zip(key[1:], signature[1:])
-#                 )
-#             ):
-#                 return custom
+def overload(behavior, signature):
+    if not any(s is None for s in signature):
+        behavior = Behavior(ak._v2.behavior, behavior)
+        for key, custom in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == len(signature)
+                and key[0] == signature[0]
+                and all(
+                    k == s
+                    or (
+                        isinstance(k, type) and isinstance(s, type) and issubclass(s, k)
+                    )
+                    for k, s in zip(key[1:], signature[1:])
+                )
+            ):
+                return custom
 
 
 # def numba_attrs(layouttype, behavior):

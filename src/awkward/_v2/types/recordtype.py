@@ -115,7 +115,7 @@ class RecordType(Type):
     def __eq__(self, other):
         if isinstance(other, RecordType):
             if self._typestr != other._typestr or not _parameters_equal(
-                self._parameters, other._parameters
+                self._parameters, other._parameters, only_array_record=True
             ):
                 return False
 

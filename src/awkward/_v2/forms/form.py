@@ -166,23 +166,42 @@ def from_json(input):
     return from_iter(json.loads(input))
 
 
-def _parameters_equal(one, two):
+def _parameters_equal(one, two, only_array_record=False):
     if one is None and two is None:
         return True
     elif one is None:
-        for value in two.values():
-            if value is not None:
-                return False
+        if only_array_record:
+            for key in ("__array__", "__record__"):
+                if two.get(key) is not None:
+                    return False
+            else:
+                return True
         else:
-            return True
+            for value in two.values():
+                if value is not None:
+                    return False
+            else:
+                return True
+
     elif two is None:
-        for value in one.values():
-            if value is not None:
-                return False
+        if only_array_record:
+            for key in ("__array__", "__record__"):
+                if one.get(key) is not None:
+                    return False
+            else:
+                return True
         else:
-            return True
+            for value in one.values():
+                if value is not None:
+                    return False
+            else:
+                return True
+
     else:
-        keys = set(one.keys()).union(two.keys())
+        if only_array_record:
+            keys = ("__array__", "__record__")
+        else:
+            keys = set(one.keys()).union(two.keys())
         for key in keys:
             if one.get(key) != two.get(key):
                 return False

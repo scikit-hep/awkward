@@ -1316,69 +1316,64 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         """
     #         return ak._v2._connect.numpy.convert_to_array(self._layout, args, kwargs)
 
-    #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-    #         """
-    #         Intercepts attempts to pass this Array to a NumPy
-    #         [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
-    #         (ufuncs) and passes it through the Array's structure.
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """
+        Intercepts attempts to pass this Array to a NumPy
+        [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
+        (ufuncs) and passes it through the Array's structure.
 
-    #         This method conforms to NumPy's
-    #         [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html)
-    #         for overriding ufuncs, which has been
-    #         [available since NumPy 1.13](https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added)
-    #         (and thus NumPy 1.13 is the minimum allowed version).
+        This method conforms to NumPy's
+        [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html)
+        for overriding ufuncs, which has been
+        [available since NumPy 1.13](https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added)
+        (and thus NumPy 1.13 is the minimum allowed version).
 
-    #         When any ufunc is applied to an Awkward Array, it applies to the
-    #         innermost level of structure and preserves the structure through the
-    #         operation.
+        When any ufunc is applied to an Awkward Array, it applies to the
+        innermost level of structure and preserves the structure through the
+        operation.
 
-    #         For example, with an `array` like
+        For example, with an `array` like
 
-    #             ak.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}], [], [{"x": 2.2, "y": [2, 2]}]])
+            ak.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}], [], [{"x": 2.2, "y": [2, 2]}]])
 
-    #         applying `np.sqrt` would yield
+        applying `np.sqrt` would yield
 
-    #             >>> print(np.sqrt(array))
-    #             [[{x: 0, y: []}, {x: 1.05, y: [1]}], [], [{x: 1.48, y: [1.41, 1.41]}]]
+            >>> print(np.sqrt(array))
+            [[{x: 0, y: []}, {x: 1.05, y: [1]}], [], [{x: 1.48, y: [1.41, 1.41]}]]
 
-    #         In addition, many unary and binary operators implicitly call ufuncs,
-    #         such as `np.power` in
+        In addition, many unary and binary operators implicitly call ufuncs,
+        such as `np.power` in
 
-    #             >>> print(array**2)
-    #             [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
+            >>> print(array**2)
+            [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
 
-    #         In the above example, `array` is a nested list of records and `2` is
-    #         a scalar. Awkward Array applies the same broadcasting rules as NumPy
-    #         plus a few more to deal with nested structures. In addition to
-    #         broadcasting a scalar, as above, it is possible to broadcast
-    #         arrays with less depth into arrays with more depth, such as
+        In the above example, `array` is a nested list of records and `2` is
+        a scalar. Awkward Array applies the same broadcasting rules as NumPy
+        plus a few more to deal with nested structures. In addition to
+        broadcasting a scalar, as above, it is possible to broadcast
+        arrays with less depth into arrays with more depth, such as
 
-    #             >>> print(array + ak.Array([10, 20, 30]))
-    #             [[{x: 10, y: []}, {x: 11.1, y: [11]}], [], [{x: 32.2, y: [32, 32]}]]
+            >>> print(array + ak.Array([10, 20, 30]))
+            [[{x: 10, y: []}, {x: 11.1, y: [11]}], [], [{x: 32.2, y: [32, 32]}]]
 
-    #         See #ak.broadcast_arrays for details about broadcasting and the
-    #         generalized set of broadcasting rules.
+        See #ak.broadcast_arrays for details about broadcasting and the
+        generalized set of broadcasting rules.
 
-    #         Third party libraries can create ufuncs, not just NumPy, so any library
-    #         that "plays well" with the NumPy ecosystem can be used with Awkward
-    #         Arrays:
+        Third party libraries can create ufuncs, not just NumPy, so any library
+        that "plays well" with the NumPy ecosystem can be used with Awkward
+        Arrays:
 
-    #             >>> import numba as nb
-    #             >>> @nb.vectorize([nb.float64(nb.float64)])
-    #             ... def sqr(x):
-    #             ...     return x * x
-    #             ...
-    #             >>> print(sqr(array))
-    #             [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
+            >>> import numba as nb
+            >>> @nb.vectorize([nb.float64(nb.float64)])
+            ... def sqr(x):
+            ...     return x * x
+            ...
+            >>> print(sqr(array))
+            [[{x: 0, y: []}, {x: 1.21, y: [1]}], [], [{x: 4.84, y: [4, 4]}]]
 
-    #         See also #__array_function__.
-    #         """
-    #         if not hasattr(self, "_tracers"):
-    #             return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
-    #         else:
-    #             return ak._v2._connect.jax.jax_utils.array_ufunc(
-    #                 self, ufunc, method, inputs, kwargs
-    #             )
+        See also #__array_function__.
+        """
+        return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     #     def __array_function__(self, func, types, args, kwargs):
     #         """
@@ -1989,21 +1984,21 @@ class Record(NDArrayOperatorsMixin):
         else:
             stream.write(out + "\n")
 
-    #     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-    #         """
-    #         Intercepts attempts to pass this Record to a NumPy
-    #         [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
-    #         (ufuncs) and passes it through the Record's structure.
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """
+        Intercepts attempts to pass this Record to a NumPy
+        [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
+        (ufuncs) and passes it through the Record's structure.
 
-    #         This method conforms to NumPy's
-    #         [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html)
-    #         for overriding ufuncs, which has been
-    #         [available since NumPy 1.13](https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added)
-    #         (and thus NumPy 1.13 is the minimum allowed version).
+        This method conforms to NumPy's
+        [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html)
+        for overriding ufuncs, which has been
+        [available since NumPy 1.13](https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added)
+        (and thus NumPy 1.13 is the minimum allowed version).
 
-    #         See #ak.Array.__array_ufunc__ for a more complete description.
-    #         """
-    #         return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        See #ak.Array.__array_ufunc__ for a more complete description.
+        """
+        return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     #     @property
     #     def numba_type(self):

@@ -119,6 +119,22 @@ class RegularArray(Content):
     def toRegularArray(self):
         return self
 
+    def maybe_toNumpyArray(self):
+        content = None
+        if isinstance(self._content, ak._v2.contents.NumpyArray):
+            content = self._content
+        elif isinstance(self._content, RegularArray):
+            content = self._content.maybe_toNumpyArray()
+
+        if isinstance(content, ak._v2.contents.NumpyArray):
+            shape = (self._length, self._size) + content.data.shape[1:]
+            return ak._v2.contents.NumpyArray(
+                content.data.reshape(shape),
+                None,
+                ak._v2._util.merge_parameters(self._parameters, content.parameters),
+                content.nplike,
+            )
+
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 

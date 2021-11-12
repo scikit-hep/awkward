@@ -43,7 +43,9 @@ class ArrayType(object):
         if isinstance(other, ArrayType):
             return (
                 self._length == other._length
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:
