@@ -8,9 +8,6 @@ import awkward as ak  # noqa: F401
 
 import datetime
 
-if not ak._util.py27 and ak._v2._util.numpy_at_least("1.14"):
-    import numpy.core._exceptions as np_exception
-
 from awkward._v2.tmp_for_testing import v1_to_v2
 
 pytestmark = pytest.mark.skipif(
@@ -693,31 +690,23 @@ def test_more():
     assert ak.sum(akarray[1:] - akarray[:-1], axis=0) == [np.timedelta64(60, "m")]
 
 
-@pytest.mark.skipif(
-    not ak._v2._util.numpy_at_least("1.14"),
-    reason="NumPy >= 1.14 required for exceptions",
-)
 def test_ufunc_sum():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
     )
     akarray = ak._v2.highlevel.Array(nparray)
 
-    with pytest.raises(np.core._exceptions.UFuncTypeError):
+    with pytest.raises(TypeError):
         akarray[1:] + akarray[:-1]
 
 
-@pytest.mark.skipif(
-    not ak._v2._util.numpy_at_least("1.14"),
-    reason="NumPy >= 1.14 required for exceptions",
-)
 def test_ufunc_mul():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
     )
     akarray = ak._v2.highlevel.Array(nparray)
 
-    with pytest.raises(np_exception._UFuncBinaryResolutionError):
+    with pytest.raises(TypeError):
         akarray * 2
 
     assert ak._v2.highlevel.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
