@@ -2147,9 +2147,7 @@ class ArrayBuilder(Sized):
        * #end_record: ends a record.
        * #append: generic method for filling #null, #boolean, #integer, #real,
          #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
-         When filling from #ak.Array or #ak.Record, the output holds references
-         to the original data, rather than copying.
-       * #extend: appends all the items from an #ak.Array (by reference).
+       * #extend: appends all the items from an iterable.
        * #list: context manager for #begin_list and #end_list.
        * #tuple: context manager for #begin_tuple and #end_tuple.
        * #record: context manager for #begin_record and #end_record.
@@ -2259,8 +2257,9 @@ class ArrayBuilder(Sized):
         The type of a #ak.layout.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
+        form = ak._v2.forms.from_json(self._layout.form())
         return ak._v2.types.ArrayType(
-            self._layout.form.type_from_behavior(self._behavior), len(self._layout)
+            form.type_from_behavior(self._behavior), len(self._layout)
         )
 
     @property
@@ -2354,11 +2353,11 @@ class ArrayBuilder(Sized):
         """
         Converts the currently accumulated data into an #ak.Array.
 
-        The currently accumulated data are *copied* into the new array (using a
-        fast memory-copy).
+        The currently accumulated data are *copied* into the new array.
         """
-        layout = self._layout.snapshot()
-        return ak._v2._util.wrap(layout, self._behavior)
+        formstr, length, container = self._layout.to_buffers()
+        form = ak._v2.forms.from_json(formstr)
+        return ak._v2.operations.convert.from_buffers(form, length, container)
 
     def null(self):
         """
