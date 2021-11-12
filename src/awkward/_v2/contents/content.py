@@ -1015,9 +1015,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     @property
     def nbytes(self):
-        largest = {0: 0}
-        self._nbytes_part(largest)
-        return sum(largest.values())
+        return self._nbytes_part()
 
     def purelist_parameter(self, key):
         return self.Form.purelist_parameter(self, key)

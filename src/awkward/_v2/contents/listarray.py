@@ -985,12 +985,13 @@ class ListArray(Content):
             else:
                 return self._content.validityerror(path + ".content")
 
-    def _nbytes_part(self, largest):
-        self.starts._nbytes_part(largest)
-        self.stops._nbytes_part(largest)
-        self.content._nbytes_part(largest)
+    def _nbytes_part(self):
+        result = self.starts._nbytes_part()
+        result = result + self.stops._nbytes_part()
+        result = result + self.content._nbytes_part()
         if self.identifier is not None:
-            self.identifier._nbytes_part(largest)
+            result = result + self.identifier._nbytes_part()
+        return result
 
     def _rpad(self, target, axis, depth, clip):
         if not clip:

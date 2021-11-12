@@ -213,9 +213,10 @@ class EmptyArray(Content):
     def _validityerror(self, path):
         return ""
 
-    def _nbytes_part(self, largest):
+    def _nbytes_part(self):
         if self.identifier is not None:
-            self.identifier._nbytes_part(largest)
+            return self.identifier._nbytes_part()
+        return 0
 
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)

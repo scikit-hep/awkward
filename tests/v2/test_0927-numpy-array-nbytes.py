@@ -28,12 +28,10 @@ def test_NumpyArray_nbytes():
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
 
-    largest = {0: 0}
-    identifier._nbytes_part(largest)
-    assert sum(largest.values()) == 8 * 5 * 10
+    assert identifier._nbytes_part() == np.dtype(np.int64).itemsize * 5 * 10
 
     array = ak._v2.contents.numpyarray.NumpyArray(np_data, identifier)
-    assert array.nbytes == np_data.nbytes + 8 * 5 * 10
+    assert array.nbytes == np_data.nbytes + np.dtype(np.int64).itemsize * 5 * 10
 
 
 def test_ByteMaskedArray_nbytes():
@@ -49,7 +47,6 @@ def test_ByteMaskedArray_nbytes():
     )
     mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
     v1_array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-    assert v1_array.nbytes == 221
     v2_array = v1_to_v2(v1_array)
 
     assert v2_array.nbytes == v1_array.nbytes
@@ -85,10 +82,10 @@ def test_BitMaskedArray_nbytes():
         lsb_order=False,
     )
 
-    assert np_array.nbytes == 112
-    assert np_index.nbytes == 13
+    assert np_array.nbytes == np_array.dtype.itemsize * len(np_array)
+    assert np_index.nbytes == np_index.dtype.itemsize * len(np_index)
     assert np.packbits(np_index).nbytes == 2
-    assert array.nbytes == 114
+    assert array.nbytes == np_array.nbytes + np.packbits(np_index).nbytes
 
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
@@ -104,7 +101,12 @@ def test_BitMaskedArray_nbytes():
         lsb_order=False,
         identifier=identifier,
     )
-    assert array.nbytes == 514
+    assert (
+        array.nbytes
+        == np_array.nbytes
+        + np.packbits(np_index).nbytes
+        + 2 * np.dtype(np.int64).itemsize * 5 * 10
+    )
 
 
 def test_EmptyArray_nbytes():
@@ -114,124 +116,148 @@ def test_EmptyArray_nbytes():
     array = ak._v2.contents.emptyarray.EmptyArray(
         identifier=identifier,
     )
-    assert array.nbytes == 400
+    assert array.nbytes == np.dtype(np.int64).itemsize * 5 * 10
 
 
 def test_IndexedArray_nbytes():
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
+    np_index = np.array([2, 2, 0, 1, 4, 5, 4])
+    np_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
     array = ak._v2.contents.indexedarray.IndexedArray(  # noqa: F841
-        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        ak._v2.index.Index(np_index),
+        ak._v2.contents.numpyarray.NumpyArray(np_content),
         identifier=identifier,
     )
-    assert array.nbytes == 504
+    assert (
+        array.nbytes
+        == np_index.nbytes + np_content.nbytes + np.dtype(np.int64).itemsize * 5 * 10
+    )
 
 
 def test_IndexedOptionArray_nbytes():
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
+    np_index = np.array([2, 2, -1, 1, -1, 5, 4])
+    np_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
     array = ak._v2.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
-        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        ak._v2.index.Index(np_index),
+        ak._v2.contents.numpyarray.NumpyArray(np_content),
         identifier=identifier,
     )
-    assert array.nbytes == 504
+    assert (
+        array.nbytes
+        == np_index.nbytes + np_content.nbytes + np.dtype(np.int64).itemsize * 5 * 10
+    )
 
 
 def test_ListArray_nbytes():
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
+    np_starts = np.array([4, 100, 1])
+    np_stops = np.array([7, 100, 3, 200])
+    np_content = np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8])
     array = ak._v2.contents.listarray.ListArray(  # noqa: F841
-        ak._v2.index.Index(np.array([4, 100, 1])),
-        ak._v2.index.Index(np.array([7, 100, 3, 200])),
-        ak._v2.contents.numpyarray.NumpyArray(
-            np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8])
-        ),
+        ak._v2.index.Index(np_starts),
+        ak._v2.index.Index(np_stops),
+        ak._v2.contents.numpyarray.NumpyArray(np_content),
         identifier=identifier,
     )
-    assert array.nbytes == 520
+    assert (
+        array.nbytes
+        == np_starts.nbytes
+        + np_stops.nbytes
+        + np_content.nbytes
+        + np.dtype(np.int64).itemsize * 5 * 10
+    )
 
 
 def test_ListOffsetArray_nbytes():
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
+    np_offsets = np.array([7, 10, 10, 200])
+    np_content = np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8])
     array = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index(np.array([7, 10, 10, 200])),
-        ak._v2.contents.numpyarray.NumpyArray(
-            np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8])
-        ),
+        ak._v2.index.Index(np_offsets),
+        ak._v2.contents.numpyarray.NumpyArray(np_content),
         identifier=identifier,
     )
-    assert array.nbytes == 496
+    assert (
+        array.nbytes
+        == np_offsets.nbytes + np_content.nbytes + np.dtype(np.int64).itemsize * 5 * 10
+    )
 
 
 def test_RecordArray_nbytes():
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
+    np_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
     array = ak._v2.contents.recordarray.RecordArray(
-        [
-            ak._v2.contents.numpyarray.NumpyArray(
-                np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-            )
-        ],
+        [ak._v2.contents.numpyarray.NumpyArray(np_content)],
         ["nest"],
         identifier=identifier,
     )
-    assert array.nbytes == 448
+    assert array.nbytes == np_content.nbytes + np.dtype(np.int64).itemsize * 5 * 10
 
 
 def test_RegularArray_nbytes():
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
+    np_content = np.array([0.0, 1.1, 2.2, 33.33, 4.4, 5.5, -6.6])
     array = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
         ak._v2.contents.recordarray.RecordArray(
-            [
-                ak._v2.contents.numpyarray.NumpyArray(
-                    np.array([0.0, 1.1, 2.2, 33.33, 4.4, 5.5, -6.6])
-                )
-            ],
+            [ak._v2.contents.numpyarray.NumpyArray(np_content)],
             ["nest"],
         ),
         3,
         identifier=identifier,
     )
-    assert array.nbytes == 456
+    assert array.nbytes == np_content.nbytes + np.dtype(np.int64).itemsize * 5 * 10
 
 
 def test_UnionArray_nbytes():
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
+    np_tags = np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)
+    np_index = np.array([4, 3, 0, 1, 2, 2, 4, 100])
+    np_content1 = np.array([1, 2, 3])
+    np_content2 = np.array([1.1, 2.2, 3.3, 4.4, 5.5])
     array = ak._v2.contents.unionarray.UnionArray(
-        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
-        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+        ak._v2.index.Index(np_tags),
+        ak._v2.index.Index(np_index),
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3])),
-            ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+            ak._v2.contents.numpyarray.NumpyArray(np_content1),
+            ak._v2.contents.numpyarray.NumpyArray(np_content2),
         ],
         identifier=identifier,
     )
-    assert array.nbytes == 440
+    assert (
+        array.nbytes
+        == np_tags.nbytes
+        + np_index.nbytes
+        + np_content1.nbytes
+        + np_content2.nbytes
+        + np.dtype(np.int64).itemsize * 5 * 10
+    )
 
 
 def test_UnmaskedArray_nbytes():
     identifier = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
+    np_content = np.array([0.0, 2.2, 1.1, 3.3], dtype=np.float64)
     array = ak._v2.contents.unmaskedarray.UnmaskedArray(
-        ak._v2.contents.numpyarray.NumpyArray(
-            np.array([0.0, 2.2, 1.1, 3.3], dtype=np.float64)
-        ),
+        ak._v2.contents.numpyarray.NumpyArray(np_content),
         identifier=identifier,
     )
-    assert array.nbytes == 432
+    assert array.nbytes == np_content.nbytes + np.dtype(np.int64).itemsize * 5 * 10
 
 
 def test_highlevel():
