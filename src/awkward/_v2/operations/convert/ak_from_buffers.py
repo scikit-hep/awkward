@@ -61,7 +61,7 @@ def from_buffers(
     See #ak.to_buffers for examples.
     """
     if ak._v2._util.isstr(form):
-        if form in ak._v2.types.numpytype._primitive_to_dtype:
+        if ak._v2.types.numpytype.is_primitive(form):
             form = ak._v2.forms.NumpyForm(form)
         else:
             form = ak._v2.forms.from_json(form)
@@ -120,7 +120,7 @@ def reconstitute(form, length, container, getkey, nplike):
         return ak._v2.contents.EmptyArray(identifier, form.parameters)
 
     elif isinstance(form, ak._v2.forms.NumpyForm):
-        dtype = ak._v2.types.numpytype._primitive_to_dtype[form.primitive]
+        dtype = ak._v2.types.numpytype.primitive_to_dtype(form.primitive)
         raw_array = container[getkey(form, "data")]
         real_length = length
         for x in form.inner_shape:

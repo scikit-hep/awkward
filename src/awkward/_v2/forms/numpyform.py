@@ -33,17 +33,8 @@ def from_dtype(dtype, parameters=None):
             parameters["__unit__"] = unitstr
             dtype = np.dtype(dtype.type)
 
-    primitive = ak._v2.types.numpytype._dtype_to_primitive.get(dtype)
-    if primitive is None:
-        raise TypeError(
-            "dtype {0} is not supported; must be one of {1}".format(
-                repr(dtype),
-                ", ".join(repr(x) for x in ak._v2.types.numpytype._dtype_to_primitive),
-            )
-        )
-
     return NumpyForm(
-        primitive=primitive,
+        primitive=ak._v2.types.numpytype.dtype_to_primitive(dtype),
         parameters=parameters,
         inner_shape=inner_shape,
     )
@@ -58,16 +49,9 @@ class NumpyForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if primitive not in ak._v2.types.numpytype._primitive_to_dtype:
-            raise TypeError(
-                "{0} 'primitive' must be one of {1}, not {2}".format(
-                    type(self).__name__,
-                    ", ".join(
-                        repr(x) for x in ak._v2.types.numpytype._primitive_to_dtype
-                    ),
-                    repr(primitive),
-                )
-            )
+        primitive = ak._v2.types.numpytype.dtype_to_primitive(
+            ak._v2.types.numpytype.primitive_to_dtype(primitive)
+        )
         if not isinstance(inner_shape, Iterable):
             raise TypeError(
                 "{0} 'inner_shape' must be iterable, not {1}".format(
@@ -89,7 +73,7 @@ class NumpyForm(Form):
 
     @property
     def itemsize(self):
-        return ak._v2.types.numpytype._primitive_to_dtype[self._primitive].itemsize
+        return ak._v2.types.numpytype.primitive_to_dtype(self._primitive).itemsize
 
     def __repr__(self):
         args = [repr(self._primitive)]
@@ -147,8 +131,8 @@ class NumpyForm(Form):
 
         elif isinstance(other, NumpyForm):
             return (
-                ak._v2.types.numpytype._primitive_to_dtype[self._primitive]
-                == ak._v2.types.numpytype._primitive_to_dtype[other._primitive]
+                ak._v2.types.numpytype.primitive_to_dtype(self._primitive)
+                == ak._v2.types.numpytype.primitive_to_dtype(other._primitive)
                 and self._inner_shape == other._inner_shape
                 and _parameters_equal(self._parameters, other._parameters)
             )
