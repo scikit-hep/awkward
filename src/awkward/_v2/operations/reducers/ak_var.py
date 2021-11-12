@@ -8,7 +8,15 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 # @ak._v2._connect.numpy.implements("var")
-def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
+def var(
+    x,
+    weight=None,
+    ddof=0,
+    axis=None,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
+):
     raise NotImplementedError
 
 
@@ -35,6 +43,8 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
 #             empty lists results in None (an option type); otherwise, the
 #             calculation is followed through with the reducers' identities,
 #             usually resulting in floating-point `nan`.
+#         flatten_records (bool): If True, axis=None combines fields from different
+#             records; otherwise, records raise an error.
 
 #     Computes the variance in each group of elements from `x` (many
 #     types supported, including all Awkward Arrays and Records). The grouping

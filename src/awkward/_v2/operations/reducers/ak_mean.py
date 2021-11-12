@@ -8,7 +8,9 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 # @ak._v2._connect.numpy.implements("mean")
-def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
+def mean(
+    x, weight=None, axis=None, keepdims=False, mask_identity=True, flatten_records=False
+):
     raise NotImplementedError
 
 
@@ -32,6 +34,8 @@ def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
 #             empty lists results in None (an option type); otherwise, the
 #             calculation is followed through with the reducers' identities,
 #             usually resulting in floating-point `nan`.
+#         flatten_records (bool): If True, axis=None combines fields from different
+#             records; otherwise, records raise an error.
 
 #     Computes the mean in each group of elements from `x` (many
 #     types supported, including all Awkward Arrays and Records). The grouping

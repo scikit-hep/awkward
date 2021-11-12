@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 # @ak._v2._connect.numpy.implements("argmin")
-def argmin(array, axis=None, keepdims=False, mask_identity=True):
+def argmin(array, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -24,6 +24,8 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
+        flatten_records (bool): If True, axis=None combines fields from different
+            records; otherwise, records raise an error.
 
     Returns the index position of the minimum value in each group of elements
     from `array` (many types supported, including all Awkward Arrays and
@@ -47,28 +49,13 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
     )
 
     if axis is None:
-        if isinstance(layout, ak.partition.PartitionedArray):  # NO PARTITIONED ARRAY
-            start = 0
-            best_index = None
-            best_value = None
-            for partition in layout.partitions:
-                for tmp in ak._v2._util.completely_flatten(partition):
-                    out = ak.nplike.of(tmp).argmin(tmp, axis=None)
-                    if best_index is None or tmp[out] < best_value:
-                        best_index = start + out
-                        best_value = tmp[out]
-                start += len(partition)
-            return best_index
-
+        flat = layout.completely_flatten(
+            function_name="ak.argmin", flatten_records=flatten_records
+        )
+        if len(flat) == 0:
+            return None
         else:
-            best_index = None
-            best_value = None
-            for tmp in ak._v2._util.completely_flatten(layout):
-                out = ak.nplike.of(tmp).argmin(tmp, axis=None)
-                if best_index is None or tmp[out] < best_value:
-                    best_index = out
-                    best_value = tmp[out]
-            return best_index
+            return layout.nplike.argmin(flat)
 
     else:
         behavior = ak._v2._util.behavior_of(array)

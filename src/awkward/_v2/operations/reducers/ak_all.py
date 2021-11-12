@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 # @ak._v2._connect.numpy.implements("all")
-def all(array, axis=None, keepdims=False, mask_identity=False):
+def all(array, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -24,6 +24,8 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
+        flatten_records (bool): If True, axis=None combines fields from different
+            records; otherwise, records raise an error.
 
     Returns True in each group of elements from `array` (many types supported,
     including all Awkward Arrays and Records) if all values are True; False
@@ -40,17 +42,14 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
+
     if axis is None:
-
-        def reduce(xs):
-            if len(xs) == 1:
-                return xs[0]
-            else:
-                return xs[0] and reduce(xs[1:])
-
-        return reduce(
-            [ak.nplike.of(x).all(x) for x in ak._v2._util.completely_flatten(layout)]
+        return layout.nplike.all(
+            layout.completely_flatten(
+                function_name="ak.all", flatten_records=flatten_records
+            )
         )
+
     else:
         behavior = ak._v2._util.behavior_of(array)
         return ak._v2._util.wrap(

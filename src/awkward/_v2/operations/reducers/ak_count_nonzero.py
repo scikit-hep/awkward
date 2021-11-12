@@ -8,7 +8,9 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 # @ak._v2._connect.numpy.implements("count_nonzero")
-def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
+def count_nonzero(
+    array, axis=None, keepdims=False, mask_identity=False, flatten_records=False
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -24,6 +26,8 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
+        flatten_records (bool): If True, axis=None combines fields from different
+            records; otherwise, records raise an error.
 
     Counts nonzero elements of `array` (many types supported, including all
     Awkward Arrays and Records). The identity of counting is `0` and it is
@@ -42,20 +46,14 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
+
     if axis is None:
-
-        def reduce(xs):
-            if len(xs) == 1:
-                return xs[0]
-            else:
-                return xs[0] + reduce(xs[1:])
-
-        return reduce(
-            [
-                ak.nplike.of(x).count_nonzero(x)
-                for x in ak._v2._util.completely_flatten(layout)
-            ]
+        return layout.nplike.count_nonzero(
+            layout.completely_flatten(
+                function_name="ak.count_nonzero", flatten_records=flatten_records
+            )
         )
+
     else:
         behavior = ak._v2._util.behavior_of(array)
         return ak._v2._util.wrap(

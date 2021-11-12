@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 # @ak._v2._connect.numpy.implements("ptp")
-def ptp(arr, axis=None, keepdims=False, mask_identity=True):
+def ptp(arr, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
     raise NotImplementedError
 
 
@@ -27,6 +27,8 @@ def ptp(arr, axis=None, keepdims=False, mask_identity=True):
 #         mask_identity (bool): If True, reducing over empty lists results in
 #             None (an option type); otherwise, reducing over empty lists
 #             results in the operation's identity of 0.
+#         flatten_records (bool): If True, axis=None combines fields from different
+#             records; otherwise, records raise an error.
 
 #     Returns the range of values in each group of elements from `array` (many
 #     types supported, including all Awkward Arrays and Records). The range of

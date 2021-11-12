@@ -8,7 +8,14 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 # @ak._v2._connect.numpy.implements("min")
-def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
+def min(
+    array,
+    axis=None,
+    keepdims=False,
+    initial=None,
+    mask_identity=True,
+    flatten_records=False,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -28,6 +35,8 @@ def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
+        flatten_records (bool): If True, axis=None combines fields from different
+            records; otherwise, records raise an error.
 
     Returns the minimum value in each group of elements from `array` (many
     types supported, including all Awkward Arrays and Records). The identity
@@ -45,19 +54,16 @@ def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
+
     if axis is None:
+        flat = layout.completely_flatten(
+            function_name="ak.min", flatten_records=flatten_records
+        )
+        if len(flat) == 0:
+            return None if mask_identity else np.iinfo(flat.dtype.type).max
+        else:
+            return layout.nplike.min(flat)
 
-        def reduce(xs):
-            if len(xs) == 0:
-                return None
-            elif len(xs) == 1:
-                return xs[0]
-            else:
-                x, y = xs[0], reduce(xs[1:])
-                return x if x < y else y
-
-        tmp = ak._v2._util.completely_flatten(layout)
-        return reduce([ak.nplike.of(x).min(x) for x in tmp if len(x) > 0])
     else:
         behavior = ak._v2._util.behavior_of(array)
         return ak._v2._util.wrap(
