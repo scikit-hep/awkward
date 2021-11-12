@@ -1377,8 +1377,7 @@ class IndexedOptionArray(Content):
             return self._content.validityerror(path + ".content")
 
     def _nbytes_part(self):
-        result = self.index._nbytes_part()
-        result = result + self.content._nbytes_part()
+        result = self.index._nbytes_part() + self.content._nbytes_part()
         if self.identifier is not None:
             result = result + self.identifier._nbytes_part()
         return result

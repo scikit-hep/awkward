@@ -986,9 +986,11 @@ class ListArray(Content):
                 return self._content.validityerror(path + ".content")
 
     def _nbytes_part(self):
-        result = self.starts._nbytes_part()
-        result = result + self.stops._nbytes_part()
-        result = result + self.content._nbytes_part()
+        result = (
+            self.starts._nbytes_part()
+            + self.stops._nbytes_part()
+            + self.content._nbytes_part()
+        )
         if self.identifier is not None:
             result = result + self.identifier._nbytes_part()
         return result

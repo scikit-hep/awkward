@@ -811,8 +811,7 @@ class UnionArray(Content):
             return ""
 
     def _nbytes_part(self):
-        result = self.tags._nbytes_part()
-        result = result + self.index._nbytes_part()
+        result = self.tags._nbytes_part() + self.index._nbytes_part()
         for content in self.contents:
             result = result + content._nbytes_part()
         if self.identifier is not None:
