@@ -172,9 +172,9 @@ def test_highlevel_timedelta64_ArrayBuilder():
 
 
 @pytest.mark.skip(
-    reason="awkward/_v2/operations/reducers/ak_count.py:11: NotImplementedError."
+    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
 )
-def test_count():
+def test_count_axis_None():
     array = ak.Array(
         [
             [
@@ -189,6 +189,22 @@ def test_count():
         check_valid=True,
     )
     assert ak._v2.operations.reducers.count(array) == 9
+
+
+def test_count():
+    array = ak.Array(
+        [
+            [
+                [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
+                [],
+                [np.datetime64("2027"), np.datetime64("2011")],
+                [np.datetime64("2013")],
+            ],
+            [],
+            [[np.datetime64("2017"), np.datetime64("2019")], [np.datetime64("2023")]],
+        ],
+        check_valid=True,
+    )
     assert ak.to_list(ak._v2.operations.reducers.count(array, axis=-1)) == [
         [3, 0, 2, 1],
         [],
@@ -226,8 +242,25 @@ def test_count():
 
 
 @pytest.mark.skip(
-    reason="awkward/_v2/operations/reducers/ak_count_nonzero.py:12: NotImplementedError."
+    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
 )
+def test_count_nonzeroaxis_None():
+    array = ak.Array(
+        [
+            [
+                [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
+                [],
+                [np.datetime64("2027"), np.datetime64("2011")],
+                [np.datetime64("2013")],
+            ],
+            [],
+            [[np.datetime64("2017"), np.datetime64("2019")], [np.datetime64("2023")]],
+        ],
+        check_valid=True,
+    )
+    assert ak._v2.operations.reducers.count_nonzero(array) == 9
+
+
 def test_count_nonzero():
     array = ak.Array(
         [
@@ -242,8 +275,6 @@ def test_count_nonzero():
         ],
         check_valid=True,
     )
-
-    assert ak._v2.operations.reducers.count_nonzero(array) == 9
     assert ak.to_list(ak._v2.operations.reducers.count_nonzero(array, axis=-1)) == [
         [3, 0, 2, 1],
         [],
@@ -254,6 +285,22 @@ def test_count_nonzero():
         [],
         [2, 1],
     ]
+
+
+def test_all_nonzero():
+    array = ak.Array(
+        [
+            [
+                [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
+                [],
+                [np.datetime64("2027"), np.datetime64("2011")],
+                [np.datetime64("2013")],
+            ],
+            [],
+            [[np.datetime64("2017"), np.datetime64("2019")], [np.datetime64("2023")]],
+        ],
+        check_valid=True,
+    )
 
     assert ak.to_list(ak._v2.operations.reducers.all(array, axis=-1)) == [
         [True, True, True, True],
@@ -268,9 +315,9 @@ def test_count_nonzero():
 
 
 @pytest.mark.skip(
-    reason="awkward/_v2/operations/reducers/ak_argmin.py:12: NotImplementedError"
+    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
 )
-def test_argmin_argmax():
+def test_argmin_argmax_axis_None():
     array = ak.Array(
         [
             [
@@ -286,6 +333,22 @@ def test_argmin_argmax():
     )
     assert ak._v2.operations.reducers.argmin(array) == 4
     assert ak._v2.operations.reducers.argmax(array) == 3
+
+
+def test_argmin_argmax():
+    array = ak.Array(
+        [
+            [
+                [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
+                [],
+                [np.datetime64("2027"), np.datetime64("2011")],
+                [np.datetime64("2013")],
+            ],
+            [],
+            [[np.datetime64("2017"), np.datetime64("2019")], [np.datetime64("2023")]],
+        ],
+        check_valid=True,
+    )
     assert ak.to_list(ak._v2.operations.reducers.argmin(array, axis=0)) == [
         [1, 1, 0],
         [1],
@@ -330,7 +393,7 @@ def test_argmin_argmax():
         ],
         highlevel=False,
     )
-    assert ak.to_list(array._v2.operations.reducers.argmin(axis=2)) == [
+    assert ak.to_list(array.argmin(axis=2)) == [
         [1],
         [None],
         [None, None, None],
@@ -338,9 +401,6 @@ def test_argmin_argmax():
     ]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/reducers/ak_any.py:12: NotImplementedError"
-)
 def test_any_all():
     array = ak.Array(
         [
@@ -368,9 +428,6 @@ def test_any_all():
     ]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/reducers/ak_prod.py:12: NotImplementedError"
-)
 def test_prod():
     array = ak.Array(
         np.array(["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]")
@@ -441,8 +498,55 @@ def test_min_max():
 
 
 @pytest.mark.skip(
-    reason="awkward/_v2/operations/reducers/ak_min.py:12: NotImplementedError"
+    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
 )
+def test_highlevel_min_max_axis_None():
+    array = ak.Array(
+        [
+            [
+                np.datetime64("2020-03-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-05"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-04-27T10:41:11"),
+            ],
+            [
+                np.datetime64("2020-04-27"),
+                np.datetime64("2020-02-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+                np.datetime64("2020-06-27T10:41:11"),
+            ],
+            [
+                np.datetime64("2020-02-27T10:41:11"),
+                np.datetime64("2020-03-27T10:41:11"),
+                np.datetime64("2020-01-27T10:41:11"),
+            ],
+        ]
+    )
+    assert ak.to_list(array) == [
+        [
+            np.datetime64("2020-03-27T10:41:11"),
+            np.datetime64("2020-01-27T10:41:11"),
+            np.datetime64("2020-05"),
+            np.datetime64("2020-01-27T10:41:11"),
+            np.datetime64("2020-04-27T10:41:11"),
+        ],
+        [
+            np.datetime64("2020-04-27"),
+            np.datetime64("2020-02-27T10:41:11"),
+            np.datetime64("2020-01-27T10:41:11"),
+            np.datetime64("2020-06-27T10:41:11"),
+        ],
+        [
+            np.datetime64("2020-02-27T10:41:11"),
+            np.datetime64("2020-03-27T10:41:11"),
+            np.datetime64("2020-01-27T10:41:11"),
+        ],
+    ]
+    assert ak._v2.operations.reducers.min(array) == np.datetime64("2020-01-27T10:41:11")
+    assert ak._v2.operations.reducers.max(array) == np.datetime64("2020-06-27T10:41:11")
+
+
 def test_highlevel_min_max():
     array = ak.Array(
         [
@@ -470,12 +574,12 @@ def test_highlevel_min_max():
         [
             np.datetime64("2020-03-27T10:41:11"),
             np.datetime64("2020-01-27T10:41:11"),
-            np.datetime64("2020-05-01T20:56:24"),
+            np.datetime64("2020-05"),
             np.datetime64("2020-01-27T10:41:11"),
             np.datetime64("2020-04-27T10:41:11"),
         ],
         [
-            np.datetime64("2020-04-27T00:00:00"),
+            np.datetime64("2020-04-27"),
             np.datetime64("2020-02-27T10:41:11"),
             np.datetime64("2020-01-27T10:41:11"),
             np.datetime64("2020-06-27T10:41:11"),
@@ -486,8 +590,6 @@ def test_highlevel_min_max():
             np.datetime64("2020-01-27T10:41:11"),
         ],
     ]
-    assert ak._v2.operations.reducers.min(array) == np.datetime64("2020-01-27T10:41:11")
-    assert ak._v2.operations.reducers.max(array) == np.datetime64("2020-06-27T10:41:11")
     assert ak.to_list(ak._v2.operations.reducers.min(array, axis=0)) == [
         np.datetime64("2020-02-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
@@ -496,11 +598,11 @@ def test_highlevel_min_max():
         np.datetime64("2020-04-27T10:41:11"),
     ]
     assert ak.to_list(ak._v2.operations.reducers.max(array, axis=0)) == [
-        np.datetime64("2020-04-27T00:00:00"),
-        np.datetime64("2020-03-27T10:41:11"),
-        np.datetime64("2020-05-01T20:56:24"),
-        np.datetime64("2020-06-27T10:41:11"),
-        np.datetime64("2020-04-27T10:41:11"),
+        datetime.datetime(2020, 4, 27, 0, 0),
+        datetime.datetime(2020, 3, 27, 10, 41, 11),
+        datetime.datetime(2020, 5, 1, 0, 0),
+        datetime.datetime(2020, 6, 27, 10, 41, 11),
+        datetime.datetime(2020, 4, 27, 10, 41, 11),
     ]
     assert ak.to_list(ak._v2.operations.reducers.min(array, axis=1)) == [
         np.datetime64("2020-01-27T10:41:11"),
@@ -508,9 +610,9 @@ def test_highlevel_min_max():
         np.datetime64("2020-01-27T10:41:11"),
     ]
     assert ak.to_list(ak._v2.operations.reducers.max(array, axis=1)) == [
-        np.datetime64("2020-05-01T20:56:24"),
-        np.datetime64("2020-06-27T10:41:11"),
-        np.datetime64("2020-03-27T10:41:11"),
+        datetime.datetime(2020, 5, 1, 0, 0),
+        datetime.datetime(2020, 6, 27, 10, 41, 11),
+        datetime.datetime(2020, 3, 27, 10, 41, 11),
     ]
 
 

@@ -44,6 +44,14 @@ class ArgMin(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
+        dtype = (
+            np.dtype(np.int64)
+            if (
+                str(array.form.type).startswith("datetime64")
+                or str(array.form.type).startswith("timedelta64")
+            )
+            else array.dtype
+        )
         result = ak._v2.index.Index64.empty(
             outlength, array.nplike, dtype=cls.preferred_dtype
         )
@@ -51,7 +59,7 @@ class ArgMin(Reducer):
             array.nplike[
                 "awkward_reduce_argmin",
                 result.dtype.type,
-                array.data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
                 result.to(array.nplike),
@@ -72,6 +80,14 @@ class ArgMax(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
+        dtype = (
+            np.dtype(np.int64)
+            if (
+                str(array.form.type).startswith("datetime64")
+                or str(array.form.type).startswith("timedelta64")
+            )
+            else array.dtype
+        )
         result = ak._v2.index.Index64.empty(
             outlength, array.nplike, dtype=cls.preferred_dtype
         )
@@ -79,7 +95,7 @@ class ArgMax(Reducer):
             array.nplike[
                 "awkward_reduce_argmax",
                 result.dtype.type,
-                array._data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
                 result.to(array.nplike),
@@ -118,12 +134,20 @@ class CountNonzero(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
+        dtype = (
+            np.dtype(np.int64)
+            if (
+                str(array.form.type).startswith("datetime64")
+                or str(array.form.type).startswith("timedelta64")
+            )
+            else array.dtype
+        )
         result = ak._v2.index.Index64.empty(outlength, array.nplike)
         array._handle_error(
             array.nplike[
                 "awkward_reduce_countnonzero",
                 result.dtype.type,
-                array._data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
                 result.to(array.nplike),
@@ -219,6 +243,10 @@ class Prod(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
+        if str(array.form.type).startswith("datetime64") or str(
+            array.form.type
+        ).startswith("timedelta64"):
+            raise ValueError
         result = ak._v2.contents.NumpyArray(
             array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
         )
@@ -261,6 +289,14 @@ class Any(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
+        dtype = (
+            np.dtype(np.int64)
+            if (
+                str(array.form.type).startswith("datetime64")
+                or str(array.form.type).startswith("timedelta64")
+            )
+            else array.dtype
+        )
         result = ak._v2.contents.NumpyArray(
             array.nplike.empty(outlength, dtype=cls.preferred_dtype)
         )
@@ -268,7 +304,7 @@ class Any(Reducer):
             array.nplike[
                 "awkward_reduce_sum_bool",
                 result.dtype.type,
-                array._data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
                 result._data,
@@ -287,6 +323,14 @@ class All(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
+        dtype = (
+            np.dtype(np.int64)
+            if (
+                str(array.form.type).startswith("datetime64")
+                or str(array.form.type).startswith("timedelta64")
+            )
+            else array.dtype
+        )
         result = ak._v2.contents.NumpyArray(
             array.nplike.empty(outlength, dtype=cls.preferred_dtype)
         )
@@ -294,7 +338,7 @@ class All(Reducer):
             array.nplike[
                 "awkward_reduce_prod_bool",
                 result.dtype.type,
-                array._data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
                 result._data,
