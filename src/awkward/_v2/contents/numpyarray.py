@@ -19,19 +19,7 @@ class NumpyArray(Content):
         self._nplike = ak.nplike.of(data) if nplike is None else nplike
         self._data = self._nplike.asarray(data)
 
-        if (
-            self._data.dtype not in ak._v2.types.numpytype._dtype_to_primitive
-            and not issubclass(self._data.dtype.type, (np.datetime64, np.timedelta64))
-        ):
-            raise TypeError(
-                "{0} 'data' dtype {1} is not supported; must be one of {2}".format(
-                    type(self).__name__,
-                    repr(self._data.dtype),
-                    ", ".join(
-                        repr(x) for x in ak._v2.types.numpytype._dtype_to_primitive
-                    ),
-                )
-            )
+        ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
             raise TypeError(
                 "{0} 'data' must be an array, not {1}".format(
@@ -73,7 +61,7 @@ class NumpyArray(Content):
 
     def _form_with_key(self, getkey):
         return self.Form(
-            ak._v2.types.numpytype._dtype_to_primitive[self._data.dtype],
+            ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype),
             self._data.shape[1:],
             has_identifier=self._identifier is not None,
             parameters=self._parameters,
