@@ -342,34 +342,34 @@ def recordclass(layout, behavior):
     return ak._v2.highlevel.Record
 
 
-# def typestrs(behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     out = {}
-#     for key, typestr in behavior.items():
-#         if (
-#             isinstance(key, tuple)
-#             and len(key) == 2
-#             and key[0] == "__typestr__"
-#             and (isinstance(key[1], str) or (py27 and isinstance(key[1], unicode)))
-#             and (isinstance(typestr, str) or (py27 and isinstance(typestr, unicode)))
-#         ):
-#             out[key[1]] = typestr
-#     return out
+def typestrs(behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    out = {}
+    for key, typestr in behavior.items():
+        if (
+            isinstance(key, tuple)
+            and len(key) == 2
+            and key[0] == "__typestr__"
+            and isstr(key[1])
+            and isstr(typestr)
+        ):
+            out[key[1]] = typestr
+    return out
 
 
-# def gettypestr(parameters, typestrs):
-#     if parameters is not None:
-#         record = parameters.get("__record__")
-#         if record is not None:
-#             typestr = typestrs.get(record)
-#             if typestr is not None:
-#                 return typestr
-#         array = parameters.get("__array__")
-#         if array is not None:
-#             typestr = typestrs.get(array)
-#             if typestr is not None:
-#                 return typestr
-#     return None
+def gettypestr(parameters, typestrs):
+    if parameters is not None:
+        record = parameters.get("__record__")
+        if record is not None:
+            typestr = typestrs.get(record)
+            if typestr is not None:
+                return typestr
+        array = parameters.get("__array__")
+        if array is not None:
+            typestr = typestrs.get(array)
+            if typestr is not None:
+                return typestr
+    return None
 
 
 # def numba_record_typer(layouttype, behavior):
@@ -1521,225 +1521,6 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         return ak.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
 #     else:
 #         return layout.type(typestrs(behavior))
-
-
-# _is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
-
-
-# def minimally_touching_string(limit_length, layout, behavior):
-#     if isinstance(layout, ak._v2.layout.Record):
-#         layout = layout.array[layout.at : layout.at + 1]
-
-#     if len(layout) == 0:
-#         return "[]"
-
-#     def forward(x, space, brackets=True, wrap=True, stop=None):
-#         done = False
-#         if wrap and isinstance(x, ak._v2.contents.Content):
-#             cls = arrayclass(x, behavior)
-#             if cls is not ak._v2.highlevel.Array:
-#                 y = cls(x, behavior=behavior)
-#                 if "__repr__" in type(y).__dict__:
-#                     yield space + repr(y)
-#                     done = True
-#         if wrap and isinstance(x, ak._v2.record.Record):
-#             cls = recordclass(x, behavior)
-#             if cls is not ak._v2.highlevel.Record:
-#                 y = cls(x, behavior=behavior)
-#                 if "__repr__" in type(y).__dict__:
-#                     yield space + repr(y)
-#                     done = True
-#         if not done:
-#             if isinstance(x, ak._v2.contents.Content):
-#                 if brackets:
-#                     yield space + "["
-#                 sp = ""
-#                 for i in range(len(x) if stop is None else stop):
-#                     for token in forward(x[i], sp):
-#                         yield token
-#                     sp = ", "
-#                 if brackets:
-#                     yield "]"
-#             elif isinstance(x, ak._v2.record.Record) and x.istuple:
-#                 yield space + "("
-#                 sp = ""
-#                 for i in range(x.numfields):
-#                     key = sp
-#                     for token in forward(x[str(i)], ""):
-#                         yield key + token
-#                         key = ""
-#                     sp = ", "
-#                 yield ")"
-#             elif isinstance(x, ak._v2.record.Record):
-#                 yield space + "{"
-#                 sp = ""
-#                 for k in x.keys():
-#                     if _is_identifier.match(k) is None:
-#                         kk = repr(k)
-#                         if kk.startswith("u"):
-#                             kk = kk[1:]
-#                     else:
-#                         kk = k
-#                     key = sp + kk + ": "
-#                     for token in forward(x[k], ""):
-#                         yield key + token
-#                         key = ""
-#                     sp = ", "
-#                 yield "}"
-#             elif isinstance(x, (np.datetime64, np.timedelta64)):
-#                 yield space + str(x)
-#             elif isinstance(x, (float, np.floating)):
-#                 yield space + "{0:.3g}".format(x)
-#             else:
-#                 yield space + repr(x)
-
-#     def backward(x, space, brackets=True, wrap=True, stop=-1):
-#         done = False
-#         if wrap and isinstance(x, ak._v2.contents.Content):
-#             cls = arrayclass(x, behavior)
-#             if cls is not ak._v2.highlevel.Array:
-#                 y = cls(x, behavior=behavior)
-#                 if "__repr__" in type(y).__dict__:
-#                     yield repr(y) + space
-#                     done = True
-#         if wrap and isinstance(x, ak._v2.record.Record):
-#             cls = recordclass(x, behavior)
-#             if cls is not ak._v2.highlevel.Record:
-#                 y = cls(x, behavior=behavior)
-#                 if "__repr__" in type(y).__dict__:
-#                     yield repr(y) + space
-#                     done = True
-#         if not done:
-#             if isinstance(x, ak._v2.contents.Content):
-#                 if brackets:
-#                     yield "]" + space
-#                 sp = ""
-#                 for i in range(len(x) - 1, stop, -1):
-#                     for token in backward(x[i], sp):
-#                         yield token
-#                     sp = ", "
-#                 if brackets:
-#                     yield "["
-#             elif isinstance(x, ak._v2.record.Record) and x.istuple:
-#                 yield ")" + space
-#                 for i in range(x.numfields - 1, -1, -1):
-#                     last = None
-#                     for token in backward(x[str(i)], ""):
-#                         if last is not None:
-#                             yield last
-#                         last = token
-#                     if last is not None:
-#                         yield last
-#                     if i != 0:
-#                         yield ", "
-#                 yield "("
-#             elif isinstance(x, ak._v2.record.Record):
-#                 yield "}" + space
-#                 keys = x.keys()
-#                 for i in range(len(keys) - 1, -1, -1):
-#                     last = None
-#                     for token in backward(x[keys[i]], ""):
-#                         if last is not None:
-#                             yield last
-#                         last = token
-#                     if _is_identifier.match(keys[i]) is None:
-#                         kk = repr(keys[i])
-#                         if kk.startswith("u"):
-#                             kk = kk[1:]
-#                     else:
-#                         kk = keys[i]
-#                     if last is not None:
-#                         yield kk + ": " + last
-#                     if i != 0:
-#                         yield ", "
-#                 yield "{"
-#             elif isinstance(x, (np.datetime64, np.timedelta64)):
-#                 yield str(x) + space
-#             elif isinstance(x, (float, np.floating)):
-#                 yield "{0:.3g}".format(x) + space
-#             else:
-#                 yield repr(x) + space
-
-#     def forever(iterable):
-#         for token in iterable:
-#             yield token
-#         while True:
-#             yield None
-
-#     halfway = len(layout) // 2
-#     left, right = ["["], ["]"]
-#     leftlen, rightlen = 1, 1
-#     leftgen = forever(forward(layout, "", brackets=False, wrap=False, stop=halfway))
-#     rightgen = forever(
-#         backward(layout, "", brackets=False, wrap=False, stop=halfway - 1)
-#     )
-#     while True:
-#         lft = next(leftgen)
-#         rgt = next(rightgen)
-
-#         if lft is not None:
-#             if (
-#                 leftlen
-#                 + rightlen
-#                 + len(lft)
-#                 + (2 if lft is None and rgt is None else 6)
-#                 > limit_length
-#             ):
-#                 break
-#             left.append(lft)
-#             leftlen += len(lft)
-
-#         if rgt is not None:
-#             if (
-#                 leftlen
-#                 + rightlen
-#                 + len(rgt)
-#                 + (2 if lft is None and rgt is None else 6)
-#                 > limit_length
-#             ):
-#                 break
-#             right.append(rgt)
-#             rightlen += len(rgt)
-
-#         if lft is None and rgt is None:
-#             break
-
-#     while len(left) > 1 and (
-#         left[-1] == "["
-#         or left[-1] == ", ["
-#         or left[-1] == "{"
-#         or left[-1] == ", {"
-#         or left[-1] == ", "
-#     ):
-#         left.pop()
-#         lft = ""
-#     while len(right) > 1 and (
-#         right[-1] == "]"
-#         or right[-1] == "], "
-#         or right[-1] == "}"
-#         or right[-1] == "}, "
-#         or right[-1] == ", "
-#     ):
-#         right.pop()
-#         rgt = ""
-#     if lft is None and rgt is None:
-#         if left == ["["]:
-#             return "[" + "".join(reversed(right)).lstrip(" ")
-#         else:
-#             return (
-#                 "".join(left).rstrip(" ") + ", " + "".join(reversed(right)).lstrip(" ")
-#             )
-#     else:
-#         if left == ["["] and right == ["]"]:
-#             return "[...]"
-#         elif left == ["["]:
-#             return "[... " + "".join(reversed(right)).lstrip(" ")
-#         else:
-#             return (
-#                 "".join(left).rstrip(" ")
-#                 + ", ... "
-#                 + "".join(reversed(right)).lstrip(" ")
-#             )
 
 
 # def make_union(tags, index, contents, identities, parameters):

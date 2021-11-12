@@ -294,6 +294,9 @@ class Form(object):
     def type(self):
         return self._type({})
 
+    def type_from_behavior(self, behavior):
+        return self._type(ak._v2._util.typestrs(behavior))
+
     def simplify_optiontype(self):
         return self
 

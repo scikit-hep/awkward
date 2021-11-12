@@ -38,23 +38,22 @@ class Reducer(object):
 
 class ArgMin(Reducer):
     name = "argmin"
-
     needs_position = True
     preferred_dtype = np.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.index.Index64.empty(
-            outlength, array.nplike, dtype=cls.preferred_dtype
-        )
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
+        result = array.nplike.empty(outlength, dtype=np.int64)
         array._handle_error(
             array.nplike[
                 "awkward_reduce_argmin",
                 result.dtype.type,
-                array.data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
-                result.to(array.nplike),
+                result,
                 array.data,
                 parents.to(array.nplike),
                 len(parents),
@@ -66,23 +65,22 @@ class ArgMin(Reducer):
 
 class ArgMax(Reducer):
     name = "argmax"
-
     needs_position = True
     preferred_dtype = np.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.index.Index64.empty(
-            outlength, array.nplike, dtype=cls.preferred_dtype
-        )
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
+        result = array.nplike.empty(outlength, dtype=np.int64)
         array._handle_error(
             array.nplike[
                 "awkward_reduce_argmax",
                 result.dtype.type,
-                array._data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
-                result.to(array.nplike),
+                result,
                 array._data,
                 parents.to(array.nplike),
                 len(parents),
@@ -98,12 +96,13 @@ class Count(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.index.Index64.empty(outlength, array.nplike)
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        result = array.nplike.empty(outlength, dtype=np.int64)
         array._handle_error(
             array.nplike[
                 "awkward_reduce_count_64", result.dtype.type, parents.dtype.type
             ](
-                result.to(array.nplike),
+                result,
                 parents.to(array.nplike),
                 len(parents),
                 outlength,
@@ -118,15 +117,17 @@ class CountNonzero(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.index.Index64.empty(outlength, array.nplike)
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
+        result = array.nplike.empty(outlength, dtype=np.int64)
         array._handle_error(
             array.nplike[
                 "awkward_reduce_countnonzero",
                 result.dtype.type,
-                array._data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
-                result.to(array.nplike),
+                result,
                 array._data,
                 parents.to(array.nplike),
                 len(parents),
@@ -142,9 +143,17 @@ class Sum(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
-        )
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        if array.dtype.kind == "M":
+            raise ValueError(
+                "cannot compute the sum (ak.sum) of {0}".format(repr(array.dtype))
+            )
+        elif array.dtype.kind == "m":
+            dtype = np.dtype(np.int64)
+        else:
+            dtype = np.dtype(cls.return_dtype(array.dtype))
+        result = array.nplike.empty(outlength, dtype=cls.return_dtype(dtype))
+
         if array.dtype == np.bool_:
             if result.dtype == np.int64 or result.dtype == np.uint64:
                 array._handle_error(
@@ -154,7 +163,7 @@ class Sum(Reducer):
                         array.dtype.type,
                         parents.dtype.type,
                     ](
-                        result._data,
+                        result,
                         array._data,
                         parents.to(array.nplike),
                         len(parents),
@@ -169,7 +178,7 @@ class Sum(Reducer):
                         array.dtype.type,
                         parents.dtype.type,
                     ](
-                        result._data,
+                        result,
                         array._data,
                         parents.to(array.nplike),
                         len(parents),
@@ -183,17 +192,21 @@ class Sum(Reducer):
                 array.nplike[
                     "awkward_reduce_sum",
                     result.dtype.type,
-                    array.dtype.type,
+                    np.int64 if array.dtype.kind == "m" else array.dtype.type,
                     parents.dtype.type,
                 ](
-                    result._data,
+                    result,
                     array._data,
                     parents.to(array.nplike),
                     len(parents),
                     outlength,
                 )
             )
-        return ak._v2.contents.NumpyArray(result)
+
+        if array.dtype.kind == "m":
+            return ak._v2.contents.NumpyArray(array.nplike.asarray(result, array.dtype))
+        else:
+            return ak._v2.contents.NumpyArray(result)
 
 
 class Prod(Reducer):
@@ -202,9 +215,12 @@ class Prod(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
-        )
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        if array.dtype.kind.upper() == "M":
+            raise ValueError(
+                "cannot compute the product (ak.prod) of {0}".format(repr(array.dtype))
+            )
+        result = array.nplike.empty(outlength, dtype=cls.return_dtype(array.dtype))
         if array.dtype == np.bool_:
             array._handle_error(
                 array.nplike[
@@ -213,7 +229,7 @@ class Prod(Reducer):
                     array.dtype.type,
                     parents.dtype.type,
                 ](
-                    result._data,
+                    result,
                     array._data,
                     parents.to(array.nplike),
                     len(parents),
@@ -228,7 +244,7 @@ class Prod(Reducer):
                     array.dtype.type,
                     parents.dtype.type,
                 ](
-                    result._data,
+                    result,
                     array._data,
                     parents.to(array.nplike),
                     len(parents),
@@ -244,17 +260,17 @@ class Any(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=cls.preferred_dtype)
-        )
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
+        result = array.nplike.empty(outlength, dtype=np.bool_)
         array._handle_error(
             array.nplike[
                 "awkward_reduce_sum_bool",
                 result.dtype.type,
-                array._data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
-                result._data,
+                result,
                 array._data,
                 parents.to(array.nplike),
                 len(parents),
@@ -270,17 +286,17 @@ class All(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        result = ak._v2.contents.NumpyArray(
-            array.nplike.empty(outlength, dtype=cls.preferred_dtype)
-        )
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
+        result = array.nplike.empty(outlength, dtype=np.bool_)
         array._handle_error(
             array.nplike[
                 "awkward_reduce_prod_bool",
                 result.dtype.type,
-                array._data.dtype.type,
+                dtype.type,
                 parents.dtype.type,
             ](
-                result._data,
+                result,
                 array._data,
                 parents.to(array.nplike),
                 len(parents),
@@ -322,9 +338,9 @@ class Min(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        dtype = array.dtype
-        result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype))
-
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
+        result = array.nplike.empty(outlength, dtype=dtype)
         if array.dtype == np.bool_:
             array._handle_error(
                 array.nplike[
@@ -333,7 +349,7 @@ class Min(Reducer):
                     array.dtype.type,
                     parents.dtype.type,
                 ](
-                    result._data,
+                    result,
                     array._data,
                     parents.to(array.nplike),
                     len(parents),
@@ -345,10 +361,10 @@ class Min(Reducer):
                 array.nplike[
                     "awkward_reduce_min",
                     result.dtype.type,
-                    array.dtype.type,
+                    dtype.type,
                     parents.dtype.type,
                 ](
-                    result._data,
+                    result,
                     array._data,
                     parents.to(array.nplike),
                     len(parents),
@@ -356,8 +372,7 @@ class Min(Reducer):
                     cls._min_initial(cls.initial, dtype.type),
                 )
             )
-
-        return ak._v2.contents.NumpyArray(result)
+        return ak._v2.contents.NumpyArray(array.nplike.array(result, array.dtype))
 
 
 class Max(Reducer):
@@ -392,9 +407,9 @@ class Max(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        dtype = array.dtype
-        result = ak._v2.contents.NumpyArray(array.nplike.empty(outlength, dtype))
-
+        assert isinstance(array, ak._v2.contents.NumpyArray)
+        dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
+        result = array.nplike.empty(outlength, dtype=dtype)
         if array.dtype == np.bool_:
             array._handle_error(
                 array.nplike[
@@ -403,7 +418,7 @@ class Max(Reducer):
                     array.dtype.type,
                     parents.dtype.type,
                 ](
-                    result._data,
+                    result,
                     array._data,
                     parents.to(array.nplike),
                     len(parents),
@@ -415,10 +430,10 @@ class Max(Reducer):
                 array.nplike[
                     "awkward_reduce_max",
                     result.dtype.type,
-                    array.dtype.type,
+                    dtype.type,
                     parents.dtype.type,
                 ](
-                    result._data,
+                    result,
                     array._data,
                     parents.to(array.nplike),
                     len(parents),
@@ -426,4 +441,4 @@ class Max(Reducer):
                     cls._max_initial(cls.initial, dtype.type),
                 )
             )
-        return ak._v2.contents.NumpyArray(result)
+        return ak._v2.contents.NumpyArray(array.nplike.array(result, array.dtype))

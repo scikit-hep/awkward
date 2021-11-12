@@ -64,7 +64,7 @@ class IndexedOptionForm(Form):
         return ak._v2.types.optiontype.OptionType(
             self._content._type(typestrs),
             parameters,
-            ak._util.gettypestr(self._parameters, typestrs),
+            ak._v2._util.gettypestr(self._parameters, typestrs),
         ).simplify_option_union()
 
     def __eq__(self, other):

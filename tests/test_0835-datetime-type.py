@@ -434,17 +434,13 @@ def test_more():
     assert ak.sum(akarray[1:] - akarray[:-1], axis=0) == [np.timedelta64(60, "m")]
 
 
-@pytest.mark.skipif(
-    ak._util.py27 or np.__version__ <= "1.13.1",
-    reason="Python 2.7 module 'numpy.core' has no attribute '_exceptions'",
-)
 def test_ufunc_sum():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
     )
     akarray = ak.Array(nparray)
 
-    with pytest.raises(np.core._exceptions.UFuncTypeError):
+    with pytest.raises(TypeError):
         akarray[1:] + akarray[:-1]
 
 
@@ -454,7 +450,7 @@ def test_ufunc_mul():
     )
     akarray = ak.Array(nparray)
 
-    with pytest.raises(ValueError):  # FIXME?: np.core._exceptions.UFuncTypeError):
+    with pytest.raises(ValueError):
         akarray * 2
 
     assert ak.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
