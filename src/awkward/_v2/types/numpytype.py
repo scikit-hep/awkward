@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import json
+import re
 
 from awkward._v2.types.type import Type
 from awkward._v2.forms.form import _parameters_equal
@@ -11,9 +12,56 @@ import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
-# FIXME: this dict must become two functions (is_primitive and primitive_to_dtype)
-# because NumPy takes ARBITRARY intervals, such as "15s".
-_primitive_to_dtype = {
+
+def is_primitive(primitive):
+    if _primitive_to_dtype_datetime.match(primitive) is not None:
+        return True
+    elif _primitive_to_dtype_timedelta.match(primitive) is not None:
+        return True
+    else:
+        return primitive in _primitive_to_dtype_dict
+
+
+def primitive_to_dtype(primitive):
+    if _primitive_to_dtype_datetime.match(primitive) is not None:
+        return np.dtype(primitive)
+    elif _primitive_to_dtype_timedelta.match(primitive) is not None:
+        return np.dtype(primitive)
+    else:
+        out = _primitive_to_dtype_dict.get(primitive)
+        if out is None:
+            raise TypeError(
+                "unrecognized primitive: {0}. Must be one of\n\n    {1}\n\nor a "
+                "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
+                    repr(primitive), ", ".join(_primitive_to_dtype_dict)
+                )
+            )
+        return out
+
+
+def dtype_to_primitive(dtype):
+    if dtype.kind.upper() == "M" and dtype == dtype.newbyteorder("="):
+        return str(dtype)
+    else:
+        out = _dtype_to_primitive_dict.get(dtype)
+        if out is None:
+            raise TypeError(
+                "unsupported dtype: {0}. Must be one of\n\n    {1}\n\nor a "
+                "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
+                    repr(dtype), ", ".join(_primitive_to_dtype_dict)
+                )
+            )
+        return out
+
+
+_primitive_to_dtype_datetime = re.compile(
+    r"datetime64\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\]"
+)
+_primitive_to_dtype_timedelta = re.compile(
+    r"timedelta64\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\]"
+)
+
+_primitive_to_dtype_dict = {
     "bool": np.dtype(np.bool_),
     "int8": np.dtype(np.int8),
     "uint8": np.dtype(np.uint8),
@@ -28,57 +76,24 @@ _primitive_to_dtype = {
     "complex64": np.dtype(np.complex64),
     "complex128": np.dtype(np.complex128),
     "datetime64": np.dtype(np.datetime64),
-    "datetime64[Y]": np.dtype("datetime64[Y]"),
-    "datetime64[M]": np.dtype("datetime64[M]"),
-    "datetime64[W]": np.dtype("datetime64[W]"),
-    "datetime64[D]": np.dtype("datetime64[D]"),
-    "datetime64[h]": np.dtype("datetime64[h]"),
-    "datetime64[m]": np.dtype("datetime64[m]"),
-    "datetime64[s]": np.dtype("datetime64[s]"),
-    "datetime64[ms]": np.dtype("datetime64[ms]"),
-    "datetime64[us]": np.dtype("datetime64[us]"),
-    "datetime64[ns]": np.dtype("datetime64[ns]"),
-    "datetime64[ps]": np.dtype("datetime64[ps]"),
-    "datetime64[fs]": np.dtype("datetime64[fs]"),
-    "datetime64[as]": np.dtype("datetime64[as]"),
     "timedelta64": np.dtype(np.timedelta64),
-    "timedelta64[Y]": np.dtype("timedelta64[Y]"),
-    "timedelta64[M]": np.dtype("timedelta64[M]"),
-    "timedelta64[W]": np.dtype("timedelta64[W]"),
-    "timedelta64[D]": np.dtype("timedelta64[D]"),
-    "timedelta64[h]": np.dtype("timedelta64[h]"),
-    "timedelta64[m]": np.dtype("timedelta64[m]"),
-    "timedelta64[s]": np.dtype("timedelta64[s]"),
-    "timedelta64[ms]": np.dtype("timedelta64[ms]"),
-    "timedelta64[us]": np.dtype("timedelta64[us]"),
-    "timedelta64[ns]": np.dtype("timedelta64[ns]"),
-    "timedelta64[ps]": np.dtype("timedelta64[ps]"),
-    "timedelta64[fs]": np.dtype("timedelta64[fs]"),
-    "timedelta64[as]": np.dtype("timedelta64[as]"),
 }
 
 if hasattr(np, "float16"):
-    _primitive_to_dtype["float16"] = np.dtype(np.float16)
+    _primitive_to_dtype_dict["float16"] = np.dtype(np.float16)
 if hasattr(np, "float128"):
-    _primitive_to_dtype["float128"] = np.dtype(np.float128)
+    _primitive_to_dtype_dict["float128"] = np.dtype(np.float128)
 if hasattr(np, "complex256"):
-    _primitive_to_dtype["complex256"] = np.dtype(np.complex256)
+    _primitive_to_dtype_dict["complex256"] = np.dtype(np.complex256)
 
-_dtype_to_primitive = {}
-for primitive, dtype in _primitive_to_dtype.items():
-    _dtype_to_primitive[dtype] = primitive
+_dtype_to_primitive_dict = {}
+for primitive, dtype in _primitive_to_dtype_dict.items():
+    _dtype_to_primitive_dict[dtype] = primitive
 
 
 class NumpyType(Type):
     def __init__(self, primitive, parameters=None, typestr=None):
-        if primitive not in _primitive_to_dtype:
-            raise TypeError(
-                "{0} 'primitive' must be one of {1}, not {2}".format(
-                    type(self).__name__,
-                    ", ".join(repr(x) for x in _primitive_to_dtype),
-                    repr(primitive),
-                )
-            )
+        primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
                 "{0} 'parameters' must be of type dict or None, not {1}".format(
