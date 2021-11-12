@@ -7,7 +7,9 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 import datetime
-import numpy.core._exceptions as np_exception
+
+if not ak._util.py27:
+    import numpy.core._exceptions as np_exception
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
