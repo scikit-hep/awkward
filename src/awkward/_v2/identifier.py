@@ -115,3 +115,6 @@ class Identifier(object):
             and self._data.strides == other._data.strides
             and self._data.dtype == other._data.dtype
         )
+
+    def _nbytes_part(self):
+        return self.data.nbytes

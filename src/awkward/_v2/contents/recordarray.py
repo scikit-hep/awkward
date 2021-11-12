@@ -671,6 +671,14 @@ class RecordArray(Content):
                 return sub
         return ""
 
+    def _nbytes_part(self):
+        result = 0
+        for content in self.contents:
+            result = result + content._nbytes_part()
+        if self.identifier is not None:
+            result = result + self.identifier._nbytes_part()
+        return result
+
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
