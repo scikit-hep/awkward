@@ -12,9 +12,6 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_from_iter.py:13: NotImplementedError"
-)
 def test_values_astype_datetime():
     array1 = ak.values_astype(ak._v2.highlevel.Array([1567416600000]), "datetime64[ms]")
     assert str(array1.type) == "1 * datetime64"
@@ -33,9 +30,6 @@ def test_values_astype_datetime():
     assert array3.to_list() == [np.datetime64("2019-09-02T09:30:00"), None]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_from_iter.py:13: NotImplementedError"
-)
 def test_modulo_units():
     array1 = ak.values_astype(
         ak._v2.highlevel.Array([1]), np.dtype("datetime64[100as/1]")
@@ -50,9 +44,6 @@ def test_modulo_units():
     assert array2.to_list() == [np.datetime64("1970-01-01T00:00:05.000", "5000ms")]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_from_iter.py:13: NotImplementedError"
-)
 def test_float_values_astype_datetime():
     array = ak._v2.highlevel.Array([1.9999, 1567416600000, 0, None, 11, 0.555])
     assert str(array.type) == "6 * ?float64"
