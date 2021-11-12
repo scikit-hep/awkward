@@ -667,6 +667,14 @@ class IndexedOptionArray(Content):
         else:
             return next._subranges_equal(nextstarts, nextstops, len(nextstarts), False)
 
+    def numbers_to_type(self, name):
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            self._index,
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._index) == 0:
             return True

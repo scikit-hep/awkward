@@ -610,6 +610,14 @@ class IndexedArray(Content):
 
         return next[0 : length[0]]
 
+    def numbers_to_type(self, name):
+        return ak._v2.contents.indexedarray.IndexedArray(
+            self._index,
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._index) == 0:
             return True

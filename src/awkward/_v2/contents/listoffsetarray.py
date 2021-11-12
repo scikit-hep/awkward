@@ -618,6 +618,14 @@ class ListOffsetArray(Content):
                 self._parameters,
             )
 
+    def numbers_to_type(self, name):
+        return ak._v2.contents.listoffsetarray.ListOffsetArray(
+            self._offsets,
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._offsets) - 1 == 0:
             return True

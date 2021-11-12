@@ -698,6 +698,14 @@ class UnionArray(Content):
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
 
+    def numbers_to_type(self, name):
+        contents = []
+        for x in self._contents:
+            contents.append(x.numbers_to_type(name))
+        return ak._v2.contents.unionarray.UnionArray(
+            self._tags, self._index, contents, self._identifier, self._parameters
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         simplified = self.simplify_uniontype(True, True)
         if isinstance(simplified, ak._v2.contents.UnionArray):

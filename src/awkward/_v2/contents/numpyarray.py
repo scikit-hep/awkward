@@ -560,6 +560,15 @@ class NumpyArray(Content):
 
         return out2, nextoffsets[: outlength[0]]
 
+    def numbers_to_type(self, name):
+        dtype = ak._v2.types.numpytype._primitive_to_dtype[name]
+        return NumpyArray(
+            self.nplike.asarray(self._data, dtype=dtype),
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._data) == 0:
             return True

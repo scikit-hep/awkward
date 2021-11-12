@@ -487,6 +487,15 @@ class ByteMaskedArray(Content):
             )
             return out2.simplify_optiontype()
 
+    def numbers_to_type(self, name):
+        return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+            self._mask,
+            self._content.numbers_to_type(name),
+            self._valid_when,
+            self._identifier,
+            self._parameters,
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._mask) == 0:
             return True
