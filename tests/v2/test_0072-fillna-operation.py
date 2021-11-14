@@ -12,6 +12,7 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
+
 def test_fillna_empty_array():
     empty = ak.layout.EmptyArray()
     value = ak.layout.NumpyArray(np.array([10]))
@@ -41,7 +42,7 @@ def test_fillna_numpy_array():
         [1.1, 2.2, 3.3, None, None],
         [4.4, 5.5, 6.6, None, None],
     ]
-    
+
     assert ak.to_list(array.fillna(value)) == [
         [1.1, 2.2, 3.3, 0, 0],
         [4.4, 5.5, 6.6, 0, 0],
@@ -112,7 +113,7 @@ def test_fillna_listarray_array():
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    
+
     assert ak.to_list(listarray.fillna(value)) == [
         [0.0, 1.1, 2.2],
         [],
@@ -144,7 +145,7 @@ def test_fillna_unionarray():
         [2.2, 2.2],
         [None, None],
     ]
-    
+
     assert ak.to_list(padded_array.fillna(value)) == [
         [777, 777],
         [2, 2],
@@ -154,9 +155,8 @@ def test_fillna_unionarray():
         [777, 777],
     ]
 
-@pytest.mark.skip(
-    reason="Fill_none not implemented."
-)
+
+@pytest.mark.skip(reason="Fill_none not implemented.")
 def test_highlevel():
     array = ak.Array([[1.1, 2.2, None, 3.3], [], [4.4, None, 5.5]])
     assert ak.to_list(ak.fill_none(array, 999, axis=1)) == [
@@ -209,4 +209,3 @@ def test_highlevel():
         [],
         [4.4, 5.5],
     ]
-
