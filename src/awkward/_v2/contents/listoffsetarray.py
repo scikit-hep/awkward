@@ -1593,6 +1593,12 @@ class ListOffsetArray(Content):
             else:
                 return self._content.validityerror(path + ".content")
 
+    def _nbytes_part(self):
+        result = self.offsets._nbytes_part() + self.content._nbytes_part()
+        if self.identifier is not None:
+            result = result + self.identifier._nbytes_part()
+        return result
+
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

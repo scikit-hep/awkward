@@ -75,7 +75,7 @@ class ListForm(Form):
         return ak._v2.types.listtype.ListType(
             self._content._type(typestrs),
             self._parameters,
-            ak._util.gettypestr(self._parameters, typestrs),
+            ak._v2._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

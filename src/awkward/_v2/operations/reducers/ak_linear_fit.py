@@ -7,15 +7,23 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
+def linear_fit(
+    x,
+    y,
+    weight=None,
+    axis=None,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
+):
     raise NotImplementedError
 
 
 #     """
 #     Args:
-#         x: one coordinate to use in the linear fit.
-#         y: the other coordinate to use in the linear fit.
-#         weight: data that can be broadcasted to `x` and `y` to give each point
+#         x: One coordinate to use in the linear fit (anything #ak.to_layout recognizes).
+#         y: The other coordinate to use in the linear fit (anything #ak.to_layout recognizes).
+#         weight: Data that can be broadcasted to `x` and `y` to give each point
 #             a weight. Weighting points equally is the same as no weights;
 #             weighting some points higher increases the significance of those
 #             points. Weights can be zero or negative.
@@ -32,6 +40,8 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
 #             empty lists results in None (an option type); otherwise, the
 #             calculation is followed through with the reducers' identities,
 #             usually resulting in floating-point `nan`.
+#         flatten_records (bool): If True, axis=None combines fields from different
+#             records; otherwise, records raise an error.
 
 #     Computes the linear fit of `y` with respect to `x` (many types supported,
 #     including all Awkward Arrays and Records, must be broadcastable to each

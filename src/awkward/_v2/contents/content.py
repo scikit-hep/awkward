@@ -1013,6 +1013,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return paramcheck
         return self._validityerror(path)
 
+    @property
+    def nbytes(self):
+        return self._nbytes_part()
+
     def purelist_parameter(self, key):
         return self.Form.purelist_parameter(self, key)
 
@@ -1155,7 +1159,10 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 "function_name": function_name,
             },
         )
-        return nplike.concatenate(arrays)
+        if len(arrays) == 0:
+            return nplike.empty(0, dtype=np.float64)
+        else:
+            return nplike.concatenate(arrays)
 
     def recursively_apply(
         self,

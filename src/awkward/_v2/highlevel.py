@@ -4,7 +4,6 @@
 #
 #    - [ ] all docstrings are old
 #    - [ ] 'Mask' nested class and 'mask' property
-#    - [ ] 'nbytes' and maybe 'nbytes_held'
 #    - [ ] `__array__`
 #    - [ ] `__array_ufunc__`
 #    - [ ] `__array_function__`
@@ -16,7 +15,6 @@
 # TODO in Array:
 #
 #    - [ ] all docstrings are old
-#    - [ ] 'nbytes' and maybe 'nbytes_held'
 #    - [ ] `__array_ufunc__`
 #    - [ ] `numba_type`
 #    - [ ] `__copy__`
@@ -455,25 +453,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         return ak._v2.operations.convert.to_numpy(self, allow_missing=allow_missing)
 
-    #     @property
-    #     def nbytes(self):
-    #         """
-    #         The total number of bytes in all the #ak.layout.Index,
-    #         #ak.layout.Identities, and #ak.layout.NumpyArray buffers in this
-    #         array tree.
+    @property
+    def nbytes(self):
+        """
+        The total number of bytes in all the #ak.layout.Index,
+        #ak.layout.Identifier, and #ak.layout.NumpyArray buffers in this
+        array tree.
 
-    #         Note: this calculation takes overlapping buffers into account, to the
-    #         extent that overlaps are not double-counted, but overlaps are currently
-    #         assumed to be complete subsets of one another, and so it is
-    #         theoretically possible (though unlikely) that this number is an
-    #         underestimate of the true usage.
-
-    #         It also does not count buffers that must be kept in memory because
-    #         of ownership, but are not directly used in the array. Nor does it count
-    #         the (small) C++ nodes or Python objects that reference the (large)
-    #         array buffers.
-    #         """
-    #         return self._layout.nbytes
+        It does not count buffers that must be kept in memory because
+        of ownership, but are not directly used in the array. Nor does it count
+        the (small) C++ nodes or Python objects that reference the (large)
+        array buffers.
+        """
+        return self._layout.nbytes
 
     @property
     def ndim(self):
@@ -520,7 +512,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         The type of a #ak.layout.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
-        return ak._v2.types.ArrayType(self._layout.form.type, len(self._layout))
+        return ak._v2.types.ArrayType(
+            self._layout.form.type_from_behavior(self._behavior), len(self._layout)
+        )
 
     @property
     def typestr(self):
@@ -533,7 +527,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         The type of a #ak.layout.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
-        return str(ak._v2.types.ArrayType(self._layout.form.type, len(self._layout)))
+        return str(self.type)
 
     def __len__(self):
         """
@@ -1656,25 +1650,19 @@ class Record(NDArrayOperatorsMixin):
         """
         return self._layout.to_list(self._behavior)
 
-    #     @property
-    #     def nbytes(self):
-    #         """
-    #         The total number of bytes in all the #ak.layout.Index,
-    #         #ak.layout.Identities, and #ak.layout.NumpyArray buffers in this
-    #         array tree.
+    @property
+    def nbytes(self):
+        """
+        The total number of bytes in all the #ak.layout.Index,
+        #ak.layout.Identifier, and #ak.layout.NumpyArray buffers in this
+        array tree.
 
-    #         Note: this calculation takes overlapping buffers into account, to the
-    #         extent that overlaps are not double-counted, but overlaps are currently
-    #         assumed to be complete subsets of one another, and so it is
-    #         theoretically possible (though unlikely) that this number is an
-    #         underestimate of the true usage.
-
-    #         It also does not count buffers that must be kept in memory because
-    #         of ownership, but are not directly used in the array. Nor does it count
-    #         the (small) C++ nodes or Python objects that reference the (large)
-    #         array buffers.
-    #         """
-    #         return self._layout.nbytes
+        It does not count buffers that must be kept in memory because
+        of ownership, but are not directly used in the array. Nor does it count
+        the (small) C++ nodes or Python objects that reference the (large)
+        array buffers.
+        """
+        return self._layout.nbytes
 
     @property
     def fields(self):
@@ -1703,7 +1691,7 @@ class Record(NDArrayOperatorsMixin):
         Note that the outermost element of a Record's type is always a
         #ak.types.RecordType.
         """
-        return self._layout.array.form.type
+        return self._layout.array.form.type_from_behavior(self._behavior)
 
     @property
     def typestr(self):
@@ -1713,7 +1701,7 @@ class Record(NDArrayOperatorsMixin):
         Note that the outermost element of a Record's type is always a
         #ak.types.RecordType.
         """
-        return str(self._layout.array.form.type)
+        return str(self.type)
 
     def __getitem__(self, where):
         """
@@ -2085,726 +2073,623 @@ class Record(NDArrayOperatorsMixin):
 #         return False
 
 
-# class ArrayBuilder(Iterable, Sized):
-#     """
-#     Args:
-#         behavior (None or dict): Custom #ak.behavior for arrays built by
-#             this ArrayBuilder.
-#         initial (int): Initial size (in bytes) of buffers used by
-#             #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
-#         resize (float): Resize multiplier for buffers used by
-#             #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
-#             should be strictly greater than 1.
-
-#     General tool for building arrays of nested data structures from a sequence
-#     of commands. Most data types can be constructed by calling commands in the
-#     right order, similar to printing tokens to construct JSON output.
-
-#     To illustrate how this works, consider the following example.
-
-#         b = ak.ArrayBuilder()
-
-#         # fill commands   # as JSON   # current array type
-#         ##########################################################################################
-#         b.begin_list()    # [         # 0 * var * unknown     (initially, the type is unknown)
-#         b.integer(1)      #   1,      # 0 * var * int64
-#         b.integer(2)      #   2,      # 0 * var * int64
-#         b.real(3)         #   3.0     # 0 * var * float64     (all the integers have become floats)
-#         b.end_list()      # ],        # 1 * var * float64
-#         b.begin_list()    # [         # 1 * var * float64
-#         b.end_list()      # ],        # 2 * var * float64
-#         b.begin_list()    # [         # 2 * var * float64
-#         b.integer(4)      #   4,      # 2 * var * float64
-#         b.null()          #   null,   # 2 * var * ?float64    (now the floats are nullable)
-#         b.integer(5)      #   5       # 2 * var * ?float64
-#         b.end_list()      # ],        # 3 * var * ?float64
-#         b.begin_list()    # [         # 3 * var * ?float64
-#         b.begin_record()  #   {       # 3 * var * ?union[float64, {}]
-#         b.field("x")      #     "x":  # 3 * var * ?union[float64, {"x": unknown}]
-#         b.integer(1)      #      1,   # 3 * var * ?union[float64, {"x": int64}]
-#         b.field("y")      #      "y": # 3 * var * ?union[float64, {"x": int64, "y": unknown}]
-#         b.begin_list()    #      [    # 3 * var * ?union[float64, {"x": int64, "y": var * unknown}]
-#         b.integer(2)      #        2, # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-#         b.integer(3)      #        3  # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-#         b.end_list()      #      ]    # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-#         b.end_record()    #   }       # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
-#         b.end_list()      # ]         # 4 * var * ?union[float64, {"x": int64, "y": var * int64}]
-
-#     To get an array, we take a #snapshot of the ArrayBuilder's current state.
-
-#         >>> ak.to_list(b.snapshot())
-#         [[1.0, 2.0, 3.0], [], [4.0, None, 5.0], [{'x': 1, 'y': [2, 3]}]]
-
-#     The full set of filling commands is the following.
-
-#        * #null: appends a None value.
-#        * #boolean: appends True or False.
-#        * #integer: appends an integer.
-#        * #real: appends a floating-point value.
-#        * #complex: appends a complex value.
-#        * #datetime: appends a datetime value.
-#        * #timedelta: appends a timedelta value.
-#        * #bytestring: appends an unencoded string (raw bytes).
-#        * #string: appends a UTF-8 encoded string.
-#        * #begin_list: begins filling a list; must be closed with #end_list.
-#        * #end_list: ends a list.
-#        * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
-#        * #index: selects a tuple slot to fill; must be followed by a command
-#          that actually fills that slot.
-#        * #end_tuple: ends a tuple.
-#        * #begin_record: begins filling a record; must be closed with
-#          #end_record.
-#        * #field: selects a record field to fill; must be followed by a command
-#          that actually fills that field.
-#        * #end_record: ends a record.
-#        * #append: generic method for filling #null, #boolean, #integer, #real,
-#          #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
-#          When filling from #ak.Array or #ak.Record, the output holds references
-#          to the original data, rather than copying.
-#        * #extend: appends all the items from an #ak.Array (by reference).
-#        * #list: context manager for #begin_list and #end_list.
-#        * #tuple: context manager for #begin_tuple and #end_tuple.
-#        * #record: context manager for #begin_record and #end_record.
-
-#     ArrayBuilders can be used in [Numba](http://numba.pydata.org/): they can
-#     be passed as arguments to a Numba-compiled function or returned as return
-#     values. (Since ArrayBuilder works by accumulating side-effects, it's not
-#     strictly necessary to return the object.)
-
-#     The primary limitation is that ArrayBuilders cannot be *created* and
-#     #snapshot cannot be called inside the Numba-compiled function. Awkward
-#     Array uses Numba as a transformer: #ak.Array and an empty #ak.ArrayBuilder
-#     go in and a filled #ak.ArrayBuilder is the result; #snapshot can be called
-#     outside of the compiled function.
-
-#     Also, context managers (Python's `with` statement) are not supported in
-#     Numba yet, so the #list, #tuple, and #record methods are not available
-#     in Numba-compiled functions.
-
-#     Here is an example of filling an ArrayBuilder in Numba, which makes a
-#     tree of dynamic depth.
-
-#         >>> import numba as nb
-#         >>> @nb.njit
-#         ... def deepnesting(builder, probability):
-#         ...     if np.random.uniform(0, 1) > probability:
-#         ...         builder.append(np.random.normal())
-#         ...     else:
-#         ...         builder.begin_list()
-#         ...         for i in range(np.random.poisson(3)):
-#         ...             deepnesting(builder, probability**2)
-#         ...         builder.end_list()
-#         ...
-#         >>> builder = ak.ArrayBuilder()
-#         >>> deepnesting(builder, 0.9)
-#         >>> builder.snapshot()
-#         <Array [... 1.23, -0.498, 0.272], -0.0519]]]] type='1 * var * var * union[var * ...'>
-#         >>> ak.to_list(builder)
-#         [[[[2.05, 0.95], [[[0.25], 1.86, 0.89, 0.31], 0.38, -1.62, [[0.18], 0.46, 0.39], [-0.57, 1.39, -0.15, -0.20]], [[[-0.74, -0.34], -0.84], [-0.81, -0.72, -0.42, [1.04, 1.69, -0.18, 1.07]]], [[0.51]]], [[-1.97, 0.57], [-1.24, -2.14, -0.54, [[0.24, -2.31, [-0.68, 0.08], 1.80, 0.16], -0.63, [0.01, [-1.28, 0.38, 1.40, -0.26, -0.48]]], -0.62, -2.53], [-1.66, 0.58]], [0.62, [[-0.76, -0.67, -1.15], -0.50, [0.36, 0.48, -0.80, [1.15, -1.09], -1.39, 1.28]], 0.93, [1.35, [0.36, 1.09, -0.27, -0.79], [-0.41], [0.67, 0.89, 0.79]], [], [0.67, [-0.48, -0.39], 1.06, 0.80, -0.34], [[1.56, -1.60, [-0.69], -0.42], 0.33, -0.73, 0.50, -1.25, -1.15], [[0.64], [-0.01], -0.95], [[0.41, -0.68, 0.79], 0.51]], [[0.62, [0.58, -0.75]], [1.61, 0.52, 0.24], -1.09, [-1.11], 0.22], [-0.41, [[0.42], 0.78, [1.22, -0.49, 0.27], -0.05xs]]]]
-#         >>> ak.type(builder.snapshot())
-#         1 * var * var * union[var * union[float64, var * union[var * union[float64, var * float64], float64]], float64]
-
-#     Note that this is a *general* method for building arrays; if the type is
-#     known in advance, more specialized procedures can be faster. This should
-#     be considered the "least effort" approach.
-#     """
-
-#     def __init__(self, behavior=None, initial=1024, resize=1.5):
-#         self._layout = ak.layout.ArrayBuilder(initial=initial, resize=resize)
-#         self.behavior = behavior
-
-#     @classmethod
-#     def _wrap(cls, layout, behavior=None):
-#         """
-#         Args:
-#             layout (#ak.layout.ArrayBuilder): Low-level builder to wrap.
-#             behavior (None or dict): Custom #ak.behavior for arrays built by
-#                 this ArrayBuilder.
-
-#         Wraps a low-level #ak.layout.ArrayBuilder as a high-level
-#         #ak.ArrayBulider.
-
-#         The #ak.ArrayBuilder constructor creates a new #ak.layout.ArrayBuilder
-#         with no accumulated data, but Numba needs to wrap existing data
-#         when returning from a lowered function.
-#         """
-#         assert isinstance(layout, ak.layout.ArrayBuilder)
-#         out = cls.__new__(cls)
-#         out._layout = layout
-#         out.behavior = behavior
-#         return out
-
-#     @property
-#     def behavior(self):
-#         """
-#         The `behavior` parameter passed into this ArrayBuilder's constructor.
-
-#            * If a dict, this `behavior` overrides the global #ak.behavior.
-#              Any keys in the global #ak.behavior but not this `behavior` are
-#              still valid, but any keys in both are overridden by this
-#              `behavior`. Keys with a None value are equivalent to missing keys,
-#              so this `behavior` can effectively remove keys from the
-#              global #ak.behavior.
-
-#            * If None, the Array defaults to the global #ak.behavior.
-
-#         See #ak.behavior for a list of recognized key patterns and their
-#         meanings.
-#         """
-#         return self._behavior
-
-#     @behavior.setter
-#     def behavior(self, behavior):
-#         if behavior is None or isinstance(behavior, dict):
-#             self._behavior = behavior
-#         else:
-#             raise TypeError(
-#                 "behavior must be None or a dict"
-#             )
-
-#     @property
-#     def type(self):
-#         """
-#         The high-level type of the accumulated array; same as #ak.type.
-
-#         Note that the outermost element of an Array's type is always an
-#         #ak.types.ArrayType, which specifies the number of elements in the array.
-
-#         The type of a #ak.layout.Content (from #ak.Array.layout) is not
-#         wrapped by an #ak.types.ArrayType.
-#         """
-#         return ak._v2.operations.describe.type(self)
-
-#     def __len__(self):
-#         """
-#         The current length of the accumulated array.
-#         """
-#         return len(self._layout)
-
-#     def __getitem__(self, where):
-#         """
-#         Args:
-#             where (many types supported; see below): Index of positions to
-#                 select from the array.
-
-#         Takes a #snapshot and selects items from the array.
-
-#         See #ak.Array.__getitem__ for a more complete description.
-#         """
-#         tmp = ak._v2._util.wrap(self._layout[where], self._behavior)
-
-#         if isinstance(tmp, ak._v2.behaviors.string.ByteBehavior):
-#             return bytes(tmp)
-#         elif isinstance(tmp, ak._v2.behaviors.string.CharBehavior):
-#             return ak._v2._util.unicode(tmp) if ak._v2._util.py27 else str(tmp)
-#         else:
-#             return tmp
-
-#     def __iter__(self):
-#         """
-#         Iterates over a #snapshot of the array in Python.
-
-#         See #ak.Array.__iter__ for performance considerations.
-#         """
-#         for x in self.snapshot():
-#             yield x
-
-#     def __str__(self):
-#         """
-#         Args:
-#             limit_value (int): Maximum number of characters to use when
-#                 presenting the ArrayBuilder as a string.
-
-#         Presents this ArrayBuilder as a string without type or
-#         `"<ArrayBuilder ...>"`.
-
-#         See #ak.Array.__str__ for a more complete description.
-#         """
-#         return self._str()
-
-#     def __repr__(self):
-#         """
-#         Args:
-#             limit_value (int): Maximum number of characters to use when
-#                 presenting the data of the ArrayBuilder.
-#             limit_total (int): Maximum number of characters to use for
-#                 the whole string (should be larger than `limit_value`).
-
-#         Presents this ArrayBuilder as a string with its type and
-#         `"<ArrayBuilder ...>"`.
-
-#         See #ak.Array.__repr__ for a more complete description.
-#         """
-#         return self._repr()
-
-#     def _str(self, limit_value=85, snapshot=None):
-#         if snapshot is None:
-#             snapshot = self.snapshot()
-#         return snapshot._str(limit_value=limit_value)
-
-#     def _repr(self, limit_value=40, limit_total=85):
-#         snapshot = self.snapshot()
-#         value = self._str(limit_value=limit_value, snapshot=snapshot)
-
-#         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
-#         typestrs = ak._v2._util.typestrs(self._behavior)
-#         typestr = repr(
-#             str(ak._v2.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
-#         )
-#         if len(typestr) > limit_type:
-#             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
-
-#         return "<ArrayBuilder {0} type={1}>".format(value, typestr)
-
-#     def __array__(self, *args, **kwargs):
-#         """
-#         Intercepts attempts to convert a #snapshot of this array into a
-#         NumPy array and either performs a zero-copy conversion or raises
-#         an error.
-
-#         See #ak.Array.__array__ for a more complete description.
-#         """
-#         return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
-
-#     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-#         """
-#         Intercepts attempts to pass this ArrayBuilder to a NumPy
-#         [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)
-#         (ufuncs) and passes it through the structure of the array's #snapshot.
-
-#         See #ak.Array.__array_ufunc__ for a more complete description.
-#         """
-#         return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
-
-#     def __array_function__(self, func, types, args, kwargs):
-#         """
-#         Intercepts attempts to pass this ArrayBuilder to those NumPy functions
-#         other than universal functions that have an Awkward equivalent.
-
-#         See #ak.ArrayBuilder.__array_ufunc__ for a more complete description.
-#         """
-#         return ak._v2._connect.numpy.array_function(func, types, args, kwargs)
-
-#     @property
-#     def numba_type(self):
-#         """
-#         The type of this Array when it is used in Numba. It contains enough
-#         information to generate low-level code for accessing any element,
-#         down to the leaves.
-
-#         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
-#         on types and signatures.
-#         """
-#         import awkward._v2._connect.numba
-
-#         ak._v2._connect.numba.register_and_check()
-#         import awkward._v2._connect.numba.builder  # noqa: F401
-
-#         return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
-
-#     def __bool__(self):
-#         if len(self) == 1:
-#             return bool(self[0])
-#         else:
-#             raise ValueError(
-#                 "the truth value of an array whose length is not 1 is ambiguous; "
-#                 "use ak.any() or ak.all()"
-#             )
-
-#     def snapshot(self):
-#         """
-#         Converts the currently accumulated data into an #ak.Array.
-
-#         This is almost always an *O(1)* operation (does not scale with the
-#         size of the accumulated data, and therefore safe to call relatively
-#         often).
-
-#         The resulting #ak.Array shares memory with the accumulated data (it
-#         is a zero-copy operation), but it is safe to continue filling the
-#         ArrayBuilder because its append-only operations only affect data
-#         outside the range viewed by old snapshots. If ArrayBuilder reallocates
-#         an internal buffer, the data are no longer shared, but they're
-#         reference-counted by the #ak.Array and the #ak.ArrayBuilder, so all
-#         buffers are deleted exactly once.
-#         """
-#         layout = self._layout.snapshot()
-#         return ak._v2._util.wrap(layout, self._behavior)
-
-#     def null(self):
-#         """
-#         Appends a None value at the current position in the accumulated array.
-#         """
-#         self._layout.null()
-
-#     def boolean(self, x):
-#         """
-#         Appends a boolean value `x` at the current position in the accumulated
-#         array.
-#         """
-#         self._layout.boolean(x)
-
-#     def integer(self, x):
-#         """
-#         Appends an integer `x` at the current position in the accumulated
-#         array.
-#         """
-#         self._layout.integer(x)
-
-#     def real(self, x):
-#         """
-#         Appends a floating point number `x` at the current position in the
-#         accumulated array.
-#         """
-#         self._layout.real(x)
-
-#     def complex(self, x):
-#         """
-#         Appends a floating point number `x` at the current position in the
-#         accumulated array.
-#         """
-#         self._layout.complex(x)
-
-#     def datetime(self, x):
-#         """
-#         Appends a datetime value `x` at the current position in the
-#         accumulated array.
-#         """
-#         self._layout.datetime(x)
-
-#     def timedelta(self, x):
-#         """
-#         Appends a timedelta value `x` at the current position in the
-#         accumulated array.
-#         """
-#         self._layout.timedelta(x)
-
-#     def bytestring(self, x):
-#         """
-#         Appends an unencoded string (raw bytes) `x` at the current position
-#         in the accumulated array.
-#         """
-#         self._layout.bytestring(x)
-
-#     def string(self, x):
-#         """
-#         Appends a UTF-8 encoded string `x` at the current position in the
-#         accumulated array.
-#         """
-#         self._layout.string(x)
-
-#     def begin_list(self):
-#         """
-#         Begins filling a list; must be closed with #end_list.
-
-#         For example,
-
-#             builder.begin_list()
-#             builder.real(1.1)
-#             builder.real(2.2)
-#             builder.real(3.3)
-#             builder.end_list()
-#             builder.begin_list()
-#             builder.end_list()
-#             builder.begin_list()
-#             builder.real(4.4)
-#             builder.real(5.5)
-#             builder.end_list()
-
-#         produces
-
-#             [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-#         """
-#         self._layout.beginlist()
-
-#     def end_list(self):
-#         """
-#         Ends a list.
-#         """
-#         self._layout.endlist()
-
-#     def begin_tuple(self, numfields):
-#         """
-#         Begins filling a tuple with `numfields` fields; must be closed with
-#         #end_tuple.
-
-#         For example,
-
-#             builder.begin_tuple(3)
-#             builder.index(0).integer(1)
-#             builder.index(1).real(1.1)
-#             builder.index(2).string("one")
-#             builder.end_tuple()
-#             builder.begin_tuple(3)
-#             builder.index(0).integer(2)
-#             builder.index(1).real(2.2)
-#             builder.index(2).string("two")
-#             builder.end_tuple()
-
-#         produces
-
-#             [(1, 1.1, "one"), (2, 2.2, "two")]
-#         """
-#         self._layout.begintuple(numfields)
-
-#     def index(self, i):
-#         """
-#         Args:
-#             i (int): The tuple slot to fill.
-
-#         This method also returns the #ak.ArrayBuilder, so that it can be
-#         chained with the value that fills the slot.
-
-#         Prepares to fill a tuple slot; see #begin_tuple for an example.
-#         """
-#         self._layout.index(i)
-#         return self
-
-#     def end_tuple(self):
-#         """
-#         Ends a tuple.
-#         """
-#         self._layout.endtuple()
-
-#     def begin_record(self, name=None):
-#         """
-#         Begins filling a record with an optional `name`; must be closed with
-#         #end_record.
-
-#         For example,
-
-#             >>> builder = ak.ArrayBuilder()
-#             >>> builder.begin_record("points")
-#             >>> builder.field("x").real(1)
-#             >>> builder.field("y").real(1.1)
-#             >>> builder.end_record()
-#             >>> builder.begin_record("points")
-#             >>> builder.field("x").real(2)
-#             >>> builder.field("y").real(2.2)
-#             >>> builder.end_record()
-
-#         produces
-
-#             >>> ak.to_list(builder.snapshot())
-#             [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
-
-#         with type
-
-#             >>> ak.type(builder.snapshot())
-#             2 * points["x": float64, "y": float64]
-
-#         The record type is named `"points"` because its `"__record__"`
-#         parameter is set to that value:
-
-#             >>> builder.snapshot().layout.parameters
-#             {'__record__': 'points'}
-
-#         The `"__record__"` parameter can be used to add behavior to the records
-#         in the array, as described in #ak.Array, #ak.Record, and #ak.behavior.
-#         """
-#         self._layout.beginrecord(name)
-
-#     def field(self, key):
-#         """
-#         Args:
-#             key (str): The field key to fill.
-
-#         This method also returns the #ak.ArrayBuilder, so that it can be
-#         chained with the value that fills the slot.
-
-#         Prepares to fill a field; see #begin_record for an example.
-#         """
-#         self._layout.field(key)
-#         return self
-
-#     def end_record(self):
-#         """
-#         Ends a record.
-#         """
-#         self._layout.endrecord()
-
-#     def append(self, obj, at=None):
-#         """
-#         Args:
-#             obj: The object to append.
-#             at (None or int): which value to select from `obj` if `obj` is
-#                 an #ak.Array.
-
-#         Appends any type of object, which can be a shorthand for #null,
-#         #boolean, #integer, #real, #bytestring, or #string, but also
-#         an #ak.Array or #ak.Record to *reference* values from an existing
-#         dataset, or any Python object to *convert* to Awkward Array.
-
-#         If `obj` is an #ak.Array or #ak.Record, the output will be an
-#         #ak.layout.IndexedArray64 (or #ak.layout.IndexedOptionArray64 if
-#         there are any None values) that references the existing data. This
-#         can be a more time and memory-efficient way to put old data in a
-#         new structure, since it avoids copying and even walking over the
-#         old data structure (matters more when the structures are large).
-
-#         If `obj` is an arbitrary Python object, this is equivalent to
-#         #ak.from_iter except that it fills an existing #ak.ArrayBuilder,
-#         rather than creating a new one.
-
-#         If `obj` is an #ak.Array and `at` is an int, this method fills the
-#         ArrayBuilder with a reference to `obj[at]` instead of `obj`.
-#         """
-#         if at is None:
-#             if isinstance(obj, Record):
-#                 self._layout.append(obj.layout.array, obj.layout.at)
-#             elif isinstance(obj, Array):
-#                 self._layout.beginlist()
-#                 self._layout.extend(obj.layout)
-#                 self._layout.endlist()
-#             else:
-#                 self._layout.fromiter(obj)
-
-#         else:
-#             if isinstance(obj, Array):
-#                 self._layout.append(obj.layout, at)
-#             else:
-#                 raise TypeError(
-#                     "'append' method can only be used with 'at' when "
-#                     "'obj' is an ak.Array"
-#                 )
-
-#     def extend(self, obj):
-#         """
-#         Args:
-#             obj (#ak.Array): The Array to concatenate with the data in this
-#                 ArrayBuilder.
-
-#         Appends every value from `obj`, by reference (see #append).
-#         """
-#         if isinstance(obj, Array):
-#             self._layout.extend(obj.layout)
-#         else:
-#             raise TypeError(
-#                 "'extend' method requires an ak.Array"
-#
-#             )
-
-#     class _Nested(object):
-#         def __init__(self, arraybuilder):
-#             self._arraybuilder = arraybuilder
-
-#         def __repr__(self, limit_value=40, limit_total=85):
-#             snapshot = self._arraybuilder.snapshot()
-#             value = self._arraybuilder._str(limit_value=limit_value, snapshot=snapshot)
-
-#             limit_type = (
-#                 limit_total
-#                 - len(value)
-#                 - len("<ArrayBuilder.  type=>")
-#                 - len(self._name)
-#             )
-#             typestrs = ak._v2._util.typestrs(self._arraybuilder._behavior)
-#             typestr = repr(
-#                 str(ak._v2.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
-#             )
-#             if len(typestr) > limit_type:
-#                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
-
-#             return "<ArrayBuilder.{0} {1} type={2}>".format(self._name, value, typestr)
-
-#     class List(_Nested):
-#         _name = "list"
-
-#         def __enter__(self):
-#             self._arraybuilder.begin_list()
-
-#         def __exit__(self, type, value, traceback):
-#             self._arraybuilder.end_list()
-
-#     def list(self):
-#         """
-#         Context manager to prevent unpaired #begin_list and #end_list. The
-#         example in the #begin_list documentation can be rewritten as
-
-#             with builder.list():
-#                 builder.real(1.1)
-#                 builder.real(2.2)
-#                 builder.real(3.3)
-#             with builder.list():
-#                 pass
-#             with builder.list():
-#                 builder.real(4.4)
-#                 builder.real(5.5)
-
-#         to produce the same result.
-
-#             [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-
-#         Since context managers aren't yet supported by Numba, this method
-#         can't be used in Numba.
-#         """
-#         return self.List(self)
-
-#     class Tuple(_Nested):
-#         _name = "tuple"
-
-#         def __init__(self, arraybuilder, numfields):
-#             super(ArrayBuilder.Tuple, self).__init__(arraybuilder)
-#             self._numfields = numfields
-
-#         def __enter__(self):
-#             self._arraybuilder.begin_tuple(self._numfields)
-
-#         def __exit__(self, type, value, traceback):
-#             self._arraybuilder.end_tuple()
-
-#     def tuple(self, numfields):
-#         """
-#         Context manager to prevent unpaired #begin_tuple and #end_tuple. The
-#         example in the #begin_tuple documentation can be rewritten as
-
-#             with builder.tuple(3):
-#                 builder.index(0).integer(1)
-#                 builder.index(1).real(1.1)
-#                 builder.index(2).string("one")
-#             with builder.tuple(3):
-#                 builder.index(0).integer(2)
-#                 builder.index(1).real(2.2)
-#                 builder.index(2).string("two")
-
-#         to produce the same result.
-
-#             [(1, 1.1, "one"), (2, 2.2, "two")]
-
-#         Since context managers aren't yet supported by Numba, this method
-#         can't be used in Numba.
-#         """
-#         return self.Tuple(self, numfields)
-
-#     class Record(_Nested):
-#         _name = "record"
-
-#         def __init__(self, arraybuilder, name):
-#             super(ArrayBuilder.Record, self).__init__(arraybuilder)
-#             self._name = name
-
-#         def __enter__(self):
-#             self._arraybuilder.begin_record(name=self._name)
-
-#         def __exit__(self, type, value, traceback):
-#             self._arraybuilder.end_record()
-
-#     def record(self, name=None):
-#         """
-#         Context manager to prevent unpaired #begin_record and #end_record. The
-#         example in the #begin_record documentation can be rewritten as
-
-#             with builder.record("points"):
-#                 builder.field("x").real(1)
-#                 builder.field("y").real(1.1)
-#             with builder.record("points"):
-#                 builder.field("x").real(2)
-#                 builder.field("y").real(2.2)
-
-#         to produce the same result.
-
-#             [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
-
-#         Since context managers aren't yet supported by Numba, this method
-#         can't be used in Numba.
-#         """
-#         return self.Record(self, name)
+class ArrayBuilder(Sized):
+    """
+    Args:
+        behavior (None or dict): Custom #ak.behavior for arrays built by
+            this ArrayBuilder.
+        initial (int): Initial size (in bytes) of buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
+        resize (float): Resize multiplier for buffers used by
+            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+            should be strictly greater than 1.
+
+    General tool for building arrays of nested data structures from a sequence
+    of commands. Most data types can be constructed by calling commands in the
+    right order, similar to printing tokens to construct JSON output.
+
+    To illustrate how this works, consider the following example.
+
+        b = ak.ArrayBuilder()
+
+        # fill commands   # as JSON   # current array type
+        ##########################################################################################
+        b.begin_list()    # [         # 0 * var * unknown     (initially, the type is unknown)
+        b.integer(1)      #   1,      # 0 * var * int64
+        b.integer(2)      #   2,      # 0 * var * int64
+        b.real(3)         #   3.0     # 0 * var * float64     (all the integers have become floats)
+        b.end_list()      # ],        # 1 * var * float64
+        b.begin_list()    # [         # 1 * var * float64
+        b.end_list()      # ],        # 2 * var * float64
+        b.begin_list()    # [         # 2 * var * float64
+        b.integer(4)      #   4,      # 2 * var * float64
+        b.null()          #   null,   # 2 * var * ?float64    (now the floats are nullable)
+        b.integer(5)      #   5       # 2 * var * ?float64
+        b.end_list()      # ],        # 3 * var * ?float64
+        b.begin_list()    # [         # 3 * var * ?float64
+        b.begin_record()  #   {       # 3 * var * ?union[float64, {}]
+        b.field("x")      #     "x":  # 3 * var * ?union[float64, {"x": unknown}]
+        b.integer(1)      #      1,   # 3 * var * ?union[float64, {"x": int64}]
+        b.field("y")      #      "y": # 3 * var * ?union[float64, {"x": int64, "y": unknown}]
+        b.begin_list()    #      [    # 3 * var * ?union[float64, {"x": int64, "y": var * unknown}]
+        b.integer(2)      #        2, # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.integer(3)      #        3  # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.end_list()      #      ]    # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.end_record()    #   }       # 3 * var * ?union[float64, {"x": int64, "y": var * int64}]
+        b.end_list()      # ]         # 4 * var * ?union[float64, {"x": int64, "y": var * int64}]
+
+    To get an array, we take a #snapshot of the ArrayBuilder's current state.
+
+        >>> ak.to_list(b.snapshot())
+        [[1.0, 2.0, 3.0], [], [4.0, None, 5.0], [{'x': 1, 'y': [2, 3]}]]
+
+    The full set of filling commands is the following.
+
+       * #null: appends a None value.
+       * #boolean: appends True or False.
+       * #integer: appends an integer.
+       * #real: appends a floating-point value.
+       * #complex: appends a complex value.
+       * #datetime: appends a datetime value.
+       * #timedelta: appends a timedelta value.
+       * #bytestring: appends an unencoded string (raw bytes).
+       * #string: appends a UTF-8 encoded string.
+       * #begin_list: begins filling a list; must be closed with #end_list.
+       * #end_list: ends a list.
+       * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
+       * #index: selects a tuple slot to fill; must be followed by a command
+         that actually fills that slot.
+       * #end_tuple: ends a tuple.
+       * #begin_record: begins filling a record; must be closed with
+         #end_record.
+       * #field: selects a record field to fill; must be followed by a command
+         that actually fills that field.
+       * #end_record: ends a record.
+       * #append: generic method for filling #null, #boolean, #integer, #real,
+         #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
+       * #extend: appends all the items from an iterable.
+       * #list: context manager for #begin_list and #end_list.
+       * #tuple: context manager for #begin_tuple and #end_tuple.
+       * #record: context manager for #begin_record and #end_record.
+
+    ArrayBuilders can be used in [Numba](http://numba.pydata.org/): they can
+    be passed as arguments to a Numba-compiled function or returned as return
+    values. (Since ArrayBuilder works by accumulating side-effects, it's not
+    strictly necessary to return the object.)
+
+    The primary limitation is that ArrayBuilders cannot be *created* and
+    #snapshot cannot be called inside the Numba-compiled function. Awkward
+    Array uses Numba as a transformer: #ak.Array and an empty #ak.ArrayBuilder
+    go in and a filled #ak.ArrayBuilder is the result; #snapshot can be called
+    outside of the compiled function.
+
+    Also, context managers (Python's `with` statement) are not supported in
+    Numba yet, so the #list, #tuple, and #record methods are not available
+    in Numba-compiled functions.
+
+    Here is an example of filling an ArrayBuilder in Numba, which makes a
+    tree of dynamic depth.
+
+        >>> import numba as nb
+        >>> @nb.njit
+        ... def deepnesting(builder, probability):
+        ...     if np.random.uniform(0, 1) > probability:
+        ...         builder.append(np.random.normal())
+        ...     else:
+        ...         builder.begin_list()
+        ...         for i in range(np.random.poisson(3)):
+        ...             deepnesting(builder, probability**2)
+        ...         builder.end_list()
+        ...
+        >>> builder = ak.ArrayBuilder()
+        >>> deepnesting(builder, 0.9)
+        >>> builder.snapshot()
+        <Array [... 1.23, -0.498, 0.272], -0.0519]]]] type='1 * var * var * union[var * ...'>
+        >>> ak.to_list(builder)
+        [[[[2.05, 0.95], [[[0.25], 1.86, 0.89, 0.31], 0.38, -1.62, [[0.18], 0.46, 0.39], [-0.57, 1.39, -0.15, -0.20]], [[[-0.74, -0.34], -0.84], [-0.81, -0.72, -0.42, [1.04, 1.69, -0.18, 1.07]]], [[0.51]]], [[-1.97, 0.57], [-1.24, -2.14, -0.54, [[0.24, -2.31, [-0.68, 0.08], 1.80, 0.16], -0.63, [0.01, [-1.28, 0.38, 1.40, -0.26, -0.48]]], -0.62, -2.53], [-1.66, 0.58]], [0.62, [[-0.76, -0.67, -1.15], -0.50, [0.36, 0.48, -0.80, [1.15, -1.09], -1.39, 1.28]], 0.93, [1.35, [0.36, 1.09, -0.27, -0.79], [-0.41], [0.67, 0.89, 0.79]], [], [0.67, [-0.48, -0.39], 1.06, 0.80, -0.34], [[1.56, -1.60, [-0.69], -0.42], 0.33, -0.73, 0.50, -1.25, -1.15], [[0.64], [-0.01], -0.95], [[0.41, -0.68, 0.79], 0.51]], [[0.62, [0.58, -0.75]], [1.61, 0.52, 0.24], -1.09, [-1.11], 0.22], [-0.41, [[0.42], 0.78, [1.22, -0.49, 0.27], -0.05xs]]]]
+        >>> ak.type(builder.snapshot())
+        1 * var * var * union[var * union[float64, var * union[var * union[float64, var * float64], float64]], float64]
+
+    Note that this is a *general* method for building arrays; if the type is
+    known in advance, more specialized procedures can be faster. This should
+    be considered the "least effort" approach.
+    """
+
+    def __init__(self, behavior=None, initial=1024, resize=1.5):
+        self._layout = ak.layout.ArrayBuilder(initial=initial, resize=resize)
+        self.behavior = behavior
+
+    @classmethod
+    def _wrap(cls, layout, behavior=None):
+        """
+        Args:
+            layout (#ak.layout.ArrayBuilder): Low-level builder to wrap.
+            behavior (None or dict): Custom #ak.behavior for arrays built by
+                this ArrayBuilder.
+
+        Wraps a low-level #ak.layout.ArrayBuilder as a high-level
+        #ak.ArrayBulider.
+
+        The #ak.ArrayBuilder constructor creates a new #ak.layout.ArrayBuilder
+        with no accumulated data, but Numba needs to wrap existing data
+        when returning from a lowered function.
+        """
+        assert isinstance(layout, ak.layout.ArrayBuilder)
+        out = cls.__new__(cls)
+        out._layout = layout
+        out.behavior = behavior
+        return out
+
+    @property
+    def behavior(self):
+        """
+        The `behavior` parameter passed into this ArrayBuilder's constructor.
+
+           * If a dict, this `behavior` overrides the global #ak.behavior.
+             Any keys in the global #ak.behavior but not this `behavior` are
+             still valid, but any keys in both are overridden by this
+             `behavior`. Keys with a None value are equivalent to missing keys,
+             so this `behavior` can effectively remove keys from the
+             global #ak.behavior.
+
+           * If None, the Array defaults to the global #ak.behavior.
+
+        See #ak.behavior for a list of recognized key patterns and their
+        meanings.
+        """
+        return self._behavior
+
+    @behavior.setter
+    def behavior(self, behavior):
+        if behavior is None or isinstance(behavior, dict):
+            self._behavior = behavior
+        else:
+            raise TypeError("behavior must be None or a dict")
+
+    @property
+    def type(self):
+        """
+        The high-level type of the accumulated array; same as #ak.type.
+
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
+
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
+        """
+        form = ak._v2.forms.from_json(self._layout.form())
+        return ak._v2.types.ArrayType(
+            form.type_from_behavior(self._behavior), len(self._layout)
+        )
+
+    @property
+    def typestr(self):
+        """
+        The high-level type of this accumulated array, presented as a string.
+
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
+
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
+        """
+        return str(self.type)
+
+    def __len__(self):
+        """
+        The current length of the accumulated array.
+        """
+        return len(self._layout)
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        typestr = repr(self.typestr)
+
+        limit_type = 80 - len("<ArrayBuilder type=>")
+        if len(typestr) > limit_type:
+            typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
+
+        return "<ArrayBuilder type={0}>".format(typestr)
+
+    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
+        """
+        Args:
+            limit_rows (int): Maximum number of rows (lines) to use in the output.
+            limit_cols (int): Maximum number of columns (characters wide).
+            type (bool): If True, print the type as well. (Doesn't count toward number
+                of rows/lines limit.)
+            stream (object with a ``write(str)`` method or None): Stream to write the
+                output to. If None, return a string instead of writing to a stream.
+
+        Display the contents of the array within `limit_rows` and `limit_cols`, using
+        ellipsis (`...`) for hidden nested data.
+
+        This method takes a snapshot of the data and calls show on it, and a snapshot
+        copies data.
+        """
+        return self.snapshot().show(
+            limit_rows=limit_rows, limit_cols=limit_cols, type=type, stream=stream
+        )
+
+    # def __array__(self, *args, **kwargs):
+    #     """
+    #     Intercepts attempts to convert a #snapshot of this array into a
+    #     NumPy array and either performs a zero-copy conversion or raises
+    #     an error.
+
+    #     See #ak.Array.__array__ for a more complete description.
+    #     """
+    #     return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
+
+    # @property
+    # def numba_type(self):
+    #     """
+    #     The type of this Array when it is used in Numba. It contains enough
+    #     information to generate low-level code for accessing any element,
+    #     down to the leaves.
+
+    #     See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+    #     on types and signatures.
+    #     """
+    #     import awkward._v2._connect.numba
+
+    #     ak._v2._connect.numba.register_and_check()
+    #     import awkward._v2._connect.numba.builder  # noqa: F401
+
+    #     return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
+
+    def __bool__(self):
+        if len(self) == 1:
+            return bool(self[0])
+        else:
+            raise ValueError(
+                "the truth value of an array whose length is not 1 is ambiguous; "
+                "use ak.any() or ak.all()"
+            )
+
+    def snapshot(self):
+        """
+        Converts the currently accumulated data into an #ak.Array.
+
+        The currently accumulated data are *copied* into the new array.
+        """
+        formstr, length, container = self._layout.to_buffers()
+        form = ak._v2.forms.from_json(formstr)
+        return ak._v2.operations.convert.from_buffers(form, length, container)
+
+    def null(self):
+        """
+        Appends a None value at the current position in the accumulated array.
+        """
+        self._layout.null()
+
+    def boolean(self, x):
+        """
+        Appends a boolean value `x` at the current position in the accumulated
+        array.
+        """
+        self._layout.boolean(x)
+
+    def integer(self, x):
+        """
+        Appends an integer `x` at the current position in the accumulated
+        array.
+        """
+        self._layout.integer(x)
+
+    def real(self, x):
+        """
+        Appends a floating point number `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.real(x)
+
+    def complex(self, x):
+        """
+        Appends a floating point number `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.complex(x)
+
+    def datetime(self, x):
+        """
+        Appends a datetime value `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.datetime(x)
+
+    def timedelta(self, x):
+        """
+        Appends a timedelta value `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.timedelta(x)
+
+    def bytestring(self, x):
+        """
+        Appends an unencoded string (raw bytes) `x` at the current position
+        in the accumulated array.
+        """
+        self._layout.bytestring(x)
+
+    def string(self, x):
+        """
+        Appends a UTF-8 encoded string `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.string(x)
+
+    def begin_list(self):
+        """
+        Begins filling a list; must be closed with #end_list.
+
+        For example,
+
+            builder.begin_list()
+            builder.real(1.1)
+            builder.real(2.2)
+            builder.real(3.3)
+            builder.end_list()
+            builder.begin_list()
+            builder.end_list()
+            builder.begin_list()
+            builder.real(4.4)
+            builder.real(5.5)
+            builder.end_list()
+
+        produces
+
+            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        """
+        self._layout.beginlist()
+
+    def end_list(self):
+        """
+        Ends a list.
+        """
+        self._layout.endlist()
+
+    def begin_tuple(self, numfields):
+        """
+        Begins filling a tuple with `numfields` fields; must be closed with
+        #end_tuple.
+
+        For example,
+
+            builder.begin_tuple(3)
+            builder.index(0).integer(1)
+            builder.index(1).real(1.1)
+            builder.index(2).string("one")
+            builder.end_tuple()
+            builder.begin_tuple(3)
+            builder.index(0).integer(2)
+            builder.index(1).real(2.2)
+            builder.index(2).string("two")
+            builder.end_tuple()
+
+        produces
+
+            [(1, 1.1, "one"), (2, 2.2, "two")]
+        """
+        self._layout.begintuple(numfields)
+
+    def index(self, i):
+        """
+        Args:
+            i (int): The tuple slot to fill.
+
+        This method also returns the #ak.ArrayBuilder, so that it can be
+        chained with the value that fills the slot.
+
+        Prepares to fill a tuple slot; see #begin_tuple for an example.
+        """
+        self._layout.index(i)
+        return self
+
+    def end_tuple(self):
+        """
+        Ends a tuple.
+        """
+        self._layout.endtuple()
+
+    def begin_record(self, name=None):
+        """
+        Begins filling a record with an optional `name`; must be closed with
+        #end_record.
+
+        For example,
+
+            >>> builder = ak.ArrayBuilder()
+            >>> builder.begin_record("points")
+            >>> builder.field("x").real(1)
+            >>> builder.field("y").real(1.1)
+            >>> builder.end_record()
+            >>> builder.begin_record("points")
+            >>> builder.field("x").real(2)
+            >>> builder.field("y").real(2.2)
+            >>> builder.end_record()
+
+        produces
+
+            >>> ak.to_list(builder.snapshot())
+            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+
+        with type
+
+            >>> ak.type(builder.snapshot())
+            2 * points["x": float64, "y": float64]
+
+        The record type is named `"points"` because its `"__record__"`
+        parameter is set to that value:
+
+            >>> builder.snapshot().layout.parameters
+            {'__record__': 'points'}
+
+        The `"__record__"` parameter can be used to add behavior to the records
+        in the array, as described in #ak.Array, #ak.Record, and #ak.behavior.
+        """
+        self._layout.beginrecord(name)
+
+    def field(self, key):
+        """
+        Args:
+            key (str): The field key to fill.
+
+        This method also returns the #ak.ArrayBuilder, so that it can be
+        chained with the value that fills the slot.
+
+        Prepares to fill a field; see #begin_record for an example.
+        """
+        self._layout.field(key)
+        return self
+
+    def end_record(self):
+        """
+        Ends a record.
+        """
+        self._layout.endrecord()
+
+    def append(self, obj):
+        """
+        Args:
+            obj: The data to append (None, bool, int, float, bytes, str, or
+                anything recognized by #ak.from_iter).
+
+        Appends any type, which can be a shorthand for #null,
+        #boolean, #integer, #real, #bytestring, or #string, but also
+        an #ak.Array or #ak.Record to *reference* values from an existing
+        dataset, or any Python object to *convert* to Awkward Array.
+
+        If `obj` is an iterable (including dict), this is equivalent to
+        #ak.from_iter except that it fills an existing #ak.ArrayBuilder,
+        rather than creating a new one.
+        """
+        self._layout.fromiter(obj)
+
+    def extend(self, obj):
+        """
+        Args:
+            obj (iterable): Iterable of data to extend this ArrayBuilder with.
+
+        Appends every value from `obj`.
+        """
+        for x in obj:
+            self._layout.fromiter(x)
+
+    class _Nested(object):
+        def __init__(self, arraybuilder):
+            self._arraybuilder = arraybuilder
+
+        def __repr__(self):
+            typestr = repr(self._arraybuilder.typestr)
+
+            limit_type = 80 - len("<ArrayBuilder. type=>") - len(self._name)
+            if len(typestr) > limit_type:
+                typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
+
+            return "<ArrayBuilder.{0} type={1}>".format(self._name, typestr)
+
+    class List(_Nested):
+        _name = "list"
+
+        def __enter__(self):
+            self._arraybuilder.begin_list()
+
+        def __exit__(self, type, value, traceback):
+            self._arraybuilder.end_list()
+
+    def list(self):
+        """
+        Context manager to prevent unpaired #begin_list and #end_list. The
+        example in the #begin_list documentation can be rewritten as
+
+            with builder.list():
+                builder.real(1.1)
+                builder.real(2.2)
+                builder.real(3.3)
+            with builder.list():
+                pass
+            with builder.list():
+                builder.real(4.4)
+                builder.real(5.5)
+
+        to produce the same result.
+
+            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+        Since context managers aren't yet supported by Numba, this method
+        can't be used in Numba.
+        """
+        return self.List(self)
+
+    class Tuple(_Nested):
+        _name = "tuple"
+
+        def __init__(self, arraybuilder, numfields):
+            super(ArrayBuilder.Tuple, self).__init__(arraybuilder)
+            self._numfields = numfields
+
+        def __enter__(self):
+            self._arraybuilder.begin_tuple(self._numfields)
+
+        def __exit__(self, type, value, traceback):
+            self._arraybuilder.end_tuple()
+
+    def tuple(self, numfields):
+        """
+        Context manager to prevent unpaired #begin_tuple and #end_tuple. The
+        example in the #begin_tuple documentation can be rewritten as
+
+            with builder.tuple(3):
+                builder.index(0).integer(1)
+                builder.index(1).real(1.1)
+                builder.index(2).string("one")
+            with builder.tuple(3):
+                builder.index(0).integer(2)
+                builder.index(1).real(2.2)
+                builder.index(2).string("two")
+
+        to produce the same result.
+
+            [(1, 1.1, "one"), (2, 2.2, "two")]
+
+        Since context managers aren't yet supported by Numba, this method
+        can't be used in Numba.
+        """
+        return self.Tuple(self, numfields)
+
+    class Record(_Nested):
+        _name = "record"
+
+        def __init__(self, arraybuilder, name):
+            super(ArrayBuilder.Record, self).__init__(arraybuilder)
+            self._name = name
+
+        def __enter__(self):
+            self._arraybuilder.begin_record(name=self._name)
+
+        def __exit__(self, type, value, traceback):
+            self._arraybuilder.end_record()
+
+    def record(self, name=None):
+        """
+        Context manager to prevent unpaired #begin_record and #end_record. The
+        example in the #begin_record documentation can be rewritten as
+
+            with builder.record("points"):
+                builder.field("x").real(1)
+                builder.field("y").real(1.1)
+            with builder.record("points"):
+                builder.field("x").real(2)
+                builder.field("y").real(2.2)
+
+        to produce the same result.
+
+            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+
+        Since context managers aren't yet supported by Numba, this method
+        can't be used in Numba.
+        """
+        return self.Record(self, name)

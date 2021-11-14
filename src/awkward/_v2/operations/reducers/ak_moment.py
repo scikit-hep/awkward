@@ -7,16 +7,24 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
+def moment(
+    x,
+    n,
+    weight=None,
+    axis=None,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
+):
     raise NotImplementedError
 
 
 #     """
 #     Args:
-#         x: the data on which to compute the moment.
-#         n (int): the choice of moment: `0` is a sum of weights, `1` is
+#         x: The data on which to compute the moment (anything #ak.to_layout recognizes).
+#         n (int): The choice of moment: `0` is a sum of weights, `1` is
 #             #ak.mean, `2` is #ak.var without subtracting the mean, etc.
-#         weight: data that can be broadcasted to `x` to give each value a
+#         weight: Data that can be broadcasted to `x` to give each value a
 #             weight. Weighting values equally is the same as no weights;
 #             weighting some values higher increases the significance of those
 #             values. Weights can be zero or negative.
@@ -33,6 +41,8 @@ def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
 #             empty lists results in None (an option type); otherwise, the
 #             calculation is followed through with the reducers' identities,
 #             usually resulting in floating-point `nan`.
+#         flatten_records (bool): If True, axis=None combines fields from different
+#             records; otherwise, records raise an error.
 
 #     Computes the `n`th moment in each group of elements from `x` (many
 #     types supported, including all Awkward Arrays and Records). The grouping

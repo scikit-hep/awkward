@@ -679,6 +679,14 @@ class RecordArray(Content):
                 return sub
         return ""
 
+    def _nbytes_part(self):
+        result = 0
+        for content in self.contents:
+            result = result + content._nbytes_part()
+        if self.identifier is not None:
+            result = result + self.identifier._nbytes_part()
+        return result
+
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -738,9 +746,11 @@ class RecordArray(Content):
         else:
             in_function = ""
             if options["function_name"] is not None:
-                in_function = "in " + options["function_name"]
+                in_function = " in " + options["function_name"]
             raise TypeError(
-                "cannot flatten record fields into the same array" + in_function
+                "cannot combine record fields{0} unless flatten_records=True".format(
+                    in_function
+                )
             )
 
     def _recursively_apply(
