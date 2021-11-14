@@ -553,6 +553,9 @@ class RegularArray(Content):
                 next, self._size, len(self), None, self._parameters
             )
 
+    def _offsets_and_flattened(self, axis, depth):
+        return self.toListOffsetArray64(True)._offsets_and_flattened(axis, depth)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

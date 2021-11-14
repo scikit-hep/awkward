@@ -492,6 +492,84 @@ class UnionArray(Content):
             out = UnionArray(self._tags, self._index, contents, None, self._parameters)
             return out.simplify_uniontype(True, False)
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+        else:
+            has_offsets = False
+            offsetsraws = []
+            contents = []
+            for content in self._contents:
+                offsets, flattened = content._offsets_and_flattened(posaxis, depth)
+                offsetsraws.append(offsets.data)
+                contents.append(flattened)
+                has_offsets = offsets.length() != 0
+
+            if has_offsets:
+                total_length = ak._v2.index.Index64.zeros(
+                    1, self.nplike, dtype=np.int64
+                )
+
+                self._handle_error(
+                    self.nplike[
+                        "awkward_UnionArray_flatten_length",
+                        self._tags.dtype.type,
+                        self._index.dtype.type,
+                        offsetsraws.dtype.type,
+                    ](
+                        total_length[0],
+                        self._tags.to(self.nplike),
+                        self._index.to(self.nplike),
+                        len(self._tags),
+                        offsetsraws.to(self.nplike),
+                    )
+                )
+
+                totags = ak._v2.index.Index8.empty(
+                    total_length[0], self.nplike, dtype=np.int8
+                )
+                toindex = ak._v2.index.Index64.empty(
+                    total_length[0], self.nplike, dtype=np.int64
+                )
+                tooffsets = ak._v2.index.Index64.empty(
+                    len(self._tags) + 1, self.nplike, dtype=np.int64
+                )
+
+                self._handle_error(
+                    self.nplike[
+                        "awkward_UnionArray_flatten_combin",
+                        totags.dtype.type,
+                        toindex.dtype.type,
+                        tooffsets.dtype.type,
+                        self._tags.dtype.type,
+                        self._index.dtype.type,
+                        offsetsraws.dtype.type,
+                    ](
+                        totags.to(self.nplike),
+                        toindex.to(self.nplike),
+                        tooffsets.to(self.nplike),
+                        self._tags.to(self.nplike),
+                        self._index.to(self.nplike),
+                        len(self._tags),
+                        offsetsraws.to(self.nplike),
+                    )
+                )
+
+                return (
+                    tooffsets,
+                    UnionArray(totags, toindex, contents, None, self._parameters),
+                )
+
+            else:
+                offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
+                return (
+                    offsets,
+                    UnionArray(
+                        self._tags, self._index, contents, None, self._parameters
+                    ),
+                )
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

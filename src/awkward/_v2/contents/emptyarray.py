@@ -140,6 +140,14 @@ class EmptyArray(Content):
             out = ak._v2.index.Index64.empty(0, self.nplike)
             return ak._v2.contents.numpyarray.NumpyArray(out)
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+        else:
+            offsets = ak._v2.index.Index64.zeros(1, self.nplike)
+            return (offsets, EmptyArray(None, self._parameters))
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

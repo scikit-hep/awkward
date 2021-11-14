@@ -400,6 +400,32 @@ class RecordArray(Content):
                 contents, self._fields, self._length, None, self._parameters
             )
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+
+        elif posaxis == depth + 1:
+            raise ValueError(
+                "arrays of records cannot be flattened (but their contents can be; try a different 'axis')"
+            )
+
+        else:
+            contents = []
+            for content in self._contents:
+                trimmed = content._getitem_range(slice(0, len(self)))
+                offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
+                if len(offsets) != 0:
+                    raise AssertionError(
+                        "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
+                    )
+                contents.append(flattened)
+            offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
+            return (
+                offsets,
+                RecordArray(contents, self._fields, None, self._parameters),
+            )
+
     def mergeable(self, other, mergebool=True):
         if not _parameters_equal(self._parameters, other._parameters):
             return False
