@@ -600,6 +600,26 @@ class IndexedOptionArray(Content):
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
 
+    def fillna(self, value):
+        if len(value) != 1:
+            raise ValueError(
+                "fillna value length ({0}) is not equal to 1".format(len(value))
+            )
+
+        contents = [self._content, value]
+        tags = self.bytemask()
+        index = ak._v2.index.Index64.empty(len(tags), self.nplike)
+
+        self._handle_error(
+            self.nplike[
+                "awkward_UnionArray_fillna", index.dtype.type, self._index.dtype.type
+            ](index.to(self.nplike), self._index.to(self.nplike), len(tags))
+        )
+        out = ak._v2.contents.unionarray.UnionArray(
+            tags, index, contents, None, self._parameters
+        )
+        return out.simplify_uniontype(True, True)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

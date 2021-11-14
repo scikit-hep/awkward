@@ -863,6 +863,15 @@ class ListArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
+    def fillna(self, value):
+        return ListArray(
+            self._starts,
+            self._stops,
+            self._content.fillna(value),
+            self._identifier,
+            self._parameters,
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

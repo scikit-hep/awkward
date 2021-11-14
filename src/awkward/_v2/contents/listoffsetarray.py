@@ -589,6 +589,14 @@ class ListOffsetArray(Content):
         )
         return listarray.mergemany(others)
 
+    def fillna(self, value):
+        return ListOffsetArray(
+            self._offsets,
+            self._content.fillna(value),
+            self._identifier,
+            self._parameters,
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

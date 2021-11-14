@@ -670,6 +670,15 @@ class UnionArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
+    def fillna(self, value):
+        contents = []
+        for content in self._contents:
+            contents.append(content.fillna(value))
+        out = UnionArray(
+            self._tags, self._index, contents, self._identifier, self._parameters
+        )
+        return out.simplify_uniontype(True, False)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

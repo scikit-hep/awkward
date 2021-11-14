@@ -595,6 +595,15 @@ class RegularArray(Content):
             return self
         return self.toListOffsetArray64(True).mergemany(others)
 
+    def fillna(self, value):
+        return RegularArray(
+            self._content.fillna(value),
+            self._size,
+            self._length,
+            self._identifier,
+            self._parameters,
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
