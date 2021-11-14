@@ -12,14 +12,14 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
-# includes test_0117, test_0110, test_0042, test_0127, 
+# includes test_0117, test_0110, test_0042, test_0127,
 # test_0198, test_0446, test_0585, test_0590
 
 
 def test_flatten_ListOffsetArray():
     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     array = v1_to_v2(array.layout)
-    
+
     assert ak.to_list(array.flatten()) == [1.1, 2.2, 3.3, 4.4, 5.5]
     print(ak.to_list(array[1:]))
 
@@ -573,9 +573,10 @@ def test_fix_corner_case():
 
 def test_flatten_allow_regulararray_size_zero():
     empty = ak.Array(
-        ak.layout.RegularArray(ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0)
+        ak.layout.RegularArray(
+            ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
+        )
     )
     assert ak.flatten(empty, axis=0).tolist() == []
     assert ak.flatten(empty, axis=1).tolist() == []
     assert ak.flatten(empty, axis=2).tolist() == []
-
