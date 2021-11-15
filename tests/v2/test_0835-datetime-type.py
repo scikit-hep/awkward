@@ -168,9 +168,6 @@ def test_highlevel_timedelta64_ArrayBuilder():
     ]
 
 
-@pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
-)
 def test_count_axis_None():
     array = ak.Array(
         [
@@ -238,9 +235,6 @@ def test_count():
     ]
 
 
-@pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
-)
 def test_count_nonzeroaxis_None():
     array = ak.Array(
         [
@@ -311,9 +305,6 @@ def test_all_nonzero():
     ]
 
 
-@pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
-)
 def test_argmin_argmax_axis_None():
     array = ak.Array(
         [
@@ -495,7 +486,7 @@ def test_min_max():
 
 
 @pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
+    reason="AttributeError: 'UnionArray' object has no attribute '_length'"
 )
 def test_highlevel_min_max_axis_None():
     array = ak.Array(
