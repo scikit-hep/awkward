@@ -568,7 +568,7 @@ class NumpyArray(Content):
             if isinstance(out, ak._v2.contents.ListOffsetArray):
                 return len(out.content) == len(self)
 
-            return len(out._data) == len(self._data)
+            return len(out) == len(self._data)
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self.shape[0] == 0:
@@ -587,15 +587,20 @@ class NumpyArray(Content):
 
             offsets = ak._v2.index.Index64.zeros(2, nplike)
             offsets[1] = flattened_shape
-            out = ak._v2.contents.NumpyArray(nplike.empty(offsets[1], self.dtype))
+            dtype = (
+                np.dtype(np.int64)
+                if self._data.dtype.kind.upper() == "M"
+                else self._data.dtype
+            )
+            out = nplike.empty(offsets[1], dtype)
             self._handle_error(
-                nplike[
+                nplike[  # noqa: E231
                     "awkward_sort",
-                    out._data.dtype.type,
-                    out._data.dtype.type,
+                    dtype.type,
+                    dtype.type,
                     offsets.dtype.type,
                 ](
-                    out._data,
+                    out,
                     contiguous_self._data,
                     offsets[1],
                     offsets.to(nplike),
@@ -610,16 +615,18 @@ class NumpyArray(Content):
             self._handle_error(
                 nplike[  # noqa: E231
                     "awkward_unique",
-                    out._data.dtype.type,
+                    out.dtype.type,
                     nextlength.dtype.type,
                 ](
-                    out._data,
-                    len(out._data),
+                    out,
+                    len(out),
                     nextlength.to(nplike),
                 )
             )
 
-            return out[: nextlength[0]]
+            return ak._v2.contents.NumpyArray(
+                nplike.asarray(out[: nextlength[0]], self.dtype)
+            )
 
         # axis is not None
         if len(self.shape) != 1 or not self.is_contiguous:
@@ -660,15 +667,15 @@ class NumpyArray(Content):
                 )
             )
 
-            out = ak._v2.contents.NumpyArray(nplike.empty(len(self._data), self.dtype))
+            out = nplike.empty(len(self._data), self.dtype)
             self._handle_error(
                 nplike[
                     "awkward_sort",
-                    out._data.dtype.type,
+                    out.dtype.type,
                     self._data.dtype.type,
                     offsets.dtype.type,
                 ](
-                    out._data,
+                    out,
                     self._data,
                     self.shape[0],
                     offsets.to(nplike),
@@ -683,12 +690,12 @@ class NumpyArray(Content):
             self._handle_error(
                 nplike[
                     "awkward_unique_ranges",
-                    out._data.dtype.type,
+                    out.dtype.type,
                     offsets.dtype.type,
                     nextoffsets.dtype.type,
                 ](
-                    out._data,
-                    len(out._data),
+                    out,
+                    len(out),
                     offsets.to(nplike),
                     len(offsets),
                     nextoffsets.to(nplike),
@@ -714,7 +721,7 @@ class NumpyArray(Content):
 
             return ak._v2.contents.ListOffsetArray(
                 outoffsets,
-                out,
+                ak._v2.contents.NumpyArray(out),
                 None,
                 self._parameters,
             )
