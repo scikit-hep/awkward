@@ -480,11 +480,8 @@ def test_min_max():
     ]
 
 
-@pytest.mark.skip(
-    reason="AttributeError: 'UnionArray' object has no attribute '_length'"
-)
 def test_highlevel_min_max_axis_None():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 np.datetime64("2020-03-27T10:41:11"),
@@ -698,16 +695,29 @@ def test_ufunc_mul():
     assert ak._v2.highlevel.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
 
 
-@pytest.mark.skip(reason="awkward/_v2/contents/numpyarray.py:26: TypeError")
 def test_NumpyArray_layout_FIXME():
-    array0 = ak._v2.contents.NumpyArray(
+    # FIXME: are strings as follows supported?
+    # "2019-09-02T09:30:00",
+    # "2019-09-13T09:30:00",
+    # "2019-09-21T20:00:00",
+
+    array = ak.layout.NumpyArray(
         ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"]
+    )
+    with pytest.raises(TypeError):
+        v1_to_v2(array)
+
+    array0 = ak._v2.contents.NumpyArray(
+        np.array(
+            ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"],
+            dtype=np.datetime64,
+        )
     )
 
     assert ak.to_list(array0) == [
-        "2019-09-02T09:30:00",
-        "2019-09-13T09:30:00",
-        "2019-09-21T20:00:00",
+        datetime.datetime(2019, 9, 2, 9, 30),
+        datetime.datetime(2019, 9, 13, 9, 30),
+        datetime.datetime(2019, 9, 21, 20, 0),
     ]
 
 
