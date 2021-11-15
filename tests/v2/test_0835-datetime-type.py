@@ -56,8 +56,7 @@ def test_time_delta():
 
     array = ak.Array(numpy_array)
     array = v1_to_v2(array.layout)
-    # FIXME:
-    # assert str(array.type) == "3 * timedelta64"
+    assert str(array.form.type) == "timedelta64[D]"
     assert ak.to_list(array) == [
         np.timedelta64("41", "D"),
         np.timedelta64("1", "D"),
@@ -474,15 +473,11 @@ def test_min_max():
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
     ]
-    # FIXME: default axis is -1
-    # np.datetime64("2020-01-27T10:41:11")
     assert ak.to_list(array.max()) == [
         datetime.datetime(2020, 5, 1, 0, 0),
         datetime.datetime(2020, 6, 27, 10, 41, 11),
         datetime.datetime(2020, 3, 27, 10, 41, 11),
     ]
-    # FIXME: default axis is -1
-    # np.datetime64("2020-06-27T10:41:11")
 
 
 @pytest.mark.skip(
