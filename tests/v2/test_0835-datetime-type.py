@@ -528,7 +528,7 @@ def test_highlevel_min_max_axis_None():
 
 
 def test_highlevel_min_max():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 np.datetime64("2020-03-27T10:41:11"),
@@ -596,9 +596,6 @@ def test_highlevel_min_max():
     ]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_to_numpy.py:11: NotImplementedError"
-)
 def test_date_time_units():
     array1 = np.array(
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"

@@ -1071,6 +1071,13 @@ class NumpyArray(Content):
             ),
         )
 
+    def _to_numpy(self, allow_missing):
+        out = ak.nplike.of(self).asarray(self)
+        if type(out).__module__.startswith("cupy."):
+            return out.get()
+        else:
+            return out
+
     def _completely_flatten(self, nplike, options):
         return [self.to(nplike).reshape(-1)]
 
