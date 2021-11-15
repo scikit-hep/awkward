@@ -921,7 +921,7 @@ class UnionArray(Content):
     def _completely_flatten(self, nplike, options):
         out = []
         for content in self._contents:
-            out.extend(content[: len(self)]._completely_flatten(nplike, options))
+            out.extend(content[: len(self._tags)]._completely_flatten(nplike, options))
         return out
 
     def _recursively_apply(

@@ -692,12 +692,7 @@ def test_ufunc_mul():
     assert ak._v2.highlevel.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
 
 
-def test_NumpyArray_layout_FIXME():
-    # FIXME: are strings as follows supported?
-    # "2019-09-02T09:30:00",
-    # "2019-09-13T09:30:00",
-    # "2019-09-21T20:00:00",
-
+def test_NumpyArray_layout_as_objects():
     array = ak.layout.NumpyArray(
         ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"]
     )
