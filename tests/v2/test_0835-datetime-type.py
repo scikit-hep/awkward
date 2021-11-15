@@ -56,8 +56,7 @@ def test_time_delta():
 
     array = ak.Array(numpy_array)
     array = v1_to_v2(array.layout)
-    # FIXME:
-    # assert str(array.type) == "3 * timedelta64"
+    assert str(array.form.type) == "timedelta64[D]"
     assert ak.to_list(array) == [
         np.timedelta64("41", "D"),
         np.timedelta64("1", "D"),
@@ -168,9 +167,6 @@ def test_highlevel_timedelta64_ArrayBuilder():
     ]
 
 
-@pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
-)
 def test_count_axis_None():
     array = ak.Array(
         [
@@ -238,9 +234,6 @@ def test_count():
     ]
 
 
-@pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
-)
 def test_count_nonzeroaxis_None():
     array = ak.Array(
         [
@@ -311,9 +304,6 @@ def test_all_nonzero():
     ]
 
 
-@pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
-)
 def test_argmin_argmax_axis_None():
     array = ak.Array(
         [
@@ -483,22 +473,15 @@ def test_min_max():
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
     ]
-    # FIXME: default axis is -1
-    # np.datetime64("2020-01-27T10:41:11")
     assert ak.to_list(array.max()) == [
         datetime.datetime(2020, 5, 1, 0, 0),
         datetime.datetime(2020, 6, 27, 10, 41, 11),
         datetime.datetime(2020, 3, 27, 10, 41, 11),
     ]
-    # FIXME: default axis is -1
-    # np.datetime64("2020-06-27T10:41:11")
 
 
-@pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'completely_flatten'"
-)
 def test_highlevel_min_max_axis_None():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 np.datetime64("2020-03-27T10:41:11"),
@@ -545,7 +528,7 @@ def test_highlevel_min_max_axis_None():
 
 
 def test_highlevel_min_max():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 np.datetime64("2020-03-27T10:41:11"),
@@ -613,9 +596,6 @@ def test_highlevel_min_max():
     ]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_to_numpy.py:11: NotImplementedError"
-)
 def test_date_time_units():
     array1 = np.array(
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
@@ -712,16 +692,24 @@ def test_ufunc_mul():
     assert ak._v2.highlevel.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
 
 
-@pytest.mark.skip(reason="awkward/_v2/contents/numpyarray.py:26: TypeError")
-def test_NumpyArray_layout_FIXME():
-    array0 = ak._v2.contents.NumpyArray(
+def test_NumpyArray_layout_as_objects():
+    array = ak.layout.NumpyArray(
         ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"]
+    )
+    with pytest.raises(TypeError):
+        v1_to_v2(array)
+
+    array0 = ak._v2.contents.NumpyArray(
+        np.array(
+            ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"],
+            dtype=np.datetime64,
+        )
     )
 
     assert ak.to_list(array0) == [
-        "2019-09-02T09:30:00",
-        "2019-09-13T09:30:00",
-        "2019-09-21T20:00:00",
+        datetime.datetime(2019, 9, 2, 9, 30),
+        datetime.datetime(2019, 9, 13, 9, 30),
+        datetime.datetime(2019, 9, 21, 20, 0),
     ]
 
 
