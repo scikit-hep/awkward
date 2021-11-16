@@ -1452,6 +1452,23 @@ class IndexedOptionArray(Content):
             options,
         )
 
+    def _to_numpy(self, allow_missing):
+        index = numpy.array(self._index, copy=True)
+        this_validbytes = self.mask_as_bool(valid_when=True)
+        index[~this_validbytes] = 0
+
+        if self.parameter("__array__") == "categorical":
+            # The new IndexedArray will have this parameter, but the rest
+            # will be in the AwkwardArrowType.mask_parameters.
+            next_parameters = {"__array__": "categorical"}
+        else:
+            next_parameters = None
+
+        next = ak._v2.contents.IndexedArray(
+            ak._v2.index.Index(index), self._content, parameters=next_parameters
+        )
+        return next._to_numpy(allow_missing)
+
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
 
