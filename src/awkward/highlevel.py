@@ -267,8 +267,6 @@ class Array(
             layout = ak.operations.structure.with_name(
                 layout, with_name, highlevel=False
             )
-        if self.__class__ is Array:
-            self.__class__ = ak._util.arrayclass(layout, behavior)
 
         if kernels is not None and kernels != ak.operations.convert.kernels(layout):
             layout = ak.operations.convert.to_kernels(layout, kernels, highlevel=False)
@@ -360,6 +358,8 @@ class Array(
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, dict):
+            if self.__class__ is Array:
+                self.__class__ = ak._util.arrayclass(self._layout, behavior)
             self._behavior = behavior
         else:
             raise TypeError(
@@ -1480,8 +1480,6 @@ class Array(
             layout = ak.operations.convert.from_buffers(
                 form, length, container, highlevel=False, behavior=behavior
             )
-        if self.__class__ is Array:
-            self.__class__ = ak._util.arrayclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
         self._caches = ak._util.find_caches(self.layout)
@@ -1585,8 +1583,6 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
             layout = ak.operations.structure.with_name(
                 layout, with_name, highlevel=False
             )
-        if self.__class__ is Record:
-            self.__class__ = ak._util.recordclass(layout, behavior)
 
         if kernels is not None and kernels != ak.operations.convert.kernels(layout):
             layout = ak.operations.convert.to_kernels(layout, kernels, highlevel=False)
@@ -1674,6 +1670,8 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, dict):
+            if self.__class__ is Record:
+                self.__class__ = ak._util.recordclass(self._layout, behavior)
             self._behavior = behavior
         else:
             raise TypeError(
@@ -2082,8 +2080,6 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                 form, length, container, highlevel=False, behavior=behavior
             )
         layout = ak.layout.Record(layout, at)
-        if self.__class__ is Record:
-            self.__class__ = ak._util.recordclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
         self._caches = ak._util.find_caches(self.layout)

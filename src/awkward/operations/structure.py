@@ -1744,7 +1744,7 @@ def where(condition, *args, **kwargs):
             else:
                 return None
 
-        behavior = ak._util.behaviorof(akcondition, left, right)
+        behavior = ak._util.behaviorof(condition, *args)
         out = ak._util.broadcast_and_apply(
             [akcondition, left, right],
             getfunction,
