@@ -365,8 +365,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
-            if self.__class__ is Array:
-                self.__class__ = ak._v2._util.arrayclass(self._layout, behavior)
+            self.__class__ = ak._v2._util.arrayclass(self._layout, behavior)
             self._behavior = behavior
         else:
             raise TypeError("behavior must be None or a dict")
@@ -1627,9 +1626,8 @@ class Record(NDArrayOperatorsMixin):
 
     @behavior.setter
     def behavior(self, behavior):
-        if behavior is None or isinstance(behavior, dict):
-            if self.__class__ is Record:
-                self.__class__ = ak._v2._util.recordclass(self._layout, behavior)
+        if behavior is None or isinstance(behavior, Mapping):
+            self.__class__ = ak._v2._util.recordclass(self._layout, behavior)
             self._behavior = behavior
         else:
             raise TypeError("behavior must be None or a dict")

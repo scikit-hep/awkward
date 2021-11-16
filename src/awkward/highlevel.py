@@ -358,8 +358,7 @@ class Array(
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, dict):
-            if self.__class__ is Array:
-                self.__class__ = ak._util.arrayclass(self._layout, behavior)
+            self.__class__ = ak._util.arrayclass(self._layout, behavior)
             self._behavior = behavior
         else:
             raise TypeError(
@@ -1670,8 +1669,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, dict):
-            if self.__class__ is Record:
-                self.__class__ = ak._util.recordclass(self._layout, behavior)
+            self.__class__ = ak._util.recordclass(self._layout, behavior)
             self._behavior = behavior
         else:
             raise TypeError(
