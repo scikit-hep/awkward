@@ -272,7 +272,6 @@ def test_sort():
     ]
 
 
-@pytest.mark.skip(reason="to_numpy: NotImplementedError")
 def test_numpy():
     assert np.array_equal(
         ak._v2.operations.convert.to_numpy(

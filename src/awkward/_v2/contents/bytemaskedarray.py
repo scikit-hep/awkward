@@ -792,6 +792,9 @@ class ByteMaskedArray(Content):
             options,
         )
 
+    def _to_numpy(self, allow_missing):
+        return self.toIndexedOptionArray64()._to_numpy(allow_missing)
+
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
 
