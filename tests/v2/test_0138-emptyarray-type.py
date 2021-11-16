@@ -12,7 +12,7 @@ pytestmark = pytest.mark.skipif(
 
 
 def test():
-    empty1 = ak._v2.highlevel.Array(ak._v2.contents.EmptyArray(), check_valid=False)
+    empty1 = ak._v2.highlevel.Array(ak._v2.contents.EmptyArray(), check_valid=True)
     empty2 = ak._v2.highlevel.Array(
         ak._v2.contents.ListOffsetArray(
             ak._v2.index.Index64(np.array([0, 0, 0, 0], dtype=np.int64)),
@@ -20,7 +20,7 @@ def test():
         ),
         check_valid=False,
     )
-    array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=False)
+    array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
 
     assert ak._v2.operations.convert.to_numpy(empty1).dtype.type is np.float64
 
