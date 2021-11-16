@@ -195,14 +195,24 @@ def test_reducers():
         True,
         True,
     ]
-    assert ak._v2.operations.reducers.any(
-        ak._v2.operations.convert.from_iter([[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]),
-        axis=1,
-    ).tolist() == [True, False, True]
-    assert ak._v2.operations.reducers.all(
-        ak._v2.operations.convert.from_iter([[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]),
-        axis=1,
-    ).tolist() == [False, True, True]
+    assert (
+        ak._v2.operations.reducers.any(
+            ak._v2.operations.convert.from_iter(
+                [[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]
+            ),
+            axis=1,
+        ).tolist()
+        == [True, False, True]
+    )
+    assert (
+        ak._v2.operations.reducers.all(
+            ak._v2.operations.convert.from_iter(
+                [[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]
+            ),
+            axis=1,
+        ).tolist()
+        == [False, True, True]
+    )
 
 
 def test_minmax():
