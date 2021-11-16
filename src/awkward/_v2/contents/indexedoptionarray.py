@@ -1453,21 +1453,37 @@ class IndexedOptionArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        index = numpy.array(self._index, copy=True)
-        this_validbytes = self.mask_as_bool(valid_when=True)
-        index[~this_validbytes] = 0
-
-        if self.parameter("__array__") == "categorical":
-            # The new IndexedArray will have this parameter, but the rest
-            # will be in the AwkwardArrowType.mask_parameters.
-            next_parameters = {"__array__": "categorical"}
-        else:
-            next_parameters = None
-
-        next = ak._v2.contents.IndexedArray(
-            ak._v2.index.Index(index), self._content, parameters=next_parameters
+        content = ak._v2.operations.convert.to_numpy(
+            self.project(), allow_missing=allow_missing
         )
-        return next._to_numpy(allow_missing)
+
+        shape = list(content.shape)
+        shape[0] = len(self)
+        data = numpy.empty(shape, dtype=content.dtype)
+        mask0 = numpy.asarray(self.bytemask()).view(np.bool_)
+        if mask0.any():
+            if allow_missing:
+                mask = numpy.broadcast_to(
+                    mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape
+                )
+                if isinstance(content, numpy.ma.MaskedArray):
+                    mask1 = numpy.ma.getmaskarray(content)
+                    mask = mask.copy()
+                    mask[~mask0] |= mask1
+
+                data[~mask0] = content
+                return numpy.ma.MaskedArray(data, mask)
+            else:
+                raise ValueError(
+                    "ak.to_numpy cannot convert 'None' values to "
+                    "np.ma.MaskedArray unless the "
+                    "'allow_missing' parameter is set to True"
+                )
+        else:
+            if allow_missing:
+                return numpy.ma.MaskedArray(content)
+            else:
+                return content
 
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
