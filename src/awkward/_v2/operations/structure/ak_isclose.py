@@ -46,7 +46,7 @@ def isclose(
                 ),
             )
 
-    behavior = ak._v2._util.behavior_of(one, two, behavior=behavior)
+    behavior = ak._v2._util.behavior_of(a, b, behavior=behavior)
     out = ak._v2._broadcasting.broadcast_and_apply([one, two], action, behavior)
     assert isinstance(out, tuple) and len(out) == 1
 

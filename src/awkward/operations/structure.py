@@ -4417,7 +4417,7 @@ def isclose(
         else:
             return None
 
-    behavior = ak._util.behaviorof(one, two, behavior=behavior)
+    behavior = ak._util.behaviorof(a, b, behavior=behavior)
     out = ak._util.broadcast_and_apply(
         [one, two], getfunction, behavior, pass_depth=False
     )
