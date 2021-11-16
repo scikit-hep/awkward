@@ -1680,7 +1680,9 @@ def test_keepdims():
     )
 
 
-@pytest.mark.skip(reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError")
+@pytest.mark.skip(
+    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
+)
 def test_highlevel():
     array = ak._v2.highlevel.Array(
         [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]], check_valid=True
@@ -1768,7 +1770,9 @@ def test_highlevel():
     ]
 
 
-@pytest.mark.skip(reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError")
+@pytest.mark.skip(
+    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
+)
 def test_nonreducers():
     x = ak._v2.highlevel.Array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]], check_valid=True)
     y = ak._v2.highlevel.Array(
@@ -1845,7 +1849,10 @@ def test_nonreducers():
         }
     )
 
-@pytest.mark.skip(reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError")
+
+@pytest.mark.skip(
+    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
+)
 def test_softmax():
     array = ak._v2.highlevel.Array(
         [[np.log(2), np.log(2), np.log(4)], [], [np.log(5), np.log(5)]],
