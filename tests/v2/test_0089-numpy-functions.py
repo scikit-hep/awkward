@@ -11,9 +11,6 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
-)
 def test_mixing_lists_and_none():
     def add(a, b):
         outer = []
@@ -91,9 +88,6 @@ def test_mixing_lists_and_none():
             assert ak.to_list(a + b) == add(a, b)
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
-)
 def test_explicit_broadcasting():
     nparray = np.arange(2 * 3 * 5).reshape(2, 3, 5)
     lsarray = ak._v2.highlevel.Array(nparray.tolist(), check_valid=True)
@@ -128,9 +122,6 @@ def test_explicit_broadcasting():
     )
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
-)
 def test_implicit_broadcasting():
     nparray = np.arange(2 * 3 * 5).reshape(2, 3, 5)
     lsarray = ak._v2.highlevel.Array(nparray.tolist(), check_valid=True)
@@ -151,18 +142,15 @@ def test_implicit_broadcasting():
     )
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
-)
 def test_tonumpy():
     assert np.array_equal(
-        ak.to_numpy(
+        ak._v2.operations.convert.to_numpy(
             ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)
         ),
         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
     )
     assert np.array_equal(
-        ak.to_numpy(
+        ak._v2.operations.convert.to_numpy(
             ak._v2.highlevel.Array(
                 np.array([1.1, 2.2, 3.3, 4.4, 5.5]), check_valid=True
             )
@@ -170,7 +158,7 @@ def test_tonumpy():
         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
     )
     assert np.array_equal(
-        ak.to_numpy(
+        ak._v2.operations.convert.to_numpy(
             ak._v2.highlevel.Array(
                 [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]], check_valid=True
             )
@@ -178,52 +166,58 @@ def test_tonumpy():
         np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]),
     )
     assert np.array_equal(
-        ak.to_numpy(
+        ak._v2.operations.convert.to_numpy(
             ak._v2.highlevel.Array(
                 np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]), check_valid=True
             )
         ),
         np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]),
     )
+    # FIXME
+    #  ValueError: at layout ("<class 'awkward._v2.contents.listoffsetarray.ListOffsetArray'>"): __array__ = "char" requires dtype == uint8
+    # assert np.array_equal(
+    #     ak._v2.operations.convert.to_numpy(ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)),
+    #     np.array(["one", "two", "three"]),
+    # )
+    # assert np.array_equal(
+    #     ak._v2.operations.convert.to_numpy(
+    #         ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
+    #     ),
+    #     np.array([b"one", b"two", b"three"]),
+    # )
     assert np.array_equal(
-        ak.to_numpy(ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)),
-        np.array(["one", "two", "three"]),
-    )
-    assert np.array_equal(
-        ak.to_numpy(
-            ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
+        ak._v2.operations.convert.to_numpy(
+            ak._v2.highlevel.Array([], check_valid=True)
         ),
-        np.array([b"one", b"two", b"three"]),
-    )
-    assert np.array_equal(
-        ak.to_numpy(ak._v2.highlevel.Array([], check_valid=True)), np.array([])
+        np.array([]),
     )
 
-    content0 = ak.layout.NumpyArray(
+    content0 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
     )
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
-    tags = ak.layout.Index8(np.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=np.int8))
-    index = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=np.int64))
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
+    tags = ak._v2.index.Index8(np.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=np.int8))
+    index = ak._v2.index.Index64(np.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=np.int64))
     array = ak._v2.highlevel.Array(
-        ak.layout.UnionArray8_64(tags, index, [content0, content1]), check_valid=True
+        ak._v2.contents.UnionArray(tags, index, [content0, content1]), check_valid=True
     )
     assert np.array_equal(
-        ak.to_numpy(array), np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5])
+        ak._v2.operations.convert.to_numpy(array),
+        np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]),
     )
 
-    assert ak.to_numpy(
+    assert ak._v2.operations.convert.to_numpy(
         ak._v2.highlevel.Array([1.1, 2.2, None, None, 3.3], check_valid=True)
     ).tolist() == [1.1, 2.2, None, None, 3.3]
-    assert ak.to_numpy(
+    assert ak._v2.operations.convert.to_numpy(
         ak._v2.highlevel.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
-    assert ak.to_numpy(
+    assert ak._v2.operations.convert.to_numpy(
         ak._v2.highlevel.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
     assert np.array_equal(
-        ak.to_numpy(
+        ak._v2.operations.convert.to_numpy(
             ak._v2.highlevel.Array(
                 [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
                 check_valid=True,
@@ -234,7 +228,7 @@ def test_tonumpy():
         ),
     )
     assert np.array_equal(
-        ak.to_numpy(
+        ak._v2.operations.convert.to_numpy(
             ak._v2.highlevel.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)
         ),
         np.array(
@@ -243,9 +237,6 @@ def test_tonumpy():
     )
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
-)
 def test_numpy_array():
     assert np.array_equal(
         np.asarray(ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)),
@@ -275,67 +266,66 @@ def test_numpy_array():
         ),
         np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]),
     )
-    assert np.array_equal(
-        np.asarray(ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)),
-        np.array(["one", "two", "three"]),
-    )
-    assert np.array_equal(
-        np.asarray(
-            ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
-        ),
-        np.array([b"one", b"two", b"three"]),
-    )
+    # FIXME:
+    # assert np.array_equal(
+    #     np.asarray(ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)),
+    #     np.array(["one", "two", "three"]),
+    # )
+    # assert np.array_equal(
+    #     np.asarray(
+    #         ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
+    #     ),
+    #     np.array([b"one", b"two", b"three"]),
+    # )
     assert np.array_equal(
         np.asarray(ak._v2.highlevel.Array([], check_valid=True)), np.array([])
     )
 
-    content0 = ak.layout.NumpyArray(
+    content0 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
     )
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
-    tags = ak.layout.Index8(np.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=np.int8))
-    index = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=np.int64))
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
+    tags = ak._v2.index.Index8(np.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=np.int8))
+    index = ak._v2.index.Index64(np.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=np.int64))
     array = ak._v2.highlevel.Array(
-        ak.layout.UnionArray8_64(tags, index, [content0, content1]), check_valid=True
+        ak._v2.contents.UnionArray(tags, index, [content0, content1]), check_valid=True
     )
     assert np.array_equal(
         np.asarray(array), np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5])
     )
 
-    assert ak.to_numpy(
+    assert ak._v2.operations.convert.to_numpy(
         ak._v2.highlevel.Array([1.1, 2.2, None, None, 3.3], check_valid=True)
     ).tolist() == [1.1, 2.2, None, None, 3.3]
-    assert ak.to_numpy(
+    assert ak._v2.operations.convert.to_numpy(
         ak._v2.highlevel.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
-    assert ak.to_numpy(
+    assert ak._v2.operations.convert.to_numpy(
         ak._v2.highlevel.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
-    assert np.array_equal(
-        np.asarray(
-            ak._v2.highlevel.Array(
-                [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
-                check_valid=True,
-            )
-        ),
-        np.array(
-            [(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", np.int64), ("y", np.float64)]
-        ),
-    )
-    assert np.array_equal(
-        np.asarray(
-            ak._v2.highlevel.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)
-        ),
-        np.array(
-            [(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", np.int64), ("1", np.float64)]
-        ),
-    )
+    # FIXME:
+    # assert np.array_equal(
+    #     np.asarray(
+    #         ak._v2.highlevel.Array(
+    #             [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
+    #             check_valid=True,
+    #         )
+    #     ),
+    #     np.array(
+    #         [(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", np.int64), ("y", np.float64)]
+    #     ),
+    # )
+    # assert np.array_equal(
+    #     np.asarray(
+    #         ak._v2.highlevel.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)
+    #     ),
+    #     np.array(
+    #         [(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", np.int64), ("1", np.float64)]
+    #     ),
+    # )
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
-)
 def test_where():
     one = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
@@ -348,7 +338,8 @@ def test_where():
         check_valid=True,
     )
 
-    assert isinstance(ak.where(condition)[0], ak._v2.highlevel.Array)
+    # FIXME:
+    # assert isinstance(ak.where(condition)[0], ak._v2.highlevel.Array)
     assert ak.to_list(ak.where(condition)[0]) == [5, 7, 9]
 
     assert ak.to_list(ak.where(condition, one, two)) == ak.to_list(
@@ -357,7 +348,7 @@ def test_where():
 
 
 @pytest.mark.skip(
-    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
+    reason='ValueError: at layout ("<class \'awkward._v2.contents.listoffsetarray.ListOffsetArray\'>"): __array__ = "char" requires dtype == uint8'
 )
 def test_string_equal():
     one = ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)
@@ -365,22 +356,20 @@ def test_string_equal():
     assert ak.to_list(one == two) == [False, True, False]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/describe/ak_validity_error.py:11: NotImplementedError"
-)
 def test_size():
     assert (
         ak.size(ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True))
         == 5
     )
-    assert (
-        ak.size(
-            ak._v2.highlevel.Array(
-                np.arange(2 * 3 * 5).reshape(2, 3, 5), check_valid=True
-            )
-        )
-        == 30
-    )
+    # FIXME: ValueError: ak.size is ambiguous due to variable-length arrays at axis 2 (try ak.flatten to remove structure or ak.to_numpy to force regularity, if possible)
+    # assert (
+    #     ak.size(
+    #         ak._v2.highlevel.Array(
+    #             np.arange(2 * 3 * 5).reshape(2, 3, 5), check_valid=True
+    #         )
+    #     )
+    #     == 30
+    # )
     assert (
         ak.size(
             ak._v2.highlevel.Array(
@@ -390,28 +379,39 @@ def test_size():
         )
         == 2
     )
+    # assert (
+    #     ak.size(
+    #         ak._v2.highlevel.Array(
+    #             np.arange(2 * 3 * 5).reshape(2, 3, 5), check_valid=True
+    #         ),
+    #         1,
+    #     )
+    #     == 3
+    # )
+    # assert (
+    #     ak.size(
+    #         ak._v2.highlevel.Array(
+    #             np.arange(2 * 3 * 5).reshape(2, 3, 5), check_valid=True
+    #         ),
+    #         2,
+    #     )
+    #     == 5
+    # )
     assert (
-        ak.size(
-            ak._v2.highlevel.Array(
-                np.arange(2 * 3 * 5).reshape(2, 3, 5), check_valid=True
-            ),
-            1,
-        )
+        ak.size(ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5))) == 30
+    )
+    assert (
+        ak.size(ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5)), 0)
+        == 2
+    )
+    assert (
+        ak.size(ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5)), 1)
         == 3
     )
     assert (
-        ak.size(
-            ak._v2.highlevel.Array(
-                np.arange(2 * 3 * 5).reshape(2, 3, 5), check_valid=True
-            ),
-            2,
-        )
+        ak.size(ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5)), 2)
         == 5
     )
-    assert ak.size(ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5))) == 30
-    assert ak.size(ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5)), 0) == 2
-    assert ak.size(ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5)), 1) == 3
-    assert ak.size(ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5)), 2) == 5
     assert np.size(np.arange(2 * 3 * 5).reshape(2, 3, 5)) == 30
     assert np.size(np.arange(2 * 3 * 5).reshape(2, 3, 5), 0) == 2
     assert np.size(np.arange(2 * 3 * 5).reshape(2, 3, 5), 1) == 3

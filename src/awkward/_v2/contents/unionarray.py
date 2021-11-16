@@ -923,7 +923,7 @@ class UnionArray(Content):
             ak._v2.operations.convert.to_numpy(
                 self.project(i), allow_missing=allow_missing
             )
-            for i in range(self.numcontents)
+            for i in range(len(self.contents))
         ]
 
         if any(isinstance(x, self.nplike.ma.MaskedArray) for x in contents):
