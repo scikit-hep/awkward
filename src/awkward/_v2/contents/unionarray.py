@@ -918,6 +918,33 @@ class UnionArray(Content):
             children=values,
         )
 
+    def _to_numpy(self, allow_missing):
+        contents = [
+            ak._v2.operations.convert.to_numpy(
+                self.project(i), allow_missing=allow_missing
+            )
+            for i in range(len(self.contents))
+        ]
+
+        if any(isinstance(x, self.nplike.ma.MaskedArray) for x in contents):
+            try:
+                out = self.nplike.ma.concatenate(contents)
+            except Exception:
+                raise ValueError(
+                    "cannot convert {0} into numpy.ma.MaskedArray".format(self)
+                )
+        else:
+            try:
+                out = numpy.concatenate(contents)
+            except Exception:
+                raise ValueError("cannot convert {0} into np.ndarray".format(self))
+
+        tags = numpy.asarray(self.tags)
+        for tag, content in enumerate(contents):
+            mask = tags == tag
+            out[mask] = content
+        return out
+
     def _completely_flatten(self, nplike, options):
         out = []
         for content in self._contents:

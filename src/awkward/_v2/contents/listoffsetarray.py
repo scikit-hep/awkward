@@ -159,7 +159,7 @@ class ListOffsetArray(Content):
         return ak._v2.contents.RegularArray(
             content,
             size[0],
-            len(self._offsets),
+            len(self._offsets) - 1,
             self._identifier,
             self._parameters,
         )
@@ -1787,6 +1787,13 @@ class ListOffsetArray(Content):
                     validbytes, options["count_nulls"]
                 ),
             )
+
+    def _to_numpy(self, allow_missing):
+        array_param = self.parameter("__array__")
+        if array_param == "bytestring" or array_param == "string":
+            return self.nplike.array(self.to_list())
+
+        return ak._v2.operations.convert.to_numpy(self.toRegularArray(), allow_missing)
 
     def _completely_flatten(self, nplike, options):
         if (

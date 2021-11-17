@@ -729,6 +729,32 @@ class RecordArray(Content):
             children=values,
         )
 
+    def _to_numpy(self, allow_missing):
+        if self.fields is None:
+            return self.nplike.empty(len(self), dtype=[])
+        contents = [x._to_numpy(allow_missing) for x in self._contents]
+        if any(len(x.shape) != 1 for x in contents):
+            raise ValueError("cannot convert {0} into np.ndarray".format(self))
+        out = self.nplike.empty(
+            len(contents[0]),
+            dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
+        )
+        mask = None
+        for n, x in zip(self.fields, contents):
+            if isinstance(x, self.nplike.ma.MaskedArray):
+                if mask is None:
+                    mask = self.nplike.ma.zeros(
+                        len(self), [(n, np.bool_) for n in self.fields]
+                    )
+                if x.mask is not None:
+                    mask[n] |= x.mask
+            out[n] = x
+
+        if mask is not None:
+            out = self.nplike.ma.MaskedArray(out, mask)
+
+        return out
+
     def _completely_flatten(self, nplike, options):
         if options["flatten_records"]:
             out = []

@@ -1452,6 +1452,39 @@ class IndexedOptionArray(Content):
             options,
         )
 
+    def _to_numpy(self, allow_missing):
+        content = ak._v2.operations.convert.to_numpy(
+            self.project(), allow_missing=allow_missing
+        )
+
+        shape = list(content.shape)
+        shape[0] = len(self)
+        data = numpy.empty(shape, dtype=content.dtype)
+        mask0 = numpy.asarray(self.bytemask()).view(np.bool_)
+        if mask0.any():
+            if allow_missing:
+                mask = numpy.broadcast_to(
+                    mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape
+                )
+                if isinstance(content, numpy.ma.MaskedArray):
+                    mask1 = numpy.ma.getmaskarray(content)
+                    mask = mask.copy()
+                    mask[~mask0] |= mask1
+
+                data[~mask0] = content
+                return numpy.ma.MaskedArray(data, mask)
+            else:
+                raise ValueError(
+                    "ak.to_numpy cannot convert 'None' values to "
+                    "np.ma.MaskedArray unless the "
+                    "'allow_missing' parameter is set to True"
+                )
+        else:
+            if allow_missing:
+                return numpy.ma.MaskedArray(content)
+            else:
+                return content
+
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
 
