@@ -1789,6 +1789,22 @@ class ListOffsetArray(Content):
             )
 
     def _to_numpy(self, allow_missing):
+        if self.parameter("__array__") == "bytestring":
+            return self.nplike.array(
+                [
+                    ak._v2.behaviors.string.ByteBehavior(self[i]).__bytes__()
+                    for i in range(len(self))
+                ]
+            )
+
+        if self.parameter("__array__") == "string":
+            return self.nplike.array(
+                [
+                    ak._v2.behaviors.string.CharBehavior(self[i]).__str__()
+                    for i in range(len(self))
+                ]
+            )
+
         return ak._v2.operations.convert.to_numpy(self.toRegularArray(), allow_missing)
 
     def _completely_flatten(self, nplike, options):

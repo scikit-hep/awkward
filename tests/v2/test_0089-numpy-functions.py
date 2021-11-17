@@ -173,16 +173,18 @@ def test_tonumpy():
         ),
         np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]),
     )
-    # assert np.array_equal(
-    #     ak._v2.operations.convert.to_numpy(ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)),
-    #     np.array(["one", "two", "three"]),
-    # )
-    # assert np.array_equal(
-    #     ak._v2.operations.convert.to_numpy(
-    #         ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
-    #     ),
-    #     np.array([b"one", b"two", b"three"]),
-    # )
+    assert np.array_equal(
+        ak._v2.operations.convert.to_numpy(
+            ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)
+        ),
+        np.array(["one", "two", "three"]),
+    )
+    assert np.array_equal(
+        ak._v2.operations.convert.to_numpy(
+            ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
+        ),
+        np.array([b"one", b"two", b"three"]),
+    )
     assert np.array_equal(
         ak._v2.operations.convert.to_numpy(
             ak._v2.highlevel.Array([], check_valid=True)
@@ -264,17 +266,16 @@ def test_numpy_array():
         ),
         np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]),
     )
-    # FIXME:
-    # assert np.array_equal(
-    #     np.asarray(ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)),
-    #     np.array(["one", "two", "three"]),
-    # )
-    # assert np.array_equal(
-    #     np.asarray(
-    #         ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
-    #     ),
-    #     np.array([b"one", b"two", b"three"]),
-    # )
+    assert np.array_equal(
+        np.asarray(ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)),
+        np.array(["one", "two", "three"]),
+    )
+    assert np.array_equal(
+        np.asarray(
+            ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
+        ),
+        np.array([b"one", b"two", b"three"]),
+    )
     assert np.array_equal(
         np.asarray(ak._v2.highlevel.Array([], check_valid=True)), np.array([])
     )
@@ -302,26 +303,40 @@ def test_numpy_array():
         ak._v2.highlevel.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
-    # FIXME:
-    # assert np.array_equal(
-    #     np.asarray(
-    #         ak._v2.highlevel.Array(
-    #             [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
-    #             check_valid=True,
-    #         )
-    #     ),
-    #     np.array(
-    #         [(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", np.int64), ("y", np.float64)]
-    #     ),
-    # )
-    # assert np.array_equal(
-    #     np.asarray(
-    #         ak._v2.highlevel.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)
-    #     ),
-    #     np.array(
-    #         [(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", np.int64), ("1", np.float64)]
-    #     ),
-    # )
+
+@pytest.mark.skip(reason="np.array_equal AssertionError: assert False")
+def test_numpy_array_FIXME():
+    assert np.array_equal(
+        np.asarray(
+            ak._v2.highlevel.Array(
+                [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
+                check_valid=True,
+            )
+        ),
+        np.array(
+            [(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", np.int64), ("y", np.float64)]
+        ),
+    )
+    assert np.array_equal(
+        np.asarray(
+            ak._v2.highlevel.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)
+        ),
+        np.array(
+            [(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", np.int64), ("1", np.float64)]
+        ),
+    )
+
+
+@pytest.mark.skip(
+    reason="assert isinstance(ak.where(condition)[0], ak._v2.highlevel.Array) AssertionError: assert False"
+)
+def test_where_FIXME():
+    condition = ak._v2.highlevel.Array(
+        [False, False, False, False, False, True, False, True, False, True],
+        check_valid=True,
+    )
+
+    assert isinstance(ak.where(condition)[0], ak._v2.highlevel.Array)
 
 
 def test_where():
@@ -336,8 +351,6 @@ def test_where():
         check_valid=True,
     )
 
-    # FIXME:
-    # assert isinstance(ak.where(condition)[0], ak._v2.highlevel.Array)
     assert ak.to_list(ak.where(condition)[0]) == [5, 7, 9]
 
     assert ak.to_list(ak.where(condition, one, two)) == ak.to_list(
