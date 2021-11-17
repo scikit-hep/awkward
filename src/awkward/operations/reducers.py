@@ -730,6 +730,10 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
     )
 
     if axis is None:
+        layout = ak.operations.structure.fill_none(
+            layout, np.inf, axis=-1, highlevel=False
+        )
+
         if isinstance(layout, ak.partition.PartitionedArray):
             start = 0
             best_index = None
@@ -800,6 +804,10 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
     )
 
     if axis is None:
+        layout = ak.operations.structure.fill_none(
+            layout, -np.inf, axis=-1, highlevel=False
+        )
+
         if isinstance(layout, ak.partition.PartitionedArray):
             start = 0
             best_index = None
