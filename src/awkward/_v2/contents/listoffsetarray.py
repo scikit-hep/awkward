@@ -159,7 +159,7 @@ class ListOffsetArray(Content):
         return ak._v2.contents.RegularArray(
             content,
             size[0],
-            len(self._offsets),
+            len(self._offsets) - 1,
             self._identifier,
             self._parameters,
         )
