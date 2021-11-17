@@ -304,6 +304,7 @@ def test_all_nonzero():
     ]
 
 
+@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.fill_none")
 def test_argmin_argmax_axis_None():
     array = ak.Array(
         [
