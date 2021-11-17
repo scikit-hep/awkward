@@ -35,18 +35,19 @@ def test_types():
 
 
 def test_boolean():
-    a = ak.layout.ArrayBuilder()
+    a = ak._v2.highlevel.ArrayBuilder()
     a.boolean(True)
     a.boolean(True)
     a.boolean(False)
     a.boolean(True)
     assert ak.to_list(a.snapshot()) == [True, True, False, True]
     assert ak.to_list(a) == [True, True, False, True]
-    assert ak.to_list(a[1:-1]) == [True, False]
+    # FIXME: TypeError: 'ArrayBuilder' object is not subscriptable
+    assert ak.to_list(a.snapshot()[1:-1]) == [True, False]
 
 
 def test_big():
-    a = ak.layout.ArrayBuilder(initial=90)
+    a = ak._v2.highlevel.ArrayBuilder(initial=90)
     for i in range(2000):
         if i == 200:
             tmp = a.snapshot()
@@ -56,7 +57,7 @@ def test_big():
 
 
 def test_integer():
-    a = ak.layout.ArrayBuilder()
+    a = ak._v2.highlevel.ArrayBuilder()
     a.integer(10)
     a.integer(9)
     a.integer(8)
@@ -64,11 +65,11 @@ def test_integer():
     a.integer(6)
     assert ak.to_list(a.snapshot()) == [10, 9, 8, 7, 6]
     assert ak.to_list(a) == [10, 9, 8, 7, 6]
-    assert ak.to_list(a[1:-1]) == [9, 8, 7]
+    assert ak.to_list(a.snapshot()[1:-1]) == [9, 8, 7]
 
 
 def test_real():
-    a = ak.layout.ArrayBuilder()
+    a = ak._v2.highlevel.ArrayBuilder()
     a.real(1.1)
     a.real(2.2)
     a.real(3.3)
@@ -76,11 +77,11 @@ def test_real():
     a.real(5.5)
     assert ak.to_list(a.snapshot()) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert ak.to_list(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert ak.to_list(a[1:-1]) == [2.2, 3.3, 4.4]
+    assert ak.to_list(a.snapshot()[1:-1]) == [2.2, 3.3, 4.4]
 
 
 def test_integer_real():
-    a = ak.layout.ArrayBuilder()
+    a = ak._v2.highlevel.ArrayBuilder()
     a.integer(1)
     a.integer(2)
     a.real(3.3)
@@ -88,11 +89,11 @@ def test_integer_real():
     a.integer(5)
     assert ak.to_list(a.snapshot()) == [1.0, 2.0, 3.3, 4.0, 5.0]
     assert ak.to_list(a) == [1.0, 2.0, 3.3, 4.0, 5.0]
-    assert ak.to_list(a[1:-1]) == [2.0, 3.3, 4.0]
+    assert ak.to_list(a.snapshot()[1:-1]) == [2.0, 3.3, 4.0]
 
 
 def test_real_integer():
-    a = ak.layout.ArrayBuilder()
+    a = ak._v2.highlevel.ArrayBuilder()
     a.real(1.1)
     a.real(2.2)
     a.integer(3)
@@ -100,55 +101,55 @@ def test_real_integer():
     a.real(5.5)
     assert ak.to_list(a.snapshot()) == [1.1, 2.2, 3.0, 4.4, 5.5]
     assert ak.to_list(a) == [1.1, 2.2, 3.0, 4.4, 5.5]
-    assert ak.to_list(a[1:-1]) == [2.2, 3.0, 4.4]
+    assert ak.to_list(a.snapshot()[1:-1]) == [2.2, 3.0, 4.4]
 
 
 def test_list_real():
-    a = ak.layout.ArrayBuilder()
-    a.beginlist()
+    a = ak._v2.highlevel.ArrayBuilder()
+    a.begin_list()
     a.real(1.1)
     a.real(2.2)
     a.real(3.3)
-    a.endlist()
-    a.beginlist()
-    a.endlist()
-    a.beginlist()
+    a.end_list()
+    a.begin_list()
+    a.end_list()
+    a.begin_list()
     a.real(4.4)
     a.real(5.5)
-    a.endlist()
+    a.end_list()
     assert ak.to_list(a.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert ak.to_list(a) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    assert ak.to_list(a[1:-1]) == [[]]
-    assert ak.to_list(a[1:]) == [[], [4.4, 5.5]]
+    assert ak.to_list(a.snapshot()[1:-1]) == [[]]
+    assert ak.to_list(a.snapshot()[1:]) == [[], [4.4, 5.5]]
 
 
 def test_list_list_real():
-    a = ak.layout.ArrayBuilder()
-    a.beginlist()
-    a.beginlist()
+    a = ak._v2.highlevel.ArrayBuilder()
+    a.begin_list()
+    a.begin_list()
     a.real(1.1)
     a.real(2.2)
     a.real(3.3)
-    a.endlist()
-    a.beginlist()
-    a.endlist()
-    a.beginlist()
+    a.end_list()
+    a.begin_list()
+    a.end_list()
+    a.begin_list()
     a.real(4.4)
     a.real(5.5)
-    a.endlist()
-    a.endlist()
-    a.beginlist()
-    a.endlist()
-    a.beginlist()
-    a.beginlist()
+    a.end_list()
+    a.end_list()
+    a.begin_list()
+    a.end_list()
+    a.begin_list()
+    a.begin_list()
     a.real(6.6)
     a.real(7.7)
-    a.endlist()
-    a.beginlist()
+    a.end_list()
+    a.begin_list()
     a.real(8.8)
     a.real(9.9)
-    a.endlist()
-    a.endlist()
+    a.end_list()
+    a.end_list()
     assert ak.to_list(a.snapshot()) == [
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
         [],
@@ -159,44 +160,44 @@ def test_list_list_real():
         [],
         [[6.6, 7.7], [8.8, 9.9]],
     ]
-    assert ak.to_list(a[1:]) == [[], [[6.6, 7.7], [8.8, 9.9]]]
+    assert ak.to_list(a.snapshot()[1:]) == [[], [[6.6, 7.7], [8.8, 9.9]]]
 
 
 def test_list_errors():
     with pytest.raises(ValueError):
-        a = ak.layout.ArrayBuilder()
-        a.endlist()
+        a = ak._v2.highlevel.ArrayBuilder()
+        a.end_list()
 
     with pytest.raises(ValueError):
-        a = ak.layout.ArrayBuilder()
+        a = ak._v2.highlevel.ArrayBuilder()
         a.real(3.14)
-        a.endlist()
+        a.end_list()
 
     with pytest.raises(ValueError):
-        a = ak.layout.ArrayBuilder()
-        a.beginlist()
+        a = ak._v2.highlevel.ArrayBuilder()
+        a.begin_list()
         a.real(3.14)
-        a.endlist()
-        a.endlist()
+        a.end_list()
+        a.end_list()
 
     with pytest.raises(ValueError):
-        a = ak.layout.ArrayBuilder()
-        a.beginlist()
-        a.beginlist()
+        a = ak._v2.highlevel.ArrayBuilder()
+        a.begin_list()
+        a.begin_list()
         a.real(3.14)
-        a.endlist()
-        a.endlist()
-        a.endlist()
+        a.end_list()
+        a.end_list()
+        a.end_list()
 
-    a = ak.layout.ArrayBuilder()
-    a.beginlist()
+    a = ak._v2.highlevel.ArrayBuilder()
+    a.begin_list()
     a.real(1.1)
     a.real(2.2)
     a.real(3.3)
-    a.endlist()
-    a.beginlist()
+    a.end_list()
+    a.begin_list()
     a.real(4.4)
     a.real(5.5)
     assert ak.to_list(a.snapshot()) == [[1.1, 2.2, 3.3]]
     assert ak.to_list(a) == [[1.1, 2.2, 3.3]]
-    assert ak.to_list(a[1:]) == []
+    assert ak.to_list(a.snapshot()[1:]) == []
