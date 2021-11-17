@@ -173,8 +173,6 @@ def test_tonumpy():
         ),
         np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]),
     )
-    # FIXME
-    #  ValueError: at layout ("<class 'awkward._v2.contents.listoffsetarray.ListOffsetArray'>"): __array__ = "char" requires dtype == uint8
     # assert np.array_equal(
     #     ak._v2.operations.convert.to_numpy(ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)),
     #     np.array(["one", "two", "three"]),
@@ -348,7 +346,7 @@ def test_where():
 
 
 @pytest.mark.skip(
-    reason='ValueError: at layout ("<class \'awkward._v2.contents.listoffsetarray.ListOffsetArray\'>"): __array__ = "char" requires dtype == uint8'
+    reason=" TypeError: no numpy.equal overloads for custom types: string, string"
 )
 def test_string_equal():
     one = ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)

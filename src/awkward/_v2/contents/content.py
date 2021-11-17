@@ -931,7 +931,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     path, type(self)
                 )
             if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
-                if content.dtype == np.uint8:
+                if content.dtype.type != np.uint8:
                     return 'at {0} ("{1}"): __array__ = "char" requires dtype == uint8'.format(
                         path, type(self)
                     )
