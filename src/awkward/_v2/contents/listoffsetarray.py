@@ -1789,21 +1789,9 @@ class ListOffsetArray(Content):
             )
 
     def _to_numpy(self, allow_missing):
-        if self.parameter("__array__") == "bytestring":
-            return self.nplike.array(
-                [
-                    ak._v2.behaviors.string.ByteBehavior(self[i]).__bytes__()
-                    for i in range(len(self))
-                ]
-            )
-
-        if self.parameter("__array__") == "string":
-            return self.nplike.array(
-                [
-                    ak._v2.behaviors.string.CharBehavior(self[i]).__str__()
-                    for i in range(len(self))
-                ]
-            )
+        array_param = self.parameter("__array__")
+        if array_param == "bytestring" or array_param == "string":
+            return self.nplike.array(self.to_list())
 
         return ak._v2.operations.convert.to_numpy(self.toRegularArray(), allow_missing)
 
