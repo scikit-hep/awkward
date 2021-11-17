@@ -12,7 +12,7 @@ def validity_error(array, exception=False):
             Array or record to check.
         exception (bool): If True, validity errors raise exceptions.
 
-    Returns None (or an empty string) if there are no errors and a str containing the error message
+    Returns an empty string if there are no errors and a str containing the error message
     if there are.
 
     Checks for errors in the structure of the array, such as indexes that run
@@ -24,9 +24,8 @@ def validity_error(array, exception=False):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
-    out = layout.validityerror(path="layout")
+    out = layout.validityerror(path="highlevel")
 
-    # FIXME?: should it return None instead of an empty string?
     if out not in (None, "") and exception:
         raise ValueError(out)
     else:
