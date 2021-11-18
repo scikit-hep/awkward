@@ -561,6 +561,14 @@ class RecordArray(Content):
                 contents, self._fields, len(self), self._identifier, self._parameters
             )
 
+    def numbers_to_type(self, name):
+        contents = []
+        for x in self._contents:
+            contents.append(x.numbers_to_type(name))
+        return ak._v2.contents.recordarray.RecordArray(
+            contents, self._fields, self._length, self._identifier, self._parameters
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         for content in self._contents:
             if not content._is_unique(negaxis, starts, parents, outlength):

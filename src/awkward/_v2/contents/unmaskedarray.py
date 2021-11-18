@@ -261,6 +261,11 @@ class UnmaskedArray(Content):
                 self._parameters,
             )
 
+    def numbers_to_type(self, name):
+        return ak._v2.contents.unmaskedarray.UnmaskedArray(
+            self._content.numbers_to_type(name), self._identifier, self._parameters
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._content) == 0:
             return True

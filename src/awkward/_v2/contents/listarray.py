@@ -893,6 +893,15 @@ class ListArray(Content):
                 self._parameters,
             )
 
+    def numbers_to_type(self, name):
+        return ak._v2.contents.listarray.ListArray(
+            self._starts,
+            self._stops,
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._starts) == 0:
             return True

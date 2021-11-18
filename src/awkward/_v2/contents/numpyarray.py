@@ -7,6 +7,7 @@ from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.numpyform import NumpyForm
 from awkward._v2.forms.form import _parameters_equal
+from awkward._v2.types.numpytype import primitive_to_dtype
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -547,6 +548,15 @@ class NumpyArray(Content):
         out2 = NumpyArray(out, None, self._parameters, nplike=nplike)
 
         return out2, nextoffsets[: outlength[0]]
+
+    def numbers_to_type(self, name):
+        dtype = primitive_to_dtype(name)
+        return NumpyArray(
+            self.nplike.asarray(self._data, dtype=dtype),
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._data) == 0:

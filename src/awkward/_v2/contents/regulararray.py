@@ -626,6 +626,15 @@ class RegularArray(Content):
                 self._parameters,
             )
 
+    def numbers_to_type(self, name):
+        return ak._v2.contents.regulararray.RegularArray(
+            self._content.numbers_to_type(name),
+            self._size,
+            len(self),
+            self._identifier,
+            self._parameters,
+        )
+
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self._length == 0:
             return True
