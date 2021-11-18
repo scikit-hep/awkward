@@ -52,11 +52,11 @@ namespace awkward {
 
     container.copy_buffer(outer_form_key.str() + "-offsets",
                           offsets_.ptr().get(),
-                          offsets_.length() * sizeof(int64_t));
+                          offsets_.length() * (int64_t)sizeof(int64_t));
 
     container.copy_buffer(inner_form_key.str() + "-data",
                           content_.ptr().get(),
-                          content_.length() * sizeof(uint8_t));
+                          content_.length() * (int64_t)sizeof(uint8_t));
 
     std::string char_parameter;
     std::string string_parameter;

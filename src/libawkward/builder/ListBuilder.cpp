@@ -43,7 +43,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-offsets",
                           offsets_.ptr().get(),
-                          offsets_.length() * sizeof(int64_t));
+                          offsets_.length() * (int64_t)sizeof(int64_t));
 
     return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""

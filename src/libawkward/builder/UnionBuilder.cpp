@@ -55,15 +55,15 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-tags",
                           tags_.ptr().get(),
-                          tags_.length() * sizeof(int8_t));
+                          tags_.length() * (int64_t)sizeof(int8_t));
 
     container.copy_buffer(form_key.str() + "-index",
                           index_.ptr().get(),
-                          index_.length() * sizeof(int64_t));
+                          index_.length() * (int64_t)sizeof(int64_t));
 
     std::stringstream out;
     out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
-    for (int64_t i = 0;  i < contents_.size();  i++) {
+    for (size_t i = 0;  i < contents_.size();  i++) {
       if (i != 0) {
         out << ", ";
       }

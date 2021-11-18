@@ -61,7 +61,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           buffer_.ptr().get(),
-                          buffer_.length() * sizeof(double) * 2);
+                          buffer_.length() * (int64_t)sizeof(double) * 2);
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
            + form_key.str() + "\"}";

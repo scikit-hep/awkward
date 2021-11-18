@@ -42,20 +42,20 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           content_.ptr().get(),
-                          content_.length() * sizeof(int64_t));
+                          content_.length() * (int64_t)sizeof(int64_t));
 
     std::string primitive(units_);
 
     if (primitive.find("datetime64") == 0) {
       return "{\"class\": \"NumpyArray\", \"primitive\": \""
              + primitive + "\", \"format\": \""
-             + "M8" + primitive.substr(10, -1) + "\", \"form_key\": \""
+             + "M8" + primitive.substr(10) + "\", \"form_key\": \""
              + form_key.str() + "\"}";
     }
     else if (primitive.find("timedelta64") == 0) {
       return "{\"class\": \"NumpyArray\", \"primitive\": \""
              + primitive + "\", \"format\": \""
-             + "m8" + primitive.substr(11, -1) + "\", \"form_key\": \""
+             + "m8" + primitive.substr(11) + "\", \"form_key\": \""
              + form_key.str() + "\"}";
     }
     else {

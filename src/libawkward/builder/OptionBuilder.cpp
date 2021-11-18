@@ -50,7 +50,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-index",
                           index_.ptr().get(),
-                          index_.length() * sizeof(int64_t));
+                          index_.length() * (int64_t)sizeof(int64_t));
 
     return "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""

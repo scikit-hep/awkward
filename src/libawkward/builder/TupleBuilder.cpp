@@ -49,7 +49,7 @@ namespace awkward {
 
     std::stringstream out;
     out << "{\"class\": \"RecordArray\", \"contents\": [";
-    for (int64_t i = 0;  i < contents_.size();  i++) {
+    for (size_t i = 0;  i < contents_.size();  i++) {
       if (i != 0) {
         out << ", ";
       }
