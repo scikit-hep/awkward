@@ -156,6 +156,9 @@ class EmptyArray(Content):
             tail_others = others[1:]
             return others[0].mergemany(tail_others)
 
+    def fillna(self, value):
+        return EmptyArray(None, self._parameters)
+
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
 

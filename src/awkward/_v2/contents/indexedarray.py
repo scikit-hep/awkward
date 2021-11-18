@@ -550,6 +550,16 @@ class IndexedArray(Content):
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
 
+    def fillna(self, value):
+        if len(value) != 1:
+            raise ValueError(
+                "fillna value length ({0}) is not equal to 1".format(len(value))
+            )
+
+        return IndexedArray(
+            self._index, self._content.fillna(value), None, self._parameters
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

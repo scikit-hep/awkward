@@ -549,6 +549,14 @@ class RecordArray(Content):
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
 
+    def fillna(self, value):
+        contents = []
+        for content in self._contents:
+            contents.append(content.fillna(value))
+        return RecordArray(
+            contents, self._fields, self._length, self._identifier, self._parameters
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

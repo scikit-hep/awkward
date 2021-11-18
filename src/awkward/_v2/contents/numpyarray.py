@@ -406,6 +406,9 @@ class NumpyArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
+    def fillna(self, value):
+        return self
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
