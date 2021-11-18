@@ -56,56 +56,57 @@ namespace awkward {
   #define CODE_END 16
   #define CODE_SEEK 17
   #define CODE_SKIP 18
-  #define CODE_WRITE 19
-  #define CODE_WRITE_ADD 20
-  #define CODE_WRITE_DUP 21
-  #define CODE_LEN_OUTPUT 22
-  #define CODE_REWIND 23
+  #define CODE_SKIP_WS 19
+  #define CODE_WRITE 20
+  #define CODE_WRITE_ADD 21
+  #define CODE_WRITE_DUP 22
+  #define CODE_LEN_OUTPUT 23
+  #define CODE_REWIND 24
   // generic builtin instructions
-  #define CODE_STRING 24
-  #define CODE_PRINT_STRING 25
-  #define CODE_PRINT 26
-  #define CODE_PRINT_CR 27
-  #define CODE_PRINT_STACK 28
-  #define CODE_I 29
-  #define CODE_J 30
-  #define CODE_K 31
-  #define CODE_DUP 32
-  #define CODE_DROP 33
-  #define CODE_SWAP 34
-  #define CODE_OVER 35
-  #define CODE_ROT 36
-  #define CODE_NIP 37
-  #define CODE_TUCK 38
-  #define CODE_ADD 39
-  #define CODE_SUB 40
-  #define CODE_MUL 41
-  #define CODE_DIV 42
-  #define CODE_MOD 43
-  #define CODE_DIVMOD 44
-  #define CODE_NEGATE 45
-  #define CODE_ADD1 46
-  #define CODE_SUB1 47
-  #define CODE_ABS 48
-  #define CODE_MIN 49
-  #define CODE_MAX 50
-  #define CODE_EQ 51
-  #define CODE_NE 52
-  #define CODE_GT 53
-  #define CODE_GE 54
-  #define CODE_LT 55
-  #define CODE_LE 56
-  #define CODE_EQ0 57
-  #define CODE_INVERT 58
-  #define CODE_AND 59
-  #define CODE_OR 60
-  #define CODE_XOR 61
-  #define CODE_LSHIFT 62
-  #define CODE_RSHIFT 63
-  #define CODE_FALSE 64
-  #define CODE_TRUE 65
+  #define CODE_STRING 25
+  #define CODE_PRINT_STRING 26
+  #define CODE_PRINT 27
+  #define CODE_PRINT_CR 28
+  #define CODE_PRINT_STACK 29
+  #define CODE_I 30
+  #define CODE_J 31
+  #define CODE_K 32
+  #define CODE_DUP 33
+  #define CODE_DROP 34
+  #define CODE_SWAP 35
+  #define CODE_OVER 36
+  #define CODE_ROT 37
+  #define CODE_NIP 38
+  #define CODE_TUCK 39
+  #define CODE_ADD 40
+  #define CODE_SUB 41
+  #define CODE_MUL 42
+  #define CODE_DIV 43
+  #define CODE_MOD 44
+  #define CODE_DIVMOD 45
+  #define CODE_NEGATE 46
+  #define CODE_ADD1 47
+  #define CODE_SUB1 48
+  #define CODE_ABS 49
+  #define CODE_MIN 50
+  #define CODE_MAX 51
+  #define CODE_EQ 52
+  #define CODE_NE 53
+  #define CODE_GT 54
+  #define CODE_GE 55
+  #define CODE_LT 56
+  #define CODE_LE 57
+  #define CODE_EQ0 58
+  #define CODE_INVERT 59
+  #define CODE_AND 60
+  #define CODE_OR 61
+  #define CODE_XOR 62
+  #define CODE_LSHIFT 63
+  #define CODE_RSHIFT 64
+  #define CODE_FALSE 65
+  #define CODE_TRUE 66
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 66
+  #define BOUND_DICTIONARY 67
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -126,7 +127,7 @@ namespace awkward {
     // variable access
     "!", "+!", "@",
     // input actions
-    "len", "pos", "end", "seek", "skip",
+    "len", "pos", "end", "seek", "skip", "skip-ws",
     // output actions
     "<-", "+<-", "stack", "rewind",
     // print (for debugging)
@@ -144,7 +145,7 @@ namespace awkward {
     "!f->", "!d->",
     // multiple little-endian
     "#?->", "#b->", "#h->", "#i->", "#q->", "#n->", "#B->", "#H->", "#I->", "#Q->", "#N->",
-    "#f->", "#d->", "#varint->", "#zigzag->",
+    "#f->", "#d->", "#varint->", "#zigzag->", "textint->",
     // multiple big-endian
     "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->",
     "#!f->", "#!d->"
@@ -553,6 +554,10 @@ namespace awkward {
         case CODE_SKIP: {
           int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return input_names_[(IndexTypeOf<int64_t>)in_num] + " skip";
+        }
+        case CODE_SKIP_WS: {
+          int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
+          return input_names_[(IndexTypeOf<int64_t>)in_num] + " skip-ws";
         }
         case CODE_WRITE: {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
@@ -1558,6 +1563,7 @@ namespace awkward {
         case CODE_END:
         case CODE_SEEK:
         case CODE_SKIP:
+        case CODE_SKIP_WS:
         case CODE_WRITE:
         case CODE_WRITE_ADD:
         case CODE_WRITE_DUP:
@@ -2337,6 +2343,12 @@ namespace awkward {
 
           pos += 2;
         }
+        else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "skip-ws") {
+          bytecodes.push_back(CODE_SKIP_WS);
+          bytecodes.push_back((int32_t)input_index);
+
+          pos += 2;
+        }
         else if (pos + 1 < stop) {
           I bytecode = 0;
 
@@ -2448,7 +2460,7 @@ namespace awkward {
             throw std::invalid_argument(
               err_linecol(linecol, pos, pos + 3,
                           "missing '*-> stack/output', "
-                          "'seek', 'skip', 'end', 'pos', or 'len' after input name")
+                          "'seek', 'skip', 'skip-ws', 'end', 'pos', or 'len' after input name")
               + FILENAME(__LINE__)
             );
           }
@@ -2490,7 +2502,7 @@ namespace awkward {
         else {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 3,
-                        "missing '*-> stack/output', 'seek', 'skip', 'end', "
+                        "missing '*-> stack/output', 'seek', 'skip', 'skip-ws', 'end', "
                         "'pos', or 'len' after input name")
             + FILENAME(__LINE__)
           );
@@ -3341,6 +3353,13 @@ namespace awkward {
               if (current_error_ != util::ForthError::none) {
                 return;
               }
+              break;
+            }
+
+            case CODE_SKIP_WS: {
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->skip_ws();
               break;
             }
 

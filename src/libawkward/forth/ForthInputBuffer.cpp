@@ -48,6 +48,22 @@ namespace awkward {
     }
   }
 
+  void
+  ForthInputBuffer::skip_ws() noexcept {
+    uint8_t* byte;
+    while (pos_ < length_) {
+      byte = reinterpret_cast<uint8_t*>(
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_
+      );
+      if (*byte == ' ' || *byte == '\n' || *byte == '\r' || *byte == '\t') {
+        pos_++;
+      }
+      else {
+        break;
+      }
+    }
+  }
+
   bool
   ForthInputBuffer::end() const noexcept {
     return pos_ == length_;

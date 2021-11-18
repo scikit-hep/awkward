@@ -34,6 +34,10 @@ namespace awkward {
       skip(int64_t num_bytes, util::ForthError& err) noexcept;
 
     /// @brief HERE
+    void
+      skip_ws() noexcept;
+
+    /// @brief HERE
     bool
       end() const noexcept;
 
