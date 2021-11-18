@@ -430,9 +430,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
-            numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
-            nextcarry, outindex = self._nextcarry_outindex(numnull)
-
+            numnull, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
             next = self._content._carry(nextcarry, False, NestedIndexError)
 
             offsets, flattened = next._offsets_and_flattened(posaxis, depth)
@@ -446,7 +444,7 @@ class IndexedOptionArray(Content):
                 )
 
             else:
-                outoffsets = ak._v2.index.Index64.empty(
+                outoffsets = ak._v2.index.Index64.zeros(
                     len(offsets) + numnull, self.nplike, dtype=np.int64
                 )
 

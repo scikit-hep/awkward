@@ -410,9 +410,9 @@ class Numpy(NumpyLike):
 
     def __getitem__(self, name_and_types):
         # for key in ak._cpu_kernels.kernel.keys():
-        #     if "awkward_unique_copy" in key[0]:
+        #     if "UnionArray_flatten_length" in key[0]:
         #         print(key)
-        #
+
         return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):

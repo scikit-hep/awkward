@@ -550,17 +550,17 @@ class ListOffsetArray(Content):
 
         elif posaxis == depth + 1:
             listoffsetarray = self.toListOffsetArray64(True)
-            stop = listoffsetarray._offsets[-1]
-            content = self._content._getitem_range(slice(0, stop))
-            return (self._offsets, content)
+            stop = listoffsetarray.offsets[-1]
+            content = listoffsetarray.content._getitem_range(slice(0, stop))
+            return (listoffsetarray.offsets, content)
 
         else:
             inneroffsets, flattened = self._content._offsets_and_flattened(
                 posaxis, depth + 1
             )
+            offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
 
             if len(inneroffsets) == 0:
-                offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
                 return (
                     offsets,
                     ListOffsetArray(self._offsets, flattened, None, self._parameters),
@@ -568,7 +568,6 @@ class ListOffsetArray(Content):
 
             elif len(self._offsets) == 1:
                 tooffsets = inneroffsets._getitem_range(slice(0, 1))
-                offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
                 return (
                     offsets,
                     ListOffsetArray(tooffsets, flattened, None, self._parameters),
@@ -578,7 +577,6 @@ class ListOffsetArray(Content):
                 tooffsets = ak._v2.index.Index64.zeros(
                     len(self._offsets), self.nplike, dtype=np.int64
                 )
-
                 self._handle_error(
                     self.nplike[
                         "awkward_ListOffsetArray_flatten_offsets",
@@ -593,7 +591,6 @@ class ListOffsetArray(Content):
                         len(inneroffsets),
                     )
                 )
-                offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
                 return (
                     offsets,
                     ListOffsetArray(tooffsets, flattened, None, self._parameters),

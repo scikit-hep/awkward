@@ -504,7 +504,9 @@ class UnionArray(Content):
                 offsets, flattened = content._offsets_and_flattened(posaxis, depth)
                 offsetsraws.append(offsets.data)
                 contents.append(flattened)
-                has_offsets = offsets.length() != 0
+                has_offsets = len(offsets) != 0
+
+            offsetsraws = self.nplike.asarray(offsetsraws)
 
             if has_offsets:
                 total_length = ak._v2.index.Index64.zeros(
@@ -514,6 +516,7 @@ class UnionArray(Content):
                 self._handle_error(
                     self.nplike[
                         "awkward_UnionArray_flatten_length",
+                        total_length.dtype.type,
                         self._tags.dtype.type,
                         self._index.dtype.type,
                         offsetsraws.dtype.type,
@@ -522,7 +525,7 @@ class UnionArray(Content):
                         self._tags.to(self.nplike),
                         self._index.to(self.nplike),
                         len(self._tags),
-                        offsetsraws.to(self.nplike),
+                        offsetsraws,
                     )
                 )
 
