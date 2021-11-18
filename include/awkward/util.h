@@ -238,6 +238,7 @@ namespace awkward {
         rewind_beyond,
         division_by_zero,
         varint_too_big,
+        textint_missing,
 
         size
     };

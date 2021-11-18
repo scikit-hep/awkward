@@ -34,6 +34,7 @@ namespace awkward {
   #define READ_VARINT (0x8 * 14)
   #define READ_ZIGZAG (0x8 * 15)
   #define READ_NBIT (0x8 * 16)
+  #define READ_TEXTINT (0x8 * 17)
 
   // instructions from special parsing rules
   #define CODE_LITERAL 0
@@ -423,6 +424,9 @@ namespace awkward {
           nbits = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + (IndexTypeOf<int64_t>)next_pos];
           next_pos++;
           rest = std::to_string(nbits) + "bit->";
+          break;
+        case READ_TEXTINT:
+          rest = "textint->";
           break;
       }
       std::string arrow = rep + big + rest;
@@ -2372,6 +2376,10 @@ namespace awkward {
               bytecode |= READ_NBIT;
               parser = parser.substr(parser.length() - 2, 2);
             }
+            else if (parser == "textint->") {
+              bytecode |= READ_TEXTINT;
+              parser = parser.substr(parser.length() - 2, 2);
+            }
             else {
               switch (parser[0]) {
                 case '?': {
@@ -2843,6 +2851,71 @@ namespace awkward {
                 }
                 data |= tmp << bits_wnd_l;
                 bits_wnd_l += 8;
+              }
+            }
+          }
+
+          else if (format == READ_TEXTINT) {
+            ForthInputBuffer* input = current_inputs_[(IndexTypeOf<int64_t>)in_num].get();
+            ForthOutputBuffer* output = nullptr;
+            if (~bytecode & READ_DIRECT) {
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
+            }
+            int64_t result;
+            int64_t sign;
+            uint8_t* byte;
+            for (int64_t count = 0;  count < num_items;  count++) {
+              do {
+                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
+              } while (*byte == ' ' || *byte == '\n' || *byte == '\r' || *byte == '\t');
+
+              sign = 1;
+              if (*byte == '-') {
+                sign = -1;
+                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
+              }
+
+              if (*byte < '1' || *byte > '9') {
+                current_error_ = util::ForthError::textint_missing;
+                return;
+              }
+
+              result = 0;
+              while (true) {
+                result *= 10;
+                result += (int64_t)(*byte) - 48;
+
+                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+                if (current_error_ == util::ForthError::read_beyond) {
+                  current_error_ = util::ForthError::none;
+                  break;
+                }
+
+                if (*byte < '0' || *byte > '9') {
+                  input->skip(-1, current_error_);  // won't skip_beyond because pos >= 0
+                  break;
+                }
+              }
+
+              result *= sign;
+
+              if (output == nullptr) {
+                if (stack_cannot_push()) {
+                  current_error_ = util::ForthError::stack_overflow;
+                  return;
+                }
+                stack_push((T)result);   // note: pushing result
+              }
+              else {
+                output->write_one_uint64((uint64_t)result, false);   // note: writing result as unsigned
               }
             }
           }
