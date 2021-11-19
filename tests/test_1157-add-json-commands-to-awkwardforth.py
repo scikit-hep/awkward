@@ -10,6 +10,10 @@ import awkward as ak  # noqa: F401
 
 from awkward.forth import ForthMachine32
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py27 or ak._util.py35, reason="JSON doesn't like bytes in old Pythons"
+)
+
 
 def test_skip_ws():
     vm = ForthMachine32("input x  x skipws")
