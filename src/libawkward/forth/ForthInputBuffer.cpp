@@ -429,15 +429,49 @@ namespace awkward {
                 return;
               }
             }
-            // FIXME: this handles ASCII only (code points from 0 through 127)
-            // Above that, you need to output multiple bytes to make a UTF-8 sequence.
-            // All of those output bytes *except the last* must increase 'length'.
+            // https://stackoverflow.com/a/4609989/1623645
             if (code_point < 0x80) {
-              string_buffer[length] = (uint8_t)code_point;
+              string_buffer[length] = code_point;
+            }
+            else if (code_point < 0x800) {
+              if (length + 1 >= max_string_size) {
+                err = util::ForthError::quoted_string_missing;
+                return;
+              }
+              string_buffer[length] = 192 + code_point / 64;
+              length++;
+              string_buffer[length] = 128 + code_point % 64;
+            }
+            else if (code_point - 0xd800u < 0x800) {
+              err = util::ForthError::quoted_string_missing;
+              return;
+            }
+            else if (code_point < 0x10000) {
+              if (length + 2 >= max_string_size) {
+                err = util::ForthError::quoted_string_missing;
+                return;
+              }
+              string_buffer[length] = 224 + code_point / 4096;
+              length++;
+              string_buffer[length] = 128 + code_point / 64 % 64;
+              length++;
+              string_buffer[length] = 128 + code_point % 64;
+            }
+            else if (code_point < 0x110000) {
+              // this one can't be reached by 4 hex-digits in JSON, but for completeness...
+              if (length + 3 >= max_string_size) {
+                err = util::ForthError::quoted_string_missing;
+                return;
+              }
+              string_buffer[length] = 240 + code_point / 262144;
+              length++;
+              string_buffer[length] = 128 + code_point / 4096 % 64;
+              length++;
+              string_buffer[length] = 128 + code_point / 64 % 64;
+              length++;
+              string_buffer[length] = 128 + code_point % 64;
             }
             else {
-              // We're just going to call non-ASCII code points "invalid" for now.
-              // I hope it doesn't cause confusion.
               err = util::ForthError::quoted_string_missing;
               return;
             }

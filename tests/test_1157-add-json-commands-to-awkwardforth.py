@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -68,3 +70,18 @@ def test_quotedstr():
         ak._v2._util.tobytes(np.asarray(vm["y"])) == b'one   twothree   fo\\u"rf\nivE'
     )
     assert vm.stack == [3, 6, 8, 6, 5]
+
+
+def test_unicode():
+    vm = ForthMachine32(
+        """input x output y uint8
+           x quotedstr-> y"""
+    )
+    x = np.array(
+        [ord(x) for x in r'"\u0000 \u007f \u0080 \u07ff \u0800 \ud7ff \ue000 \uffff"'],
+        np.uint8,
+    )
+    expecting = json.loads(ak._v2._util.tobytes(x)).encode("utf-8")
+    vm.run({"x": x})
+    assert ak._v2._util.tobytes(np.asarray(vm["y"])) == expecting
+    assert vm.stack == [25] == [len(expecting)]
