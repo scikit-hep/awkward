@@ -36,6 +36,7 @@ namespace awkward {
   #define READ_NBIT (0x8 * 16)
   #define READ_TEXTINT (0x8 * 17)
   #define READ_TEXTFLOAT (0x8 * 18)
+  #define READ_QUOTEDSTR (0x8 * 19)
 
   // instructions from special parsing rules
   #define CODE_LITERAL 0
@@ -220,6 +221,7 @@ namespace awkward {
   ForthMachineOf<T, I>::ForthMachineOf(const std::string& source,
                                        int64_t stack_max_depth,
                                        int64_t recursion_max_depth,
+                                       int64_t string_buffer_size,
                                        int64_t output_initial_size,
                                        double output_resize_factor)
     : source_(source)
@@ -229,6 +231,9 @@ namespace awkward {
     , stack_buffer_(new T[stack_max_depth])
     , stack_depth_(0)
     , stack_max_depth_(stack_max_depth)
+
+    , string_buffer_(new char[string_buffer_size])
+    , string_buffer_size_(string_buffer_size)
 
     , current_inputs_()
     , current_outputs_()
@@ -260,6 +265,7 @@ namespace awkward {
   template <typename T, typename I>
   ForthMachineOf<T, I>::~ForthMachineOf() {
     delete [] stack_buffer_;
+    delete [] string_buffer_;
     delete [] current_which_;
     delete [] current_where_;
     delete [] do_recursion_depth_;
@@ -432,6 +438,9 @@ namespace awkward {
           break;
         case READ_TEXTFLOAT:
           rest = "textfloat->";
+          break;
+        case READ_QUOTEDSTR:
+          rest = "quotedstr->";
           break;
       }
       std::string arrow = rep + big + rest;
@@ -732,6 +741,12 @@ namespace awkward {
   int64_t
   ForthMachineOf<T, I>::recursion_max_depth() const noexcept {
     return recursion_max_depth_;
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::string_buffer_size() const noexcept {
+    return string_buffer_size_;
   }
 
   template <typename T, typename I>
@@ -1335,6 +1350,11 @@ namespace awkward {
         case util::ForthError::text_number_missing: {
           throw std::invalid_argument(
             "'text number missing' in AwkwardForth runtime: expected a number in "
+            "input text, didn't find one");
+        }
+        case util::ForthError::quoted_string_missing: {
+          throw std::invalid_argument(
+            "'quoted string missing' in AwkwardForth runtime: expected a quoted string in "
             "input text, didn't find one");
         }
         default:
@@ -2405,6 +2425,10 @@ namespace awkward {
               bytecode |= READ_TEXTFLOAT;
               parser = parser.substr(parser.length() - 2, 2);
             }
+            else if (parser == "quotedstr->") {
+              bytecode |= READ_QUOTEDSTR;
+              parser = parser.substr(parser.length() - 2, 2);
+            }
             else {
               switch (parser[0]) {
                 case '?': {
@@ -2486,6 +2510,13 @@ namespace awkward {
               throw std::invalid_argument(
                 err_linecol(linecol, pos, pos + 3,
                             "'stack' not allowed after 'textfloat->'")
+                + FILENAME(__LINE__)
+              );
+            }
+            if ((bytecode & READ_MASK) == READ_QUOTEDSTR) {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos, pos + 3,
+                            "'stack' not allowed after 'quotedstr->'")
                 + FILENAME(__LINE__)
               );
             }
@@ -2925,6 +2956,32 @@ namespace awkward {
                 return;
               }
               output->write_one_float64(result, false);   // note: writing value as floating-point
+            }
+          }
+
+          else if (format == READ_QUOTEDSTR) {
+            ForthInputBuffer* input = current_inputs_[(IndexTypeOf<int64_t>)in_num].get();
+            I out_num = bytecode_get();
+            bytecodes_pointer_where()++;
+            ForthOutputBuffer* output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
+
+            for (int64_t count = 0;  count < num_items;  count++) {
+              if (count != 0) {
+                input->skipws();
+              }
+              int64_t length;
+              input->read_quotedstr(string_buffer_, string_buffer_size_, length, current_error_);
+              if (current_error_ != util::ForthError::none) {
+                return;
+              }
+              if (stack_cannot_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push((T)length);   // note: pushing length
+              if (length != 0) {
+                output->write_one_string(string_buffer_, length);   // note: copying string
+              }
             }
           }
 

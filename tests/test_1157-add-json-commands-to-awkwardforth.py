@@ -46,3 +46,25 @@ def test_textfloat():
     assert np.asarray(vm["y"]).tolist() == pytest.approx(
         [42, -42, 42.123, -42.123e1, 42.123e2, -42.123e-2]
     )
+
+
+def test_quotedstr():
+    vm = ForthMachine32(
+        """input x output y uint8
+           x skipws 5 x #quotedstr-> y"""
+    )
+    vm.run(
+        {
+            "x": np.array(
+                [
+                    ord(x)
+                    for x in r'     "one" "   two"   "three   " "fo\\u\"r"     "f\niv\u0045"'
+                ],
+                np.uint8,
+            )
+        }
+    )
+    assert (
+        ak._v2._util.tobytes(np.asarray(vm["y"])) == b'one   twothree   fo\\u"rf\nivE'
+    )
+    assert vm.stack == [3, 6, 8, 6, 5]

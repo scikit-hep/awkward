@@ -30,6 +30,7 @@ namespace awkward {
     ForthMachineOf(const std::string& source,
                    int64_t stack_max_depth=1024,
                    int64_t recursion_max_depth=1024,
+                   int64_t string_buffer_size=1024,
                    int64_t output_initial_size=1024,
                    double output_resize_factor=1.5);
 
@@ -66,6 +67,10 @@ namespace awkward {
     /// @brief HERE
     int64_t
       recursion_max_depth() const noexcept;
+
+    /// @brief HERE
+    int64_t
+      string_buffer_size() const noexcept;
 
     /// @brief HERE
     int64_t
@@ -553,6 +558,9 @@ namespace awkward {
     std::vector<I> dictionary_bytecodes_;
     std::vector<int64_t> bytecodes_offsets_;
     std::vector<I> bytecodes_;
+
+    char* string_buffer_;
+    int64_t string_buffer_size_;
 
     std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
     std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;

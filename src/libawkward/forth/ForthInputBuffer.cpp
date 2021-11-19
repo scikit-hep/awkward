@@ -115,7 +115,7 @@ namespace awkward {
       negative = true;
       pos_++;
       if (pos_ == length_) {
-        err = util::ForthError::read_beyond;
+        err = util::ForthError::text_number_missing;
         return 0;
       }
     }
@@ -241,7 +241,7 @@ namespace awkward {
       negative = true;
       pos_++;
       if (pos_ == length_) {
-        err = util::ForthError::read_beyond;
+        err = util::ForthError::text_number_missing;
         return 0.0;
       }
     }
@@ -338,6 +338,134 @@ namespace awkward {
       result = -result;
     }
     return result;
+  }
+
+  void
+  ForthInputBuffer::read_quotedstr(char* string_buffer, int64_t max_string_size, int64_t& length,
+                                   util::ForthError& err) noexcept {
+    if (pos_ == length_) {
+      err = util::ForthError::read_beyond;
+      return;
+    }
+
+    const uint8_t* ptr = reinterpret_cast<uint8_t*>(
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_
+    );
+
+    if (ptr[pos_] == '\"') {
+      pos_++;
+      if (pos_ == length_) {
+        err = util::ForthError::quoted_string_missing;
+        return;
+      }
+    }
+    else {
+      err = util::ForthError::quoted_string_missing;
+      return;
+    }
+
+    length = 0;
+    uint64_t code_point;
+    int64_t i;
+    while (ptr[pos_] != '\"') {
+      // this while loop puts one character in the output buffer
+      if (length == max_string_size) {
+        // "doesn't fit in string buffer" means "it's not a string" for our purposes
+        err = util::ForthError::quoted_string_missing;
+        return;
+      }
+
+      // if escaped character
+      if (ptr[pos_] == '\\') {
+        pos_++;
+        if (pos_ == length_) {
+          err = util::ForthError::quoted_string_missing;
+          return;
+        }
+
+        // which escape sequence?
+        switch (ptr[pos_]) {
+          case 'n':
+            string_buffer[length] = '\n';
+            break;
+          case 'r':
+            string_buffer[length] = '\r';
+            break;
+          case 't':
+            string_buffer[length] = '\t';
+            break;
+          case 'b':
+            string_buffer[length] = '\b';
+            break;
+          case 'f':
+            string_buffer[length] = '\f';
+            break;
+          case '\"':
+          case '/':
+          case '\\':
+            string_buffer[length] = ptr[pos_];
+            break;
+          case 'u':
+            // check all the positions that will be used *in the following loop*
+            if (pos_ + 4 >= length_) {
+              err = util::ForthError::quoted_string_missing;
+              return;
+            }
+            code_point = 0;
+            for (i = 0; i < 4; i++) {
+              pos_++;  // first get past the 'u', then end on the last of the 4 hex digits
+              code_point *= 16;
+              if (ptr[pos_] >= '0' && ptr[pos_] <= '9') {
+                code_point += ptr[pos_] - '0';
+              }
+              else if (ptr[pos_] >= 'a' && ptr[pos_] <= 'f') {
+                code_point += ptr[pos_] - 'a' + 10;
+              }
+              else if (ptr[pos_] >= 'A' && ptr[pos_] <= 'F') {
+                code_point += ptr[pos_] - 'A' + 10;
+              }
+              else {
+                err = util::ForthError::quoted_string_missing;
+                return;
+              }
+            }
+            // FIXME: this handles ASCII only (code points from 0 through 127)
+            // Above that, you need to output multiple bytes to make a UTF-8 sequence.
+            // All of those output bytes *except the last* must increase 'length'.
+            if (code_point < 0x80) {
+              string_buffer[length] = (uint8_t)code_point;
+            }
+            else {
+              // We're just going to call non-ASCII code points "invalid" for now.
+              // I hope it doesn't cause confusion.
+              err = util::ForthError::quoted_string_missing;
+              return;
+            }
+            break;
+          default:
+            err = util::ForthError::quoted_string_missing;
+            return;
+        }
+      }
+      // else unescaped character
+      else {
+        string_buffer[length] = ptr[pos_];
+      }
+
+      // whether the input was an escaped sequence or not, pos_ ended on an interpreted byte
+      pos_++;
+
+      // the input buffer should not end without closing the string (this while loop)
+      if (pos_ == length_) {
+        err = util::ForthError::quoted_string_missing;
+        return;
+      }
+      // and the output has increased by only one character
+      length++;
+    }
+
+    // we are now at the final quotation mark, so step one past it
+    pos_++;
   }
 
   void

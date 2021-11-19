@@ -47,6 +47,11 @@ namespace awkward {
 
     /// @brief HERE
     void
+      read_quotedstr(char* string_buffer, int64_t max_string_size, int64_t& length,
+                     util::ForthError& err) noexcept;
+
+    /// @brief HERE
+    void
       seek(int64_t to, util::ForthError& err) noexcept;
 
     /// @brief HERE
