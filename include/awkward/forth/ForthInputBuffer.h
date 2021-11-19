@@ -30,6 +30,10 @@ namespace awkward {
       read_byte(util::ForthError& err) noexcept;
 
     /// @brief HERE
+    uint8_t
+      peek_byte(util::ForthError& err) noexcept;
+
+    /// @brief HERE
     uint64_t
       read_varint(util::ForthError& err) noexcept;
 

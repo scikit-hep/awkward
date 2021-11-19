@@ -89,3 +89,15 @@ def test_unicode():
     vm.run({"x": x})
     assert ak._v2._util.tobytes(np.asarray(vm["y"])) == expecting
     assert vm.stack == [25] == [len(expecting)]
+
+
+def test_peek():
+    vm = ForthMachine32(
+        """input x output y float64
+           5 0 do x skipws x peek x textint-> y loop"""
+    )
+    vm.run(
+        {"x": np.array([ord(x) for x in "     12345 -123      3210  -42 0"], np.uint8)}
+    )
+    assert vm.stack == [ord("1"), ord("-"), ord("3"), ord("-"), ord("0")]
+    assert np.asarray(vm["y"]).tolist() == [12345, -123, 3210, -42, 0]

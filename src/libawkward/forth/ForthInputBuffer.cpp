@@ -40,6 +40,17 @@ namespace awkward {
     );
   }
 
+  uint8_t
+  ForthInputBuffer::peek_byte(util::ForthError& err) noexcept {
+    if (pos_ + 1 > length_) {
+      err = util::ForthError::read_beyond;
+      return 0;
+    }
+    return *reinterpret_cast<uint8_t*>(
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_
+    );
+  }
+
   uint64_t
   ForthInputBuffer::read_varint(util::ForthError& err) noexcept {
     const uint8_t* ptr = reinterpret_cast<uint8_t*>(
@@ -50,7 +61,7 @@ namespace awkward {
     uint64_t result = 0;
     uint8_t byte;
     do {
-      if (pos_ == length_) {
+      if (pos_ >= length_) {
         err = util::ForthError::read_beyond;
         return 0;
       }
@@ -79,7 +90,7 @@ namespace awkward {
     int64_t result = 0;
     uint8_t byte;
     do {
-      if (pos_ == length_) {
+      if (pos_ >= length_) {
         err = util::ForthError::read_beyond;
         return 0;
       }
@@ -101,7 +112,7 @@ namespace awkward {
 
   int64_t
   ForthInputBuffer::read_textint(util::ForthError& err) noexcept {
-    if (pos_ == length_) {
+    if (pos_ >= length_) {
       err = util::ForthError::read_beyond;
       return 0;
     }
@@ -227,7 +238,7 @@ namespace awkward {
 
   double
   ForthInputBuffer::read_textfloat(util::ForthError& err) noexcept {
-    if (pos_ == length_) {
+    if (pos_ >= length_) {
       err = util::ForthError::read_beyond;
       return 0.0;
     }
@@ -343,7 +354,7 @@ namespace awkward {
   void
   ForthInputBuffer::read_quotedstr(char* string_buffer, int64_t max_string_size, int64_t& length,
                                    util::ForthError& err) noexcept {
-    if (pos_ == length_) {
+    if (pos_ >= length_) {
       err = util::ForthError::read_beyond;
       return;
     }

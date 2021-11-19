@@ -551,6 +551,10 @@ namespace awkward {
           int64_t var_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return variable_names_[(IndexTypeOf<int64_t>)var_num] + " @";
         }
+        case CODE_PEEK: {
+          int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
+          return input_names_[(IndexTypeOf<int64_t>)in_num] + " peek";
+        }
         case CODE_LEN_INPUT: {
           int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return input_names_[(IndexTypeOf<int64_t>)in_num] + " len";
@@ -1590,6 +1594,7 @@ namespace awkward {
         case CODE_PUT:
         case CODE_INC:
         case CODE_GET:
+        case CODE_PEEK:
         case CODE_LEN_INPUT:
         case CODE_POS:
         case CODE_END:
@@ -2345,7 +2350,13 @@ namespace awkward {
           }
         }
 
-        if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "len") {
+        if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "peek") {
+          bytecodes.push_back(CODE_PEEK);
+          bytecodes.push_back((int32_t)input_index);
+
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "len") {
           bytecodes.push_back(CODE_LEN_INPUT);
           bytecodes.push_back((int32_t)input_index);
 
@@ -3044,7 +3055,7 @@ namespace awkward {
                     current_error_ = util::ForthError::stack_overflow;         \
                     return;                                                    \
                   }                                                            \
-                  stack_push(value);                                           \
+                  stack_push((T)value);                                        \
                 }                                                              \
                 break;                                                         \
               }
@@ -3065,7 +3076,7 @@ namespace awkward {
                     current_error_ = util::ForthError::stack_overflow;         \
                     return;                                                    \
                   }                                                            \
-                  stack_push((I)value);                                        \
+                  stack_push((T)value);                                        \
                 }                                                              \
                 break;                                                         \
               }
@@ -3091,7 +3102,7 @@ namespace awkward {
                     current_error_ = util::ForthError::stack_overflow;         \
                     return;                                                    \
                   }                                                            \
-                  stack_push((I)value);                                        \
+                  stack_push((T)value);                                        \
                 }                                                              \
                 break;                                                         \
               }
@@ -3351,6 +3362,21 @@ namespace awkward {
               break;
             }
 
+            case CODE_PEEK: {
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->peek_byte(current_error_);
+              if (current_error_ != util::ForthError::none) {
+                return;
+              }
+              if (stack_cannot_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(result);
+              break;
+            }
+
             case CODE_LEN_INPUT: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
@@ -3358,7 +3384,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push((I)current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->len());
+              stack_push((T)current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->len());
               break;
             }
 
@@ -3369,7 +3395,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push((I)current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->pos());
+              stack_push((T)current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->pos());
               break;
             }
 
@@ -3472,7 +3498,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push((I)current_outputs_[(IndexTypeOf<int64_t>)out_num].get()->len());
+              stack_push((T)current_outputs_[(IndexTypeOf<int64_t>)out_num].get()->len());
               break;
             }
 
@@ -3497,7 +3523,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(string_num);
+              stack_push((T)string_num);
               break;
             }
 
@@ -3536,7 +3562,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push((I)do_i());
+              stack_push((T)do_i());
               break;
             }
 
@@ -3545,7 +3571,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push((I)do_j());
+              stack_push((T)do_j());
               break;
             }
 
@@ -3554,7 +3580,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push((I)do_k());
+              stack_push((T)do_k());
               break;
             }
 
