@@ -104,8 +104,8 @@ def test_peek():
 
 
 def test_enum():
-    vm = ForthMachine32(r'input x   x enum s" one" s" two"')
-    vm.run({"x": np.array([ord(x) for x in "one two three"], np.uint8)})
-    # print(vm.stack)
-
-    # raise Exception
+    vm = ForthMachine32(
+        r'input x   3 0 do x skipws x enum s" zero" s" one" s" two" s" three" loop'
+    )
+    vm.run({"x": np.array([ord(x) for x in "one three two"], np.uint8)})
+    assert vm.stack == [1, 3, 2]

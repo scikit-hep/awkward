@@ -42,12 +42,29 @@ namespace awkward {
 
   int64_t
   ForthInputBuffer::read_enum(const std::vector<std::string>& strings, int64_t start, int64_t stop) noexcept {
-    std::cout << "read_enum" << std::endl;
-    for (int64_t i = start;  i < stop;  i++) {
-      std::cout << "    " << i << " " << strings[i] << std::endl;
+    if (pos_ >= length_) {
+      return -1;
     }
 
-    return 0;
+    const char* ptr = reinterpret_cast<char*>(
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_
+    );
+
+    int64_t i = 0;
+    int64_t howmany = stop - start;
+    size_t len;
+    for (auto it = strings.begin() + start;  i < howmany;  i++) {
+      len = it->length();
+      if (pos_ + len <= length_) {
+        if (strncmp(it->data(), ptr, len) == 0) {
+          pos_ += len;
+          return i;
+        }
+      }
+      ++it;
+    }
+
+    return -1;
   }
 
   uint8_t
