@@ -54,7 +54,7 @@ namespace awkward {
   #define CODE_PUT 12
   #define CODE_INC 13
   #define CODE_GET 14
-  #define CODE_ENUM 15   // looks at input, moves pointer past matching string
+  #define CODE_ENUM 15
   #define CODE_PEEK 16
   #define CODE_LEN_INPUT 17
   #define CODE_POS 18
@@ -123,7 +123,7 @@ namespace awkward {
     // manipulate control flow externally
     "halt", "pause",
     // conditionals
-    "if", "then", "else",
+    "if", "then", "else", "case", "of", "endof", "endcase",
     // loops
     "do", "loop", "+loop",
     "begin", "again", "until", "while", "repeat",
@@ -132,7 +132,7 @@ namespace awkward {
     // variable access
     "!", "+!", "@",
     // input actions
-    "len", "pos", "end", "seek", "skip", "skipws",
+    "enum", "peek", "len", "pos", "end", "seek", "skip", "skipws",
     // output actions
     "<-", "+<-", "stack", "rewind",
     // print (for debugging)
@@ -144,13 +144,13 @@ namespace awkward {
   const std::set<std::string> input_parser_words_({
     // single little-endian
     "?->", "b->", "h->", "i->", "q->", "n->", "B->", "H->", "I->", "Q->", "N->",
-    "f->", "d->", "varint->", "zigzag->",
+    "f->", "d->", "varint->", "zigzag->", "textint->", "textfloat->", "quotedstr->",
     // single big-endian
     "!h->", "!i->", "!q->", "!n->", "!H->", "!I->", "!Q->", "!N->",
     "!f->", "!d->",
     // multiple little-endian
     "#?->", "#b->", "#h->", "#i->", "#q->", "#n->", "#B->", "#H->", "#I->", "#Q->", "#N->",
-    "#f->", "#d->", "#varint->", "#zigzag->", "textint->", "textfloat->",
+    "#f->", "#d->", "#varint->", "#zigzag->", "#textint->", "#textfloat->", "#quotedstr->",
     // multiple big-endian
     "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->",
     "#!f->", "#!d->"
@@ -2116,6 +2116,127 @@ namespace awkward {
 
           pos = substop + 1;
         }
+      }
+
+      else if (word == "case") {
+        // General 'case' statement can be turned into 'if' chain:
+        //
+	// CASE
+	// test1 OF ... ENDOF           test1 OVER = IF DROP ... ELSE
+	// test2 OF ... ENDOF           test2 OVER = IF DROP ... ELSE
+	// testn OF ... ENDOF           testn OVER = IF DROP ... ELSE
+	// ... ( default case )         ...
+	// ENDCASE                      DROP THEN [THEN [THEN ...]]
+        //
+        // But the regular case should become a jump table with CODE_CASE_REGULAR.
+
+        std::vector<int64_t> ofs;
+        std::vector<int64_t> endofs;
+        int64_t substop = pos;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, stop, "'case' is missing its closing 'endcase'")
+              + FILENAME(__LINE__)
+            );
+          }
+          else if (tokenized[(IndexTypeOf<std::string>)substop] == "case") {
+            nesting++;
+          }
+          else if (tokenized[(IndexTypeOf<std::string>)substop] == "endcase") {
+            nesting--;
+          }
+          else if (tokenized[(IndexTypeOf<std::string>)substop] == "of"  &&  nesting == 1) {
+            ofs.push_back(substop);
+          }
+          else if (tokenized[(IndexTypeOf<std::string>)substop] == "endof"  &&  nesting == 1) {
+            endofs.push_back(substop);
+          }
+        }
+
+        // check the lengths and orders of 'of' and 'endof'
+        if (ofs.size() != endofs.size()) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, stop, "in 'case' .. 'endcase', there must be an 'endof' for every 'of'")
+            + FILENAME(__LINE__)
+          );
+        }
+        for (int64_t i = 0;  i < ofs.size();  i++) {
+          if (ofs[i] > endofs[i]) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, stop, "in 'case' .. 'endcase', there must be an 'endof' for every 'of'")
+            + FILENAME(__LINE__)
+          );
+          }
+        }
+
+        std::vector<I> predicates;
+        std::vector<I> consequents;
+        I alternate;
+
+        // std::vector<I>* filling = &bytecodes;
+
+        int64_t substart = pos + 1;
+        for (int64_t i = 0;  i < ofs.size();  i++) {
+          I pred_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
+          std::vector<I> pred;
+          dictionary.push_back(pred);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                ofs[i],
+                pred,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          pred.push_back(CODE_OVER);  // append "over"
+          pred.push_back(CODE_EQ);    // append "="
+          dictionary[(IndexTypeOf<int64_t>)pred_bytecode - BOUND_DICTIONARY] = pred;
+          predicates.push_back(pred_bytecode);
+
+          I cons_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
+          std::vector<I> cons;
+          dictionary.push_back(cons);
+          cons.push_back(CODE_DROP);  // prepend "drop"
+          parse(defn,
+                tokenized,
+                linecol,
+                ofs[i] + 1,
+                endofs[i],
+                cons,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[(IndexTypeOf<int64_t>)cons_bytecode - BOUND_DICTIONARY] = cons;
+          consequents.push_back(cons_bytecode);
+
+          substart = endofs[i] + 1;
+        }
+
+        {
+          I alt_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
+          std::vector<I> alt;
+          dictionary.push_back(alt);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                substop,
+                alt,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          alt.push_back(CODE_DROP);  // append "drop"
+          dictionary[(IndexTypeOf<int64_t>)alt_bytecode - BOUND_DICTIONARY] = alt;
+          alternate = alt_bytecode;
+        }
+
+        throw std::runtime_error("HERE");
+
+        pos = substop + 1;
       }
 
       else if (word == "do") {

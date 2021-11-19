@@ -42,6 +42,10 @@ namespace awkward {
 
   int64_t
   ForthInputBuffer::read_enum(const std::vector<std::string>& strings, int64_t start, int64_t stop) noexcept {
+    // Ideally, we'd use a string trie instead of repeatedly looping over the same set of strings.
+    // However, C++ doesn't seem to have one in its standard library, and anyway, we don't
+    // care about insertion/removal, so it can be compact (small array indexes, not pointers).
+
     if (pos_ >= length_) {
       return -1;
     }

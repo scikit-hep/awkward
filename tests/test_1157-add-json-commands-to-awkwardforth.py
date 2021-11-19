@@ -109,3 +109,9 @@ def test_enum():
     )
     vm.run({"x": np.array([ord(x) for x in "one three two"], np.uint8)})
     assert vm.stack == [1, 3, 2]
+
+
+# def test_case():
+#     vm = ForthMachine32(
+#         r'case 0 of 1000 endof 1 of 1001 endof 2 of 1002 endof 9999 endcase'
+#     )
