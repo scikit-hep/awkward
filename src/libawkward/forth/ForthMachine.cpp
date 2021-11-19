@@ -55,7 +55,7 @@ namespace awkward {
   #define CODE_INC 13
   #define CODE_GET 14
   #define CODE_ENUM 15   // looks at input, moves pointer past matching string
-  #define CODE_PEEK 16   // looks at input, doesn't move pointer
+  #define CODE_PEEK 16
   #define CODE_LEN_INPUT 17
   #define CODE_POS 18
   #define CODE_END 19
@@ -550,6 +550,10 @@ namespace awkward {
         case CODE_GET: {
           int64_t var_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return variable_names_[(IndexTypeOf<int64_t>)var_num] + " @";
+        }
+        case CODE_ENUM: {
+          int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
+          return input_names_[(IndexTypeOf<int64_t>)in_num] + " enum";
         }
         case CODE_PEEK: {
           int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
@@ -1584,6 +1588,8 @@ namespace awkward {
     }
     else {
       switch (bytecode) {
+        case CODE_ENUM:
+          return 4;
         case CODE_IF_ELSE:
           return 3;
         case CODE_LITERAL:
@@ -2350,7 +2356,49 @@ namespace awkward {
           }
         }
 
-        if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "peek") {
+        if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "enum") {
+          bytecodes.push_back(CODE_ENUM);
+          bytecodes.push_back((int32_t)input_index);
+          bytecodes.push_back((int32_t)strings_.size());
+          size_t start_size = strings_.size();
+
+          if (pos + 2 >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 2, "need at least one string (s\" word) after \"enum\"")
+              + FILENAME(__LINE__)
+            );
+          }
+
+          pos += 2;
+
+          while (pos < stop) {
+            std::string next_word = tokenized[(IndexTypeOf<std::string>)pos];
+            if (next_word == "s\"") {
+              if (pos + 1 >= stop) {
+                throw std::invalid_argument(
+                  err_linecol(linecol, pos, pos + 2, "unclosed string after s\" word")
+                  + FILENAME(__LINE__)
+                );
+              }
+              strings_.push_back(tokenized[(IndexTypeOf<std::string>)pos + 1]);
+
+              pos += 2;
+            }
+            else {
+              break;
+            }
+          }
+
+          if (strings_.size() == start_size) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos - 2, pos + 1, "need at least one string (s\" word) after \"enum\"")
+              + FILENAME(__LINE__)
+            );
+          }
+
+          bytecodes.push_back((int32_t)strings_.size());
+        }
+        else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "peek") {
           bytecodes.push_back(CODE_PEEK);
           bytecodes.push_back((int32_t)input_index);
 
@@ -3359,6 +3407,22 @@ namespace awkward {
                 return;
               }
               stack_push(variables_[(IndexTypeOf<T>)num]);
+              break;
+            }
+
+            case CODE_ENUM: {
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              I start = bytecode_get();
+              bytecodes_pointer_where()++;
+              I stop = bytecode_get();
+              bytecodes_pointer_where()++;
+              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop);
+              if (stack_cannot_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(result);
               break;
             }
 

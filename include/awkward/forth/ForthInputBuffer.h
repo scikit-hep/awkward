@@ -30,6 +30,10 @@ namespace awkward {
       read_byte(util::ForthError& err) noexcept;
 
     /// @brief HERE
+    int64_t
+      read_enum(const std::vector<std::string>& strings, int64_t start, int64_t stop) noexcept;
+
+    /// @brief HERE
     uint8_t
       peek_byte(util::ForthError& err) noexcept;
 

@@ -101,3 +101,11 @@ def test_peek():
     )
     assert vm.stack == [ord("1"), ord("-"), ord("3"), ord("-"), ord("0")]
     assert np.asarray(vm["y"]).tolist() == [12345, -123, 3210, -42, 0]
+
+
+def test_enum():
+    vm = ForthMachine32(r'input x   x enum s" one" s" two"')
+    vm.run({"x": np.array([ord(x) for x in "one two three"], np.uint8)})
+    # print(vm.stack)
+
+    # raise Exception

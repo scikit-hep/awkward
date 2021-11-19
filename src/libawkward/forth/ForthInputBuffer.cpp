@@ -40,6 +40,16 @@ namespace awkward {
     );
   }
 
+  int64_t
+  ForthInputBuffer::read_enum(const std::vector<std::string>& strings, int64_t start, int64_t stop) noexcept {
+    std::cout << "read_enum" << std::endl;
+    for (int64_t i = start;  i < stop;  i++) {
+      std::cout << "    " << i << " " << strings[i] << std::endl;
+    }
+
+    return 0;
+  }
+
   uint8_t
   ForthInputBuffer::peek_byte(util::ForthError& err) noexcept {
     if (pos_ + 1 > length_) {
