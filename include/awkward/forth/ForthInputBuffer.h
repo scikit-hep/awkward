@@ -26,6 +26,18 @@ namespace awkward {
       read(int64_t num_bytes, util::ForthError& err) noexcept;
 
     /// @brief HERE
+    uint8_t
+      read_byte(util::ForthError& err) noexcept;
+
+    /// @brief HERE
+    int64_t
+      read_textint(util::ForthError& err) noexcept;
+
+    /// @brief HERE
+    double
+      read_textfloat(util::ForthError& err) noexcept;
+
+    /// @brief HERE
     void
       seek(int64_t to, util::ForthError& err) noexcept;
 
@@ -35,7 +47,7 @@ namespace awkward {
 
     /// @brief HERE
     void
-      skip_ws() noexcept;
+      skipws() noexcept;
 
     /// @brief HERE
     bool

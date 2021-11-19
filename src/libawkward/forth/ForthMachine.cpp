@@ -35,6 +35,7 @@ namespace awkward {
   #define READ_ZIGZAG (0x8 * 15)
   #define READ_NBIT (0x8 * 16)
   #define READ_TEXTINT (0x8 * 17)
+  #define READ_TEXTFLOAT (0x8 * 18)
 
   // instructions from special parsing rules
   #define CODE_LITERAL 0
@@ -56,7 +57,7 @@ namespace awkward {
   #define CODE_END 16
   #define CODE_SEEK 17
   #define CODE_SKIP 18
-  #define CODE_SKIP_WS 19
+  #define CODE_SKIPWS 19
   #define CODE_WRITE 20
   #define CODE_WRITE_ADD 21
   #define CODE_WRITE_DUP 22
@@ -127,7 +128,7 @@ namespace awkward {
     // variable access
     "!", "+!", "@",
     // input actions
-    "len", "pos", "end", "seek", "skip", "skip-ws",
+    "len", "pos", "end", "seek", "skip", "skipws",
     // output actions
     "<-", "+<-", "stack", "rewind",
     // print (for debugging)
@@ -145,7 +146,7 @@ namespace awkward {
     "!f->", "!d->",
     // multiple little-endian
     "#?->", "#b->", "#h->", "#i->", "#q->", "#n->", "#B->", "#H->", "#I->", "#Q->", "#N->",
-    "#f->", "#d->", "#varint->", "#zigzag->", "textint->",
+    "#f->", "#d->", "#varint->", "#zigzag->", "textint->", "textfloat->",
     // multiple big-endian
     "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->",
     "#!f->", "#!d->"
@@ -429,6 +430,9 @@ namespace awkward {
         case READ_TEXTINT:
           rest = "textint->";
           break;
+        case READ_TEXTFLOAT:
+          rest = "textfloat->";
+          break;
       }
       std::string arrow = rep + big + rest;
 
@@ -555,9 +559,9 @@ namespace awkward {
           int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return input_names_[(IndexTypeOf<int64_t>)in_num] + " skip";
         }
-        case CODE_SKIP_WS: {
+        case CODE_SKIPWS: {
           int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
-          return input_names_[(IndexTypeOf<int64_t>)in_num] + " skip-ws";
+          return input_names_[(IndexTypeOf<int64_t>)in_num] + " skipws";
         }
         case CODE_WRITE: {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
@@ -1326,7 +1330,12 @@ namespace awkward {
         case util::ForthError::varint_too_big: {
           throw std::invalid_argument(
             "'varint too big' in AwkwardForth runtime: variable-length integer is "
-            "greater than 2**63");
+            "too big to represent as a fixed-width integer");
+        }
+        case util::ForthError::text_number_missing: {
+          throw std::invalid_argument(
+            "'text number missing' in AwkwardForth runtime: expected a number in "
+            "input text, didn't find one");
         }
         default:
           break;
@@ -1563,7 +1572,7 @@ namespace awkward {
         case CODE_END:
         case CODE_SEEK:
         case CODE_SKIP:
-        case CODE_SKIP_WS:
+        case CODE_SKIPWS:
         case CODE_WRITE:
         case CODE_WRITE_ADD:
         case CODE_WRITE_DUP:
@@ -2343,8 +2352,8 @@ namespace awkward {
 
           pos += 2;
         }
-        else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "skip-ws") {
-          bytecodes.push_back(CODE_SKIP_WS);
+        else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "skipws") {
+          bytecodes.push_back(CODE_SKIPWS);
           bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
@@ -2390,6 +2399,10 @@ namespace awkward {
             }
             else if (parser == "textint->") {
               bytecode |= READ_TEXTINT;
+              parser = parser.substr(parser.length() - 2, 2);
+            }
+            else if (parser == "textfloat->") {
+              bytecode |= READ_TEXTFLOAT;
               parser = parser.substr(parser.length() - 2, 2);
             }
             else {
@@ -2460,7 +2473,7 @@ namespace awkward {
             throw std::invalid_argument(
               err_linecol(linecol, pos, pos + 3,
                           "missing '*-> stack/output', "
-                          "'seek', 'skip', 'skip-ws', 'end', 'pos', or 'len' after input name")
+                          "'seek', 'skip', 'skipws', 'end', 'pos', or 'len' after input name")
               + FILENAME(__LINE__)
             );
           }
@@ -2469,6 +2482,13 @@ namespace awkward {
           IndexTypeOf<I> output_index = 0;
           if (pos + 2 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 2] == "stack") {
             // not READ_DIRECT
+            if ((bytecode & READ_MASK) == READ_TEXTFLOAT) {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos, pos + 3,
+                            "'stack' not allowed after 'textfloat->'")
+                + FILENAME(__LINE__)
+              );
+            }
           }
           else if (pos + 2 < stop  &&  is_output(tokenized[(IndexTypeOf<std::string>)pos + 2])) {
             for (;  output_index < output_names_.size();  output_index++) {
@@ -2502,7 +2522,7 @@ namespace awkward {
         else {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 3,
-                        "missing '*-> stack/output', 'seek', 'skip', 'skip-ws', 'end', "
+                        "missing '*-> stack/output', 'seek', 'skip', 'skipws', 'end', "
                         "'pos', or 'len' after input name")
             + FILENAME(__LINE__)
           );
@@ -2721,13 +2741,13 @@ namespace awkward {
               output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
             }
             int64_t shift;
-            int64_t result;
-            uint8_t* byte;
+            uint64_t result;
+            uint8_t byte;
             for (int64_t count = 0;  count < num_items;  count++) {
               shift = 0;
               result = 0;
               do {
-                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+                byte = input->read_byte(current_error_);
                 if (current_error_ != util::ForthError::none) {
                   return;
                 }
@@ -2735,9 +2755,9 @@ namespace awkward {
                   current_error_ = util::ForthError::varint_too_big;
                   return;
                 }
-                result |= (int64_t)(*byte & 0x7f) << shift;
+                result |= (uint64_t)(byte & 0x7f) << shift;
                 shift += 7;
-              } while (*byte & 0x80);
+              } while (byte & 0x80);
 
               if (output == nullptr) {
                 if (stack_cannot_push()) {
@@ -2747,7 +2767,7 @@ namespace awkward {
                 stack_push((T)result);   // note: pushing result
               }
               else {
-                output->write_one_uint64((uint64_t)result, false);   // note: writing result as unsigned
+                output->write_one_uint64(result, false);   // note: writing result as unsigned
               }
             }
           }
@@ -2762,13 +2782,13 @@ namespace awkward {
             }
             int64_t shift;
             int64_t result;
-            uint8_t* byte;
+            uint8_t byte;
             int64_t value;
             for (int64_t count = 0;  count < num_items;  count++) {
               shift = 0;
               result = 0;
               do {
-                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+                byte = input->read_byte(current_error_);
                 if (current_error_ != util::ForthError::none) {
                   return;
                 }
@@ -2776,9 +2796,9 @@ namespace awkward {
                   current_error_ = util::ForthError::varint_too_big;
                   return;
                 }
-                result |= (int64_t)(*byte & 0x7f) << shift;
+                result |= (int64_t)(byte & 0x7f) << shift;
                 shift += 7;
-              } while (*byte & 0x80);
+              } while (byte & 0x80);
 
               // This is the difference between VARINT and ZIGZAG: conversion to signed.
               value = (result >> 1) ^ (-(result & 1));
@@ -2790,7 +2810,7 @@ namespace awkward {
                 stack_push((T)value);   // note: pushing value
               }
               else {
-                output->write_one_int64((T)value, false);   // note: writing value as signed
+                output->write_one_int64(value, false);   // note: writing value as signed
               }
             }
           }
@@ -2816,14 +2836,14 @@ namespace awkward {
             int64_t items_remaining = num_items;
             uint64_t data;
             uint64_t tmp;
-            uint8_t* tmpptr;
+            uint8_t tmpbyte;
 
             if (items_remaining != 0) {
-              tmpptr = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+              tmpbyte = input->read_byte(current_error_);
               if (current_error_ != util::ForthError::none) {
                 return;
               }
-              tmp = (uint64_t)(*tmpptr);
+              tmp = (uint64_t)tmpbyte;
               if (flip) {
                 // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
                 tmp = (uint64_t)(bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
@@ -2843,20 +2863,20 @@ namespace awkward {
                     current_error_ = util::ForthError::stack_overflow;
                     return;
                   }
-                  stack_push((T)tmp);
+                  stack_push((T)tmp);   // note: pushing value
                 }
                 else {
-                  output->write_one_int64((T)tmp, false);
+                  output->write_one_uint64(tmp, false);   // note: writing value as unsigned
                 }
                 items_remaining--;
                 bits_wnd_r += (uint64_t)bit_width;
               }
               else {
-                tmpptr = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+                tmpbyte = input->read_byte(current_error_);
                 if (current_error_ != util::ForthError::none) {
                   return;
                 }
-                tmp = (uint64_t)(*tmpptr);
+                tmp = (uint64_t)tmpbyte;
                 if (flip) {
                   // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
                   tmp = (uint64_t)(bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
@@ -2875,49 +2895,13 @@ namespace awkward {
               bytecodes_pointer_where()++;
               output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
             }
+
             int64_t result;
-            int64_t sign;
-            uint8_t* byte;
             for (int64_t count = 0;  count < num_items;  count++) {
-              do {
-                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
-                if (current_error_ != util::ForthError::none) {
-                  return;
-                }
-              } while (*byte == ' ' || *byte == '\n' || *byte == '\r' || *byte == '\t');
-
-              sign = 1;
-              if (*byte == '-') {
-                sign = -1;
-                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
-                if (current_error_ != util::ForthError::none) {
-                  return;
-                }
-              }
-
-              if (*byte < '1' || *byte > '9') {
-                current_error_ = util::ForthError::textint_missing;
+              result = input->read_textint(current_error_);
+              if (current_error_ != util::ForthError::none) {
                 return;
               }
-
-              result = 0;
-              while (true) {
-                result *= 10;
-                result += (int64_t)(*byte) - 48;
-
-                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
-                if (current_error_ == util::ForthError::read_beyond) {
-                  current_error_ = util::ForthError::none;
-                  break;
-                }
-
-                if (*byte < '0' || *byte > '9') {
-                  input->skip(-1, current_error_);  // won't skip_beyond because pos >= 0
-                  break;
-                }
-              }
-
-              result *= sign;
 
               if (output == nullptr) {
                 if (stack_cannot_push()) {
@@ -2927,8 +2911,24 @@ namespace awkward {
                 stack_push((T)result);   // note: pushing result
               }
               else {
-                output->write_one_uint64((uint64_t)result, false);   // note: writing result as unsigned
+                output->write_one_int64(result, false);   // note: writing value as signed
               }
+            }
+          }
+
+          else if (format == READ_TEXTFLOAT) {
+            ForthInputBuffer* input = current_inputs_[(IndexTypeOf<int64_t>)in_num].get();
+            I out_num = bytecode_get();
+            bytecodes_pointer_where()++;
+            ForthOutputBuffer* output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
+
+            double result;
+            for (int64_t count = 0;  count < num_items;  count++) {
+              result = input->read_textfloat(current_error_);
+              if (current_error_ != util::ForthError::none) {
+                return;
+              }
+              output->write_one_float64(result, false);   // note: writing value as floating-point
             }
           }
 
@@ -3356,10 +3356,10 @@ namespace awkward {
               break;
             }
 
-            case CODE_SKIP_WS: {
+            case CODE_SKIPWS: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
-              current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->skip_ws();
+              current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->skipws();
               break;
             }
 
