@@ -40,6 +40,65 @@ namespace awkward {
     );
   }
 
+  uint64_t
+  ForthInputBuffer::read_varint(util::ForthError& err) noexcept {
+    const uint8_t* ptr = reinterpret_cast<uint8_t*>(
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_
+    );
+
+    int64_t shift = 0;
+    uint64_t result = 0;
+    uint8_t byte;
+    do {
+      if (pos_ == length_) {
+        err = util::ForthError::read_beyond;
+        return 0;
+      }
+      byte = ptr[pos_];
+      pos_++;
+
+      if (shift == 7 * 9) {
+        err = util::ForthError::varint_too_big;
+        return 0;
+      }
+
+      result |= (uint64_t)(byte & 0x7f) << shift;
+      shift += 7;
+    } while (byte & 0x80);
+
+    return result;
+  }
+
+  int64_t
+  ForthInputBuffer::read_zigzag(util::ForthError& err) noexcept {
+    const uint8_t* ptr = reinterpret_cast<uint8_t*>(
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_
+    );
+
+    int64_t shift = 0;
+    int64_t result = 0;
+    uint8_t byte;
+    do {
+      if (pos_ == length_) {
+        err = util::ForthError::read_beyond;
+        return 0;
+      }
+      byte = ptr[pos_];
+      pos_++;
+
+      if (shift == 7 * 9) {
+        err = util::ForthError::varint_too_big;
+        return 0;
+      }
+
+      result |= (int64_t)(byte & 0x7f) << shift;
+      shift += 7;
+    } while (byte & 0x80);
+
+    // This is the difference between VARINT and ZIGZAG: conversion to signed.
+    return (result >> 1) ^ (-(result & 1));
+  }
+
   int64_t
   ForthInputBuffer::read_textint(util::ForthError& err) noexcept {
     if (pos_ == length_) {

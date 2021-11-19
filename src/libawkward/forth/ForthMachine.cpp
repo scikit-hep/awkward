@@ -2740,33 +2740,26 @@ namespace awkward {
               bytecodes_pointer_where()++;
               output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
             }
-            int64_t shift;
-            uint64_t result;
-            uint8_t byte;
-            for (int64_t count = 0;  count < num_items;  count++) {
-              shift = 0;
-              result = 0;
-              do {
-                byte = input->read_byte(current_error_);
+
+            if (output == nullptr) {
+              for (int64_t count = 0;  count < num_items;  count++) {
+                uint64_t result = input->read_varint(current_error_);
                 if (current_error_ != util::ForthError::none) {
                   return;
                 }
-                if (shift == 7 * 9) {
-                  current_error_ = util::ForthError::varint_too_big;
-                  return;
-                }
-                result |= (uint64_t)(byte & 0x7f) << shift;
-                shift += 7;
-              } while (byte & 0x80);
-
-              if (output == nullptr) {
                 if (stack_cannot_push()) {
                   current_error_ = util::ForthError::stack_overflow;
                   return;
                 }
                 stack_push((T)result);   // note: pushing result
               }
-              else {
+            }
+            else {
+              for (int64_t count = 0;  count < num_items;  count++) {
+                uint64_t result = input->read_varint(current_error_);
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
                 output->write_one_uint64(result, false);   // note: writing result as unsigned
               }
             }
@@ -2780,37 +2773,27 @@ namespace awkward {
               bytecodes_pointer_where()++;
               output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
             }
-            int64_t shift;
-            int64_t result;
-            uint8_t byte;
-            int64_t value;
-            for (int64_t count = 0;  count < num_items;  count++) {
-              shift = 0;
-              result = 0;
-              do {
-                byte = input->read_byte(current_error_);
+
+            if (output == nullptr) {
+              for (int64_t count = 0;  count < num_items;  count++) {
+                int64_t result = input->read_zigzag(current_error_);
                 if (current_error_ != util::ForthError::none) {
                   return;
                 }
-                if (shift == 7 * 9) {
-                  current_error_ = util::ForthError::varint_too_big;
-                  return;
-                }
-                result |= (int64_t)(byte & 0x7f) << shift;
-                shift += 7;
-              } while (byte & 0x80);
-
-              // This is the difference between VARINT and ZIGZAG: conversion to signed.
-              value = (result >> 1) ^ (-(result & 1));
-              if (output == nullptr) {
                 if (stack_cannot_push()) {
                   current_error_ = util::ForthError::stack_overflow;
                   return;
                 }
-                stack_push((T)value);   // note: pushing value
+                stack_push((T)result);   // note: pushing value
               }
-              else {
-                output->write_one_int64(value, false);   // note: writing value as signed
+            }
+            else {
+              for (int64_t count = 0;  count < num_items;  count++) {
+                int64_t result = input->read_zigzag(current_error_);
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
+                output->write_one_int64(result, false);   // note: writing value as signed
               }
             }
           }
@@ -2896,21 +2879,32 @@ namespace awkward {
               output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
             }
 
-            int64_t result;
-            for (int64_t count = 0;  count < num_items;  count++) {
-              result = input->read_textint(current_error_);
-              if (current_error_ != util::ForthError::none) {
-                return;
-              }
+            if (output == nullptr) {
+              for (int64_t count = 0;  count < num_items;  count++) {
+                if (count != 0) {
+                  input->skipws();
+                }
+                int64_t result = input->read_textint(current_error_);
 
-              if (output == nullptr) {
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
                 if (stack_cannot_push()) {
                   current_error_ = util::ForthError::stack_overflow;
                   return;
                 }
                 stack_push((T)result);   // note: pushing result
               }
-              else {
+            }
+            else {
+              for (int64_t count = 0;  count < num_items;  count++) {
+                if (count != 0) {
+                  input->skipws();
+                }
+                int64_t result = input->read_textint(current_error_);
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
                 output->write_one_int64(result, false);   // note: writing value as signed
               }
             }
@@ -2922,9 +2916,11 @@ namespace awkward {
             bytecodes_pointer_where()++;
             ForthOutputBuffer* output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
 
-            double result;
             for (int64_t count = 0;  count < num_items;  count++) {
-              result = input->read_textfloat(current_error_);
+              if (count != 0) {
+                input->skipws();
+              }
+              double result = input->read_textfloat(current_error_);
               if (current_error_ != util::ForthError::none) {
                 return;
               }

@@ -18,20 +18,22 @@ def test_skip_ws():
 def test_textint():
     vm = ForthMachine32(
         """input x output y float64
-           3 0 do x skipws x textint-> stack loop
-           x skipws x textint-> y"""
+           x skipws 2 x #textint-> stack
+           x skipws x textint-> stack
+           x skipws 2 x #textint-> y"""
     )
     vm.run(
-        {"x": np.array([ord(x) for x in "     12345 -123      3210  -42"], np.uint8)}
+        {"x": np.array([ord(x) for x in "     12345 -123      3210  -42 0"], np.uint8)}
     )
     assert vm.stack == [12345, -123, 3210]
-    assert np.asarray(vm["y"]).tolist() == [-42.0]
+    assert np.asarray(vm["y"]).tolist() == [-42.0, 0.0]
 
 
 def test_textfloat():
     vm = ForthMachine32(
         """input x output y float64
-           6 0 do x skipws x textfloat-> y loop"""
+           x skipws 5 x #textfloat-> y
+           x skipws x textfloat-> y"""
     )
     vm.run(
         {
