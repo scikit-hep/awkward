@@ -16,12 +16,12 @@ def test_textint():
     vm = ForthMachine32(
         "input x output y float64  3 0 do x textint-> stack loop x textint-> y"
     )
-    vm.run({"x": b"     12345 -123      3210  42"})
+    vm.run({"x": np.array([ord(x) for x in "     12345 -123      3210  42"], np.uint8)})
     assert vm.stack == [12345, -123, 3210]
     assert np.asarray(vm["y"]).tolist() == [42.0]
 
 
 def test_skip_ws():
     vm = ForthMachine32("input x  x skip-ws")
-    vm.run({"x": np.array([b"     hello"])})
+    vm.run({"x": np.array([ord(x) for x in "     hello"], np.uint8)})
     assert vm.input_position("x") == 5
