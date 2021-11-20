@@ -342,7 +342,8 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   ForthMachineOf<T, I>::decompiled_segment(int64_t segment_position,
-                                           const std::string& indent) const {
+                                           const std::string& indent,
+                                           bool endline) const {
     if ((IndexTypeOf<int64_t>)segment_position < 0  ||  (IndexTypeOf<int64_t>)segment_position + 1 >= bytecodes_offsets_.size()) {
       throw std::runtime_error(
         std::string("segment ") + std::to_string(segment_position)
@@ -354,8 +355,11 @@ namespace awkward {
       if (bytecode_position != bytecodes_offsets_[(IndexTypeOf<int64_t>)segment_position]) {
         out << indent;
       }
-      out << decompiled_at(bytecode_position, indent) << std::endl;
+      out << decompiled_at(bytecode_position, indent);
       bytecode_position += bytecodes_per_instruction(bytecode_position);
+      if (endline || bytecode_position < bytecodes_offsets_[(IndexTypeOf<int64_t>)segment_position + 1]) {
+        out << std::endl;
+      }
     }
     return std::move(out.str());
   }
@@ -490,7 +494,7 @@ namespace awkward {
           return dictionary_names_[i];
         }
       }
-      return "(anonymous segment at " + std::to_string(bytecode - BOUND_DICTIONARY) + ")";
+      return decompiled_segment(bytecode - BOUND_DICTIONARY, indent, false);
     }
 
     else {
@@ -2176,8 +2180,6 @@ namespace awkward {
         std::vector<I> consequents;
         I alternate;
 
-        // std::vector<I>* filling = &bytecodes;
-
         int64_t substart = pos + 1;
         for (int64_t i = 0;  i < ofs.size();  i++) {
           I pred_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
@@ -2234,7 +2236,23 @@ namespace awkward {
           alternate = alt_bytecode;
         }
 
-        throw std::runtime_error("HERE");
+        I bytecode2 = alternate;
+        for (int64_t i = (int64_t)ofs.size() - 1;  i >= 0;  i--) {
+          I bytecode1 = consequents[i];
+
+          I ifthenelse_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
+          std::vector<I> ifthenelse;
+          dictionary.push_back(ifthenelse);
+          ifthenelse.push_back(predicates[i]);
+          ifthenelse.push_back(CODE_IF_ELSE);
+          ifthenelse.push_back(bytecode1);
+          ifthenelse.push_back(bytecode2);
+          dictionary[(IndexTypeOf<int64_t>)ifthenelse_bytecode - BOUND_DICTIONARY] = ifthenelse;
+
+          bytecode2 = ifthenelse_bytecode;
+        }
+
+        bytecodes.push_back(bytecode2);
 
         pos = substop + 1;
       }

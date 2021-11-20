@@ -50,7 +50,8 @@ namespace awkward {
 
     /// @brief HERE
     const std::string
-      decompiled_segment(int64_t segment_position, const std::string& indent="") const;
+      decompiled_segment(int64_t segment_position, const std::string& indent="",
+                         bool endline = true) const;
 
     /// @brief HERE
     const std::string
