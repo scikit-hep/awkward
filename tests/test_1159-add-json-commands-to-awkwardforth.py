@@ -111,7 +111,7 @@ def test_enum():
     assert vm.stack == [1, 3, 2]
 
 
-def test_case():
+def test_general_case():
     vm = ForthMachine32(
         r"case 0 of 1000 endof 1 of 1001 endof 1 1 + of 1002 endof 9999 swap endcase"
     )
@@ -135,3 +135,12 @@ def test_case():
     vm.stack_push(3)
     vm.resume()
     assert vm.stack == [9999]
+
+
+# def test_specialized_case():
+#     vm = ForthMachine32(
+#         r"case 0 of 1000 endof 1 of 1001 endof 2 of 1002 endof 9999 swap endcase"
+#     )
+#     print(vm.decompiled)
+
+#     raise Exception

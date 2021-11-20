@@ -2123,17 +2123,6 @@ namespace awkward {
       }
 
       else if (word == "case") {
-        // General 'case' statement can be turned into 'if' chain:
-        //
-	// CASE
-	// test1 OF ... ENDOF           test1 OVER = IF DROP ... ELSE
-	// test2 OF ... ENDOF           test2 OVER = IF DROP ... ELSE
-	// testn OF ... ENDOF           testn OVER = IF DROP ... ELSE
-	// ... ( default case )         ...
-	// ENDCASE                      DROP THEN [THEN [THEN ...]]
-        //
-        // But the regular case should become a jump table with CODE_CASE_REGULAR.
-
         std::vector<int64_t> ofs;
         std::vector<int64_t> endofs;
         int64_t substop = pos;
@@ -2180,6 +2169,7 @@ namespace awkward {
         std::vector<I> consequents;
         I alternate;
 
+        bool can_specialize = true;
         int64_t substart = pos + 1;
         for (int64_t i = 0;  i < ofs.size();  i++) {
           I pred_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
@@ -2194,6 +2184,9 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
+          if (pred != std::vector<I>({ 0, (int32_t)i })) {
+            can_specialize = false;
+          }
           pred.push_back(CODE_OVER);  // append "over"
           pred.push_back(CODE_EQ);    // append "="
           dictionary[(IndexTypeOf<int64_t>)pred_bytecode - BOUND_DICTIONARY] = pred;
@@ -2236,25 +2229,56 @@ namespace awkward {
           alternate = alt_bytecode;
         }
 
-        I bytecode2 = alternate;
-        for (int64_t i = (int64_t)ofs.size() - 1;  i >= 0;  i--) {
-          I bytecode1 = consequents[i];
+        if (can_specialize) {
+          // Specialized 'case' statement can be turned into a jump table:
+          //
+          // CASE                         CODE_CASE_REGULAR
+          // 0 OF ... ENDOF               dictionary index of case 0
+          // 1 OF ... ENDOF               dictionary index of default case
+          // 2 OF ... ENDOF
+          // ... ( default case )
+          // ENDCASE
+          //
+          // where CODE_CASE_REGULAR pops an item off the stack; if it's nonnegative
+          // and less than n, the dictionary index is computed from it by adding
+          // the "dictionary index of case 0"; if it's out of range, the dictionary
+          // index is for the default case.
 
-          I ifthenelse_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
-          std::vector<I> ifthenelse;
-          dictionary.push_back(ifthenelse);
-          ifthenelse.push_back(predicates[i]);
-          ifthenelse.push_back(CODE_IF_ELSE);
-          ifthenelse.push_back(bytecode1);
-          ifthenelse.push_back(bytecode2);
-          dictionary[(IndexTypeOf<int64_t>)ifthenelse_bytecode - BOUND_DICTIONARY] = ifthenelse;
-
-          bytecode2 = ifthenelse_bytecode;
+          throw std::runtime_error("not implemented");
         }
 
-        bytecodes.push_back(bytecode2);
+        else {
+          // General 'case' statement can be turned into 'if' chain:
+          //
+          // CASE
+          // test1 OF ... ENDOF           test1 OVER = IF DROP ... ELSE
+          // test2 OF ... ENDOF           test2 OVER = IF DROP ... ELSE
+          // testn OF ... ENDOF           testn OVER = IF DROP ... ELSE
+          // ... ( default case )         ...
+          // ENDCASE                      DROP THEN [THEN [THEN ...]]
+          //
+          // But the regular case should become a jump table with CODE_CASE_REGULAR.
 
-        pos = substop + 1;
+          I bytecode2 = alternate;
+          for (int64_t i = (int64_t)ofs.size() - 1;  i >= 0;  i--) {
+            I bytecode1 = consequents[i];
+
+            I ifthenelse_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
+            std::vector<I> ifthenelse;
+            dictionary.push_back(ifthenelse);
+            ifthenelse.push_back(predicates[i]);
+            ifthenelse.push_back(CODE_IF_ELSE);
+            ifthenelse.push_back(bytecode1);
+            ifthenelse.push_back(bytecode2);
+            dictionary[(IndexTypeOf<int64_t>)ifthenelse_bytecode - BOUND_DICTIONARY] = ifthenelse;
+
+            bytecode2 = ifthenelse_bytecode;
+          }
+
+          bytecodes.push_back(bytecode2);
+
+          pos = substop + 1;
+        }
       }
 
       else if (word == "do") {
