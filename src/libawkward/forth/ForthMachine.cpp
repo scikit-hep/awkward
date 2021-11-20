@@ -531,7 +531,7 @@ namespace awkward {
           int64_t stop = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2] - BOUND_DICTIONARY;
           int64_t num_cases = (stop - start) >> 1;  // divide by 2
           std::stringstream out;
-          out << "case\n";
+          out << "case ( regular )\n";
           for (int64_t i = 0;  i < num_cases;  i++) {
             out << indent << "  " << i << " of";
             I consequent = start + (i << 1) + 1;
@@ -586,7 +586,14 @@ namespace awkward {
         }
         case CODE_ENUM: {
           int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
-          return input_names_[(IndexTypeOf<int64_t>)in_num] + " enum";
+          int64_t start = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2];
+          int64_t stop = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 3];
+          std::stringstream out;
+          out << input_names_[(IndexTypeOf<int64_t>)in_num] << " enum";
+          for (int64_t i = start;  i < stop;  i++) {
+            out << " s\" " << strings_[i] << "\"";
+          }
+          return out.str();
         }
         case CODE_PEEK: {
           int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
