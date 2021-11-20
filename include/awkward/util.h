@@ -238,6 +238,8 @@ namespace awkward {
         rewind_beyond,
         division_by_zero,
         varint_too_big,
+        text_number_missing,
+        quoted_string_missing,
 
         size
     };
