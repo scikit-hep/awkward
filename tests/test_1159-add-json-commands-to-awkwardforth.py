@@ -113,34 +113,127 @@ def test_enum():
 
 def test_general_case():
     vm = ForthMachine32(
-        r"case 0 of 1000 endof 1 of 1001 endof 1 1 + of 1002 endof 9999 swap endcase"
+        r"case 0 of 1000 endof 1 of 1001 endof 1 1 + of 1002 endof 9999 swap endcase 10 20 30"
     )
 
     vm.begin()
     vm.stack_push(0)
     vm.resume()
-    assert vm.stack == [1000]
+    assert vm.stack == [1000, 10, 20, 30]
 
     vm.begin()
     vm.stack_push(1)
     vm.resume()
-    assert vm.stack == [1001]
+    assert vm.stack == [1001, 10, 20, 30]
 
     vm.begin()
     vm.stack_push(2)
     vm.resume()
-    assert vm.stack == [1002]
+    assert vm.stack == [1002, 10, 20, 30]
 
     vm.begin()
     vm.stack_push(3)
     vm.resume()
-    assert vm.stack == [9999]
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(-1)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm = ForthMachine32(
+        r"case 0 of 1000 endof 1 of 1001 endof 1 1 + of 1002 endof endcase 10 20 30"
+    )
+
+    vm.begin()
+    vm.stack_push(2)
+    vm.resume()
+    assert vm.stack == [1002, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(3)
+    vm.resume()
+    assert vm.stack == [10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(-1)
+    vm.resume()
+    assert vm.stack == [10, 20, 30]
 
 
 def test_specialized_case():
     vm = ForthMachine32(
-        r"case 0 of 1000 endof 1 of 1001 endof 2 of 1002 endof 9999 swap endcase"
+        r"case 0 of 1000 endof 1 of 1001 endof 2 of 1002 endof 9999 swap endcase 10 20 30"
     )
-    print(vm.decompiled)
 
-    # raise Exception
+    vm.begin()
+    vm.stack_push(0)
+    vm.resume()
+    assert vm.stack == [1000, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(1)
+    vm.resume()
+    assert vm.stack == [1001, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(2)
+    vm.resume()
+    assert vm.stack == [1002, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(3)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(-1)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm = ForthMachine32(
+        r"case 0 of 1000 endof 1 of 1001 endof 2 of 1002 endof endcase 10 20 30"
+    )
+
+    vm.begin()
+    vm.stack_push(2)
+    vm.resume()
+    assert vm.stack == [1002, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(3)
+    vm.resume()
+    assert vm.stack == [10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(-1)
+    vm.resume()
+    assert vm.stack == [10, 20, 30]
+
+    vm = ForthMachine32(r"case 9999 swap endcase 10 20 30")
+
+    vm.begin()
+    vm.stack_push(0)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm = ForthMachine32(r"case endcase 10 20 30")
+
+    vm.begin()
+    vm.stack_push(0)
+    vm.resume()
+    assert vm.stack == [10, 20, 30]
+
+    vm = ForthMachine32(
+        r"case 0 of 1000 endof 1 of 1001 endof 2 of endof 9999 swap endcase 10 20 30"
+    )
+
+    vm.begin()
+    vm.stack_push(1)
+    vm.resume()
+    assert vm.stack == [1001, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(2)
+    vm.resume()
+    assert vm.stack == [10, 20, 30]

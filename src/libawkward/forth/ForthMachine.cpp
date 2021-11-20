@@ -544,8 +544,13 @@ namespace awkward {
               out << " endof\n";
             }
           }
-          if (segment_nonempty(stop)) {
-            out << indent << "  ( default )\n" << indent << "    " << decompiled_segment(stop, indent + "    ");
+          bool alt_nonempty = (bytecodes_offsets_[(IndexTypeOf<int64_t>)stop] + 1
+                            != bytecodes_offsets_[(IndexTypeOf<int64_t>)stop + 1]);
+          if (alt_nonempty) {
+            std::string alt_segment = decompiled_segment(stop, indent + "    ");
+            // remove the last "drop" command, which is for execution but not visible in source code
+            alt_segment = alt_segment.substr(0, alt_segment.length() - indent.length() - 9);
+            out << indent << "  ( default )\n" << indent << "    " << alt_segment;
           }
           out << "endcase";
           return std::move(out.str());
@@ -2266,6 +2271,9 @@ namespace awkward {
           // the "dictionary index of case 0"; if it's out of range, the dictionary
           // index is for the default case.
 
+          auto alt = dictionary.begin() + (alternate - BOUND_DICTIONARY);
+          alt->push_back(CODE_DROP);  // append "drop"
+
           bytecodes.push_back(CODE_CASE_REGULAR);
           bytecodes.push_back(first_bytecode);
           bytecodes.push_back(alternate);
@@ -3475,7 +3483,34 @@ namespace awkward {
             }
 
             case CODE_CASE_REGULAR: {
-              // FIXME
+              if (stack_cannot_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* value = stack_peek();
+
+              I start = bytecode_get();
+              bytecodes_pointer_where()++;
+              I stop = bytecode_get();
+              bytecodes_pointer_where()++;
+
+              I which;
+              if (*value < 0  ||  *value >= ((stop - start) >> 1)) {
+                which = stop;
+              }
+              else {
+                stack_depth_--;
+                which = start + (*value << 1) + 1;
+              }
+
+              if (recursion_current_depth_ == recursion_max_depth_) {
+                current_error_ = util::ForthError::recursion_depth_exceeded;
+                return;
+              }
+              bytecodes_pointer_push(which - BOUND_DICTIONARY);
+
+              // Ordinarily, a redirection like the above would count as one.
+              count_instructions_++;
 
               break;
             }
