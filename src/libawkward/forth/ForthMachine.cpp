@@ -44,7 +44,7 @@ namespace awkward {
   #define CODE_PAUSE 2
   #define CODE_IF 3
   #define CODE_IF_ELSE 4
-  #define CODE_CASE_REGULAR 5   // has one argument, the number of cases
+  #define CODE_CASE_REGULAR 5
   #define CODE_DO 6
   #define CODE_DO_STEP 7
   #define CODE_AGAIN 8
@@ -525,6 +525,30 @@ namespace awkward {
                  + (segment_nonempty(alternate) ? indent + "  " : "")
                  + decompiled_segment(alternate, indent + "  ")
                  + indent + "then");
+        }
+        case CODE_CASE_REGULAR: {
+          int64_t start = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1] - BOUND_DICTIONARY;
+          int64_t stop = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2] - BOUND_DICTIONARY;
+          int64_t num_cases = (stop - start) >> 1;  // divide by 2
+          std::stringstream out;
+          out << "case\n";
+          for (int64_t i = 0;  i < num_cases;  i++) {
+            out << indent << "  " << i << " of";
+            I consequent = start + (i << 1) + 1;
+            if (segment_nonempty(consequent)) {
+              out << "\n" << indent << "    ";
+              out << decompiled_segment(consequent, indent + "    ");
+              out << indent << "  endof\n";
+            }
+            else {
+              out << " endof\n";
+            }
+          }
+          if (segment_nonempty(stop)) {
+            out << indent << "  ( default )\n" << indent << "    " << decompiled_segment(stop, indent + "    ");
+          }
+          out << "endcase";
+          return std::move(out.str());
         }
         case CODE_DO: {
           int64_t body = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1] - BOUND_DICTIONARY;
@@ -1595,6 +1619,7 @@ namespace awkward {
         case CODE_ENUM:
           return 4;
         case CODE_IF_ELSE:
+        case CODE_CASE_REGULAR:
           return 3;
         case CODE_LITERAL:
         case CODE_IF:
@@ -2169,6 +2194,7 @@ namespace awkward {
         std::vector<I> consequents;
         I alternate;
 
+        I first_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
         bool can_specialize = true;
         int64_t substart = pos + 1;
         for (int64_t i = 0;  i < ofs.size();  i++) {
@@ -2184,18 +2210,15 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          if (pred != std::vector<I>({ 0, (int32_t)i })) {
+          if (pred != std::vector<I>({ CODE_LITERAL, (int32_t)i })) {
             can_specialize = false;
           }
-          pred.push_back(CODE_OVER);  // append "over"
-          pred.push_back(CODE_EQ);    // append "="
           dictionary[(IndexTypeOf<int64_t>)pred_bytecode - BOUND_DICTIONARY] = pred;
           predicates.push_back(pred_bytecode);
 
           I cons_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> cons;
           dictionary.push_back(cons);
-          cons.push_back(CODE_DROP);  // prepend "drop"
           parse(defn,
                 tokenized,
                 linecol,
@@ -2224,7 +2247,6 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          alt.push_back(CODE_DROP);  // append "drop"
           dictionary[(IndexTypeOf<int64_t>)alt_bytecode - BOUND_DICTIONARY] = alt;
           alternate = alt_bytecode;
         }
@@ -2233,8 +2255,8 @@ namespace awkward {
           // Specialized 'case' statement can be turned into a jump table:
           //
           // CASE                         CODE_CASE_REGULAR
-          // 0 OF ... ENDOF               dictionary index of case 0
-          // 1 OF ... ENDOF               dictionary index of default case
+          // 0 OF ... ENDOF               first dictionary index (predicate)
+          // 1 OF ... ENDOF               dictionary index of default case (last)
           // 2 OF ... ENDOF
           // ... ( default case )
           // ENDCASE
@@ -2244,7 +2266,9 @@ namespace awkward {
           // the "dictionary index of case 0"; if it's out of range, the dictionary
           // index is for the default case.
 
-          throw std::runtime_error("not implemented");
+          bytecodes.push_back(CODE_CASE_REGULAR);
+          bytecodes.push_back(first_bytecode);
+          bytecodes.push_back(alternate);
         }
 
         else {
@@ -2258,6 +2282,16 @@ namespace awkward {
           // ENDCASE                      DROP THEN [THEN [THEN ...]]
           //
           // But the regular case should become a jump table with CODE_CASE_REGULAR.
+
+          for (int64_t i = 0;  i < ofs.size();  i++) {
+            auto pred = dictionary.begin() + (predicates[i] - BOUND_DICTIONARY);
+            pred->push_back(CODE_OVER);  // append "over"
+            pred->push_back(CODE_EQ);    // append "="
+            auto cons = dictionary.begin() + (consequents[i] - BOUND_DICTIONARY);
+            cons->insert(cons->begin(), CODE_DROP);  // prepend "drop"
+          }
+          auto alt = dictionary.begin() + (alternate - BOUND_DICTIONARY);
+          alt->push_back(CODE_DROP);  // append "drop"
 
           I bytecode2 = alternate;
           for (int64_t i = (int64_t)ofs.size() - 1;  i >= 0;  i--) {
@@ -2276,9 +2310,9 @@ namespace awkward {
           }
 
           bytecodes.push_back(bytecode2);
-
-          pos = substop + 1;
         }
+
+        pos = substop + 1;
       }
 
       else if (word == "do") {
@@ -3437,6 +3471,12 @@ namespace awkward {
                 // Ordinarily, a redirection like the above would count as one.
                 count_instructions_++;
               }
+              break;
+            }
+
+            case CODE_CASE_REGULAR: {
+              // FIXME
+
               break;
             }
 
