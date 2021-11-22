@@ -50,7 +50,6 @@ def test_concatenate_number():
         [4, 5, 323],
     ]
 
-
 @pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_list_offset_array_concatenate():
     content_one = ak.layout.NumpyArray(
@@ -65,6 +64,16 @@ def test_list_offset_array_concatenate():
     offsets_four = ak.layout.Index64(np.array([1, 3, 4, 4, 6, 7, 7], dtype=np.int64))
 
     one = ak.layout.ListOffsetArray64(offsets_one, content_one)
+    
+    two = ak.layout.ListOffsetArray64(offsets_two, content_two)
+    three = ak.layout.ListOffsetArray64(offsets_three, one)
+    four = ak.layout.ListOffsetArray64(offsets_four, two)
+    
+    one = v1_to_v2(one)
+    two = v1_to_v2(two)
+    three = v1_to_v2(three)
+    four = v1_to_v2(four)
+
     padded_one = one.rpad(7, 0)
     assert ak.to_list(padded_one) == [
         [0.0, 1.1, 2.2],
@@ -76,11 +85,7 @@ def test_list_offset_array_concatenate():
         None,
     ]
 
-    two = ak.layout.ListOffsetArray64(offsets_two, content_two)
-    three = ak.layout.ListOffsetArray64(offsets_three, one)
-    four = ak.layout.ListOffsetArray64(offsets_four, two)
-
-    assert ak.to_list(ak.concatenate([one, two], 0)) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
@@ -95,7 +100,7 @@ def test_list_offset_array_concatenate():
         [0.99],
     ]
 
-    assert ak.to_list(ak.concatenate([padded_one, two], axis=1)) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([padded_one, two], axis=1)) == [
         [0.0, 1.1, 2.2, 0.11, 0.22],
         [0.33],
         [3.3, 4.4],
@@ -106,9 +111,9 @@ def test_list_offset_array_concatenate():
     ]
 
     with pytest.raises(ValueError):
-        assert ak.to_list(ak.concatenate([one, two], 2))
+        assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 2))
 
-    assert ak.to_list(ak.concatenate([three, four], 0)) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([three, four], 0)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         [[5.5], [6.6, 7.7, 8.8, 9.9]],
@@ -122,7 +127,7 @@ def test_list_offset_array_concatenate():
 
     padded = three.rpad(6, 0)
 
-    assert ak.to_list(ak.concatenate([padded, four], 1)) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([padded, four], 1)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [0.33], []],
         [[0.44, 0.55]],
         [[5.5], [6.6, 7.7, 8.8, 9.9]],
@@ -131,7 +136,7 @@ def test_list_offset_array_concatenate():
         [],
     ]
 
-    assert ak.to_list(ak.concatenate([four, four], 2)) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([four, four], 2)) == [
         [[0.33, 0.33], []],
         [[0.44, 0.55, 0.44, 0.55]],
         [],
@@ -212,7 +217,6 @@ def test_indexed_array_concatenate():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_bytemasked_concatenate():
     one = (
         ak.Array([1, 2, 3, 4, 5, 6]).mask[[True, True, False, True, False, True]].layout
@@ -240,7 +244,6 @@ def test_bytemasked_concatenate():
         ak.to_list(ak._v2.operations.structure.concatenate([one, two], 1))
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_listoffsetarray_concatenate():
     content_one = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
     offsets_one = ak.layout.Index64(np.array([0, 3, 3, 5, 9]))
@@ -275,7 +278,6 @@ def test_listoffsetarray_concatenate():
     # ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_numpyarray_concatenate_axis0():
     np1 = np.arange(2 * 7 * 5, dtype=np.float64).reshape(2, 7, 5)
     np2 = np.arange(3 * 7 * 5, dtype=np.int64).reshape(3, 7, 5)
