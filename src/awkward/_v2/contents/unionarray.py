@@ -272,6 +272,32 @@ class UnionArray(Content):
         )
         return outindex
 
+    def _nested_tags_index(self, offsets, counts):
+        nplike = self.nplike
+        contentlen = offsets[len(offsets) - 1]
+
+        tags = ak._v2.index.Index8.empty(contentlen, nplike)
+        index = ak._v2.index.Index64.empty(contentlen, nplike)
+
+        for tag in range(len(counts)):
+            self._handle_error(
+                nplike[
+                    "awkward_UnionArray_nestedfill_tags_index",
+                    tags.dtype.type,
+                    index.dtype.type,
+                    offsets.dtype.type,
+                    counts[tag].dtype.type,
+                ](
+                    tags.to(nplike),
+                    index.to(nplike),
+                    offsets.to(nplike),
+                    tag,
+                    counts[tag].to(nplike),
+                    len(offsets) - 1,
+                )
+            )
+        return (tags, index)
+
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         simplified = self.simplify_uniontype()
         if (

@@ -627,594 +627,701 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         )
 
 
-# def broadcast_and_apply(  # noqa: C901
-#     inputs,
-#     getfunction,
-#     behavior,
-#     allow_records=True,
-#     pass_depth=True,
-#     pass_user=False,
-#     user=None,
-#     left_broadcast=True,
-#     right_broadcast=True,
-#     numpy_to_regular=False,
-#     regular_to_jagged=False,
-# ):
-#     def checklength(inputs):
-#         length = len(inputs[0])
-#         for x in inputs[1:]:
-#             if len(x) != length:
-#                 raise ValueError(
-#                     "cannot broadcast {0} of length {1} with {2} of "
-#                     "length {3}".format(
-#                         type(inputs[0]).__name__, length, type(x).__name__, len(x)
-#                     )
-#
-#                 )
+def broadcast_and_apply(  # noqa: C901
+    inputs,
+    getfunction,
+    behavior,
+    allow_records=True,
+    pass_depth=True,
+    pass_user=False,
+    user=None,
+    left_broadcast=True,
+    right_broadcast=True,
+    numpy_to_regular=False,
+    regular_to_jagged=False,
+):
+    def checklength(inputs):
+        length = len(inputs[0])
+        for x in inputs[1:]:
+            if len(x) != length:
+                raise ValueError(
+                    "cannot broadcast {0} of length {1} with {2} of "
+                    "length {3}".format(
+                        type(inputs[0]).__name__, length, type(x).__name__, len(x)
+                    )
+                )
 
-#     def all_same_offsets(nplike, inputs):
-#         offsets = None
-#         for x in inputs:
-#             if isinstance(
-#                 x,
-#                 (
-#                     ak._v2.contents.ListOffsetArray32,
-#                     ak._v2.contents.ListOffsetArrayU32,
-#                     ak._v2.contents.ListOffsetArray64,
-#                 ),
-#             ):
-#                 if offsets is None:
-#                     offsets = nplike.asarray(x.offsets)
-#                 elif not nplike.array_equal(offsets, nplike.asarray(x.offsets)):
-#                     return False
-#             elif isinstance(
-#                 x,
-#                 (
-#                     ak._v2.contents.ListArray32,
-#                     ak._v2.contents.ListArrayU32,
-#                     ak._v2.contents.ListArray64,
-#                 ),
-#             ):
-#                 starts = nplike.asarray(x.starts)
-#                 stops = nplike.asarray(x.stops)
-#                 if not nplike.array_equal(starts[1:], stops[:-1]):
-#                     return False
-#                 if offsets is None:
-#                     offsets = nplike.empty(len(starts) + 1, dtype=starts.dtype)
-#                     if len(offsets) == 1:
-#                         offsets[0] = 0
-#                     else:
-#                         offsets[:-1] = starts
-#                         offsets[-1] = stops[-1]
-#                 elif not nplike.array_equal(offsets[:-1], starts) or (
-#                     len(stops) != 0 and offsets[-1] != stops[-1]
-#                 ):
-#                     return False
-#             elif isinstance(x, ak._v2.contents.RegularArray):
-#                 if x.size == 0:
-#                     my_offsets = nplike.empty(0, dtype=np.int64)
-#                 else:
-#                     my_offsets = nplike.arange(0, len(x.content), x.size)
-#                 if offsets is None:
-#                     offsets = my_offsets
-#                 elif not nplike.array_equal(offsets, my_offsets):
-#                     return False
-#             elif isinstance(x, ak._v2.contents.Content):
-#                 return False
-#         else:
-#             return True
+    def all_same_offsets(nplike, inputs):
+        offsets = None
+        for x in inputs:
+            if isinstance(
+                x,
+                (
+                    ak._v2.contents.ListOffsetArray32,
+                    ak._v2.contents.ListOffsetArrayU32,
+                    ak._v2.contents.ListOffsetArray64,
+                ),
+            ):
+                if offsets is None:
+                    offsets = nplike.asarray(x.offsets)
+                elif not nplike.array_equal(offsets, nplike.asarray(x.offsets)):
+                    return False
+            elif isinstance(
+                x,
+                (
+                    ak._v2.contents.ListArray32,
+                    ak._v2.contents.ListArrayU32,
+                    ak._v2.contents.ListArray64,
+                ),
+            ):
+                starts = nplike.asarray(x.starts)
+                stops = nplike.asarray(x.stops)
+                if not nplike.array_equal(starts[1:], stops[:-1]):
+                    return False
+                if offsets is None:
+                    offsets = nplike.empty(len(starts) + 1, dtype=starts.dtype)
+                    if len(offsets) == 1:
+                        offsets[0] = 0
+                    else:
+                        offsets[:-1] = starts
+                        offsets[-1] = stops[-1]
+                elif not nplike.array_equal(offsets[:-1], starts) or (
+                    len(stops) != 0 and offsets[-1] != stops[-1]
+                ):
+                    return False
+            elif isinstance(x, ak._v2.contents.RegularArray):
+                if x.size == 0:
+                    my_offsets = nplike.empty(0, dtype=np.int64)
+                else:
+                    my_offsets = nplike.arange(0, len(x.content), x.size)
+                if offsets is None:
+                    offsets = my_offsets
+                elif not nplike.array_equal(offsets, my_offsets):
+                    return False
+            elif isinstance(x, ak._v2.contents.Content):
+                return False
+        else:
+            return True
 
-#     def apply(inputs, depth, user):
-#         nplike = ak.nplike.of(*inputs)
+    def apply(inputs, depth, user):
+        nplike = ak.nplike.of(*inputs)
 
-#         if numpy_to_regular:
-#             inputs = [
-#                 x.toRegularArray() if isinstance(x, ak._v2.contents.NumpyArray) else x
-#                 for x in inputs
-#             ]
+        if numpy_to_regular:
+            inputs = [
+                x.toRegularArray() if isinstance(x, ak._v2.contents.NumpyArray) else x
+                for x in inputs
+            ]
 
-#         if regular_to_jagged:
-#             inputs = [
-#                 x.toListOffsetArray64(False)
-#                 if isinstance(x, ak._v2.contents.RegularArray)
-#                 else x
-#                 for x in inputs
-#             ]
+        if regular_to_jagged:
+            inputs = [
+                x.toListOffsetArray64(False)
+                if isinstance(x, ak._v2.contents.RegularArray)
+                else x
+                for x in inputs
+            ]
 
-#         # handle implicit right-broadcasting (i.e. NumPy-like)
-#         if right_broadcast and any(isinstance(x, listtypes) for x in inputs):
-#             maxdepth = max(
-#                 x.purelist_depth for x in inputs if isinstance(x, ak._v2.contents.Content)
-#             )
+        # handle implicit right-broadcasting (i.e. NumPy-like)
+        if right_broadcast and any(
+            isinstance(
+                x,
+                (
+                    ak._v2.contents.RegularArray,
+                    ak._v2.contents.ListArray,
+                    ak._v2.contents.ListOffsetArray,
+                ),
+            )
+            for x in inputs
+        ):
+            maxdepth = max(
+                x.purelist_depth
+                for x in inputs
+                if isinstance(x, ak._v2.contents.Content)
+            )
 
-#             if maxdepth > 0 and all(
-#                 x.purelist_isregular for x in inputs if isinstance(x, ak._v2.contents.Content)
-#             ):
-#                 nextinputs = []
-#                 for obj in inputs:
-#                     if isinstance(obj, ak._v2.contents.Content):
-#                         while obj.purelist_depth < maxdepth:
-#                             obj = ak._v2.contents.RegularArray(obj, 1, len(obj))
-#                     nextinputs.append(obj)
-#                 if any(x is not y for x, y in zip(inputs, nextinputs)):
-#                     return apply(nextinputs, depth, user)
+            if maxdepth > 0 and all(
+                x.purelist_isregular
+                for x in inputs
+                if isinstance(x, ak._v2.contents.Content)
+            ):
+                nextinputs = []
+                for obj in inputs:
+                    if isinstance(obj, ak._v2.contents.Content):
+                        while obj.purelist_depth < maxdepth:
+                            obj = ak._v2.contents.RegularArray(obj, 1, len(obj))
+                    nextinputs.append(obj)
+                if any(x is not y for x, y in zip(inputs, nextinputs)):
+                    return apply(nextinputs, depth, user)
 
-#         # now all lengths must agree
-#         checklength([x for x in inputs if isinstance(x, ak._v2.contents.Content)])
+        # now all lengths must agree
+        checklength([x for x in inputs if isinstance(x, ak._v2.contents.Content)])
 
-#         args = ()
-#         if pass_depth:
-#             args = args + (depth,)
-#         if pass_user:
-#             args = args + (user,)
+        args = ()
+        if pass_depth:
+            args = args + (depth,)
+        if pass_user:
+            args = args + (user,)
 
-#         custom = getfunction(inputs, *args)
-#         if callable(custom):
-#             return custom()
-#         else:
-#             user = custom
+        custom = getfunction(inputs, *args)
+        if callable(custom):
+            return custom()
+        else:
+            user = custom
 
-#         # the rest of this is one switch statement
-#         if any(isinstance(x, virtualtypes) for x in inputs):
-#             nextinputs = []
-#             for x in inputs:
-#                 if isinstance(x, virtualtypes):
-#                     nextinputs.append(x.array)
-#                 else:
-#                     nextinputs.append(x)
-#             return apply(nextinputs, depth, user)
+        # the rest of this is one switch statement
+        # if any(isinstance(x, virtualtypes) for x in inputs):
+        #     nextinputs = []
+        #     for x in inputs:
+        #         if isinstance(x, virtualtypes):
+        #             nextinputs.append(x.array)
+        #         else:
+        #             nextinputs.append(x)
+        #     return apply(nextinputs, depth, user)
 
-#         elif any(isinstance(x, unknowntypes) for x in inputs):
-#             nextinputs = []
-#             for x in inputs:
-#                 if isinstance(x, unknowntypes):
-#                     nextinputs.append(
-#                         ak._v2.contents.NumpyArray(nplike.array([], dtype=np.bool_))
-#                     )
-#                 else:
-#                     nextinputs.append(x)
-#             return apply(nextinputs, depth, user)
+        if any(isinstance(x, ak._v2.contents.EmptyArray) for x in inputs):
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, ak._v2.contents.EmptyArray):
+                    nextinputs.append(
+                        ak._v2.contents.NumpyArray(nplike.array([], dtype=np.bool_))
+                    )
+                else:
+                    nextinputs.append(x)
+            return apply(nextinputs, depth, user)
 
-#         elif any(isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1 for x in inputs):
-#             nextinputs = []
-#             for x in inputs:
-#                 if isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1:
-#                     nextinputs.append(x.toRegularArray())
-#                 else:
-#                     nextinputs.append(x)
-#             return apply(nextinputs, depth, user)
+        elif any(
+            isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1 for x in inputs
+        ):
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, ak._v2.contents.NumpyArray) and x.ndim > 1:
+                    nextinputs.append(x.toRegularArray())
+                else:
+                    nextinputs.append(x)
+            return apply(nextinputs, depth, user)
 
-#         elif any(isinstance(x, indexedtypes) for x in inputs):
-#             nextinputs = []
-#             for x in inputs:
-#                 if isinstance(x, indexedtypes):
-#                     nextinputs.append(x.project())
-#                 else:
-#                     nextinputs.append(x)
-#             return apply(nextinputs, depth, user)
+        elif any(isinstance(x, ak._v2.contents.IndexedArray) for x in inputs):
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, ak._v2.contents.IndexedArray):
+                    nextinputs.append(x.project())
+                else:
+                    nextinputs.append(x)
+            return apply(nextinputs, depth, user)
 
-#         elif any(isinstance(x, uniontypes) for x in inputs):
-#             tagslist = []
-#             numtags = []
-#             length = None
-#             for x in inputs:
-#                 if isinstance(x, uniontypes):
-#                     tagslist.append(nplike.asarray(x.tags))
-#                     numtags.append(len(x.contents))
-#                     if length is None:
-#                         length = len(tagslist[-1])
-#                     elif length != len(tagslist[-1]):
-#                         raise ValueError(
-#                             "cannot broadcast UnionArray of length {0} "
-#                             "with UnionArray of length {1}".format(
-#                                 length, len(tagslist[-1])
-#                             )
-#
-#                         )
+        elif any(isinstance(x, ak._v2.contents.UnionArray) for x in inputs):
+            tagslist = []
+            numtags = []
+            length = None
+            for x in inputs:
+                if isinstance(x, ak._v2.contents.UnionArray):
+                    tagslist.append(nplike.asarray(x.tags))
+                    numtags.append(len(x.contents))
+                    if length is None:
+                        length = len(tagslist[-1])
+                    elif length != len(tagslist[-1]):
+                        raise ValueError(
+                            "cannot broadcast UnionArray of length {0} "
+                            "with UnionArray of length {1}".format(
+                                length, len(tagslist[-1])
+                            )
+                        )
 
-#             combos = nplike.stack(tagslist, axis=-1)
+            combos = nplike.stack(tagslist, axis=-1)
 
-#             all_combos = nplike.array(
-#                 list(itertools.product(*[range(x) for x in numtags])),
-#                 dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
-#             )
+            all_combos = nplike.array(
+                list(itertools.product(*[range(x) for x in numtags])),
+                dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
+            )
 
-#             combos = combos.view(
-#                 [(str(i), combos.dtype) for i in range(len(tagslist))]
-#             ).reshape(length)
+            combos = combos.view(
+                [(str(i), combos.dtype) for i in range(len(tagslist))]
+            ).reshape(length)
 
-#             tags = nplike.empty(length, dtype=np.int8)
-#             index = nplike.empty(length, dtype=np.int64)
-#             numoutputs = None
-#             outcontents = []
-#             for tag, combo in enumerate(all_combos):
-#                 mask = combos == combo
-#                 tags[mask] = tag
-#                 index[mask] = nplike.arange(nplike.count_nonzero(mask))
-#                 nextinputs = []
-#                 i = 0
-#                 for x in inputs:
-#                     if isinstance(x, uniontypes):
-#                         nextinputs.append(x[mask].project(combo[str(i)]))
-#                         i += 1
-#                     elif isinstance(x, ak._v2.contents.Content):
-#                         nextinputs.append(x[mask])
-#                     else:
-#                         nextinputs.append(x)
-#                 outcontents.append(apply(nextinputs, depth, user))
-#                 assert isinstance(outcontents[-1], tuple)
-#                 if numoutputs is not None:
-#                     assert numoutputs == len(outcontents[-1])
-#                 numoutputs = len(outcontents[-1])
+            tags = nplike.empty(length, dtype=np.int8)
+            index = nplike.empty(length, dtype=np.int64)
+            numoutputs = None
+            outcontents = []
+            for tag, combo in enumerate(all_combos):
+                mask = combos == combo
+                tags[mask] = tag
+                index[mask] = nplike.arange(nplike.count_nonzero(mask))
+                nextinputs = []
+                i = 0
+                for x in inputs:
+                    if isinstance(x, uniontypes):
+                        nextinputs.append(x[mask].project(combo[str(i)]))
+                        i += 1
+                    elif isinstance(x, ak._v2.contents.Content):
+                        nextinputs.append(x[mask])
+                    else:
+                        nextinputs.append(x)
+                outcontents.append(apply(nextinputs, depth, user))
+                assert isinstance(outcontents[-1], tuple)
+                if numoutputs is not None:
+                    assert numoutputs == len(outcontents[-1])
+                numoutputs = len(outcontents[-1])
 
-#             assert numoutputs is not None
+            assert numoutputs is not None
 
-#             tags = ak._v2.contents.Index8(tags)
-#             index = ak._v2.contents.Index64(index)
-#             return tuple(
-#                 ak._v2.contents.UnionArray8_64(
-#                     tags, index, [x[i] for x in outcontents]
-#                 ).simplify()
-#                 for i in range(numoutputs)
-#             )
+            tags = ak._v2.contents.Index8(tags)
+            index = ak._v2.contents.Index64(index)
+            return tuple(
+                ak._v2.contents.UnionArray8_64(
+                    tags, index, [x[i] for x in outcontents]
+                ).simplify()
+                for i in range(numoutputs)
+            )
 
-#         elif any(isinstance(x, optiontypes) for x in inputs):
-#             mask = None
-#             for x in inputs:
-#                 if isinstance(x, optiontypes):
-#                     m = nplike.asarray(x.bytemask()).view(np.bool_)
-#                     if mask is None:
-#                         mask = m
-#                     else:
-#                         nplike.bitwise_or(mask, m, out=mask)
+        elif any(
+            isinstance(
+                x,
+                (
+                    ak._v2.contents.IndexedOptionArray,
+                    ak._v2.contents.ByteMaskedArray,
+                    ak._v2.contents.BitMaskedArray,
+                    ak._v2.contents.UnmaskedArray,
+                ),
+            )
+            for x in inputs
+        ):
+            mask = None
+            for x in inputs:
+                if isinstance(
+                    x,
+                    (
+                        ak._v2.contents.IndexedOptionArray,
+                        ak._v2.contents.ByteMaskedArray,
+                        ak._v2.contents.BitMaskedArray,
+                        ak._v2.contents.UnmaskedArray,
+                    ),
+                ):
+                    m = nplike.asarray(x.bytemask()).view(np.bool_)
+                    if mask is None:
+                        mask = m
+                    else:
+                        nplike.bitwise_or(mask, m, out=mask)
 
-#             nextmask = ak._v2.contents.Index8(mask.view(np.int8))
-#             index = nplike.full(len(mask), -1, dtype=np.int64)
-#             index[~mask] = nplike.arange(
-#                 len(mask) - nplike.count_nonzero(mask), dtype=np.int64
-#             )
-#             index = ak._v2.contents.Index64(index)
-#             if any(not isinstance(x, optiontypes) for x in inputs):
-#                 nextindex = nplike.arange(len(mask), dtype=np.int64)
-#                 nextindex[mask] = -1
-#                 nextindex = ak._v2.contents.Index64(nextindex)
+            nextmask = ak._v2.contents.Index8(mask.view(np.int8))
+            index = nplike.full(len(mask), -1, dtype=np.int64)
+            index[~mask] = nplike.arange(
+                len(mask) - nplike.count_nonzero(mask), dtype=np.int64
+            )
+            index = ak._v2.contents.Index64(index)
+            if any(
+                not isinstance(
+                    x,
+                    (
+                        ak._v2.contents.IndexedOptionArray,
+                        ak._v2.contents.ByteMaskedArray,
+                        ak._v2.contents.BitMaskedArray,
+                        ak._v2.contents.UnmaskedArray,
+                    ),
+                )
+                for x in inputs
+            ):
+                nextindex = nplike.arange(len(mask), dtype=np.int64)
+                nextindex[mask] = -1
+                nextindex = ak._v2.contents.Index64(nextindex)
 
-#             nextinputs = []
-#             for x in inputs:
-#                 if isinstance(x, optiontypes):
-#                     nextinputs.append(x.project(nextmask))
-#                 elif isinstance(x, ak._v2.contents.Content):
-#                     nextinputs.append(
-#                         ak._v2.contents.IndexedOptionArray64(nextindex, x).project(nextmask)
-#                     )
-#                 else:
-#                     nextinputs.append(x)
+            nextinputs = []
+            for x in inputs:
+                if isinstance(
+                    x,
+                    (
+                        ak._v2.contents.IndexedOptionArray,
+                        ak._v2.contents.ByteMaskedArray,
+                        ak._v2.contents.BitMaskedArray,
+                        ak._v2.contents.UnmaskedArray,
+                    ),
+                ):
+                    nextinputs.append(x.project(nextmask))
+                elif isinstance(x, ak._v2.contents.Content):
+                    nextinputs.append(
+                        ak._v2.contents.IndexedOptionArray64(nextindex, x).project(
+                            nextmask
+                        )
+                    )
+                else:
+                    nextinputs.append(x)
 
-#             outcontent = apply(nextinputs, depth, user)
-#             assert isinstance(outcontent, tuple)
-#             return tuple(
-#                 ak._v2.contents.IndexedOptionArray64(index, x).simplify() for x in outcontent
-#             )
+            outcontent = apply(nextinputs, depth, user)
+            assert isinstance(outcontent, tuple)
+            return tuple(
+                ak._v2.contents.IndexedOptionArray64(index, x).simplify()
+                for x in outcontent
+            )
 
-#         elif any(isinstance(x, listtypes) for x in inputs):
-#             if all(
-#                 isinstance(x, ak._v2.contents.RegularArray) or not isinstance(x, listtypes)
-#                 for x in inputs
-#             ):
-#                 maxsize = max(
-#                     [x.size for x in inputs if isinstance(x, ak._v2.contents.RegularArray)]
-#                 )
-#                 for x in inputs:
-#                     if isinstance(x, ak._v2.contents.RegularArray):
-#                         if maxsize > 1 and x.size == 1:
-#                             tmpindex = ak._v2.contents.Index64(
-#                                 nplike.repeat(
-#                                     nplike.arange(len(x), dtype=np.int64), maxsize
-#                                 )
-#                             )
-#                 nextinputs = []
-#                 for x in inputs:
-#                     if isinstance(x, ak._v2.contents.RegularArray):
-#                         if maxsize > 1 and x.size == 1:
-#                             nextinputs.append(
-#                                 ak._v2.contents.IndexedArray64(
-#                                     tmpindex, x.content[: len(x) * x.size]
-#                                 ).project()
-#                             )
-#                         elif x.size == maxsize:
-#                             nextinputs.append(x.content[: len(x) * x.size])
-#                         else:
-#                             raise ValueError(
-#                                 "cannot broadcast RegularArray of size "
-#                                 "{0} with RegularArray of size {1}".format(
-#                                     x.size, maxsize
-#                                 )
-#
-#                             )
-#                     else:
-#                         nextinputs.append(x)
+        elif any(
+            isinstance(
+                x,
+                (
+                    ak._v2.contents.RegularArray,
+                    ak._v2.contents.ListArray,
+                    ak._v2.contents.ListOffsetArray,
+                ),
+            )
+            for x in inputs
+        ):
+            if all(
+                isinstance(x, ak._v2.contents.RegularArray)
+                or not isinstance(
+                    x,
+                    (
+                        ak._v2.contents.RegularArray,
+                        ak._v2.contents.ListArray,
+                        ak._v2.contents.ListOffsetArray,
+                    ),
+                )
+                for x in inputs
+            ):
+                maxsize = max(
+                    [
+                        x.size
+                        for x in inputs
+                        if isinstance(x, ak._v2.contents.RegularArray)
+                    ]
+                )
+                for x in inputs:
+                    if isinstance(x, ak._v2.contents.RegularArray):
+                        if maxsize > 1 and x.size == 1:
+                            tmpindex = ak._v2.contents.Index64(
+                                nplike.repeat(
+                                    nplike.arange(len(x), dtype=np.int64), maxsize
+                                )
+                            )
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, ak._v2.contents.RegularArray):
+                        if maxsize > 1 and x.size == 1:
+                            nextinputs.append(
+                                ak._v2.contents.IndexedArray64(
+                                    tmpindex, x.content[: len(x) * x.size]
+                                ).project()
+                            )
+                        elif x.size == maxsize:
+                            nextinputs.append(x.content[: len(x) * x.size])
+                        else:
+                            raise ValueError(
+                                "cannot broadcast RegularArray of size "
+                                "{0} with RegularArray of size {1}".format(
+                                    x.size, maxsize
+                                )
+                            )
+                    else:
+                        nextinputs.append(x)
 
-#                 maxlen = max(
-#                     [len(x) for x in nextinputs if isinstance(x, ak._v2.contents.Content)]
-#                 )
-#                 outcontent = apply(nextinputs, depth + 1, user)
-#                 assert isinstance(outcontent, tuple)
+                maxlen = max(
+                    [
+                        len(x)
+                        for x in nextinputs
+                        if isinstance(x, ak._v2.contents.Content)
+                    ]
+                )
+                outcontent = apply(nextinputs, depth + 1, user)
+                assert isinstance(outcontent, tuple)
 
-#                 return tuple(
-#                     ak._v2.contents.RegularArray(x, maxsize, maxlen) for x in outcontent
-#                 )
+                return tuple(
+                    ak._v2.contents.RegularArray(x, maxsize, maxlen) for x in outcontent
+                )
 
-#             elif not all_same_offsets(nplike, inputs):
-#                 fcns = [
-#                     custom_broadcast(x, behavior)
-#                     if isinstance(x, ak._v2.contents.Content)
-#                     else None
-#                     for x in inputs
-#                 ]
+            elif not all_same_offsets(nplike, inputs):
+                fcns = [
+                    custom_broadcast(x, behavior)
+                    if isinstance(x, ak._v2.contents.Content)
+                    else None
+                    for x in inputs
+                ]
 
-#                 first, secondround = None, False
-#                 for x, fcn in zip(inputs, fcns):
-#                     if (
-#                         isinstance(x, listtypes)
-#                         and not isinstance(x, ak._v2.contents.RegularArray)
-#                         and fcn is None
-#                     ):
-#                         first = x
-#                         break
+                first, secondround = None, False
+                for x, fcn in zip(inputs, fcns):
+                    if (
+                        isinstance(
+                            x,
+                            (
+                                ak._v2.contents.RegularArray,
+                                ak._v2.contents.ListArray,
+                                ak._v2.contents.ListOffsetArray,
+                            ),
+                        )
+                        and not isinstance(x, ak._v2.contents.RegularArray)
+                        and fcn is None
+                    ):
+                        first = x
+                        break
 
-#                 if first is None:
-#                     secondround = True
-#                     for x in inputs:
-#                         if isinstance(x, listtypes) and not isinstance(
-#                             x, ak._v2.contents.RegularArray
-#                         ):
-#                             first = x
-#                             break
+                if first is None:
+                    secondround = True
+                    for x in inputs:
+                        if (
+                            isinstance(
+                                x,
+                                (
+                                    ak._v2.contents.RegularArray,
+                                    ak._v2.contents.ListArray,
+                                    ak._v2.contents.ListOffsetArray,
+                                ),
+                            )
+                            and not isinstance(x, ak._v2.contents.RegularArray)
+                        ):
+                            first = x
+                            break
 
-#                 offsets = first.compact_offsets64(True)
+                offsets = first.compact_offsets64(True)
 
-#                 nextinputs = []
-#                 for x, fcn in zip(inputs, fcns):
-#                     if callable(fcn) and not secondround:
-#                         nextinputs.append(fcn(x, offsets))
-#                     elif isinstance(x, listtypes):
-#                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)
-#                     # handle implicit left-broadcasting (unlike NumPy)
-#                     elif left_broadcast and isinstance(x, ak._v2.contents.Content):
-#                         nextinputs.append(
-#                             ak._v2.contents.RegularArray(x, 1, len(x))
-#                             .broadcast_tooffsets64(offsets)
-#                             .content
-#                         )
-#                     else:
-#                         nextinputs.append(x)
+                nextinputs = []
+                for x, fcn in zip(inputs, fcns):
+                    if callable(fcn) and not secondround:
+                        nextinputs.append(fcn(x, offsets))
+                    elif isinstance(
+                        x,
+                        (
+                            ak._v2.contents.RegularArray,
+                            ak._v2.contents.ListArray,
+                            ak._v2.contents.ListOffsetArray,
+                        ),
+                    ):
+                        nextinputs.append(x.broadcast_tooffsets64(offsets).content)
+                    # handle implicit left-broadcasting (unlike NumPy)
+                    elif left_broadcast and isinstance(x, ak._v2.contents.Content):
+                        nextinputs.append(
+                            ak._v2.contents.RegularArray(x, 1, len(x))
+                            .broadcast_tooffsets64(offsets)
+                            .content
+                        )
+                    else:
+                        nextinputs.append(x)
 
-#                 outcontent = apply(nextinputs, depth + 1, user)
-#                 assert isinstance(outcontent, tuple)
+                outcontent = apply(nextinputs, depth + 1, user)
+                assert isinstance(outcontent, tuple)
 
-#                 return tuple(
-#                     ak._v2.contents.ListOffsetArray64(offsets, x) for x in outcontent
-#                 )
+                return tuple(
+                    ak._v2.contents.ListOffsetArray64(offsets, x) for x in outcontent
+                )
 
-#             else:
-#                 lencontent, offsets, starts, stops = None, None, None, None
-#                 nextinputs = []
+            else:
+                lencontent, offsets, starts, stops = None, None, None, None
+                nextinputs = []
 
-#                 for x in inputs:
-#                     if isinstance(
-#                         x,
-#                         (
-#                             ak._v2.contents.ListOffsetArray32,
-#                             ak._v2.contents.ListOffsetArrayU32,
-#                             ak._v2.contents.ListOffsetArray64,
-#                         ),
-#                     ):
-#                         offsets = x.offsets
-#                         lencontent = offsets[-1]
-#                         nextinputs.append(x.content[:lencontent])
+                for x in inputs:
+                    if isinstance(
+                        x,
+                        (
+                            ak._v2.contents.ListOffsetArray32,
+                            ak._v2.contents.ListOffsetArrayU32,
+                            ak._v2.contents.ListOffsetArray64,
+                        ),
+                    ):
+                        offsets = x.offsets
+                        lencontent = offsets[-1]
+                        nextinputs.append(x.content[:lencontent])
 
-#                     elif isinstance(
-#                         x,
-#                         (
-#                             ak._v2.contents.ListArray32,
-#                             ak._v2.contents.ListArrayU32,
-#                             ak._v2.contents.ListArray64,
-#                         ),
-#                     ):
-#                         starts, stops = x.starts, x.stops
-#                         if len(starts) == 0 or len(stops) == 0:
-#                             nextinputs.append(x.content[:0])
-#                         else:
-#                             lencontent = nplike.max(stops)
-#                             nextinputs.append(x.content[:lencontent])
+                    elif isinstance(
+                        x,
+                        (
+                            ak._v2.contents.ListArray32,
+                            ak._v2.contents.ListArrayU32,
+                            ak._v2.contents.ListArray64,
+                        ),
+                    ):
+                        starts, stops = x.starts, x.stops
+                        if len(starts) == 0 or len(stops) == 0:
+                            nextinputs.append(x.content[:0])
+                        else:
+                            lencontent = nplike.max(stops)
+                            nextinputs.append(x.content[:lencontent])
 
-#                     else:
-#                         nextinputs.append(x)
+                    else:
+                        nextinputs.append(x)
 
-#                 outcontent = apply(nextinputs, depth + 1, user)
+                outcontent = apply(nextinputs, depth + 1, user)
 
-#                 if isinstance(offsets, ak._v2.contents.Index32):
-#                     return tuple(
-#                         ak._v2.contents.ListOffsetArray32(offsets, x) for x in outcontent
-#                     )
-#                 elif isinstance(offsets, ak._v2.contents.IndexU32):
-#                     return tuple(
-#                         ak._v2.contents.ListOffsetArrayU32(offsets, x) for x in outcontent
-#                     )
-#                 elif isinstance(offsets, ak._v2.contents.Index64):
-#                     return tuple(
-#                         ak._v2.contents.ListOffsetArray64(offsets, x) for x in outcontent
-#                     )
-#                 elif isinstance(starts, ak._v2.contents.Index32):
-#                     return tuple(
-#                         ak._v2.contents.ListArray32(starts, stops, x) for x in outcontent
-#                     )
-#                 elif isinstance(starts, ak._v2.contents.IndexU32):
-#                     return tuple(
-#                         ak._v2.contents.ListArrayU32(starts, stops, x) for x in outcontent
-#                     )
-#                 elif isinstance(starts, ak._v2.contents.Index64):
-#                     return tuple(
-#                         ak._v2.contents.ListArray64(starts, stops, x) for x in outcontent
-#                     )
-#                 else:
-#                     raise AssertionError(
-#                         "unexpected offsets, starts: {0} {1}".format(
-#                             type(offsets), type(starts)
-#                         )
-#
-#                     )
+                if isinstance(offsets, ak._v2.contents.Index32):
+                    return tuple(
+                        ak._v2.contents.ListOffsetArray32(offsets, x)
+                        for x in outcontent
+                    )
+                elif isinstance(offsets, ak._v2.contents.IndexU32):
+                    return tuple(
+                        ak._v2.contents.ListOffsetArrayU32(offsets, x)
+                        for x in outcontent
+                    )
+                elif isinstance(offsets, ak._v2.contents.Index64):
+                    return tuple(
+                        ak._v2.contents.ListOffsetArray64(offsets, x)
+                        for x in outcontent
+                    )
+                elif isinstance(starts, ak._v2.contents.Index32):
+                    return tuple(
+                        ak._v2.contents.ListArray32(starts, stops, x)
+                        for x in outcontent
+                    )
+                elif isinstance(starts, ak._v2.contents.IndexU32):
+                    return tuple(
+                        ak._v2.contents.ListArrayU32(starts, stops, x)
+                        for x in outcontent
+                    )
+                elif isinstance(starts, ak._v2.contents.Index64):
+                    return tuple(
+                        ak._v2.contents.ListArray64(starts, stops, x)
+                        for x in outcontent
+                    )
+                else:
+                    raise AssertionError(
+                        "unexpected offsets, starts: {0} {1}".format(
+                            type(offsets), type(starts)
+                        )
+                    )
 
-#         elif any(isinstance(x, recordtypes) for x in inputs):
-#             if not allow_records:
-#                 raise ValueError(
-#                     "cannot broadcast records in this type of operation"
-#
-#                 )
+        elif any(isinstance(x, recordtypes) for x in inputs):
+            if not allow_records:
+                raise ValueError("cannot broadcast records in this type of operation")
 
-#             keys = None
-#             length = None
-#             istuple = True
-#             for x in inputs:
-#                 if isinstance(x, recordtypes):
-#                     if keys is None:
-#                         keys = x.keys()
-#                     elif set(keys) != set(x.keys()):
-#                         raise ValueError(
-#                             "cannot broadcast records because keys don't "
-#                             "match:\n    {0}\n    {1}".format(
-#                                 ", ".join(sorted(keys)), ", ".join(sorted(x.keys()))
-#                             )
-#
-#                         )
-#                     if length is None:
-#                         length = len(x)
-#                     elif length != len(x):
-#                         raise ValueError(
-#                             "cannot broadcast RecordArray of length {0} "
-#                             "with RecordArray of length {1}".format(length, len(x))
-#
-#                         )
-#                     if not x.istuple:
-#                         istuple = False
+            keys = None
+            length = None
+            istuple = True
+            for x in inputs:
+                if isinstance(x, recordtypes):
+                    if keys is None:
+                        keys = x.keys()
+                    elif set(keys) != set(x.keys()):
+                        raise ValueError(
+                            "cannot broadcast records because keys don't "
+                            "match:\n    {0}\n    {1}".format(
+                                ", ".join(sorted(keys)), ", ".join(sorted(x.keys()))
+                            )
+                        )
+                    if length is None:
+                        length = len(x)
+                    elif length != len(x):
+                        raise ValueError(
+                            "cannot broadcast RecordArray of length {0} "
+                            "with RecordArray of length {1}".format(length, len(x))
+                        )
+                    if not x.istuple:
+                        istuple = False
 
-#             outcontents = []
-#             numoutputs = None
-#             for key in keys:
-#                 outcontents.append(
-#                     apply(
-#                         [
-#                             x if not isinstance(x, recordtypes) else x[key]
-#                             for x in inputs
-#                         ],
-#                         depth,
-#                         user,
-#                     )
-#                 )
-#                 assert isinstance(outcontents[-1], tuple)
-#                 if numoutputs is not None:
-#                     assert numoutputs == len(outcontents[-1])
-#                 numoutputs = len(outcontents[-1])
-#             return tuple(
-#                 ak._v2.contents.RecordArray(
-#                     [x[i] for x in outcontents], None if istuple else keys, length
-#                 )
-#                 for i in range(numoutputs)
-#             )
+            outcontents = []
+            numoutputs = None
+            for key in keys:
+                outcontents.append(
+                    apply(
+                        [
+                            x if not isinstance(x, recordtypes) else x[key]
+                            for x in inputs
+                        ],
+                        depth,
+                        user,
+                    )
+                )
+                assert isinstance(outcontents[-1], tuple)
+                if numoutputs is not None:
+                    assert numoutputs == len(outcontents[-1])
+                numoutputs = len(outcontents[-1])
+            return tuple(
+                ak._v2.contents.RecordArray(
+                    [x[i] for x in outcontents], None if istuple else keys, length
+                )
+                for i in range(numoutputs)
+            )
 
-#         else:
-#             raise ValueError(
-#                 "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
-#
-#             )
+        else:
+            raise ValueError(
+                "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
+            )
 
-#     if any(isinstance(x, ak.partition.PartitionedArray) for x in inputs):   # NO PARTITIONED ARRAY
-#         purelist_isregular = True
-#         purelist_depths = set()
-#         for x in inputs:
-#             if isinstance(x, (ak._v2.contents.Content, ak.partition.PartitionedArray)):   # NO PARTITIONED ARRAY
-#                 if not x.purelist_isregular:
-#                     purelist_isregular = False
-#                     break
-#                 purelist_depths.add(x.purelist_depth)
+    if any(
+        isinstance(x, ak.partition.PartitionedArray) for x in inputs
+    ):  # NO PARTITIONED ARRAY
+        purelist_isregular = True
+        purelist_depths = set()
+        for x in inputs:
+            if isinstance(
+                x, (ak._v2.contents.Content, ak.partition.PartitionedArray)
+            ):  # NO PARTITIONED ARRAY
+                if not x.purelist_isregular:
+                    purelist_isregular = False
+                    break
+                purelist_depths.add(x.purelist_depth)
 
-#         if purelist_isregular and len(purelist_depths) > 1:
-#             nextinputs = []
-#             for x in inputs:
-#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
-#                     nextinputs.append(x.toContent())
-#                 else:
-#                     nextinputs.append(x)
+        if purelist_isregular and len(purelist_depths) > 1:
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, ak.partition.PartitionedArray):  # NO PARTITIONED ARRAY
+                    nextinputs.append(x.toContent())
+                else:
+                    nextinputs.append(x)
 
-#             isscalar = []
-#             out = apply(broadcast_pack(nextinputs, isscalar), 0, None)
-#             assert isinstance(out, tuple)
-#             return tuple(broadcast_unpack(x, isscalar) for x in out)
+            isscalar = []
+            out = apply(broadcast_pack(nextinputs, isscalar), 0, None)
+            assert isinstance(out, tuple)
+            return tuple(broadcast_unpack(x, isscalar) for x in out)
 
-#         else:
-#             sample = None
-#             for x in inputs:
-#                 if isinstance(x, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
-#                     sample = x
-#                     break
-#             nextinputs = ak.partition.partition_as(sample, inputs)
+        else:
+            sample = None
+            for x in inputs:
+                if isinstance(x, ak.partition.PartitionedArray):  # NO PARTITIONED ARRAY
+                    sample = x
+                    break
+            nextinputs = ak.partition.partition_as(sample, inputs)
 
-#             outputs = []
-#             for part_inputs in ak.partition.iterate(sample.numpartitions, nextinputs):
-#                 isscalar = []
-#                 part = apply(broadcast_pack(part_inputs, isscalar), 0, None)
-#                 assert isinstance(part, tuple)
-#                 outputs.append(tuple(broadcast_unpack(x, isscalar) for x in part))
+            outputs = []
+            for part_inputs in ak.partition.iterate(sample.numpartitions, nextinputs):
+                isscalar = []
+                part = apply(broadcast_pack(part_inputs, isscalar), 0, None)
+                assert isinstance(part, tuple)
+                outputs.append(tuple(broadcast_unpack(x, isscalar) for x in part))
 
-#             out = ()
-#             for i in range(len(part)):
-#                 out = out + (
-#                     ak.partition.IrregularlyPartitionedArray([x[i] for x in outputs]),   # NO PARTITIONED ARRAY
-#                 )
-#             return out
+            out = ()
+            for i in range(len(part)):
+                out = out + (
+                    ak.partition.IrregularlyPartitionedArray(
+                        [x[i] for x in outputs]
+                    ),  # NO PARTITIONED ARRAY
+                )
+            return out
 
-#     else:
-#         isscalar = []
-#         out = apply(broadcast_pack(inputs, isscalar), 0, user)
-#         assert isinstance(out, tuple)
-#         return tuple(broadcast_unpack(x, isscalar) for x in out)
-
-
-# def broadcast_pack(inputs, isscalar):
-#     maxlen = -1
-#     for x in inputs:
-#         if isinstance(x, ak._v2.contents.Content):
-#             maxlen = max(maxlen, len(x))
-#     if maxlen < 0:
-#         maxlen = 1
-
-#     nextinputs = []
-#     for x in inputs:
-#         if isinstance(x, ak._v2.record.Record):
-#             index = ak.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
-#             nextinputs.append(ak._v2.contents.RegularArray(x.array[index], maxlen, 1))
-#             isscalar.append(True)
-#         elif isinstance(x, ak._v2.contents.Content):
-#             nextinputs.append(ak._v2.contents.RegularArray(x, len(x), 1))
-#             isscalar.append(False)
-#         else:
-#             nextinputs.append(x)
-#             isscalar.append(True)
-
-#     return nextinputs
+    else:
+        isscalar = []
+        out = apply(broadcast_pack(inputs, isscalar), 0, user)
+        assert isinstance(out, tuple)
+        return tuple(broadcast_unpack(x, isscalar) for x in out)
 
 
-# def broadcast_unpack(x, isscalar):
-#     if all(isscalar):
-#         if len(x) == 0:
-#             return x.getitem_nothing().getitem_nothing()
-#         else:
-#             return x[0][0]
-#     else:
-#         if len(x) == 0:
-#             return x.getitem_nothing()
-#         else:
-#             return x[0]
+def broadcast_pack(inputs, isscalar):
+    maxlen = -1
+    for x in inputs:
+        if isinstance(x, ak._v2.contents.Content):
+            maxlen = max(maxlen, len(x))
+    if maxlen < 0:
+        maxlen = 1
+
+    nextinputs = []
+    for x in inputs:
+        if isinstance(x, ak._v2.record.Record):
+            index = ak.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            nextinputs.append(ak._v2.contents.RegularArray(x.array[index], maxlen, 1))
+            isscalar.append(True)
+        elif isinstance(x, ak._v2.contents.Content):
+            nextinputs.append(ak._v2.contents.RegularArray(x, len(x), 1))
+            isscalar.append(False)
+        else:
+            nextinputs.append(x)
+            isscalar.append(True)
+
+    return nextinputs
+
+
+def broadcast_unpack(x, isscalar):
+    if all(isscalar):
+        if len(x) == 0:
+            return x.getitem_nothing().getitem_nothing()
+        else:
+            return x[0][0]
+    else:
+        if len(x) == 0:
+            return x.getitem_nothing()
+        else:
+            return x[0]
 
 
 # def recursively_apply(

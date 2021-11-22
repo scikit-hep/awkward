@@ -219,7 +219,10 @@ def test_bytemasked_concatenate():
     )
     two = ak.Array([7, 99, 999, 8, 9]).mask[[True, False, False, True, True]].layout
 
-    assert ak.to_list(ak.concatenate([one, two], 0)) == [
+    one = v1_to_v2(one)
+    two = v1_to_v2(two)
+
+    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         1,
         2,
         None,
@@ -234,7 +237,7 @@ def test_bytemasked_concatenate():
     ]
 
     with pytest.raises(ValueError):
-        ak.to_list(ak.concatenate([one, two], 1))
+        ak.to_list(ak._v2.operations.structure.concatenate([one, two], 1))
 
 
 @pytest.mark.skip(reason="Concatente not supporting axis yet")
@@ -243,14 +246,18 @@ def test_listoffsetarray_concatenate():
     offsets_one = ak.layout.Index64(np.array([0, 3, 3, 5, 9]))
     one = ak.layout.ListOffsetArray64(offsets_one, content_one)
 
+    one = v1_to_v2(one)
+
     assert ak.to_list(one) == [[1, 2, 3], [], [4, 5], [6, 7, 8, 9]]
 
     content_two = ak.layout.NumpyArray(np.array([100, 200, 300, 400, 500]))
     offsets_two = ak.layout.Index64(np.array([0, 2, 4, 4, 5]))
     two = ak.layout.ListOffsetArray64(offsets_two, content_two)
 
+    two = v1_to_v2(two)
+
     assert ak.to_list(two) == [[100, 200], [300, 400], [], [500]]
-    assert ak.to_list(ak.concatenate([one, two], 0)) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         [1, 2, 3],
         [],
         [4, 5],
@@ -260,12 +267,12 @@ def test_listoffsetarray_concatenate():
         [],
         [500],
     ]
-    assert ak.to_list(ak.concatenate([one, two], 1)) == [
-        [1, 2, 3, 100, 200],
-        [300, 400],
-        [4, 5],
-        [6, 7, 8, 9, 500],
-    ]
+    # assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 1)) == [
+    #     [1, 2, 3, 100, 200],
+    #     [300, 400],
+    #     [4, 5],
+    #     [6, 7, 8, 9, 500],
+    # ]
 
 
 @pytest.mark.skip(reason="Concatente not supporting axis yet")
@@ -275,14 +282,17 @@ def test_numpyarray_concatenate_axis0():
     ak1 = ak.layout.NumpyArray(np1)
     ak2 = ak.layout.NumpyArray(np2)
 
-    assert ak.to_list(ak.concatenate([np1, np2, np1, np2], 0)) == ak.to_list(
-        np.concatenate([np1, np2, np1, np2], 0)
-    )
-    assert ak.to_list(ak.concatenate([ak1, ak2], 0)) == ak.to_list(
-        np.concatenate([ak1, ak2], 0)
-    )
+    ak1 = v1_to_v2(ak1)
+    ak2 = v1_to_v2(ak2)
+
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([np1, np2, np1, np2], 0)
+    ) == ak.to_list(np.concatenate([np1, np2, np1, np2], 0))
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([ak1, ak2], 0)
+    ) == ak.to_list(np.concatenate([ak1, ak2], 0))
     assert ak.to_list(np.concatenate([ak1, ak2], 0)) == ak.to_list(
-        ak.concatenate([np1, np2], 0)
+        ak._v2.operations.structure.concatenate([np1, np2], 0)
     )
 
 
@@ -294,20 +304,23 @@ def test_numpyarray_concatenate():
     ak1 = ak.layout.NumpyArray(np1)
     ak2 = ak.layout.NumpyArray(np2)
 
+    ak1 = v1_to_v2(ak1)
+    ak2 = v1_to_v2(ak2)
+
     assert ak.to_list(np.concatenate([np1, np2], 1)) == ak.to_list(
-        ak.concatenate([ak1, ak2], 1)
+        ak._v2.operations.structure.concatenate([ak1, ak2], 1)
     )
     assert ak.to_list(np.concatenate([np2, np1], 1)) == ak.to_list(
-        ak.concatenate([ak2, ak1], 1)
+        ak._v2.operations.structure.concatenate([ak2, ak1], 1)
     )
     assert ak.to_list(np.concatenate([np1, np2], 2)) == ak.to_list(
-        ak.concatenate([ak1, ak2], 2)
+        ak._v2.operations.structure.concatenate([ak1, ak2], 2)
     )
     assert ak.to_list(np.concatenate([np2, np1], 2)) == ak.to_list(
-        ak.concatenate([ak2, ak1], 2)
+        ak._v2.operations.structure.concatenate([ak2, ak1], 2)
     )
     assert ak.to_list(np.concatenate([np2, np1], -1)) == ak.to_list(
-        ak.concatenate([ak2, ak1], -1)
+        ak._v2.operations.structure.concatenate([ak2, ak1], -1)
     )
 
 
