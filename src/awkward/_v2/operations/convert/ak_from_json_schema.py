@@ -6,7 +6,7 @@ import json
 import os
 
 import awkward as ak
-from awkward.forth import ForthMachine64
+from awkward.forth import ForthMachine32, ForthMachine64
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -17,6 +17,7 @@ def from_json_schema(
     schema,
     highlevel=True,
     behavior=None,
+    bits64=True,
     initial=1024,
     resize=1.5,
 ):
@@ -43,7 +44,9 @@ def from_json_schema(
         initialization = []
         instructions = []
 
-        form = build_forth(schema["items"], outputs, initialization, instructions, "  ")
+        form = build_forth(
+            schema["items"], outputs, initialization, instructions, "  ", bits64
+        )
 
         forthcode = r"""input source
 {0}
@@ -52,7 +55,6 @@ def from_json_schema(
 source skipws
 source enumonly s" [" drop
 source skipws
-
 0
 source enum s" ]"
 begin
@@ -72,7 +74,11 @@ repeat
         # print(form)
         # print(forthcode)
 
-        vm = ForthMachine64(forthcode)
+        if bits64:
+            vm = ForthMachine64(forthcode)
+        else:
+            vm = ForthMachine32(forthcode)
+
         try:
             vm.run({"source": source})
 
@@ -109,7 +115,7 @@ repeat
         raise TypeError("only 'array' and 'object' types supported at schema top-level")
 
 
-def build_forth(schema, outputs, initialization, instructions, indent):
+def build_forth(schema, outputs, initialization, instructions, indent, bits64):
     if not isinstance(schema, dict):
         raise TypeError(
             "unrecognized jsonschema: expected dict, got {0}".format(repr(schema))
@@ -213,7 +219,7 @@ def build_forth(schema, outputs, initialization, instructions, indent):
             mask = "node{0}".format(len(outputs))
             outputs[mask + "-mask"] = "int8"
             offsets = "node{0}".format(len(outputs))
-            outputs[offsets + "-offsets"] = "int64"
+            outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
             node = "node{0}".format(len(outputs))
             outputs[node + "-data"] = "uint8"
             initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
@@ -231,7 +237,7 @@ def build_forth(schema, outputs, initialization, instructions, indent):
             return ak._v2.forms.ByteMaskedForm(
                 "i8",
                 ak._v2.forms.ListOffsetForm(
-                    "i64",
+                    "i64" if bits64 else "i32",
                     ak._v2.forms.NumpyForm(
                         outputs[node + "-data"],
                         parameters={"__array__": "char"},
@@ -246,7 +252,7 @@ def build_forth(schema, outputs, initialization, instructions, indent):
 
         else:
             offsets = "node{0}".format(len(outputs))
-            outputs[offsets + "-offsets"] = "int64"
+            outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
             node = "node{0}".format(len(outputs))
             outputs[node + "-data"] = "uint8"
             initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
@@ -257,7 +263,7 @@ def build_forth(schema, outputs, initialization, instructions, indent):
                 ]
             )
             return ak._v2.forms.ListOffsetForm(
-                "i64",
+                "i64" if bits64 else "i32",
                 ak._v2.forms.NumpyForm(
                     outputs[node + "-data"],
                     parameters={"__array__": "char"},
@@ -268,7 +274,93 @@ def build_forth(schema, outputs, initialization, instructions, indent):
             )
 
     elif tpe == "array":
-        raise NotImplementedError
+        # https://json-schema.org/understanding-json-schema/reference/array.html
+
+        if "items" not in schema:
+            raise TypeError("jsonschema type is not concrete: array without items")
+
+        if is_optional:
+            mask = "node{0}".format(len(outputs))
+            outputs[mask + "-mask"] = "int8"
+            offsets = "node{0}".format(len(outputs))
+            outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
+            initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
+            instructions.extend(
+                [
+                    r"""{0}source enumonly s" null" s" [" dup if""".format(indent),
+                    r"""{0}  source skipws""".format(indent),
+                    r"""{0}  0""".format(indent),
+                    r"""{0}  source enum s" ]" """.format(indent),
+                    r"""{0}  begin""".format(indent),
+                    r"""{0}  while""".format(indent),
+                    r"""{0}    source skipws""".format(indent),
+                ]
+            )
+            content = build_forth(
+                schema["items"],
+                outputs,
+                initialization,
+                instructions,
+                indent + "    ",
+                bits64,
+            )
+            instructions.extend(
+                [
+                    r"""{0}    1+""".format(indent),
+                    r"""{0}    source skipws""".format(indent),
+                    r"""{0}    source enumonly s" ]" s" ," """.format(indent),
+                    r"""{0}  repeat""".format(indent),
+                    r"""{0}  {1}-offsets +<- stack""".format(indent, offsets),
+                    r"""{0}else""".format(indent),
+                    r"""{0}  0 {1}-offsets +<- stack""".format(indent, offsets),
+                    r"""{0}then""".format(indent),
+                    r"""{0}{1}-mask <- stack""".format(indent, mask),
+                ]
+            )
+            return ak._v2.forms.ByteMaskedForm(
+                "i8",
+                ak._v2.forms.ListOffsetForm(
+                    "i64" if bits64 else "i32", content, form_key=offsets
+                ),
+                valid_when=True,
+                form_key=mask,
+            )
+
+        else:
+            offsets = "node{0}".format(len(outputs))
+            outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
+            initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
+            instructions.extend(
+                [
+                    r"""{0}source enumonly s" [" drop""".format(indent),
+                    r"""{0}source skipws""".format(indent),
+                    r"""{0}0""".format(indent),
+                    r"""{0}source enum s" ]" """.format(indent),
+                    r"""{0}begin""".format(indent),
+                    r"""{0}while""".format(indent),
+                    r"""{0}  source skipws""".format(indent),
+                ]
+            )
+            content = build_forth(
+                schema["items"],
+                outputs,
+                initialization,
+                instructions,
+                indent + "  ",
+                bits64,
+            )
+            instructions.extend(
+                [
+                    r"""{0}  1+""".format(indent),
+                    r"""{0}  source skipws""".format(indent),
+                    r"""{0}  source enumonly s" ]" s" ," """.format(indent),
+                    r"""{0}repeat""".format(indent),
+                    r"""{0}{1}-offsets +<- stack""".format(indent, offsets),
+                ]
+            )
+            return ak._v2.forms.ListOffsetForm(
+                "i64" if bits64 else "i32", content, form_key=offsets
+            )
 
     elif tpe == "object":
         raise NotImplementedError

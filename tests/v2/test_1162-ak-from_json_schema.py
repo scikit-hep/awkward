@@ -18,6 +18,12 @@ def test_boolean():
     )
     assert result.tolist() == [True, False, True, True, False]
 
+    result = ak._v2.operations.convert.from_json_schema(
+        "[]",
+        {"type": "array", "items": {"type": "boolean"}},
+    )
+    assert result.tolist() == []
+
 
 def test_integer():
     result = ak._v2.operations.convert.from_json_schema(
@@ -25,6 +31,12 @@ def test_integer():
         {"type": "array", "items": {"type": "integer"}},
     )
     assert result.tolist() == [1, 2, 3, 4, 5]
+
+    result = ak._v2.operations.convert.from_json_schema(
+        "[]",
+        {"type": "array", "items": {"type": "integer"}},
+    )
+    assert result.tolist() == []
 
 
 def test_number():
@@ -50,18 +62,96 @@ def test_option_integer():
     )
     assert result.tolist() == [1, 2, None, 4, 5]
 
+    result = ak._v2.operations.convert.from_json_schema(
+        "[]",
+        {"type": "array", "items": {"type": ["null", "integer"]}},
+    )
+    assert result.tolist() == []
+
 
 def test_string():
     result = ak._v2.operations.convert.from_json_schema(
-        r'["one", "two", "three \u2192 3", "\"four\"", "fi\nve"]',
+        r'["", "two", "three \u2192 3", "\"four\"", "fi\nve"]',
         {"type": "array", "items": {"type": "string"}},
     )
-    assert result.tolist() == ["one", "two", "three \u2192 3", '"four"', "fi\nve"]
+    assert result.tolist() == ["", "two", "three \u2192 3", '"four"', "fi\nve"]
+
+    result = ak._v2.operations.convert.from_json_schema(
+        r"[]",
+        {"type": "array", "items": {"type": "string"}},
+    )
+    assert result.tolist() == []
 
 
 def test_option_string():
     result = ak._v2.operations.convert.from_json_schema(
-        r'["one", null, "three \u2192 3", "\"four\"", "fi\nve"]',
+        r'["", null, "three \u2192 3", "\"four\"", "fi\nve"]',
         {"type": "array", "items": {"type": ["null", "string"]}},
     )
-    assert result.tolist() == ["one", None, "three \u2192 3", '"four"', "fi\nve"]
+    assert result.tolist() == ["", None, "three \u2192 3", '"four"', "fi\nve"]
+
+    result = ak._v2.operations.convert.from_json_schema(
+        r"[]",
+        {"type": "array", "items": {"type": ["null", "string"]}},
+    )
+    assert result.tolist() == []
+
+
+def test_array_integer():
+    result = ak._v2.operations.convert.from_json_schema(
+        "[[1, 2, 3], [], [4, 5]]",
+        {"type": "array", "items": {"type": "array", "items": {"type": "integer"}}},
+    )
+    assert result.tolist() == [[1, 2, 3], [], [4, 5]]
+
+    result = ak._v2.operations.convert.from_json_schema(
+        "[]",
+        {"type": "array", "items": {"type": "array", "items": {"type": "integer"}}},
+    )
+    assert result.tolist() == []
+
+
+def test_option_array_integer():
+    result = ak._v2.operations.convert.from_json_schema(
+        "[[1, 2, 3], null, [], [4, 5]]",
+        {
+            "type": "array",
+            "items": {"type": ["null", "array"], "items": {"type": "integer"}},
+        },
+    )
+    assert result.tolist() == [[1, 2, 3], None, [], [4, 5]]
+
+    result = ak._v2.operations.convert.from_json_schema(
+        "[]",
+        {
+            "type": "array",
+            "items": {"type": ["null", "array"], "items": {"type": "integer"}},
+        },
+    )
+    assert result.tolist() == []
+
+
+def test_option_array_option_integer():
+    result = ak._v2.operations.convert.from_json_schema(
+        "[[1, 2, 3], null, [], [null, 5]]",
+        {
+            "type": "array",
+            "items": {
+                "type": ["null", "array"],
+                "items": {"type": ["integer", "null"]},
+            },
+        },
+    )
+    assert result.tolist() == [[1, 2, 3], None, [], [None, 5]]
+
+    result = ak._v2.operations.convert.from_json_schema(
+        "[]",
+        {
+            "type": "array",
+            "items": {
+                "type": ["null", "array"],
+                "items": {"type": ["integer", "null"]},
+            },
+        },
+    )
+    assert result.tolist() == []
