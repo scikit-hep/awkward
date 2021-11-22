@@ -50,7 +50,8 @@ def test_concatenate_number():
         [4, 5, 323],
     ]
 
-@pytest.mark.skip(reason="Concatente not supporting axis yet")
+
+# @pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_list_offset_array_concatenate():
     content_one = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
@@ -64,11 +65,11 @@ def test_list_offset_array_concatenate():
     offsets_four = ak.layout.Index64(np.array([1, 3, 4, 4, 6, 7, 7], dtype=np.int64))
 
     one = ak.layout.ListOffsetArray64(offsets_one, content_one)
-    
+
     two = ak.layout.ListOffsetArray64(offsets_two, content_two)
     three = ak.layout.ListOffsetArray64(offsets_three, one)
     four = ak.layout.ListOffsetArray64(offsets_four, two)
-    
+
     one = v1_to_v2(one)
     two = v1_to_v2(two)
     three = v1_to_v2(three)
@@ -100,7 +101,9 @@ def test_list_offset_array_concatenate():
         [0.99],
     ]
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([padded_one, two], axis=1)) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([padded_one, two], axis=1)
+    ) == [
         [0.0, 1.1, 2.2, 0.11, 0.22],
         [0.33],
         [3.3, 4.4],
@@ -329,75 +332,89 @@ def test_numpyarray_concatenate():
 @pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_numbers_and_records_concatenate():
     numbers = [
-        ak.Array(
-            [
-                [1.1, 2.2, 3.3],
-                [],
-                [4.4, 5.5],
-                [6.6, 7.7, 8.8, 9.9],
-            ]
-        ),
-        ak.Array(
-            [
-                [10, 20],
-                [30],
-                [],
-                [40, 50, 60],
-            ]
-        ),
-        ak.Array(
-            np.array(
+        v1_to_v2(
+            ak.Array(
                 [
-                    [101, 102, 103],
-                    [201, 202, 203],
-                    [301, 302, 303],
-                    [401, 402, 403],
+                    [1.1, 2.2, 3.3],
+                    [],
+                    [4.4, 5.5],
+                    [6.6, 7.7, 8.8, 9.9],
                 ]
-            )
+            ).layout
+        ),
+        v1_to_v2(
+            ak.Array(
+                [
+                    [10, 20],
+                    [30],
+                    [],
+                    [40, 50, 60],
+                ]
+            ).layout
+        ),
+        v1_to_v2(
+            ak.Array(
+                np.array(
+                    [
+                        [101, 102, 103],
+                        [201, 202, 203],
+                        [301, 302, 303],
+                        [401, 402, 403],
+                    ]
+                )
+            ).layout
         ),
     ]
 
     records = [
-        ak.Array(
-            [
-                [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
-                [],
-                [{"x": 2.2, "y": [1, 2]}],
-                [{"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
-            ]
+        v1_to_v2(
+            ak.Array(
+                [
+                    [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
+                    [],
+                    [{"x": 2.2, "y": [1, 2]}],
+                    [{"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
+                ]
+            ).layout
         ),
-        ak.Array(
-            [
-                [{"x": 0.0, "y": []}],
-                [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
-                [],
-                [{"x": 3.3, "y": [1, 2, 3]}],
-            ]
+        v1_to_v2(
+            ak.Array(
+                [
+                    [{"x": 0.0, "y": []}],
+                    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
+                    [],
+                    [{"x": 3.3, "y": [1, 2, 3]}],
+                ]
+            ).layout
         ),
     ]
 
-    assert ak.to_list(ak.concatenate([numbers[0], records[0]], 1)) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([numbers[0], records[0]], 1)
+    ) == [
         [1.1, 2.2, 3.3, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
         [],
         [4.4, 5.5, {"x": 2.2, "y": [1, 2]}],
         [6.6, 7.7, 8.8, 9.9, {"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
     ]
 
-    assert ak.to_list(ak.concatenate([numbers[0], numbers[1]], axis=1)) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([numbers[0], numbers[1]], axis=1)
+    ) == [
         [1.1, 2.2, 3.3, 10, 20],
         [30],
         [4.4, 5.5],
         [6.6, 7.7, 8.8, 9.9, 40, 50, 60],
     ]
 
-    assert ak.to_list(ak.concatenate(numbers, axis=1)) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate(numbers, axis=1)) == [
         [1.1, 2.2, 3.3, 10, 20, 101, 102, 103],
         [30, 201, 202, 203],
         [4.4, 5.5, 301, 302, 303],
         [6.6, 7.7, 8.8, 9.9, 40, 50, 60, 401, 402, 403],
     ]
 
-    assert ak.to_list(ak.concatenate(records, axis=1)) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate(records, axis=1)) == [
         [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 0.0, "y": []}],
         [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
         [{"x": 2.2, "y": [1, 2]}],
@@ -413,14 +430,17 @@ def test_numbers_and_records_concatenate():
     assert str(err.value).startswith("cannot broadcast")
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_broadcast_and_apply_levels():
     arrays = [
-        ak.Array([[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]),
-        ak.Array([[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]),
+        v1_to_v2(
+            ak.Array(
+                [[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]
+            ).layout
+        ),
+        v1_to_v2(ak.Array([[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]).layout),
     ]
     # nothing is required to have the same length
-    assert ak.concatenate(arrays, axis=0).tolist() == [
+    assert ak._v2.operations.structure.concatenate(arrays, axis=0).tolist() == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4]],
         [[5.5], [6.6, 7.7, 8.8, 9.9]],
@@ -429,17 +449,17 @@ def test_broadcast_and_apply_levels():
         [[50, 60, 70], [80, 90]],
     ]
     # the outermost arrays are required to have the same length, but nothing deeper than that
-    assert ak.concatenate(arrays, axis=1).tolist() == [
+    assert ak._v2.operations.structure.concatenate(arrays, axis=1).tolist() == [
         [[0.0, 1.1, 2.2], [], [10, 20], [30]],
         [[3.3, 4.4], [40]],
         [[5.5], [6.6, 7.7, 8.8, 9.9], [50, 60, 70], [80, 90]],
     ]
     # the outermost arrays and the first level are required to have the same length, but nothing deeper
-    assert ak.concatenate(arrays, axis=2).tolist() == [
-        [[0.0, 1.1, 2.2, 10, 20], [30]],
-        [[3.3, 4.4, 40]],
-        [[5.5, 50, 60, 70], [6.6, 7.7, 8.8, 9.9, 80, 90]],
-    ]
+    # assert ak._v2.operations.structure.concatenate(arrays, axis=2).tolist() == [
+    #     [[0.0, 1.1, 2.2, 10, 20], [30]],
+    #     [[3.3, 4.4, 40]],
+    #     [[5.5, 50, 60, 70], [6.6, 7.7, 8.8, 9.9, 80, 90]],
+    # ]
 
 
 @pytest.mark.skip(reason="Concatente not supporting axis yet")

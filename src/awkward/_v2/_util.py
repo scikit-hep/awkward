@@ -721,17 +721,7 @@ def broadcast_and_apply(  # noqa: C901
             ]
 
         # handle implicit right-broadcasting (i.e. NumPy-like)
-        if right_broadcast and any(
-            isinstance(
-                x,
-                (
-                    ak._v2.contents.RegularArray,
-                    ak._v2.contents.ListArray,
-                    ak._v2.contents.ListOffsetArray,
-                ),
-            )
-            for x in inputs
-        ):
+        if right_broadcast and any(x.is_ListType for x in inputs):
             maxdepth = max(
                 x.purelist_depth
                 for x in inputs
@@ -777,7 +767,7 @@ def broadcast_and_apply(  # noqa: C901
         #             nextinputs.append(x)
         #     return apply(nextinputs, depth, user)
 
-        if any(isinstance(x, ak._v2.contents.EmptyArray) for x in inputs):
+        if any(x.is_UnknownType for x in inputs):
             nextinputs = []
             for x in inputs:
                 if isinstance(x, ak._v2.contents.EmptyArray):
@@ -848,7 +838,7 @@ def broadcast_and_apply(  # noqa: C901
                 nextinputs = []
                 i = 0
                 for x in inputs:
-                    if isinstance(x, uniontypes):
+                    if x.is_UnionType:
                         nextinputs.append(x[mask].project(combo[str(i)]))
                         i += 1
                     elif isinstance(x, ak._v2.contents.Content):
@@ -872,29 +862,10 @@ def broadcast_and_apply(  # noqa: C901
                 for i in range(numoutputs)
             )
 
-        elif any(
-            isinstance(
-                x,
-                (
-                    ak._v2.contents.IndexedOptionArray,
-                    ak._v2.contents.ByteMaskedArray,
-                    ak._v2.contents.BitMaskedArray,
-                    ak._v2.contents.UnmaskedArray,
-                ),
-            )
-            for x in inputs
-        ):
+        elif any(x.is_OptionType for x in inputs):
             mask = None
             for x in inputs:
-                if isinstance(
-                    x,
-                    (
-                        ak._v2.contents.IndexedOptionArray,
-                        ak._v2.contents.ByteMaskedArray,
-                        ak._v2.contents.BitMaskedArray,
-                        ak._v2.contents.UnmaskedArray,
-                    ),
-                ):
+                if x.is_OptionType:
                     m = nplike.asarray(x.bytemask()).view(np.bool_)
                     if mask is None:
                         mask = m
@@ -907,33 +878,14 @@ def broadcast_and_apply(  # noqa: C901
                 len(mask) - nplike.count_nonzero(mask), dtype=np.int64
             )
             index = ak._v2.contents.Index64(index)
-            if any(
-                not isinstance(
-                    x,
-                    (
-                        ak._v2.contents.IndexedOptionArray,
-                        ak._v2.contents.ByteMaskedArray,
-                        ak._v2.contents.BitMaskedArray,
-                        ak._v2.contents.UnmaskedArray,
-                    ),
-                )
-                for x in inputs
-            ):
+            if any(not x.is_OptionType for x in inputs):
                 nextindex = nplike.arange(len(mask), dtype=np.int64)
                 nextindex[mask] = -1
                 nextindex = ak._v2.contents.Index64(nextindex)
 
             nextinputs = []
             for x in inputs:
-                if isinstance(
-                    x,
-                    (
-                        ak._v2.contents.IndexedOptionArray,
-                        ak._v2.contents.ByteMaskedArray,
-                        ak._v2.contents.BitMaskedArray,
-                        ak._v2.contents.UnmaskedArray,
-                    ),
-                ):
+                if x.is_OptionType:
                     nextinputs.append(x.project(nextmask))
                 elif isinstance(x, ak._v2.contents.Content):
                     nextinputs.append(
@@ -951,27 +903,9 @@ def broadcast_and_apply(  # noqa: C901
                 for x in outcontent
             )
 
-        elif any(
-            isinstance(
-                x,
-                (
-                    ak._v2.contents.RegularArray,
-                    ak._v2.contents.ListArray,
-                    ak._v2.contents.ListOffsetArray,
-                ),
-            )
-            for x in inputs
-        ):
+        elif any(x.is_ListType for x in inputs):
             if all(
-                isinstance(x, ak._v2.contents.RegularArray)
-                or not isinstance(
-                    x,
-                    (
-                        ak._v2.contents.RegularArray,
-                        ak._v2.contents.ListArray,
-                        ak._v2.contents.ListOffsetArray,
-                    ),
-                )
+                isinstance(x, ak._v2.contents.RegularArray) or not is_ListType
                 for x in inputs
             ):
                 maxsize = max(
@@ -1035,14 +969,7 @@ def broadcast_and_apply(  # noqa: C901
                 first, secondround = None, False
                 for x, fcn in zip(inputs, fcns):
                     if (
-                        isinstance(
-                            x,
-                            (
-                                ak._v2.contents.RegularArray,
-                                ak._v2.contents.ListArray,
-                                ak._v2.contents.ListOffsetArray,
-                            ),
-                        )
+                        x.is_ListType
                         and not isinstance(x, ak._v2.contents.RegularArray)
                         and fcn is None
                     ):
@@ -1052,16 +979,8 @@ def broadcast_and_apply(  # noqa: C901
                 if first is None:
                     secondround = True
                     for x in inputs:
-                        if (
-                            isinstance(
-                                x,
-                                (
-                                    ak._v2.contents.RegularArray,
-                                    ak._v2.contents.ListArray,
-                                    ak._v2.contents.ListOffsetArray,
-                                ),
-                            )
-                            and not isinstance(x, ak._v2.contents.RegularArray)
+                        if x.is_ListType and not isinstance(
+                            x, ak._v2.contents.RegularArray
                         ):
                             first = x
                             break
@@ -1072,14 +991,7 @@ def broadcast_and_apply(  # noqa: C901
                 for x, fcn in zip(inputs, fcns):
                     if callable(fcn) and not secondround:
                         nextinputs.append(fcn(x, offsets))
-                    elif isinstance(
-                        x,
-                        (
-                            ak._v2.contents.RegularArray,
-                            ak._v2.contents.ListArray,
-                            ak._v2.contents.ListOffsetArray,
-                        ),
-                    ):
+                    elif x.is_ListType:
                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)
                     # handle implicit left-broadcasting (unlike NumPy)
                     elif left_broadcast and isinstance(x, ak._v2.contents.Content):
