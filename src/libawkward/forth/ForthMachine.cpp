@@ -1771,24 +1771,9 @@ namespace awkward {
         }
         int64_t nextline = line;
         current = source_[stop];
-        while (current == ' '  ||  current == '\r'  ||  current == '\t'  ||
-               current == '\v'  ||  current == '\f'  ||  current == '\n') {
-          if (current == '\n') {
-            nextline++;
-            colstart = 0;
-            colstop = 0;
-          }
-          stop++;
-          colstop++;
-          if (stop == source_.size()) {
-            throw std::invalid_argument(
-              std::string("unclosed string after .\" or s\" word") + FILENAME(__LINE__));
-          }
-          current = source_[stop];
-        }
         start = stop;
         colstart = colstop;
-        while (current != '\"'  &&  source_[stop - 1] != '\\') {
+        while (current != '\"'  ||  source_[stop - 1] == '\\') {
           if (current == '\n') {
             nextline++;
             colstart = 0;

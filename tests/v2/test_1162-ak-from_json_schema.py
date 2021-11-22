@@ -155,3 +155,17 @@ def test_option_array_option_integer():
         },
     )
     assert result.tolist() == []
+
+
+def test_array_array_integer():
+    result = ak._v2.operations.convert.from_json_schema(
+        "[[[1, 2, 3]], [[], [4, 5]], []]",
+        {
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": {"type": "array", "items": {"type": "integer"}},
+            },
+        },
+    )
+    assert result.tolist() == [[[1, 2, 3]], [[], [4, 5]], []]

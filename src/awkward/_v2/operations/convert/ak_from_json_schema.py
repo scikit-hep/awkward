@@ -277,7 +277,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
         # https://json-schema.org/understanding-json-schema/reference/array.html
 
         if "items" not in schema:
-            raise TypeError("jsonschema type is not concrete: array without items")
+            raise TypeError("jsonschema type is not concrete: array without 'items'")
 
         if is_optional:
             mask = "node{0}".format(len(outputs))
@@ -363,10 +363,52 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
             )
 
     elif tpe == "object":
+        # https://json-schema.org/understanding-json-schema/reference/object.html
+
+        if "properties" not in schema:
+            raise TypeError(
+                "jsonschema type is not concrete: object without 'properties'"
+            )
+
+        if "required" not in schema or set(schema["required"]) != set(
+            schema["properties"]
+        ):
+            raise TypeError(
+                "jsonschema type is not concrete: object's 'required' must include all 'properties'"
+            )
+
+        names = []
+        subschemas = []
+        for k, v in schema["properties"].items():
+            names.append(k)
+            subschemas.append(v)
+
+        instructions.extend(
+            [
+                r"""{0}source enumonly s" {{" drop""".format(indent),
+                r"""{0}source skipws""".format(indent),
+                r"""{0}source enum s" }}" """.format(indent),
+                r"""{0}begin""".format(indent),
+                r"""{0}while""".format(indent),
+                r"""{0}  source skipws""".format(indent),
+            ]
+        )
+        # contents = []
+
+        instructions.extend(
+            [
+                r"""{0}""".format(indent),
+                r"""{0}""".format(indent),
+                r"""{0}""".format(indent),
+                r"""{0}""".format(indent),
+                r"""{0}""".format(indent),
+            ]
+        )
+
         raise NotImplementedError
 
     elif isinstance(tpe, list):
-        raise NotImplementedError
+        raise NotImplementedError("arbitrary unions of types are not yet supported")
 
     else:
         raise TypeError("unrecognized jsonschema: {0}".format(repr(tpe)))
