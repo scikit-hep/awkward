@@ -50,6 +50,7 @@ def test_concatenate_number():
         [4, 5, 323],
     ]
 
+
 @pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_list_offset_array_concatenate():
     content_one = ak.layout.NumpyArray(
@@ -64,11 +65,11 @@ def test_list_offset_array_concatenate():
     offsets_four = ak.layout.Index64(np.array([1, 3, 4, 4, 6, 7, 7], dtype=np.int64))
 
     one = ak.layout.ListOffsetArray64(offsets_one, content_one)
-    
+
     two = ak.layout.ListOffsetArray64(offsets_two, content_two)
     three = ak.layout.ListOffsetArray64(offsets_three, one)
     four = ak.layout.ListOffsetArray64(offsets_four, two)
-    
+
     one = v1_to_v2(one)
     two = v1_to_v2(two)
     three = v1_to_v2(three)
@@ -100,7 +101,9 @@ def test_list_offset_array_concatenate():
         [0.99],
     ]
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([padded_one, two], axis=1)) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([padded_one, two], axis=1)
+    ) == [
         [0.0, 1.1, 2.2, 0.11, 0.22],
         [0.33],
         [3.3, 4.4],
