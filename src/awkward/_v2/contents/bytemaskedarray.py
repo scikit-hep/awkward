@@ -438,7 +438,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
-            numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
+            numnull = ak._v2.index.Index64.empty(1, self.nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, False, NestedIndexError)
@@ -455,7 +455,7 @@ class ByteMaskedArray(Content):
 
             else:
                 outoffsets = ak._v2.index.Index64.empty(
-                    len(offsets) + numnull, self.nplike, dtype=np.int64
+                    len(offsets) + numnull[0], self.nplike, dtype=np.int64
                 )
 
                 self._handle_error(
@@ -481,7 +481,7 @@ class ByteMaskedArray(Content):
         if isinstance(
             other,
             (
-                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.emptyarray.EmptyArray,
                 ak._v2.contents.unionarray.UnionArray,
             ),
         ):
