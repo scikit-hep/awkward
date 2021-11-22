@@ -2035,7 +2035,7 @@ namespace awkward {
         }
 
         input_names_.push_back(name);
-        input_must_be_writable_.push_back(true);
+        input_must_be_writable_.push_back(false);
 
         pos += 2;
       }

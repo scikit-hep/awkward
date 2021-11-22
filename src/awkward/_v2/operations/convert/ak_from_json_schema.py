@@ -54,11 +54,9 @@ source skipws
 0
 source enum s" ]"
 begin
-  0= invert
 while
   source skipws
 {1}
-
   1+
   source skipws
   source enumonly s" ]" s" ,"
@@ -77,7 +75,7 @@ repeat
 
         except ValueError:
             position = vm.input_position("source")
-            before = source[position - 30 : position].decode(
+            before = source[max(0, position - 30) : position].decode(
                 "ascii", errors="surrogateescape"
             )
             before = before.replace(os.linesep, repr(os.linesep).strip("'\""))
@@ -121,32 +119,90 @@ def build_forth(schema, outputs, instructions, indent):
 
     tpe = schema["type"]
 
-    # is_option = False
-    # if isinstance(tpe, list):
-    #     if "null" in tpe:
-    #         is_option = True
-    #         tpe = [x for x in tpe if x != "null"]
-    #         if len(tpe) == 1:
-    #             tpe = tpe[0]
+    is_optional = False
+    if isinstance(tpe, list):
+        if "null" in tpe:
+            is_optional = True
+            tpe = [x for x in tpe if x != "null"]
+            if len(tpe) == 1:
+                tpe = tpe[0]
 
     if tpe == "boolean":
-        raise NotImplementedError
+        # https://json-schema.org/understanding-json-schema/reference/boolean.html
+        if is_optional:
+            mask = "node{0}".format(len(outputs))
+            outputs[mask + "-mask"] = "int8"
+            node = "node{0}".format(len(outputs))
+            outputs[node + "-data"] = "int8"
+            instructions.extend(
+                [
+                    r"""{0}source enumonly s" null" s" false" s" true" dup""".format(
+                        indent
+                    ),
+                    r"""{0}1- {1}-data <- stack""".format(indent, node),
+                    r"""{0}{1}-mask <- stack""".format(indent, mask),
+                ]
+            )
+            return ak._v2.forms.ByteMaskedForm(
+                "i8",
+                ak._v2.forms.NumpyForm(outputs[node + "-data"], form_key=node),
+                valid_when=True,
+                form_key=mask,
+            )
 
-    elif tpe == "integer":
+        else:
+            node = "node{0}".format(len(outputs))
+            outputs[node + "-data"] = "int8"
+            instructions.extend(
+                [
+                    """{0}source enum s" false" s" true" {1}-data <- stack""".format(
+                        indent, node
+                    ),
+                ]
+            )
+            return ak._v2.forms.NumpyForm(outputs[node + "-data"], form_key=node)
+
+    elif tpe == "integer" or tpe == "number":
         # https://json-schema.org/understanding-json-schema/reference/numeric.html
-        node = "node{0}".format(len(outputs))
-        outputs[node + "-data"] = "int64"
-        instructions.extend(
-            [
-                "",
-                # note: accepts (and truncates) fractional part
-                "{0}source textfloat-> {1}-data".format(indent, node),
-            ]
-        )
-        return ak._v2.forms.NumpyForm("int64", form_key=node)
+        if is_optional:
+            mask = "node{0}".format(len(outputs))
+            outputs[mask + "-mask"] = "int8"
+            node = "node{0}".format(len(outputs))
+            if tpe == "integer":
+                outputs[node + "-data"] = "int64"
+            else:
+                outputs[node + "-data"] = "float64"
+            instructions.extend(
+                [
+                    r"""{0}source enum s" null" dup if""".format(indent),
+                    # note: we want textfloat-> for integers, too
+                    r"""{0}  source textfloat-> {1}-data""".format(indent, node),
+                    r"""{0}else""".format(indent),
+                    r"""{0}  0 {1}-data <- stack""".format(indent, node),
+                    r"""{0}then""".format(indent),
+                    r"""{0}{1}-mask <- stack""".format(indent, mask),
+                ]
+            )
+            return ak._v2.forms.ByteMaskedForm(
+                "i8",
+                ak._v2.forms.NumpyForm(outputs[node + "-data"], form_key=node),
+                valid_when=True,
+                form_key=mask,
+            )
 
-    elif tpe == "number":
-        raise NotImplementedError
+        else:
+            node = "node{0}".format(len(outputs))
+            if tpe == "integer":
+                outputs[node + "-data"] = "int64"
+            else:
+                outputs[node + "-data"] = "float64"
+            instructions.extend(
+                [
+                    # note: we want textfloat-> for integers, too
+                    r"{0}source textfloat-> {1}-data".format(indent, node),
+                ]
+            )
+            return ak._v2.forms.NumpyForm(outputs[node + "-data"], form_key=node)
 
     elif tpe == "string":
         raise NotImplementedError
