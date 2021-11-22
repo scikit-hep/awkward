@@ -1744,7 +1744,7 @@ def where(condition, *args, **kwargs):
             else:
                 return None
 
-        behavior = ak._util.behaviorof(akcondition, left, right)
+        behavior = ak._util.behaviorof(condition, *args)
         out = ak._util.broadcast_and_apply(
             [akcondition, left, right],
             getfunction,
@@ -4417,7 +4417,7 @@ def isclose(
         else:
             return None
 
-    behavior = ak._util.behaviorof(one, two, behavior=behavior)
+    behavior = ak._util.behaviorof(a, b, behavior=behavior)
     out = ak._util.broadcast_and_apply(
         [one, two], getfunction, behavior, pass_depth=False
     )

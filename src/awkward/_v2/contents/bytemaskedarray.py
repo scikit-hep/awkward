@@ -433,6 +433,47 @@ class ByteMaskedArray(Content):
             )
             return out2.simplify_optiontype()
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+        else:
+            numnull = ak._v2.index.Index64.empty(1, self.nplike)
+            nextcarry, outindex = self._nextcarry_outindex(numnull)
+
+            next = self._content._carry(nextcarry, False, NestedIndexError)
+
+            offsets, flattened = next._offsets_and_flattened(posaxis, depth)
+
+            if len(offsets) == 0:
+                return (
+                    offsets,
+                    ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                        outindex, flattened, None, self._parameters
+                    ),
+                )
+
+            else:
+                outoffsets = ak._v2.index.Index64.empty(
+                    len(offsets) + numnull[0], self.nplike, dtype=np.int64
+                )
+
+                self._handle_error(
+                    self.nplike[
+                        "awkward_IndexedArray_flatten_none2empty",
+                        outoffsets.dtype.type,
+                        outindex.dtype.type,
+                        offsets.dtype.type,
+                    ](
+                        outoffsets.to(self.nplike),
+                        outindex.to(self.nplike),
+                        len(outindex),
+                        offsets.to(self.nplike),
+                        len(offsets),
+                    )
+                )
+                return (outoffsets, flattened)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False
@@ -440,7 +481,7 @@ class ByteMaskedArray(Content):
         if isinstance(
             other,
             (
-                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.emptyarray.EmptyArray,
                 ak._v2.contents.unionarray.UnionArray,
             ),
         ):
@@ -469,6 +510,9 @@ class ByteMaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
+    def fillna(self, value):
+        return self.toIndexedOptionArray64().fillna(value)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -486,6 +530,15 @@ class ByteMaskedArray(Content):
                 self._parameters,
             )
             return out2.simplify_optiontype()
+
+    def numbers_to_type(self, name):
+        return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+            self._mask,
+            self._content.numbers_to_type(name),
+            self._valid_when,
+            self._identifier,
+            self._parameters,
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._mask) == 0:
@@ -791,6 +844,9 @@ class ByteMaskedArray(Content):
             length,
             options,
         )
+
+    def _to_numpy(self, allow_missing):
+        return self.toIndexedOptionArray64()._to_numpy(allow_missing)
 
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)

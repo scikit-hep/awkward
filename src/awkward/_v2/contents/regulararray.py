@@ -553,6 +553,9 @@ class RegularArray(Content):
                 next, self._size, len(self), None, self._parameters
             )
 
+    def _offsets_and_flattened(self, axis, depth):
+        return self.toListOffsetArray64(True)._offsets_and_flattened(axis, depth)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False
@@ -595,6 +598,15 @@ class RegularArray(Content):
             return self
         return self.toListOffsetArray64(True).mergemany(others)
 
+    def fillna(self, value):
+        return RegularArray(
+            self._content.fillna(value),
+            self._size,
+            self._length,
+            self._identifier,
+            self._parameters,
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -625,6 +637,15 @@ class RegularArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def numbers_to_type(self, name):
+        return ak._v2.contents.regulararray.RegularArray(
+            self._content.numbers_to_type(name),
+            self._size,
+            len(self),
+            self._identifier,
+            self._parameters,
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self._length == 0:
@@ -933,6 +954,17 @@ class RegularArray(Content):
                 None,
                 self._parameters,
             )
+
+    def _to_numpy(self, allow_missing):
+        out = ak._v2.operations.convert.to_numpy(
+            self.content, allow_missing=allow_missing
+        )
+        head, tail = out.shape[0], out.shape[1:]
+        if self.size == 0:
+            shape = (0, 0) + tail
+        else:
+            shape = (head // self.size, self.size) + tail
+        return out[: shape[0] * self.size].reshape(shape)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":

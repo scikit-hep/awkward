@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import copy
+import ctypes
 
 try:
     from collections.abc import Iterable
@@ -518,6 +519,85 @@ class UnionArray(Content):
             out = UnionArray(self._tags, self._index, contents, None, self._parameters)
             return out.simplify_uniontype(True, False)
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+
+        else:
+            has_offsets = False
+            offsetsraws = self.nplike.empty(len(self._contents), dtype=np.intp)
+            contents = []
+
+            for i in range(len(self._contents)):
+                offsets, flattened = self._contents[i]._offsets_and_flattened(
+                    posaxis, depth
+                )
+                offsetsraws[i] = offsets.ptr
+                contents.append(flattened)
+                has_offsets = len(offsets) != 0
+
+            if has_offsets:
+                total_length = ak._v2.index.Index64.empty(1, self.nplike)
+                self._handle_error(
+                    self.nplike[
+                        "awkward_UnionArray_flatten_length",
+                        total_length.dtype.type,
+                        self._tags.dtype.type,
+                        self._index.dtype.type,
+                        np.int64,
+                    ](
+                        total_length.to(self.nplike),
+                        self._tags.to(self.nplike),
+                        self._index.to(self.nplike),
+                        len(self._tags),
+                        offsetsraws.ctypes.data_as(
+                            ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
+                        ),
+                    )
+                )
+
+                totags = ak._v2.index.Index8.empty(total_length[0], self.nplike)
+                toindex = ak._v2.index.Index64.empty(total_length[0], self.nplike)
+                tooffsets = ak._v2.index.Index64.empty(len(self._tags) + 1, self.nplike)
+
+                self._handle_error(
+                    self.nplike[
+                        "awkward_UnionArray_flatten_combine",
+                        totags.dtype.type,
+                        toindex.dtype.type,
+                        tooffsets.dtype.type,
+                        self._tags.dtype.type,
+                        self._index.dtype.type,
+                        np.int64,
+                    ](
+                        totags.to(self.nplike),
+                        toindex.to(self.nplike),
+                        tooffsets.to(self.nplike),
+                        self._tags.to(self.nplike),
+                        self._index.to(self.nplike),
+                        len(self._tags),
+                        offsetsraws.ctypes.data_as(
+                            ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
+                        ),
+                    )
+                )
+
+                return (
+                    tooffsets,
+                    UnionArray(totags, toindex, contents, None, self._parameters),
+                )
+
+            else:
+                offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
+                return (
+                    offsets,
+                    UnionArray(
+                        self._tags, self._index, contents, None, self._parameters
+                    ),
+                )
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False
@@ -696,6 +776,15 @@ class UnionArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
+    def fillna(self, value):
+        contents = []
+        for content in self._contents:
+            contents.append(content.fillna(value))
+        out = UnionArray(
+            self._tags, self._index, contents, self._identifier, self._parameters
+        )
+        return out.simplify_uniontype(True, False)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -723,6 +812,14 @@ class UnionArray(Content):
             return ak._v2.unionarray.UnionArray(
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
+
+    def numbers_to_type(self, name):
+        contents = []
+        for x in self._contents:
+            contents.append(x.numbers_to_type(name))
+        return ak._v2.contents.unionarray.UnionArray(
+            self._tags, self._index, contents, self._identifier, self._parameters
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         simplified = self.simplify_uniontype(True, True)
@@ -944,10 +1041,37 @@ class UnionArray(Content):
             children=values,
         )
 
+    def _to_numpy(self, allow_missing):
+        contents = [
+            ak._v2.operations.convert.to_numpy(
+                self.project(i), allow_missing=allow_missing
+            )
+            for i in range(len(self.contents))
+        ]
+
+        if any(isinstance(x, self.nplike.ma.MaskedArray) for x in contents):
+            try:
+                out = self.nplike.ma.concatenate(contents)
+            except Exception:
+                raise ValueError(
+                    "cannot convert {0} into numpy.ma.MaskedArray".format(self)
+                )
+        else:
+            try:
+                out = numpy.concatenate(contents)
+            except Exception:
+                raise ValueError("cannot convert {0} into np.ndarray".format(self))
+
+        tags = numpy.asarray(self.tags)
+        for tag, content in enumerate(contents):
+            mask = tags == tag
+            out[mask] = content
+        return out
+
     def _completely_flatten(self, nplike, options):
         out = []
         for content in self._contents:
-            out.extend(content[: self._length]._completely_flatten(nplike, options))
+            out.extend(content[: len(self._tags)]._completely_flatten(nplike, options))
         return out
 
     def _recursively_apply(

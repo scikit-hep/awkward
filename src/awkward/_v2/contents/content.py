@@ -931,7 +931,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     path, type(self)
                 )
             if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
-                if content.dtype == np.uint8:
+                if content.dtype.type != np.uint8:
                     return 'at {0} ("{1}"): __array__ = "char" requires dtype == uint8'.format(
                         path, type(self)
                     )
@@ -965,7 +965,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     path, type(self)
                 )
             if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
-                if content.dtype == np.uint8:
+                if content.dtype.type != np.uint8:
                     return 'at {0} ("{1}"): __array__ = "byte" requires dtype == uint8'.format(
                         path, type(self)
                     )
@@ -1147,6 +1147,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             },
         )
 
+    def to_numpy(self, allow_missing):
+        return self._to_numpy(allow_missing)
+
     def completely_flatten(
         self, nplike=None, flatten_records=False, function_name=None
     ):
@@ -1201,3 +1204,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             for i in range(len(self)):
                 out[i] = array[i]
             return out
+
+    def flatten(self, axis=1, depth=0):
+        offsets, flattened = self._offsets_and_flattened(axis, depth)
+        return flattened

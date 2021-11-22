@@ -129,6 +129,10 @@ namespace awkward {
 
     /// @brief HERE
     virtual void
+      write_one_string(char* string_buffer, int64_t length) noexcept = 0;
+
+    /// @brief HERE
+    virtual void
       write_bool(int64_t num_items, bool* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
@@ -260,6 +264,9 @@ namespace awkward {
 
     void
       write_one_float64(double value, bool byteswap) noexcept override;
+
+    void
+      write_one_string(char* string_buffer, int64_t length) noexcept override;
 
     void
       write_bool(int64_t num_items, bool* values, bool byteswap) noexcept override;

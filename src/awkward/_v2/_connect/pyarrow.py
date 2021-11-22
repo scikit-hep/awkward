@@ -635,7 +635,7 @@ def handle_arrow(obj, pass_empty_field=False):
             # zero-length array with the right type
             raise NotImplementedError
         elif len(batches) == 1:
-            return handle_arrow(batches[0], pass_empty_field)
+            out = handle_arrow(batches[0], pass_empty_field)
         else:
             arrays = [
                 handle_arrow(batch, pass_empty_field)
@@ -645,7 +645,32 @@ def handle_arrow(obj, pass_empty_field=False):
             raise NotImplementedError(
                 "FIXME: need ak._v2.operations.structure.concatenate"
             )
-            return ak._v2.operations.structure.concatenate(arrays, highlevel=False)
+            out = ak._v2.operations.structure.concatenate(arrays, highlevel=False)
+
+        if obj.schema.metadata is not None and b"ak:parameters" in obj.schema.metadata:
+            optiontype, recordtype = None, None
+            if out.is_OptionType:
+                optiontype = out
+            if out.is_RecordType:
+                recordtype = out
+            elif out.content.is_RecordType:
+                recordtype = out.content
+
+            parameters = json.loads(obj.schema.metadata[b"ak:parameters"])
+            for x in parameters:
+                (key,) = x.keys()
+                (value,) = x.values()
+                if key in (
+                    "UnmaskedArray",
+                    "BitMaskedArray",
+                    "ByteMaskedArray",
+                    "IndexedOptionArray",
+                ):
+                    optiontype._parameters = value
+                elif key == "RecordArray":
+                    recordtype._parameters = value
+
+        return out
 
     elif (
         isinstance(obj, Iterable)

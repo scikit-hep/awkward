@@ -374,6 +374,14 @@ class IndexedArray(Content):
         else:
             return self.project().num(posaxis, depth)
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+
+        else:
+            return self.project()._offsets_and_flattened(posaxis, depth)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False
@@ -550,6 +558,16 @@ class IndexedArray(Content):
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
 
+    def fillna(self, value):
+        if len(value) != 1:
+            raise ValueError(
+                "fillna value length ({0}) is not equal to 1".format(len(value))
+            )
+
+        return IndexedArray(
+            self._index, self._content.fillna(value), None, self._parameters
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -609,6 +627,14 @@ class IndexedArray(Content):
             )
 
         return next[0 : length[0]]
+
+    def numbers_to_type(self, name):
+        return ak._v2.contents.indexedarray.IndexedArray(
+            self._index,
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._index) == 0:
@@ -1003,6 +1029,9 @@ class IndexedArray(Content):
             return next.merge_parameters(self._parameters)._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
+
+    def _to_numpy(self, allow_missing):
+        return self.project()._to_numpy(allow_missing)
 
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
