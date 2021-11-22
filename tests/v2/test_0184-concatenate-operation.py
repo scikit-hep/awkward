@@ -51,7 +51,7 @@ def test_concatenate_number():
     ]
 
 
-# @pytest.mark.skip(reason="Concatente not supporting axis yet")
+@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_list_offset_array_concatenate():
     content_one = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
