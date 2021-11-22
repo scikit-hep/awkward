@@ -40,12 +40,14 @@ def from_json_schema(
             raise TypeError("jsonschema type is not concrete: array without items")
 
         outputs = {}
+        initialization = []
         instructions = []
 
-        form = build_forth(schema["items"], outputs, instructions, "  ")
+        form = build_forth(schema["items"], outputs, initialization, instructions, "  ")
 
         forthcode = r"""input source
 {0}
+{1}
 
 source skipws
 source enumonly s" [" drop
@@ -56,13 +58,14 @@ source enum s" ]"
 begin
 while
   source skipws
-{1}
+{2}
   1+
   source skipws
   source enumonly s" ]" s" ,"
 repeat
 """.format(
-            " ".join("output {0} {1}".format(n, t) for n, t in outputs.items()),
+            "\n".join("output {0} {1}".format(n, t) for n, t in outputs.items()),
+            "\n".join(initialization),
             "\n".join(instructions),
         )
 
@@ -106,7 +109,7 @@ repeat
         raise TypeError("only 'array' and 'object' types supported at schema top-level")
 
 
-def build_forth(schema, outputs, instructions, indent):
+def build_forth(schema, outputs, initialization, instructions, indent):
     if not isinstance(schema, dict):
         raise TypeError(
             "unrecognized jsonschema: expected dict, got {0}".format(repr(schema))
@@ -199,13 +202,70 @@ def build_forth(schema, outputs, instructions, indent):
             instructions.extend(
                 [
                     # note: we want textfloat-> for integers, too
-                    r"{0}source textfloat-> {1}-data".format(indent, node),
+                    r"""{0}source textfloat-> {1}-data""".format(indent, node),
                 ]
             )
             return ak._v2.forms.NumpyForm(outputs[node + "-data"], form_key=node)
 
     elif tpe == "string":
-        raise NotImplementedError
+        # https://json-schema.org/understanding-json-schema/reference/string.html#string
+        if is_optional:
+            mask = "node{0}".format(len(outputs))
+            outputs[mask + "-mask"] = "int8"
+            offsets = "node{0}".format(len(outputs))
+            outputs[offsets + "-offsets"] = "int64"
+            node = "node{0}".format(len(outputs))
+            outputs[node + "-data"] = "uint8"
+            initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
+            instructions.extend(
+                [
+                    r"""{0}source enum s" null" dup if""".format(indent),
+                    r"""{0}  source quotedstr-> {1}-data""".format(indent, node),
+                    r"""{0}  {1}-offsets +<- stack""".format(indent, offsets),
+                    r"""{0}else""".format(indent),
+                    r"""{0}  0 {1}-offsets +<- stack""".format(indent, offsets),
+                    r"""{0}then""".format(indent),
+                    r"""{0}{1}-mask <- stack""".format(indent, mask),
+                ]
+            )
+            return ak._v2.forms.ByteMaskedForm(
+                "i8",
+                ak._v2.forms.ListOffsetForm(
+                    "i64",
+                    ak._v2.forms.NumpyForm(
+                        outputs[node + "-data"],
+                        parameters={"__array__": "char"},
+                        form_key=node,
+                    ),
+                    parameters={"__array__": "string"},
+                    form_key=offsets,
+                ),
+                valid_when=True,
+                form_key=mask,
+            )
+
+        else:
+            offsets = "node{0}".format(len(outputs))
+            outputs[offsets + "-offsets"] = "int64"
+            node = "node{0}".format(len(outputs))
+            outputs[node + "-data"] = "uint8"
+            initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
+            instructions.extend(
+                [
+                    r"""{0}source quotedstr-> {1}-data""".format(indent, node),
+                    r"""{0}{1}-offsets +<- stack""".format(indent, offsets),
+                ]
+            )
+            return ak._v2.forms.ListOffsetForm(
+                "i64",
+                ak._v2.forms.NumpyForm(
+                    outputs[node + "-data"],
+                    parameters={"__array__": "char"},
+                    form_key=node,
+                ),
+                parameters={"__array__": "string"},
+                form_key=offsets,
+            )
 
     elif tpe == "array":
         raise NotImplementedError

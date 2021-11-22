@@ -49,3 +49,19 @@ def test_option_integer():
         {"type": "array", "items": {"type": ["null", "integer"]}},
     )
     assert result.tolist() == [1, 2, None, 4, 5]
+
+
+def test_string():
+    result = ak._v2.operations.convert.from_json_schema(
+        r'["one", "two", "three \u2192 3", "\"four\"", "fi\nve"]',
+        {"type": "array", "items": {"type": "string"}},
+    )
+    assert result.tolist() == ["one", "two", "three \u2192 3", '"four"', "fi\nve"]
+
+
+def test_option_string():
+    result = ak._v2.operations.convert.from_json_schema(
+        r'["one", null, "three \u2192 3", "\"four\"", "fi\nve"]',
+        {"type": "array", "items": {"type": ["null", "string"]}},
+    )
+    assert result.tolist() == ["one", None, "three \u2192 3", '"four"', "fi\nve"]
