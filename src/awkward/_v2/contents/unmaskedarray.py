@@ -214,6 +214,18 @@ class UnmaskedArray(Content):
                 self._content.num(posaxis, depth), None, self._parameters
             )
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+        else:
+            offsets, flattened = self._content._offsets_and_flattened(posaxis, depth)
+            if len(offsets) == 0:
+                return (offsets, UnmaskedArray(flattened, None, self._parameters))
+
+            else:
+                return (offsets, flattened)
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

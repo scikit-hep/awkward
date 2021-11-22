@@ -543,6 +543,59 @@ class ListOffsetArray(Content):
                 offsets, next, None, self.parameters
             )
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+
+        elif posaxis == depth + 1:
+            listoffsetarray = self.toListOffsetArray64(True)
+            stop = listoffsetarray.offsets[-1]
+            content = listoffsetarray.content._getitem_range(slice(0, stop))
+            return (listoffsetarray.offsets, content)
+
+        else:
+            inneroffsets, flattened = self._content._offsets_and_flattened(
+                posaxis, depth + 1
+            )
+            offsets = ak._v2.index.Index64.zeros(0, self.nplike, dtype=np.int64)
+
+            if len(inneroffsets) == 0:
+                return (
+                    offsets,
+                    ListOffsetArray(self._offsets, flattened, None, self._parameters),
+                )
+
+            elif len(self._offsets) == 1:
+                tooffsets = inneroffsets._getitem_range(slice(0, 1))
+                return (
+                    offsets,
+                    ListOffsetArray(tooffsets, flattened, None, self._parameters),
+                )
+
+            else:
+                tooffsets = ak._v2.index.Index64.zeros(
+                    len(self._offsets), self.nplike, dtype=np.int64
+                )
+                self._handle_error(
+                    self.nplike[
+                        "awkward_ListOffsetArray_flatten_offsets",
+                        tooffsets.dtype.type,
+                        self._offsets.dtype.type,
+                        inneroffsets.dtype.type,
+                    ](
+                        tooffsets.to(self.nplike),
+                        self._offsets.to(self.nplike),
+                        len(self._offsets),
+                        inneroffsets.to(self.nplike),
+                        len(inneroffsets),
+                    )
+                )
+                return (
+                    offsets,
+                    ListOffsetArray(tooffsets, flattened, None, self._parameters),
+                )
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

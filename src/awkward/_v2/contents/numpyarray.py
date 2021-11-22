@@ -321,6 +321,17 @@ class NumpyArray(Content):
             tonum.data.reshape(shape), None, self.parameters
         )
 
+    def _offsets_and_flattened(self, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            raise np.AxisError(self, "axis=0 not allowed for flatten")
+
+        elif len(self.shape) != 1:
+            return self.toRegularArray()._offsets_and_flattened(posaxis, depth)
+
+        else:
+            raise np.AxisError(self, "axis out of range for flatten")
+
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False

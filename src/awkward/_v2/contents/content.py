@@ -1204,3 +1204,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             for i in range(len(self)):
                 out[i] = array[i]
             return out
+
+    def flatten(self, axis=1, depth=0):
+        offsets, flattened = self._offsets_and_flattened(axis, depth)
+        return flattened
