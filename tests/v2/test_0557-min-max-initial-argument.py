@@ -68,7 +68,6 @@ def test():
     assert ak.to_list(data.max(axis=-1)) == 113
 
 
-@pytest.mark.skip(reason="FIXME: handle date-time case for min/max (@ianna)")
 def test_date_time():
     numpy_array = np.array(
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"

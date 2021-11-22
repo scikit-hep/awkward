@@ -751,6 +751,15 @@ class UnionArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
+    def fillna(self, value):
+        contents = []
+        for content in self._contents:
+            contents.append(content.fillna(value))
+        out = UnionArray(
+            self._tags, self._index, contents, self._identifier, self._parameters
+        )
+        return out.simplify_uniontype(True, False)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -778,6 +787,14 @@ class UnionArray(Content):
             return ak._v2.unionarray.UnionArray(
                 self._tags, self._index, contents, self._identifier, self._parameters
             )
+
+    def numbers_to_type(self, name):
+        contents = []
+        for x in self._contents:
+            contents.append(x.numbers_to_type(name))
+        return ak._v2.contents.unionarray.UnionArray(
+            self._tags, self._index, contents, self._identifier, self._parameters
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         simplified = self.simplify_uniontype(True, True)
@@ -999,10 +1016,37 @@ class UnionArray(Content):
             children=values,
         )
 
+    def _to_numpy(self, allow_missing):
+        contents = [
+            ak._v2.operations.convert.to_numpy(
+                self.project(i), allow_missing=allow_missing
+            )
+            for i in range(len(self.contents))
+        ]
+
+        if any(isinstance(x, self.nplike.ma.MaskedArray) for x in contents):
+            try:
+                out = self.nplike.ma.concatenate(contents)
+            except Exception:
+                raise ValueError(
+                    "cannot convert {0} into numpy.ma.MaskedArray".format(self)
+                )
+        else:
+            try:
+                out = numpy.concatenate(contents)
+            except Exception:
+                raise ValueError("cannot convert {0} into np.ndarray".format(self))
+
+        tags = numpy.asarray(self.tags)
+        for tag, content in enumerate(contents):
+            mask = tags == tag
+            out[mask] = content
+        return out
+
     def _completely_flatten(self, nplike, options):
         out = []
         for content in self._contents:
-            out.extend(content[: self._length]._completely_flatten(nplike, options))
+            out.extend(content[: len(self._tags)]._completely_flatten(nplike, options))
         return out
 
     def _recursively_apply(

@@ -11,16 +11,16 @@ np = ak.nplike.NumpyMetadata.instance()
 class ByteBehavior(Array):
     __name__ = "Array"
 
+    def __bytes__(self):
+        tmp = ak.nplike.of(self.layout).asarray(self.layout)
+        if hasattr(tmp, "tobytes"):
+            return tmp.tobytes()
+        else:
+            return tmp.tostring()
 
-#     def __bytes__(self):
-#         tmp = ak.nplike.of(self.layout).asarray(self.layout)
-#         if hasattr(tmp, "tobytes"):
-#             return tmp.tobytes()
-#         else:
-#             return tmp.tostring()
+    def __str__(self):
+        return str(self.__bytes__())
 
-#     def __str__(self):
-#         return str(self.__bytes__())
 
 #     def __repr__(self):
 #         return repr(self.__bytes__())
@@ -54,16 +54,16 @@ class ByteBehavior(Array):
 class CharBehavior(Array):
     __name__ = "Array"
 
+    def __bytes__(self):
+        tmp = ak.nplike.of(self.layout).asarray(self.layout)
+        if hasattr(tmp, "tobytes"):
+            return tmp.tobytes()
+        else:
+            return tmp.tostring()
 
-#     def __bytes__(self):
-#         tmp = ak.nplike.of(self.layout).asarray(self.layout)
-#         if hasattr(tmp, "tobytes"):
-#             return tmp.tobytes()
-#         else:
-#             return tmp.tostring()
+    def __str__(self):
+        return self.__bytes__().decode("utf-8", "surrogateescape")
 
-#     def __str__(self):
-#         return self.__bytes__().decode("utf-8", "surrogateescape")
 
 #     def __repr__(self):
 #         return repr(self.__bytes__().decode("utf-8", "surrogateescape"))

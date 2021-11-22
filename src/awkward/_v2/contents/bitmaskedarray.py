@@ -374,8 +374,14 @@ class BitMaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
+    def fillna(self, value):
+        return self.toIndexedOptionArray64().fillna(value)
+
     def _localindex(self, axis, depth):
         return self.toByteMaskedArray()._localindex(axis, depth)
+
+    def numbers_to_type(self, name):
+        return self.toByteMaskedArray().numbers_to_type(name)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._mask) == 0:
@@ -493,6 +499,9 @@ class BitMaskedArray(Content):
         return self.toByteMaskedArray()._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
+
+    def _to_numpy(self, allow_missing):
+        return self.toByteMaskedArray()._to_numpy(allow_missing)
 
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)

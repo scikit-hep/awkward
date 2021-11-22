@@ -1678,3 +1678,231 @@ def test_keepdims():
         depth2.typetracer.prod(axis=-3, keepdims=True).form
         == depth2.prod(axis=-3, keepdims=True).form
     )
+
+
+def test_highlevel():
+    array = ak._v2.highlevel.Array(
+        [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]], check_valid=True
+    )
+
+    assert ak._v2.operations.reducers.count(array) == 9
+    assert ak.to_list(ak._v2.operations.reducers.count(array, axis=-1)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.count(array, axis=2)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert ak.to_list(
+        ak._v2.operations.reducers.count(array, axis=-1, keepdims=True)
+    ) == [
+        [[3], [0], [2], [1]],
+        [],
+        [[2], [1]],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.count(array, axis=-2)) == [
+        [3, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.count(array, axis=1)) == [
+        [3, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert ak.to_list(
+        ak._v2.operations.reducers.count(array, axis=-2, keepdims=True)
+    ) == [
+        [[3, 2, 1]],
+        [[]],
+        [[2, 1]],
+    ]
+
+    assert ak._v2.operations.reducers.count_nonzero(array) == 9
+    assert ak.to_list(ak._v2.operations.reducers.count_nonzero(array, axis=-1)) == [
+        [3, 0, 2, 1],
+        [],
+        [2, 1],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.count_nonzero(array, axis=-2)) == [
+        [3, 2, 1],
+        [],
+        [2, 1],
+    ]
+
+    assert (
+        ak._v2.operations.reducers.sum(array) == 2 + 3 + 5 + 7 + 11 + 13 + 17 + 19 + 23
+    )
+    assert ak.to_list(ak._v2.operations.reducers.sum(array, axis=-1)) == [
+        [2 + 3 + 5, 0, 7 + 11, 13],
+        [],
+        [17 + 19, 23],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.sum(array, axis=-2)) == [
+        [2 + 7 + 13, 3 + 11, 5],
+        [],
+        [17 + 23, 19],
+    ]
+
+    assert (
+        ak._v2.operations.reducers.prod(array) == 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23
+    )
+    assert ak.to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [
+        [2 * 3 * 5, 1, 7 * 11, 13],
+        [],
+        [17 * 19, 23],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.prod(array, axis=-2)) == [
+        [2 * 7 * 13, 3 * 11, 5],
+        [],
+        [17 * 23, 19],
+    ]
+
+    assert ak._v2.operations.reducers.min(array) == 2
+    assert ak.to_list(ak._v2.operations.reducers.min(array, axis=-1)) == [
+        [2, None, 7, 13],
+        [],
+        [17, 23],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.min(array, axis=-2)) == [
+        [2, 3, 5],
+        [],
+        [17, 19],
+    ]
+
+    assert ak._v2.operations.reducers.max(array) == 23
+    assert ak.to_list(ak._v2.operations.reducers.max(array, axis=-1)) == [
+        [5, None, 11, 13],
+        [],
+        [19, 23],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.max(array, axis=-2)) == [
+        [13, 11, 5],
+        [],
+        [23, 19],
+    ]
+
+    array = ak._v2.highlevel.Array(
+        [
+            [[True, False, True], [], [False, False], [True]],
+            [],
+            [[False, True], [True]],
+        ],
+        check_valid=True,
+    )
+
+    assert ak._v2.operations.reducers.any(array) is np.bool_(True)
+    assert ak.to_list(ak._v2.operations.reducers.any(array, axis=-1)) == [
+        [True, False, False, True],
+        [],
+        [True, True],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.any(array, axis=-2)) == [
+        [True, False, True],
+        [],
+        [True, True],
+    ]
+
+    assert ak._v2.operations.reducers.all(array) is np.bool_(False)
+    assert ak.to_list(ak._v2.operations.reducers.all(array, axis=-1)) == [
+        [False, True, False, True],
+        [],
+        [False, True],
+    ]
+    assert ak.to_list(ak._v2.operations.reducers.all(array, axis=-2)) == [
+        [False, False, True],
+        [],
+        [False, True],
+    ]
+
+
+def test_nonreducers():
+    x = ak._v2.highlevel.Array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]], check_valid=True)
+    y = ak._v2.highlevel.Array(
+        [[1.1, 2.2, 2.9, 4.0, 5.1], [0.9, 2.1, 3.2, 4.1, 4.9]], check_valid=True
+    )
+
+    assert ak.mean(y) == np.mean(ak._v2.operations.convert.to_numpy(y))
+    assert ak.var(y) == np.var(ak._v2.operations.convert.to_numpy(y))
+    assert ak.var(y, ddof=1) == np.var(ak._v2.operations.convert.to_numpy(y), ddof=1)
+    assert ak.std(y) == np.std(ak._v2.operations.convert.to_numpy(y))
+    assert ak.std(y, ddof=1) == np.std(ak._v2.operations.convert.to_numpy(y), ddof=1)
+
+    assert ak.moment(y, 1) == np.mean(ak._v2.operations.convert.to_numpy(y))
+    assert ak.moment(y - ak.mean(y), 2) == np.var(ak._v2.operations.convert.to_numpy(y))
+    assert ak.covar(y, y) == np.var(ak._v2.operations.convert.to_numpy(y))
+    assert ak.corr(y, y) == 1.0
+
+    assert ak.corr(x, y) == pytest.approx(0.9968772535047296)
+    fit = ak.linear_fit(x, y)
+    assert ak.to_list(fit) == pytest.approx(
+        {
+            "intercept": 0.07999999999999773,
+            "slope": 0.99,
+            "intercept_error": 0.7416198487095663,
+            "slope_error": 0.22360679774997896,
+        }
+    )
+
+    assert ak.to_list(ak.mean(y, axis=-1)) == pytest.approx(
+        ak.to_list(np.mean(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    )
+    assert ak.to_list(ak.var(y, axis=-1)) == pytest.approx(
+        ak.to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    )
+    assert ak.to_list(ak.var(y, axis=-1, ddof=1)) == pytest.approx(
+        ak.to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1, ddof=1))
+    )
+    assert ak.to_list(ak.std(y, axis=-1)) == pytest.approx(
+        ak.to_list(np.std(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    )
+    assert ak.to_list(ak.std(y, axis=-1, ddof=1)) == pytest.approx(
+        ak.to_list(np.std(ak._v2.operations.convert.to_numpy(y), axis=-1, ddof=1))
+    )
+
+    assert ak.to_list(ak.moment(y, 1, axis=-1)) == pytest.approx(
+        ak.to_list(np.mean(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    )
+    assert ak.to_list(ak.moment(y - ak.mean(y, axis=-1), 2, axis=-1)) == pytest.approx(
+        ak.to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    )
+    assert ak.to_list(ak.covar(y, y, axis=-1)) == pytest.approx(
+        ak.to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    )
+    assert ak.to_list(ak.corr(y, y, axis=-1)) == pytest.approx([1.0, 1.0])
+
+    assert ak.to_list(ak.corr(x, y, axis=-1)) == pytest.approx(
+        [0.9975103695813371, 0.9964193240901015]
+    )
+    fit = ak.linear_fit(x, y, axis=-1)
+    assert ak.to_list(fit[0]) == pytest.approx(
+        {
+            "intercept": 0.11999999999999772,
+            "slope": 0.9800000000000005,
+            "intercept_error": 1.0488088481701516,
+            "slope_error": 0.31622776601683794,
+        }
+    )
+    assert ak.to_list(fit[1]) == pytest.approx(
+        {
+            "intercept": 0.04000000000000228,
+            "slope": 0.9999999999999994,
+            "intercept_error": 1.0488088481701516,
+            "slope_error": 0.31622776601683794,
+        }
+    )
+
+
+def test_softmax():
+    array = ak._v2.highlevel.Array(
+        [[np.log(2), np.log(2), np.log(4)], [], [np.log(5), np.log(5)]],
+        check_valid=True,
+    )
+    assert ak.to_list(ak.softmax(array, axis=-1)) == [
+        pytest.approx([0.25, 0.25, 0.5]),
+        [],
+        pytest.approx([0.5, 0.5]),
+    ]

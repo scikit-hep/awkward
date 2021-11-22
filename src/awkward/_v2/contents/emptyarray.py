@@ -164,8 +164,14 @@ class EmptyArray(Content):
             tail_others = others[1:]
             return others[0].mergemany(tail_others)
 
+    def fillna(self, value):
+        return EmptyArray(None, self._parameters)
+
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64))
+
+    def numbers_to_type(self, name):
+        return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -268,6 +274,9 @@ class EmptyArray(Content):
                 nplike=numpy,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
+    def _to_numpy(self, allow_missing):
+        return self.nplike.empty(0, dtype=np.float64)
 
     def _completely_flatten(self, nplike, options):
         return []

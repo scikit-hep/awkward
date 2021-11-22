@@ -49,6 +49,9 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True, flatten_records
     )
 
     if axis is None:
+        layout = ak._v2.operations.structure.fill_none(
+            layout, np.inf, axis=-1, highlevel=False
+        )
         flat = layout.completely_flatten(
             function_name="ak.argmin", flatten_records=flatten_records
         )

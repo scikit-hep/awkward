@@ -355,6 +355,15 @@ namespace awkward {
 
   template <typename OUT>
   void
+  ForthOutputBufferOf<OUT>::write_one_string(char* string_buffer, int64_t length) noexcept {
+    int64_t next = length_ + length;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], string_buffer, length);
+    length_ = next;
+  }
+
+  template <typename OUT>
+  void
   ForthOutputBufferOf<OUT>::write_bool(int64_t num_items,
                                        bool* values,
                                        bool byteswap) noexcept {
