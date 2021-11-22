@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import copy
+import ctypes
 
 try:
     from collections.abc import Iterable
@@ -501,21 +502,16 @@ class UnionArray(Content):
         else:
             has_offsets = False
             offsetsraws = self.nplike.empty(len(self._contents), dtype=np.intp)
-            offsetslist = []
             contents = []
 
             for i in range(len(self._contents)):
                 offsets, flattened = self._contents[i]._offsets_and_flattened(
                     posaxis, depth
                 )
-                print(offsets)
-                offsetslist.append(offsets)
                 offsetsraws[i] = offsets.ptr
-
                 contents.append(flattened)
                 has_offsets = len(offsets) != 0
 
-            print(offsetsraws[0])
             if has_offsets:
                 total_length = ak._v2.index.Index64.empty(1, self.nplike)
                 self._handle_error(
@@ -526,11 +522,13 @@ class UnionArray(Content):
                         self._index.dtype.type,
                         np.int64,
                     ](
-                        total_length[0],
+                        total_length.to(self.nplike),
                         self._tags.to(self.nplike),
                         self._index.to(self.nplike),
                         len(self._tags),
-                        offsetsraws,
+                        offsetsraws.ctypes.data_as(
+                            ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
+                        ),
                     )
                 )
 
@@ -540,13 +538,13 @@ class UnionArray(Content):
 
                 self._handle_error(
                     self.nplike[
-                        "awkward_UnionArray_flatten_combin",
+                        "awkward_UnionArray_flatten_combine",
                         totags.dtype.type,
                         toindex.dtype.type,
                         tooffsets.dtype.type,
                         self._tags.dtype.type,
                         self._index.dtype.type,
-                        offsetsraws.dtype.type,
+                        np.int64,
                     ](
                         totags.to(self.nplike),
                         toindex.to(self.nplike),
@@ -554,7 +552,9 @@ class UnionArray(Content):
                         self._tags.to(self.nplike),
                         self._index.to(self.nplike),
                         len(self._tags),
-                        offsetsraws.to(self.nplike),
+                        offsetsraws.ctypes.data_as(
+                            ctypes.POINTER(ctypes.POINTER(ctypes.c_int64))
+                        ),
                     )
                 )
 

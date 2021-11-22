@@ -342,21 +342,21 @@ def test_flatten_UnionArray():
     array = ak.Array(ak.layout.UnionArray8_64(tags, index, [content1, content2]))
     array = v1_to_v2(array.layout)
 
-    # assert ak.to_list(array) == [
-    #     [1.1],
-    #     [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
-    #     [2.2, 2.2],
-    #     [[2, 2], [2, 2]],
-    #     [3.3, 3.3, 3.3],
-    #     [[1]],
-    # ]
-    # assert ak.to_list(array[1:]) == [
-    #     [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
-    #     [2.2, 2.2],
-    #     [[2, 2], [2, 2]],
-    #     [3.3, 3.3, 3.3],
-    #     [[1]],
-    # ]
+    assert ak.to_list(array) == [
+        [1.1],
+        [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
+        [2.2, 2.2],
+        [[2, 2], [2, 2]],
+        [3.3, 3.3, 3.3],
+        [[1]],
+    ]
+    assert ak.to_list(array[1:]) == [
+        [[3, 3, 3], [3, 3, 3], [3, 3, 3]],
+        [2.2, 2.2],
+        [[2, 2], [2, 2]],
+        [3.3, 3.3, 3.3],
+        [[1]],
+    ]
     assert ak.to_list(array.flatten()) == [
         1.1,
         [3, 3, 3],
@@ -371,7 +371,6 @@ def test_flatten_UnionArray():
         3.3,
         [1],
     ]
-    assert 1 == 2
     assert ak.to_list(array[1:].flatten()) == [
         [3, 3, 3],
         [3, 3, 3],
