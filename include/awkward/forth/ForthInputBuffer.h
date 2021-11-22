@@ -22,6 +22,10 @@ namespace awkward {
                      int64_t length);
 
     /// @brief HERE
+    uint8_t
+      peek_byte(int64_t after, util::ForthError& err) noexcept;
+
+    /// @brief HERE
     void*
       read(int64_t num_bytes, util::ForthError& err) noexcept;
 
@@ -32,10 +36,6 @@ namespace awkward {
     /// @brief HERE
     int64_t
       read_enum(const std::vector<std::string>& strings, int64_t start, int64_t stop) noexcept;
-
-    /// @brief HERE
-    uint8_t
-      peek_byte(int64_t after, util::ForthError& err) noexcept;
 
     /// @brief HERE
     uint64_t
