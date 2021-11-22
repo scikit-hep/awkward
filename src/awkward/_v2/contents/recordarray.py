@@ -423,7 +423,9 @@ class RecordArray(Content):
             offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
             return (
                 offsets,
-                RecordArray(contents, self._fields, self._length, None, self._parameters),
+                RecordArray(
+                    contents, self._fields, self._length, None, self._parameters
+                ),
             )
 
     def mergeable(self, other, mergebool=True):

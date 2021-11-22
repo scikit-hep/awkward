@@ -494,10 +494,10 @@ class UnionArray(Content):
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
-        
+
         if posaxis == depth:
             raise np.AxisError(self, "axis=0 not allowed for flatten")
-            
+
         else:
             has_offsets = False
             offsetsraws = self.nplike.empty(len(self._contents), dtype=np.intp)
@@ -505,7 +505,9 @@ class UnionArray(Content):
             contents = []
 
             for i in range(len(self._contents)):
-                offsets, flattened = self._contents[i]._offsets_and_flattened(posaxis, depth)
+                offsets, flattened = self._contents[i]._offsets_and_flattened(
+                    posaxis, depth
+                )
                 print(offsets)
                 offsetslist.append(offsets)
                 offsetsraws[i] = offsets.ptr
@@ -515,8 +517,7 @@ class UnionArray(Content):
 
             print(offsetsraws[0])
             if has_offsets:
-                total_length = ak._v2.index.Index64.empty(
-                    1, self.nplike)
+                total_length = ak._v2.index.Index64.empty(1, self.nplike)
                 self._handle_error(
                     self.nplike[
                         "awkward_UnionArray_flatten_length",
@@ -529,18 +530,13 @@ class UnionArray(Content):
                         self._tags.to(self.nplike),
                         self._index.to(self.nplike),
                         len(self._tags),
-                        offsetsraws
+                        offsetsraws,
                     )
                 )
 
-                totags = ak._v2.index.Index8.empty(
-                    total_length[0], self.nplike)
-                toindex = ak._v2.index.Index64.empty(
-                    total_length[0], self.nplike
-                )
-                tooffsets = ak._v2.index.Index64.empty(
-                    len(self._tags) + 1, self.nplike
-                )
+                totags = ak._v2.index.Index8.empty(total_length[0], self.nplike)
+                toindex = ak._v2.index.Index64.empty(total_length[0], self.nplike)
+                tooffsets = ak._v2.index.Index64.empty(len(self._tags) + 1, self.nplike)
 
                 self._handle_error(
                     self.nplike[
