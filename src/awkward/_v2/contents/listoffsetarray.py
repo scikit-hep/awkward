@@ -558,7 +558,7 @@ class ListOffsetArray(Content):
             inneroffsets, flattened = self._content._offsets_and_flattened(
                 posaxis, depth + 1
             )
-            offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
+            offsets = ak._v2.index.Index64.zeros(0, self.nplike, dtype=np.int64)
 
             if len(inneroffsets) == 0:
                 return (
