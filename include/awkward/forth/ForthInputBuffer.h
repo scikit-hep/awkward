@@ -35,7 +35,7 @@ namespace awkward {
 
     /// @brief HERE
     uint8_t
-      peek_byte(util::ForthError& err) noexcept;
+      peek_byte(int64_t after, util::ForthError& err) noexcept;
 
     /// @brief HERE
     uint64_t

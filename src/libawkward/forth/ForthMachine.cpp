@@ -3674,7 +3674,14 @@ namespace awkward {
             case CODE_PEEK: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
-              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->peek_byte(current_error_);
+              if (stack_cannot_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T after = stack_pop();
+              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->peek_byte(
+                  after, current_error_
+              );
               if (current_error_ != util::ForthError::none) {
                 return;
               }

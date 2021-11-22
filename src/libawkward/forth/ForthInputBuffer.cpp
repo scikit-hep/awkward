@@ -72,13 +72,13 @@ namespace awkward {
   }
 
   uint8_t
-  ForthInputBuffer::peek_byte(util::ForthError& err) noexcept {
-    if (pos_ + 1 > length_) {
+  ForthInputBuffer::peek_byte(int64_t after, util::ForthError& err) noexcept {
+    if (pos_ + after + 1 > length_) {
       err = util::ForthError::read_beyond;
       return 0;
     }
     return *reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_ + (size_t)after
     );
   }
 
