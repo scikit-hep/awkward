@@ -527,7 +527,7 @@ def test_ByteMaskedArray_flatten():
     ]
 
 
-@pytest.mark.skip(reason="FIXME:")
+@pytest.mark.skip(reason="ak.flatten() not implemented yet")
 def test_flatten0():
     array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
     array = v1_to_v2(array.layout)
@@ -578,7 +578,7 @@ def test_flatten0():
     ]
 
 
-@pytest.mark.skip(reason="FIXME:")
+@pytest.mark.skip(reason="ak.flatten() not implemented yet")
 def test_fix_flatten_of_sliced_array():
     array = ak.Array([[1, 2, 3], [], [4, 5], [6, 7, 8, 9]])
     array = v1_to_v2(array.layout)
@@ -589,7 +589,7 @@ def test_fix_flatten_of_sliced_array():
     assert array[:-2].flatten(axis=None).tolist() == [1, 2, 3]
 
 
-@pytest.mark.skip(reason="FIXME:")
+@pytest.mark.skip(reason="ak.flatten() not implemented yet")
 def test_fix_corner_case():
     array = ak.Array([[1, 2, 3], [], [4, 5]])
     array = v1_to_v2(array.layout)
@@ -612,7 +612,7 @@ def test_fix_corner_case():
     assert array.flatten(axis=-1).tolist() == [1, 2, 3, 4, 5]
 
 
-@pytest.mark.skip(reason="FIXME:")
+@pytest.mark.skip(reason="ak.flatten() not implemented yet")
 def test_flatten_allow_regulararray_size_zero():
     empty = ak.Array(
         ak.layout.RegularArray(
