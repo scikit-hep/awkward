@@ -575,6 +575,14 @@ class RecordArray(Content):
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
 
+    def fillna(self, value):
+        contents = []
+        for content in self._contents:
+            contents.append(content.fillna(value))
+        return RecordArray(
+            contents, self._fields, self._length, self._identifier, self._parameters
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -586,6 +594,14 @@ class RecordArray(Content):
             return RecordArray(
                 contents, self._fields, len(self), self._identifier, self._parameters
             )
+
+    def numbers_to_type(self, name):
+        contents = []
+        for x in self._contents:
+            contents.append(x.numbers_to_type(name))
+        return ak._v2.contents.recordarray.RecordArray(
+            contents, self._fields, self._length, self._identifier, self._parameters
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         for content in self._contents:
@@ -754,6 +770,32 @@ class RecordArray(Content):
             [ak._v2._connect.pyarrow.to_validbits(validbytes)],
             children=values,
         )
+
+    def _to_numpy(self, allow_missing):
+        if self.fields is None:
+            return self.nplike.empty(len(self), dtype=[])
+        contents = [x._to_numpy(allow_missing) for x in self._contents]
+        if any(len(x.shape) != 1 for x in contents):
+            raise ValueError("cannot convert {0} into np.ndarray".format(self))
+        out = self.nplike.empty(
+            len(contents[0]),
+            dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
+        )
+        mask = None
+        for n, x in zip(self.fields, contents):
+            if isinstance(x, self.nplike.ma.MaskedArray):
+                if mask is None:
+                    mask = self.nplike.ma.zeros(
+                        len(self), [(n, np.bool_) for n in self.fields]
+                    )
+                if x.mask is not None:
+                    mask[n] |= x.mask
+            out[n] = x
+
+        if mask is not None:
+            out = self.nplike.ma.MaskedArray(out, mask)
+
+        return out
 
     def _completely_flatten(self, nplike, options):
         if options["flatten_records"]:

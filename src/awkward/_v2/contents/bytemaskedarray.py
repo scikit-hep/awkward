@@ -510,6 +510,9 @@ class ByteMaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
+    def fillna(self, value):
+        return self.toIndexedOptionArray64().fillna(value)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -527,6 +530,15 @@ class ByteMaskedArray(Content):
                 self._parameters,
             )
             return out2.simplify_optiontype()
+
+    def numbers_to_type(self, name):
+        return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+            self._mask,
+            self._content.numbers_to_type(name),
+            self._valid_when,
+            self._identifier,
+            self._parameters,
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._mask) == 0:
@@ -832,6 +844,9 @@ class ByteMaskedArray(Content):
             length,
             options,
         )
+
+    def _to_numpy(self, allow_missing):
+        return self.toIndexedOptionArray64()._to_numpy(allow_missing)
 
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)

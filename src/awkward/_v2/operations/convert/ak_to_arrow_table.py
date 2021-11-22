@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import json
+
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -68,13 +70,14 @@ def to_arrow_table(
         array, allow_record=False, allow_other=False
     )
 
-    check = layout
-    while check.is_OptionType or check.is_IndexedType:
-        check = check.content
+    check = [layout]
+    while check[-1].is_OptionType or check[-1].is_IndexedType:
+        check.append(check[-1].content)
 
+    parameters = None
     paarrays, pafields = [], []
-    if check.is_RecordType and not check.is_tuple:
-        for name in check.fields:
+    if check[-1].is_RecordType and not check[-1].is_tuple:
+        for name in check[-1].fields:
             paarrays.append(
                 layout[name].to_arrow(
                     list_to32=list_to32,
@@ -91,6 +94,12 @@ def to_arrow_table(
                     layout.is_OptionType
                 )
             )
+        parameters = []
+        for x in check:
+            parameters.append(
+                {ak._v2._util.direct_Content_subclass(x).__name__: x._parameters}
+            )
+
     else:
         paarrays.append(
             layout.to_arrow(
@@ -108,4 +117,9 @@ def to_arrow_table(
         )
 
     batch = pyarrow.RecordBatch.from_arrays(paarrays, schema=pyarrow.schema(pafields))
-    return pyarrow.Table.from_batches([batch])
+    out = pyarrow.Table.from_batches([batch])
+
+    if parameters is None:
+        return out
+    else:
+        return out.replace_schema_metadata({"ak:parameters": json.dumps(parameters)})

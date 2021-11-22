@@ -262,6 +262,9 @@ class UnmaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
+    def fillna(self, value):
+        return self._content.fillna(value)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -272,6 +275,11 @@ class UnmaskedArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def numbers_to_type(self, name):
+        return ak._v2.contents.unmaskedarray.UnmaskedArray(
+            self._content.numbers_to_type(name), self._identifier, self._parameters
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._content) == 0:
@@ -435,6 +443,15 @@ class UnmaskedArray(Content):
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self._content._to_arrow(pyarrow, self, None, length, options)
+
+    def _to_numpy(self, allow_missing):
+        content = ak._v2.operations.convert.to_numpy(
+            self.content, allow_missing=allow_missing
+        )
+        if allow_missing:
+            return self.nplike.ma.MaskedArray(content)
+        else:
+            return content
 
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)

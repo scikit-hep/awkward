@@ -866,6 +866,15 @@ class ListArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
+    def fillna(self, value):
+        return ListArray(
+            self._starts,
+            self._stops,
+            self._content.fillna(value),
+            self._identifier,
+            self._parameters,
+        )
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -895,6 +904,15 @@ class ListArray(Content):
                 self._identifier,
                 self._parameters,
             )
+
+    def numbers_to_type(self, name):
+        return ak._v2.contents.listarray.ListArray(
+            self._starts,
+            self._stops,
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._starts) == 0:
@@ -1114,6 +1132,9 @@ class ListArray(Content):
         return self.toListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
+
+    def _to_numpy(self, allow_missing):
+        return ak._v2.operations.convert.to_numpy(self.toRegularArray(), allow_missing)
 
     def _completely_flatten(self, nplike, options):
         if (

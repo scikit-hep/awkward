@@ -639,6 +639,26 @@ class IndexedOptionArray(Content):
             "not implemented: " + type(self).__name__ + " ::mergemany"
         )
 
+    def fillna(self, value):
+        if len(value) != 1:
+            raise ValueError(
+                "fillna value length ({0}) is not equal to 1".format(len(value))
+            )
+
+        contents = [self._content, value]
+        tags = self.bytemask()
+        index = ak._v2.index.Index64.empty(len(tags), self.nplike)
+
+        self._handle_error(
+            self.nplike[
+                "awkward_UnionArray_fillna", index.dtype.type, self._index.dtype.type
+            ](index.to(self.nplike), self._index.to(self.nplike), len(tags))
+        )
+        out = ak._v2.contents.unionarray.UnionArray(
+            tags, index, contents, None, self._parameters
+        )
+        return out.simplify_uniontype(True, True)
+
     def _localindex(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -705,6 +725,14 @@ class IndexedOptionArray(Content):
             return next._is_subrange_equal(nextstarts, nextstops, len(nextstarts))
         else:
             return next._subranges_equal(nextstarts, nextstops, len(nextstarts), False)
+
+    def numbers_to_type(self, name):
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            self._index,
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if len(self._index) == 0:
@@ -1490,6 +1518,39 @@ class IndexedOptionArray(Content):
             length,
             options,
         )
+
+    def _to_numpy(self, allow_missing):
+        content = ak._v2.operations.convert.to_numpy(
+            self.project(), allow_missing=allow_missing
+        )
+
+        shape = list(content.shape)
+        shape[0] = len(self)
+        data = numpy.empty(shape, dtype=content.dtype)
+        mask0 = numpy.asarray(self.bytemask()).view(np.bool_)
+        if mask0.any():
+            if allow_missing:
+                mask = numpy.broadcast_to(
+                    mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape
+                )
+                if isinstance(content, numpy.ma.MaskedArray):
+                    mask1 = numpy.ma.getmaskarray(content)
+                    mask = mask.copy()
+                    mask[~mask0] |= mask1
+
+                data[~mask0] = content
+                return numpy.ma.MaskedArray(data, mask)
+            else:
+                raise ValueError(
+                    "ak.to_numpy cannot convert 'None' values to "
+                    "np.ma.MaskedArray unless the "
+                    "'allow_missing' parameter is set to True"
+                )
+        else:
+            if allow_missing:
+                return numpy.ma.MaskedArray(content)
+            else:
+                return content
 
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
