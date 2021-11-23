@@ -64,14 +64,12 @@ while
   source enumonly s" ]" s" ,"
   source skipws
 repeat
+source skipws
 """.format(
             "\n".join("output {0} {1}".format(n, t) for n, t in outputs.items()),
             "".join("\n" + x for x in initialization),
             "\n".join(instructions),
         )
-
-        # print(form)
-        # print(forthcode)
 
         if bits64:
             vm = ForthMachine64(forthcode)
@@ -80,6 +78,9 @@ repeat
 
         try:
             vm.run({"source": source})
+
+            if vm.input_position("source") != len(source):
+                raise ValueError
 
         except ValueError:
             position = vm.input_position("source")
@@ -382,9 +383,23 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
             names.append(name)
             subschemas.append(subschema)
 
+        if is_optional:
+            mask = "node{0}".format(len(outputs))
+            outputs[mask + "-index"] = "int64" if bits64 else "int32"
+            initialization.append("variable {0}-count".format(mask))
+            instructions.extend(
+                [
+                    r"""{0}source enumonly s" null" s" {{" if""".format(indent),
+                    r"""{0}  {1}-count @ {1}-index <- stack""".format(indent, mask),
+                    r"""{0}  1 {1}-count +!""".format(indent, mask),
+                ]
+            )
+            indent = indent + "  "
+        else:
+            instructions.append(r"""{0}source enumonly s" {{" drop""".format(indent))
+
         instructions.extend(
             [
-                r"""{0}source enumonly s" {{" drop""".format(indent),
                 r"""{0}source skipws""".format(indent),
                 r"""{0}source enum s" }}" """.format(indent),
                 r"""{0}begin""".format(indent),
@@ -425,7 +440,23 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
             ]
         )
 
-        return ak._v2.forms.RecordForm(contents, names)
+        if is_optional:
+            indent = indent[:-2]
+            instructions.extend(
+                [
+                    r"""{0}else""".format(indent),
+                    r"""{0}  -1 {1}-index <- stack""".format(indent, mask),
+                    r"""{0}then""".format(indent),
+                ]
+            )
+            return ak._v2.forms.IndexedOptionForm(
+                "i64" if bits64 else "i32",
+                ak._v2.forms.RecordForm(contents, names),
+                form_key=mask,
+            )
+
+        else:
+            return ak._v2.forms.RecordForm(contents, names)
 
     elif isinstance(tpe, list):
         raise NotImplementedError("arbitrary unions of types are not yet supported")
