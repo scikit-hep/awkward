@@ -49,8 +49,7 @@ def from_json_schema(
         )
 
         forthcode = r"""input source
-{0}
-{1}
+{0}{1}
 
 source skipws
 source enumonly s" [" drop
@@ -59,15 +58,15 @@ source skipws
 source enum s" ]"
 begin
 while
-  source skipws
 {2}
   1+
   source skipws
   source enumonly s" ]" s" ,"
+  source skipws
 repeat
 """.format(
             "\n".join("output {0} {1}".format(n, t) for n, t in outputs.items()),
-            "\n".join(initialization),
+            "".join("\n" + x for x in initialization),
             "\n".join(instructions),
         )
 
@@ -293,7 +292,6 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                     r"""{0}  source enum s" ]" """.format(indent),
                     r"""{0}  begin""".format(indent),
                     r"""{0}  while""".format(indent),
-                    r"""{0}    source skipws""".format(indent),
                 ]
             )
             content = build_forth(
@@ -309,6 +307,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                     r"""{0}    1+""".format(indent),
                     r"""{0}    source skipws""".format(indent),
                     r"""{0}    source enumonly s" ]" s" ," """.format(indent),
+                    r"""{0}    source skipws""".format(indent),
                     r"""{0}  repeat""".format(indent),
                     r"""{0}  {1}-offsets +<- stack""".format(indent, offsets),
                     r"""{0}else""".format(indent),
@@ -338,7 +337,6 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                     r"""{0}source enum s" ]" """.format(indent),
                     r"""{0}begin""".format(indent),
                     r"""{0}while""".format(indent),
-                    r"""{0}  source skipws""".format(indent),
                 ]
             )
             content = build_forth(
@@ -354,6 +352,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                     r"""{0}  1+""".format(indent),
                     r"""{0}  source skipws""".format(indent),
                     r"""{0}  source enumonly s" ]" s" ," """.format(indent),
+                    r"""{0}  source skipws""".format(indent),
                     r"""{0}repeat""".format(indent),
                     r"""{0}{1}-offsets +<- stack""".format(indent, offsets),
                 ]
@@ -379,9 +378,9 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
 
         names = []
         subschemas = []
-        for k, v in schema["properties"].items():
-            names.append(k)
-            subschemas.append(v)
+        for name, subschema in schema["properties"].items():
+            names.append(name)
+            subschemas.append(subschema)
 
         instructions.extend(
             [
@@ -390,22 +389,43 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                 r"""{0}source enum s" }}" """.format(indent),
                 r"""{0}begin""".format(indent),
                 r"""{0}while""".format(indent),
+                r"""{0}  source enumonly {1}""".format(
+                    indent,
+                    " ".join(r's" \"' + json.dumps(x)[1:-1] + r'\""' for x in names),
+                ),
                 r"""{0}  source skipws""".format(indent),
+                r"""{0}  source enumonly s" :" drop """.format(indent),
+                r"""{0}  source skipws""".format(indent),
+                r"""{0}  case""".format(indent),
             ]
         )
-        # contents = []
+
+        contents = []
+        for index, subschema in enumerate(subschemas):
+            instructions.append(r"""{0}    {1} of""".format(indent, index))
+            contents.append(
+                build_forth(
+                    subschema,
+                    outputs,
+                    initialization,
+                    instructions,
+                    indent + "      ",
+                    bits64,
+                )
+            )
+            instructions.append(r"""{0}    endof""".format(indent))
 
         instructions.extend(
             [
-                r"""{0}""".format(indent),
-                r"""{0}""".format(indent),
-                r"""{0}""".format(indent),
-                r"""{0}""".format(indent),
-                r"""{0}""".format(indent),
+                r"""{0}  endcase""".format(indent),
+                r"""{0}  source skipws""".format(indent),
+                r"""{0}  source enumonly s" }}" s" ," """.format(indent),
+                r"""{0}  source skipws""".format(indent),
+                r"""{0}repeat""".format(indent),
             ]
         )
 
-        raise NotImplementedError
+        return ak._v2.forms.RecordForm(contents, names)
 
     elif isinstance(tpe, list):
         raise NotImplementedError("arbitrary unions of types are not yet supported")

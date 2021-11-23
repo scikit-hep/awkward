@@ -169,3 +169,22 @@ def test_array_array_integer():
         },
     )
     assert result.tolist() == [[[1, 2, 3]], [[], [4, 5]], []]
+
+
+def test_record():
+    result = ak._v2.operations.convert.from_json_schema(
+        '[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]',
+        {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"x": {"type": "integer"}, "y": {"type": "number"}},
+                "required": ["x", "y"],
+            },
+        },
+    )
+    assert result.tolist() == [
+        {"x": 1, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": 3.3},
+    ]

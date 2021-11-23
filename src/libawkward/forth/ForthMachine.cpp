@@ -1789,7 +1789,13 @@ namespace awkward {
         }
         stop++;
         colstop++;
-        tokenized.push_back(source_.substr(start, stop - start - 1));
+        std::string str = source_.substr(start, stop - start - 1);
+        size_t pos = 0;
+        while ((pos = str.find("\\\"", pos)) != std::string::npos) {
+          str.replace(pos, 2, "\"");
+          pos++;
+        }
+        tokenized.push_back(str);
         linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         start = stop;
         full = false;
