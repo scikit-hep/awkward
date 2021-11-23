@@ -11,6 +11,7 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace awkward {
+  //
   class Content;
   using ContentPtr    = std::shared_ptr<Content>;
 

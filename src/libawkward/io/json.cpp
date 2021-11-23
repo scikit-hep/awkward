@@ -15,13 +15,265 @@
 
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/Content.h"
-#include "awkward/refactoring.h"
+
+#include "awkward/builder/OptionBuilder.h"
+#include "awkward/builder/BoolBuilder.h"
+#include "awkward/builder/DatetimeBuilder.h"
+#include "awkward/builder/Int64Builder.h"
+#include "awkward/builder/Float64Builder.h"
+#include "awkward/builder/StringBuilder.h"
+#include "awkward/builder/ListBuilder.h"
+#include "awkward/builder/TupleBuilder.h"
+#include "awkward/builder/RecordBuilder.h"
+#include "awkward/builder/Complex128Builder.h"
+#include "awkward/builder/UnionBuilder.h"
+#include "awkward/builder/UnknownBuilder.h"
+#include "awkward/array/EmptyArray.h"
+#include "awkward/array/IndexedArray.h"
+#include "awkward/array/ByteMaskedArray.h"
+#include "awkward/array/BitMaskedArray.h"
+#include "awkward/array/UnmaskedArray.h"
+#include "awkward/array/ListArray.h"
+#include "awkward/array/ListOffsetArray.h"
+#include "awkward/array/None.h"
+#include "awkward/array/NumpyArray.h"
+#include "awkward/array/Record.h"
+#include "awkward/array/RecordArray.h"
+#include "awkward/array/RegularArray.h"
+#include "awkward/array/UnionArray.h"
+#include "awkward/datetime_util.h"
 
 #include "awkward/io/json.h"
 
 namespace rj = rapidjson;
 
 namespace awkward {
+
+  namespace {
+
+    const ContentPtr
+    builder_snapshot(const BuilderPtr builder) {
+      ContentPtr out;
+      if (builder.get()->classname() == "BoolBuilder") {
+        const std::shared_ptr<const BoolBuilder> raw = std::dynamic_pointer_cast<const BoolBuilder>(builder);
+        std::vector<ssize_t> shape = { (ssize_t)raw.get()->buffer().length() };
+        std::vector<ssize_t> strides = { (ssize_t)sizeof(bool) };
+        out = std::make_shared<NumpyArray>(Identities::none(),
+                                               util::Parameters(),
+                                               raw.get()->buffer().ptr(),
+                                               shape,
+                                               strides,
+                                               0,
+                                               sizeof(bool),
+                                               "?",
+                                               util::dtype::boolean,
+                                               kernel::lib::cpu);
+
+      }
+      else if (builder.get()->classname() == "Complex128Builder") {
+        const std::shared_ptr<const Complex128Builder> raw = std::dynamic_pointer_cast<const Complex128Builder>(builder);
+        std::vector<ssize_t> shape = { (ssize_t)raw.get()->buffer().length() };
+        std::vector<ssize_t> strides = { (ssize_t)sizeof(std::complex<double>) };
+        out = std::make_shared<NumpyArray>(Identities::none(),
+                                               util::Parameters(),
+                                               raw.get()->buffer().ptr(),
+                                               shape,
+                                               strides,
+                                               0,
+                                               sizeof(std::complex<double>),
+                                               "Zd",
+                                               util::dtype::complex128,
+                                               kernel::lib::cpu);
+
+      }
+      else if (builder.get()->classname() == "DatetimeBuilder") {
+        const std::shared_ptr<const DatetimeBuilder> raw = std::dynamic_pointer_cast<const DatetimeBuilder>(builder);
+        std::vector<ssize_t> shape = { (ssize_t)raw.get()->buffer().length() };
+        std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
+
+        auto dtype = util::name_to_dtype(raw.get()->unit());
+        auto format = std::string(util::dtype_to_format(dtype))
+          .append(std::to_string(util::dtype_to_itemsize(dtype)))
+          .append(util::format_to_units(raw.get()->unit()));
+        out = std::make_shared<NumpyArray>(
+                 Identities::none(),
+                 util::Parameters(),
+                 raw.get()->buffer().ptr(),
+                 shape,
+                 strides,
+                 0,
+                 sizeof(int64_t),
+                 format,
+                 dtype,
+                 kernel::lib::cpu);
+
+      }
+      else if (builder.get()->classname() == "Float64Builder") {
+        const std::shared_ptr<const Float64Builder> raw = std::dynamic_pointer_cast<const Float64Builder>(builder);
+        std::vector<ssize_t> shape = { (ssize_t)raw.get()->buffer().length() };
+        std::vector<ssize_t> strides = { (ssize_t)sizeof(double) };
+        out = std::make_shared<NumpyArray>(Identities::none(),
+                                               util::Parameters(),
+                                               raw.get()->buffer().ptr(),
+                                               shape,
+                                               strides,
+                                               0,
+                                               sizeof(double),
+                                               "d",
+                                               util::dtype::float64,
+                                               kernel::lib::cpu);
+      }
+        else if (builder.get()->classname() == "Int64Builder") {
+          const std::shared_ptr<const Int64Builder> raw = std::dynamic_pointer_cast<const Int64Builder>(builder);
+          std::vector<ssize_t> shape = { (ssize_t)raw.get()->buffer().length() };
+          std::vector<ssize_t> strides = { (ssize_t)sizeof(int64_t) };
+          return std::make_shared<NumpyArray>(
+                   Identities::none(),
+                   util::Parameters(),
+                   raw.get()->buffer().ptr(),
+                   shape,
+                   strides,
+                   0,
+                   sizeof(int64_t),
+                   util::dtype_to_format(util::dtype::int64),
+                   util::dtype::int64,
+                   kernel::lib::cpu);
+        }
+        else if (builder.get()->classname() == "ListBuilder") {
+          const std::shared_ptr<const ListBuilder> raw = std::dynamic_pointer_cast<const ListBuilder>(builder);
+          Index64 offsets(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), kernel::lib::cpu);
+          return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                         util::Parameters(),
+                                                         offsets,
+                                                         builder_snapshot(raw.get()->builder()));
+        }
+        else if (builder.get()->classname() == "OptionBuilder") {
+          const std::shared_ptr<const OptionBuilder> raw = std::dynamic_pointer_cast<const OptionBuilder>(builder);
+          Index64 index(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), kernel::lib::cpu);
+          return std::make_shared<IndexedOptionArray64>(Identities::none(),
+                                          util::Parameters(),
+                                          index,
+                                          builder_snapshot(raw.get()->builder())).get()->simplify_optiontype();
+        }
+        else if (builder.get()->classname() == "RecordBuilder") {
+          const std::shared_ptr<const RecordBuilder> raw = std::dynamic_pointer_cast<const RecordBuilder>(builder);
+          if (raw.get()->length() == -1) {
+            return std::make_shared<EmptyArray>(Identities::none(),
+                                                    util::Parameters());
+          }
+          util::Parameters parameters;
+          if (raw.get()->nameptr() != nullptr) {
+            parameters["__record__"] = util::quote(raw.get()->name());
+          }
+          ContentPtrVec contents;
+          util::RecordLookupPtr recordlookup =
+            std::make_shared<util::RecordLookup>();
+          for (size_t i = 0;  i < raw.get()->builders().size();  i++) {
+            contents.push_back(builder_snapshot(raw.get()->builders()[i]));
+            recordlookup.get()->push_back(raw.get()->keys()[i]);
+          }
+          std::vector<ArrayCachePtr> caches;  // nothing is virtual here
+          return std::make_shared<RecordArray>(Identities::none(),
+                                               parameters,
+                                               contents,
+                                               recordlookup,
+                                               raw.get()->length(),
+                                               caches);
+        }
+        else if (builder.get()->classname() == "StringBuilder") {
+          const std::shared_ptr<const StringBuilder> raw = std::dynamic_pointer_cast<const StringBuilder>(builder);
+          util::Parameters char_parameters;
+          util::Parameters string_parameters;
+
+          if (raw.get()->encoding() == nullptr) {
+            char_parameters["__array__"] = std::string("\"byte\"");
+            string_parameters["__array__"] = std::string("\"bytestring\"");
+          }
+          else if (std::string(raw.get()->encoding()) == std::string("utf-8")) {
+            char_parameters["__array__"] = std::string("\"char\"");
+            string_parameters["__array__"] = std::string("\"string\"");
+          }
+          else {
+            throw std::invalid_argument(
+              std::string("unsupported encoding: ") + util::quote(raw.get()->encoding()));
+          }
+
+          Index64 offsets(raw.get()->buffer().ptr(), 0, raw.get()->buffer().length(), kernel::lib::cpu);
+          std::vector<ssize_t> shape = { (ssize_t)raw.get()->content().length() };
+          std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
+          ContentPtr content;
+          content = std::make_shared<NumpyArray>(Identities::none(),
+                                                 char_parameters,
+                                                 raw.get()->content().ptr(),
+                                                 shape,
+                                                 strides,
+                                                 0,
+                                                 sizeof(uint8_t),
+                                                 "B",
+                                                 util::dtype::uint8,
+                                                 kernel::lib::cpu);
+          return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                     string_parameters,
+                                                     offsets,
+                                                     content);
+        }
+        else if (builder.get()->classname() == "TupleBuilder") {
+          const std::shared_ptr<const TupleBuilder> raw = std::dynamic_pointer_cast<const TupleBuilder>(builder);
+          if (raw.get()->length() == -1) {
+            return std::make_shared<EmptyArray>(Identities::none(),
+                                                    util::Parameters());
+          }
+          ContentPtrVec contents;
+          for (size_t i = 0;  i < raw.get()->contents().size();  i++) {
+            contents.push_back(builder_snapshot(raw.get()->contents()[i]));
+          }
+          std::vector<ArrayCachePtr> caches;  // nothing is virtual here
+          return std::make_shared<RecordArray>(Identities::none(),
+                                                   util::Parameters(),
+                                                   contents,
+                                                   util::RecordLookupPtr(nullptr),
+                                                   raw.get()->length(),
+                                                   caches);
+        }
+        else if (builder.get()->classname() == "UnionBuilder") {
+          const std::shared_ptr<const UnionBuilder> raw = std::dynamic_pointer_cast<const UnionBuilder>(builder);
+          Index8 tags(raw.get()->tags().ptr(), 0, raw.get()->tags().length(), kernel::lib::cpu);
+          Index64 index(raw.get()->index().ptr(), 0, raw.get()->index().length(), kernel::lib::cpu);
+          ContentPtrVec contents;
+          for (auto content : raw.get()->contents()) {
+            contents.push_back(builder_snapshot(content));
+          }
+          return std::make_shared<UnionArray8_64>(Identities::none(),
+                                    util::Parameters(),
+                                    tags,
+                                    index,
+                                    contents).get()->simplify_uniontype(true, false);
+
+        }
+        else if (builder.get()->classname() == "UnknownBuilder") {
+          const std::shared_ptr<const UnknownBuilder> raw = std::dynamic_pointer_cast<const UnknownBuilder>(builder);
+          if (raw.get()->nullcount() == 0) {
+            return std::make_shared<EmptyArray>(Identities::none(),
+                                                    util::Parameters());
+          }
+          else {
+            // This is the only snapshot that is O(N), rather than O(1),
+            // but it is a corner case (array of only Nones).
+            Index64 index(raw.get()->nullcount());
+            int64_t* rawptr = index.ptr().get();
+            for (int64_t i = 0;  i < raw.get()->nullcount();  i++) {
+              rawptr[i] = -1;
+            }
+            return std::make_shared<IndexedOptionArray64>(
+              Identities::none(),
+              util::Parameters(),
+              index,
+              std::make_shared<EmptyArray>(Identities::none(), util::Parameters()));
+        }
+      }
+      return out;
+    }
+  }
   ////////// writing to JSON
   ToJson::~ToJson() = default;
 
@@ -760,7 +1012,7 @@ namespace awkward {
 
     // FIXME: refactor
     const ContentPtr snapshot() const {
-      return ::builder_snapshot(builder_.builder());
+      return builder_snapshot(builder_.builder());
     }
 
   private:
@@ -830,6 +1082,7 @@ namespace awkward {
     return do_parse(handler, reader, stream);
   }
 
+  //
   const ContentPtr
   FromJsonFile(FILE* source,
                const ArrayBuilderOptions& options,
