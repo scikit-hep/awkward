@@ -2,18 +2,15 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/io.cpp", line)
 
+#include <pybind11/numpy.h>
 #include <string>
 
-#include "awkward/Content.h"
-#include "awkward/Index.h"
-#include "awkward/array/NumpyArray.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/io/json.h"
 #include "awkward/io/uproot.h"
 #include "awkward/python/content.h"
 
 #include "awkward/python/io.h"
-#include <pybind11/numpy.h>
 
 namespace ak = awkward;
 namespace {
@@ -40,15 +37,6 @@ namespace {
 
   private:
     py::dict container_;
-  };
-
-  class EmptyBuffersContainer: public ak::BuffersContainer {
-  public:
-    void
-      copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override { }
-
-    void
-      full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) override { }
   };
 
   /// @brief Turns the accumulated data into a Content array.

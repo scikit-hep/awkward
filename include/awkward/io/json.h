@@ -12,10 +12,6 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace awkward {
-  //
-  // class Content;
-  // using ContentPtr    = std::shared_ptr<Content>;
-
   /// @class ToJson
   ///
   /// Abstract base class for producing JSON data.
@@ -328,7 +324,7 @@ namespace awkward {
     const char* complex_imag_string_;
   };
 
-  /// @brief Convert a JSON-encoded string into a Content array using an
+  /// @brief Parses a JSON-encoded string using an
   /// ArrayBuilder.
   ///
   /// @param source Null-terminated string containing any valid JSON data.
@@ -347,7 +343,7 @@ namespace awkward {
                    const char* infinity_string = nullptr,
                    const char* minus_infinity_string = nullptr);
 
-  /// @brief Convert a JSON-encoded file into a Content array using an
+  /// @brief Parses a JSON-encoded file using an
   /// ArrayBuilder.
   ///
   /// @param source C file handle to a file containing any valid JSON data.
