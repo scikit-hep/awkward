@@ -59,8 +59,8 @@ def from_json_schema(
     Supported JSONSchema elements:
 
       * The root of the schema must be `"type": "array"` or `"type": "object"`.
-      * Every level must have a `"type"`, which can only name one type or
-        one type and `"null"`.
+      * Every level must have a `"type"`, which can only name one type (as a string
+        or length-1 list) or one type and `"null"` (as a length-2 list).
       * `"type": "boolean"` \u2192 1-byte boolean values.
       * `"type": "integer"` \u2192 8-byte integer values (regardless of `bits64`).
         Numbers may include a fractional part, as per the JSONSchema specification,
@@ -69,7 +69,7 @@ def from_json_schema(
       * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
         supported. Remember that the `source` data are ASCII; Unicode is derived from
         "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
-        as categorical values (#ak.layout.IndexedArray).
+        as categorical values (#ak.layout.IndexedArray or #ak.layout.IndexedOptionArray).
       * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
         `"minItems"` and `"maxItems"` are specified and equal to each other, the
         list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
@@ -108,9 +108,10 @@ def from_json_schema(
         outputs = {}
         initialization = []
         instructions = []
+        extras = {}
 
         form = build_forth(
-            schema["items"], outputs, initialization, instructions, "  ", bits64
+            schema["items"], outputs, initialization, instructions, extras, "  ", bits64
         )
 
         forthcode = r"""input source
@@ -186,6 +187,8 @@ source skipws
         contents = {}
         for name in outputs:
             contents[name] = numpy.asarray(vm[name])
+        for name, data in extras.items():
+            contents[name] = data
 
         return ak._v2.operations.convert.from_buffers(form, length, contents)
 
@@ -196,7 +199,7 @@ source skipws
         raise TypeError("only 'array' and 'object' types supported at schema top-level")
 
 
-def build_forth(schema, outputs, initialization, instructions, indent, bits64):
+def build_forth(schema, outputs, initialization, instructions, extras, indent, bits64):
     if not isinstance(schema, dict):
         raise TypeError(
             "unrecognized JSONSchema: expected dict, got {0}".format(repr(schema))
@@ -296,28 +299,129 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
 
     elif tpe == "string":
         # https://json-schema.org/understanding-json-schema/reference/string.html#string
-        if is_optional:
-            mask = "node{0}".format(len(outputs))
-            outputs[mask + "-mask"] = "int8"
-            offsets = "node{0}".format(len(outputs))
-            outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
-            node = "node{0}".format(len(outputs))
-            outputs[node + "-data"] = "uint8"
-            initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
-            instructions.extend(
-                [
-                    r"""{0}source enum s" null" dup if""".format(indent),
-                    r"""{0}  source quotedstr-> {1}-data""".format(indent, node),
-                    r"""{0}  {1}-offsets +<- stack""".format(indent, offsets),
-                    r"""{0}else""".format(indent),
-                    r"""{0}  0 {1}-offsets +<- stack""".format(indent, offsets),
-                    r"""{0}then""".format(indent),
-                    r"""{0}{1}-mask <- stack""".format(indent, mask),
-                ]
+
+        if "enum" in schema:
+            strings = schema["enum"]
+            assert isinstance(strings, list)
+            assert len(strings) >= 1
+            assert all(ak._v2._util.isstr(x) for x in strings)
+            bytestrings = [x.encode("utf-8", errors="surrogateescape") for x in strings]
+
+            index = "node{0}".format(len(outputs))
+            outputs[index + "-index"] = "int64" if bits64 else "int32"
+            offsets = "extra{0}".format(len(extras))
+            extras[offsets + "-offsets"] = numpy.empty(
+                len(strings) + 1, np.int64 if bits64 else np.int32
             )
-            return ak._v2.forms.ByteMaskedForm(
-                "i8",
-                ak._v2.forms.ListOffsetForm(
+            extras[offsets + "-offsets"][0] = 0
+            extras[offsets + "-offsets"][1:] = numpy.cumsum(
+                [len(x) for x in bytestrings]
+            )
+            node = "extra{0}".format(len(extras))
+            extras[node + "-data"] = b"".join(bytestrings)
+
+            if is_optional:
+                instructions.extend(
+                    [
+                        r"""{0}source enumonly {1}""".format(
+                            indent,
+                            r's" null"'
+                            + " ".join(
+                                r's" \"' + json.dumps(x)[1:-1] + r'\""' for x in strings
+                            ),
+                        ),
+                        r"""{0}1- {1}-index <- stack""".format(indent, index),
+                    ]
+                )
+                return ak._v2.forms.IndexedOptionForm(
+                    "i64" if bits64 else "i32",
+                    ak._v2.forms.ListOffsetForm(
+                        "i64" if bits64 else "i32",
+                        ak._v2.forms.NumpyForm(
+                            "uint8", parameters={"__array__": "char"}, form_key=node
+                        ),
+                        parameters={"__array__": "string"},
+                        form_key=offsets,
+                    ),
+                    parameters={"__array__": "categorical"},
+                    form_key=index,
+                )
+
+            else:
+                instructions.extend(
+                    [
+                        r"""{0}source enumonly {1}""".format(
+                            indent,
+                            " ".join(
+                                r's" \"' + json.dumps(x)[1:-1] + r'\""' for x in strings
+                            ),
+                        ),
+                        r"""{0}{1}-index <- stack""".format(indent, index),
+                    ]
+                )
+                return ak._v2.forms.IndexedForm(
+                    "i64" if bits64 else "i32",
+                    ak._v2.forms.ListOffsetForm(
+                        "i64" if bits64 else "i32",
+                        ak._v2.forms.NumpyForm(
+                            "uint8", parameters={"__array__": "char"}, form_key=node
+                        ),
+                        parameters={"__array__": "string"},
+                        form_key=offsets,
+                    ),
+                    parameters={"__array__": "categorical"},
+                    form_key=index,
+                )
+
+        else:
+            if is_optional:
+                mask = "node{0}".format(len(outputs))
+                outputs[mask + "-mask"] = "int8"
+                offsets = "node{0}".format(len(outputs))
+                outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
+                node = "node{0}".format(len(outputs))
+                outputs[node + "-data"] = "uint8"
+                initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
+                instructions.extend(
+                    [
+                        r"""{0}source enum s" null" dup if""".format(indent),
+                        r"""{0}  source quotedstr-> {1}-data""".format(indent, node),
+                        r"""{0}  {1}-offsets +<- stack""".format(indent, offsets),
+                        r"""{0}else""".format(indent),
+                        r"""{0}  0 {1}-offsets +<- stack""".format(indent, offsets),
+                        r"""{0}then""".format(indent),
+                        r"""{0}{1}-mask <- stack""".format(indent, mask),
+                    ]
+                )
+                return ak._v2.forms.ByteMaskedForm(
+                    "i8",
+                    ak._v2.forms.ListOffsetForm(
+                        "i64" if bits64 else "i32",
+                        ak._v2.forms.NumpyForm(
+                            outputs[node + "-data"],
+                            parameters={"__array__": "char"},
+                            form_key=node,
+                        ),
+                        parameters={"__array__": "string"},
+                        form_key=offsets,
+                    ),
+                    valid_when=True,
+                    form_key=mask,
+                )
+
+            else:
+                offsets = "node{0}".format(len(outputs))
+                outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
+                node = "node{0}".format(len(outputs))
+                outputs[node + "-data"] = "uint8"
+                initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
+                instructions.extend(
+                    [
+                        r"""{0}source quotedstr-> {1}-data""".format(indent, node),
+                        r"""{0}{1}-offsets +<- stack""".format(indent, offsets),
+                    ]
+                )
+                return ak._v2.forms.ListOffsetForm(
                     "i64" if bits64 else "i32",
                     ak._v2.forms.NumpyForm(
                         outputs[node + "-data"],
@@ -326,33 +430,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                     ),
                     parameters={"__array__": "string"},
                     form_key=offsets,
-                ),
-                valid_when=True,
-                form_key=mask,
-            )
-
-        else:
-            offsets = "node{0}".format(len(outputs))
-            outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
-            node = "node{0}".format(len(outputs))
-            outputs[node + "-data"] = "uint8"
-            initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
-            instructions.extend(
-                [
-                    r"""{0}source quotedstr-> {1}-data""".format(indent, node),
-                    r"""{0}{1}-offsets +<- stack""".format(indent, offsets),
-                ]
-            )
-            return ak._v2.forms.ListOffsetForm(
-                "i64" if bits64 else "i32",
-                ak._v2.forms.NumpyForm(
-                    outputs[node + "-data"],
-                    parameters={"__array__": "char"},
-                    form_key=node,
-                ),
-                parameters={"__array__": "string"},
-                form_key=offsets,
-            )
+                )
 
     elif tpe == "array":
         # https://json-schema.org/understanding-json-schema/reference/array.html
@@ -389,6 +467,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                 outputs,
                 initialization,
                 instructions,
+                extras,
                 indent + "  ",
                 bits64,
             )
@@ -441,6 +520,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                     outputs,
                     initialization,
                     instructions,
+                    extras,
                     indent + "    ",
                     bits64,
                 )
@@ -486,6 +566,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                     outputs,
                     initialization,
                     instructions,
+                    extras,
                     indent + "  ",
                     bits64,
                 )
@@ -565,6 +646,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
                     outputs,
                     initialization,
                     instructions,
+                    extras,
                     indent + "      ",
                     bits64,
                 )

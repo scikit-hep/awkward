@@ -97,6 +97,29 @@ def test_option_string():
     assert result.tolist() == []
 
 
+def test_enum_string():
+    result = ak._v2.operations.convert.from_json_schema(
+        r'["three", "two", "one", "one", "two", "three"]',
+        {"type": "array", "items": {"type": "string", "enum": ["one", "two", "three"]}},
+    )
+    assert result.tolist() == ["three", "two", "one", "one", "two", "three"]
+    assert isinstance(result.layout, ak._v2.contents.IndexedArray)
+    assert result.layout.index.data.tolist() == [2, 1, 0, 0, 1, 2]
+
+
+def test_option_enum_string():
+    result = ak._v2.operations.convert.from_json_schema(
+        r'["three", "two", null, "one", "one", "two", "three"]',
+        {
+            "type": "array",
+            "items": {"type": ["null", "string"], "enum": ["one", "two", "three"]},
+        },
+    )
+    assert result.tolist() == ["three", "two", None, "one", "one", "two", "three"]
+    assert isinstance(result.layout, ak._v2.contents.IndexedOptionArray)
+    assert result.layout.index.data.tolist() == [2, 1, -1, 0, 0, 1, 2]
+
+
 def test_array_integer():
     result = ak._v2.operations.convert.from_json_schema(
         " [ [ 1 ,2, 3], [], [4, 5]]",
