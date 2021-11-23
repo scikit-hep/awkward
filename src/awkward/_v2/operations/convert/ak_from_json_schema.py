@@ -18,9 +18,55 @@ def from_json_schema(
     highlevel=True,
     behavior=None,
     bits64=True,
-    initial=1024,
-    resize=1.5,
+    stack_size=1024,
+    recursion_depth=1024,
+    string_buffer_size=1024,
+    output_initial_size=1024,
+    output_resize_factor=1.5,
 ):
+    """
+    Args:
+        source (str or bytes): JSON-formatted string to convert into an array.
+        schema (str, bytes, or nested dicts): JSONSchema to assume in the parsing.
+            The JSON data are *not* validated against the schema; the schema is
+            only used to accelerate parsing.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        bits64 (bool): If True, use a 64-bit Forth machine and generate 64-bit
+            offsets and indexes for structure; otherwise, use 32-bits. Regardless
+            of this setting, numerical values from the JSON text are represented
+            as int64 integers and float64 floating-point numbers.
+        stack_size (int): Fixed depth of the Forth data stack. If you're getting
+            "stack overflow" errors, increase this parameter.
+        recursion_depth (int): Fixed depth of the Forth instruction stack. If you're
+            getting "recursion depth exceeded" errors, increase this parameter.
+        string_buffer_size (int): Fixed size of readable strings in bytes. If your JSON
+            contains large string values and it is declared invalid at the position
+            of such a string, increase this value.
+        output_initial_size (int): Initial size (in bytes) of output buffers, which
+            grow as needed to accommodate the size of the dataset.
+        output_resize_factor (float): Resize multiplier for output buffers, which
+            determines how quickly they grow; should be strictly greater than 1.
+
+    Converts a JSON string into an Awkward Array, using a JSONSchema to accelerate
+    the parsing of the source and building of the output. The JSON data are not
+    *validated* against the schema; the schema is *assumed* to be correct.
+
+    Internally, this function uses the schema to generate a specialized Forth machine
+    that parses only the JSON type that the schema specifies, avoiding unnecessary
+    type checks. It also avoids the type-discovery of #ak.ArrayBuilder for further
+    speedup.
+
+    TODO:
+
+      * Use JSONSchema enums to produce categorical data (IndexedArrays).
+      * Use array length limits to produce regular list types (RegularArrays).
+      * Use `type: [X, Y, Z]` to produce heterogeneous data (UnionArrays).
+
+    See also #ak.from_json and #ak.to_json.
+    """
     if isinstance(source, bytes):
         pass
     elif ak._v2._util.isstr(source):
@@ -28,17 +74,17 @@ def from_json_schema(
     else:
         raise NotImplementedError("for now, 'source' must be bytes or str")
 
-    if ak._v2._util.isstr(schema):
+    if isinstance(schema, bytes) or ak._v2._util.isstr(schema):
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
         raise TypeError(
-            "malformed jsonschema: expected dict, got {0}".format(repr(schema))
+            "malformed JSONSchema: expected dict, got {0}".format(repr(schema))
         )
 
     if schema.get("type") == "array":
         if "items" not in schema:
-            raise TypeError("jsonschema type is not concrete: array without items")
+            raise TypeError("JSONSchema type is not concrete: array without items")
 
         outputs = {}
         initialization = []
@@ -71,10 +117,17 @@ source skipws
             "\n".join(instructions),
         )
 
+        options = {
+            "stack_size": stack_size,
+            "recursion_depth": recursion_depth,
+            "string_buffer_size": string_buffer_size,
+            "output_initial_size": output_initial_size,
+            "output_resize_factor": output_resize_factor,
+        }
         if bits64:
-            vm = ForthMachine64(forthcode)
+            vm = ForthMachine64(forthcode, **options)
         else:
-            vm = ForthMachine32(forthcode)
+            vm = ForthMachine32(forthcode, **options)
 
         try:
             vm.run({"source": source})
@@ -82,24 +135,33 @@ source skipws
             if vm.input_position("source") != len(source):
                 raise ValueError
 
-        except ValueError:
-            position = vm.input_position("source")
-            before = source[max(0, position - 30) : position].decode(
-                "ascii", errors="surrogateescape"
-            )
-            before = before.replace(os.linesep, repr(os.linesep).strip("'\""))
-            if position - 30 > 0:
-                before = "..." + before
-            after = source[position : position + 30].decode(
-                "ascii", errors="surrogateescape"
-            )
-            if position + 30 < len(source):
-                after = after + "..."
-            raise ValueError(
-                "JSON is invalid or does not fit schema at position {0}:\n\n    {1}\n    {2}".format(
-                    position, before + after, "-" * len(before) + "^"
+        except ValueError as err:
+            if (
+                "read beyond" in str(err)
+                or "varint too big" in str(err)
+                or "text number missing" in str(err)
+                or "quoted string missing" in str(err)
+                or "enumeration missing" in str(err)
+            ):
+                position = vm.input_position("source")
+                before = source[max(0, position - 30) : position].decode(
+                    "ascii", errors="surrogateescape"
                 )
-            )
+                before = before.replace(os.linesep, repr(os.linesep).strip("'\""))
+                if position - 30 > 0:
+                    before = "..." + before
+                after = source[position : position + 30].decode(
+                    "ascii", errors="surrogateescape"
+                )
+                if position + 30 < len(source):
+                    after = after + "..."
+                raise ValueError(
+                    "JSON is invalid or does not fit schema at position {0}:\n\n    {1}\n    {2}".format(
+                        position, before + after, "-" * len(before) + "^"
+                    )
+                )
+            else:
+                raise err
 
         (length,) = vm.stack
         contents = {}
@@ -118,12 +180,12 @@ source skipws
 def build_forth(schema, outputs, initialization, instructions, indent, bits64):
     if not isinstance(schema, dict):
         raise TypeError(
-            "unrecognized jsonschema: expected dict, got {0}".format(repr(schema))
+            "unrecognized JSONSchema: expected dict, got {0}".format(repr(schema))
         )
 
     if "type" not in schema is None:
         raise TypeError(
-            "unrecognized jsonschema: no 'type' in {0}".format(repr(schema))
+            "unrecognized JSONSchema: no 'type' in {0}".format(repr(schema))
         )
 
     tpe = schema["type"]
@@ -277,7 +339,7 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
         # https://json-schema.org/understanding-json-schema/reference/array.html
 
         if "items" not in schema:
-            raise TypeError("jsonschema type is not concrete: array without 'items'")
+            raise TypeError("JSONSchema type is not concrete: array without 'items'")
 
         if is_optional:
             mask = "node{0}".format(len(outputs))
@@ -367,14 +429,14 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
 
         if "properties" not in schema:
             raise TypeError(
-                "jsonschema type is not concrete: object without 'properties'"
+                "JSONSchema type is not concrete: object without 'properties'"
             )
 
         if "required" not in schema or set(schema["required"]) != set(
             schema["properties"]
         ):
             raise TypeError(
-                "jsonschema type is not concrete: object's 'required' must include all 'properties'"
+                "JSONSchema type is not concrete: object's 'required' must include all 'properties'"
             )
 
         names = []
@@ -462,4 +524,4 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
         raise NotImplementedError("arbitrary unions of types are not yet supported")
 
     else:
-        raise TypeError("unrecognized jsonschema: {0}".format(repr(tpe)))
+        raise TypeError("unrecognized JSONSchema: {0}".format(repr(tpe)))

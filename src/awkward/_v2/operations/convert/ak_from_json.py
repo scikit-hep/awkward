@@ -57,7 +57,7 @@ def from_json(  # note: move ability to read from file into from_json_file
 #     and deeply nested JSON can be converted, but the output will never have
 #     regular-typed array lengths.
 
-#     See also #ak.to_json.
+#     See also #ak.from_json_schema and #ak.to_json.
 #     """
 
 #     if complex_record_fields is None:
