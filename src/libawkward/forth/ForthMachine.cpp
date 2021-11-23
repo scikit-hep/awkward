@@ -55,63 +55,64 @@ namespace awkward {
   #define CODE_INC 13
   #define CODE_GET 14
   #define CODE_ENUM 15
-  #define CODE_PEEK 16
-  #define CODE_LEN_INPUT 17
-  #define CODE_POS 18
-  #define CODE_END 19
-  #define CODE_SEEK 20
-  #define CODE_SKIP 21
-  #define CODE_SKIPWS 22
-  #define CODE_WRITE 23
-  #define CODE_WRITE_ADD 24
-  #define CODE_WRITE_DUP 25
-  #define CODE_LEN_OUTPUT 26
-  #define CODE_REWIND 27
+  #define CODE_ENUMONLY 16
+  #define CODE_PEEK 17
+  #define CODE_LEN_INPUT 18
+  #define CODE_POS 19
+  #define CODE_END 20
+  #define CODE_SEEK 21
+  #define CODE_SKIP 22
+  #define CODE_SKIPWS 23
+  #define CODE_WRITE 24
+  #define CODE_WRITE_ADD 25
+  #define CODE_WRITE_DUP 26
+  #define CODE_LEN_OUTPUT 27
+  #define CODE_REWIND 28
   // generic builtin instructions
-  #define CODE_STRING 28
-  #define CODE_PRINT_STRING 29
-  #define CODE_PRINT 30
-  #define CODE_PRINT_CR 31
-  #define CODE_PRINT_STACK 32
-  #define CODE_I 33
-  #define CODE_J 34
-  #define CODE_K 35
-  #define CODE_DUP 36
-  #define CODE_DROP 37
-  #define CODE_SWAP 38
-  #define CODE_OVER 39
-  #define CODE_ROT 40
-  #define CODE_NIP 41
-  #define CODE_TUCK 42
-  #define CODE_ADD 43
-  #define CODE_SUB 44
-  #define CODE_MUL 45
-  #define CODE_DIV 46
-  #define CODE_MOD 47
-  #define CODE_DIVMOD 48
-  #define CODE_NEGATE 49
-  #define CODE_ADD1 50
-  #define CODE_SUB1 51
-  #define CODE_ABS 52
-  #define CODE_MIN 53
-  #define CODE_MAX 54
-  #define CODE_EQ 55
-  #define CODE_NE 56
-  #define CODE_GT 57
-  #define CODE_GE 58
-  #define CODE_LT 59
-  #define CODE_LE 60
-  #define CODE_EQ0 61
-  #define CODE_INVERT 62
-  #define CODE_AND 63
-  #define CODE_OR 64
-  #define CODE_XOR 65
-  #define CODE_LSHIFT 66
-  #define CODE_RSHIFT 67
-  #define CODE_FALSE 68
-  #define CODE_TRUE 69
+  #define CODE_STRING 29
+  #define CODE_PRINT_STRING 30
+  #define CODE_PRINT 31
+  #define CODE_PRINT_CR 32
+  #define CODE_PRINT_STACK 33
+  #define CODE_I 34
+  #define CODE_J 35
+  #define CODE_K 36
+  #define CODE_DUP 37
+  #define CODE_DROP 38
+  #define CODE_SWAP 39
+  #define CODE_OVER 40
+  #define CODE_ROT 41
+  #define CODE_NIP 42
+  #define CODE_TUCK 43
+  #define CODE_ADD 44
+  #define CODE_SUB 45
+  #define CODE_MUL 46
+  #define CODE_DIV 47
+  #define CODE_MOD 48
+  #define CODE_DIVMOD 49
+  #define CODE_NEGATE 50
+  #define CODE_ADD1 51
+  #define CODE_SUB1 52
+  #define CODE_ABS 53
+  #define CODE_MIN 54
+  #define CODE_MAX 55
+  #define CODE_EQ 56
+  #define CODE_NE 57
+  #define CODE_GT 58
+  #define CODE_GE 59
+  #define CODE_LT 60
+  #define CODE_LE 61
+  #define CODE_EQ0 62
+  #define CODE_INVERT 63
+  #define CODE_AND 64
+  #define CODE_OR 65
+  #define CODE_XOR 66
+  #define CODE_LSHIFT 67
+  #define CODE_RSHIFT 68
+  #define CODE_FALSE 69
+  #define CODE_TRUE 70
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 70
+  #define BOUND_DICTIONARY 71
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -132,7 +133,7 @@ namespace awkward {
     // variable access
     "!", "+!", "@",
     // input actions
-    "enum", "peek", "len", "pos", "end", "seek", "skip", "skipws",
+    "enum", "enumonly", "peek", "len", "pos", "end", "seek", "skip", "skipws",
     // output actions
     "<-", "+<-", "stack", "rewind",
     // print (for debugging)
@@ -590,6 +591,17 @@ namespace awkward {
           int64_t stop = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 3];
           std::stringstream out;
           out << input_names_[(IndexTypeOf<int64_t>)in_num] << " enum";
+          for (int64_t i = start;  i < stop;  i++) {
+            out << " s\" " << strings_[i] << "\"";
+          }
+          return out.str();
+        }
+        case CODE_ENUMONLY: {
+          int64_t in_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
+          int64_t start = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2];
+          int64_t stop = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 3];
+          std::stringstream out;
+          out << input_names_[(IndexTypeOf<int64_t>)in_num] << " enumonly";
           for (int64_t i = start;  i < stop;  i++) {
             out << " s\" " << strings_[i] << "\"";
           }
@@ -1408,6 +1420,11 @@ namespace awkward {
             "'quoted string missing' in AwkwardForth runtime: expected a quoted string in "
             "input text, didn't find one");
         }
+        case util::ForthError::enumeration_missing: {
+          throw std::invalid_argument(
+            "'enumeration missing' in AwkwardForth runtime: expected one of several "
+            "enumerated values in the input text, didn't find one");
+        }
         default:
           break;
       }
@@ -1629,6 +1646,7 @@ namespace awkward {
     else {
       switch (bytecode) {
         case CODE_ENUM:
+        case CODE_ENUMONLY:
           return 4;
         case CODE_IF_ELSE:
         case CODE_CASE_REGULAR:
@@ -1753,24 +1771,9 @@ namespace awkward {
         }
         int64_t nextline = line;
         current = source_[stop];
-        while (current == ' '  ||  current == '\r'  ||  current == '\t'  ||
-               current == '\v'  ||  current == '\f'  ||  current == '\n') {
-          if (current == '\n') {
-            nextline++;
-            colstart = 0;
-            colstop = 0;
-          }
-          stop++;
-          colstop++;
-          if (stop == source_.size()) {
-            throw std::invalid_argument(
-              std::string("unclosed string after .\" or s\" word") + FILENAME(__LINE__));
-          }
-          current = source_[stop];
-        }
         start = stop;
         colstart = colstop;
-        while (current != '\"'  &&  source_[stop - 1] != '\\') {
+        while (current != '\"'  ||  source_[stop - 1] == '\\') {
           if (current == '\n') {
             nextline++;
             colstart = 0;
@@ -1786,7 +1789,13 @@ namespace awkward {
         }
         stop++;
         colstop++;
-        tokenized.push_back(source_.substr(start, stop - start - 1));
+        std::string str = source_.substr(start, stop - start - 1);
+        size_t pos = 0;
+        while ((pos = str.find("\\\"", pos)) != std::string::npos) {
+          str.replace(pos, 2, "\"");
+          pos++;
+        }
+        tokenized.push_back(str);
         linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         start = stop;
         full = false;
@@ -2017,7 +2026,7 @@ namespace awkward {
         }
 
         input_names_.push_back(name);
-        input_must_be_writable_.push_back(true);
+        input_must_be_writable_.push_back(false);
 
         pos += 2;
       }
@@ -2568,17 +2577,31 @@ namespace awkward {
           }
         }
 
-        if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "enum") {
-          bytecodes.push_back(CODE_ENUM);
+        if (pos + 1 < stop  &&  (tokenized[(IndexTypeOf<std::string>)pos + 1] == "enum"  ||
+                                 tokenized[(IndexTypeOf<std::string>)pos + 1] == "enumonly")) {
+          if (tokenized[(IndexTypeOf<std::string>)pos + 1] == "enum") {
+            bytecodes.push_back(CODE_ENUM);
+          }
+          else {
+            bytecodes.push_back(CODE_ENUMONLY);
+          }
           bytecodes.push_back((int32_t)input_index);
           bytecodes.push_back((int32_t)strings_.size());
           size_t start_size = strings_.size();
 
           if (pos + 2 >= stop) {
-            throw std::invalid_argument(
-              err_linecol(linecol, pos, pos + 2, "need at least one string (s\" word) after \"enum\"")
-              + FILENAME(__LINE__)
-            );
+            if (tokenized[(IndexTypeOf<std::string>)pos + 1] == "enum") {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos, pos + 2, "need at least one string (s\" word) after \"enum\"")
+                + FILENAME(__LINE__)
+              );
+            }
+            else {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos, pos + 2, "need at least one string (s\" word) after \"enumonly\"")
+                + FILENAME(__LINE__)
+              );
+            }
           }
 
           pos += 2;
@@ -2602,10 +2625,18 @@ namespace awkward {
           }
 
           if (strings_.size() == start_size) {
-            throw std::invalid_argument(
-              err_linecol(linecol, pos - 2, pos + 1, "need at least one string (s\" word) after \"enum\"")
-              + FILENAME(__LINE__)
-            );
+            if (tokenized[(IndexTypeOf<std::string>)pos + 1] == "enum") {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos - 2, pos + 1, "need at least one string (s\" word) after \"enum\"")
+                + FILENAME(__LINE__)
+              );
+            }
+            else {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos - 2, pos + 1, "need at least one string (s\" word) after \"enumonly\"")
+                + FILENAME(__LINE__)
+              );
+            }
           }
 
           bytecodes.push_back((int32_t)strings_.size());
@@ -3671,10 +3702,37 @@ namespace awkward {
               break;
             }
 
+            case CODE_ENUMONLY: {
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              I start = bytecode_get();
+              bytecodes_pointer_where()++;
+              I stop = bytecode_get();
+              bytecodes_pointer_where()++;
+              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop);
+              if (result == -1) {
+                current_error_ = util::ForthError::enumeration_missing;
+                return;
+              }
+              if (stack_cannot_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(result);
+              break;
+            }
+
             case CODE_PEEK: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
-              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->peek_byte(current_error_);
+              if (stack_cannot_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T after = stack_pop();
+              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->peek_byte(
+                  after, current_error_
+              );
               if (current_error_ != util::ForthError::none) {
                 return;
               }

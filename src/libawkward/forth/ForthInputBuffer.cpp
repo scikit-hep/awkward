@@ -13,6 +13,17 @@ namespace awkward {
     , length_(length)
     , pos_(0) { }
 
+  uint8_t
+  ForthInputBuffer::peek_byte(int64_t after, util::ForthError& err) noexcept {
+    if (pos_ + after + 1 > length_) {
+      err = util::ForthError::read_beyond;
+      return 0;
+    }
+    return *reinterpret_cast<uint8_t*>(
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_ + (size_t)after
+    );
+  }
+
   void*
   ForthInputBuffer::read(int64_t num_bytes, util::ForthError& err) noexcept {
     int64_t next = pos_ + num_bytes;
@@ -57,6 +68,7 @@ namespace awkward {
     int64_t i = 0;
     int64_t howmany = stop - start;
     size_t len;
+
     for (auto it = strings.begin() + start;  i < howmany;  i++) {
       len = it->length();
       if (pos_ + len <= length_) {
@@ -69,17 +81,6 @@ namespace awkward {
     }
 
     return -1;
-  }
-
-  uint8_t
-  ForthInputBuffer::peek_byte(util::ForthError& err) noexcept {
-    if (pos_ + 1 > length_) {
-      err = util::ForthError::read_beyond;
-      return 0;
-    }
-    return *reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_
-    );
   }
 
   uint64_t

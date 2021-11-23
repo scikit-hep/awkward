@@ -24,7 +24,8 @@ py::object maybe_throw(const ak::ForthMachineOf<T, I>& self,
                        bool raise_division_by_zero,
                        bool raise_varint_too_big,
                        bool raise_text_number_missing,
-                       bool raise_quoted_string_missing) {
+                       bool raise_quoted_string_missing,
+                       bool raise_enumeration_missing) {
   std::set<ak::util::ForthError> ignore;
   if (!raise_user_halt) {
     ignore.insert(ak::util::ForthError::user_halt);
@@ -62,6 +63,9 @@ py::object maybe_throw(const ak::ForthMachineOf<T, I>& self,
   if (!raise_quoted_string_missing) {
     ignore.insert(ak::util::ForthError::quoted_string_missing);
   }
+  if (!raise_enumeration_missing) {
+    ignore.insert(ak::util::ForthError::enumeration_missing);
+  }
   self.maybe_throw(err, ignore);
 
   switch (err) {
@@ -95,6 +99,8 @@ py::object maybe_throw(const ak::ForthMachineOf<T, I>& self,
       return py::str("text number missing");
     case ak::util::ForthError::quoted_string_missing:
       return py::str("quoted string missing");
+    case ak::util::ForthError::enumeration_missing:
+      return py::str("enumeration missing");
     default:
       throw std::invalid_argument(
           std::string("unrecognized ForthError: ")
@@ -267,7 +273,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_division_by_zero,
                           bool raise_varint_too_big,
                           bool raise_text_number_missing,
-                          bool raise_quoted_string_missing) -> py::object {
+                          bool raise_quoted_string_missing,
+                          bool raise_enumeration_missing) -> py::object {
               ak::util::ForthError err = self.step();
               return maybe_throw<T, I>(self,
                                        err,
@@ -282,7 +289,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                                        raise_division_by_zero,
                                        raise_varint_too_big,
                                        raise_text_number_missing,
-                                       raise_quoted_string_missing);
+                                       raise_quoted_string_missing,
+                                       raise_enumeration_missing);
           }, py::arg("raise_user_halt") = true
            , py::arg("raise_recursion_depth_exceeded") = true
            , py::arg("raise_stack_underflow") = true
@@ -294,7 +302,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_division_by_zero") = true
            , py::arg("raise_varint_too_big") = true
            , py::arg("raise_text_number_missing") = true
-           , py::arg("raise_quoted_string_missing") = true)
+           , py::arg("raise_quoted_string_missing") = true
+           , py::arg("raise_enumeration_missing") = true)
           .def("run", [](ak::ForthMachineOf<T, I>& self,
                          const py::dict& inputs,
                          bool raise_user_halt,
@@ -308,7 +317,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                          bool raise_division_by_zero,
                          bool raise_varint_too_big,
                          bool raise_text_number_missing,
-                         bool raise_quoted_string_missing) -> py::object {
+                         bool raise_quoted_string_missing,
+                         bool raise_enumeration_missing) -> py::object {
               std::map<std::string, std::shared_ptr<ak::ForthInputBuffer>> ins;
               for (auto pair : inputs) {
                 std::string name = pair.first.cast<std::string>();
@@ -339,7 +349,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                                        raise_division_by_zero,
                                        raise_varint_too_big,
                                        raise_text_number_missing,
-                                       raise_quoted_string_missing);
+                                       raise_quoted_string_missing,
+                                       raise_enumeration_missing);
           }, py::arg("inputs") = py::dict()
            , py::arg("raise_user_halt") = true
            , py::arg("raise_recursion_depth_exceeded") = true
@@ -352,7 +363,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_division_by_zero") = true
            , py::arg("raise_varint_too_big") = true
            , py::arg("raise_text_number_missing") = true
-           , py::arg("raise_quoted_string_missing") = true)
+           , py::arg("raise_quoted_string_missing") = true
+           , py::arg("raise_enumeration_missing") = true)
           .def("resume", [](ak::ForthMachineOf<T, I>& self,
                           bool raise_user_halt,
                           bool raise_recursion_depth_exceeded,
@@ -365,7 +377,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_division_by_zero,
                           bool raise_varint_too_big,
                           bool raise_text_number_missing,
-                          bool raise_quoted_string_missing) -> py::object {
+                          bool raise_quoted_string_missing,
+                          bool raise_enumeration_missing) -> py::object {
               py::gil_scoped_release release;
               ak::util::ForthError err = self.resume();
               py::gil_scoped_acquire acquire;
@@ -382,7 +395,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                                        raise_division_by_zero,
                                        raise_varint_too_big,
                                        raise_text_number_missing,
-                                       raise_quoted_string_missing);
+                                       raise_quoted_string_missing,
+                                       raise_enumeration_missing);
           }, py::arg("raise_user_halt") = true
            , py::arg("raise_recursion_depth_exceeded") = true
            , py::arg("raise_stack_underflow") = true
@@ -394,7 +408,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_division_by_zero") = true
            , py::arg("raise_varint_too_big") = true
            , py::arg("raise_text_number_missing") = true
-           , py::arg("raise_quoted_string_missing") = true)
+           , py::arg("raise_quoted_string_missing") = true
+           , py::arg("raise_enumeration_missing") = true)
           .def("call", [](ak::ForthMachineOf<T, I>& self,
                           const std::string& name,
                           bool raise_user_halt,
@@ -408,7 +423,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_division_by_zero,
                           bool raise_varint_too_big,
                           bool raise_text_number_missing,
-                          bool raise_quoted_string_missing) -> py::object {
+                          bool raise_quoted_string_missing,
+                          bool raise_enumeration_missing) -> py::object {
               py::gil_scoped_release release;
               ak::util::ForthError err = self.call(name);
               py::gil_scoped_acquire acquire;
@@ -425,7 +441,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                                        raise_division_by_zero,
                                        raise_varint_too_big,
                                        raise_text_number_missing,
-                                       raise_quoted_string_missing);
+                                       raise_quoted_string_missing,
+                                       raise_enumeration_missing);
           }, py::arg("name")
            , py::arg("raise_user_halt") = true
            , py::arg("raise_recursion_depth_exceeded") = true
@@ -438,7 +455,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_division_by_zero") = true
            , py::arg("raise_varint_too_big") = true
            , py::arg("raise_text_number_missing") = true
-           , py::arg("raise_quoted_string_missing") = true)
+           , py::arg("raise_quoted_string_missing") = true
+           , py::arg("raise_enumeration_missing") = true)
           .def_property_readonly("current_bytecode_position",
               &ak::ForthMachineOf<T, I>::current_bytecode_position)
           .def_property_readonly("current_recursion_depth",
