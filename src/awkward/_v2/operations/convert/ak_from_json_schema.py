@@ -24,9 +24,11 @@ def from_json_schema(
     output_initial_size=1024,
     output_resize_factor=1.5,
 ):
-    """
+    u"""
     Args:
         source (str or bytes): JSON-formatted string to convert into an array.
+            Only ASCII bytes are supported; for Unicode in the output data, use
+            JSON's "`\\uXXXX`" escape sequences in the source.
         schema (str, bytes, or nested dicts): JSONSchema to assume in the parsing.
             The JSON data are *not* validated against the schema; the schema is
             only used to accelerate parsing.
@@ -54,16 +56,33 @@ def from_json_schema(
     the parsing of the source and building of the output. The JSON data are not
     *validated* against the schema; the schema is *assumed* to be correct.
 
+    Supported JSONSchema elements:
+
+      * The root of the schema must be `"type": "array"` or `"type": "object"`.
+      * Every level must have a `"type"`, which can only name one type or
+        one type and `"null"`.
+      * `"type": "boolean"` \u2192 1-byte boolean values.
+      * `"type": "integer"` \u2192 8-byte integer values (regardless of `bits64`).
+        Numbers may include a fractional part, as per the JSONSchema specification,
+        but this function ignores any fractional part.
+      * `"type": "number"` \u2192 8-byte floating-point values (regardless of `bits64`).
+      * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
+        supported. Remember that the `source` data are ASCII; Unicode is derived from
+        "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
+        as categorical values (#ak.layout.IndexedArray).
+      * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
+        `"minItems"` and `"maxItems"` are specified and equal to each other, the
+        list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
+        type (#ak.types.ListType).
+      * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
+        and `"required"` must be a list of all property names.
+
     Internally, this function uses the schema to generate a specialized Forth machine
     that parses only the JSON type that the schema specifies, avoiding unnecessary
     type checks. It also avoids the type-discovery of #ak.ArrayBuilder for further
-    speedup.
-
-    TODO:
-
-      * Use JSONSchema enums to produce categorical data (IndexedArrays).
-      * Use array length limits to produce regular list types (RegularArrays).
-      * Use `type: [X, Y, Z]` to produce heterogeneous data (UnionArrays).
+    speedup. Most of the arguments (`bits64`, `stack_size`, `recursion_depth`,
+    `string_buffer_size`, `output_initial_size`, and `output_resize_factor`) configure
+    the Forth machine.
 
     See also #ak.from_json and #ak.to_json.
     """
@@ -195,8 +214,8 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
         if "null" in tpe:
             is_optional = True
             tpe = [x for x in tpe if x != "null"]
-            if len(tpe) == 1:
-                tpe = tpe[0]
+        if len(tpe) == 1:
+            tpe = tpe[0]
 
     if tpe == "boolean":
         # https://json-schema.org/understanding-json-schema/reference/boolean.html
