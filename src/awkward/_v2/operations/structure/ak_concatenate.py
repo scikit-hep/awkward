@@ -4,6 +4,8 @@ from __future__ import absolute_import
 
 import awkward as ak
 
+from awkward._v2.operations.structure.ak_fill_none import fill_none
+
 np = ak.nplike.NumpyMetadata.instance()
 
 
@@ -45,11 +47,7 @@ def concatenate(
     if not any(
         isinstance(
             x,
-            (
-                ak._v2.contents.Content,
-                ak.partition.PartitionedArray,
-                ak._v2.contents.Content,
-            ),  # NO PARTITIONED ARRAY
+            (ak._v2.contents.Content,),  # NO PARTITIONED ARRAY
         )
         for x in contents
     ):
@@ -60,11 +58,7 @@ def concatenate(
         for x in contents
         if isinstance(
             x,
-            (
-                ak._v2.contents.Content,
-                ak.partition.PartitionedArray,
-                ak._v2.contents.Content,
-            ),  # NO PARTITIONED ARRAY
+            (ak._v2.contents.Content,),  # NO PARTITIONED ARRAY
         )
     ][0]
     posaxis = first_content.axis_wrap_if_negative(axis)
@@ -95,80 +89,7 @@ def concatenate(
                     "axis={0}".format(axis)
                 )
 
-    if any(
-        isinstance(x, ak.partition.PartitionedArray) for x in contents
-    ):  # NO PARTITIONED ARRAY
-        if posaxis == 0:
-            partitions = []
-            offsets = [0]
-            for content in contents:
-                if isinstance(
-                    content, ak.partition.PartitionedArray
-                ):  # NO PARTITIONED ARRAY
-                    start = 0
-                    for stop, part in __builtins__["zip"](
-                        content.stops, content.partitions
-                    ):
-                        count = stop - start
-                        start = stop
-                        partitions.append(part)
-                        offsets.append(offsets[-1] + count)
-                elif isinstance(content, ak._v2.contents.Content):
-                    partitions.append(content)
-                    offsets.append(offsets[-1] + len(content))
-                else:
-                    partitions.append(
-                        ak._v2.operations.convert.from_iter([content], highlevel=False)
-                    )
-                    offsets.append(offsets[-1] + 1)
-
-            out = ak.partition.IrregularlyPartitionedArray(
-                partitions, offsets[1:]
-            )  # NO PARTITIONED ARRAY
-
-        else:
-            for content in contents:
-                if isinstance(
-                    content, ak.partition.PartitionedArray
-                ):  # NO PARTITIONED ARRAY
-                    stops = content.stops
-                    slices = []
-                    start = 0
-                    for stop in stops:
-                        slices.append(slice(start, stop))
-                        start = stop
-                    break
-
-            partitions = []
-            offsets = [0]
-            for slc in slices:
-                newcontents = []
-                for content in contents:
-                    if isinstance(
-                        content, ak.partition.PartitionedArray
-                    ):  # NO PARTITIONED ARRAY
-                        newcontents.append(content[slc].toContent())
-                    elif isinstance(content, ak._v2.contents.Content):
-                        newcontents.append(content[slc])
-                    else:
-                        newcontents.append(content)
-
-                partitions.append(
-                    concatenate(
-                        newcontents,
-                        axis=axis,
-                        merge=merge,
-                        mergebool=mergebool,
-                        highlevel=False,
-                    )
-                )
-                offsets.append(offsets[-1] + len(partitions[-1]))
-
-            out = ak.partition.IrregularlyPartitionedArray(
-                partitions, offsets[1:]
-            )  # NO PARTITIONED ARRAY
-
-    elif posaxis == 0:
+    if posaxis == 0:
         contents = [
             x
             if isinstance(x, ak._v2.contents.Content)
@@ -191,50 +112,17 @@ def concatenate(
     else:
 
         def getfunction(inputs, depth):
-            if depth == posaxis and any(
-                isinstance(
-                    x,
-                    (
-                        ak._v2.contents.IndexedOptionArray,
-                        ak._v2.contents.ByteMaskedArray,
-                        ak._v2.contents.BitMaskedArray,
-                        ak._v2.contents.UnmaskedArray,
-                    ),
-                )
-                for x in inputs
-            ):
+            if depth == posaxis and any(x.is_OptionType for x in inputs):
                 nextinputs = []
                 for x in inputs:
-                    if isinstance(
-                        x,
-                        (
-                            ak._v2.contents.IndexedOptionArray,
-                            ak._v2.contents.ByteMaskedArray,
-                            ak._v2.contents.BitMaskedArray,
-                            ak._v2.contents.UnmaskedArray,
-                        ),
-                    ) and isinstance(
-                        x.content,
-                        (
-                            ak._v2.contents.RegularArray,
-                            ak._v2.contents.ListArray,
-                            ak._v2.contents.ListOffsetArray,
-                        ),
-                    ):
+                    if x.is_OptionType and x.content.is_ListType:
                         nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
 
             if depth == posaxis and all(
-                isinstance(
-                    x,
-                    (
-                        ak._v2.contents.RegularArray,
-                        ak._v2.contents.ListArray,
-                        ak._v2.contents.ListOffsetArray,
-                    ),
-                )
+                x.is_ListType
                 or (isinstance(x, ak._v2.contents.NumpyArray) and x.data.ndim > 1)
                 or not isinstance(x, ak._v2.contents.Content)
                 for x in inputs
@@ -250,7 +138,7 @@ def concatenate(
                         nextinputs.append(x)
                     else:
                         nextinputs.append(
-                            ak._v2.contents.ListOffsetArray64(
+                            ak._v2.contents.ListOffsetArray(
                                 ak._v2.index.Index64(
                                     nplike.arange(length + 1, dtype=np.int64)
                                 ),
@@ -264,6 +152,7 @@ def concatenate(
                 all_counts = []
                 all_flatten = []
                 for x in nextinputs:
+
                     o, f = x._offsets_and_flattened(1, 0)
                     o = nplike.asarray(o)
                     c = o[1:] - o[:-1]
@@ -276,19 +165,24 @@ def concatenate(
                 nplike.cumsum(counts, out=offsets[1:])
 
                 offsets = ak._v2.index.Index64(offsets)
-                tags = ak._v2.index.Index8.empty(len(offsets) - 1, nplike)
-                index = ak._v2.index.Index64.empty(len(offsets) - 1, nplike)
 
-                inner = ak._v2.contents.UnionArray(tags, index, all_flatten)
+                inner = ak._v2.contents.UnionArray(
+                    ak._v2.index.Index8.empty(len(offsets) - 1, nplike),
+                    ak._v2.index.Index64.empty(len(offsets) - 1, nplike),
+                    all_flatten,
+                )
 
                 tags, index = inner._nested_tags_index(
-                    offsets, [ak._v2.index.Index64(x) for x in all_counts]
+                    offsets,
+                    [ak._v2.index.Index64(x) for x in all_counts],
                 )
+
                 inner = ak._v2.contents.UnionArray(tags, index, all_flatten)
 
                 out = ak._v2.contents.ListOffsetArray(
                     offsets, inner.simplify_uniontype(merge=merge, mergebool=mergebool)
                 )
+
                 return lambda: (out,)
 
             elif any(

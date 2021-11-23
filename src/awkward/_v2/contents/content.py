@@ -607,7 +607,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     # FIXME: Temporary fix for concatenate (only working for axis = 0)
     def concatenate(self, others):
         if not isinstance(others, list):
-            others = [others]
+            others = [ak._v2.contents.NumpyArray([others])]
         batch = [self]
         for x in others:
             if batch[-1].mergeable(x, True):

@@ -275,7 +275,8 @@ class UnionArray(Content):
 
     def _nested_tags_index(self, offsets, counts):
         nplike = self.nplike
-        contentlen = offsets[len(offsets) - 1]
+        f_offsets = ak._v2.index.Index64(copy.deepcopy(offsets.data))
+        contentlen = f_offsets[len(f_offsets) - 1]
 
         tags = ak._v2.index.Index8.empty(contentlen, nplike)
         index = ak._v2.index.Index64.empty(contentlen, nplike)
@@ -286,15 +287,15 @@ class UnionArray(Content):
                     "awkward_UnionArray_nestedfill_tags_index",
                     tags.dtype.type,
                     index.dtype.type,
-                    offsets.dtype.type,
+                    f_offsets.dtype.type,
                     counts[tag].dtype.type,
                 ](
                     tags.to(nplike),
                     index.to(nplike),
-                    offsets.to(nplike),
+                    f_offsets.to(nplike),
                     tag,
                     counts[tag].to(nplike),
-                    len(offsets) - 1,
+                    len(f_offsets) - 1,
                 )
             )
         return (tags, index)
