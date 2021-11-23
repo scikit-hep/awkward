@@ -120,7 +120,7 @@ make_fromjsonfile(py::module& m, const std::string& name) {
       int num = 0;
       ak::BuilderPtr out(nullptr);
       try {
-        auto out_pair = FromJsonFile(file,
+        auto out_pair = ak::FromJsonFile(file,
                            ak::ArrayBuilderOptions(initial, resize),
                            buffersize,
                            nan_string,
