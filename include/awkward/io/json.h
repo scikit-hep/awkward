@@ -8,12 +8,13 @@
 #include <string>
 
 #include "awkward/common.h"
+#include "awkward/builder/Builder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace awkward {
   //
-  class Content;
-  using ContentPtr    = std::shared_ptr<Content>;
+  // class Content;
+  // using ContentPtr    = std::shared_ptr<Content>;
 
   /// @class ToJson
   ///
@@ -339,7 +340,7 @@ namespace awkward {
   /// representation in JSON format
   /// @param minus_infinity_string user-defined string for a negative
   /// infinity representation in JSON format
-  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
+  LIBAWKWARD_EXPORT_SYMBOL const std::pair<int, const BuilderPtr>
     FromJsonString(const char* source,
                    const ArrayBuilderOptions& options,
                    const char* nan_string = nullptr,
@@ -359,7 +360,7 @@ namespace awkward {
   /// representation in JSON format
   /// @param minus_infinity_string user-defined string for a negative
   /// infinity representation in JSON format
-  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
+  LIBAWKWARD_EXPORT_SYMBOL const std::pair<int, const BuilderPtr>
     FromJsonFile(FILE* source,
                  const ArrayBuilderOptions& options,
                  int64_t buffersize,

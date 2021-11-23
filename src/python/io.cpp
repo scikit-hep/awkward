@@ -13,8 +13,67 @@
 #include "awkward/python/content.h"
 
 #include "awkward/python/io.h"
+#include <pybind11/numpy.h>
 
 namespace ak = awkward;
+namespace {
+  class NumpyBuffersContainer: public ak::BuffersContainer {
+  public:
+    py::dict container() {
+      return container_;
+    }
+
+    void
+      copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override {
+        py::object pyarray = py::module::import("numpy").attr("empty")(num_bytes, "u1");
+        py::array_t<uint8_t> rawarray = pyarray.cast<py::array_t<uint8_t>>();
+        py::buffer_info rawinfo = rawarray.request();
+        std::memcpy(rawinfo.ptr, source, num_bytes);
+        container_[py::str(name)] = pyarray;
+      }
+
+    void
+      full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) override {
+        py::object pyarray = py::module::import("numpy").attr("full")(py::int_(length), py::int_(value), py::str(dtype));
+        container_[py::str(name)] = pyarray;
+      }
+
+  private:
+    py::dict container_;
+  };
+
+  class EmptyBuffersContainer: public ak::BuffersContainer {
+  public:
+    void
+      copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override { }
+
+    void
+      full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) override { }
+  };
+
+  /// @brief Turns the accumulated data into a Content array.
+  ///
+  /// This operation only converts Builder nodes into Content nodes; the
+  /// buffers holding array data are shared between the Builder and the
+  /// Content. Hence, taking a snapshot is a constant-time operation.
+  ///
+  /// It is safe to take multiple snapshots while accumulating data. The
+  /// shared buffers are only appended to, which affects elements beyond
+  /// the limited view of old snapshots.
+  py::object
+  builder_snapshot(const ak::BuilderPtr builder) {
+    ::NumpyBuffersContainer container;
+    int64_t form_key_id = 0;
+    std::string form = builder.get()->to_buffers(container, form_key_id);
+    py::dict kwargs;
+    kwargs[py::str("form")] = py::str(form);
+    kwargs[py::str("length")] = py::int_(builder.get()->length());
+    kwargs[py::str("container")] = container.container();
+    kwargs[py::str("key_format")] = py::str("{form_key}-{attribute}");
+    kwargs[py::str("highlevel")] = py::bool_(false);
+    return py::module::import("awkward").attr("from_buffers")(**kwargs);
+  }
+}
 
 ////////// fromjson
 
@@ -28,12 +87,17 @@ make_fromjson(py::module& m, const std::string& name) {
            int64_t initial,
            double resize,
            int64_t buffersize) -> py::object {
-    ak::ContentPtr out = ak::FromJsonString(source.c_str(),
-                                            ak::ArrayBuilderOptions(initial, resize),
-                                            nan_string,
-                                            infinity_string,
-                                            minus_infinity_string);
-    return box(out);
+    auto out = ak::FromJsonString(source.c_str(),
+                                  ak::ArrayBuilderOptions(initial, resize),
+                                  nan_string,
+                                  infinity_string,
+                                  minus_infinity_string);
+    if (out.first == 1) {
+      return box(unbox_content(::builder_snapshot(out.second))->getitem_at_nowrap(0));
+    }
+    else {
+      return ::builder_snapshot(out.second);
+    }
   }, py::arg("source"),
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,
@@ -65,21 +129,29 @@ make_fromjsonfile(py::module& m, const std::string& name) {
           + std::string("\" could not be opened for reading")
           + FILENAME(__LINE__));
       }
-      std::shared_ptr<ak::Content> out(nullptr);
+      int num = 0;
+      ak::BuilderPtr out(nullptr);
       try {
-        out = FromJsonFile(file,
+        auto out_pair = FromJsonFile(file,
                            ak::ArrayBuilderOptions(initial, resize),
                            buffersize,
                            nan_string,
                            infinity_string,
                            minus_infinity_string);
+        num = out_pair.first;
+        out = out_pair.second;
       }
       catch (...) {
         fclose(file);
         throw;
       }
       fclose(file);
-      return box(out);
+      if (num == 1) {
+        return box(unbox_content(::builder_snapshot(out))->getitem_at_nowrap(0));
+      }
+      else {
+        return ::builder_snapshot(out);
+      }
   }, py::arg("source"),
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,
