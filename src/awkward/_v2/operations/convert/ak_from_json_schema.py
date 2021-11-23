@@ -360,62 +360,25 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
         if "items" not in schema:
             raise TypeError("JSONSchema type is not concrete: array without 'items'")
 
-        if is_optional:
-            mask = "node{0}".format(len(outputs))
-            outputs[mask + "-mask"] = "int8"
-            offsets = "node{0}".format(len(outputs))
-            outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
-            initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
-            instructions.extend(
-                [
-                    r"""{0}source enumonly s" null" s" [" dup if""".format(indent),
-                    r"""{0}  source skipws""".format(indent),
-                    r"""{0}  0""".format(indent),
-                    r"""{0}  source enum s" ]" """.format(indent),
-                    r"""{0}  begin""".format(indent),
-                    r"""{0}  while""".format(indent),
-                ]
-            )
-            content = build_forth(
-                schema["items"],
-                outputs,
-                initialization,
-                instructions,
-                indent + "    ",
-                bits64,
-            )
-            instructions.extend(
-                [
-                    r"""{0}    1+""".format(indent),
-                    r"""{0}    source skipws""".format(indent),
-                    r"""{0}    source enumonly s" ]" s" ," """.format(indent),
-                    r"""{0}    source skipws""".format(indent),
-                    r"""{0}  repeat""".format(indent),
-                    r"""{0}  {1}-offsets +<- stack""".format(indent, offsets),
-                    r"""{0}else""".format(indent),
-                    r"""{0}  0 {1}-offsets +<- stack""".format(indent, offsets),
-                    r"""{0}then""".format(indent),
-                    r"""{0}{1}-mask <- stack""".format(indent, mask),
-                ]
-            )
-            return ak._v2.forms.ByteMaskedForm(
-                "i8",
-                ak._v2.forms.ListOffsetForm(
-                    "i64" if bits64 else "i32", content, form_key=offsets
-                ),
-                valid_when=True,
-                form_key=mask,
-            )
+        if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
+            if is_optional:
+                mask = "node{0}".format(len(outputs))
+                outputs[mask + "-index"] = "int64" if bits64 else "int32"
+                initialization.append("variable {0}-count".format(mask))
+                instructions.extend(
+                    [
+                        r"""{0}source enumonly s" null" s" [" if""".format(indent),
+                        r"""{0}  {1}-count @ {1}-index <- stack""".format(indent, mask),
+                        r"""{0}  1 {1}-count +!""".format(indent, mask),
+                    ]
+                )
+                indent = indent + "  "
+            else:
+                instructions.append(r"""{0}source enumonly s" [" drop""".format(indent))
 
-        else:
-            offsets = "node{0}".format(len(outputs))
-            outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
-            initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
             instructions.extend(
                 [
-                    r"""{0}source enumonly s" [" drop""".format(indent),
                     r"""{0}source skipws""".format(indent),
-                    r"""{0}0""".format(indent),
                     r"""{0}source enum s" ]" """.format(indent),
                     r"""{0}begin""".format(indent),
                     r"""{0}while""".format(indent),
@@ -431,17 +394,114 @@ def build_forth(schema, outputs, initialization, instructions, indent, bits64):
             )
             instructions.extend(
                 [
-                    r"""{0}  1+""".format(indent),
                     r"""{0}  source skipws""".format(indent),
                     r"""{0}  source enumonly s" ]" s" ," """.format(indent),
                     r"""{0}  source skipws""".format(indent),
                     r"""{0}repeat""".format(indent),
-                    r"""{0}{1}-offsets +<- stack""".format(indent, offsets),
                 ]
             )
-            return ak._v2.forms.ListOffsetForm(
-                "i64" if bits64 else "i32", content, form_key=offsets
-            )
+
+            if is_optional:
+                indent = indent[:-2]
+                instructions.extend(
+                    [
+                        r"""{0}else""".format(indent),
+                        r"""{0}  -1 {1}-index <- stack""".format(indent, mask),
+                        r"""{0}then""".format(indent),
+                    ]
+                )
+                return ak._v2.forms.IndexedOptionForm(
+                    "i64" if bits64 else "i32",
+                    ak._v2.forms.RegularForm(content, size=schema.get("minItems")),
+                    form_key=mask,
+                )
+
+            else:
+                return ak._v2.forms.RegularForm(content, size=schema.get("minItems"))
+
+        else:
+            if is_optional:
+                mask = "node{0}".format(len(outputs))
+                outputs[mask + "-mask"] = "int8"
+                offsets = "node{0}".format(len(outputs))
+                outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
+                initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
+                instructions.extend(
+                    [
+                        r"""{0}source enumonly s" null" s" [" dup if""".format(indent),
+                        r"""{0}  source skipws""".format(indent),
+                        r"""{0}  0""".format(indent),
+                        r"""{0}  source enum s" ]" """.format(indent),
+                        r"""{0}  begin""".format(indent),
+                        r"""{0}  while""".format(indent),
+                    ]
+                )
+                content = build_forth(
+                    schema["items"],
+                    outputs,
+                    initialization,
+                    instructions,
+                    indent + "    ",
+                    bits64,
+                )
+                instructions.extend(
+                    [
+                        r"""{0}    1+""".format(indent),
+                        r"""{0}    source skipws""".format(indent),
+                        r"""{0}    source enumonly s" ]" s" ," """.format(indent),
+                        r"""{0}    source skipws""".format(indent),
+                        r"""{0}  repeat""".format(indent),
+                        r"""{0}  {1}-offsets +<- stack""".format(indent, offsets),
+                        r"""{0}else""".format(indent),
+                        r"""{0}  0 {1}-offsets +<- stack""".format(indent, offsets),
+                        r"""{0}then""".format(indent),
+                        r"""{0}{1}-mask <- stack""".format(indent, mask),
+                    ]
+                )
+                return ak._v2.forms.ByteMaskedForm(
+                    "i8",
+                    ak._v2.forms.ListOffsetForm(
+                        "i64" if bits64 else "i32", content, form_key=offsets
+                    ),
+                    valid_when=True,
+                    form_key=mask,
+                )
+
+            else:
+                offsets = "node{0}".format(len(outputs))
+                outputs[offsets + "-offsets"] = "int64" if bits64 else "int32"
+                initialization.append(r"""0 {0}-offsets <- stack""".format(offsets))
+                instructions.extend(
+                    [
+                        r"""{0}source enumonly s" [" drop""".format(indent),
+                        r"""{0}source skipws""".format(indent),
+                        r"""{0}0""".format(indent),
+                        r"""{0}source enum s" ]" """.format(indent),
+                        r"""{0}begin""".format(indent),
+                        r"""{0}while""".format(indent),
+                    ]
+                )
+                content = build_forth(
+                    schema["items"],
+                    outputs,
+                    initialization,
+                    instructions,
+                    indent + "  ",
+                    bits64,
+                )
+                instructions.extend(
+                    [
+                        r"""{0}  1+""".format(indent),
+                        r"""{0}  source skipws""".format(indent),
+                        r"""{0}  source enumonly s" ]" s" ," """.format(indent),
+                        r"""{0}  source skipws""".format(indent),
+                        r"""{0}repeat""".format(indent),
+                        r"""{0}{1}-offsets +<- stack""".format(indent, offsets),
+                    ]
+                )
+                return ak._v2.forms.ListOffsetForm(
+                    "i64" if bits64 else "i32", content, form_key=offsets
+                )
 
     elif tpe == "object":
         # https://json-schema.org/understanding-json-schema/reference/object.html

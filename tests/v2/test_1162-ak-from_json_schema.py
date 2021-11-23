@@ -103,12 +103,47 @@ def test_array_integer():
         {"type": "array", "items": {"type": "array", "items": {"type": "integer"}}},
     )
     assert result.tolist() == [[1, 2, 3], [], [4, 5]]
+    assert str(result.type) == "3 * var * int64"
 
     result = ak._v2.operations.convert.from_json_schema(
         "[]",
         {"type": "array", "items": {"type": "array", "items": {"type": "integer"}}},
     )
     assert result.tolist() == []
+
+
+def test_regulararray_integer():
+    result = ak._v2.operations.convert.from_json_schema(
+        "[[1, 2, 3], [4, 5, 6]]",
+        {
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": {"type": "integer"},
+                "minItems": 3,
+                "maxItems": 3,
+            },
+        },
+    )
+    assert result.tolist() == [[1, 2, 3], [4, 5, 6]]
+    assert str(result.type) == "2 * 3 * int64"
+
+
+def test_option_regulararray_integer():
+    result = ak._v2.operations.convert.from_json_schema(
+        "[[1, 2, 3], null, [4, 5, 6]]",
+        {
+            "type": "array",
+            "items": {
+                "type": ["array", "null"],
+                "items": {"type": "integer"},
+                "minItems": 3,
+                "maxItems": 3,
+            },
+        },
+    )
+    assert result.tolist() == [[1, 2, 3], None, [4, 5, 6]]
+    assert str(result.type) == "3 * option[3 * int64]"
 
 
 def test_option_array_integer():
@@ -120,6 +155,7 @@ def test_option_array_integer():
         },
     )
     assert result.tolist() == [[1, 2, 3], None, [], [4, 5]]
+    assert str(result.type) == "4 * option[var * int64]"
 
     result = ak._v2.operations.convert.from_json_schema(
         "[]",
