@@ -293,3 +293,15 @@ def test_option_record():
         },
     )
     assert result.tolist() == []
+
+
+def test_top_record():
+    result = ak._v2.operations.convert.from_json_schema(
+        ' { "x" :1 ,"y":1.1}  ',
+        {
+            "type": "object",
+            "properties": {"y": {"type": "number"}, "x": {"type": "integer"}},
+            "required": ["x", "y"],
+        },
+    )
+    assert result.tolist() == {"x": 1, "y": 1.1}

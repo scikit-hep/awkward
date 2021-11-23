@@ -101,14 +101,14 @@ def from_json_schema(
             "malformed JSONSchema: expected dict, got {0}".format(repr(schema))
         )
 
+    outputs = {}
+    initialization = []
+    instructions = []
+    extras = {}
+
     if schema.get("type") == "array":
         if "items" not in schema:
             raise TypeError("JSONSchema type is not concrete: array without items")
-
-        outputs = {}
-        initialization = []
-        instructions = []
-        extras = {}
 
         form = build_forth(
             schema["items"], outputs, initialization, instructions, extras, "  ", bits64
@@ -137,66 +137,91 @@ source skipws
             "\n".join(instructions),
         )
 
-        options = {
-            "stack_size": stack_size,
-            "recursion_depth": recursion_depth,
-            "string_buffer_size": string_buffer_size,
-            "output_initial_size": output_initial_size,
-            "output_resize_factor": output_resize_factor,
-        }
-        if bits64:
-            vm = ForthMachine64(forthcode, **options)
-        else:
-            vm = ForthMachine32(forthcode, **options)
-
-        try:
-            vm.run({"source": source})
-
-            if vm.input_position("source") != len(source):
-                raise ValueError
-
-        except ValueError as err:
-            if (
-                "read beyond" in str(err)
-                or "varint too big" in str(err)
-                or "text number missing" in str(err)
-                or "quoted string missing" in str(err)
-                or "enumeration missing" in str(err)
-            ):
-                position = vm.input_position("source")
-                before = source[max(0, position - 30) : position].decode(
-                    "ascii", errors="surrogateescape"
-                )
-                before = before.replace(os.linesep, repr(os.linesep).strip("'\""))
-                if position - 30 > 0:
-                    before = "..." + before
-                after = source[position : position + 30].decode(
-                    "ascii", errors="surrogateescape"
-                )
-                if position + 30 < len(source):
-                    after = after + "..."
-                raise ValueError(
-                    "JSON is invalid or does not fit schema at position {0}:\n\n    {1}\n    {2}".format(
-                        position, before + after, "-" * len(before) + "^"
-                    )
-                )
-            else:
-                raise err
-
-        (length,) = vm.stack
-        contents = {}
-        for name in outputs:
-            contents[name] = numpy.asarray(vm[name])
-        for name, data in extras.items():
-            contents[name] = data
-
-        return ak._v2.operations.convert.from_buffers(form, length, contents)
-
     elif schema.get("type") == "object":
-        raise NotImplementedError
+        form = build_forth(
+            schema, outputs, initialization, instructions, extras, "", bits64
+        )
+
+        forthcode = r"""input source
+{0}{1}
+
+source skipws
+{2}
+source skipws
+""".format(
+            "\n".join("output {0} {1}".format(n, t) for n, t in outputs.items()),
+            "".join("\n" + x for x in initialization),
+            "\n".join(instructions),
+        )
 
     else:
-        raise TypeError("only 'array' and 'object' types supported at schema top-level")
+        raise TypeError(
+            "only 'array' and 'object' types supported at the JSONSchema root"
+        )
+
+    options = {
+        "stack_size": stack_size,
+        "recursion_depth": recursion_depth,
+        "string_buffer_size": string_buffer_size,
+        "output_initial_size": output_initial_size,
+        "output_resize_factor": output_resize_factor,
+    }
+    if bits64:
+        vm = ForthMachine64(forthcode, **options)
+    else:
+        vm = ForthMachine32(forthcode, **options)
+
+    try:
+        vm.run({"source": source})
+
+        if vm.input_position("source") != len(source):
+            raise ValueError
+
+    except ValueError as err:
+        if (
+            "read beyond" in str(err)
+            or "varint too big" in str(err)
+            or "text number missing" in str(err)
+            or "quoted string missing" in str(err)
+            or "enumeration missing" in str(err)
+        ):
+            position = vm.input_position("source")
+            before = source[max(0, position - 30) : position].decode(
+                "ascii", errors="surrogateescape"
+            )
+            before = before.replace(os.linesep, repr(os.linesep).strip("'\""))
+            if position - 30 > 0:
+                before = "..." + before
+            after = source[position : position + 30].decode(
+                "ascii", errors="surrogateescape"
+            )
+            if position + 30 < len(source):
+                after = after + "..."
+            raise ValueError(
+                "JSON is invalid or does not fit schema at position {0}:\n\n    {1}\n    {2}".format(
+                    position, before + after, "-" * len(before) + "^"
+                )
+            )
+        else:
+            raise err
+
+    if schema.get("type") == "array":
+        (length,) = vm.stack
+    else:
+        length = 1
+
+    contents = {}
+    for name in outputs:
+        contents[name] = numpy.asarray(vm[name])
+    for name, data in extras.items():
+        contents[name] = data
+
+    out = ak._v2.operations.convert.from_buffers(form, length, contents)
+
+    if schema.get("type") == "array":
+        return out
+    else:
+        return out[0]
 
 
 def build_forth(schema, outputs, initialization, instructions, extras, indent, bits64):
