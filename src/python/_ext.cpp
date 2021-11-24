@@ -141,6 +141,6 @@ PYBIND11_MODULE(_ext, m) {
 
   make_ForthMachineOf<int32_t, int32_t>(m, "ForthMachine32");
   make_ForthMachineOf<int64_t, int32_t>(m, "ForthMachine64");
-  make_SpecializedJSON(m, "SpecializedJSON");
+  // make_SpecializedJSON(m, "SpecializedJSON");
 
 }

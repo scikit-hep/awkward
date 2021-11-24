@@ -497,38 +497,38 @@ make_ForthMachineOf(const py::handle& m, const std::string& name);
 template py::class_<ak::ForthMachine64, std::shared_ptr<ak::ForthMachine64>>
 make_ForthMachineOf(const py::handle& m, const std::string& name);
 
-py::class_<ak::SpecializedJSON, std::shared_ptr<ak::SpecializedJSON>>
-make_SpecializedJSON(const py::handle& m, const std::string& name) {
-  return (py::class_<ak::SpecializedJSON,
-          std::shared_ptr<ak::SpecializedJSON>>(m, name.c_str())
-          .def(py::init([](const std::string& jsonassembly,
-                           int64_t output_initial_size,
-                           double output_resize_factor)
-                        -> std::shared_ptr<ak::SpecializedJSON> {
-            return std::make_shared<ak::SpecializedJSON>(jsonassembly,
-                                                         output_initial_size,
-                                                         output_resize_factor);
-          }),
-          py::arg("jsonassembly"),
-          py::arg("output_initial_size") = 1024,
-          py::arg("output_resize_factor") = 1.5)
-          .def("parse_string", &ak::SpecializedJSON::parse_string)
-          .def("__len__", &ak::SpecializedJSON::length)
-          .def("__getitem__", [](py::object self, const std::string& key) -> py::object {
-            const std::shared_ptr<ak::SpecializedJSON> thyself =
-              self.cast<const std::shared_ptr<ak::SpecializedJSON>>();
-            ak::ForthOutputBuffer* output = thyself.get()->output_at(key).get();
-            ak::util::dtype dtype = thyself.get()->dtype_at(key);
-            py::buffer_info info(
-              output->ptr().get(),
-              ak::util::dtype_to_itemsize(dtype),
-              ak::util::dtype_to_format(dtype),
-              1,
-              std::vector<py::ssize_t>({ (py::ssize_t)output->len() }),
-              std::vector<py::ssize_t>({ (py::ssize_t)ak::util::dtype_to_itemsize(dtype) })
-            );
-            return py::array(info, self);
-          })
+// py::class_<ak::SpecializedJSON, std::shared_ptr<ak::SpecializedJSON>>
+// make_SpecializedJSON(const py::handle& m, const std::string& name) {
+//   return (py::class_<ak::SpecializedJSON,
+//           std::shared_ptr<ak::SpecializedJSON>>(m, name.c_str())
+//           .def(py::init([](const std::string& jsonassembly,
+//                            int64_t output_initial_size,
+//                            double output_resize_factor)
+//                         -> std::shared_ptr<ak::SpecializedJSON> {
+//             return std::make_shared<ak::SpecializedJSON>(jsonassembly,
+//                                                          output_initial_size,
+//                                                          output_resize_factor);
+//           }),
+//           py::arg("jsonassembly"),
+//           py::arg("output_initial_size") = 1024,
+//           py::arg("output_resize_factor") = 1.5)
+//           .def("parse_string", &ak::SpecializedJSON::parse_string)
+//           .def("__len__", &ak::SpecializedJSON::length)
+//           .def("__getitem__", [](py::object self, const std::string& key) -> py::object {
+//             const std::shared_ptr<ak::SpecializedJSON> thyself =
+//               self.cast<const std::shared_ptr<ak::SpecializedJSON>>();
+//             ak::ForthOutputBuffer* output = thyself.get()->output_at(key).get();
+//             ak::util::dtype dtype = thyself.get()->dtype_at(key);
+//             py::buffer_info info(
+//               output->ptr().get(),
+//               ak::util::dtype_to_itemsize(dtype),
+//               ak::util::dtype_to_format(dtype),
+//               1,
+//               std::vector<py::ssize_t>({ (py::ssize_t)output->len() }),
+//               std::vector<py::ssize_t>({ (py::ssize_t)ak::util::dtype_to_itemsize(dtype) })
+//             );
+//             return py::array(info, self);
+//           })
 
-        );
-}
+//         );
+// }

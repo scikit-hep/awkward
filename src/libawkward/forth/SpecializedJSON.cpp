@@ -1,932 +1,932 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/SpecializedJSON.cpp", line)
+// #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/SpecializedJSON.cpp", line)
 
-#include <stdexcept>
+// #include <stdexcept>
 
-#include "rapidjson/document.h"
-#include "rapidjson/reader.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/filereadstream.h"
-#include "rapidjson/error/en.h"
+// #include "rapidjson/document.h"
+// #include "rapidjson/reader.h"
+// #include "rapidjson/stringbuffer.h"
+// #include "rapidjson/filereadstream.h"
+// #include "rapidjson/error/en.h"
 
-#include "awkward/forth/SpecializedJSON.h"
+// #include "awkward/forth/SpecializedJSON.h"
 
-namespace rj = rapidjson;
+// namespace rj = rapidjson;
 
-namespace awkward {
-  #define TopLevelArray 0           // no arguments
-  #define FillByteMaskedArray 1     // arg1: ByteMaskedArray output
-  #define FillIndexedOptionArray 2  // arg1: IndexedOptionArray output, arg2: counter
-  #define FillBoolean 3             // arg1: boolean output
-  #define FillInteger 4             // arg1: integer output
-  #define FillNumber 5              // arg1: number output
-  #define FillString 6              // arg1: offsets output, arg2: content output
-  #define FillEnumString 7          // arg1: index output, arg2: strings start, arg3: strings stop
-  #define VarLengthList 8           // arg1: offsets output
-  #define FixedLengthList 9         // arg1: expected length, arg2: counter
-  #define KeyTableHeader 10         // arg1: number of items
-  #define KeyTableItem 11           // arg1: string index, arg2: jump to instruction
+// namespace awkward {
+//   #define TopLevelArray 0           // no arguments
+//   #define FillByteMaskedArray 1     // arg1: ByteMaskedArray output
+//   #define FillIndexedOptionArray 2  // arg1: IndexedOptionArray output, arg2: counter
+//   #define FillBoolean 3             // arg1: boolean output
+//   #define FillInteger 4             // arg1: integer output
+//   #define FillNumber 5              // arg1: number output
+//   #define FillString 6              // arg1: offsets output, arg2: content output
+//   #define FillEnumString 7          // arg1: index output, arg2: strings start, arg3: strings stop
+//   #define VarLengthList 8           // arg1: offsets output
+//   #define FixedLengthList 9         // arg1: expected length, arg2: counter
+//   #define KeyTableHeader 10         // arg1: number of items
+//   #define KeyTableItem 11           // arg1: string index, arg2: jump to instruction
 
-  class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
-  public:
-    Handler(SpecializedJSON* specializedjson): specializedjson_(specializedjson) { }
+//   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
+//   public:
+//     Handler(SpecializedJSON* specializedjson): specializedjson_(specializedjson) { }
 
-    bool Null() {
-      std::cout << "Null instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//     bool Null() {
+//       std::cout << "Null instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          specializedjson_->write_int8(specializedjson_->argument1(), 0);
-          specializedjson_->step_forward();
-          switch (specializedjson_->instruction()) {
-            case TopLevelArray:
-              return false;
-            case FillByteMaskedArray:
-              return false;
-            case FillIndexedOptionArray:
-              return false;
-            case FillBoolean:
-              specializedjson_->write_int8(specializedjson_->argument1(), 0);
-              break;
-            case FillInteger:
-              specializedjson_->write_int64(specializedjson_->argument1(), 0);
-              break;
-            case FillNumber:
-              specializedjson_->write_float64(specializedjson_->argument1(), 0.0);
-              break;
-            case FillString:
-              // FIXME
-              return false;
-            case FillEnumString:
-              // FIXME
-              return false;
-            case VarLengthList:
-              specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
-              break;
-            case FixedLengthList:
-              return false;
-            case KeyTableHeader:
-              return false;
-            case KeyTableItem:
-              return false;
-          }
-          specializedjson_->step_backward();
-          return true;
-        case FillIndexedOptionArray:
-          specializedjson_->write_int64(specializedjson_->argument1(), -1);
-          return true;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           specializedjson_->write_int8(specializedjson_->argument1(), 0);
+//           specializedjson_->step_forward();
+//           switch (specializedjson_->instruction()) {
+//             case TopLevelArray:
+//               return false;
+//             case FillByteMaskedArray:
+//               return false;
+//             case FillIndexedOptionArray:
+//               return false;
+//             case FillBoolean:
+//               specializedjson_->write_int8(specializedjson_->argument1(), 0);
+//               break;
+//             case FillInteger:
+//               specializedjson_->write_int64(specializedjson_->argument1(), 0);
+//               break;
+//             case FillNumber:
+//               specializedjson_->write_float64(specializedjson_->argument1(), 0.0);
+//               break;
+//             case FillString:
+//               // FIXME
+//               return false;
+//             case FillEnumString:
+//               // FIXME
+//               return false;
+//             case VarLengthList:
+//               specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
+//               break;
+//             case FixedLengthList:
+//               return false;
+//             case KeyTableHeader:
+//               return false;
+//             case KeyTableItem:
+//               return false;
+//           }
+//           specializedjson_->step_backward();
+//           return true;
+//         case FillIndexedOptionArray:
+//           specializedjson_->write_int64(specializedjson_->argument1(), -1);
+//           return true;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           return false;
+//         case FillNumber:
+//           return false;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool Bool(bool x) {
-      bool out;
+//     bool Bool(bool x) {
+//       bool out;
 
-      std::cout << "Bool " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//       std::cout << "Bool " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          specializedjson_->write_int8(specializedjson_->argument1(), 1);
-          specializedjson_->step_forward();
-          out = Bool(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->step_forward();
-          out = Bool(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillBoolean:
-          specializedjson_->write_int8(specializedjson_->argument1(), x);
-          return true;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           specializedjson_->write_int8(specializedjson_->argument1(), 1);
+//           specializedjson_->step_forward();
+//           out = Bool(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillIndexedOptionArray:
+//           specializedjson_->write_int64(
+//             specializedjson_->argument1(),
+//             specializedjson_->get_and_increment(specializedjson_->argument2())
+//           );
+//           specializedjson_->step_forward();
+//           out = Bool(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillBoolean:
+//           specializedjson_->write_int8(specializedjson_->argument1(), x);
+//           return true;
+//         case FillInteger:
+//           return false;
+//         case FillNumber:
+//           return false;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool Int(int x) {
-      bool out;
+//     bool Int(int x) {
+//       bool out;
 
-      std::cout << "Int " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//       std::cout << "Int " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          specializedjson_->write_int8(specializedjson_->argument1(), 1);
-          specializedjson_->step_forward();
-          out = Int(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->step_forward();
-          out = Int(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
-          return true;
-        case FillNumber:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
-          return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           specializedjson_->write_int8(specializedjson_->argument1(), 1);
+//           specializedjson_->step_forward();
+//           out = Int(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillIndexedOptionArray:
+//           specializedjson_->write_int64(
+//             specializedjson_->argument1(),
+//             specializedjson_->get_and_increment(specializedjson_->argument2())
+//           );
+//           specializedjson_->step_forward();
+//           out = Int(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           specializedjson_->write_int64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillNumber:
+//           specializedjson_->write_int64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool Uint(unsigned int x) {
-      bool out;
+//     bool Uint(unsigned int x) {
+//       bool out;
 
-      std::cout << "Uint " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//       std::cout << "Uint " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          specializedjson_->write_int8(specializedjson_->argument1(), 1);
-          specializedjson_->step_forward();
-          out = Uint(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->step_forward();
-          out = Uint(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
-          return true;
-        case FillNumber:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
-          return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           specializedjson_->write_int8(specializedjson_->argument1(), 1);
+//           specializedjson_->step_forward();
+//           out = Uint(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillIndexedOptionArray:
+//           specializedjson_->write_int64(
+//             specializedjson_->argument1(),
+//             specializedjson_->get_and_increment(specializedjson_->argument2())
+//           );
+//           specializedjson_->step_forward();
+//           out = Uint(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           specializedjson_->write_int64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillNumber:
+//           specializedjson_->write_int64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool Int64(int64_t x) {
-      bool out;
+//     bool Int64(int64_t x) {
+//       bool out;
 
-      std::cout << "Int64 " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//       std::cout << "Int64 " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          specializedjson_->write_int8(specializedjson_->argument1(), 1);
-          specializedjson_->step_forward();
-          out = Int64(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->step_forward();
-          out = Int64(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
-          return true;
-        case FillNumber:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
-          return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           specializedjson_->write_int8(specializedjson_->argument1(), 1);
+//           specializedjson_->step_forward();
+//           out = Int64(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillIndexedOptionArray:
+//           specializedjson_->write_int64(
+//             specializedjson_->argument1(),
+//             specializedjson_->get_and_increment(specializedjson_->argument2())
+//           );
+//           specializedjson_->step_forward();
+//           out = Int64(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           specializedjson_->write_int64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillNumber:
+//           specializedjson_->write_int64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool Uint64(uint64_t x) {
-      bool out;
+//     bool Uint64(uint64_t x) {
+//       bool out;
 
-      std::cout << "Uint64 " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//       std::cout << "Uint64 " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          specializedjson_->write_int8(specializedjson_->argument1(), 1);
-          specializedjson_->step_forward();
-          out = Uint64(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->step_forward();
-          out = Uint64(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          specializedjson_->write_uint64(specializedjson_->argument1(), x);
-          return true;
-        case FillNumber:
-          specializedjson_->write_uint64(specializedjson_->argument1(), x);
-          return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           specializedjson_->write_int8(specializedjson_->argument1(), 1);
+//           specializedjson_->step_forward();
+//           out = Uint64(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillIndexedOptionArray:
+//           specializedjson_->write_int64(
+//             specializedjson_->argument1(),
+//             specializedjson_->get_and_increment(specializedjson_->argument2())
+//           );
+//           specializedjson_->step_forward();
+//           out = Uint64(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           specializedjson_->write_uint64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillNumber:
+//           specializedjson_->write_uint64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool Double(double x) {
-      bool out;
+//     bool Double(double x) {
+//       bool out;
 
-      std::cout << "Double " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//       std::cout << "Double " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          specializedjson_->write_int8(specializedjson_->argument1(), 1);
-          specializedjson_->step_forward();
-          out = Double(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->step_forward();
-          out = Double(x);
-          specializedjson_->step_backward();
-          return out;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          specializedjson_->write_float64(specializedjson_->argument1(), x);
-          return true;
-        case FillNumber:
-          specializedjson_->write_float64(specializedjson_->argument1(), x);
-          return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           specializedjson_->write_int8(specializedjson_->argument1(), 1);
+//           specializedjson_->step_forward();
+//           out = Double(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillIndexedOptionArray:
+//           specializedjson_->write_int64(
+//             specializedjson_->argument1(),
+//             specializedjson_->get_and_increment(specializedjson_->argument2())
+//           );
+//           specializedjson_->step_forward();
+//           out = Double(x);
+//           specializedjson_->step_backward();
+//           return out;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           specializedjson_->write_float64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillNumber:
+//           specializedjson_->write_float64(specializedjson_->argument1(), x);
+//           return true;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool
-    String(const char* str, rj::SizeType length, bool copy) {
-      std::cout << "String " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//     bool
+//     String(const char* str, rj::SizeType length, bool copy) {
+//       std::cout << "String " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          return false;
-        case FillIndexedOptionArray:
-          return false;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           return false;
+//         case FillIndexedOptionArray:
+//           return false;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           return false;
+//         case FillNumber:
+//           return false;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool
-    StartArray() {
-      std::cout << "StartArray instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//     bool
+//     StartArray() {
+//       std::cout << "StartArray instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
-          return true;
-        case FillByteMaskedArray:
-          specializedjson_->write_int8(specializedjson_->argument1(), 1);
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
-          return true;
-        case FillIndexedOptionArray:
-          specializedjson_->write_int64(
-            specializedjson_->argument1(),
-            specializedjson_->get_and_increment(specializedjson_->argument2())
-          );
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
-          return true;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
-          return true;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+//           return true;
+//         case FillByteMaskedArray:
+//           specializedjson_->write_int8(specializedjson_->argument1(), 1);
+//           specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
+//           return true;
+//         case FillIndexedOptionArray:
+//           specializedjson_->write_int64(
+//             specializedjson_->argument1(),
+//             specializedjson_->get_and_increment(specializedjson_->argument2())
+//           );
+//           specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
+//           return true;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           return false;
+//         case FillNumber:
+//           return false;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+//           return true;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool
-    EndArray(rj::SizeType numfields) {
-      std::cout << "EndArray " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-      specializedjson_->pop_stack();
-      std::cout << "Now instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//     bool
+//     EndArray(rj::SizeType numfields) {
+//       std::cout << "EndArray " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//       specializedjson_->pop_stack();
+//       std::cout << "Now instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          specializedjson_->set_length(numfields);
-          return true;
-        case FillByteMaskedArray:
-        case FillIndexedOptionArray:
-          specializedjson_->step_forward();
-          switch (specializedjson_->instruction()) {
-            case TopLevelArray:
-              return false;
-            case FillByteMaskedArray:
-              return false;
-            case FillIndexedOptionArray:
-              return false;
-            case FillBoolean:
-              return false;
-            case FillInteger:
-              return false;
-            case FillNumber:
-              return false;
-            case FillString:
-              return false;
-            case FillEnumString:
-              return false;
-            case VarLengthList:
-              specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
-              break;
-            case FixedLengthList:
-              return false;
-            case KeyTableHeader:
-              return false;
-            case KeyTableItem:
-              return false;
-          }
-          specializedjson_->step_backward();
-          return true;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
-          return true;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           specializedjson_->set_length(numfields);
+//           return true;
+//         case FillByteMaskedArray:
+//         case FillIndexedOptionArray:
+//           specializedjson_->step_forward();
+//           switch (specializedjson_->instruction()) {
+//             case TopLevelArray:
+//               return false;
+//             case FillByteMaskedArray:
+//               return false;
+//             case FillIndexedOptionArray:
+//               return false;
+//             case FillBoolean:
+//               return false;
+//             case FillInteger:
+//               return false;
+//             case FillNumber:
+//               return false;
+//             case FillString:
+//               return false;
+//             case FillEnumString:
+//               return false;
+//             case VarLengthList:
+//               specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
+//               break;
+//             case FixedLengthList:
+//               return false;
+//             case KeyTableHeader:
+//               return false;
+//             case KeyTableItem:
+//               return false;
+//           }
+//           specializedjson_->step_backward();
+//           return true;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           return false;
+//         case FillNumber:
+//           return false;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
+//           return true;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool
-    StartObject() {
-      std::cout << "StartObject instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//     bool
+//     StartObject() {
+//       std::cout << "StartObject instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          return false;
-        case FillIndexedOptionArray:
-          return false;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           return false;
+//         case FillIndexedOptionArray:
+//           return false;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           return false;
+//         case FillNumber:
+//           return false;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool
-    EndObject(rj::SizeType numfields) {
-      std::cout << "EndObject " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//     bool
+//     EndObject(rj::SizeType numfields) {
+//       std::cout << "EndObject " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          return false;
-        case FillIndexedOptionArray:
-          return false;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           return false;
+//         case FillIndexedOptionArray:
+//           return false;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           return false;
+//         case FillNumber:
+//           return false;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-    bool
-    Key(const char* str, rj::SizeType length, bool copy) {
-      std::cout << "Key " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+//     bool
+//     Key(const char* str, rj::SizeType length, bool copy) {
+//       std::cout << "Key " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
-      switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          return false;
-        case FillIndexedOptionArray:
-          return false;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
-          return false;
-      }
-      return false;
-    }
+//       switch (specializedjson_->instruction()) {
+//         case TopLevelArray:
+//           return false;
+//         case FillByteMaskedArray:
+//           return false;
+//         case FillIndexedOptionArray:
+//           return false;
+//         case FillBoolean:
+//           return false;
+//         case FillInteger:
+//           return false;
+//         case FillNumber:
+//           return false;
+//         case FillString:
+//           return false;
+//         case FillEnumString:
+//           return false;
+//         case VarLengthList:
+//           return false;
+//         case FixedLengthList:
+//           return false;
+//         case KeyTableHeader:
+//           return false;
+//         case KeyTableItem:
+//           return false;
+//       }
+//       return false;
+//     }
 
-  private:
-    SpecializedJSON* specializedjson_;
-  };
+//   private:
+//     SpecializedJSON* specializedjson_;
+//   };
 
-  SpecializedJSON::SpecializedJSON(const std::string& jsonassembly,
-                                   int64_t output_initial_size,
-                                   double output_resize_factor) {
-    rj::Document doc;
-    doc.Parse<rj::kParseDefaultFlags>(jsonassembly.c_str());
+//   SpecializedJSON::SpecializedJSON(const std::string& jsonassembly,
+//                                    int64_t output_initial_size,
+//                                    double output_resize_factor) {
+//     rj::Document doc;
+//     doc.Parse<rj::kParseDefaultFlags>(jsonassembly.c_str());
 
-    if (doc.HasParseError()) {
-      throw std::invalid_argument(
-        "failed to parse jsonassembly" + FILENAME(__LINE__)
-      );
-    }
+//     if (doc.HasParseError()) {
+//       throw std::invalid_argument(
+//         "failed to parse jsonassembly" + FILENAME(__LINE__)
+//       );
+//     }
 
-    if (!doc.IsArray()) {
-      throw std::invalid_argument(
-        "jsonassembly must be an array of instructions" + FILENAME(__LINE__)
-      );
-    }
+//     if (!doc.IsArray()) {
+//       throw std::invalid_argument(
+//         "jsonassembly must be an array of instructions" + FILENAME(__LINE__)
+//       );
+//     }
 
-    int64_t instruction_stack_max_depth = 0;
-    std::vector<std::string> strings;
+//     int64_t instruction_stack_max_depth = 0;
+//     std::vector<std::string> strings;
 
-    for (auto& item : doc.GetArray()) {
-      if (!item.IsArray()  ||  item.Size() == 0  ||  !item[0].IsString()) {
-        throw std::invalid_argument(
-          "each jsonassembly instruction must be an array starting with a string" +
-          FILENAME(__LINE__)
-        );
-      }
+//     for (auto& item : doc.GetArray()) {
+//       if (!item.IsArray()  ||  item.Size() == 0  ||  !item[0].IsString()) {
+//         throw std::invalid_argument(
+//           "each jsonassembly instruction must be an array starting with a string" +
+//           FILENAME(__LINE__)
+//         );
+//       }
 
-      if (std::string("TopLevelArray") == item[0].GetString()) {
-        if (item.Size() != 1) {
-          throw std::invalid_argument(
-            "TopLevelArray arguments: (none!)" + FILENAME(__LINE__)
-          );
-        }
-        instruction_stack_max_depth++;
-        instructions_.push_back(TopLevelArray);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
-      }
+//       if (std::string("TopLevelArray") == item[0].GetString()) {
+//         if (item.Size() != 1) {
+//           throw std::invalid_argument(
+//             "TopLevelArray arguments: (none!)" + FILENAME(__LINE__)
+//           );
+//         }
+//         instruction_stack_max_depth++;
+//         instructions_.push_back(TopLevelArray);
+//         instructions_.push_back(-1);
+//         instructions_.push_back(-1);
+//         instructions_.push_back(-1);
+//       }
 
-      else if (std::string("FillByteMaskedArray") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
-          throw std::invalid_argument(
-            "FillByteMaskedArray arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
-        }
-        int64_t outi = output_index(item[1].GetString(),
-                                    util::name_to_dtype(item[2].GetString()),
-                                    false,
-                                    output_initial_size,
-                                    output_resize_factor);
-        instructions_.push_back(FillByteMaskedArray);
-        instructions_.push_back(outi);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
-      }
-      else if (std::string("FillIndexedOptionArray") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
-          throw std::invalid_argument(
-            "FillIndexedOptionArray arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
-        }
-        int64_t outi = output_index(item[1].GetString(),
-                                    util::name_to_dtype(item[2].GetString()),
-                                    false,
-                                    output_initial_size,
-                                    output_resize_factor);
-        int64_t counti = counters_.size();
-        counters_.push_back(0);
-        instructions_.push_back(FillIndexedOptionArray);
-        instructions_.push_back(outi);
-        instructions_.push_back(counti);
-        instructions_.push_back(-1);
-      }
-      else if (std::string("FillBoolean") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
-          throw std::invalid_argument(
-            "FillBoolean arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
-        }
-        int64_t outi = output_index(item[1].GetString(),
-                                    util::name_to_dtype(item[2].GetString()),
-                                    false,
-                                    output_initial_size,
-                                    output_resize_factor);
-        instructions_.push_back(FillBoolean);
-        instructions_.push_back(outi);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
-      }
-      else if (std::string("FillInteger") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
-          throw std::invalid_argument(
-            "FillInteger arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
-        }
-        int64_t outi = output_index(item[1].GetString(),
-                                    util::name_to_dtype(item[2].GetString()),
-                                    false,
-                                    output_initial_size,
-                                    output_resize_factor);
-        instructions_.push_back(FillInteger);
-        instructions_.push_back(outi);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
-      }
-      else if (std::string("FillNumber") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
-          throw std::invalid_argument(
-            "FillNumber arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
-        }
-        int64_t outi = output_index(item[1].GetString(),
-                                    util::name_to_dtype(item[2].GetString()),
-                                    false,
-                                    output_initial_size,
-                                    output_resize_factor);
-        instructions_.push_back(FillNumber);
-        instructions_.push_back(outi);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
-      }
-      else if (std::string("FillString") == item[0].GetString()) {
-        instructions_.push_back(FillString);
-      }
-      else if (std::string("FillEnumString") == item[0].GetString()) {
-        instructions_.push_back(FillEnumString);
-      }
-      else if (std::string("VarLengthList") == item[0].GetString()) {
-        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
-          throw std::invalid_argument(
-            "VarLengthList arguments: output:str dtype:str" + FILENAME(__LINE__)
-          );
-        }
-        instruction_stack_max_depth++;
-        int64_t outi = output_index(item[1].GetString(),
-                                    util::name_to_dtype(item[2].GetString()),
-                                    true,
-                                    output_initial_size,
-                                    output_resize_factor);
-        instructions_.push_back(VarLengthList);
-        instructions_.push_back(outi);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
-      }
-      else if (std::string("FixedLengthList") == item[0].GetString()) {
-        instructions_.push_back(FixedLengthList);
-      }
-      else if (std::string("KeyTableHeader") == item[0].GetString()) {
-        instructions_.push_back(KeyTableHeader);
-      }
-      else if (std::string("KeyTableItem") == item[0].GetString()) {
-        instructions_.push_back(KeyTableItem);
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("unrecognized jsonassembly instruction: ") + item[0].GetString() +
-          FILENAME(__LINE__)
-        );
-      }
-    }
+//       else if (std::string("FillByteMaskedArray") == item[0].GetString()) {
+//         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+//           throw std::invalid_argument(
+//             "FillByteMaskedArray arguments: output:str dtype:str" + FILENAME(__LINE__)
+//           );
+//         }
+//         int64_t outi = output_index(item[1].GetString(),
+//                                     util::name_to_dtype(item[2].GetString()),
+//                                     false,
+//                                     output_initial_size,
+//                                     output_resize_factor);
+//         instructions_.push_back(FillByteMaskedArray);
+//         instructions_.push_back(outi);
+//         instructions_.push_back(-1);
+//         instructions_.push_back(-1);
+//       }
+//       else if (std::string("FillIndexedOptionArray") == item[0].GetString()) {
+//         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+//           throw std::invalid_argument(
+//             "FillIndexedOptionArray arguments: output:str dtype:str" + FILENAME(__LINE__)
+//           );
+//         }
+//         int64_t outi = output_index(item[1].GetString(),
+//                                     util::name_to_dtype(item[2].GetString()),
+//                                     false,
+//                                     output_initial_size,
+//                                     output_resize_factor);
+//         int64_t counti = counters_.size();
+//         counters_.push_back(0);
+//         instructions_.push_back(FillIndexedOptionArray);
+//         instructions_.push_back(outi);
+//         instructions_.push_back(counti);
+//         instructions_.push_back(-1);
+//       }
+//       else if (std::string("FillBoolean") == item[0].GetString()) {
+//         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+//           throw std::invalid_argument(
+//             "FillBoolean arguments: output:str dtype:str" + FILENAME(__LINE__)
+//           );
+//         }
+//         int64_t outi = output_index(item[1].GetString(),
+//                                     util::name_to_dtype(item[2].GetString()),
+//                                     false,
+//                                     output_initial_size,
+//                                     output_resize_factor);
+//         instructions_.push_back(FillBoolean);
+//         instructions_.push_back(outi);
+//         instructions_.push_back(-1);
+//         instructions_.push_back(-1);
+//       }
+//       else if (std::string("FillInteger") == item[0].GetString()) {
+//         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+//           throw std::invalid_argument(
+//             "FillInteger arguments: output:str dtype:str" + FILENAME(__LINE__)
+//           );
+//         }
+//         int64_t outi = output_index(item[1].GetString(),
+//                                     util::name_to_dtype(item[2].GetString()),
+//                                     false,
+//                                     output_initial_size,
+//                                     output_resize_factor);
+//         instructions_.push_back(FillInteger);
+//         instructions_.push_back(outi);
+//         instructions_.push_back(-1);
+//         instructions_.push_back(-1);
+//       }
+//       else if (std::string("FillNumber") == item[0].GetString()) {
+//         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+//           throw std::invalid_argument(
+//             "FillNumber arguments: output:str dtype:str" + FILENAME(__LINE__)
+//           );
+//         }
+//         int64_t outi = output_index(item[1].GetString(),
+//                                     util::name_to_dtype(item[2].GetString()),
+//                                     false,
+//                                     output_initial_size,
+//                                     output_resize_factor);
+//         instructions_.push_back(FillNumber);
+//         instructions_.push_back(outi);
+//         instructions_.push_back(-1);
+//         instructions_.push_back(-1);
+//       }
+//       else if (std::string("FillString") == item[0].GetString()) {
+//         instructions_.push_back(FillString);
+//       }
+//       else if (std::string("FillEnumString") == item[0].GetString()) {
+//         instructions_.push_back(FillEnumString);
+//       }
+//       else if (std::string("VarLengthList") == item[0].GetString()) {
+//         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+//           throw std::invalid_argument(
+//             "VarLengthList arguments: output:str dtype:str" + FILENAME(__LINE__)
+//           );
+//         }
+//         instruction_stack_max_depth++;
+//         int64_t outi = output_index(item[1].GetString(),
+//                                     util::name_to_dtype(item[2].GetString()),
+//                                     true,
+//                                     output_initial_size,
+//                                     output_resize_factor);
+//         instructions_.push_back(VarLengthList);
+//         instructions_.push_back(outi);
+//         instructions_.push_back(-1);
+//         instructions_.push_back(-1);
+//       }
+//       else if (std::string("FixedLengthList") == item[0].GetString()) {
+//         instructions_.push_back(FixedLengthList);
+//       }
+//       else if (std::string("KeyTableHeader") == item[0].GetString()) {
+//         instructions_.push_back(KeyTableHeader);
+//       }
+//       else if (std::string("KeyTableItem") == item[0].GetString()) {
+//         instructions_.push_back(KeyTableItem);
+//       }
+//       else {
+//         throw std::invalid_argument(
+//           std::string("unrecognized jsonassembly instruction: ") + item[0].GetString() +
+//           FILENAME(__LINE__)
+//         );
+//       }
+//     }
 
-    for (int64_t i = 0;  i < instruction_stack_max_depth;  i++) {
-      instruction_stack_.push_back(0);
-    }
+//     for (int64_t i = 0;  i < instruction_stack_max_depth;  i++) {
+//       instruction_stack_.push_back(0);
+//     }
 
-    std::cout << "num instructions " << instructions_.size() << std::endl;
-  }
+//     std::cout << "num instructions " << instructions_.size() << std::endl;
+//   }
 
-  const std::shared_ptr<ForthOutputBuffer>
-  SpecializedJSON::output_at(const std::string& name) const {
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
-      if (output_names_[i] == name) {
-        return outputs_[i];
-      }
-    }
-    throw std::invalid_argument(
-      std::string("output not found: ") + name + FILENAME(__LINE__)
-    );
-  }
+//   const std::shared_ptr<ForthOutputBuffer>
+//   SpecializedJSON::output_at(const std::string& name) const {
+//     for (int64_t i = 0;  i < output_names_.size();  i++) {
+//       if (output_names_[i] == name) {
+//         return outputs_[i];
+//       }
+//     }
+//     throw std::invalid_argument(
+//       std::string("output not found: ") + name + FILENAME(__LINE__)
+//     );
+//   }
 
-  util::dtype
-  SpecializedJSON::dtype_at(const std::string& name) const {
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
-      if (output_names_[i] == name) {
-        return output_dtypes_[i];
-      }
-    }
-    throw std::invalid_argument(
-      std::string("output not found: ") + name + FILENAME(__LINE__)
-    );
-  }
+//   util::dtype
+//   SpecializedJSON::dtype_at(const std::string& name) const {
+//     for (int64_t i = 0;  i < output_names_.size();  i++) {
+//       if (output_names_[i] == name) {
+//         return output_dtypes_[i];
+//       }
+//     }
+//     throw std::invalid_argument(
+//       std::string("output not found: ") + name + FILENAME(__LINE__)
+//     );
+//   }
 
-  int64_t
-  SpecializedJSON::length() const noexcept {
-    return length_;
-  }
+//   int64_t
+//   SpecializedJSON::length() const noexcept {
+//     return length_;
+//   }
 
-  bool
-  SpecializedJSON::parse_string(const char* source) noexcept {
-    reset();
-    rj::Reader reader;
-    rj::StringStream stream(source);
-    Handler handler(this);
-    bool out = reader.Parse<rj::kParseDefaultFlags>(stream, handler);
-    json_position_ = stream.Tell();
-    return out;
-  }
+//   bool
+//   SpecializedJSON::parse_string(const char* source) noexcept {
+//     reset();
+//     rj::Reader reader;
+//     rj::StringStream stream(source);
+//     Handler handler(this);
+//     bool out = reader.Parse<rj::kParseDefaultFlags>(stream, handler);
+//     json_position_ = stream.Tell();
+//     return out;
+//   }
 
-  void
-  SpecializedJSON::reset() noexcept {
-    current_instruction_ = 0;
-    current_stack_depth_ = 0;
-    for (int64_t i = 0;  i < counters_.size();  i++) {
-      counters_[i] = 0;
-    }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
-      outputs_[i].get()->reset();
-      if (output_leading_zero_[i]) {
-        outputs_[i].get()->write_one_int64(0, false);
-      }
-    }
-    length_ = 0;
-  }
+//   void
+//   SpecializedJSON::reset() noexcept {
+//     current_instruction_ = 0;
+//     current_stack_depth_ = 0;
+//     for (int64_t i = 0;  i < counters_.size();  i++) {
+//       counters_[i] = 0;
+//     }
+//     for (int64_t i = 0;  i < output_names_.size();  i++) {
+//       outputs_[i].get()->reset();
+//       if (output_leading_zero_[i]) {
+//         outputs_[i].get()->write_one_int64(0, false);
+//       }
+//     }
+//     length_ = 0;
+//   }
 
-  int64_t
-  SpecializedJSON::output_index(const std::string& name,
-                                util::dtype dtype,
-                                bool leading_zero,
-                                int64_t init,
-                                double resize) {
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
-      if (name == output_names_[i]) {
-        if (dtype != output_dtypes_[i]  ||  leading_zero != output_leading_zero_[i]) {
-          throw std::invalid_argument(
-            std::string("redeclaration of ") + name +
-            std::string(" with a different dtype or leading zero") + FILENAME(__LINE__)
-          );
-        }
-        return i;
-      }
-    }
-    int64_t i = output_names_.size();
-    output_names_.push_back(name);
-    output_dtypes_.push_back(dtype);
-    output_leading_zero_.push_back(leading_zero);
+//   int64_t
+//   SpecializedJSON::output_index(const std::string& name,
+//                                 util::dtype dtype,
+//                                 bool leading_zero,
+//                                 int64_t init,
+//                                 double resize) {
+//     for (int64_t i = 0;  i < output_names_.size();  i++) {
+//       if (name == output_names_[i]) {
+//         if (dtype != output_dtypes_[i]  ||  leading_zero != output_leading_zero_[i]) {
+//           throw std::invalid_argument(
+//             std::string("redeclaration of ") + name +
+//             std::string(" with a different dtype or leading zero") + FILENAME(__LINE__)
+//           );
+//         }
+//         return i;
+//       }
+//     }
+//     int64_t i = output_names_.size();
+//     output_names_.push_back(name);
+//     output_dtypes_.push_back(dtype);
+//     output_leading_zero_.push_back(leading_zero);
 
-    std::shared_ptr<ForthOutputBuffer> out;
-    switch (dtype) {
-      case util::dtype::boolean: {
-        out = std::make_shared<ForthOutputBufferOf<bool>>(init, resize);
-        break;
-      }
-      case util::dtype::int8: {
-        out = std::make_shared<ForthOutputBufferOf<int8_t>>(init, resize);
-        break;
-      }
-      case util::dtype::int16: {
-        out = std::make_shared<ForthOutputBufferOf<int16_t>>(init, resize);
-        break;
-      }
-      case util::dtype::int32: {
-        out = std::make_shared<ForthOutputBufferOf<int32_t>>(init, resize);
-        break;
-      }
-      case util::dtype::int64: {
-        out = std::make_shared<ForthOutputBufferOf<int64_t>>(init, resize);
-        break;
-      }
-      case util::dtype::uint8: {
-        out = std::make_shared<ForthOutputBufferOf<uint8_t>>(init, resize);
-        break;
-      }
-      case util::dtype::uint16: {
-        out = std::make_shared<ForthOutputBufferOf<uint16_t>>(init, resize);
-        break;
-      }
-      case util::dtype::uint32: {
-        out = std::make_shared<ForthOutputBufferOf<uint32_t>>(init, resize);
-        break;
-      }
-      case util::dtype::uint64: {
-        out = std::make_shared<ForthOutputBufferOf<uint64_t>>(init, resize);
-        break;
-      }
-      case util::dtype::float32: {
-        out = std::make_shared<ForthOutputBufferOf<float>>(init, resize);
-        break;
-      }
-      case util::dtype::float64: {
-        out = std::make_shared<ForthOutputBufferOf<double>>(init, resize);
-        break;
-      }
-      default: {
-        throw std::runtime_error(std::string("unhandled ForthOutputBuffer type")
-                                 + FILENAME(__LINE__));
-      }
-    }
-    outputs_.push_back(out);
+//     std::shared_ptr<ForthOutputBuffer> out;
+//     switch (dtype) {
+//       case util::dtype::boolean: {
+//         out = std::make_shared<ForthOutputBufferOf<bool>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::int8: {
+//         out = std::make_shared<ForthOutputBufferOf<int8_t>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::int16: {
+//         out = std::make_shared<ForthOutputBufferOf<int16_t>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::int32: {
+//         out = std::make_shared<ForthOutputBufferOf<int32_t>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::int64: {
+//         out = std::make_shared<ForthOutputBufferOf<int64_t>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::uint8: {
+//         out = std::make_shared<ForthOutputBufferOf<uint8_t>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::uint16: {
+//         out = std::make_shared<ForthOutputBufferOf<uint16_t>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::uint32: {
+//         out = std::make_shared<ForthOutputBufferOf<uint32_t>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::uint64: {
+//         out = std::make_shared<ForthOutputBufferOf<uint64_t>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::float32: {
+//         out = std::make_shared<ForthOutputBufferOf<float>>(init, resize);
+//         break;
+//       }
+//       case util::dtype::float64: {
+//         out = std::make_shared<ForthOutputBufferOf<double>>(init, resize);
+//         break;
+//       }
+//       default: {
+//         throw std::runtime_error(std::string("unhandled ForthOutputBuffer type")
+//                                  + FILENAME(__LINE__));
+//       }
+//     }
+//     outputs_.push_back(out);
 
-    return i;
-  }
+//     return i;
+//   }
 
-}
+// }
