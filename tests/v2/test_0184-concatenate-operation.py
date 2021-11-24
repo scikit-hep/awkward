@@ -13,13 +13,19 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yet")
+# @pytest.mark.skip(reason="ak.type not implemented")
 def test_concatenate_number():
+
+    a1 = ak.Array([[1, 2, 3], [], [4, 5]])
     a1 = v1_to_v2(ak.Array([[1, 2, 3], [], [4, 5]]).layout)
     a2 = v1_to_v2(ak.Array([[[1.1], [2.2, 3.3]], [[]], [[4.4], [5.5]]]).layout)
     a3 = v1_to_v2(ak.Array([[123], [223], [323]]).layout)
 
-    # assert ak.to_list(ak._v2.operations.structure.concatenate([a1, 999], axis=1)) == [[1, 2, 3, 999], [999], [4, 5, 999]]
+    assert ak.to_list(ak._v2.operations.structure.concatenate([a1, 999], axis=1)) == [
+        [1, 2, 3, 999],
+        [999],
+        [4, 5, 999],
+    ]
 
     assert ak.to_list(ak._v2.operations.structure.concatenate([a2, 999], axis=2)) == [
         [[1.1, 999.0], [2.2, 3.3, 999.0]],
@@ -29,15 +35,13 @@ def test_concatenate_number():
 
     assert (
         str(
-            ak.type(
-                ak._v2.operations.structure.concatenate(
-                    [
-                        a1,
-                        a3,
-                    ],
-                    axis=1,
-                )
-            )
+            ak._v2.operations.structure.concatenate(
+                [
+                    a1,
+                    a3,
+                ],
+                axis=1,
+            ).type
         )
         == "3 * var * int64"
     )
@@ -498,7 +502,6 @@ def test_negative_axis_concatenate():
     ]
 
 
-@pytest.mark.skip(reason="Concatente not supporting axis yet")
 def test_even_more():
     dim1 = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
     dim1a = ak.Array([[1.1], [2.2], [3.3], [4.4], [5.5]])
@@ -528,7 +531,6 @@ def test_even_more():
         4.4,
         5.5,
     ]
-
     assert ak._v2.operations.structure.concatenate([dim1, dim2]).tolist() == [
         1.1,
         2.2,

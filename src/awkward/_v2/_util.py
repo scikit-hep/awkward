@@ -671,14 +671,7 @@ def broadcast_and_apply(  # noqa: C901
                     offsets = nplike.asarray(x.offsets)
                 elif not nplike.array_equal(offsets, nplike.asarray(x.offsets)):
                     return False
-            elif isinstance(
-                x,
-                (
-                    ak._v2.contents.ListArray32,
-                    ak._v2.contents.ListArrayU32,
-                    ak._v2.contents.ListArray64,
-                ),
-            ):
+            elif isinstance(x, ak._v2.contents.ListArray):
                 starts = nplike.asarray(x.starts)
                 stops = nplike.asarray(x.stops)
                 if not nplike.array_equal(starts[1:], stops[:-1]):
@@ -763,19 +756,18 @@ def broadcast_and_apply(  # noqa: C901
             user = custom
 
         # the rest of this is one switch statement
-        if any(not isinstance(x, ak._v2.contents.Content) for x in inputs):
-            nextinputs = []
-            for x in inputs:
-                if not isinstance(x, ak._v2.contents.Content):
-                    nextinputs.append(ak._v2.contents.NumpyArray(nplike.array([x])))
-                else:
-                    nextinputs.append(x)
-            return apply(nextinputs, depth, user)
+        # if any(not isinstance(x, ak._v2.contents.Content) for x in inputs):
+        #     nextinputs = []
+        #     for x in range(len(inputs)):
+        #         if not isinstance(inputs[x], ak._v2.contents.Content):
+        #             inputs[x] = ak._v2.contents.NumpyArray(nplike.array([x]))
 
-        if any(x.is_UnknownType for x in inputs):
+        if any(
+            isinstance(x, ak._v2.contents.Content) and x.is_UnknownType for x in inputs
+        ):
             nextinputs = []
             for x in inputs:
-                if isinstance(x, ak._v2.contents.EmptyArray):
+                if x.is_UnknownType:
                     nextinputs.append(
                         ak._v2.contents.NumpyArray(nplike.array([], dtype=np.bool_))
                     )
@@ -795,21 +787,25 @@ def broadcast_and_apply(  # noqa: C901
                     nextinputs.append(x)
             return apply(nextinputs, depth, user)
 
-        elif any(isinstance(x, ak._v2.contents.IndexedArray) for x in inputs):
+        elif any(
+            isinstance(x, ak._v2.contents.Content) and x.is_IndexedType for x in inputs
+        ):
             nextinputs = []
             for x in inputs:
-                if isinstance(x, ak._v2.contents.IndexedArray):
+                if x.IndexedType:
                     nextinputs.append(x.project())
                 else:
                     nextinputs.append(x)
             return apply(nextinputs, depth, user)
 
-        elif any(isinstance(x, ak._v2.contents.UnionArray) for x in inputs):
+        elif any(
+            isinstance(x, ak._v2.contents.Content) and x.is_UnionType for x in inputs
+        ):
             tagslist = []
             numtags = []
             length = None
             for x in inputs:
-                if isinstance(x, ak._v2.contents.UnionArray):
+                if x.UnionType:
                     tagslist.append(nplike.asarray(x.tags))
                     numtags.append(len(x.contents))
                     if length is None:
@@ -844,7 +840,7 @@ def broadcast_and_apply(  # noqa: C901
                 nextinputs = []
                 i = 0
                 for x in inputs:
-                    if x.is_UnionType:
+                    if hasattr(x, "UnionType"):
                         nextinputs.append(x[mask].project(combo[str(i)]))
                         i += 1
                     elif isinstance(x, ak._v2.contents.Content):
@@ -862,13 +858,15 @@ def broadcast_and_apply(  # noqa: C901
             tags = ak._v2.index.Index8(tags)
             index = ak._v2.index.Index64(index)
             return tuple(
-                ak._v2.contents.UnionArray8_64(
+                ak._v2.contents.UnionArray(
                     tags, index, [x[i] for x in outcontents]
                 ).simplify()
                 for i in range(numoutputs)
             )
 
-        elif any(x.is_OptionType for x in inputs):
+        elif any(
+            isinstance(x, ak._v2.contents.Content) and x.is_OptionType for x in inputs
+        ):
             mask = None
             for x in inputs:
                 if x.is_OptionType:
@@ -909,11 +907,22 @@ def broadcast_and_apply(  # noqa: C901
                 for x in outcontent
             )
 
-        elif any(x.is_ListType for x in inputs):
+        elif any(
+            isinstance(x, ak._v2.contents.Content) and x.is_ListType for x in inputs
+        ):
             if all(
-                isinstance(x, ak._v2.contents.RegularArray) or not x.is_ListType
+                isinstance(x, ak._v2.contents.RegularArray)
+                or not isinstance(
+                    x,
+                    (
+                        ak._v2.contents.RegularArray,
+                        ak._v2.contents.ListArray,
+                        ak._v2.contents.ListOffsetArray,
+                    ),
+                )
                 for x in inputs
             ):
+
                 maxsize = max(
                     [
                         x.size
@@ -1066,18 +1075,18 @@ def broadcast_and_apply(  # noqa: C901
             if not allow_records:
                 raise ValueError("cannot broadcast records in this type of operation")
 
-            keys = None
+            fields = None
             length = None
             istuple = True
             for x in inputs:
                 if x.is_RecordType:
-                    if keys is None:
-                        keys = x.keys()
-                    elif set(keys) != set(x.keys()):
+                    if fields is None:
+                        fields = x.fields
+                    elif set(fields) != set(x.fields):
                         raise ValueError(
-                            "cannot broadcast records because keys don't "
+                            "cannot broadcast records because fields don't "
                             "match:\n    {0}\n    {1}".format(
-                                ", ".join(sorted(keys)), ", ".join(sorted(x.keys()))
+                                ", ".join(sorted(fields)), ", ".join(sorted(x.fields()))
                             )
                         )
                     if length is None:
@@ -1087,15 +1096,15 @@ def broadcast_and_apply(  # noqa: C901
                             "cannot broadcast RecordArray of length {0} "
                             "with RecordArray of length {1}".format(length, len(x))
                         )
-                    if not x.istuple:
+                    if not x.is_tuple:
                         istuple = False
 
             outcontents = []
             numoutputs = None
-            for key in keys:
+            for field in fields:
                 outcontents.append(
                     apply(
-                        [x if not x.is_RecordType else x[key] for x in inputs],
+                        [x if not x.is_RecordType else x[field] for x in inputs],
                         depth,
                         user,
                     )
@@ -1106,7 +1115,7 @@ def broadcast_and_apply(  # noqa: C901
                 numoutputs = len(outcontents[-1])
             return tuple(
                 ak._v2.contents.RecordArray(
-                    [x[i] for x in outcontents], None if istuple else keys, length
+                    [x[i] for x in outcontents], None if istuple else fields, length
                 )
                 for i in range(numoutputs)
             )
@@ -1116,62 +1125,10 @@ def broadcast_and_apply(  # noqa: C901
                 "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
             )
 
-    if any(
-        isinstance(x, ak.partition.PartitionedArray) for x in inputs
-    ):  # NO PARTITIONED ARRAY
-        purelist_isregular = True
-        purelist_depths = set()
-        for x in inputs:
-            if isinstance(
-                x, (ak._v2.contents.Content, ak.partition.PartitionedArray)
-            ):  # NO PARTITIONED ARRAY
-                if not x.purelist_isregular:
-                    purelist_isregular = False
-                    break
-                purelist_depths.add(x.purelist_depth)
-
-        if purelist_isregular and len(purelist_depths) > 1:
-            nextinputs = []
-            for x in inputs:
-                if isinstance(x, ak.partition.PartitionedArray):  # NO PARTITIONED ARRAY
-                    nextinputs.append(x.toContent())
-                else:
-                    nextinputs.append(x)
-
-            isscalar = []
-            out = apply(broadcast_pack(nextinputs, isscalar), 0, None)
-            assert isinstance(out, tuple)
-            return tuple(broadcast_unpack(x, isscalar) for x in out)
-
-        else:
-            sample = None
-            for x in inputs:
-                if isinstance(x, ak.partition.PartitionedArray):  # NO PARTITIONED ARRAY
-                    sample = x
-                    break
-            nextinputs = ak.partition.partition_as(sample, inputs)
-
-            outputs = []
-            for part_inputs in ak.partition.iterate(sample.numpartitions, nextinputs):
-                isscalar = []
-                part = apply(broadcast_pack(part_inputs, isscalar), 0, None)
-                assert isinstance(part, tuple)
-                outputs.append(tuple(broadcast_unpack(x, isscalar) for x in part))
-
-            out = ()
-            for i in range(len(part)):
-                out = out + (
-                    ak.partition.IrregularlyPartitionedArray(
-                        [x[i] for x in outputs]
-                    ),  # NO PARTITIONED ARRAY
-                )
-            return out
-
-    else:
-        isscalar = []
-        out = apply(broadcast_pack(inputs, isscalar), 0, user)
-        assert isinstance(out, tuple)
-        return tuple(broadcast_unpack(x, isscalar) for x in out)
+    isscalar = []
+    out = apply(broadcast_pack(inputs, isscalar), 0, user)
+    assert isinstance(out, tuple)
+    return tuple(broadcast_unpack(x, isscalar) for x in out)
 
 
 def broadcast_pack(inputs, isscalar):

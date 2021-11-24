@@ -2,8 +2,13 @@
 
 from __future__ import absolute_import
 
-from collections import Iterable
 import numbers
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()

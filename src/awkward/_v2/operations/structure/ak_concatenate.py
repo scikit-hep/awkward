@@ -38,29 +38,20 @@ def concatenate(
     #     must have the same lengths and nested lists are each concatenated,
     #     element for element, and similarly for deeper levels.
     #     """
+
     contents = [
         ak._v2.operations.convert.to_layout(
             x, allow_record=False if axis == 0 else True, allow_other=True
         )
         for x in arrays
     ]
-    if not any(
-        isinstance(
-            x,
-            (ak._v2.contents.Content,),  # NO PARTITIONED ARRAY
-        )
-        for x in contents
-    ):
+    if not any(isinstance(x, (ak._v2.contents.Content,)) for x in contents):
         raise ValueError("need at least one array to concatenate")
 
-    first_content = [
-        x
-        for x in contents
-        if isinstance(
-            x,
-            (ak._v2.contents.Content,),  # NO PARTITIONED ARRAY
-        )
-    ][0]
+    first_content = [x for x in contents if isinstance(x, (ak._v2.contents.Content,))][
+        0
+    ]
+
     posaxis = first_content.axis_wrap_if_negative(axis)
     maxdepth = max(
         [
@@ -68,11 +59,7 @@ def concatenate(
             for x in contents
             if isinstance(
                 x,
-                (
-                    ak._v2.contents.Content,
-                    ak.partition.PartitionedArray,  # NO PARTITIONED ARRAY
-                    ak._v2.contents.Content,
-                ),
+                (ak._v2.contents.Content,),
             )
         ]
     )
@@ -112,7 +99,11 @@ def concatenate(
     else:
 
         def getfunction(inputs, depth):
-            if depth == posaxis and any(x.is_OptionType for x in inputs):
+
+            if depth == posaxis and any(
+                isinstance(x, ak._v2.contents.Content) and x.is_OptionType
+                for x in inputs
+            ):
                 nextinputs = []
                 for x in inputs:
                     if x.is_OptionType and x.content.is_ListType:
@@ -122,7 +113,8 @@ def concatenate(
                 inputs = nextinputs
 
             if depth == posaxis and all(
-                x.is_ListType
+                isinstance(x, ak._v2.contents.Content)
+                and x.is_ListType
                 or (isinstance(x, ak._v2.contents.NumpyArray) and x.data.ndim > 1)
                 or not isinstance(x, ak._v2.contents.Content)
                 for x in inputs
