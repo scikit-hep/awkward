@@ -15,30 +15,69 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  #define FillByteMaskedArray 0     // arg1: ByteMaskedArray output
-  #define FillIndexedOptionArray 1  // arg1: IndexedOptionArray output, arg2: counter
-  #define FillBoolean 2             // arg1: boolean output
-  #define FillInteger 3             // arg1: integer output
-  #define FillNumber 4              // arg1: number output
-  #define FillString 5              // arg1: offsets output, arg2: content output
-  #define FillEnumString 6          // arg1: index output, arg2: strings start, arg3: strings stop
-  #define VarLengthList 7           // arg1: offsets output
-  #define FixedLengthList 8         // no arguments
-  #define KeyTableHeader 9          // arg1: number of items
-  #define KeyTableItem 10           // arg1: string index, arg2: jump to instruction
+  #define TopLevelArray 0           // no arguments
+  #define FillByteMaskedArray 1     // arg1: ByteMaskedArray output
+  #define FillIndexedOptionArray 2  // arg1: IndexedOptionArray output, arg2: counter
+  #define FillBoolean 3             // arg1: boolean output
+  #define FillInteger 4             // arg1: integer output
+  #define FillNumber 5              // arg1: number output
+  #define FillString 6              // arg1: offsets output, arg2: content output
+  #define FillEnumString 7          // arg1: index output, arg2: strings start, arg3: strings stop
+  #define VarLengthList 8           // arg1: offsets output
+  #define FixedLengthList 9         // arg1: expected length, arg2: counter
+  #define KeyTableHeader 10         // arg1: number of items
+  #define KeyTableItem 11           // arg1: string index, arg2: jump to instruction
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
     Handler(SpecializedJSON* specializedjson): specializedjson_(specializedjson) { }
 
     bool Null() {
-      std::cout << "Null instruction: " << specializedjson_->instruction() << std::endl;
+      std::cout << "Null instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), 0);
+          specializedjson_->step_forward();
+          switch (specializedjson_->instruction()) {
+            case TopLevelArray:
+              return false;
+            case FillByteMaskedArray:
+              return false;
+            case FillIndexedOptionArray:
+              return false;
+            case FillBoolean:
+              specializedjson_->write_int8(specializedjson_->argument1(), 0);
+              break;
+            case FillInteger:
+              specializedjson_->write_int64(specializedjson_->argument1(), 0);
+              break;
+            case FillNumber:
+              specializedjson_->write_float64(specializedjson_->argument1(), 0.0);
+              break;
+            case FillString:
+              // FIXME
+              return false;
+            case FillEnumString:
+              // FIXME
+              return false;
+            case VarLengthList:
+              // FIXME
+              return false;
+            case FixedLengthList:
+              return false;
+            case KeyTableHeader:
+              return false;
+            case KeyTableItem:
+              return false;
+          }
+          specializedjson_->step_backward();
+          return true;
         case FillIndexedOptionArray:
-          return false;
+          specializedjson_->write_int64(specializedjson_->argument1(), -1);
+          return true;
         case FillBoolean:
           return false;
         case FillInteger:
@@ -62,15 +101,31 @@ namespace awkward {
     }
 
     bool Bool(bool x) {
-      std::cout << "Bool " << x << " instruction: " << specializedjson_->instruction() << std::endl;
+      bool out;
+
+      std::cout << "Bool " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), 1);
+          specializedjson_->step_forward();
+          out = Bool(x);
+          specializedjson_->step_backward();
+          return out;
         case FillIndexedOptionArray:
-          return false;
+          specializedjson_->write_int64(
+            specializedjson_->argument1(),
+            specializedjson_->get_and_increment(specializedjson_->argument2())
+          );
+          specializedjson_->step_forward();
+          out = Bool(x);
+          specializedjson_->step_backward();
+          return out;
         case FillBoolean:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), x);
+          return true;
         case FillInteger:
           return false;
         case FillNumber:
@@ -92,20 +147,36 @@ namespace awkward {
     }
 
     bool Int(int x) {
-      std::cout << "Int " << x << " instruction: " << specializedjson_->instruction() << std::endl;
+      bool out;
+
+      std::cout << "Int " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), 1);
+          specializedjson_->step_forward();
+          out = Int(x);
+          specializedjson_->step_backward();
+          return out;
         case FillIndexedOptionArray:
-          return false;
+          specializedjson_->write_int64(
+            specializedjson_->argument1(),
+            specializedjson_->get_and_increment(specializedjson_->argument2())
+          );
+          specializedjson_->step_forward();
+          out = Int(x);
+          specializedjson_->step_backward();
+          return out;
         case FillBoolean:
           return false;
         case FillInteger:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
-          return false;
+          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          return true;
         case FillString:
           return false;
         case FillEnumString:
@@ -123,19 +194,36 @@ namespace awkward {
     }
 
     bool Uint(unsigned int x) {
-      std::cout << "Uint " << x << " instruction: " << specializedjson_->instruction() << std::endl;
+      bool out;
+
+      std::cout << "Uint " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), 1);
+          specializedjson_->step_forward();
+          out = Uint(x);
+          specializedjson_->step_backward();
+          return out;
         case FillIndexedOptionArray:
-          return false;
+          specializedjson_->write_int64(
+            specializedjson_->argument1(),
+            specializedjson_->get_and_increment(specializedjson_->argument2())
+          );
+          specializedjson_->step_forward();
+          out = Uint(x);
+          specializedjson_->step_backward();
+          return out;
         case FillBoolean:
           return false;
         case FillInteger:
-          return false;
+          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          return true;
         case FillNumber:
-          return false;
+          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          return true;
         case FillString:
           return false;
         case FillEnumString:
@@ -153,19 +241,36 @@ namespace awkward {
     }
 
     bool Int64(int64_t x) {
-      std::cout << "Int64 " << x << " instruction: " << specializedjson_->instruction() << std::endl;
+      bool out;
+
+      std::cout << "Int64 " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), 1);
+          specializedjson_->step_forward();
+          out = Int64(x);
+          specializedjson_->step_backward();
+          return out;
         case FillIndexedOptionArray:
-          return false;
+          specializedjson_->write_int64(
+            specializedjson_->argument1(),
+            specializedjson_->get_and_increment(specializedjson_->argument2())
+          );
+          specializedjson_->step_forward();
+          out = Int64(x);
+          specializedjson_->step_backward();
+          return out;
         case FillBoolean:
           return false;
         case FillInteger:
-          return false;
+          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          return true;
         case FillNumber:
-          return false;
+          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          return true;
         case FillString:
           return false;
         case FillEnumString:
@@ -183,24 +288,83 @@ namespace awkward {
     }
 
     bool Uint64(uint64_t x) {
-      std::cout << "Uint64 " << x << " instruction: " << specializedjson_->instruction() << std::endl;
+      bool out;
+
+      std::cout << "Uint64 " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+
+      switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
+        case FillByteMaskedArray:
+          specializedjson_->write_int8(specializedjson_->argument1(), 1);
+          specializedjson_->step_forward();
+          out = Uint64(x);
+          specializedjson_->step_backward();
+          return out;
+        case FillIndexedOptionArray:
+          specializedjson_->write_int64(
+            specializedjson_->argument1(),
+            specializedjson_->get_and_increment(specializedjson_->argument2())
+          );
+          specializedjson_->step_forward();
+          out = Uint64(x);
+          specializedjson_->step_backward();
+          return out;
+        case FillBoolean:
+          return false;
+        case FillInteger:
+          specializedjson_->write_uint64(specializedjson_->argument1(), x);
+          return true;
+        case FillNumber:
+          specializedjson_->write_uint64(specializedjson_->argument1(), x);
+          return true;
+        case FillString:
+          return false;
+        case FillEnumString:
+          return false;
+        case VarLengthList:
+          return false;
+        case FixedLengthList:
+          return false;
+        case KeyTableHeader:
+          return false;
+        case KeyTableItem:
+          return false;
+      }
       return false;
     }
 
     bool Double(double x) {
-      std::cout << "Double " << x << " instruction: " << specializedjson_->instruction() << std::endl;
+      bool out;
+
+      std::cout << "Double " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), 1);
+          specializedjson_->step_forward();
+          out = Double(x);
+          specializedjson_->step_backward();
+          return out;
         case FillIndexedOptionArray:
-          return false;
+          specializedjson_->write_int64(
+            specializedjson_->argument1(),
+            specializedjson_->get_and_increment(specializedjson_->argument2())
+          );
+          specializedjson_->step_forward();
+          out = Double(x);
+          specializedjson_->step_backward();
+          return out;
         case FillBoolean:
           return false;
         case FillInteger:
-          return false;
+          specializedjson_->write_float64(specializedjson_->argument1(), x);
+          return true;
         case FillNumber:
-          return false;
+          specializedjson_->write_float64(specializedjson_->argument1(), x);
+          return true;
         case FillString:
           return false;
         case FillEnumString:
@@ -219,9 +383,11 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
-      std::cout << "String " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << std::endl;
+      std::cout << "String " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
           return false;
         case FillIndexedOptionArray:
@@ -250,9 +416,12 @@ namespace awkward {
 
     bool
     StartArray() {
-      std::cout << "StartArray instruction: " << specializedjson_->instruction() << std::endl;
+      std::cout << "StartArray instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          specializedjson_->step_forward();
+          return true;
         case FillByteMaskedArray:
           return false;
         case FillIndexedOptionArray:
@@ -270,8 +439,7 @@ namespace awkward {
         case VarLengthList:
           return false;
         case FixedLengthList:
-          specializedjson_->step_forward();
-          return true;
+          return false;
         case KeyTableHeader:
           return false;
         case KeyTableItem:
@@ -282,16 +450,18 @@ namespace awkward {
 
     bool
     EndArray(rj::SizeType numfields) {
-      std::cout << "EndArray " << numfields << " instruction: " << specializedjson_->instruction() << std::endl;
+      std::cout << "EndArray " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
       specializedjson_->step_backward();
       return true;
     }
 
     bool
     StartObject() {
-      std::cout << "StartObject instruction: " << specializedjson_->instruction() << std::endl;
+      std::cout << "StartObject instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
           return false;
         case FillIndexedOptionArray:
@@ -320,9 +490,11 @@ namespace awkward {
 
     bool
     EndObject(rj::SizeType numfields) {
-      std::cout << "EndObject " << numfields << " instruction: " << specializedjson_->instruction() << std::endl;
+      std::cout << "EndObject " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
           return false;
         case FillIndexedOptionArray:
@@ -351,9 +523,11 @@ namespace awkward {
 
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
-      std::cout << "Key " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << std::endl;
+      std::cout << "Key " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          return false;
         case FillByteMaskedArray:
           return false;
         case FillIndexedOptionArray:
@@ -413,7 +587,19 @@ namespace awkward {
         );
       }
 
-      if (std::string("FillByteMaskedArray") == item[0].GetString()) {
+      if (std::string("TopLevelArray") == item[0].GetString()) {
+        if (item.Size() != 1) {
+          throw std::invalid_argument(
+            "TopLevelArray arguments: (none!)" + FILENAME(__LINE__)
+          );
+        }
+        instructions_.push_back(TopLevelArray);
+        instructions_.push_back(-1);
+        instructions_.push_back(-1);
+        instructions_.push_back(-1);
+      }
+
+      else if (std::string("FillByteMaskedArray") == item[0].GetString()) {
         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
           throw std::invalid_argument(
             "FillByteMaskedArray arguments: output:str dtype:str" + FILENAME(__LINE__)
@@ -430,10 +616,38 @@ namespace awkward {
         instructions_.push_back(-1);
       }
       else if (std::string("FillIndexedOptionArray") == item[0].GetString()) {
+        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+          throw std::invalid_argument(
+            "FillIndexedOptionArray arguments: output:str dtype:str" + FILENAME(__LINE__)
+          );
+        }
+        int64_t outi = output_index(item[1].GetString(),
+                                    util::name_to_dtype(item[2].GetString()),
+                                    false,
+                                    output_initial_size,
+                                    output_resize_factor);
+        int64_t counti = counters_.size();
+        counters_.push_back(0);
         instructions_.push_back(FillIndexedOptionArray);
+        instructions_.push_back(outi);
+        instructions_.push_back(counti);
+        instructions_.push_back(-1);
       }
       else if (std::string("FillBoolean") == item[0].GetString()) {
+        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+          throw std::invalid_argument(
+            "FillBoolean arguments: output:str dtype:str" + FILENAME(__LINE__)
+          );
+        }
+        int64_t outi = output_index(item[1].GetString(),
+                                    util::name_to_dtype(item[2].GetString()),
+                                    false,
+                                    output_initial_size,
+                                    output_resize_factor);
         instructions_.push_back(FillBoolean);
+        instructions_.push_back(outi);
+        instructions_.push_back(-1);
+        instructions_.push_back(-1);
       }
       else if (std::string("FillInteger") == item[0].GetString()) {
         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
@@ -452,7 +666,20 @@ namespace awkward {
         instructions_.push_back(-1);
       }
       else if (std::string("FillNumber") == item[0].GetString()) {
+        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+          throw std::invalid_argument(
+            "FillNumber arguments: output:str dtype:str" + FILENAME(__LINE__)
+          );
+        }
+        int64_t outi = output_index(item[1].GetString(),
+                                    util::name_to_dtype(item[2].GetString()),
+                                    false,
+                                    output_initial_size,
+                                    output_resize_factor);
         instructions_.push_back(FillNumber);
+        instructions_.push_back(outi);
+        instructions_.push_back(-1);
+        instructions_.push_back(-1);
       }
       else if (std::string("FillString") == item[0].GetString()) {
         instructions_.push_back(FillString);
@@ -464,15 +691,7 @@ namespace awkward {
         instructions_.push_back(VarLengthList);
       }
       else if (std::string("FixedLengthList") == item[0].GetString()) {
-        if (item.Size() != 1) {
-          throw std::invalid_argument(
-            "FixedLengthList arguments: (none!)" + FILENAME(__LINE__)
-          );
-        }
         instructions_.push_back(FixedLengthList);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
-        instructions_.push_back(-1);
       }
       else if (std::string("KeyTableHeader") == item[0].GetString()) {
         instructions_.push_back(KeyTableHeader);
