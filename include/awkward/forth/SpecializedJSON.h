@@ -124,6 +124,11 @@ namespace awkward {
     }
 
     /// @brief HERE
+    inline void write_many_uint8(int64_t index, int64_t num_items, const uint8_t* values) noexcept {
+      outputs_[index].get()->write_const_uint8(num_items, values);
+    }
+
+    /// @brief HERE
     inline void write_add_int64(int64_t index, int64_t x) noexcept {
       outputs_[index].get()->write_add_int64(x);
     }

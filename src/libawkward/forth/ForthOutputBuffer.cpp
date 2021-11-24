@@ -451,6 +451,13 @@ namespace awkward {
 
   template <typename OUT>
   void
+  ForthOutputBufferOf<OUT>::write_const_uint8(int64_t num_items,
+                                              const uint8_t* values) noexcept {
+    write_copy(num_items, values);
+  }
+
+  template <typename OUT>
+  void
   ForthOutputBufferOf<OUT>::write_uint8(int64_t num_items,
                                         uint8_t* values,
                                         bool byteswap) noexcept {
@@ -612,6 +619,16 @@ namespace awkward {
     if (byteswap) {
       byteswap64(num_items, &ptr_.get()[length_]);
     }
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferOf<uint8_t>::write_const_uint8(int64_t num_items,
+                                                  const uint8_t* values) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
     length_ = next;
   }
 

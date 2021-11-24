@@ -58,8 +58,8 @@ namespace awkward {
               specializedjson_->write_float64(specializedjson_->argument1(), 0.0);
               break;
             case FillString:
-              // FIXME
-              return false;
+              specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
+              break;
             case FillEnumString:
               // FIXME
               return false;
@@ -383,15 +383,28 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
+      bool out;
+
       std::cout << "String " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
         case FillByteMaskedArray:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), 1);
+          specializedjson_->step_forward();
+          out = String(str, length, copy);
+          specializedjson_->step_backward();
+          return out;
         case FillIndexedOptionArray:
-          return false;
+          specializedjson_->write_int64(
+            specializedjson_->argument1(),
+            specializedjson_->get_and_increment(specializedjson_->argument2())
+          );
+          specializedjson_->step_forward();
+          out = String(str, length, copy);
+          specializedjson_->step_backward();
+          return out;
         case FillBoolean:
           return false;
         case FillInteger:
@@ -399,7 +412,11 @@ namespace awkward {
         case FillNumber:
           return false;
         case FillString:
-          return false;
+          specializedjson_->write_add_int64(specializedjson_->argument1(), length);
+          specializedjson_->write_many_uint8(
+            specializedjson_->argument2(), length, reinterpret_cast<const uint8_t*>(str)
+          );
+          return true;
         case FillEnumString:
           return false;
         case VarLengthList:
@@ -779,7 +796,25 @@ namespace awkward {
         instructions_.push_back(-1);
       }
       else if (std::string("FillString") == item[0].GetString()) {
+        if (item.Size() != 5  ||  !item[1].IsString()  ||  !item[2].IsString()  ||  !item[3].IsString()  ||  !item[4].IsString()) {
+          throw std::invalid_argument(
+            "FillString arguments: offsets:str offsets_dtype:str content:str content_dtype:str" + FILENAME(__LINE__)
+          );
+        }
+        int64_t offsetsi = output_index(item[1].GetString(),
+                                        util::name_to_dtype(item[2].GetString()),
+                                        true,
+                                        output_initial_size,
+                                        output_resize_factor);
+        int64_t contenti = output_index(item[3].GetString(),
+                                        util::name_to_dtype(item[4].GetString()),
+                                        false,
+                                        output_initial_size,
+                                        output_resize_factor);
         instructions_.push_back(FillString);
+        instructions_.push_back(offsetsi);
+        instructions_.push_back(contenti);
+        instructions_.push_back(-1);
       }
       else if (std::string("FillEnumString") == item[0].GetString()) {
         instructions_.push_back(FillEnumString);
