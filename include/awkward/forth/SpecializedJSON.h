@@ -91,6 +91,23 @@ namespace awkward {
     }
 
     /// @brief HERE
+    inline int64_t find_enum(const char* str) noexcept {
+      int64_t* offsets = string_offsets_.data();
+      char* chars = characters_.data();
+      int64_t stringsstart = argument2();
+      int64_t start;
+      int64_t stop;
+      for (int64_t i = stringsstart;  i < argument3();  i++) {
+        start = offsets[i];
+        stop = offsets[i + 1];
+        if (strncmp(str, &chars[start], stop - start) == 0) {
+          return i - stringsstart;
+        }
+      }
+      return -1;
+    }
+
+    /// @brief HERE
     inline int64_t find_key(const char* str) noexcept {
       int64_t* offsets = string_offsets_.data();
       char* chars = characters_.data();

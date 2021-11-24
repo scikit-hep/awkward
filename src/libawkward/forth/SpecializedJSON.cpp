@@ -23,10 +23,11 @@ namespace awkward {
   #define FillNumber 5              // arg1: number output
   #define FillString 6              // arg1: offsets output, arg2: content output
   #define FillEnumString 7          // arg1: index output, arg2: strings start, arg3: strings stop
-  #define VarLengthList 8           // arg1: offsets output
-  #define FixedLengthList 9         // arg1: expected length, arg2: counter
-  #define KeyTableHeader 10         // arg1: number of items
-  #define KeyTableItem 11           // arg1: string index, arg2: jump to instruction
+  #define FillNullEnumString 8      // arg1: index output, arg2: strings start, arg3: strings stop
+  #define VarLengthList 9           // arg1: offsets output
+  #define FixedLengthList 10        // arg1: expected length, arg2: counter
+  #define KeyTableHeader 11         // arg1: number of items
+  #define KeyTableItem 12           // arg1: string index, arg2: jump to instruction
 
   class SpecializedJSONHandler: public rj::BaseReaderHandler<rj::UTF8<>, SpecializedJSONHandler> {
   public:
@@ -61,7 +62,8 @@ namespace awkward {
               specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
               break;
             case FillEnumString:
-              // FIXME
+              return false;
+            case FillNullEnumString:
               return false;
             case VarLengthList:
               specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
@@ -88,6 +90,9 @@ namespace awkward {
           return false;
         case FillEnumString:
           return false;
+        case FillNullEnumString:
+          specializedjson_->write_int64(specializedjson_->argument1(), -1);
+          return true;
         case VarLengthList:
           return false;
         case FixedLengthList:
@@ -133,6 +138,8 @@ namespace awkward {
         case FillString:
           return false;
         case FillEnumString:
+          return false;
+        case FillNullEnumString:
           return false;
         case VarLengthList:
           return false;
@@ -181,6 +188,8 @@ namespace awkward {
           return false;
         case FillEnumString:
           return false;
+        case FillNullEnumString:
+          return false;
         case VarLengthList:
           return false;
         case FixedLengthList:
@@ -227,6 +236,8 @@ namespace awkward {
         case FillString:
           return false;
         case FillEnumString:
+          return false;
+        case FillNullEnumString:
           return false;
         case VarLengthList:
           return false;
@@ -275,6 +286,8 @@ namespace awkward {
           return false;
         case FillEnumString:
           return false;
+        case FillNullEnumString:
+          return false;
         case VarLengthList:
           return false;
         case FixedLengthList:
@@ -321,6 +334,8 @@ namespace awkward {
         case FillString:
           return false;
         case FillEnumString:
+          return false;
+        case FillNullEnumString:
           return false;
         case VarLengthList:
           return false;
@@ -369,6 +384,8 @@ namespace awkward {
           return false;
         case FillEnumString:
           return false;
+        case FillNullEnumString:
+          return false;
         case VarLengthList:
           return false;
         case FixedLengthList:
@@ -384,6 +401,7 @@ namespace awkward {
     bool
     String(const char* str, rj::SizeType length, bool copy) {
       bool out;
+      int64_t enumi;
 
       std::cout << "String " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
 
@@ -418,7 +436,15 @@ namespace awkward {
           );
           return true;
         case FillEnumString:
-          return false;
+        case FillNullEnumString:
+          enumi = specializedjson_->find_enum(str);
+          if (enumi == -1) {
+            return false;
+          }
+          else {
+            specializedjson_->write_int64(specializedjson_->argument1(), enumi);
+            return true;
+          }
         case VarLengthList:
           return false;
         case FixedLengthList:
@@ -459,6 +485,8 @@ namespace awkward {
         case FillString:
           return false;
         case FillEnumString:
+          return false;
+        case FillNullEnumString:
           return false;
         case VarLengthList:
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
@@ -503,6 +531,8 @@ namespace awkward {
               return false;
             case FillEnumString:
               return false;
+            case FillNullEnumString:
+              return false;
             case VarLengthList:
               specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
               break;
@@ -524,6 +554,8 @@ namespace awkward {
         case FillString:
           return false;
         case FillEnumString:
+          return false;
+        case FillNullEnumString:
           return false;
         case VarLengthList:
           specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
@@ -564,6 +596,8 @@ namespace awkward {
           return false;
         case FillEnumString:
           return false;
+        case FillNullEnumString:
+          return false;
         case VarLengthList:
           return false;
         case FixedLengthList:
@@ -600,6 +634,8 @@ namespace awkward {
         case FillString:
           return false;
         case FillEnumString:
+          return false;
+        case FillNullEnumString:
           return false;
         case VarLengthList:
           return false;
@@ -647,6 +683,8 @@ namespace awkward {
         case FillString:
           return false;
         case FillEnumString:
+          return false;
+        case FillNullEnumString:
           return false;
         case VarLengthList:
           return false;
@@ -816,8 +854,39 @@ namespace awkward {
         instructions_.push_back(contenti);
         instructions_.push_back(-1);
       }
-      else if (std::string("FillEnumString") == item[0].GetString()) {
-        instructions_.push_back(FillEnumString);
+      else if (std::string("FillEnumString") == item[0].GetString()  ||
+               std::string("FillNullEnumString") == item[0].GetString()) {
+        if (item.Size() != 4  ||  !item[1].IsString()  ||  !item[2].IsString()  ||  !item[3].IsArray()) {
+          throw std::invalid_argument(
+            "FillEnumString/FillNullEnumString arguments: index:str dtype:str:str [strings]" +
+            FILENAME(__LINE__)
+          );
+        }
+        int64_t outi = output_index(item[1].GetString(),
+                                    util::name_to_dtype(item[2].GetString()),
+                                    false,
+                                    output_initial_size,
+                                    output_resize_factor);
+        int64_t start = strings.size();
+        for (auto& x : item[3].GetArray()) {
+          if (!x.IsString()) {
+            throw std::invalid_argument(
+              "FillEnumString/FillNullEnumString list of strings (argument 3) must all be strings" +
+              FILENAME(__LINE__)
+            );
+          }
+          strings.push_back(x.GetString());
+        }
+        int64_t stop = strings.size();
+        if (std::string("FillEnumString") == item[0].GetString()) {
+          instructions_.push_back(FillEnumString);
+        }
+        else {
+          instructions_.push_back(FillNullEnumString);
+        }
+        instructions_.push_back(outi);
+        instructions_.push_back(start);
+        instructions_.push_back(stop);
       }
       else if (std::string("VarLengthList") == item[0].GetString()) {
         if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
@@ -949,17 +1018,6 @@ namespace awkward {
                                 bool leading_zero,
                                 int64_t init,
                                 double resize) {
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
-      if (name == output_names_[i]) {
-        if (dtype != output_dtypes_[i]  ||  leading_zero != output_leading_zero_[i]) {
-          throw std::invalid_argument(
-            std::string("redeclaration of ") + name +
-            std::string(" with a different dtype or leading zero") + FILENAME(__LINE__)
-          );
-        }
-        return i;
-      }
-    }
     int64_t i = output_names_.size();
     output_names_.push_back(name);
     output_dtypes_.push_back(dtype);
