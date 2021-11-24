@@ -44,6 +44,10 @@ namespace awkward {
       rewind(int64_t num_items, util::ForthError& err) noexcept;
 
     /// @brief HERE
+    void
+      reset() noexcept;
+
+    /// @brief HERE
     virtual void
       dup(int64_t num_times, util::ForthError& err) noexcept = 0;
 

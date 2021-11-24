@@ -75,6 +75,11 @@ namespace awkward {
     }
   }
 
+  void
+  ForthOutputBuffer::reset() noexcept {
+    length_ = 0;
+  }
+
   ////////// specialized
 
   template <typename OUT>
