@@ -64,8 +64,8 @@ namespace awkward {
               // FIXME
               return false;
             case VarLengthList:
-              // FIXME
-              return false;
+              specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
+              break;
             case FixedLengthList:
               return false;
             case KeyTableHeader:
@@ -420,12 +420,19 @@ namespace awkward {
 
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
-          specializedjson_->step_forward();
+          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
           return true;
         case FillByteMaskedArray:
-          return false;
+          specializedjson_->write_int8(specializedjson_->argument1(), 1);
+          specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
+          return true;
         case FillIndexedOptionArray:
-          return false;
+          specializedjson_->write_int64(
+            specializedjson_->argument1(),
+            specializedjson_->get_and_increment(specializedjson_->argument2())
+          );
+          specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
+          return true;
         case FillBoolean:
           return false;
         case FillInteger:
@@ -437,7 +444,8 @@ namespace awkward {
         case FillEnumString:
           return false;
         case VarLengthList:
-          return false;
+          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+          return true;
         case FixedLengthList:
           return false;
         case KeyTableHeader:
@@ -451,8 +459,66 @@ namespace awkward {
     bool
     EndArray(rj::SizeType numfields) {
       std::cout << "EndArray " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-      specializedjson_->step_backward();
-      return true;
+      specializedjson_->pop_stack();
+      std::cout << "Now instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
+
+      switch (specializedjson_->instruction()) {
+        case TopLevelArray:
+          specializedjson_->set_length(numfields);
+          return true;
+        case FillByteMaskedArray:
+        case FillIndexedOptionArray:
+          specializedjson_->step_forward();
+          switch (specializedjson_->instruction()) {
+            case TopLevelArray:
+              return false;
+            case FillByteMaskedArray:
+              return false;
+            case FillIndexedOptionArray:
+              return false;
+            case FillBoolean:
+              return false;
+            case FillInteger:
+              return false;
+            case FillNumber:
+              return false;
+            case FillString:
+              return false;
+            case FillEnumString:
+              return false;
+            case VarLengthList:
+              specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
+              break;
+            case FixedLengthList:
+              return false;
+            case KeyTableHeader:
+              return false;
+            case KeyTableItem:
+              return false;
+          }
+          specializedjson_->step_backward();
+          return true;
+        case FillBoolean:
+          return false;
+        case FillInteger:
+          return false;
+        case FillNumber:
+          return false;
+        case FillString:
+          return false;
+        case FillEnumString:
+          return false;
+        case VarLengthList:
+          specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
+          return true;
+        case FixedLengthList:
+          return false;
+        case KeyTableHeader:
+          return false;
+        case KeyTableItem:
+          return false;
+      }
+      return false;
     }
 
     bool
@@ -593,6 +659,7 @@ namespace awkward {
             "TopLevelArray arguments: (none!)" + FILENAME(__LINE__)
           );
         }
+        instruction_stack_max_depth++;
         instructions_.push_back(TopLevelArray);
         instructions_.push_back(-1);
         instructions_.push_back(-1);
@@ -688,7 +755,21 @@ namespace awkward {
         instructions_.push_back(FillEnumString);
       }
       else if (std::string("VarLengthList") == item[0].GetString()) {
+        if (item.Size() != 3  ||  !item[1].IsString()  ||  !item[2].IsString()) {
+          throw std::invalid_argument(
+            "VarLengthList arguments: output:str dtype:str" + FILENAME(__LINE__)
+          );
+        }
+        instruction_stack_max_depth++;
+        int64_t outi = output_index(item[1].GetString(),
+                                    util::name_to_dtype(item[2].GetString()),
+                                    true,
+                                    output_initial_size,
+                                    output_resize_factor);
         instructions_.push_back(VarLengthList);
+        instructions_.push_back(outi);
+        instructions_.push_back(-1);
+        instructions_.push_back(-1);
       }
       else if (std::string("FixedLengthList") == item[0].GetString()) {
         instructions_.push_back(FixedLengthList);
@@ -738,6 +819,11 @@ namespace awkward {
     );
   }
 
+  int64_t
+  SpecializedJSON::length() const noexcept {
+    return length_;
+  }
+
   bool
   SpecializedJSON::parse_string(const char* source) noexcept {
     reset();
@@ -762,6 +848,7 @@ namespace awkward {
         outputs_[i].get()->write_one_int64(0, false);
       }
     }
+    length_ = 0;
   }
 
   int64_t

@@ -513,6 +513,7 @@ make_SpecializedJSON(const py::handle& m, const std::string& name) {
           py::arg("output_initial_size") = 1024,
           py::arg("output_resize_factor") = 1.5)
           .def("parse_string", &ak::SpecializedJSON::parse_string)
+          .def("__len__", &ak::SpecializedJSON::length)
           .def("__getitem__", [](py::object self, const std::string& key) -> py::object {
             const std::shared_ptr<ak::SpecializedJSON> thyself =
               self.cast<const std::shared_ptr<ak::SpecializedJSON>>();
@@ -523,8 +524,8 @@ make_SpecializedJSON(const py::handle& m, const std::string& name) {
               ak::util::dtype_to_itemsize(dtype),
               ak::util::dtype_to_format(dtype),
               1,
-              std::vector<py::ssize_t>({ output->len() }),
-              std::vector<py::ssize_t>({ ak::util::dtype_to_itemsize(dtype) })
+              std::vector<py::ssize_t>({ (py::ssize_t)output->len() }),
+              std::vector<py::ssize_t>({ (py::ssize_t)ak::util::dtype_to_itemsize(dtype) })
             );
             return py::array(info, self);
           })

@@ -28,6 +28,10 @@ namespace awkward {
       dtype_at(const std::string& name) const;
 
     /// @brief HERE
+    int64_t
+      length() const noexcept;
+
+    /// @brief HERE
     bool parse_string(const char* source) noexcept;
 
     /// @brief HERE
@@ -74,11 +78,6 @@ namespace awkward {
     }
 
     /// @brief HERE
-    inline int64_t next_step() noexcept {
-      return current_instruction_ + 1;
-    }
-
-    /// @brief HERE
     inline void push_stack(int64_t jump_to) noexcept {
       instruction_stack_[current_stack_depth_] = current_instruction_;
       current_stack_depth_++;
@@ -121,6 +120,11 @@ namespace awkward {
       return counters_[index]++;
     }
 
+    /// @brief HERE
+    inline void set_length(int64_t length) noexcept {
+      length_ = length;
+    }
+
   private:
     int64_t output_index(const std::string& name,
                          util::dtype dtype,
@@ -141,6 +145,8 @@ namespace awkward {
     std::vector<int64_t> instruction_stack_;
     int64_t current_stack_depth_;
     std::vector<int64_t> counters_;
+
+    int64_t length_;
 
     int64_t json_position_;
   };
