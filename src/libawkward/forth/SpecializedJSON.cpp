@@ -25,7 +25,7 @@ namespace awkward {
   #define FillEnumString 7          // arg1: index output, arg2: strings start, arg3: strings stop
   #define FillNullEnumString 8      // arg1: index output, arg2: strings start, arg3: strings stop
   #define VarLengthList 9           // arg1: offsets output
-  #define FixedLengthList 10        // arg1: expected length, arg2: counter
+  #define FixedLengthList 10        // arg1: expected length
   #define KeyTableHeader 11         // arg1: number of items
   #define KeyTableItem 12           // arg1: string index, arg2: jump to instruction
 
@@ -492,7 +492,8 @@ namespace awkward {
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
           return true;
         case FixedLengthList:
-          return false;
+          specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+          return true;
         case KeyTableHeader:
           return false;
         case KeyTableItem:
@@ -503,6 +504,8 @@ namespace awkward {
 
     bool
     EndArray(rj::SizeType numfields) {
+      bool out;
+
       std::cout << "EndArray " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
       specializedjson_->pop_stack();
       std::cout << "Now instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
@@ -535,16 +538,18 @@ namespace awkward {
               return false;
             case VarLengthList:
               specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
+              out = true;
               break;
             case FixedLengthList:
-              return false;
+              out = numfields == specializedjson_->argument1();
+              break;
             case KeyTableHeader:
               return false;
             case KeyTableItem:
               return false;
           }
           specializedjson_->step_backward();
-          return true;
+          return out;
         case FillBoolean:
           return false;
         case FillInteger:
@@ -561,7 +566,7 @@ namespace awkward {
           specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
           return true;
         case FixedLengthList:
-          return false;
+          return numfields == specializedjson_->argument1();
         case KeyTableHeader:
           return false;
         case KeyTableItem:
@@ -906,7 +911,15 @@ namespace awkward {
         instructions_.push_back(-1);
       }
       else if (std::string("FixedLengthList") == item[0].GetString()) {
+        if (item.Size() != 2  ||  !item[1].IsInt64()) {
+          throw std::invalid_argument(
+            "FixedLengthList arguments: length:int" + FILENAME(__LINE__)
+          );
+        }
         instructions_.push_back(FixedLengthList);
+        instructions_.push_back(item[1].GetInt64());
+        instructions_.push_back(-1);
+        instructions_.push_back(-1);
       }
       else if (std::string("KeyTableHeader") == item[0].GetString()) {
         if (item.Size() != 2  ||  !item[1].IsInt64()) {
