@@ -11,6 +11,7 @@ from awkward._v2.operations.convert.ak_to_list import to_list  # noqa: F401
 from awkward._v2.operations.convert.ak_from_json import from_json  # noqa: F401
 from awkward._v2.operations.convert.ak_from_json_schema import (  # noqa: F401
     from_json_schema,
+    from_json_schema_2,
 )
 from awkward._v2.operations.convert.ak_to_json import to_json  # noqa: F401
 from awkward._v2.operations.convert.ak_to_layout import to_layout  # noqa: F401

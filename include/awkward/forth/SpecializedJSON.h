@@ -32,6 +32,10 @@ namespace awkward {
       length() const noexcept;
 
     /// @brief HERE
+    int64_t
+      json_position() const noexcept;
+
+    /// @brief HERE
     bool parse_string(const char* source) noexcept;
 
     /// @brief HERE

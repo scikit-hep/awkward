@@ -863,7 +863,7 @@ namespace awkward {
                std::string("FillNullEnumString") == item[0].GetString()) {
         if (item.Size() != 4  ||  !item[1].IsString()  ||  !item[2].IsString()  ||  !item[3].IsArray()) {
           throw std::invalid_argument(
-            "FillEnumString/FillNullEnumString arguments: index:str dtype:str:str [strings]" +
+            "FillEnumString/FillNullEnumString arguments: index:str dtype:str [strings]" +
             FILENAME(__LINE__)
           );
         }
@@ -996,6 +996,11 @@ namespace awkward {
   int64_t
   SpecializedJSON::length() const noexcept {
     return length_;
+  }
+
+  int64_t
+  SpecializedJSON::json_position() const noexcept {
+    return json_position_;
   }
 
   bool

@@ -12,6 +12,299 @@ np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
 
+def from_json_schema_2(
+    source,
+    schema,
+    highlevel=True,
+    behavior=None,
+):
+    if not isinstance(source, bytes) and not ak._v2._util.isstr(source):
+        raise NotImplementedError("for now, 'source' must be bytes or str")
+
+    if isinstance(schema, bytes) or ak._v2._util.isstr(schema):
+        schema = json.loads(schema)
+
+    if not isinstance(schema, dict):
+        raise TypeError(
+            "malformed JSONSchema: expected dict, got {0}".format(repr(schema))
+        )
+
+    container = {}
+    instructions = []
+
+    if schema.get("type") == "array":
+        if "items" not in schema:
+            raise TypeError("JSONSchema type is not concrete: array without items")
+
+        instructions.append(["TopLevelArray"])
+        form = build_assembly(schema["items"], container, instructions)
+
+    elif schema.get("type") == "object":
+        form = build_assembly(schema, container, instructions)
+
+    else:
+        raise TypeError(
+            "only 'array' and 'object' types supported at the JSONSchema root"
+        )
+
+    specializedjson = ak._ext.SpecializedJSON(json.dumps(instructions))
+
+    if not specializedjson.parse_string(source):
+        position = specializedjson.json_position
+        before = source[max(0, position - 30) : position]
+        if isinstance(before, bytes):
+            before = before.decode("ascii", errors="surrogateescape")
+        before = before.replace(os.linesep, repr(os.linesep).strip("'\""))
+        if position - 30 > 0:
+            before = "..." + before
+        after = source[position : position + 30]
+        if isinstance(after, bytes):
+            after = after.decode("ascii", errors="surrogateescape")
+        if position + 30 < len(source):
+            after = after + "..."
+        raise ValueError(
+            "JSON is invalid or does not fit schema at position {0}:\n\n    {1}\n    {2}".format(
+                position, before + after, "-" * len(before) + "^"
+            )
+        )
+
+    for key, value in container.items():
+        if value is None:
+            container[key] = specializedjson[key]
+
+    if schema.get("type") == "array":
+        length = len(specializedjson)
+    else:
+        length = 1
+
+    out = ak._v2.operations.convert.from_buffers(form, length, container)
+
+    if schema.get("type") == "array":
+        return out
+    else:
+        return out[0]
+
+
+def build_assembly(schema, container, instructions):
+    if not isinstance(schema, dict):
+        raise TypeError(
+            "unrecognized JSONSchema: expected dict, got {0}".format(repr(schema))
+        )
+
+    if "type" not in schema is None:
+        raise TypeError(
+            "unrecognized JSONSchema: no 'type' in {0}".format(repr(schema))
+        )
+
+    tpe = schema["type"]
+
+    is_optional = False
+    if isinstance(tpe, list):
+        if "null" in tpe:
+            is_optional = True
+            tpe = [x for x in tpe if x != "null"]
+        if len(tpe) == 1:
+            tpe = tpe[0]
+
+    if tpe == "boolean" or tpe == "integer" or tpe == "number":
+        # https://json-schema.org/understanding-json-schema/reference/boolean.html
+        # https://json-schema.org/understanding-json-schema/reference/numeric.html
+
+        if tpe == "boolean":
+            instruction = "FillBoolean"
+            dtype = "uint8"
+            primitive = "bool"
+        elif tpe == "integer":
+            instruction = "FillInteger"
+            primitive = dtype = "int64"
+        elif tpe == "number":
+            instruction = "FillNumber"
+            primitive = dtype = "float64"
+
+        if is_optional:
+            mask = "node{0}".format(len(container))
+            container[mask + "-mask"] = None
+            node = "node{0}".format(len(container))
+            container[node + "-data"] = None
+            instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
+            instructions.append([instruction, node + "-data", dtype])
+            return ak._v2.forms.ByteMaskedForm(
+                "i8",
+                ak._v2.forms.NumpyForm(primitive, form_key=node),
+                valid_when=True,
+                form_key=mask,
+            )
+
+        else:
+            node = "node{0}".format(len(container))
+            container[node + "-data"] = None
+            instructions.append([instruction, node + "-data", dtype])
+            return ak._v2.forms.NumpyForm(primitive, form_key=node)
+
+    elif tpe == "string":
+        # https://json-schema.org/understanding-json-schema/reference/string.html#string
+        if "enum" in schema:
+            strings = schema["enum"]
+            assert isinstance(strings, list)
+            assert len(strings) >= 1
+            assert all(ak._v2._util.isstr(x) for x in strings)
+            bytestrings = [x.encode("utf-8", errors="surrogateescape") for x in strings]
+
+            index = "node{0}".format(len(container))
+            container[index + "-index"] = None
+            offsets = "node{0}".format(len(container))
+            container[offsets + "-offsets"] = numpy.empty(len(strings) + 1, np.int64)
+            container[offsets + "-offsets"][0] = 0
+            container[offsets + "-offsets"][1:] = numpy.cumsum(
+                [len(x) for x in bytestrings]
+            )
+            node = "container{0}".format(len(container))
+            container[node + "-data"] = b"".join(bytestrings)
+
+            if is_optional:
+                instruction = "FillNullEnumString"
+                formtype = ak._v2.forms.IndexedOptionForm
+            else:
+                instruction = "FillEnumString"
+                formtype = ak._v2.forms.IndexedForm
+
+            instructions.append([instruction, index + "-index", "int64", strings])
+
+            return formtype(
+                "i64",
+                ak._v2.forms.ListOffsetForm(
+                    "i64",
+                    ak._v2.forms.NumpyForm(
+                        "uint8", parameters={"__array__": "char"}, form_key=node
+                    ),
+                    parameters={"__array__": "string"},
+                    form_key=offsets,
+                ),
+                parameters={"__array__": "categorical"},
+                form_key=index,
+            )
+
+        else:
+            if is_optional:
+                mask = "node{0}".format(container)
+                container[mask + "-mask"] = None
+                instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
+
+            offsets = "node{0}".format(len(container))
+            container[offsets + "-offsets"] = None
+            node = "node{0}".format(len(container))
+            container[node + "-data"] = None
+            instructions.append(
+                ["FillString", offsets + "-offsets", "int64", node + "-data", "uint8"]
+            )
+
+            out = ak._v2.forms.ListOffsetForm(
+                "i64",
+                ak._v2.forms.NumpyForm(
+                    "uint8",
+                    parameters={"__array__": "char"},
+                    form_key=node,
+                ),
+                parameters={"__array__": "string"},
+                form_key=offsets,
+            )
+            if is_optional:
+                return ak._v2.forms.ByteMaskedForm(
+                    "i8", out, valid_when=True, form_key=mask
+                )
+            else:
+                return out
+
+    elif tpe == "array":
+        # https://json-schema.org/understanding-json-schema/reference/array.html
+
+        if "items" not in schema:
+            raise TypeError("JSONSchema type is not concrete: array without 'items'")
+
+        if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
+            assert ak._v2._util.isint(schema.get("minItems"))
+
+            if is_optional:
+                mask = "node{0}".format(len(container))
+                container[mask + "-index"] = None
+                instructions.append(
+                    ["FillIndexedOptionArray", mask + "-index", "int64"]
+                )
+
+            instructions.append(["FixedLengthList", schema.get("minItems")])
+
+            content = build_assembly(schema["items"], container, instructions)
+
+            out = ak._v2.forms.RegularForm(content, size=schema.get("minItems"))
+            if is_optional:
+                return ak._v2.forms.IndexedOptionForm("i64", out, form_key=mask)
+            else:
+                return out
+
+        else:
+            if is_optional:
+                mask = "node{0}".format(len(container))
+                container[mask + "-mask"] = None
+                instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
+
+            offsets = "node{0}".format(len(container))
+            container[offsets + "-offsets"] = None
+            instructions.append(["VarLengthList", offsets + "-offsets", "int64"])
+
+            content = build_assembly(schema["items"], container, instructions)
+
+            out = ak._v2.forms.ListOffsetForm("i64", content, form_key=offsets)
+            if is_optional:
+                return ak._v2.forms.ByteMaskedForm(
+                    "i8", out, valid_when=True, form_key=mask
+                )
+            else:
+                return out
+
+    elif tpe == "object":
+        # https://json-schema.org/understanding-json-schema/reference/object.html
+
+        if "properties" not in schema:
+            raise TypeError(
+                "JSONSchema type is not concrete: object without 'properties'"
+            )
+
+        names = []
+        subschemas = []
+        for name, subschema in schema["properties"].items():
+            names.append(name)
+            subschemas.append(subschema)
+
+        if is_optional:
+            mask = "node{0}".format(len(container))
+            container[mask + "-index"] = None
+            instructions.append(["FillIndexedOptionArray", mask + "-index", "int64"])
+
+        instructions.append(["KeyTableHeader", len(names)])
+        startkeys = len(instructions)
+
+        for name in names:
+            instructions.append(["KeyTableItem", name, None])
+
+        contents = []
+        for keyindex, subschema in enumerate(subschemas):
+            # set the "jump_to" instruction position in the KeyTable
+            instructions[startkeys + keyindex][2] = len(instructions)
+            contents.append(build_assembly(subschema, container, instructions))
+
+        out = ak._v2.forms.RecordForm(contents, names)
+        if is_optional:
+            return ak._v2.forms.IndexedOptionForm("i64", out, form_key=mask)
+        else:
+            return out
+
+    elif isinstance(tpe, list):
+        raise NotImplementedError("arbitrary unions of types are not yet supported")
+
+    else:
+        raise TypeError("unrecognized JSONSchema: {0}".format(repr(tpe)))
+
+
 def from_json_schema(
     source,
     schema,
