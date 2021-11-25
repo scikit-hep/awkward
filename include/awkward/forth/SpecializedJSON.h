@@ -42,6 +42,12 @@ namespace awkward {
     void reset() noexcept;
 
     /// @brief HERE
+    std::string debug() const noexcept;
+
+    /// @brief HERE
+    std::string debug_listing() const noexcept;
+
+    /// @brief HERE
     inline int64_t current_stack_depth() const noexcept {
       return current_stack_depth_;
     }
@@ -83,7 +89,7 @@ namespace awkward {
 
     /// @brief HERE
     inline void push_stack(int64_t jump_to) noexcept {
-      instruction_stack_[current_stack_depth_] = current_instruction_;
+      instruction_stack_.data()[current_stack_depth_] = current_instruction_;
       current_stack_depth_++;
       current_instruction_ = jump_to;
     }
@@ -91,7 +97,7 @@ namespace awkward {
     /// @brief HERE
     inline void pop_stack() noexcept {
       current_stack_depth_--;
-      current_instruction_ = instruction_stack_[current_stack_depth_];
+      current_instruction_ = instruction_stack_.data()[current_stack_depth_];
     }
 
     /// @brief HERE

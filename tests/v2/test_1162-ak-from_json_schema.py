@@ -154,9 +154,8 @@ def test_regulararray_integer():
             },
         },
     )
-    assert result is None
-    # assert result.tolist() == [[1, 2, 3], [4, 5, 6]]
-    # assert str(result.type) == "2 * 3 * int64"
+    assert result.tolist() == [[1, 2, 3], [4, 5, 6]]
+    assert str(result.type) == "2 * 3 * int64"
 
 
 def test_option_regulararray_integer():
@@ -172,9 +171,8 @@ def test_option_regulararray_integer():
             },
         },
     )
-    assert result is None
-    # assert result.tolist() == [[1, 2, 3], None, [4, 5, 6]]
-    # assert str(result.type) == "3 * option[3 * int64]"
+    assert result.tolist() == [[1, 2, 3], None, [4, 5, 6]]
+    assert str(result.type) == "3 * option[3 * int64]"
 
 
 def test_option_array_integer():

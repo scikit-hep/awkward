@@ -97,14 +97,6 @@ def from_json_schema(
         output_resize_factor=output_resize_factor,
     )
 
-    if isinstance(form, ak._v2.forms.RegularForm):
-        return None
-
-    if isinstance(form, ak._v2.forms.IndexedOptionForm) and isinstance(
-        form.content, ak._v2.forms.RegularForm
-    ):
-        return None
-
     if not specializedjson.parse_string(source):
         position = specializedjson.json_position
         before = source[max(0, position - 30) : position]

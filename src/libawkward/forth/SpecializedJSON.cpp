@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/SpecializedJSON.cpp", line)
 
 #include <stdexcept>
+#include <sstream>
 
 #include "rapidjson/document.h"
 #include "rapidjson/reader.h"
@@ -34,12 +35,17 @@ namespace awkward {
     SpecializedJSONHandler(SpecializedJSON* specializedjson): specializedjson_(specializedjson) { }
 
     bool Null() {
+      // std::cout << "null " << specializedjson_->debug() << std::endl;
+
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 0);
           specializedjson_->step_forward();
+
+          // std::cout << "  FillByteMaskedArray " << specializedjson_->debug() << std::endl;
+
           switch (specializedjson_->instruction()) {
             case TopLevelArray:
               return false;
@@ -104,6 +110,8 @@ namespace awkward {
     }
 
     bool Bool(bool x) {
+      // std::cout << "bool " << x << " " << specializedjson_->debug() << std::endl;
+
       bool out;
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
@@ -149,6 +157,8 @@ namespace awkward {
     }
 
     bool Int(int x) {
+      // std::cout << "int " << x << " " << specializedjson_->debug() << std::endl;
+
       bool out;
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
@@ -195,6 +205,8 @@ namespace awkward {
     }
 
     bool Uint(unsigned int x) {
+      // std::cout << "uint " << x << " " << specializedjson_->debug() << std::endl;
+
       bool out;
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
@@ -241,6 +253,8 @@ namespace awkward {
     }
 
     bool Int64(int64_t x) {
+      // std::cout << "int64 " << x << " " << specializedjson_->debug() << std::endl;
+
       bool out;
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
@@ -287,6 +301,8 @@ namespace awkward {
     }
 
     bool Uint64(uint64_t x) {
+      // std::cout << "uint64 " << x << " " << specializedjson_->debug() << std::endl;
+
       bool out;
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
@@ -333,6 +349,8 @@ namespace awkward {
     }
 
     bool Double(double x) {
+      // std::cout << "double " << x << " " << specializedjson_->debug() << std::endl;
+
       bool out;
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
@@ -380,6 +398,8 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
+      // std::cout << "string " << str << " " << specializedjson_->debug() << std::endl;
+
       bool out;
       int64_t enumi;
       switch (specializedjson_->instruction()) {
@@ -436,6 +456,8 @@ namespace awkward {
 
     bool
     StartArray() {
+      // std::cout << "startarray " << specializedjson_->debug() << std::endl;
+
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
@@ -479,8 +501,13 @@ namespace awkward {
 
     bool
     EndArray(rj::SizeType numfields) {
+      // std::cout << "endarray " << specializedjson_->debug() << std::endl;
+
       bool out;
       specializedjson_->pop_stack();
+
+      // std::cout << "  pop " << specializedjson_->debug() << std::endl;
+
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           specializedjson_->set_length(numfields);
@@ -548,6 +575,8 @@ namespace awkward {
 
     bool
     StartObject() {
+      // std::cout << "startobject " << specializedjson_->debug() << std::endl;
+
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -587,7 +616,12 @@ namespace awkward {
 
     bool
     EndObject(rj::SizeType numfields) {
+      // std::cout << "endobject " << specializedjson_->debug() << std::endl;
+
       specializedjson_->pop_stack();
+
+      // std::cout << "  pop " << specializedjson_->debug() << std::endl;
+
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -621,8 +655,13 @@ namespace awkward {
 
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
+      // std::cout << "key " << specializedjson_->debug() << std::endl;
+
       int64_t jump_to;
       specializedjson_->pop_stack();
+
+      // std::cout << "  pop " << specializedjson_->debug() << std::endl;
+
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -876,6 +915,7 @@ namespace awkward {
             "FixedLengthList arguments: length:int" + FILENAME(__LINE__)
           );
         }
+        instruction_stack_max_depth++;
         instructions_.push_back(FixedLengthList);
         instructions_.push_back(item[1].GetInt64());
         instructions_.push_back(-1);
@@ -915,7 +955,7 @@ namespace awkward {
     }
 
     for (int64_t i = 0;  i < instruction_stack_max_depth;  i++) {
-      instruction_stack_.push_back(0);
+      instruction_stack_.push_back(-1);
     }
 
     string_offsets_.push_back(0);
@@ -925,6 +965,8 @@ namespace awkward {
         characters_.push_back(c);
       }
     }
+
+    // std::cout << debug_listing();
   }
 
   const std::shared_ptr<ForthOutputBuffer>
@@ -970,6 +1012,78 @@ namespace awkward {
     bool out = reader.Parse<rj::kParseDefaultFlags>(stream, handler);
     json_position_ = stream.Tell();
     return out;
+  }
+
+  std::string
+  SpecializedJSON::debug() const noexcept {
+    std::stringstream out;
+    out << "at " << current_instruction_ << " | " << instructions_[current_instruction_ * 4] << " stack";
+    for (int64_t i = 0;  i < instruction_stack_.size();  i++) {
+      if (i == current_stack_depth_) {
+        out << " ;";
+      }
+      out << " " << instruction_stack_.data()[i];
+    }
+    if (current_stack_depth_ == instruction_stack_.size()) {
+      out << " ;";
+    }
+    return out.str();
+  }
+
+  std::string
+  SpecializedJSON::debug_listing() const noexcept {
+    std::stringstream out;
+    for (int64_t i = 0;  i < instructions_.size() / 4;  i++) {
+      out << i << " | " << instructions_[i * 4];
+      switch (instructions_[i * 4]) {
+        case TopLevelArray:
+          out << " TopLevelArray ";
+          break;
+        case FillByteMaskedArray:
+          out << " FillByteMaskedArray ";
+          break;
+        case FillIndexedOptionArray:
+          out << " FillIndexedOptionArray ";
+          break;
+        case FillBoolean:
+          out << " FillBoolean ";
+          break;
+        case FillInteger:
+          out << " FillInteger ";
+          break;
+        case FillNumber:
+          out << " FillNumber ";
+          break;
+        case FillString:
+          out << " FillString ";
+          break;
+        case FillEnumString:
+          out << " FillEnumString ";
+          break;
+        case FillNullEnumString:
+          out << " FillNullEnumString ";
+          break;
+        case VarLengthList:
+          out << " VarLengthList ";
+          break;
+        case FixedLengthList:
+          out << " FixedLengthList ";
+          break;
+        case KeyTableHeader:
+          out << " KeyTableHeader ";
+          break;
+        case KeyTableItem:
+          out << " KeyTableItem ";
+          break;
+        default:
+          out << " ??? ";
+          break;
+      }
+      out << instructions_[i * 4 + 1] << " "
+          << instructions_[i * 4 + 2] << " "
+          << instructions_[i * 4 + 3] << std::endl;
+    }
+    return out.str();
   }
 
   void
