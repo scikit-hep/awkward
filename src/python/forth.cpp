@@ -527,7 +527,7 @@ make_SpecializedJSON(const py::handle& m, const std::string& name) {
             ak::util::dtype dtype = thyself.get()->dtype_at(key);
             py::buffer_info info(
               output->ptr().get(),
-              ak::util::dtype_to_itemsize(dtype),
+              (py::ssize_t)ak::util::dtype_to_itemsize(dtype),
               ak::util::dtype_to_format(dtype),
               1,
               std::vector<py::ssize_t>({ (py::ssize_t)output->len() }),
