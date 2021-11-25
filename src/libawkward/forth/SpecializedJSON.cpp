@@ -34,8 +34,6 @@ namespace awkward {
     SpecializedJSONHandler(SpecializedJSON* specializedjson): specializedjson_(specializedjson) { }
 
     bool Null() {
-      std::cout << "Null instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -107,9 +105,6 @@ namespace awkward {
 
     bool Bool(bool x) {
       bool out;
-
-      std::cout << "Bool " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -155,9 +150,6 @@ namespace awkward {
 
     bool Int(int x) {
       bool out;
-
-      std::cout << "Int " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -204,9 +196,6 @@ namespace awkward {
 
     bool Uint(unsigned int x) {
       bool out;
-
-      std::cout << "Uint " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -253,9 +242,6 @@ namespace awkward {
 
     bool Int64(int64_t x) {
       bool out;
-
-      std::cout << "Int64 " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -302,9 +288,6 @@ namespace awkward {
 
     bool Uint64(uint64_t x) {
       bool out;
-
-      std::cout << "Uint64 " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -351,9 +334,6 @@ namespace awkward {
 
     bool Double(double x) {
       bool out;
-
-      std::cout << "Double " << x << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -402,9 +382,6 @@ namespace awkward {
     String(const char* str, rj::SizeType length, bool copy) {
       bool out;
       int64_t enumi;
-
-      std::cout << "String " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -459,8 +436,6 @@ namespace awkward {
 
     bool
     StartArray() {
-      std::cout << "StartArray instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
@@ -505,11 +480,7 @@ namespace awkward {
     bool
     EndArray(rj::SizeType numfields) {
       bool out;
-
-      std::cout << "EndArray " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
       specializedjson_->pop_stack();
-      std::cout << "Now instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           specializedjson_->set_length(numfields);
@@ -577,8 +548,6 @@ namespace awkward {
 
     bool
     StartObject() {
-      std::cout << "StartObject instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -618,11 +587,7 @@ namespace awkward {
 
     bool
     EndObject(rj::SizeType numfields) {
-      std::cout << "EndObject " << numfields << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       specializedjson_->pop_stack();
-      std::cout << "Now instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -657,12 +622,7 @@ namespace awkward {
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
       int64_t jump_to;
-
-      std::cout << "Key " << str << " " << length << " " << copy << " instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       specializedjson_->pop_stack();
-      std::cout << "Now instruction: " << specializedjson_->instruction() << " stack: " << specializedjson_->current_stack_depth() << std::endl;
-
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           return false;
@@ -965,8 +925,6 @@ namespace awkward {
         characters_.push_back(c);
       }
     }
-
-    std::cout << "num instructions " << instructions_.size() << std::endl;
   }
 
   const std::shared_ptr<ForthOutputBuffer>
