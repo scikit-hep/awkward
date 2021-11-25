@@ -38,8 +38,6 @@ namespace awkward {
       // std::cout << "null " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 0);
           specializedjson_->step_forward();
@@ -47,12 +45,6 @@ namespace awkward {
           // std::cout << "  FillByteMaskedArray " << specializedjson_->debug() << std::endl;
 
           switch (specializedjson_->instruction()) {
-            case TopLevelArray:
-              return false;
-            case FillByteMaskedArray:
-              return false;
-            case FillIndexedOptionArray:
-              return false;
             case FillBoolean:
               specializedjson_->write_int8(specializedjson_->argument1(), 0);
               break;
@@ -65,18 +57,10 @@ namespace awkward {
             case FillString:
               specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
               break;
-            case FillEnumString:
-              return false;
-            case FillNullEnumString:
-              return false;
             case VarLengthList:
               specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
               break;
-            case FixedLengthList:
-              return false;
-            case KeyTableHeader:
-              return false;
-            case KeyTableItem:
+            default:
               return false;
           }
           specializedjson_->step_backward();
@@ -84,29 +68,12 @@ namespace awkward {
         case FillIndexedOptionArray:
           specializedjson_->write_int64(specializedjson_->argument1(), -1);
           return true;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
         case FillNullEnumString:
           specializedjson_->write_int64(specializedjson_->argument1(), -1);
           return true;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool Bool(bool x) {
@@ -114,8 +81,6 @@ namespace awkward {
 
       bool out;
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 1);
           specializedjson_->step_forward();
@@ -134,26 +99,9 @@ namespace awkward {
         case FillBoolean:
           specializedjson_->write_int8(specializedjson_->argument1(), x);
           return true;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool Int(int x) {
@@ -161,8 +109,6 @@ namespace awkward {
 
       bool out;
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 1);
           specializedjson_->step_forward();
@@ -178,30 +124,15 @@ namespace awkward {
           out = Int(x);
           specializedjson_->step_backward();
           return out;
-        case FillBoolean:
-          return false;
         case FillInteger:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool Uint(unsigned int x) {
@@ -209,8 +140,6 @@ namespace awkward {
 
       bool out;
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 1);
           specializedjson_->step_forward();
@@ -226,30 +155,15 @@ namespace awkward {
           out = Uint(x);
           specializedjson_->step_backward();
           return out;
-        case FillBoolean:
-          return false;
         case FillInteger:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool Int64(int64_t x) {
@@ -257,8 +171,6 @@ namespace awkward {
 
       bool out;
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 1);
           specializedjson_->step_forward();
@@ -274,30 +186,15 @@ namespace awkward {
           out = Int64(x);
           specializedjson_->step_backward();
           return out;
-        case FillBoolean:
-          return false;
         case FillInteger:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool Uint64(uint64_t x) {
@@ -305,8 +202,6 @@ namespace awkward {
 
       bool out;
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 1);
           specializedjson_->step_forward();
@@ -322,30 +217,15 @@ namespace awkward {
           out = Uint64(x);
           specializedjson_->step_backward();
           return out;
-        case FillBoolean:
-          return false;
         case FillInteger:
           specializedjson_->write_uint64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
           specializedjson_->write_uint64(specializedjson_->argument1(), x);
           return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool Double(double x) {
@@ -353,8 +233,6 @@ namespace awkward {
 
       bool out;
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 1);
           specializedjson_->step_forward();
@@ -370,30 +248,15 @@ namespace awkward {
           out = Double(x);
           specializedjson_->step_backward();
           return out;
-        case FillBoolean:
-          return false;
         case FillInteger:
           specializedjson_->write_float64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
           specializedjson_->write_float64(specializedjson_->argument1(), x);
           return true;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool
@@ -403,8 +266,6 @@ namespace awkward {
       bool out;
       int64_t enumi;
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 1);
           specializedjson_->step_forward();
@@ -420,12 +281,6 @@ namespace awkward {
           out = String(str, length, copy);
           specializedjson_->step_backward();
           return out;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
         case FillString:
           specializedjson_->write_add_int64(specializedjson_->argument1(), length);
           specializedjson_->write_many_uint8(
@@ -442,16 +297,9 @@ namespace awkward {
             specializedjson_->write_int64(specializedjson_->argument1(), enumi);
             return true;
           }
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool
@@ -473,30 +321,15 @@ namespace awkward {
           );
           specializedjson_->push_stack(specializedjson_->current_instruction() + 2);
           return true;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
         case VarLengthList:
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
           return true;
         case FixedLengthList:
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
           return true;
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool
@@ -516,24 +349,6 @@ namespace awkward {
         case FillIndexedOptionArray:
           specializedjson_->step_forward();
           switch (specializedjson_->instruction()) {
-            case TopLevelArray:
-              return false;
-            case FillByteMaskedArray:
-              return false;
-            case FillIndexedOptionArray:
-              return false;
-            case FillBoolean:
-              return false;
-            case FillInteger:
-              return false;
-            case FillNumber:
-              return false;
-            case FillString:
-              return false;
-            case FillEnumString:
-              return false;
-            case FillNullEnumString:
-              return false;
             case VarLengthList:
               specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
               out = true;
@@ -541,36 +356,19 @@ namespace awkward {
             case FixedLengthList:
               out = numfields == specializedjson_->argument1();
               break;
-            case KeyTableHeader:
-              return false;
-            case KeyTableItem:
+            default:
               return false;
           }
           specializedjson_->step_backward();
           return out;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
         case VarLengthList:
           specializedjson_->write_add_int64(specializedjson_->argument1(), numfields);
           return true;
         case FixedLengthList:
           return numfields == specializedjson_->argument1();
-        case KeyTableHeader:
-          return false;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool
@@ -578,10 +376,6 @@ namespace awkward {
       // std::cout << "startobject " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          return false;
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
             specializedjson_->argument1(),
@@ -589,29 +383,12 @@ namespace awkward {
           );
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
           return true;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
         case KeyTableHeader:
           specializedjson_->push_stack(specializedjson_->current_instruction());
           return true;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool
@@ -623,34 +400,13 @@ namespace awkward {
       // std::cout << "  pop " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          return false;
         case FillIndexedOptionArray:
           return true;
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
         case KeyTableHeader:
           return true;
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
     bool
@@ -663,10 +419,6 @@ namespace awkward {
       // std::cout << "  pop " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
-        case TopLevelArray:
-          return false;
-        case FillByteMaskedArray:
-          return false;
         case FillIndexedOptionArray:
           specializedjson_->step_forward();
           jump_to = specializedjson_->find_key(str);
@@ -678,22 +430,6 @@ namespace awkward {
             specializedjson_->push_stack(jump_to);
             return true;
           }
-        case FillBoolean:
-          return false;
-        case FillInteger:
-          return false;
-        case FillNumber:
-          return false;
-        case FillString:
-          return false;
-        case FillEnumString:
-          return false;
-        case FillNullEnumString:
-          return false;
-        case VarLengthList:
-          return false;
-        case FixedLengthList:
-          return false;
         case KeyTableHeader:
           jump_to = specializedjson_->find_key(str);
           if (jump_to == -1) {
@@ -703,10 +439,9 @@ namespace awkward {
             specializedjson_->push_stack(jump_to);
             return true;
           }
-        case KeyTableItem:
+        default:
           return false;
       }
-      return false;
     }
 
   private:
