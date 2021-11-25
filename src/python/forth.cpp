@@ -512,7 +512,12 @@ make_SpecializedJSON(const py::handle& m, const std::string& name) {
           py::arg("jsonassembly"),
           py::arg("output_initial_size") = 1024,
           py::arg("output_resize_factor") = 1.5)
-          .def("parse_string", &ak::SpecializedJSON::parse_string)
+          .def("parse_string", [](ak::SpecializedJSON& self, const std::string& source) -> bool {
+            py::gil_scoped_release release;
+            bool out = self.parse_string(source.c_str());
+            py::gil_scoped_acquire acquire;
+            return out;
+          })
           .def_property_readonly("json_position", &ak::SpecializedJSON::json_position)
           .def("__len__", &ak::SpecializedJSON::length)
           .def("__getitem__", [](py::object self, const std::string& key) -> py::object {
