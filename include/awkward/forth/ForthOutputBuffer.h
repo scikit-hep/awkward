@@ -44,6 +44,10 @@ namespace awkward {
       rewind(int64_t num_items, util::ForthError& err) noexcept;
 
     /// @brief HERE
+    void
+      reset() noexcept;
+
+    /// @brief HERE
     virtual void
       dup(int64_t num_times, util::ForthError& err) noexcept = 0;
 
@@ -154,6 +158,10 @@ namespace awkward {
     /// @brief HERE
     virtual void
       write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept = 0;
+
+    /// @brief HERE
+    virtual void
+      write_const_uint8(int64_t num_items, const uint8_t* values) noexcept = 0;
 
     /// @brief HERE
     virtual void
@@ -285,6 +293,9 @@ namespace awkward {
 
     void
       write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept override;
+
+    void
+      write_const_uint8(int64_t num_items, const uint8_t* values) noexcept override;
 
     void
       write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept override;

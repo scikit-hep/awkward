@@ -31,12 +31,14 @@ def test_integer():
         {"type": "array", "items": {"type": "integer"}},
     )
     assert result.tolist() == [1, 2, 3, 4, 5]
+    assert str(result.type) == "5 * int64"
 
     result = ak._v2.operations.convert.from_json_schema(
         "[ ]",
         {"type": "array", "items": {"type": "integer"}},
     )
     assert result.tolist() == []
+    assert str(result.type) == "0 * int64"
 
 
 def test_number():
@@ -45,6 +47,7 @@ def test_number():
         {"type": "array", "items": {"type": "number"}},
     )
     assert result.tolist() == [1, 2, 3.14, 4, 5]
+    assert str(result.type) == "5 * float64"
 
 
 def test_option_boolean():
@@ -53,6 +56,7 @@ def test_option_boolean():
         {"type": "array", "items": {"type": ["boolean", "null"]}},
     )
     assert result.tolist() == [True, False, None, True, False]
+    assert str(result.type) == "5 * ?bool"
 
 
 def test_option_integer():
@@ -61,12 +65,14 @@ def test_option_integer():
         {"type": "array", "items": {"type": ["null", "integer"]}},
     )
     assert result.tolist() == [1, 2, None, 4, 5]
+    assert str(result.type) == "5 * ?int64"
 
     result = ak._v2.operations.convert.from_json_schema(
         " [ ]",
         {"type": "array", "items": {"type": ["null", "integer"]}},
     )
     assert result.tolist() == []
+    assert str(result.type) == "0 * ?int64"
 
 
 def test_string():
