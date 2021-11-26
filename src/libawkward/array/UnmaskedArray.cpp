@@ -395,8 +395,7 @@ namespace awkward {
   }
 
   const TypePtr
-  UnmaskedArray::type(const std::map<std::string,
-                      std::string>& typestrs) const {
+  UnmaskedArray::type(const util::TypeStrs& typestrs) const {
     return form(true).get()->type(typestrs);
   }
 
