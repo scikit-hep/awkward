@@ -377,6 +377,7 @@ def apply_step(
 
                 nextinputs = []
                 for x in inputs:
+
                     if isinstance(x, RegularArray):
                         if maxsize > 1 and x.size == 1:
                             nextinputs.append(
@@ -545,15 +546,14 @@ def apply_step(
                                 length, len(x), in_function(options)
                             )
                         )
-                    if not x.istuple:
+                    if not x.is_tuple:
                         istuple = False
-
             outcontents, numoutputs = [], None
             for field in fields:
                 outcontents.append(
                     apply_step(
                         nplike,
-                        [x[field] if isinstance(x, RecordArray) else x],
+                        [x[field] if isinstance(x, RecordArray) else x for x in inputs],
                         action,
                         depth,
                         copy.copy(depth_context),

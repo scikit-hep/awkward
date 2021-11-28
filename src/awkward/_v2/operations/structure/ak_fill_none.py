@@ -15,48 +15,47 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
-    # raise NotImplementedError
 
-    #     """
-    #     Args:
-    #         array: Data in which to replace None with a given value.
-    #         value: Data with which to replace None.
-    #         axis (None or int): If None, replace all None values in the array
-    #             with the given value; if an int, The dimension at which this
-    #             operation is applied. The outermost dimension is `0`, followed
-    #             by `1`, etc., and negative values count backward from the
-    #             innermost: `-1` is the innermost  dimension, `-2` is the next
-    #             level up, etc.
-    #         highlevel (bool): If True, return an #ak.Array; otherwise, return
-    #             a low-level #ak.layout.Content subclass.
-    #         behavior (None or dict): Custom #ak.behavior for the output array, if
-    #             high-level.
+    """
+    Args:
+        array: Data in which to replace None with a given value.
+        value: Data with which to replace None.
+        axis (None or int): If None, replace all None values in the array
+            with the given value; if an int, The dimension at which this
+            operation is applied. The outermost dimension is `0`, followed
+            by `1`, etc., and negative values count backward from the
+            innermost: `-1` is the innermost  dimension, `-2` is the next
+            level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
-    #     Replaces missing values (None) with a given `value`.
+    Replaces missing values (None) with a given `value`.
 
-    #     For example, in the following `array`,
+    For example, in the following `array`,
 
-    #         ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
+        ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
 
-    #     The None values could be replaced with `0` by
+    The None values could be replaced with `0` by
 
-    #         >>> ak.fill_none(array, 0)
-    #         <Array [[1.1, 0, 2.2], [], [0, 3.3, 4.4]] type='3 * var * float64'>
+        >>> ak.fill_none(array, 0)
+        <Array [[1.1, 0, 2.2], [], [0, 3.3, 4.4]] type='3 * var * float64'>
 
-    #     The replacement value doesn't strictly need the same type as the
-    #     surrounding data. For example, the None values could also be replaced
-    #     by a string.
+    The replacement value doesn't strictly need the same type as the
+    surrounding data. For example, the None values could also be replaced
+    by a string.
 
-    #         >>> ak.fill_none(array, "hi")
-    #         <Array [[1.1, 'hi', 2.2], ... ['hi', 3.3, 4.4]] type='3 * var * union[float64, s...'>
+        >>> ak.fill_none(array, "hi")
+        <Array [[1.1, 'hi', 2.2], ... ['hi', 3.3, 4.4]] type='3 * var * union[float64, s...'>
 
-    #     The list content now has a union type:
+    The list content now has a union type:
 
-    #         >>> ak.type(ak.fill_none(array, "hi"))
-    #         3 * var * union[float64, string]
+        >>> ak.type(ak.fill_none(array, "hi"))
+        3 * var * union[float64, string]
 
-    #     The values could be floating-point numbers or strings.
-    #     """
+    The values could be floating-point numbers or strings.
+    """
 
     arraylayout = ak._v2.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
@@ -81,10 +80,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
         )
     elif (
         isinstance(value, Iterable)
-        and not (
-            isinstance(value, (str, bytes))
-            or (ak._v2._util.py27 and isinstance(value, ak._v2._util.unicode))
-        )
+        and not (isinstance(value, (str, bytes)))
         or isinstance(value, (ak._v2.highlevel.Record, ak._v2.record.Record))
     ):
         valuelayout = ak._v2.operations.convert.to_layout(
@@ -110,25 +106,19 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
     if axis is None:
 
-        def transform(layout, depth, posaxis):
-            return ak._v2._util.transform_child_layouts(
-                transform, maybe_fillna(layout), depth, posaxis
-            )
+        def action(layout, depth, depth_context, **kwargs):
+            layout = maybe_fillna(layout)
 
     else:
 
-        def transform(layout, depth, posaxis):
-            posaxis = layout.axis_wrap_if_negative(posaxis)
+        def action(layout, depth, depth_context, **kwargs):
+            posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
             if posaxis + 1 < depth:
                 return layout
+            elif posaxis + 1 == depth:
+                return maybe_fillna(layout)
 
-            if posaxis + 1 == depth:
-                layout = maybe_fillna(layout)
-
-            return ak._v2._util.transform_child_layouts(
-                transform, layout, depth, posaxis
-            )
-
-    out = transform(arraylayout, 1, axis)
+    depth_context = {"posaxis": axis}
+    out = arraylayout.recursively_apply(action, depth_context=depth_context)
 
     return ak._v2._util.wrap(out, array, behavior, highlevel)

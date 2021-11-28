@@ -13,7 +13,6 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-# @pytest.mark.skip(reason="ak.type not implemented")
 def test_concatenate_number():
 
     a1 = ak.Array([[1, 2, 3], [], [4, 5]])

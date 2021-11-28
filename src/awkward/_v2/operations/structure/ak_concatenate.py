@@ -13,31 +13,30 @@ np = ak.nplike.NumpyMetadata.instance()
 def concatenate(
     arrays, axis=0, merge=True, mergebool=True, highlevel=True, behavior=None
 ):
+    """
+    Args:
+        arrays: Arrays to concatenate along any dimension.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        merge (bool): If True, combine data into the same buffers wherever
+            possible, eliminating unnecessary #ak.layout.UnionArray8_64 types
+            at the expense of materializing #ak.layout.VirtualArray nodes.
+        mergebool (bool): If True, boolean and nummeric data can be combined
+            into the same buffer, losing information about False vs `0` and
+            True vs `1`; otherwise, they are kept in separate buffers with
+            distinct types (using an #ak.layout.UnionArray8_64).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
-    #     """
-    #     Args:
-    #         arrays: Arrays to concatenate along any dimension.
-    #         axis (int): The dimension at which this operation is applied. The
-    #             outermost dimension is `0`, followed by `1`, etc., and negative
-    #             values count backward from the innermost: `-1` is the innermost
-    #             dimension, `-2` is the next level up, etc.
-    #         merge (bool): If True, combine data into the same buffers wherever
-    #             possible, eliminating unnecessary #ak.layout.UnionArray8_64 types
-    #             at the expense of materializing #ak.layout.VirtualArray nodes.
-    #         mergebool (bool): If True, boolean and nummeric data can be combined
-    #             into the same buffer, losing information about False vs `0` and
-    #             True vs `1`; otherwise, they are kept in separate buffers with
-    #             distinct types (using an #ak.layout.UnionArray8_64).
-    #         highlevel (bool): If True, return an #ak.Array; otherwise, return
-    #             a low-level #ak.layout.Content subclass.
-    #         behavior (None or dict): Custom #ak.behavior for the output array, if
-    #             high-level.
-
-    #     Returns an array with `arrays` concatenated. For `axis=0`, this means that
-    #     one whole array follows another. For `axis=1`, it means that the `arrays`
-    #     must have the same lengths and nested lists are each concatenated,
-    #     element for element, and similarly for deeper levels.
-    #     """
+    Returns an array with `arrays` concatenated. For `axis=0`, this means that
+    one whole array follows another. For `axis=1`, it means that the `arrays`
+    must have the same lengths and nested lists are each concatenated,
+    element for element, and similarly for deeper levels.
+    """
 
     contents = [
         ak._v2.operations.convert.to_layout(
@@ -93,12 +92,11 @@ def concatenate(
 
         out = batch[0].mergemany(batch[1:])
         if isinstance(out, ak._v2.contents.unionarray.UnionArray):
-            # if isinstance(out, ak._v2._util.uniontypes):
             out = out.simplify_uniontype(merge=merge, mergebool=mergebool)
 
     else:
 
-        def getfunction(inputs, depth):
+        def action(inputs, depth, **kwargs):
 
             if depth == posaxis and any(
                 isinstance(x, ak._v2.contents.Content) and x.is_OptionType
@@ -108,6 +106,9 @@ def concatenate(
                 for x in inputs:
                     if x.is_OptionType and x.content.is_ListType:
                         nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
+                        # print("v2")
+                        # print(nextinputs)
+                        # print("v2")
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
@@ -119,6 +120,7 @@ def concatenate(
                 or not isinstance(x, ak._v2.contents.Content)
                 for x in inputs
             ):
+
                 nplike = ak.nplike.of(*inputs)
 
                 length = max(
@@ -143,8 +145,8 @@ def concatenate(
                 counts = nplike.zeros(len(nextinputs[0]), dtype=np.int64)
                 all_counts = []
                 all_flatten = []
-                for x in nextinputs:
 
+                for x in nextinputs:
                     o, f = x._offsets_and_flattened(1, 0)
                     o = nplike.asarray(o)
                     c = o[1:] - o[:-1]
@@ -175,7 +177,7 @@ def concatenate(
                     offsets, inner.simplify_uniontype(merge=merge, mergebool=mergebool)
                 )
 
-                return lambda: (out,)
+                return (out,)
 
             elif any(
                 x.minmax_depth == (1, 1)
@@ -190,13 +192,12 @@ def concatenate(
             else:
                 return None
 
-        out = ak._v2._util.broadcast_and_apply(
+        out = ak._v2._broadcasting.broadcast_and_apply(
             contents,
-            getfunction,
+            action,
             behavior=ak._v2._util.behavior_of(*arrays, behavior=behavior),
             allow_records=True,
             right_broadcast=False,
-            pass_depth=True,
         )[0]
 
     return ak._v2._util.wrap(
