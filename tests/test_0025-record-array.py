@@ -670,6 +670,11 @@ def test_fromiter():
         assert ak.to_list(ak.from_iter(datum)) == datum
 
 
+pytest.mark.skipif(
+    ak._util.py36, reason="as of Python 3.6 dictionaries are insurtion ordered"
+)
+
+
 def test_json():
     dataset = [
         '[{"one":1,"two":1.1},{"one":2,"two":2.2},{"one":3,"two":3.3}]',
