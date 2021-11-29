@@ -6,10 +6,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-pytestmark = pytest.mark.skipif(
-    ak._util.py36, reason="as of Python 3.6 dictionaries are insurtion ordered"
-)
-
 
 class Canary(dict):
     def __init__(self):
@@ -25,6 +21,7 @@ class Canary(dict):
         return super(Canary, self).__setitem__(key, value)
 
 
+@pytest.mark.skipif(ak._util.py36, reason="requires python3.6 or higher")
 def test_lazy_buffers():
 
     array = ak.from_json(

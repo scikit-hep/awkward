@@ -293,11 +293,7 @@ def test_blanc_lines():
     assert ak.to_list(array) == [1, 2, 3]
 
 
-pytest.mark.skipif(
-    ak._util.py36, reason="as of Python 3.6 dictionaries are insurtion ordered"
-)
-
-
+@pytest.mark.skipif(ak._util.py36, reason="requires python3.6 or higher")
 def test_tostring():
     # write a json string from an array built from
     # multiple json fragments from a string

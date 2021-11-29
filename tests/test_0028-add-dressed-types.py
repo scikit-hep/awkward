@@ -13,11 +13,7 @@ def test_fromnumpy():
     assert ak.to_list(a) == ak.to_list(b)
 
 
-pytest.mark.skipif(
-    ak._util.py36, reason="as of Python 3.6 dictionaries are insurtion ordered"
-)
-
-
+@pytest.mark.skipif(ak._util.py36, reason="requires python3.6 or higher")
 def test_highlevel():
     a = ak.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True
