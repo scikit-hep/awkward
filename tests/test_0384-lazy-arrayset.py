@@ -6,6 +6,10 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+pytestmark = pytest.mark.skipif(
+    ak._util.py36, reason="as of Python 3.6 dictionaries are insurtion ordered"
+)
+
 
 class Canary(dict):
     def __init__(self):
@@ -19,114 +23,6 @@ class Canary(dict):
     def __setitem__(self, key, value):
         self.ops.append(("set", key))
         return super(Canary, self).__setitem__(key, value)
-
-
-def test_array_builder():
-    b = ak.ArrayBuilder()
-    b.begin_list()
-
-    b.begin_record()
-    b.field("listcollection")
-
-    b.begin_list()
-
-    b.begin_record()
-    b.field("item1")
-
-    b.begin_list()
-    b.integer(1)
-    b.integer(3)
-    b.integer(2)
-    b.end_list()
-
-    b.end_record()
-
-    b.begin_record()
-    b.field("item2")
-
-    b.begin_list()
-    b.integer(2)
-    b.integer(6)
-    b.integer(4)
-    b.end_list()
-
-    b.end_record()
-
-    b.end_list()
-    b.end_record()
-
-    b.begin_record()
-    b.field("collection")
-    b.begin_list()
-    b.begin_record()
-    b.field("item1")
-    b.integer(3)
-    b.end_record()
-    b.begin_record()
-    b.field("item2")
-    b.integer(4)
-    b.end_record()
-
-    b.end_list()
-    b.end_record()
-
-    b.begin_record()
-    b.field("singleton")
-    b.integer(5)
-    b.end_record()
-
-    b.begin_record()
-    b.field("listsingleton")
-    b.begin_list()
-    b.integer(1)
-    b.integer(3)
-    b.integer(2)
-    b.end_list()
-    b.end_record()
-
-    b.begin_record()
-    b.field("unioncollection")
-    b.begin_record()
-    b.field("item1")
-    b.integer(3)
-    b.end_record()
-    b.end_record()
-
-    b.begin_record()
-    b.field("masked")
-    b.null()
-    b.end_record()
-    b.end_list()
-
-    print(b.snapshot().layout)
-
-    #
-    #     },
-    #     {
-    #         "a_listcollection": [
-    #             {"item1": 1, "item2": 2},
-    #             {"item1": 2, "item2": 4},
-    #             {"item1": 3, "item2": 6}
-    #         ],
-    #         "b_collection": {"item1": 3, "item2": 4},
-    #         "c_singleton": 5,
-    #         "d_listsingleton": [1, 2, 3],
-    #         "e_unioncollection": [{"item1": 2}],
-    #         "f_masked": 4
-    #     },
-    #     {
-    #         "a_listcollection": [
-    #             {"item1": 1, "item2": 2},
-    #             {"item1": 2, "item2": 4},
-    #             {"item1": 3, "item2": 6}
-    #         ],
-    #         "b_collection": {"item1": 3, "item2": 4},
-    #         "c_singleton": 5,
-    #         "d_listsingleton": [1, 2, 3],
-    #         "e_unioncollection": {"item1": 4},
-    #         "f_masked": 4
-    #     }
-    # ]
 
 
 def test_lazy_buffers():
