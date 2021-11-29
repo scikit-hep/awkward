@@ -240,6 +240,7 @@ namespace awkward {
         varint_too_big,
         text_number_missing,
         quoted_string_missing,
+        enumeration_missing,
 
         size
     };
