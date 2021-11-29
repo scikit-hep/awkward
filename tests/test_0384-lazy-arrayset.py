@@ -21,7 +21,9 @@ class Canary(dict):
         return super(Canary, self).__setitem__(key, value)
 
 
-@pytest.mark.skipif(ak._util.py36, reason="requires python3.6 or higher")
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py36, reason="requires python3.6 or higher"
+)
 def test_lazy_buffers():
 
     array = ak.from_json(

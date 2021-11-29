@@ -670,7 +670,9 @@ def test_fromiter():
         assert ak.to_list(ak.from_iter(datum)) == datum
 
 
-@pytest.mark.skipif(ak._util.py36, reason="requires python3.6 or higher")
+@pytest.mark.skipif(
+    ak._util.py27 or ak._util.py36, reason="requires python3.6 or higher"
+)
 def test_json():
     dataset = [
         '[{"one":1,"two":1.1},{"one":2,"two":2.2},{"one":3,"two":3.3}]',
