@@ -598,11 +598,10 @@ make_RecordForm(const py::handle& m, const std::string& name) {
           py::arg("has_identities") = false,
           py::arg("parameters") = py::none(),
           py::arg("form_key") = py::none())
-      .def_property_readonly("contents", [](const ak::RecordForm& self)
-           -> std::map<std::string, std::shared_ptr<ak::Form>> {
-        std::map<std::string, std::shared_ptr<ak::Form>> out;
+      .def_property_readonly("contents", [](const ak::RecordForm& self) -> py::dict {
+        py::dict out;
         for (int64_t i = 0;  i < self.numfields();  i++) {
-          out[self.key(i)] = self.content(i);
+          out[py::str(self.key(i))] = py::cast(self.content(i));
         }
         return out;
       })
