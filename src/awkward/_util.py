@@ -25,6 +25,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 py27 = sys.version_info[0] < 3
 py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
+py36 = sys.version_info[0] == 3 and sys.version_info[1] <= 6
+
 win = os.name == "nt"
 bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
 
