@@ -577,7 +577,7 @@ make_RecordForm(const py::handle& m, const std::string& name) {
           py::arg("has_identities") = false,
           py::arg("parameters") = py::none(),
           py::arg("form_key") = py::none())
-      .def(py::init([](const std::unordered_map<std::string,
+      .def(py::init([](const std::map<std::string,
                                       std::shared_ptr<ak::Form>>& contents,
                        bool has_identities,
                        const py::object& parameters,
@@ -599,10 +599,10 @@ make_RecordForm(const py::handle& m, const std::string& name) {
           py::arg("parameters") = py::none(),
           py::arg("form_key") = py::none())
       .def_property_readonly("contents", [](const ak::RecordForm& self)
-           -> std::unordered_map<std::string, std::shared_ptr<ak::Form>> {
-        std::unordered_map<std::string, std::shared_ptr<ak::Form>> out;
-        for (int64_t i = self.numfields() - 1;  i >= 0;  --i) {
-          out.emplace(self.key(i), self.content(i));
+           -> std::map<std::string, std::shared_ptr<ak::Form>> {
+        std::map<std::string, std::shared_ptr<ak::Form>> out;
+        for (int64_t i = 0;  i < self.numfields();  i++) {
+          out[self.key(i)] = self.content(i);
         }
         return out;
       })
