@@ -719,21 +719,31 @@ def test_merge_parameters():
     )
     two = v1_to_v2(ak.from_iter(["good", "stuff"], highlevel=False))
 
-    assert ak.to_list(one.concatenate([two])) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two])) == [
         [121, 117, 99, 107, 121],
         [115, 116, 117, 102, 102],
         "good",
         "stuff",
     ]
-    assert ak.to_list(two.concatenate([one])) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([two, one])) == [
         "good",
         "stuff",
         [121, 117, 99, 107, 121],
         [115, 116, 117, 102, 102],
     ]
 
-    assert one.typetracer.concatenate([two]).form == one.concatenate([two]).form
-    assert two.typetracer.concatenate([one]).form == two.concatenate([one]).form
+    assert (
+        ak._v2.operations.structure.concatenate(
+            [one, two], highlevel=False
+        ).typetracer.form
+        == ak._v2.operations.structure.concatenate([one, two], highlevel=False).form
+    )
+    assert (
+        ak._v2.operations.structure.concatenate(
+            [two, one], highlevel=False
+        ).typetracer.form
+        == ak._v2.operations.structure.concatenate([two, one], highlevel=False).form
+    )
 
 
 def test_mask_as_bool():
@@ -1370,7 +1380,7 @@ def test_concatenate():
         ak.Array([True, False, False, True, True], check_valid=True).layout
     )
 
-    assert ak.to_list(one.concatenate([two, three])) == [
+    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two, three])) == [
         1.1,
         2.2,
         3.3,
@@ -1387,9 +1397,17 @@ def test_concatenate():
         1.0,
     ]
     assert isinstance(
-        one.concatenate([two, three]), ak._v2.contents.unionarray.UnionArray
+        ak._v2.operations.structure.concatenate([one, two, three], highlevel=False),
+        ak._v2.contents.unionarray.UnionArray,
     )
-    assert len(one.concatenate([two, three]).contents) == 2
+    assert (
+        len(
+            ak._v2.operations.structure.concatenate(
+                [one, two, three], highlevel=False
+            ).contents
+        )
+        == 2
+    )
 
 
 @pytest.mark.skip(reason="</NumpyArray> cannot be converted into an Awkward Array")

@@ -604,22 +604,6 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
         return ak._v2.contents.NumpyArray(localindex)
 
-    # FIXME: Temporary fix for concatenate (only working for axis = 0)
-    def concatenate(self, others):
-        if not isinstance(others, list):
-            others = [others]
-        batch = [self]
-        for x in others:
-            if batch[-1].mergeable(x, True):
-                batch.append(x)
-            else:
-                collapsed = batch[0].mergemany(batch[1:])
-                batch = [collapsed.merge_as_union(x)]
-        out = batch[0].mergemany(batch[1:])
-        if isinstance(out, ak._v2.contents.unionarray.UnionArray):
-            out = out.simplify_uniontype(merge=True, mergebool=True)
-        return out
-
     def merge(self, other):
         others = [other]
         return self.mergemany(others)

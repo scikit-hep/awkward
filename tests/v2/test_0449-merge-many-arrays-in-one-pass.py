@@ -956,7 +956,9 @@ def test_concatenate():
     three = v1_to_v2(ak.Array([6, 7, 8]).layout)
     four = v1_to_v2(ak.Array([[9, 9, 9], [10, 10, 10]]).layout)
 
-    assert ak.to_list(one.concatenate([two, three, four])) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([one, two, three, four])
+    ) == [
         1,
         2,
         3,
@@ -968,7 +970,9 @@ def test_concatenate():
         [9, 9, 9],
         [10, 10, 10],
     ]
-    assert ak.to_list(four.concatenate([one, two, three])) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([four, one, two, three])
+    ) == [
         [9, 9, 9],
         [10, 10, 10],
         1,
@@ -980,7 +984,9 @@ def test_concatenate():
         7,
         8,
     ]
-    assert ak.to_list(one.concatenate([two, four, three])) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([one, two, four, three])
+    ) == [
         1,
         2,
         3,
@@ -994,7 +1000,9 @@ def test_concatenate():
     ]
 
     five = v1_to_v2(ak.Array(["nine", "ten"]).layout)
-    assert ak.to_list(one.concatenate([two, three, five])) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([one, two, three, five])
+    ) == [
         1,
         2,
         3,
@@ -1006,7 +1014,9 @@ def test_concatenate():
         "nine",
         "ten",
     ]
-    assert ak.to_list(five.concatenate([one, two, three])) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([five, one, two, three])
+    ) == [
         "nine",
         "ten",
         1,
@@ -1018,7 +1028,9 @@ def test_concatenate():
         7,
         8,
     ]
-    assert ak.to_list(one.concatenate([two, five, three])) == [
+    assert ak.to_list(
+        ak._v2.operations.structure.concatenate([one, two, five, three])
+    ) == [
         1,
         2,
         3,
