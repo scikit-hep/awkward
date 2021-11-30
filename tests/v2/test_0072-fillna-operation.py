@@ -156,7 +156,6 @@ def test_fillna_unionarray():
     ]
 
 
-# @pytest.mark.skip(reason="Fill_none not implemented.")
 def test_highlevel():
     array = ak.Array([[1.1, 2.2, None, 3.3], [], [4.4, None, 5.5]])
 

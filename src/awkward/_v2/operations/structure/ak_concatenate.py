@@ -106,9 +106,6 @@ def concatenate(
                 for x in inputs:
                     if x.is_OptionType and x.content.is_ListType:
                         nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
-                        # print("v2")
-                        # print(nextinputs)
-                        # print("v2")
                     else:
                         nextinputs.append(x)
                 inputs = nextinputs
