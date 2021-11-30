@@ -14,14 +14,15 @@
 #include "rapidjson/error/en.h"
 
 #include "awkward/builder/ArrayBuilder.h"
-#include "awkward/Content.h"
-#include "awkward/refactoring.h"
+#include "awkward/common.h"
+#include "awkward/kernel-dispatch.h"
 
 #include "awkward/io/json.h"
 
 namespace rj = rapidjson;
 
 namespace awkward {
+
   ////////// writing to JSON
   ToJson::~ToJson() = default;
 
@@ -758,9 +759,8 @@ namespace awkward {
       return true;
     }
 
-    // FIXME: refactor
-    const ContentPtr snapshot() const {
-      return ::builder_snapshot(builder_.builder());
+    const BuilderPtr array_builder() const {
+      return builder_.builder();
     }
 
   private:
@@ -772,7 +772,7 @@ namespace awkward {
   };
 
   template<typename HANDLER, typename STREAM>
-  const ContentPtr
+  const std::pair<int, const BuilderPtr>
   do_parse(HANDLER& handler, rj::Reader& reader, STREAM& stream) {
     int64_t number = 0;
     while (stream.Peek() != 0) {
@@ -806,16 +806,10 @@ namespace awkward {
       }
     }
 
-    ContentPtr obj = handler.snapshot();
-    if (number == 1) {
-      return obj.get()->getitem_at_nowrap(0);
-    }
-    else {
-      return obj;
-    }
+    return std::make_pair(number, handler.array_builder());
   }
 
-  const ContentPtr
+  const std::pair<int, const BuilderPtr>
   FromJsonString(const char* source,
                  const ArrayBuilderOptions& options,
                  const char* nan_string,
@@ -830,7 +824,7 @@ namespace awkward {
     return do_parse(handler, reader, stream);
   }
 
-  const ContentPtr
+  const std::pair<int, const BuilderPtr>
   FromJsonFile(FILE* source,
                const ArrayBuilderOptions& options,
                int64_t buffersize,

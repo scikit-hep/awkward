@@ -71,7 +71,7 @@ namespace awkward {
 
     std::stringstream out;
     out << "{\"class\": \"RecordArray\", \"contents\": {";
-    for (int64_t i = 0;  i < contents_.size();  i++) {
+    for (size_t i = 0;  i < contents_.size();  i++) {
       if (i != 0) {
         out << ", ";
       }
@@ -83,6 +83,7 @@ namespace awkward {
       out << "\"parameters\": {\"__record__\": " + util::quote(name_) + "}, ";
     }
     out << "\"form_key\": \"" + form_key.str() + "\"}";
+
     return out.str();
   }
 

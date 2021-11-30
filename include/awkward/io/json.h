@@ -8,12 +8,10 @@
 #include <string>
 
 #include "awkward/common.h"
+#include "awkward/builder/Builder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace awkward {
-  class Content;
-  using ContentPtr    = std::shared_ptr<Content>;
-
   /// @class ToJson
   ///
   /// Abstract base class for producing JSON data.
@@ -326,7 +324,7 @@ namespace awkward {
     const char* complex_imag_string_;
   };
 
-  /// @brief Convert a JSON-encoded string into a Content array using an
+  /// @brief Parses a JSON-encoded string using an
   /// ArrayBuilder.
   ///
   /// @param source Null-terminated string containing any valid JSON data.
@@ -338,14 +336,14 @@ namespace awkward {
   /// representation in JSON format
   /// @param minus_infinity_string user-defined string for a negative
   /// infinity representation in JSON format
-  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
+  LIBAWKWARD_EXPORT_SYMBOL const std::pair<int, const BuilderPtr>
     FromJsonString(const char* source,
                    const ArrayBuilderOptions& options,
                    const char* nan_string = nullptr,
                    const char* infinity_string = nullptr,
                    const char* minus_infinity_string = nullptr);
 
-  /// @brief Convert a JSON-encoded file into a Content array using an
+  /// @brief Parses a JSON-encoded file using an
   /// ArrayBuilder.
   ///
   /// @param source C file handle to a file containing any valid JSON data.
@@ -358,7 +356,7 @@ namespace awkward {
   /// representation in JSON format
   /// @param minus_infinity_string user-defined string for a negative
   /// infinity representation in JSON format
-  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
+  LIBAWKWARD_EXPORT_SYMBOL const std::pair<int, const BuilderPtr>
     FromJsonFile(FILE* source,
                  const ArrayBuilderOptions& options,
                  int64_t buffersize,

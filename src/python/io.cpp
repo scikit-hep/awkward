@@ -2,11 +2,9 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/io.cpp", line)
 
+#include <pybind11/numpy.h>
 #include <string>
 
-#include "awkward/Content.h"
-#include "awkward/Index.h"
-#include "awkward/array/NumpyArray.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/io/json.h"
 #include "awkward/io/uproot.h"
@@ -20,6 +18,7 @@ namespace ak = awkward;
 
 void
 make_fromjson(py::module& m, const std::string& name) {
+  std::cout << "make_fromjson\n";
   m.def(name.c_str(),
         [](const std::string& source,
            const char* nan_string,
@@ -28,12 +27,17 @@ make_fromjson(py::module& m, const std::string& name) {
            int64_t initial,
            double resize,
            int64_t buffersize) -> py::object {
-    ak::ContentPtr out = ak::FromJsonString(source.c_str(),
-                                            ak::ArrayBuilderOptions(initial, resize),
-                                            nan_string,
-                                            infinity_string,
-                                            minus_infinity_string);
-    return box(out);
+    auto out = ak::FromJsonString(source.c_str(),
+                                  ak::ArrayBuilderOptions(initial, resize),
+                                  nan_string,
+                                  infinity_string,
+                                  minus_infinity_string);
+    if (out.first == 1) {
+      return box(unbox_content(::builder_snapshot(out.second))->getitem_at_nowrap(0));
+    }
+    else {
+      return ::builder_snapshot(out.second);
+    }
   }, py::arg("source"),
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,
@@ -65,21 +69,29 @@ make_fromjsonfile(py::module& m, const std::string& name) {
           + std::string("\" could not be opened for reading")
           + FILENAME(__LINE__));
       }
-      std::shared_ptr<ak::Content> out(nullptr);
+      int num = 0;
+      ak::BuilderPtr out(nullptr);
       try {
-        out = FromJsonFile(file,
+        auto out_pair = ak::FromJsonFile(file,
                            ak::ArrayBuilderOptions(initial, resize),
                            buffersize,
                            nan_string,
                            infinity_string,
                            minus_infinity_string);
+        num = out_pair.first;
+        out = out_pair.second;
       }
       catch (...) {
         fclose(file);
         throw;
       }
       fclose(file);
-      return box(out);
+      if (num == 1) {
+        return box(unbox_content(::builder_snapshot(out))->getitem_at_nowrap(0));
+      }
+      else {
+        return ::builder_snapshot(out);
+      }
   }, py::arg("source"),
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,

@@ -9,18 +9,6 @@
 #include "awkward/type/Type.h"
 #include "awkward/Reducer.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/builder/OptionBuilder.h"
-#include "awkward/builder/BoolBuilder.h"
-#include "awkward/builder/DatetimeBuilder.h"
-#include "awkward/builder/Int64Builder.h"
-#include "awkward/builder/Float64Builder.h"
-#include "awkward/builder/StringBuilder.h"
-#include "awkward/builder/ListBuilder.h"
-#include "awkward/builder/TupleBuilder.h"
-#include "awkward/builder/RecordBuilder.h"
-#include "awkward/builder/Complex128Builder.h"
-#include "awkward/builder/UnionBuilder.h"
-#include "awkward/builder/UnknownBuilder.h"
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
 #include "awkward/layoutbuilder/ByteMaskedArrayBuilder.h"
@@ -987,65 +975,6 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   }
 }
 
-namespace {
-  class NumpyBuffersContainer: public ak::BuffersContainer {
-  public:
-    py::dict container() {
-      return container_;
-    }
-
-    void
-      copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override {
-        py::object pyarray = py::module::import("numpy").attr("empty")(num_bytes, "u1");
-        py::array_t<uint8_t> rawarray = pyarray.cast<py::array_t<uint8_t>>();
-        py::buffer_info rawinfo = rawarray.request();
-        std::memcpy(rawinfo.ptr, source, num_bytes);
-        container_[py::str(name)] = pyarray;
-      }
-
-    void
-      full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) override {
-        py::object pyarray = py::module::import("numpy").attr("full")(py::int_(length), py::int_(value), py::str(dtype));
-        container_[py::str(name)] = pyarray;
-      }
-
-  private:
-    py::dict container_;
-  };
-
-  class EmptyBuffersContainer: public ak::BuffersContainer {
-  public:
-    void
-      copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override { }
-
-    void
-      full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) override { }
-  };
-
-  /// @brief Turns the accumulated data into a Content array.
-  ///
-  /// This operation only converts Builder nodes into Content nodes; the
-  /// buffers holding array data are shared between the Builder and the
-  /// Content. Hence, taking a snapshot is a constant-time operation.
-  ///
-  /// It is safe to take multiple snapshots while accumulating data. The
-  /// shared buffers are only appended to, which affects elements beyond
-  /// the limited view of old snapshots.
-  py::object
-  builder_snapshot(const ak::BuilderPtr builder) {
-    ::NumpyBuffersContainer container;
-    int64_t form_key_id = 0;
-    std::string form = builder.get()->to_buffers(container, form_key_id);
-    py::dict kwargs;
-    kwargs[py::str("form")] = py::str(form);
-    kwargs[py::str("length")] = py::int_(builder.get()->length());
-    kwargs[py::str("container")] = container.container();
-    kwargs[py::str("key_format")] = py::str("{form_key}-{attribute}");
-    kwargs[py::str("highlevel")] = py::bool_(false);
-    return py::module::import("awkward").attr("from_buffers")(**kwargs);
-  }
-}
-
 template <>
 py::object
 getitem<ak::ArrayBuilder>(const ak::ArrayBuilder& self, const py::object& obj) {
@@ -1170,9 +1099,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
 ////////// LayoutBuilder<T, I>
 
 namespace {
-  /// @brief Turns the accumulated data into a Content array.
-  ///
-  /// This operation only converts FormBuilder nodes into Content nodes
   template <typename T, typename I>
   py::object
   layoutbuilder_snapshot(const ak::FormBuilderPtr<T, I> builder, const ak::ForthOutputBufferMap& outputs) {
