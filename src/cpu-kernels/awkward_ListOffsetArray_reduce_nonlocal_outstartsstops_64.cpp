@@ -11,7 +11,7 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
   int64_t lendistincts,
   const int64_t* gaps,
   int64_t outlength) {
-  int64_t maxcount = lendistincts / outlength;
+  int64_t maxcount = (outlength == 0) ? lendistincts : lendistincts / outlength;
 
   int64_t j = 0;
   int64_t k = 0;
