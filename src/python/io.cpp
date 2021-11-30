@@ -13,30 +13,6 @@
 #include "awkward/python/io.h"
 
 namespace ak = awkward;
-// namespace {
-//   /// @brief Turns the accumulated data into a Content array.
-//   ///
-//   /// This operation only converts Builder nodes into Content nodes; the
-//   /// buffers holding array data are shared between the Builder and the
-//   /// Content. Hence, taking a snapshot is a constant-time operation.
-//   ///
-//   /// It is safe to take multiple snapshots while accumulating data. The
-//   /// shared buffers are only appended to, which affects elements beyond
-//   /// the limited view of old snapshots.
-//   py::object
-//   builder_snapshot(const ak::BuilderPtr builder) {
-//     ::NumpyBuffersContainer container;
-//     int64_t form_key_id = 0;
-//     std::string form = builder.get()->to_buffers(container, form_key_id);
-//     py::dict kwargs;
-//     kwargs[py::str("form")] = py::str(form);
-//     kwargs[py::str("length")] = py::int_(builder.get()->length());
-//     kwargs[py::str("container")] = container.container();
-//     kwargs[py::str("key_format")] = py::str("{form_key}-{attribute}");
-//     kwargs[py::str("highlevel")] = py::bool_(false);
-//     return py::module::import("awkward").attr("from_buffers")(**kwargs);
-//   }
-// }
 
 ////////// fromjson
 
