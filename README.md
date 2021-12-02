@@ -208,14 +208,14 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 | [1.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.4.0) | 2021-07-02 | _(none)_ |
 | [1.5.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.5.0) | 2021-09-12 | _(none)_ |
 | 1.6.0 | _(skipped)_ | A deprecation was scheduled for "1.7.0, Oct 1, 2021," but we were a version number behind when October came, so the number 1.6.0 was skipped. |
+| [1.7.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.7.0) | 2021-12-02 | [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) default `axis` will be `-1`. Until then, all uses without an explicit `axis` raise warnings. |
 
 | Version number | Target date | Deprecated features to remove in this version |
 |:--------------:|:-----------:|:----------------------------------------------|
-| 1.7.0 | 2021-10-01 | [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) default `axis` will be `-1`. Until then, all uses without an explicit `axis` raise warnings. |
-| 1.8.0 | 2021-11-01 | |
-| 1.9.0 | 2021-12-01 | |
-| 1.10.0 | 2022-01-01 | |
-| 1.11.0 | 2022-02-01 | |
+| 1.8.0 | 2022-01-01 | No support for Python 2 or 3.5. Minimum Python version is 3.6. |
+| 2.0.0 | _(soon thereafter)_ | |
+
+See [Discussion #1151](https://github.com/scikit-hep/awkward-1.0/discussions/1151) for details about Awkward version 2.x. Maybe also the [presentation that initiated it](https://indico.cern.ch/event/1032972/) or the [ACAT 2021 "lessons learned" presentation](https://indico.cern.ch/event/855454/contributions/4605044/).
 
 ## Voting for fixes/features
 
