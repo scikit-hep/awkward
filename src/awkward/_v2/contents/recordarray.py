@@ -551,16 +551,20 @@ class RecordArray(Content):
                     )
 
         nextcontents = []
-        minlength = -1
-
+        minlength = None
         for forfield in for_each_field:
             tail_forfield = forfield[1:]
             merged = forfield[0].mergemany(tail_forfield)
 
             nextcontents.append(merged)
 
-            if minlength == -1 or len(merged) < minlength:
+            if minlength is None or len(merged) < minlength:
                 minlength = len(merged)
+
+        if minlength is None:
+            minlength = len(self)
+            for x in others:
+                minlength += len(x)
 
         next = RecordArray(nextcontents, self._fields, minlength, None, parameters)
 

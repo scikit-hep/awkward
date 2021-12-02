@@ -276,7 +276,7 @@ class RecordForm(Form):
     @property
     def minmax_depth(self):
         if len(self._contents) == 0:
-            return (0, 0)
+            return (1, 1)
         mins, maxs = [], []
         for content in self._contents:
             mindepth, maxdepth = content.minmax_depth

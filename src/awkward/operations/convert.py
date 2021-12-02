@@ -2949,6 +2949,9 @@ def _from_arrow(
             else:
                 return ak.operations.structure.concatenate(chunks, highlevel=False)
 
+        elif isinstance(obj, Iterable) and len(obj) == 0:
+            return ak.layout.RecordArray([], [], length=0)
+
         else:
             raise TypeError(
                 "unrecognized Arrow type: {0}".format(type(obj))
@@ -3287,7 +3290,6 @@ def _parquet_schema_to_form(schema):
         field = schema.field(index)
         content = maybe_nullable(field, recurse(field.type, (name,)))
         contents.append(ak.forms.VirtualForm(content, has_length=True))
-    assert len(contents) != 0
     return ak.forms.RecordForm(contents, schema.names)
 
 
@@ -3985,17 +3987,23 @@ def from_parquet(
 
     else:
         batches = dataset.read_row_group_batches()
-        out = _from_arrow(batches, False, highlevel=False)
-        assert isinstance(out, ak.layout.RecordArray) and not out.istuple
 
-        if dataset.partition_columns != []:
-            field_names, fields = zip(*dataset.partition_columns)
-            out = ak.layout.RecordArray(
-                fields + tuple(out.contents), field_names + tuple(out.keys())
-            )
+        if len(batches) == 0:
+            form = _parquet_schema_to_form(dataset.schema)
+            out = from_buffers(form, 0, {}, highlevel=False)
 
-        elif dataset.schema.names == [""]:
-            out = out[""]
+        else:
+            out = _from_arrow(batches, False, highlevel=False)
+            assert isinstance(out, ak.layout.RecordArray) and not out.istuple
+
+            if dataset.partition_columns != []:
+                field_names, fields = zip(*dataset.partition_columns)
+                out = ak.layout.RecordArray(
+                    fields + tuple(out.contents), field_names + tuple(out.keys())
+                )
+
+            elif dataset.schema.names == [""]:
+                out = out[""]
 
     return ak._util.maybe_wrap(out, behavior, highlevel)
 
