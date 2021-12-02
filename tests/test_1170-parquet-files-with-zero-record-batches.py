@@ -21,3 +21,8 @@ def test_concatenate():
     two = ak.Array(ak.layout.RecordArray([], [], length=0))
     assert len(ak.concatenate([one, two])) == 0
     assert len(ak.concatenate([one])) == 0
+
+    one = ak.Array(ak.layout.RecordArray([], [], length=3))
+    two = ak.Array(ak.layout.RecordArray([], [], length=5))
+    assert len(ak.concatenate([one, two])) == 8
+    assert len(ak.concatenate([one])) == 3

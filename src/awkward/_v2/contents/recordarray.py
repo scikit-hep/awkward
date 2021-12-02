@@ -562,7 +562,9 @@ class RecordArray(Content):
                 minlength = len(merged)
 
         if minlength is None:
-            minlength = 0
+            minlength = len(self)
+            for x in others:
+                minlength += len(x)
 
         next = RecordArray(nextcontents, self._fields, minlength, None, parameters)
 

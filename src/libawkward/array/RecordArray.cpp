@@ -1372,7 +1372,10 @@ namespace awkward {
       }
     }
     if (minlength < 0) {
-      minlength = 0;
+      minlength = length();
+      for (auto x : others) {
+        minlength += x.get()->length();
+      }
     }
 
     ContentPtr next = std::make_shared<RecordArray>(Identities::none(),
