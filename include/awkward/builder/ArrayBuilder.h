@@ -233,7 +233,7 @@ namespace awkward {
     /// @brief Internal function to replace the root node of the ArrayBuilder's
     /// Builder tree with a new root.
     void
-      maybeupdate(const BuilderPtr& tmp);
+      maybeupdate(const BuilderPtr builder);
 
 private:
     /// @brief Constant equal to `nullptr`.

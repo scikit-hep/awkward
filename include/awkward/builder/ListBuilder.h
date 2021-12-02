@@ -115,15 +115,14 @@ namespace awkward {
 
     bool begun() { return begun_; }
 
+    void
+      maybeupdate(const BuilderPtr builder);
+
   private:
     const ArrayBuilderOptions options_;
     GrowableBuffer<int64_t> offsets_;
     BuilderPtr content_;
     bool begun_;
-
-  public:
-    void
-      maybeupdate(const BuilderPtr& tmp);
   };
 }
 

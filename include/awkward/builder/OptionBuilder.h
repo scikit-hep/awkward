@@ -120,14 +120,13 @@ namespace awkward {
 
     const BuilderPtr builder() const { return content_; }
 
+    void
+      maybeupdate(const BuilderPtr builder);
+
   private:
     const ArrayBuilderOptions options_;
     GrowableBuffer<int64_t> index_;
     BuilderPtr content_;
-
-  public:
-    void
-      maybeupdate(const BuilderPtr& tmp);
   };
 
 }

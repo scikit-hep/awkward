@@ -135,6 +135,9 @@ namespace awkward {
 
     int64_t nextindex() { return nextindex_; }
 
+    void
+      maybeupdate(int64_t i, const BuilderPtr builder);
+
   private:
     const BuilderPtr
       field_fast(const char* key);
@@ -153,10 +156,6 @@ namespace awkward {
     int64_t nextindex_;
     int64_t nexttotry_;
     int64_t keys_size_;
-
-  public:
-    void
-      maybeupdate(int64_t i, const BuilderPtr& tmp);
   };
 }
 
