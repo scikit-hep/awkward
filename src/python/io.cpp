@@ -18,7 +18,6 @@ namespace ak = awkward;
 
 void
 make_fromjson(py::module& m, const std::string& name) {
-  std::cout << "make_fromjson\n";
   m.def(name.c_str(),
         [](const std::string& source,
            const char* nan_string,
