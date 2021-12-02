@@ -9,8 +9,15 @@ import awkward as ak  # noqa: F401
 pytest.importorskip("pyarrow.parquet")
 
 
-def test():
+def test_parquet():
     empty = ak.from_parquet("tests/samples/zero-record-batches.parquet")
     assert isinstance(empty, ak.Array)
     assert len(empty) == 0
     assert str(empty.type) == "0 * {}"
+
+
+def test_concatenate():
+    one = ak.Array(ak.layout.RecordArray([], [], length=0))
+    two = ak.Array(ak.layout.RecordArray([], [], length=0))
+    assert len(ak.concatenate([one, two])) == 0
+    assert len(ak.concatenate([one])) == 0

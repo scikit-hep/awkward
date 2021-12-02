@@ -177,7 +177,7 @@ namespace awkward {
   const std::pair<int64_t, int64_t>
   RecordForm::minmax_depth() const {
     if (contents_.empty()) {
-      return std::pair<int64_t, int64_t>(0, 0);
+      return std::pair<int64_t, int64_t>(1, 1);
     }
     int64_t min = kMaxInt64;
     int64_t max = 0;
@@ -968,7 +968,7 @@ namespace awkward {
   const std::pair<int64_t, int64_t>
   RecordArray::minmax_depth() const {
     if (contents_.empty()) {
-      return std::pair<int64_t, int64_t>(0, 0);
+      return std::pair<int64_t, int64_t>(1, 1);
     }
     int64_t min = kMaxInt64;
     int64_t max = 0;
@@ -1370,6 +1370,9 @@ namespace awkward {
       if (minlength == -1  ||  merged.get()->length() < minlength) {
         minlength = merged.get()->length();
       }
+    }
+    if (minlength < 0) {
+      minlength = 0;
     }
 
     ContentPtr next = std::make_shared<RecordArray>(Identities::none(),
