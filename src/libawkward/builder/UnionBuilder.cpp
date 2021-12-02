@@ -108,21 +108,16 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::boolean(bool x) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (dynamic_cast<BoolBuilder*>(content.get()) != nullptr) {
-          tofill = content;
-          break;
-        }
-        i++;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        return dynamic_cast<BoolBuilder*>(p.get());
+      });
+      if (tofill == contents_.end()) {
+        contents_.emplace_back(BoolBuilder::fromempty(options_));
+        tofill = --contents_.end();
       }
-      if (tofill.get() == nullptr) {
-        tofill = BoolBuilder::fromempty(options_);
-        contents_.push_back(tofill);
-      }
-      int64_t length = tofill.get()->length();
-      tofill.get()->boolean(x);
+      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
+      int64_t length = tofill->get()->length();
+      tofill->get()->boolean(x);
       tags_.append(i);
       index_.append(length);
     }
@@ -135,23 +130,18 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::integer(int64_t x) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (dynamic_cast<Int64Builder*>(content.get()) != nullptr) {
-          tofill = content;
-          break;
-        }
-        i++;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        return dynamic_cast<Int64Builder*>(p.get());
+      });
+      if (tofill == contents_.end()) {
+        contents_.emplace_back(Int64Builder::fromempty(options_));
+        tofill = --contents_.end();
       }
-      if (tofill.get() == nullptr) {
-        tofill = Int64Builder::fromempty(options_);
-        contents_.push_back(tofill);
-      }
-      int64_t length = tofill.get()->length();
-      tofill.get()->integer(x);
+      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
+      int64_t len = tofill->get()->length();
+      tofill->get()->integer(x);
       tags_.append(i);
-      index_.append(length);
+      index_.append(len);
     }
     else {
       contents_[(size_t)current_].get()->integer(x);
@@ -162,37 +152,26 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::real(double x) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (dynamic_cast<Float64Builder*>(content.get()) != nullptr) {
-          tofill = content;
-          break;
-        }
-        i++;
-      }
-      if (tofill.get() == nullptr) {
-        i = 0;
-        for (auto content : contents_) {
-          if (dynamic_cast<Int64Builder*>(content.get()) != nullptr) {
-            tofill = content;
-            break;
-          }
-          i++;
-        }
-        if (tofill.get() != nullptr) {
-          tofill = Float64Builder::fromint64(
-            options_,
-            dynamic_cast<Int64Builder*>(tofill.get())->buffer());
-          contents_[(size_t)i] = tofill;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        return dynamic_cast<Float64Builder*>(p.get());
+      });
+      if (tofill == contents_.end()) {
+        tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+          return dynamic_cast<Int64Builder*>(p.get());
+        });
+        if (tofill != contents_.end()) {
+          *tofill = std::move(Float64Builder::fromint64(
+              options_,
+              static_cast<Int64Builder*>(tofill->get())->buffer()));
         }
         else {
-          tofill = Float64Builder::fromempty(options_);
-          contents_.push_back(tofill);
+          contents_.emplace_back(Float64Builder::fromempty(options_));
+          tofill = --contents_.end();
         }
       }
-      int64_t length = tofill.get()->length();
-      tofill.get()->real(x);
+      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
+      int64_t length = tofill->get()->length();
+      tofill->get()->real(x);
       tags_.append(i);
       index_.append(length);
     }
@@ -205,53 +184,36 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::complex(std::complex<double> x) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (dynamic_cast<Complex128Builder*>(content.get()) != nullptr) {
-          tofill = content;
-          break;
-        }
-        i++;
-      }
-      if (tofill.get() == nullptr) {
-        i = 0;
-        for (auto content : contents_) {
-          if (dynamic_cast<Float64Builder*>(content.get()) != nullptr) {
-            tofill = content;
-            break;
-          }
-          i++;
-        }
-        if (tofill.get() != nullptr) {
-          tofill = Complex128Builder::fromfloat64(
-            options_,
-            dynamic_cast<Float64Builder*>(tofill.get())->buffer());
-          contents_[(size_t)i] = tofill;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        return dynamic_cast<Complex128Builder*>(p.get());
+      });
+      if (tofill == contents_.end()) {
+        tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+          return dynamic_cast<Float64Builder*>(p.get());
+        });
+        if (tofill != contents_.end()) {
+          *tofill = std::move(Complex128Builder::fromfloat64(
+              options_,
+              static_cast<Float64Builder*>(tofill->get())->buffer()));
         }
       }
-      if (tofill.get() == nullptr) {
-        i = 0;
-        for (auto content : contents_) {
-          if (dynamic_cast<Int64Builder*>(content.get()) != nullptr) {
-            tofill = content;
-            break;
-          }
-          i++;
-        }
-        if (tofill.get() != nullptr) {
-          tofill = Complex128Builder::fromint64(
-            options_,
-            dynamic_cast<Int64Builder*>(tofill.get())->buffer());
-          contents_[(size_t)i] = tofill;
+      if (tofill == contents_.end()) {
+        tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+          return dynamic_cast<Int64Builder*>(p.get());
+        });
+        if (tofill != contents_.end()) {
+          *tofill = std::move(Complex128Builder::fromint64(
+              options_,
+              static_cast<Int64Builder*>(tofill->get())->buffer()));
         }
         else {
-          tofill = Complex128Builder::fromempty(options_);
-          contents_.push_back(tofill);
+          contents_.emplace_back(Complex128Builder::fromempty(options_));
+          tofill = --contents_.end();
         }
       }
-      int64_t length = tofill.get()->length();
-      tofill.get()->complex(x);
+      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
+      int64_t length = tofill->get()->length();
+      tofill->get()->complex(x);
       tags_.append(i);
       index_.append(length);
     }
@@ -264,23 +226,17 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::datetime(int64_t x, const std::string& unit) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (DatetimeBuilder* raw = dynamic_cast<DatetimeBuilder*>(content.get())) {
-          if (raw->units() == unit) {
-            tofill = content;
-            break;
-          }
-        }
-        i++;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        const auto& raw = dynamic_cast<DatetimeBuilder*>(p.get());
+        return raw != 0 && raw->units() == unit;
+      });
+      if (tofill == contents_.end()) {
+        contents_.emplace_back(DatetimeBuilder::fromempty(options_, unit));
+        tofill = --contents_.end();
       }
-      if (tofill.get() == nullptr) {
-        tofill = DatetimeBuilder::fromempty(options_, unit);
-        contents_.push_back(tofill);
-      }
-      int64_t len = tofill.get()->length();
-      tofill.get()->datetime(x, unit);
+      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
+      int64_t len = tofill->get()->length();
+      tofill->get()->datetime(x, unit);
       tags_.append(i);
       index_.append(len);
     }
@@ -293,23 +249,17 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::timedelta(int64_t x, const std::string& unit) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (DatetimeBuilder* raw = dynamic_cast<DatetimeBuilder*>(content.get())) {
-          if (raw->units() == unit) {
-            tofill = content;
-            break;
-          }
-        }
-        i++;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        const auto& raw = dynamic_cast<DatetimeBuilder*>(p.get());
+        return raw != 0 && raw->units() == unit;
+      });
+      if (tofill == contents_.end()) {
+        contents_.emplace_back(DatetimeBuilder::fromempty(options_, unit));
+        tofill = --contents_.end();
       }
-      if (tofill.get() == nullptr) {
-        tofill = DatetimeBuilder::fromempty(options_, unit);
-        contents_.push_back(tofill);
-      }
-      int64_t len = tofill.get()->length();
-      tofill.get()->timedelta(x, unit);
+      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
+      int64_t len = tofill->get()->length();
+      tofill->get()->timedelta(x, unit);
       tags_.append(i);
       index_.append(len);
     }
@@ -322,23 +272,17 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (StringBuilder* raw = dynamic_cast<StringBuilder*>(content.get())) {
-          if (raw->encoding() == encoding) {
-            tofill = content;
-            break;
-          }
-        }
-        i++;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        const auto& raw = dynamic_cast<StringBuilder*>(p.get());
+        return raw != 0 && raw->encoding() == encoding;
+      });
+      if (tofill == contents_.end()) {
+        contents_.emplace_back(StringBuilder::fromempty(options_, encoding));
+        tofill = --contents_.end();
       }
-      if (tofill.get() == nullptr) {
-        tofill = StringBuilder::fromempty(options_, encoding);
-        contents_.push_back(tofill);
-      }
-      int64_t len = tofill.get()->length();
-      tofill.get()->string(x, length, encoding);
+      int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
+      int64_t len = tofill->get()->length();
+      tofill->get()->string(x, length, encoding);
       tags_.append(i);
       index_.append(len);
     }
@@ -351,21 +295,15 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::beginlist() {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (dynamic_cast<ListBuilder*>(content.get()) != nullptr) {
-          tofill = content;
-          break;
-        }
-        i++;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        return dynamic_cast<ListBuilder*>(p.get());
+      });
+      if (tofill == contents_.end()) {
+        contents_.emplace_back(ListBuilder::fromempty(options_));
+        tofill = --contents_.end();
       }
-      if (tofill.get() == nullptr) {
-        tofill = ListBuilder::fromempty(options_);
-        contents_.push_back(tofill);
-      }
-      tofill->beginlist();
-      current_ = i;
+      tofill->get()->beginlist();
+      current_ = (int8_t)std::distance(contents_.begin(), tofill);
     }
     else {
       contents_[(size_t)current_].get()->beginlist();
@@ -395,23 +333,16 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::begintuple(int64_t numfields) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (TupleBuilder* raw = dynamic_cast<TupleBuilder*>(content.get())) {
-          if (raw->length() == -1  ||  raw->numfields() == numfields) {
-            tofill = content;
-            break;
-          }
-        }
-        i++;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        const auto& raw = dynamic_cast<TupleBuilder*>(p.get());
+        return raw != nullptr  &&  (raw->length() == -1  ||  raw->numfields() == numfields);
+      });
+      if (tofill == contents_.end()) {
+        contents_.emplace_back(TupleBuilder::fromempty(options_));
+        tofill = --contents_.end();
       }
-      if (tofill.get() == nullptr) {
-        tofill = TupleBuilder::fromempty(options_);
-        contents_.push_back(tofill);
-      }
-      tofill->begintuple(numfields);
-      current_ = i;
+      tofill->get()->begintuple(numfields);
+      current_ = (int8_t)std::distance(contents_.begin(), tofill);
     }
     else {
       contents_[(size_t)current_].get()->begintuple(numfields);
@@ -454,25 +385,18 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::beginrecord(const char* name, bool check) {
     if (current_ == -1) {
-      BuilderPtr tofill(nullptr);
-      int8_t i = 0;
-      for (auto content : contents_) {
-        if (RecordBuilder* raw = dynamic_cast<RecordBuilder*>(content.get())) {
-          if (raw->length() == -1  ||
-              ((check  &&  raw->name() == name)  ||
-               (!check  &&  raw->nameptr() == name))) {
-            tofill = content;
-            break;
-          }
-        }
-        i++;
+      auto tofill = std::find_if(contents_.begin(), contents_.end(), [&](BuilderPtr const& p) {
+        const auto& raw = dynamic_cast<RecordBuilder*>(p.get());
+        return raw != nullptr  &&  (raw->length() == -1  ||
+                ((check  &&  raw->name() == name)  ||
+                 (!check  &&  raw->nameptr() == name)));
+      });
+      if (tofill == contents_.end()) {
+        contents_.emplace_back(RecordBuilder::fromempty(options_));
+        tofill = --contents_.end();
       }
-      if (tofill.get() == nullptr) {
-        tofill = RecordBuilder::fromempty(options_);
-        contents_.push_back(tofill);
-      }
-      tofill->beginrecord(name, check);
-      current_ = i;
+      tofill->get()->beginrecord(name, check);
+      current_ = (int8_t)std::distance(contents_.begin(), tofill);
     }
     else {
       contents_[(size_t)current_].get()->beginrecord(name, check);
