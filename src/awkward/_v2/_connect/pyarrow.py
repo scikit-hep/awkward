@@ -692,5 +692,8 @@ def handle_arrow(obj, pass_empty_field=False):
             )
             return ak._v2.operations.structure.concatenate(chunks, highlevel=False)
 
+    elif isinstance(obj, Iterable) and len(obj) == 0:
+        return ak._v2.contents.RecordArray([], [], length=0)
+
     else:
         raise TypeError("unrecognized Arrow type: {0}".format(type(obj)))
