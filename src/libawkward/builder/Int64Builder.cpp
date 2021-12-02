@@ -66,14 +66,14 @@ namespace awkward {
   Int64Builder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -86,42 +86,42 @@ namespace awkward {
   Int64Builder::real(double x) {
     BuilderPtr out = Float64Builder::fromint64(options_, buffer_);
     out.get()->real(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::complex(std::complex<double> x) {
     BuilderPtr out = Complex128Builder::fromint64(options_, buffer_);
     out.get()->complex(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -135,7 +135,7 @@ namespace awkward {
   Int64Builder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -156,7 +156,7 @@ namespace awkward {
   Int64Builder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr

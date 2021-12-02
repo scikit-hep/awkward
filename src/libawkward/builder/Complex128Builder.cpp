@@ -86,14 +86,14 @@ namespace awkward {
   Complex128Builder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -118,28 +118,28 @@ namespace awkward {
   Complex128Builder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -153,7 +153,7 @@ namespace awkward {
   Complex128Builder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -174,7 +174,7 @@ namespace awkward {
   Complex128Builder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr

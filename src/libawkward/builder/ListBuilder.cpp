@@ -72,7 +72,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->null());
@@ -85,7 +85,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->boolean(x);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->boolean(x));
@@ -98,7 +98,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->integer(x));
@@ -111,7 +111,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->real(x);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->real(x));
@@ -124,7 +124,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->complex(x);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->complex(x));
@@ -137,7 +137,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->datetime(x, unit);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->datetime(x, unit));
@@ -150,7 +150,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->timedelta(x, unit);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->timedelta(x, unit));
@@ -163,7 +163,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->string(x, length, encoding));
@@ -204,7 +204,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->begintuple(numfields);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->begintuple(numfields));
@@ -243,7 +243,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginrecord(name, check);
-      return out;
+      return std::move(out);
     }
     else {
       maybeupdate(content_.get()->beginrecord(name, check));
@@ -278,9 +278,7 @@ namespace awkward {
   }
 
   void
-  ListBuilder::maybeupdate(const BuilderPtr& tmp) {
-    if (tmp.get() != content_.get()) {
-      content_ = tmp;
-    }
+  ListBuilder::maybeupdate(const BuilderPtr builder) {
+    content_ = std::move(builder);
   }
 }

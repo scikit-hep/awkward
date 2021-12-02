@@ -79,14 +79,14 @@ namespace awkward {
   Float64Builder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -105,35 +105,35 @@ namespace awkward {
   Float64Builder::complex(std::complex<double> x) {
     BuilderPtr out = Complex128Builder::fromfloat64(options_, buffer_);
     out.get()->complex(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -147,7 +147,7 @@ namespace awkward {
   Float64Builder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -168,7 +168,7 @@ namespace awkward {
   Float64Builder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr

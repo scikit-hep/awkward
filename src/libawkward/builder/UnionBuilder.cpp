@@ -97,7 +97,7 @@ namespace awkward {
     if (current_ == -1) {
       BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
-      return out;
+      return std::move(out);
     }
     else {
       contents_[(size_t)current_].get()->null();

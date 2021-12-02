@@ -86,7 +86,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->boolean(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -96,7 +96,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->integer(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -106,7 +106,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->real(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -116,7 +116,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->complex(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -126,7 +126,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->datetime(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -136,7 +136,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->timedelta(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -146,7 +146,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->string(x, length, encoding);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -156,7 +156,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->beginlist();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -173,7 +173,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->begintuple(numfields);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -197,7 +197,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->beginrecord(name, check);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
