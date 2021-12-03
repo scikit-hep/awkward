@@ -190,7 +190,7 @@ namespace awkward {
     return std::move(out);
   }
 
-  const BuilderPtr
+  void
   DatetimeBuilder::field(const char* key, bool check) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")

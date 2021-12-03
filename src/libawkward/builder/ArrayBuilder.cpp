@@ -150,12 +150,12 @@ namespace awkward {
 
   void
   ArrayBuilder::field_fast(const char* key) {
-    maybeupdate(builder_.get()->field(key, false));
+    builder_.get()->field(key, false);
   }
 
   void
   ArrayBuilder::field_check(const char* key) {
-    maybeupdate(builder_.get()->field(key, true));
+    builder_.get()->field(key, true);
   }
 
   void

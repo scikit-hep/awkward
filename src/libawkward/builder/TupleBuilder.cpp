@@ -401,7 +401,7 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
+  void
   TupleBuilder::field(const char* key, bool check) {
     if (!begun_) {
       throw std::invalid_argument(
@@ -417,7 +417,6 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->field(key, check);
     }
-    return shared_from_this();
   }
 
   const BuilderPtr

@@ -94,7 +94,7 @@ namespace awkward {
     const BuilderPtr
       beginrecord(const char* name, bool check) override;
 
-    const BuilderPtr
+    void
       field(const char* key, bool check) override;
 
     const BuilderPtr

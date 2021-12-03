@@ -427,17 +427,17 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
+  void
   RecordBuilder::field(const char* key, bool check) {
     if (check) {
-      return field_check(key);
+      field_check(key);
     }
     else {
-      return field_fast(key);
+      field_fast(key);
     }
   }
 
-  const BuilderPtr
+  void
   RecordBuilder::field_fast(const char* key) {
     if (!begun_) {
       throw std::invalid_argument(
@@ -457,7 +457,7 @@ namespace awkward {
         if (pointers_[(size_t)i] == key) {
           nextindex_ = i;
           nexttotry_ = i + 1;
-          return shared_from_this();
+          return;
         }
         i++;
       } while (i != nexttotry_);
@@ -475,15 +475,15 @@ namespace awkward {
       keys_.push_back(std::string(key));
       pointers_.push_back(key);
       keys_size_ = (int64_t)keys_.size();
-      return shared_from_this();
+      return;
     }
     else {
       contents_[(size_t)nextindex_].get()->field(key, false);
-      return shared_from_this();
+      return;
     }
   }
 
-  const BuilderPtr
+  void
   RecordBuilder::field_check(const char* key) {
     if (!begun_) {
       throw std::invalid_argument(
@@ -503,29 +503,29 @@ namespace awkward {
         if (keys_[(size_t)i].compare(key) == 0) {
           nextindex_ = i;
           nexttotry_ = i + 1;
-          return shared_from_this();
+          return;
         }
         i++;
       } while (i != nexttotry_);
       nextindex_ = keys_size_;
       nexttotry_ = 0;
       if (length_ == 0) {
-        contents_.push_back(UnknownBuilder::fromempty(options_));
+        contents_.emplace_back(UnknownBuilder::fromempty(options_));
       }
       else {
-        contents_.push_back(
+        contents_.emplace_back(
           OptionBuilder::fromnulls(options_,
                                    length_,
                                    UnknownBuilder::fromempty(options_)));
       }
-      keys_.push_back(std::string(key));
-      pointers_.push_back(nullptr);
+      keys_.emplace_back(std::string(key));
+      pointers_.emplace_back(nullptr);
       keys_size_ = (int64_t)keys_.size();
-      return shared_from_this();
+      return;
     }
     else {
       contents_[(size_t)nextindex_].get()->field(key, true);
-      return shared_from_this();
+      return;
     }
   }
 

@@ -404,7 +404,7 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
+  void
   UnionBuilder::field(const char* key, bool check) {
     if (current_ == -1) {
       throw std::invalid_argument(
@@ -414,7 +414,6 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->field(key, check);
     }
-    return shared_from_this();
   }
 
   const BuilderPtr

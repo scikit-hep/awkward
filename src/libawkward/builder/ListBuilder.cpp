@@ -251,7 +251,7 @@ namespace awkward {
     }
   }
 
-  const BuilderPtr
+  void
   ListBuilder::field(const char* key, bool check) {
     if (!begun_) {
       throw std::invalid_argument(
@@ -260,7 +260,6 @@ namespace awkward {
     }
     else {
       content_.get()->field(key, check);
-      return shared_from_this();
     }
   }
 

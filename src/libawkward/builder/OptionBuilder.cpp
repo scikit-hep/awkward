@@ -255,7 +255,7 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
+  void
   OptionBuilder::field(const char* key, bool check) {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
@@ -265,7 +265,6 @@ namespace awkward {
     else {
       content_.get()->field(key, check);
     }
-    return shared_from_this();
   }
 
   const BuilderPtr
