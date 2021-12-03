@@ -237,7 +237,7 @@ See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-
    * [Presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) (video) on July 5, 2020.
    * [Tutorial at PyHEP 2020](https://youtu.be/ea-zYLQBS4U) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski/2020-07-13-pyhep2020-tutorial.git/1.1?urlpath=lab/tree/tutorial.ipynb)) on July 13, 2020.
    * [Tutorial at PyHEP 2021](https://youtu.be/5aWAxvdrszw?t=9189) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski-talks/2021-07-06-pyhep-uproot-awkward-tutorial/v1.2?urlpath=lab/tree/uproot-awkward-tutorial.ipynb) on July 6, 2021.
-   * [Tutorial for STAR collaboration meeting](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme) on September 13, 2021. This is the first tutorial with extensive exercises to test your understanding.
+   * [Tutorial for STAR collaboration meeting](https://youtu.be/NnU_zp5s1MY) on September 13, 2021 (video with [interactive notebook on Binder](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme)). This is the first tutorial with extensive exercises to test your understanding.
 
 # Acknowledgements
 
