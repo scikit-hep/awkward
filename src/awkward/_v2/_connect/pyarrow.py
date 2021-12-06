@@ -200,7 +200,6 @@ if not ak._v2._util.numpy_at_least("1.17.0"):
         else:
             return ready_to_bitswap
 
-
 else:
 
     def packbits(bytearray, lsb_order=True):
