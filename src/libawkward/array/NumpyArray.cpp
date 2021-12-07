@@ -478,8 +478,10 @@ namespace awkward {
     }
     NumpyArray contiguous_self = contiguous();
     std::vector<ssize_t> flatshape({ 1 });
+    std::vector<ssize_t> zeroslen({ 1 });
     for (auto x : shape_) {
       flatshape[0] = flatshape[0] * x;
+      zeroslen.push_back(zeroslen.back() * x);
     }
     std::vector<ssize_t> flatstrides({ itemsize_ });
     ContentPtr out = std::make_shared<NumpyArray>(
@@ -498,7 +500,7 @@ namespace awkward {
                                            util::Parameters(),
                                            out,
                                            shape_[(size_t)i],
-                                           shape_[(size_t)(i - 1)]);
+                                           zeroslen[(size_t)i]);
     }
     return out;
   }
