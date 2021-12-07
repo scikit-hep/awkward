@@ -2088,6 +2088,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                         "structure imposed by 'counts' does not fit in the array or partition "
                         "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
                     )
+                positions[0] = 0
 
                 return ak.layout.ListOffsetArray64(
                     ak.layout.Index64(positions), content
