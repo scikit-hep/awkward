@@ -137,6 +137,7 @@ NumpyMetadata.all_complex = tuple(
 
 
 class NumpyLike(Singleton):
+    known_data = True
     known_shape = True
     known_dtype = True
 

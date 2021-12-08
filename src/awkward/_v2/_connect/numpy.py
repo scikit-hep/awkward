@@ -179,8 +179,29 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             for x in inputs
         ):
             nplike = ak.nplike.of(*inputs)
-            args = [x.to(nplike) if isinstance(x, NumpyArray) else x for x in inputs]
-            result = getattr(ufunc, method)(*args, **kwargs)
+
+            if nplike.known_data:
+                args = []
+                for x in inputs:
+                    if isinstance(x, NumpyArray):
+                        args.append(x.to(nplike))
+                    else:
+                        args.append(x)
+                result = getattr(ufunc, method)(*args, **kwargs)
+
+            else:
+                shape = None
+                args = []
+                for x in inputs:
+                    if isinstance(x, NumpyArray):
+                        shape = x.shape
+                        args.append(numpy.empty((0,), x.dtype))
+                    else:
+                        args.append(x)
+                assert shape is not None
+                dtype = getattr(ufunc, method)(*args, **kwargs).dtype
+                result = nplike.empty(shape, dtype)
+
             return (NumpyArray(result, nplike=nplike),)
 
         for x in inputs:

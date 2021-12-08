@@ -497,6 +497,7 @@ unset = object()
 
 
 class TypeTracer(ak.nplike.NumpyLike):
+    known_data = False
     known_shape = False
 
     def to_rectilinear(self, array, *args, **kwargs):

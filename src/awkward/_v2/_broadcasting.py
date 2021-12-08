@@ -186,7 +186,8 @@ def apply_step(
                 )
 
     # Now all lengths must agree.
-    checklength([x for x in inputs if isinstance(x, Content)], options)
+    if nplike.known_shape:
+        checklength([x for x in inputs if isinstance(x, Content)], options)
 
     # This whole function is one big switch statement.
     def continuation():
@@ -241,6 +242,9 @@ def apply_step(
 
         # Any UnionArrays?
         elif any(isinstance(x, UnionArray) for x in inputs):
+            if isinstance(nplike, ak._v2._typetracer.TypeTracer):
+                raise NotImplementedError("FIXME: broadcast unions of typetracers")
+
             tagslist, numtags, length = [], [], None
             for x in inputs:
                 if isinstance(x, UnionArray):
@@ -312,36 +316,48 @@ def apply_step(
 
         # Any option-types?
         elif any(isinstance(x, optiontypes) for x in inputs):
-            mask = None
-            for x in inputs:
-                if isinstance(x, optiontypes):
-                    m = x.mask_as_bool(valid_when=False, nplike=nplike)
-                    if mask is None:
-                        mask = m
+            if nplike.known_data:
+                mask = None
+                for x in inputs:
+                    if isinstance(x, optiontypes):
+                        m = x.mask_as_bool(valid_when=False, nplike=nplike)
+                        if mask is None:
+                            mask = m
+                        else:
+                            mask = nplike.bitwise_or(mask, m, out=mask)
+
+                nextmask = Index8(mask.view(np.int8))
+                index = nplike.full(len(mask), -1, dtype=np.int64)
+                index[~mask] = nplike.arange(
+                    len(mask) - nplike.count_nonzero(mask), dtype=np.int64
+                )
+                index = Index64(index)
+                if any(not isinstance(x, optiontypes) for x in inputs):
+                    nextindex = nplike.arange(len(mask), dtype=np.int64)
+                    nextindex[mask] = -1
+                    nextindex = Index64(nextindex)
+
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, optiontypes):
+                        nextinputs.append(x.project(nextmask))
+                    elif isinstance(x, Content):
+                        nextinputs.append(
+                            IndexedOptionArray(nextindex, x).project(nextmask)
+                        )
                     else:
-                        mask = nplike.bitwise_or(mask, m, out=mask)
+                        nextinputs.append(x)
 
-            nextmask = Index8(mask.view(np.int8))
-            index = nplike.full(len(mask), -1, dtype=np.int64)
-            index[~mask] = nplike.arange(
-                len(mask) - nplike.count_nonzero(mask), dtype=np.int64
-            )
-            index = Index64(index)
-            if any(not isinstance(x, optiontypes) for x in inputs):
-                nextindex = nplike.arange(len(mask), dtype=np.int64)
-                nextindex[mask] = -1
-                nextindex = Index64(nextindex)
-
-            nextinputs = []
-            for x in inputs:
-                if isinstance(x, optiontypes):
-                    nextinputs.append(x.project(nextmask))
-                elif isinstance(x, Content):
-                    nextinputs.append(
-                        IndexedOptionArray(nextindex, x).project(nextmask)
-                    )
-                else:
-                    nextinputs.append(x)
+            else:
+                index = None
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, optiontypes):
+                        index = Index64(nplike.empty((len(x),), np.int64))
+                        nextinputs.append(x.content)
+                    else:
+                        nextinputs.append(x)
+                assert index is not None
 
             outcontent = apply_step(
                 nplike,
@@ -366,38 +382,55 @@ def apply_step(
                 for x in inputs
             ):
                 maxsize = max([x.size for x in inputs if isinstance(x, RegularArray)])
-                for x in inputs:
-                    if isinstance(x, RegularArray):
-                        if maxsize > 1 and x.size == 1:
-                            tmpindex = Index64(
-                                nplike.repeat(
-                                    nplike.arange(len(x), dtype=np.int64), maxsize
+
+                if nplike.known_data:
+                    for x in inputs:
+                        if isinstance(x, RegularArray):
+                            if maxsize > 1 and x.size == 1:
+                                tmpindex = Index64(
+                                    nplike.repeat(
+                                        nplike.arange(len(x), dtype=np.int64), maxsize
+                                    )
                                 )
-                            )
 
-                nextinputs = []
-                for x in inputs:
-
-                    if isinstance(x, RegularArray):
-                        if maxsize > 1 and x.size == 1:
-                            nextinputs.append(
-                                IndexedArray(
-                                    tmpindex, x.content[: len(x) * x.size]
-                                ).project()
-                            )
-                        elif x.size == maxsize:
-                            nextinputs.append(x.content[: len(x) * x.size])
+                    nextinputs = []
+                    for x in inputs:
+                        if isinstance(x, RegularArray):
+                            if maxsize > 1 and x.size == 1:
+                                nextinputs.append(
+                                    IndexedArray(
+                                        tmpindex, x.content[: len(x) * x.size]
+                                    ).project()
+                                )
+                            elif x.size == maxsize:
+                                nextinputs.append(x.content[: len(x) * x.size])
+                            else:
+                                raise ValueError(
+                                    "cannot broadcast RegularArray of size "
+                                    "{0} with RegularArray of size {1}{2}".format(
+                                        x.size, maxsize, in_function(options)
+                                    )
+                                )
                         else:
-                            raise ValueError(
-                                "cannot broadcast RegularArray of size "
-                                "{0} with RegularArray of size {1}{2}".format(
-                                    x.size, maxsize, in_function(options)
-                                )
-                            )
-                    else:
-                        nextinputs.append(x)
+                            nextinputs.append(x)
 
-                maxlen = max(len(x) for x in nextinputs if isinstance(x, Content))
+                else:
+                    nextinputs = []
+                    for x in inputs:
+                        if isinstance(x, RegularArray):
+                            nextinputs.append(x.content)
+                        else:
+                            nextinputs.append(x)
+
+                length = None
+                for x in inputs:
+                    if isinstance(x, Content):
+                        if length is None:
+                            length = len(x)
+                        elif nplike.known_shape:
+                            assert length == len(x)
+                assert length is not None
+
                 outcontent = apply_step(
                     nplike,
                     nextinputs,
@@ -409,7 +442,38 @@ def apply_step(
                     options,
                 )
                 assert isinstance(outcontent, tuple)
-                return tuple(RegularArray(x, maxsize, maxlen) for x in outcontent)
+                return tuple(RegularArray(x, maxsize, length) for x in outcontent)
+
+            elif not nplike.known_data or not nplike.known_shape:
+                offsets = None
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, ListOffsetArray):
+                        offsets = x.offsets
+                        nextinputs.append(x.content)
+                    elif isinstance(x, ListArray):
+                        offsets = Index(
+                            nplike.empty((x.starts.shape[0] + 1,), x.starts.dtype)
+                        )
+                        nextinputs.append(x.content)
+                    elif isinstance(x, RegularArray):
+                        nextinputs.append(x.content)
+                    else:
+                        nextinputs.append(x)
+
+                outcontent = apply_step(
+                    nplike,
+                    nextinputs,
+                    action,
+                    depth + 1,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    behavior,
+                    options,
+                )
+                assert isinstance(outcontent, tuple)
+
+                return tuple(ListOffsetArray(offsets, x) for x in outcontent)
 
             # Not all regular, but all same offsets?
             # Optimization: https://github.com/scikit-hep/awkward-1.0/issues/442
