@@ -34,7 +34,7 @@ namespace awkward {
     /// #beginlist and before #endlist and is #active; if `false`,
     /// it is not.
     ListBuilder(const ArrayBuilderOptions& options,
-                const GrowableBuffer<int64_t>& offsets,
+                GrowableBuffer<int64_t> offsets,
                 const BuilderPtr& content,
                 bool begun);
 

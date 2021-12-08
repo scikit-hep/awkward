@@ -19,18 +19,18 @@ namespace awkward {
     offsets.append(0);
     GrowableBuffer<uint8_t> content = GrowableBuffer<uint8_t>::empty(options);
     return std::make_shared<StringBuilder>(options,
-                                           offsets,
-                                           content,
+                                           std::move(offsets),
+                                           std::move(content),
                                            encoding);
   }
 
   StringBuilder::StringBuilder(const ArrayBuilderOptions& options,
-                               const GrowableBuffer<int64_t>& offsets,
-                               const GrowableBuffer<uint8_t>& content,
+                               GrowableBuffer<int64_t> offsets,
+                               GrowableBuffer<uint8_t> content,
                                const char* encoding)
       : options_(options)
-      , offsets_(offsets)
-      , content_(content)
+      , offsets_(std::move(offsets))
+      , content_(std::move(content))
       , encoding_(encoding) { }
 
   const std::string

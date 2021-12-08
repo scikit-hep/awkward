@@ -17,17 +17,17 @@ namespace awkward {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
     return std::make_shared<ListBuilder>(options,
-                                         offsets,
+                                         std::move(offsets),
                                          UnknownBuilder::fromempty(options),
                                          false);
   }
 
   ListBuilder::ListBuilder(const ArrayBuilderOptions& options,
-                           const GrowableBuffer<int64_t>& offsets,
+                           GrowableBuffer<int64_t> offsets,
                            const BuilderPtr& content,
                            bool begun)
       : options_(options)
-      , offsets_(offsets)
+      , offsets_(std::move(offsets))
       , content_(content)
       , begun_(begun) { }
 

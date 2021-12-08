@@ -191,6 +191,26 @@ namespace awkward {
       }
     }
 
+    template<class T>
+    using UniquePtrDeleter = decltype(kernel::array_deleter<T>());
+    template<class T>
+    using UniquePtr = std::unique_ptr<T, UniquePtrDeleter<T>>;
+
+    template <typename T>
+    UniquePtr<T> unique_malloc(
+      kernel::lib ptr_lib,
+      int64_t bytelength) {
+      if (ptr_lib == lib::cpu) {
+        return UniquePtr<T>(
+          reinterpret_cast<T*>(awkward_malloc(bytelength)),
+          kernel::array_deleter<T>());
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in ptr_alloc<bool>"));
+      }
+    }
+
     /////////////////////////////////// awkward/kernels/getitem.h
 
     /// @brief Internal utility kernel to avoid raw pointer access.

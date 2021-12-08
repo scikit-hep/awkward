@@ -13,41 +13,41 @@ namespace awkward {
   const BuilderPtr
   Complex128Builder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<Complex128Builder>(options,
-                                              GrowableBuffer<std::complex<double>>::empty(options));
+                                              std::move(GrowableBuffer<std::complex<double>>::empty(options)));
   }
 
   const BuilderPtr
   Complex128Builder::fromint64(const ArrayBuilderOptions& options,
                                const GrowableBuffer<int64_t>& old) {
     GrowableBuffer<std::complex<double>> buffer =
-      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
+      GrowableBuffer<std::complex<double>>::empty_reserved(options, old.reserved());
     int64_t* oldraw = old.ptr().get();
     std::complex<double>* newraw = buffer.ptr().get();
     for (int64_t i = 0;  i < 2*old.length();  i++) {
       newraw[i] = {static_cast<double>(oldraw[i]), 0};
     }
     buffer.set_length(old.length());
-    return std::make_shared<Complex128Builder>(options, buffer);
+    return std::make_shared<Complex128Builder>(options, std::move(buffer));
   }
 
   const BuilderPtr
   Complex128Builder::fromfloat64(const ArrayBuilderOptions& options,
                                  const GrowableBuffer<double>& old) {
     GrowableBuffer<std::complex<double>> buffer =
-      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
+      GrowableBuffer<std::complex<double>>::empty_reserved(options, old.reserved());
     double* oldraw = old.ptr().get();
     std::complex<double>* newraw = buffer.ptr().get();
     for (int64_t i = 0;  i < old.length();  i++) {
       newraw[i] = std::complex<double>(oldraw[i], 0);
     }
     buffer.set_length(old.length());
-    return std::make_shared<Complex128Builder>(options, buffer);
+    return std::make_shared<Complex128Builder>(options, std::move(buffer));
   }
 
   Complex128Builder::Complex128Builder(const ArrayBuilderOptions& options,
-                                       const GrowableBuffer<std::complex<double>>& buffer)
+                                       GrowableBuffer<std::complex<double>> buffer)
       : options_(options)
-      , buffer_(buffer) { }
+      , buffer_(std::move(buffer)) { }
 
   const std::string
   Complex128Builder::classname() const {

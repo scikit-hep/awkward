@@ -15,29 +15,29 @@ namespace awkward {
   const BuilderPtr
   Float64Builder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<Float64Builder>(options,
-                                            GrowableBuffer<double>::empty(options));
+                                            std::move(GrowableBuffer<double>::empty(options)));
   }
 
   const BuilderPtr
   Float64Builder::fromint64(const ArrayBuilderOptions& options,
                             const GrowableBuffer<int64_t>& old) {
     GrowableBuffer<double> buffer =
-      GrowableBuffer<double>::empty(options, old.reserved());
+      GrowableBuffer<double>::empty_reserved(options, old.reserved());
     int64_t* oldraw = old.ptr().get();
     double* newraw = buffer.ptr().get();
     for (int64_t i = 0;  i < old.length();  i++) {
       newraw[i] = (double)oldraw[i];
     }
     buffer.set_length(old.length());
-    return std::make_shared<Float64Builder>(options, buffer);
+    return std::make_shared<Float64Builder>(options, std::move(buffer));
   }
 
   Float64Builder::Float64Builder(const ArrayBuilderOptions& options,
-                                 const GrowableBuffer<double>& buffer)
+                                 GrowableBuffer<double> buffer)
       : options_(options)
-      , buffer_(buffer) { }
+      , buffer_(std::move(buffer)) { }
 
-  const GrowableBuffer<double>
+  const GrowableBuffer<double>&
   Float64Builder::buffer() const {
     return buffer_;
   }
@@ -103,7 +103,7 @@ namespace awkward {
 
   const BuilderPtr
   Float64Builder::complex(std::complex<double> x) {
-    BuilderPtr out = Complex128Builder::fromfloat64(options_, buffer_);
+    BuilderPtr out = Complex128Builder::fromfloat64(options_, std::move(buffer_));
     out.get()->complex(x);
     return std::move(out);
   }

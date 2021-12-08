@@ -44,7 +44,7 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated real numbers.
     Complex128Builder(const ArrayBuilderOptions& options,
-                      const GrowableBuffer<std::complex<double>>& buffer);
+                      GrowableBuffer<std::complex<double>> buffer);
 
     /// @brief User-friendly name of this class: `"Complex128Builder"`.
     const std::string

@@ -19,15 +19,15 @@ namespace awkward {
   DatetimeBuilder::fromempty(const ArrayBuilderOptions& options, const std::string& units) {
     GrowableBuffer<int64_t> content = GrowableBuffer<int64_t>::empty(options);
     return std::make_shared<DatetimeBuilder>(options,
-                                             content,
+                                             std::move(content),
                                              units);
   }
 
   DatetimeBuilder::DatetimeBuilder(const ArrayBuilderOptions& options,
-                                   const GrowableBuffer<int64_t>& content,
+                                   GrowableBuffer<int64_t> content,
                                    const std::string& units)
       : options_(options)
-      , content_(content)
+      , content_(std::move(content))
       , units_(units) { }
 
   const std::string

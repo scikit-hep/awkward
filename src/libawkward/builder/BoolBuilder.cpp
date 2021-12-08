@@ -14,13 +14,13 @@ namespace awkward {
   const BuilderPtr
   BoolBuilder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<BoolBuilder>(options,
-                                         GrowableBuffer<uint8_t>::empty(options));
+                                         std::move(GrowableBuffer<uint8_t>::empty(options)));
   }
 
   BoolBuilder::BoolBuilder(const ArrayBuilderOptions& options,
-                           const GrowableBuffer<uint8_t>& buffer)
+                           GrowableBuffer<uint8_t> buffer)
       : options_(options)
-      , buffer_(buffer) { }
+      , buffer_(std::move(buffer)) { }
 
   const std::string
   BoolBuilder::classname() const {

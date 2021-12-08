@@ -5,6 +5,7 @@
 
 #include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
+#include "awkward/kernel-dispatch.h"
 
 #include <memory>
 
@@ -39,6 +40,7 @@ namespace awkward {
   /// by a more appropriately sized buffer.
   template <typename T>
   class LIBAWKWARD_EXPORT_SYMBOL GrowableBuffer {
+    using UniquePtr = kernel::UniquePtr<T>;
   public:
     /// @brief Creates an empty GrowableBuffer.
     ///
@@ -53,7 +55,7 @@ namespace awkward {
     /// of `minreserve` and
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial}.
     static GrowableBuffer<T>
-      empty(const ArrayBuilderOptions& options, int64_t minreserve);
+      empty_reserved(const ArrayBuilderOptions& options, int64_t minreserve);
 
     /// @brief Creates a GrowableBuffer in which all elements are initialized
     /// to a given value.
@@ -90,7 +92,7 @@ namespace awkward {
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of reallocations.
     GrowableBuffer(const ArrayBuilderOptions& options,
-                   std::shared_ptr<T> ptr,
+                   GrowableBuffer::UniquePtr ptr,
                    int64_t length,
                    int64_t reserved);
 
@@ -100,8 +102,11 @@ namespace awkward {
     GrowableBuffer(const ArrayBuilderOptions& options);
 
     /// @brief Reference-counted pointer to the array buffer.
-    const std::shared_ptr<T>
+    const GrowableBuffer::UniquePtr&
       ptr() const;
+
+    GrowableBuffer::UniquePtr
+      get_ptr();
 
     /// @brief Currently used number of elements.
     ///
@@ -158,7 +163,7 @@ namespace awkward {
   private:
     const ArrayBuilderOptions options_;
     // @brief See #ptr.
-    std::shared_ptr<T> ptr_;
+    UniquePtr ptr_;
     // @brief See #length.
     int64_t length_;
     // @brief See #reserved.

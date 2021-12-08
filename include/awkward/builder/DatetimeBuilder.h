@@ -27,7 +27,7 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated integers.
     DatetimeBuilder(const ArrayBuilderOptions& options,
-                    const GrowableBuffer<int64_t>& content,
+                    GrowableBuffer<int64_t> content,
                     const std::string& units);
 
     /// @brief User-friendly name of this class: `"DatetimeBuilder"`.

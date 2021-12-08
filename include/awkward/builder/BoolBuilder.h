@@ -30,7 +30,7 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated boolean values.
     BoolBuilder(const ArrayBuilderOptions& options,
-                const GrowableBuffer<uint8_t>& buffer);
+                GrowableBuffer<uint8_t> buffer);
 
     /// @brief User-friendly name of this class: `"BoolBuilder"`.
     const std::string

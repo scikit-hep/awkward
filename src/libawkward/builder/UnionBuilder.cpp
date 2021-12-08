@@ -28,18 +28,18 @@ namespace awkward {
       GrowableBuffer<int64_t>::arange(options, firstcontent->length());
     std::vector<BuilderPtr> contents({ firstcontent });
     return std::make_shared<UnionBuilder>(options,
-                                          tags,
-                                          index,
+                                          std::move(tags),
+                                          std::move(index),
                                           contents);
   }
 
   UnionBuilder::UnionBuilder(const ArrayBuilderOptions& options,
-                             const GrowableBuffer<int8_t>& tags,
-                             const GrowableBuffer<int64_t>& index,
+                             GrowableBuffer<int8_t> tags,
+                             GrowableBuffer<int64_t> index,
                              std::vector<BuilderPtr>& contents)
       : options_(options)
-      , tags_(tags)
-      , index_(index)
+      , tags_(std::move(tags))
+      , index_(std::move(index))
       , contents_(contents)
       , current_(-1) { }
 
@@ -160,9 +160,9 @@ namespace awkward {
           return dynamic_cast<Int64Builder*>(p.get());
         });
         if (tofill != contents_.end()) {
-          *tofill = std::move(Float64Builder::fromint64(
+          *tofill = Float64Builder::fromint64(
               options_,
-              static_cast<Int64Builder*>(tofill->get())->buffer()));
+              static_cast<Int64Builder*>(tofill->get())->buffer());
         }
         else {
           contents_.emplace_back(Float64Builder::fromempty(options_));

@@ -16,15 +16,15 @@ namespace awkward {
   const BuilderPtr
   Int64Builder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<Int64Builder>(options,
-                                          GrowableBuffer<int64_t>::empty(options));
+                                          std::move(GrowableBuffer<int64_t>::empty(options)));
   }
 
   Int64Builder::Int64Builder(const ArrayBuilderOptions& options,
-                             const GrowableBuffer<int64_t>& buffer)
+                             GrowableBuffer<int64_t> buffer)
       : options_(options)
-      , buffer_(buffer) { }
+      , buffer_(std::move(buffer)) { }
 
-  const GrowableBuffer<int64_t>
+  const GrowableBuffer<int64_t>&
   Int64Builder::buffer() const {
     return buffer_;
   }
@@ -84,14 +84,14 @@ namespace awkward {
 
   const BuilderPtr
   Int64Builder::real(double x) {
-    BuilderPtr out = Float64Builder::fromint64(options_, buffer_);
+    BuilderPtr out = Float64Builder::fromint64(options_, std::move(buffer_));
     out.get()->real(x);
     return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::complex(std::complex<double> x) {
-    BuilderPtr out = Complex128Builder::fromint64(options_, buffer_);
+    BuilderPtr out = Complex128Builder::fromint64(options_, std::move(buffer_));
     out.get()->complex(x);
     return std::move(out);
   }

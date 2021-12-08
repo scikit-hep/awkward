@@ -44,8 +44,8 @@ namespace awkward {
     /// {@link IndexedArrayOf#index IndexedOptionArray::index}).
     /// @param content Builder for the non-missing data.
     OptionBuilder(const ArrayBuilderOptions& options,
-                  const GrowableBuffer<int64_t>& index,
-                  const BuilderPtr& content);
+                  GrowableBuffer<int64_t> index,
+                  const BuilderPtr content);
 
     /// @brief User-friendly name of this class: `"OptionBuilder"`.
     const std::string
@@ -116,7 +116,7 @@ namespace awkward {
 
     const GrowableBuffer<int64_t>& buffer() const { return index_; }
 
-    GrowableBuffer<int64_t>& index() { return index_; }
+    const GrowableBuffer<int64_t>& index() { return index_; }
 
     const BuilderPtr builder() const { return content_; }
 

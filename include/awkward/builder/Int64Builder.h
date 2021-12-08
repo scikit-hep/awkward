@@ -27,10 +27,10 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated integers.
     Int64Builder(const ArrayBuilderOptions& options,
-                 const GrowableBuffer<int64_t>& buffer);
+                 GrowableBuffer<int64_t> buffer);
 
     /// @brief Contains the accumulated integers.
-    const GrowableBuffer<int64_t>
+    const GrowableBuffer<int64_t>&
       buffer() const;
 
     /// @brief User-friendly name of this class: `"Int64Builder"`.

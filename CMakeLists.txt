@@ -92,6 +92,8 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
+addtest(test0007 tests/test_ArrayBuilder.cpp)
+
 option(PYBUILD "Build Python modules")
 
 # Third tier: Python modules.
