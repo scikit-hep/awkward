@@ -4,7 +4,6 @@ from __future__ import absolute_import
 
 import awkward as ak
 import awkward._v2.types.type
-from awkward._v2.forms.form import _parameters_equal
 
 
 class ArrayType(object):
