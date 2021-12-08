@@ -11,10 +11,6 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 pyarrow = pytest.importorskip("pyarrow")
 pytest.importorskip("awkward._v2._connect.pyarrow")
 
-pytestmark = pytest.mark.skipif(
-    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
-)
-
 
 def test_toarrow_BitMaskedArray():
     content = v1_to_v2(
@@ -897,27 +893,25 @@ def test_arrow_null_nested_struct_nested_null():
 
 
 def test_arrow_strings():
-    if not ak._util.py27:
-        a = pyarrow.array(["one", "two", "three", u"fo\u2014ur", "five"])
-        assert ak.to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
-            "one",
-            "two",
-            "three",
-            u"fo\u2014ur",
-            "five",
-        ]
+    a = pyarrow.array(["one", "two", "three", u"fo\u2014ur", "five"])
+    assert ak.to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+        "one",
+        "two",
+        "three",
+        u"fo\u2014ur",
+        "five",
+    ]
 
 
 def test_arrow_strings_null():
-    if not ak._util.py27:
-        a = pyarrow.array(["one", "two", None, u"fo\u2014ur", "five"])
-        assert ak.to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
-            "one",
-            "two",
-            None,
-            u"fo\u2014ur",
-            "five",
-        ]
+    a = pyarrow.array(["one", "two", None, u"fo\u2014ur", "five"])
+    assert ak.to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+        "one",
+        "two",
+        None,
+        u"fo\u2014ur",
+        "five",
+    ]
 
 
 def test_arrow_binary():

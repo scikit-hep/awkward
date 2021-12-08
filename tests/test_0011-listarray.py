@@ -153,39 +153,37 @@ def test_listoffsetarray_slice_slice():
 def test_listarray_ellipsis():
     array1 = ak.layout.ListArray64(starts1, stops1, content)
     array2 = ak.layout.ListArray64(starts2, stops2, array1)
-    if not ak._util.py27:
-        assert ak.to_list(array1[Ellipsis, 1:]) == [
-            [2.2, 3.3],
-            [],
-            [5.5],
-            [],
-            [8.8, 9.9],
-        ]
-        assert ak.to_list(array2[Ellipsis, 1:]) == [
-            [[2.2, 3.3], []],
-            [[5.5]],
-            [],
-            [[], [8.8, 9.9]],
-        ]
+    assert ak.to_list(array1[Ellipsis, 1:]) == [
+        [2.2, 3.3],
+        [],
+        [5.5],
+        [],
+        [8.8, 9.9],
+    ]
+    assert ak.to_list(array2[Ellipsis, 1:]) == [
+        [[2.2, 3.3], []],
+        [[5.5]],
+        [],
+        [[], [8.8, 9.9]],
+    ]
 
 
 def test_listoffsetarray_ellipsis():
     array1 = ak.layout.ListOffsetArray64(offsets1, content)
     array2 = ak.layout.ListOffsetArray64(offsets2, array1)
-    if not ak._util.py27:
-        assert ak.to_list(array1[Ellipsis, 1:]) == [
-            [2.2, 3.3],
-            [],
-            [5.5],
-            [],
-            [8.8, 9.9],
-        ]
-        assert ak.to_list(array2[Ellipsis, 1:]) == [
-            [[2.2, 3.3], []],
-            [[5.5]],
-            [],
-            [[], [8.8, 9.9]],
-        ]
+    assert ak.to_list(array1[Ellipsis, 1:]) == [
+        [2.2, 3.3],
+        [],
+        [5.5],
+        [],
+        [8.8, 9.9],
+    ]
+    assert ak.to_list(array2[Ellipsis, 1:]) == [
+        [[2.2, 3.3], []],
+        [[5.5]],
+        [],
+        [[], [8.8, 9.9]],
+    ]
 
 
 def test_listarray_array_slice():

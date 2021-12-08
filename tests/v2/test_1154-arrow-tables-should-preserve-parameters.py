@@ -8,10 +8,6 @@ import awkward as ak  # noqa: F401
 
 pytest.importorskip("pyarrow")
 
-pytestmark = pytest.mark.skipif(
-    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
-)
-
 
 def test():
     a = ak._v2.highlevel.Array(

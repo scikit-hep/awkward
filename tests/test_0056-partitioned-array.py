@@ -353,17 +353,15 @@ def test_getitem_basic():
     )
     array = ak.partition.IrregularlyPartitionedArray([one, two])
 
-    if not ak._util.py27 and not ak._util.py35:
-        assert (
-            array.tojson()
-            == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
-        )
-        assert array["x"].tojson() == "[0.0,1.1,2.2,3.3,4.4]"
-        assert array["y"].tojson() == "[[],[1],[2,2],[3,3,3],[4,4,4,4]]"
-        assert (
-            array[["x"]].tojson()
-            == '[{"x":0.0},{"x":1.1},{"x":2.2},{"x":3.3},{"x":4.4}]'
-        )
+    assert (
+        array.tojson()
+        == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
+    )
+    assert array["x"].tojson() == "[0.0,1.1,2.2,3.3,4.4]"
+    assert array["y"].tojson() == "[[],[1],[2,2],[3,3,3],[4,4,4,4]]"
+    assert (
+        array[["x"]].tojson() == '[{"x":0.0},{"x":1.1},{"x":2.2},{"x":3.3},{"x":4.4}]'
+    )
 
 
 def test_getitem_first_dimension_int():
@@ -446,11 +444,10 @@ def test_getitem_first_dimension_field():
     )
     array = ak.partition.IrregularlyPartitionedArray([one, two])
 
-    if not ak._util.py27 and not ak._util.py35:
-        assert (
-            array.tojson()
-            == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
-        )
+    assert (
+        array.tojson()
+        == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
+    )
     assert array["y", :, :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
     assert (
         array[["y"], :, :2].tojson()
@@ -857,9 +854,8 @@ def test_zip():
         {"x": [6], "y": 4.4},
         {"x": [7, 8, 9, 10], "y": 5.5},
     ]
-    if not ak._util.py27 and not ak._util.py35:
-        assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-        assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+    assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     x = ak.repartition(x, 3)
     assert isinstance(x.layout, ak.partition.PartitionedArray)
@@ -891,9 +887,8 @@ def test_zip():
         {"x": [6], "y": 4.4},
         {"x": [7, 8, 9, 10], "y": 5.5},
     ]
-    if not ak._util.py27 and not ak._util.py35:
-        assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-        assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+    assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     y = ak.repartition(y, 2)
     assert isinstance(x.layout, ak.partition.PartitionedArray)
@@ -925,9 +920,8 @@ def test_zip():
         {"x": [6], "y": 4.4},
         {"x": [7, 8, 9, 10], "y": 5.5},
     ]
-    if not ak._util.py27 and not ak._util.py35:
-        assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-        assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+    assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     x = ak.repartition(x, None)
     assert isinstance(x.layout, ak.layout.Content)
@@ -959,9 +953,8 @@ def test_zip():
         {"x": [6], "y": 4.4},
         {"x": [7, 8, 9, 10], "y": 5.5},
     ]
-    if not ak._util.py27 and not ak._util.py35:
-        assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-        assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+    assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     y = ak.repartition(y, None)
     assert isinstance(y.layout, ak.layout.Content)
@@ -993,9 +986,8 @@ def test_zip():
         {"x": [6], "y": 4.4},
         {"x": [7, 8, 9, 10], "y": 5.5},
     ]
-    if not ak._util.py27 and not ak._util.py35:
-        assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
-        assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert ak.to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
+    assert ak.to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
 
 def test_with_name_field():

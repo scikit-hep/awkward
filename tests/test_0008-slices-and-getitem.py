@@ -151,11 +151,10 @@ def test_numpyarray_getitem_bystrides():
         a[np.newaxis, :, np.newaxis, :, np.newaxis]
     )
 
-    if not ak._util.py27:
-        assert ak.to_list(b[Ellipsis, 3]) == ak.to_list(a[Ellipsis, 3])
-        assert ak.to_list(b[Ellipsis, 3, 2]) == ak.to_list(a[Ellipsis, 3, 2])
-        assert ak.to_list(b[3, Ellipsis]) == ak.to_list(a[3, Ellipsis])
-        assert ak.to_list(b[3, 2, Ellipsis]) == ak.to_list(a[3, 2, Ellipsis])
+    assert ak.to_list(b[Ellipsis, 3]) == ak.to_list(a[Ellipsis, 3])
+    assert ak.to_list(b[Ellipsis, 3, 2]) == ak.to_list(a[Ellipsis, 3, 2])
+    assert ak.to_list(b[3, Ellipsis]) == ak.to_list(a[3, Ellipsis])
+    assert ak.to_list(b[3, 2, Ellipsis]) == ak.to_list(a[3, 2, Ellipsis])
 
 
 def test_numpyarray_contiguous():
@@ -234,6 +233,5 @@ def test_numpyarray_getitem_next():
     assert ak.to_list(b[c, np.newaxis, np.newaxis, 1:4]) == ak.to_list(
         a[c, np.newaxis, np.newaxis, 1:4]
     )
-    if not ak._util.py27:
-        assert ak.to_list(b[Ellipsis, c]) == ak.to_list(a[Ellipsis, c])
-        assert ak.to_list(b[c, Ellipsis]) == ak.to_list(a[c, Ellipsis])
+    assert ak.to_list(b[Ellipsis, c]) == ak.to_list(a[Ellipsis, c])
+    assert ak.to_list(b[c, Ellipsis]) == ak.to_list(a[c, Ellipsis])

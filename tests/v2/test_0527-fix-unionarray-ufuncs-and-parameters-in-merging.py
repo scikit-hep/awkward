@@ -6,11 +6,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-pytestmark = pytest.mark.skipif(
-    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
-)
-
-
 # https://github.com/scikit-hep/awkward-1.0/issues/459#issuecomment-694941328
 #
 # So the rules would be,

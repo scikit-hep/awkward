@@ -353,27 +353,22 @@ def test_to_categorical_masked_again():
 
 
 def test_typestr():
-    if not ak._util.py27:
-        assert (
-            str(ak.type(ak.to_categorical(ak.Array([1.1, 2.2, 2.2, 3.3]))))
-            == "4 * categorical[type=float64]"
-        )
-        assert (
-            str(ak.type(ak.to_categorical(ak.Array([1.1, 2.2, None, 2.2, 3.3]))))
-            == "5 * categorical[type=?float64]"
-        )
-        assert (
-            str(ak.type(ak.to_categorical(ak.Array(["one", "two", "two", "three"]))))
-            == "4 * categorical[type=string]"
-        )
-        assert (
-            str(
-                ak.type(
-                    ak.to_categorical(ak.Array(["one", "two", None, "two", "three"]))
-                )
-            )
-            == "5 * categorical[type=option[string]]"
-        )
+    assert (
+        str(ak.type(ak.to_categorical(ak.Array([1.1, 2.2, 2.2, 3.3]))))
+        == "4 * categorical[type=float64]"
+    )
+    assert (
+        str(ak.type(ak.to_categorical(ak.Array([1.1, 2.2, None, 2.2, 3.3]))))
+        == "5 * categorical[type=?float64]"
+    )
+    assert (
+        str(ak.type(ak.to_categorical(ak.Array(["one", "two", "two", "three"]))))
+        == "4 * categorical[type=string]"
+    )
+    assert (
+        str(ak.type(ak.to_categorical(ak.Array(["one", "two", None, "two", "three"]))))
+        == "5 * categorical[type=option[string]]"
+    )
 
 
 def test_zip():

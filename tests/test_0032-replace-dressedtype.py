@@ -107,8 +107,7 @@ def test_record_name():
     builder.endrecord()
 
     a = builder.snapshot()
-    if not (ak._util.py27 or ak._util.py35):
-        assert repr(a.type(typestrs)) == 'Dummy["one": int64, "two": float64]'
+    assert repr(a.type(typestrs)) == 'Dummy["one": int64, "two": float64]'
     assert a.type(typestrs).parameters == {"__record__": "Dummy"}
 
 
@@ -120,16 +119,10 @@ def test_builder_string():
     builder.bytestring(b"three")
 
     a = builder.snapshot()
-    if ak._util.py27:
-        assert str(a) == "['one', 'two', 'three']"
-    else:
-        assert str(a) == "[b'one', b'two', b'three']"
+    assert str(a) == "[b'one', b'two', b'three']"
     assert ak.to_list(a) == [b"one", b"two", b"three"]
     assert ak.to_json(a) == '["one","two","three"]'
-    if ak._util.py27:
-        assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * bytes'>"
-    else:
-        assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
+    assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
     assert repr(ak.type(a)) == "3 * bytes"
 
     builder = ak.ArrayBuilder()
@@ -139,16 +132,10 @@ def test_builder_string():
     builder.string("three")
 
     a = builder.snapshot()
-    if ak._util.py27:
-        assert str(a) == "[u'one', u'two', u'three']"
-    else:
-        assert str(a) == "['one', 'two', 'three']"
+    assert str(a) == "['one', 'two', 'three']"
     assert ak.to_list(a) == ["one", "two", "three"]
     assert ak.to_json(a) == '["one","two","three"]'
-    if ak._util.py27:
-        assert repr(a) == "<Array [u'one', u'two', u'three'] type='3 * string'>"
-    else:
-        assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
+    assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
     assert repr(ak.type(a)) == "3 * string"
 
     builder = ak.ArrayBuilder()
@@ -168,10 +155,7 @@ def test_builder_string():
     builder.end_list()
 
     a = builder.snapshot()
-    if ak._util.py27:
-        assert str(a) == "[[u'one', u'two', u'three'], [], [u'four', u'five']]"
-    else:
-        assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
+    assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
     assert ak.to_list(a) == [["one", "two", "three"], [], ["four", "five"]]
     assert ak.to_json(a) == '[["one","two","three"],[],["four","five"]]'
     assert repr(ak.type(a)) == "3 * var * string"

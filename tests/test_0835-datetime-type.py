@@ -123,10 +123,6 @@ def test_timedelta64_ArrayBuilder():
     ]
 
 
-@pytest.mark.skipif(
-    ak._util.py27,
-    reason="Python 2.7 to_list returns datetime.timedelta see the test above",
-)
 def test_timedelta64_ArrayBuilder_py3():
     builder = ak.layout.ArrayBuilder()
     builder.timedelta(np.timedelta64(5, "W"))

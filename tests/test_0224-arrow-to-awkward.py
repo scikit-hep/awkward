@@ -881,27 +881,25 @@ def test_arrow_null_nested_struct_nested_null():
 
 
 def test_arrow_strings():
-    if not ak._util.py27:
-        a = pyarrow.array(["one", "two", "three", u"fo\u2014ur", "five"])
-        assert ak.to_list(ak.from_arrow(a, highlevel=False)) == [
-            "one",
-            "two",
-            "three",
-            u"fo\u2014ur",
-            "five",
-        ]
+    a = pyarrow.array(["one", "two", "three", u"fo\u2014ur", "five"])
+    assert ak.to_list(ak.from_arrow(a, highlevel=False)) == [
+        "one",
+        "two",
+        "three",
+        u"fo\u2014ur",
+        "five",
+    ]
 
 
 def test_arrow_strings_null():
-    if not ak._util.py27:
-        a = pyarrow.array(["one", "two", None, u"fo\u2014ur", "five"])
-        assert ak.to_list(ak.from_arrow(a, highlevel=False)) == [
-            "one",
-            "two",
-            None,
-            u"fo\u2014ur",
-            "five",
-        ]
+    a = pyarrow.array(["one", "two", None, u"fo\u2014ur", "five"])
+    assert ak.to_list(ak.from_arrow(a, highlevel=False)) == [
+        "one",
+        "two",
+        None,
+        u"fo\u2014ur",
+        "five",
+    ]
 
 
 def test_arrow_binary():
