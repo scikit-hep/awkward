@@ -938,14 +938,20 @@ def broadcast_and_apply(  # noqa: C901
                     else:
                         nextinputs.append(x)
 
-                maxlen = max(
-                    [len(x) for x in nextinputs if isinstance(x, ak.layout.Content)]
-                )
                 outcontent = apply(nextinputs, depth + 1, user)
                 assert isinstance(outcontent, tuple)
 
+                length = None
+                for x in inputs:
+                    if isinstance(x, ak.layout.Content):
+                        if length is None:
+                            length = len(x)
+                        else:
+                            assert length == len(x)
+                assert length is not None
+
                 return tuple(
-                    ak.layout.RegularArray(x, maxsize, maxlen) for x in outcontent
+                    ak.layout.RegularArray(x, maxsize, length) for x in outcontent
                 )
 
             elif not all_same_offsets(nplike, inputs):

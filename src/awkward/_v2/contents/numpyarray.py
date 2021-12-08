@@ -134,21 +134,17 @@ class NumpyArray(Content):
         )
 
     def toRegularArray(self):
-        if len(self._data.shape) == 1:
-            return self
-        else:
-            return ak._v2.contents.RegularArray(
-                NumpyArray(
-                    self._data.reshape((-1,) + self._data.shape[2:]),
-                    None,
-                    None,
-                    nplike=self._nplike,
-                ).toRegularArray(),
-                self._data.shape[1],
-                self._data.shape[0],
-                self._identifier,
-                self._parameters,
-            )
+        shape = self._data.shape
+        zeroslen = [1]
+        for x in shape:
+            zeroslen.append(zeroslen[-1] * x)
+
+        out = NumpyArray(self._data.reshape(-1), None, None, nplike=self._nplike)
+        for i in range(len(shape) - 1, 0, -1):
+            out = ak._v2.contents.RegularArray(out, shape[i], zeroslen[i])
+        out._identifier = self._identifier
+        out._parameters = self._parameters
+        return out
 
     def maybe_to_nplike(self, nplike):
         return nplike.asarray(self._data)
