@@ -59,14 +59,14 @@ def broadcast_pack(inputs, isscalar):
     return nextinputs
 
 
-def broadcast_unpack(x, isscalar):
+def broadcast_unpack(x, isscalar, nplike):
     if all(isscalar):
-        if len(x) == 0:
+        if not nplike.known_shape or len(x) == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
-        if len(x) == 0:
+        if not nplike.known_shape or len(x) == 0:
             return x._getitem_nothing()
         else:
             return x[0]
@@ -449,17 +449,20 @@ def apply_step(
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, ListOffsetArray):
-                        offsets = x.offsets
+                        offsets = Index64(
+                            nplike.empty((x.offsets.data.shape[0],), np.int64)
+                        )
                         nextinputs.append(x.content)
                     elif isinstance(x, ListArray):
-                        offsets = Index(
-                            nplike.empty((x.starts.shape[0] + 1,), x.starts.dtype)
+                        offsets = Index64(
+                            nplike.empty((x.starts.data.shape[0] + 1,), np.int64)
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, RegularArray):
                         nextinputs.append(x.content)
                     else:
                         nextinputs.append(x)
+                assert offsets is not None
 
                 outcontent = apply_step(
                     nplike,
@@ -511,9 +514,15 @@ def apply_step(
                 assert isinstance(outcontent, tuple)
 
                 if isinstance(offsets, Index):
-                    return tuple(ListOffsetArray(offsets, x) for x in outcontent)
+                    return tuple(
+                        ListOffsetArray(offsets, x).toListOffsetArray64(False)
+                        for x in outcontent
+                    )
                 elif isinstance(starts, Index) and isinstance(stops, Index):
-                    return tuple(ListArray(starts, stops, x) for x in outcontent)
+                    return tuple(
+                        ListArray(starts, stops, x).toListOffsetArray64(False)
+                        for x in outcontent
+                    )
                 else:
                     raise AssertionError(
                         "unexpected offsets, starts: {0}, {1}".format(
@@ -677,9 +686,10 @@ def broadcast_and_apply(
     regular_to_jagged=False,
     function_name=None,
 ):
+    nplike = ak.nplike.of(*inputs)
     isscalar = []
     out = apply_step(
-        ak.nplike.of(*inputs),
+        nplike,
         broadcast_pack(inputs, isscalar),
         action,
         0,
@@ -696,4 +706,4 @@ def broadcast_and_apply(
         },
     )
     assert isinstance(out, tuple)
-    return tuple(broadcast_unpack(x, isscalar) for x in out)
+    return tuple(broadcast_unpack(x, isscalar, nplike) for x in out)

@@ -15,38 +15,17 @@ def of(*arrays):
     libs = set()
     for array in arrays:
         nplike = getattr(array, "nplike", None)
-        if isinstance(nplike, NumpyLike):
+        if (
+            isinstance(array, ak._v2.highlevel.Array)
+            and isinstance(array.layout, ak._v2.contents.EmptyArray)
+        ) or isinstance(array, ak._v2.contents.EmptyArray):
+            nplike = None
+
+        if nplike is not None:
             libs.add(nplike)
-        elif isinstance(array, numpy.ndarray):
-            ptr_lib = "cpu"
-        elif (
-            type(array).__module__.startswith("cupy.")
-            and type(array).__name__ == "ndarray"
-        ):
-            ptr_lib = "cuda"
-        else:
-            ptr_lib = ak.operations.convert.kernels(array)
-            if ptr_lib is None:
-                pass
-            elif ptr_lib == "cpu":
-                libs.add("cpu")
-            elif ptr_lib == "cuda":
-                libs.add("cuda")
-            else:
-                raise ValueError(
-                    """structure mixes 'cpu' and 'cuda' buffers; use one of
 
-    ak.to_kernels(array, 'cpu')
-    ak.to_kernels(array, 'cuda')
-
-to obtain an unmixed array in main memory or the GPU(s)."""
-                    + ak._util.exception_suffix(__file__)
-                )
-
-    if libs == set() or libs == set(["cpu"]):
+    if libs == set():
         return Numpy.instance()
-    elif libs == set(["cuda"]):
-        return Cupy.instance()
     elif len(libs) == 1:
         return next(iter(libs))
     else:

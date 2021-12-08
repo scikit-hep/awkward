@@ -6,7 +6,9 @@ import awkward as ak
 import numpy as np
 import pytest
 
-pytest.mark.skip(reason="Top-down JAX tests disabled; to be replaced by bottom-up.")
+pytestmark = pytest.mark.skip(
+    reason="Top-down JAX tests disabled; to be replaced by bottom-up."
+)
 
 jax = pytest.importorskip("jax")
 jax.config.update("jax_platform_name", "cpu")

@@ -195,12 +195,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 for x in inputs:
                     if isinstance(x, NumpyArray):
                         shape = x.shape
-                        args.append(numpy.empty((0,), x.dtype))
+                        args.append(numpy.empty((0,) + x.shape[1:], x.dtype))
                     else:
                         args.append(x)
                 assert shape is not None
-                dtype = getattr(ufunc, method)(*args, **kwargs).dtype
-                result = nplike.empty(shape, dtype)
+                tmp = getattr(ufunc, method)(*args, **kwargs)
+                result = nplike.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
 
             return (NumpyArray(result, nplike=nplike),)
 
@@ -239,11 +239,37 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
         return None
 
-    out = ak._v2._broadcasting.broadcast_and_apply(
-        inputs, action, behavior, allow_records=False, function_name=ufunc.__name__
-    )
-    assert isinstance(out, tuple) and len(out) == 1
-    return ak._v2._util.wrap(out[0], behavior)
+    if sum(int(isinstance(x, ak._v2.contents.Content)) for x in inputs) == 1:
+        where = None
+        for i, x in enumerate(inputs):
+            if isinstance(x, ak._v2.contents.Content):
+                where = i
+                break
+        assert where is not None
+
+        nextinputs = list(inputs)
+
+        def unary_action(layout, **ignore):
+            nextinputs[where] = layout
+            result = action(tuple(nextinputs), **ignore)
+            if result is None:
+                return None
+            else:
+                assert isinstance(result, tuple) and len(result) == 1
+                return result[0]
+
+        out = inputs[where].recursively_apply(
+            unary_action, function_name=ufunc.__name__
+        )
+
+    else:
+        out = ak._v2._broadcasting.broadcast_and_apply(
+            inputs, action, behavior, allow_records=False, function_name=ufunc.__name__
+        )
+        assert isinstance(out, tuple) and len(out) == 1
+        out = out[0]
+
+    return ak._v2._util.wrap(out, behavior)
 
 
 # def matmul_for_numba(lefts, rights, dtype):
