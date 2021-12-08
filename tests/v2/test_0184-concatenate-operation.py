@@ -299,10 +299,10 @@ def test_numpyarray_concatenate_axis0():
     ) == ak.to_list(np.concatenate([np1, np2, np1, np2], 0))
     assert ak.to_list(
         ak._v2.operations.structure.concatenate([ak1, ak2], 0)
-    ) == ak.to_list(np.concatenate([ak1, ak2], 0))
-    assert ak.to_list(np.concatenate([ak1, ak2], 0)) == ak.to_list(
-        ak._v2.operations.structure.concatenate([np1, np2], 0)
-    )
+    ) == ak.to_list(np.concatenate([np.asarray(ak1), np.asarray(ak2)], 0))
+    assert ak.to_list(
+        np.concatenate([np.asarray(ak1), np.asarray(ak2)], 0)
+    ) == ak.to_list(ak._v2.operations.structure.concatenate([np1, np2], 0))
 
 
 def test_numpyarray_concatenate():

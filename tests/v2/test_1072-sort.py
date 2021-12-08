@@ -244,7 +244,7 @@ def test_numpyarray_sort():
         np.array([3.3, 2.2, 1.1, 5.5, 4.4]), regulararray=True, highlevel=False
     )
     v2_array = v1_to_v2(v1_array)
-    assert ak.to_list(np.sort(v2_array)) == [
+    assert ak.to_list(np.sort(np.asarray(v2_array))) == [
         1.1,
         2.2,
         3.3,
@@ -284,14 +284,16 @@ def test_3d():
     ) == ak.to_list(np.argsort(array, 2))
     assert ak.to_list(
         ak.sort(array, axis=2, ascending=True, stable=False)
-    ) == ak.to_list(np.sort(array, 2))
+    ) == ak.to_list(np.sort(np.asarray(array), 2))
     assert ak.to_list(
         ak.argsort(array, axis=1, ascending=True, stable=False)
-    ) == ak.to_list(np.argsort(array, 1))
+    ) == ak.to_list(np.argsort(np.asarray(array), 1))
     assert ak.to_list(
         ak.sort(array, axis=1, ascending=True, stable=False)
-    ) == ak.to_list(np.sort(array, 1))
-    assert ak.to_list(ak.sort(array, axis=1, ascending=False, stable=False)) == [
+    ) == ak.to_list(np.sort(np.asarray(array), 1))
+    assert ak.to_list(
+        ak.sort(np.asarray(array), axis=1, ascending=False, stable=False)
+    ) == [
         [
             [11.11, 12.12, 13.13, 14.14, 15.15],
             [6.6, 7.7, 8.8, 9.9, 10.1],
@@ -305,10 +307,10 @@ def test_3d():
     ]
     assert ak.to_list(
         ak.sort(array, axis=0, ascending=True, stable=False)
-    ) == ak.to_list(np.sort(array, 0))
+    ) == ak.to_list(np.sort(np.asarray(array), 0))
     assert ak.to_list(
         ak.argsort(array, axis=0, ascending=True, stable=False)
-    ) == ak.to_list(np.argsort(array, 0))
+    ) == ak.to_list(np.argsort(np.asarray(array), 0))
 
 
 def test_bool_sort():

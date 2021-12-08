@@ -67,6 +67,12 @@ class EmptyArray(Content):
             nplike.empty(0, dtype), self._identifier, self._parameters, nplike=nplike
         )
 
+    def __array__(self, **kwargs):
+        return numpy.empty((0,))
+
+    def __iter__(self):
+        return iter([])
+
     def _getitem_nothing(self):
         return self
 

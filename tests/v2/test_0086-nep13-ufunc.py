@@ -42,8 +42,12 @@ def test_indexedoptionarray():
     two = ak._v2.highlevel.Array(ak._v2.contents.IndexedOptionArray(index2, content))
     assert ak.to_list(one + two) == [None, None, 8.8, None, 8.8]
 
-    uno = ak._v2.contents.NumpyArray(np.array([2.2, 4.4, 4.4, 0.0, 8.8]))
-    dos = ak._v2.contents.NumpyArray(np.array([6.6, 4.4, 4.4, 8.8, 0.0]))
+    uno = ak._v2.highlevel.Array(
+        ak._v2.contents.NumpyArray(np.array([2.2, 4.4, 4.4, 0.0, 8.8]))
+    )
+    dos = ak._v2.highlevel.Array(
+        ak._v2.contents.NumpyArray(np.array([6.6, 4.4, 4.4, 8.8, 0.0]))
+    )
     assert ak.to_list(uno + two) == [None, 8.8, 8.8, None, 8.8]
     assert ak.to_list(one + dos) == [8.8, None, 8.8, 8.8, 8.8]
 

@@ -149,6 +149,12 @@ class NumpyArray(Content):
     def maybe_to_nplike(self, nplike):
         return nplike.asarray(self._data)
 
+    def __array__(self, **kwargs):
+        return numpy.asarray(self._data, **kwargs)
+
+    def __iter__(self):
+        return iter(self._data)
+
     def _getitem_nothing(self):
         tmp = self._data[0:0]
         return NumpyArray(

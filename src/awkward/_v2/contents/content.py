@@ -187,6 +187,25 @@ class Content(object):
                 else:
                     raise NestedIndexError(self, slicer, message)
 
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        raise TypeError(
+            "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+        )
+
+    def __array_function__(self, func, types, args, kwargs):
+        raise TypeError(
+            "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+        )
+
+    def __array__(self, **kwargs):
+        raise TypeError(
+            "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak._v2.highlevel.Array"
+        )
+
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self._getitem_at(i)
+
     def _getitem_next_field(self, head, tail, advanced):
         nexthead, nexttail = ak._v2._slicing.headtail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
