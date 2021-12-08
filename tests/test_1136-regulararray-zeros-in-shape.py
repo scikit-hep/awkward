@@ -156,7 +156,7 @@ def test_toRegularArray():
 
 
 def test_actual():
-    x = ak.from_numpy(np.arange(2 * 3 * 4).reshape(2, 3, 4))
+    x = ak.from_numpy(np.arange(2 * 3 * 4, dtype=np.int64).reshape(2, 3, 4))
     s = x[..., :0]
     result = ak.zip({"q": s, "t": s})
     assert str(ak.type(result)) == '2 * 3 * 0 * {"q": int64, "t": int64}'
