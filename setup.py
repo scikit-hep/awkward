@@ -14,12 +14,7 @@ import setuptools.command.build_ext
 import setuptools.command.build_py
 import setuptools.command.install
 from setuptools import setup, Extension
-
-if sys.version_info < (3,):
-    # Note: never import from distutils before setuptools!
-    from distutils.util import get_platform
-else:
-    from sysconfig import get_platform
+from sysconfig import get_platform
 
 
 try:

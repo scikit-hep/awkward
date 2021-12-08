@@ -267,13 +267,11 @@ Templating is only used for integer specialization.
 
 ### Python standard
 
-We target Python 2.7 and recent versions of Python 3, currently starting with 3.5 (though that may move up to 3.6).
+We target Python 3.6 and above. Import statements can assume Python 3 names, string-checking can assume Python 3 meanings of `str` and `bytes`, Unicode literals don't need to be prefixed by `u`, and dict order can be assumed to be stable. Python's f-strings can now be used, but not with equals signs (e.g. `f"{something = }"` rather than `f"something = {something}"`) because that's a Python 3.8 feature (its main use is in debugging, anyway).
 
-We only support Python 2.7 as much as is practical. For example, we ignore compiler warnings when compiling against Python 2.7 and any unit tests that depend on the difference are skipped for Python 2.7.
+If you see any `if ak._util.py27` or `py35` checks in the code, you can safely remove the old code branch (and that will increase test coverage, since we don't test in old Pythons). You may see old-Python inspired idioms like `"some: {0} thing: {1}".format(some, thing)` (which is position-based to be compatible with Python 2.6!) and can freely update them if it makes the code you're working on easier to read. Updating all anachronisms en mass is not a high priority. (Some strings are not easier to read as f-strings; it should be a case-by-case basis.) Similarly, explicit class inheritance from `object` can be implicit now.
 
-Python 2.7 and 3.5 have unstable dict order, which excludes them both from some tests.
-
-Allowing Python 2.7 after it has been [fully and finally discontinued](https://mail.python.org/archives/list/python-dev@python.org/message/OFCIETIXLX34X7FVK5B5WPZH22HXV342/) may sound anachronistic, but some of our users depend on legacy codebases forcing them in Python 2, so we support that for now.
+Although newer versions of the Python language have great features, none of them have been "painful" to not have (such as the pain of writing tests around an unstable dict order, or completely different module names and syntax in Python 2). Python 3.6 will be the standard until it becomes "painful" to keep it (like, when CI and build tools no longer support it, or if we adopt type annotations).
 
 ### Third party dependencies
 
