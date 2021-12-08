@@ -628,8 +628,7 @@ def test_builder_record():
     builder.real(3.3)
     builder.endrecord()
 
-    if not (ak._util.py27 or ak._util.py35):
-        assert str(builder.type(typestrs)) == '{"one": int64, "two": float64}'
+    assert str(builder.type(typestrs)) == '{"one": int64, "two": float64}'
     assert ak.to_list(builder.snapshot()) == [
         {"one": 1, "two": 1.1},
         {"one": 2, "two": 2.2},
@@ -670,9 +669,6 @@ def test_fromiter():
         assert ak.to_list(ak.from_iter(datum)) == datum
 
 
-@pytest.mark.skipif(
-    ak._util.py27 or ak._util.py36, reason="requires python3.6 or higher"
-)
 def test_json():
     dataset = [
         '[{"one":1,"two":1.1},{"one":2,"two":2.2},{"one":3,"two":3.3}]',

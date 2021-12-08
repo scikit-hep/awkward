@@ -8,10 +8,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-pytestmark = pytest.mark.skipif(
-    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
-)
-
 
 ak_Array = ak._v2.highlevel.Array
 ak_Record = ak._v2.highlevel.Record

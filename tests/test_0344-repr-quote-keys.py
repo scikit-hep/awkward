@@ -7,10 +7,6 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-@pytest.mark.skipif(
-    ak._util.py27 and ak._util.win,
-    reason="Windows Python 2.7 inserts 'L' after numbers in repr",
-)
 def test():
     assert str(
         ak.Array(

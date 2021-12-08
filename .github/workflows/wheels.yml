@@ -45,7 +45,7 @@ jobs:
         - os: ubuntu-latest
           type: ManyLinux1
           arch: auto64
-          build: "cp{27,35,36,37,38}-*"
+          build: "cp{36,37,38}-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
 
         - os: ubuntu-latest
@@ -57,7 +57,7 @@ jobs:
         - os: macos-latest
           type: 2.7-3.6
           arch: auto
-          build: "cp{27,35,36}-*"
+          build: "cp{36}-*"
 
         - os: macos-latest
           type: 3.7-3.9 & pypy

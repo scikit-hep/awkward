@@ -12,10 +12,6 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 
 pyarrow = pytest.importorskip("pyarrow")
 
-pytestmark = pytest.mark.skipif(
-    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
-)
-
 
 def test_issue1():
     null_array = v1_to_v2(ak.Array({"null_col": [None]}).layout)

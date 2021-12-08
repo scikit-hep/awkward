@@ -441,30 +441,29 @@ def test_forms():
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
-    if not ak._util.py27 and not ak._util.py35:
-        assert [json.loads(str(x)) for x in form.values()] == [
-            {
-                "class": "NumpyArray",
-                "itemsize": 8,
-                "format": "d",
-                "primitive": "float64",
-            },
-            {"class": "NumpyArray", "itemsize": 1, "format": "?", "primitive": "bool"},
-        ]
-        assert {n: json.loads(str(x)) for n, x in form.contents.items()} == {
-            "one": {
-                "class": "NumpyArray",
-                "itemsize": 8,
-                "format": "d",
-                "primitive": "float64",
-            },
-            "two": {
-                "class": "NumpyArray",
-                "itemsize": 1,
-                "format": "?",
-                "primitive": "bool",
-            },
-        }
+    assert [json.loads(str(x)) for x in form.values()] == [
+        {
+            "class": "NumpyArray",
+            "itemsize": 8,
+            "format": "d",
+            "primitive": "float64",
+        },
+        {"class": "NumpyArray", "itemsize": 1, "format": "?", "primitive": "bool"},
+    ]
+    assert {n: json.loads(str(x)) for n, x in form.contents.items()} == {
+        "one": {
+            "class": "NumpyArray",
+            "itemsize": 8,
+            "format": "d",
+            "primitive": "float64",
+        },
+        "two": {
+            "class": "NumpyArray",
+            "itemsize": 1,
+            "format": "?",
+            "primitive": "bool",
+        },
+    }
     assert json.loads(str(form.content("one"))) == {
         "class": "NumpyArray",
         "itemsize": 8,
@@ -477,19 +476,18 @@ def test_forms():
         "format": "?",
         "primitive": "bool",
     }
-    if not ak._util.py27 and not ak._util.py35:
-        assert json.loads(str(form.content(0))) == {
-            "class": "NumpyArray",
-            "itemsize": 8,
-            "format": "d",
-            "primitive": "float64",
-        }
-        assert json.loads(str(form.content(1))) == {
-            "class": "NumpyArray",
-            "itemsize": 1,
-            "format": "?",
-            "primitive": "bool",
-        }
+    assert json.loads(str(form.content(0))) == {
+        "class": "NumpyArray",
+        "itemsize": 8,
+        "format": "d",
+        "primitive": "float64",
+    }
+    assert json.loads(str(form.content(1))) == {
+        "class": "NumpyArray",
+        "itemsize": 1,
+        "format": "?",
+        "primitive": "bool",
+    }
     assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]

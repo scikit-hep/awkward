@@ -25,13 +25,11 @@ def test_string():
     assert f1(array, 1) == "two"
     assert f1(array, 2) == "three"
 
-    if not ak._util.py27:
+    def f2(x, i, j):
+        return x[i] + x[j]
 
-        def f2(x, i, j):
-            return x[i] + x[j]
-
-        assert f2(array, 1, 3) == "twofour"
-        assert numba.njit(f2)(array, 1, 3) == "twofour"
+    assert f2(array, 1, 3) == "twofour"
+    assert numba.njit(f2)(array, 1, 3) == "twofour"
 
 
 def test_bytestring():

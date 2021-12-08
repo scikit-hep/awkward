@@ -24,7 +24,7 @@ def test_refcount1():
 
     assert (sys.getrefcount(i), sys.getrefcount(i2)) == (
         3,
-        2 + (2 if ak._util.py27 else 1),
+        2 + 1,
     )
 
     del tmp
@@ -35,7 +35,7 @@ def test_refcount1():
 
     assert (sys.getrefcount(i), sys.getrefcount(i2)) == (
         3,
-        2 + (2 if ak._util.py27 else 1),
+        2 + 1,
     )
 
     del tmp2

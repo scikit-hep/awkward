@@ -6,10 +6,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-pytestmark = pytest.mark.skipif(
-    ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
-)
-
 ak_to_buffers = ak._v2.operations.convert.to_buffers
 ak_from_buffers = ak._v2.operations.convert.from_buffers
 ak_from_iter = ak._v2.operations.convert.from_iter

@@ -38,16 +38,10 @@ def test_string2():
     assert isinstance(a, ak.Array)
     assert ak.to_list(a) == ["hey", "", "there"]
 
-    if ak._util.py27:
-        assert str(a) == "[u'hey', u'', u'there']"
-        assert repr(a[0]) == "u'hey'"
-        assert repr(a[1]) == "u''"
-        assert repr(a[2]) == "u'there'"
-    else:
-        assert str(a) == "['hey', '', 'there']"
-        assert repr(a[0]) == "'hey'"
-        assert repr(a[1]) == "''"
-        assert repr(a[2]) == "'there'"
+    assert str(a) == "['hey', '', 'there']"
+    assert repr(a[0]) == "'hey'"
+    assert repr(a[1]) == "''"
+    assert repr(a[2]) == "'there'"
 
 
 def test_dress():

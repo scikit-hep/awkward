@@ -7,10 +7,6 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-@pytest.mark.skipif(
-    ak._util.py27,
-    reason="np.ma.zeros(..., structured dtype) fails for NumPy " + str(np.__version__),
-)
 def test():
     a = ak.to_numpy(ak.Array({"A": [1, 2, 3], "B": [4, None, 5]}))
     assert a["A"].data.tolist() == [1, 2, 3]
