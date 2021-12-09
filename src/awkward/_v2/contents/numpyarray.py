@@ -357,29 +357,41 @@ class NumpyArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            return self.mergeable(other.content, mergebool)
-
-        if self._data.ndim == 0:
-            return False
+            return self.mergeable(other._content, mergebool)
 
         if isinstance(other, ak._v2.contents.numpyarray.NumpyArray):
-            if self._data.ndim != other.data.ndim:
+            if self._data.ndim != other._data.ndim:
                 return False
 
-            if self.dtype != other.dtype and (
-                self.dtype == np.datetime64 or other.dtype == np.datetime64
+            if (
+                not mergebool
+                and self._data.dtype != other._data.dtype
+                and (
+                    self._data.dtype.type is np.bool_
+                    or other._data.dtype.type is np.bool_
+                )
             ):
                 return False
 
-            if self.dtype != other.dtype and (
-                self.dtype == np.timedelta64 or other.dtype == np.timedelta64
+            if self._data.dtype != other._data.dtype and (
+                self._data.dtype == np.datetime64 or other._data.dtype == np.datetime64
             ):
                 return False
 
-            if len(self.shape) > 1 and len(self.shape) != (other.shape):
+            if self._data.dtype != other._data.dtype and (
+                self._data.dtype == np.timedelta64
+                or other._data.dtype == np.timedelta64
+            ):
+                return False
+
+            if (
+                len(self._data.shape) > 1
+                and self._data.shape[1:] != other._data.shape[1:]
+            ):
                 return False
 
             return True
+
         else:
             return False
 

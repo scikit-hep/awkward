@@ -559,6 +559,7 @@ class RegularArray(Content):
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
             return False
+
         if isinstance(
             other,
             (

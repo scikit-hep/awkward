@@ -361,7 +361,7 @@ class BitMaskedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            self._content.mergeable(other.content, mergebool)
+            return self._content.mergeable(other.content, mergebool)
 
         else:
             return self._content.mergeable(other, mergebool)
