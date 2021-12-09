@@ -133,7 +133,8 @@ class BitMaskedArray(Content):
             self._parameters,
         )
 
-    def __len__(self):
+    @property
+    def length(self):
         return self._length
 
     def __repr__(self):
@@ -145,7 +146,7 @@ class BitMaskedArray(Content):
         out.append(" lsb_order=")
         out.append(repr(json.dumps(self._lsb_order)))
         out.append(" len=")
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

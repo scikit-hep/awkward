@@ -57,7 +57,8 @@ class UnmaskedArray(Content):
             self._parameters,
         )
 
-    def __len__(self):
+    @property
+    def length(self):
         return len(self._content)
 
     def __repr__(self):
@@ -65,7 +66,7 @@ class UnmaskedArray(Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnmaskedArray len="]
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

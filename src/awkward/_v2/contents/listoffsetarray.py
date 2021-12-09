@@ -34,12 +34,13 @@ class ListOffsetArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if not len(offsets) >= 1:
-            raise ValueError(
-                "{0} len(offsets) ({1}) must be >= 1".format(
-                    type(self).__name__, len(offsets)
+        if ak.nplike.of(offsets).known_shape:
+            if not len(offsets) >= 1:
+                raise ValueError(
+                    "{0} len(offsets) ({1}) must be >= 1".format(
+                        type(self).__name__, len(offsets)
+                    )
                 )
-            )
 
         self._offsets = offsets
         self._content = content
@@ -93,15 +94,16 @@ class ListOffsetArray(Content):
             self._parameters,
         )
 
-    def __len__(self):
-        return len(self._offsets) - 1
+    @property
+    def length(self):
+        return self._offsets.length - 1
 
     def __repr__(self):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<ListOffsetArray len="]
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

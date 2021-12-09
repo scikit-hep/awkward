@@ -95,7 +95,8 @@ class ByteMaskedArray(Content):
             self._parameters,
         )
 
-    def __len__(self):
+    @property
+    def length(self):
         return len(self._mask)
 
     def __repr__(self):
@@ -105,7 +106,7 @@ class ByteMaskedArray(Content):
         out = [indent, pre, "<ByteMaskedArray valid_when="]
         out.append(repr(json.dumps(self._valid_when)))
         out.append(" len=")
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

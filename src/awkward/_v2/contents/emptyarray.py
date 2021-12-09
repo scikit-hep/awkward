@@ -39,7 +39,8 @@ class EmptyArray(Content):
     def nplike(self):
         return ak.nplike.Numpy.instance()
 
-    def __len__(self):
+    @property
+    def length(self):
         return 0
 
     def __repr__(self):

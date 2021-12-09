@@ -151,7 +151,8 @@ class RecordArray(Content):
             self._parameters,
         )
 
-    def __len__(self):
+    @property
+    def length(self):
         return self._length
 
     def __repr__(self):
@@ -161,7 +162,7 @@ class RecordArray(Content):
         out = [indent, pre, "<RecordArray is_tuple="]
         out.append(repr(json.dumps(self.is_tuple)))
         out.append(" len=")
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

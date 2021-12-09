@@ -140,6 +140,9 @@ class Content(object):
 
         return form, len(self), container
 
+    def __len__(self):
+        return self.length
+
     def _repr_extra(self, indent):
         out = []
         if self._parameters is not None:

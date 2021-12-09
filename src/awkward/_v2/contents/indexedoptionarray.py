@@ -83,7 +83,8 @@ class IndexedOptionArray(Content):
             self._parameters,
         )
 
-    def __len__(self):
+    @property
+    def length(self):
         return len(self._index)
 
     def __repr__(self):
@@ -91,7 +92,7 @@ class IndexedOptionArray(Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<IndexedOptionArray len="]
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

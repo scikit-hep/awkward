@@ -84,7 +84,8 @@ class RegularArray(Content):
             self._parameters,
         )
 
-    def __len__(self):
+    @property
+    def length(self):
         return self._length
 
     def __repr__(self):
@@ -94,7 +95,7 @@ class RegularArray(Content):
         out = [indent, pre, "<RegularArray size="]
         out.append(repr(str(self._size)))
         out.append(" len=")
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

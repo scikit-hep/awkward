@@ -122,7 +122,8 @@ class UnionArray(Content):
             self._parameters,
         )
 
-    def __len__(self):
+    @property
+    def length(self):
         return len(self._tags)
 
     def __repr__(self):
@@ -130,7 +131,7 @@ class UnionArray(Content):
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnionArray len="]
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")

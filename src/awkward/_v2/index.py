@@ -83,8 +83,12 @@ class Index(object):
     def ptr(self):
         return self._data.ctypes.data
 
+    @property
+    def length(self):
+        return self._data.shape[0]
+
     def __len__(self):
-        return len(self._data)
+        return self.length
 
     def to(self, nplike):
         return nplike.asarray(self._data)

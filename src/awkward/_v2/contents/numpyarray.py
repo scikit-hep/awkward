@@ -83,7 +83,8 @@ class NumpyArray(Content):
             nplike=ak._v2._typetracer.TypeTracer.instance(),
         )
 
-    def __len__(self):
+    @property
+    def length(self):
         return len(self._data)
 
     def to(self, nplike):
