@@ -279,7 +279,7 @@ namespace awkward {
   void
   ListBuilder::maybeupdate(const BuilderPtr tmp) {
     if (tmp.get() != content_.get()) {
-      content_ = tmp;
+      content_ = std::move(tmp);
     }
   }
 }
