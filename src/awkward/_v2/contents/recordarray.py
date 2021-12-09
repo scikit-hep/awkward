@@ -453,25 +453,32 @@ class RecordArray(Content):
         ):
             return self.mergeable(other.content, mergebool)
 
-        if isinstance(other, ak._v2.contents.recordarray.RecordArray):
+        if isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
-                if len(self.contents) == len(other.contents):
-                    for i in range(len(self.contents)):
-                        if not self.contents[i].mergeable(other.contents[i], mergebool):
+                if len(self._contents) == len(other._contents):
+                    for i in range(len(self._contents)):
+                        if not self._contents[i].mergeable(
+                            other._contents[i], mergebool
+                        ):
                             return False
-                    return True
+                    else:
+                        return True
 
             elif not self.is_tuple and not other.is_tuple:
-                self_fields = self.fields.copy()
-                other_fields = other.fields.copy()
-                self_fields.sort()
-                other_fields.sort()
-                if self_fields == other_fields:
-                    for field in self_fields:
-                        if not self[field].mergeable(other[field], mergebool):
-                            return False
+                if set(self._fields) != set(other._fields):
+                    return False
+
+                for i, field in enumerate(self._fields):
+                    x = self._contents[i]
+                    y = other._contents[other.field_to_index(field)]
+                    if not x.mergeable(y, mergebool):
+                        return False
+                else:
                     return True
-            return False
+
+            else:
+                return False
+
         else:
             return False
 

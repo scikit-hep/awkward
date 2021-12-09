@@ -7,10 +7,18 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
+def tt(highlevel):
+    return ak._v2.highlevel.Array(highlevel.layout.typetracer)
+
+
 def test_basic():
     array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     assert ak.to_list(array + array) == [[2.2, 4.4, 6.6], [], [8.8, 11.0]]
+    assert (array + array).layout.form == (tt(array) + tt(array)).layout.form
     assert ak.to_list(array * 2) == [[2.2, 4.4, 6.6], [], [8.8, 11.0]]
+    assert ak.to_list(2 * array) == [[2.2, 4.4, 6.6], [], [8.8, 11.0]]
+    assert (array * 2).layout.form == (tt(array) * 2).layout.form
+    assert (array * 2).layout.form == (2 * tt(array)).layout.form
 
 
 def test_emptyarray():
@@ -19,6 +27,9 @@ def test_emptyarray():
     assert ak.to_list(one + one) == []
     assert ak.to_list(two + two) == []
     assert ak.to_list(one + two) == []
+    assert (one + one).layout.form == (tt(one) + tt(one)).layout.form
+    assert (two + two).layout.form == (tt(two) + tt(two)).layout.form
+    assert (one + two).layout.form == (tt(one) + tt(two)).layout.form
 
 
 def test_indexedarray():
@@ -30,6 +41,7 @@ def test_indexedarray():
     one = ak._v2.highlevel.Array(ak._v2.contents.IndexedArray(index1, content))
     two = ak._v2.highlevel.Array(ak._v2.contents.IndexedArray(index2, content))
     assert ak.to_list(one + two) == [8.8, 8.8, 8.8, 8.8, 8.8]
+    assert (one + two).layout.form == (tt(one) + tt(two)).layout.form
 
 
 def test_indexedoptionarray():
@@ -41,11 +53,18 @@ def test_indexedoptionarray():
     one = ak._v2.highlevel.Array(ak._v2.contents.IndexedOptionArray(index1, content))
     two = ak._v2.highlevel.Array(ak._v2.contents.IndexedOptionArray(index2, content))
     assert ak.to_list(one + two) == [None, None, 8.8, None, 8.8]
+    assert (one + two).layout.form == (tt(one) + tt(two)).layout.form
 
-    uno = ak._v2.contents.NumpyArray(np.array([2.2, 4.4, 4.4, 0.0, 8.8]))
-    dos = ak._v2.contents.NumpyArray(np.array([6.6, 4.4, 4.4, 8.8, 0.0]))
+    uno = ak._v2.highlevel.Array(
+        ak._v2.contents.NumpyArray(np.array([2.2, 4.4, 4.4, 0.0, 8.8]))
+    )
+    dos = ak._v2.highlevel.Array(
+        ak._v2.contents.NumpyArray(np.array([6.6, 4.4, 4.4, 8.8, 0.0]))
+    )
     assert ak.to_list(uno + two) == [None, 8.8, 8.8, None, 8.8]
+    assert (uno + two).layout.form == (tt(uno) + tt(two)).layout.form
     assert ak.to_list(one + dos) == [8.8, None, 8.8, 8.8, 8.8]
+    assert (one + dos).layout.form == (tt(one) + tt(dos)).layout.form
 
 
 def test_regularize_shape():
@@ -60,18 +79,23 @@ def test_regulararray():
         ak.to_list(array + array)
         == (np.arange(2 * 3 * 5).reshape(2, 3, 5) * 2).tolist()
     )
+    assert (array + array).layout.form == (tt(array) + tt(array)).layout.form
     assert ak.to_list(array * 2) == (np.arange(2 * 3 * 5).reshape(2, 3, 5) * 2).tolist()
+    assert (array * 2).layout.form == (tt(array) * 2).layout.form
     array2 = ak._v2.highlevel.Array(np.arange(2 * 1 * 5).reshape(2, 1, 5))
     assert ak.to_list(array + array2) == ak.to_list(
         np.arange(2 * 3 * 5).reshape(2, 3, 5) + np.arange(2 * 1 * 5).reshape(2, 1, 5)
     )
+    assert (array + array2).layout.form == (tt(array) + tt(array2)).layout.form
     array3 = ak._v2.highlevel.Array(np.arange(2 * 3 * 5).reshape(2, 3, 5).tolist())
     assert ak.to_list(array + array3) == ak.to_list(
         np.arange(2 * 3 * 5).reshape(2, 3, 5) + np.arange(2 * 3 * 5).reshape(2, 3, 5)
     )
+    assert (array + array3).layout.form == (tt(array) + tt(array3)).layout.form
     assert ak.to_list(array3 + array) == ak.to_list(
         np.arange(2 * 3 * 5).reshape(2, 3, 5) + np.arange(2 * 3 * 5).reshape(2, 3, 5)
     )
+    assert (array3 + array).layout.form == (tt(array3) + tt(array)).layout.form
 
 
 def test_listarray():
@@ -91,6 +115,7 @@ def test_listarray():
         [],
         [110, 111],
     ]
+    assert (one + 100).layout.form == (tt(one) + 100).layout.form
     assert ak.to_list(one + two) == [
         [103, 104, 105, 106],
         [200, 201, 202],
@@ -99,6 +124,7 @@ def test_listarray():
         [],
         [410, 411],
     ]
+    assert (one + two).layout.form == (tt(one) + tt(two)).layout.form
     assert ak.to_list(two + one) == [
         [103, 104, 105, 106],
         [200, 201, 202],
@@ -107,6 +133,7 @@ def test_listarray():
         [],
         [410, 411],
     ]
+    assert (two + one).layout.form == (tt(two) + tt(one)).layout.form
     assert ak.to_list(
         one + np.array([100, 200, 300, 400, 500, 600])[:, np.newaxis]
     ) == [[103, 104, 105, 106], [200, 201, 202], [], [402, 403], [], [610, 611]]
@@ -121,6 +148,7 @@ def test_listarray():
         [],
         [110, 111],
     ]
+    assert (one + 100).layout.form == (tt(one) + 100).layout.form
 
 
 def test_unionarray():
@@ -145,3 +173,8 @@ def test_unionarray():
     assert ak.to_list(one) == [0.0, 1.1, 2.2, 3.3, 4, 5]
     assert ak.to_list(two) == [0, 100, 200.3, 300.3, 400.4, 500.5]
     assert ak.to_list(one + two) == [0.0, 101.1, 202.5, 303.6, 404.4, 505.5]
+    assert ak.to_list(one + 100) == [100.0, 101.1, 102.2, 103.3, 104, 105]
+    assert ak.to_list(100 + one) == [100.0, 101.1, 102.2, 103.3, 104, 105]
+    assert (one + two).layout.form == (tt(one) + tt(two)).layout.form
+    assert (one + 100).layout.form == (tt(one) + 100).layout.form
+    assert (100 + one).layout.form == (100 + tt(one)).layout.form

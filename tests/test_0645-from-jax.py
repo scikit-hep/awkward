@@ -6,6 +6,10 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+pytestmark = pytest.mark.skip(
+    reason="Top-down JAX tests disabled; to be replaced by bottom-up."
+)
+
 jax = pytest.importorskip("jax")
 jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)

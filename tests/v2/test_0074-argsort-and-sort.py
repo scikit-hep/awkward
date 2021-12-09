@@ -111,19 +111,19 @@ def test_NumpyArray():
     array2 = v1_to_v2(array2)
 
     assert ak.to_list(array2.sort(axis=1, ascending=True, stable=False)) == ak.to_list(
-        np.sort(array2, axis=1)
+        np.sort(np.asarray(array2), axis=1)
     )
     assert ak.to_list(array2.sort(axis=0, ascending=True, stable=False)) == ak.to_list(
-        np.sort(array2, axis=0)
+        np.sort(np.asarray(array2), axis=0)
     )
 
     assert ak.to_list(
         array2.argsort(axis=1, ascending=True, stable=False)
-    ) == ak.to_list(np.argsort(array2, 1))
+    ) == ak.to_list(np.argsort(np.asarray(array2), 1))
 
     assert ak.to_list(
         array2.argsort(axis=0, ascending=True, stable=False)
-    ) == ak.to_list(np.argsort(array2, 0))
+    ) == ak.to_list(np.argsort(np.asarray(array2), 0))
 
     with pytest.raises(ValueError) as err:
         array2.sort(axis=2, ascending=True, stable=False)
@@ -314,22 +314,22 @@ def test_3d():
         )
     )  # 5
     sorted = ak.argsort(array, axis=1, ascending=True, stable=False)
-    assert ak.to_list(sorted) == ak.to_list(np.argsort(array, 1))
+    assert ak.to_list(sorted) == ak.to_list(np.argsort(np.asarray(array), 1))
 
     array = v1_to_v2(array)
 
     sorted = array.argsort(axis=2, ascending=True, stable=False)
-    assert ak.to_list(sorted) == ak.to_list(np.argsort(array, 2))
+    assert ak.to_list(sorted) == ak.to_list(np.argsort(np.asarray(array), 2))
 
     sorted = array.sort(axis=2, ascending=True, stable=False)
-    assert ak.to_list(sorted) == ak.to_list(np.sort(array, 2))
+    assert ak.to_list(sorted) == ak.to_list(np.sort(np.asarray(array), 2))
 
     sorted = array.argsort(axis=1, ascending=True, stable=False)
 
-    assert ak.to_list(sorted) == ak.to_list(np.argsort(array, 1))
+    assert ak.to_list(sorted) == ak.to_list(np.argsort(np.asarray(array), 1))
 
     sorted = array.sort(axis=1, ascending=True, stable=False)
-    assert ak.to_list(sorted) == ak.to_list(np.sort(array, 1))
+    assert ak.to_list(sorted) == ak.to_list(np.sort(np.asarray(array), 1))
 
     sorted = array.sort(axis=1, ascending=False, stable=False)
     assert ak.to_list(sorted) == [
@@ -346,11 +346,11 @@ def test_3d():
     ]
 
     sorted = array.sort(axis=0, ascending=True, stable=False)
-    assert ak.to_list(sorted) == ak.to_list(np.sort(array, 0))
+    assert ak.to_list(sorted) == ak.to_list(np.sort(np.asarray(array), 0))
 
     assert ak.to_list(
         array.argsort(axis=0, ascending=True, stable=False)
-    ) == ak.to_list(np.argsort(array, 0))
+    ) == ak.to_list(np.argsort(np.asarray(array), 0))
 
 
 def test_ByteMaskedArray():

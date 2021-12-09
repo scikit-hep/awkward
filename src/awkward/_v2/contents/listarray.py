@@ -719,6 +719,7 @@ class ListArray(Content):
             ),
         ):
             return True
+
         if isinstance(
             other,
             (
@@ -729,7 +730,7 @@ class ListArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            self.mergeable(other.content, mergebool)
+            return self.mergeable(other.content, mergebool)
 
         if isinstance(
             other,
@@ -739,7 +740,7 @@ class ListArray(Content):
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ),
         ):
-            self._content.mergeable(other.content, mergebool)
+            return self._content.mergeable(other.content, mergebool)
 
         else:
             return False
