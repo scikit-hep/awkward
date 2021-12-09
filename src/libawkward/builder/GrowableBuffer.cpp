@@ -35,16 +35,12 @@ namespace awkward {
   GrowableBuffer<T>::full(const ArrayBuilderOptions& options,
                           T value,
                           int64_t length) {
-    size_t actual = (size_t)options.initial();
-    if (actual < (size_t)length) {
-      actual = (size_t)length;
-    }
-    UniquePtr ptr = kernel::unique_malloc<T>(kernel::lib::cpu, (int64_t)(actual*sizeof(T)));
-    T* rawptr = ptr.get();
+    GrowableBuffer<T> out = empty_reserved(options, length);
+    T* rawptr = out.ptr().get();
     for (int64_t i = 0;  i < length;  i++) {
       rawptr[i] = value;
     }
-    return GrowableBuffer<T>(options, std::move(ptr), length, (int64_t)actual);
+    return GrowableBuffer<T>(options, std::move(out.get_ptr()), length, out.reserved());
   }
 
   template <typename T>
