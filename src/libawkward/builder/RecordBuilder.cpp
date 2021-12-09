@@ -560,7 +560,7 @@ namespace awkward {
   void
   RecordBuilder::maybeupdate(int64_t i, const BuilderPtr tmp) {
     if (tmp.get() != contents_[(size_t)i].get()) {
-      contents_[(size_t)i] = std::move(tmp);
+      contents_[(size_t)i] = tmp;
     }
   }
 }

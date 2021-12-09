@@ -287,7 +287,7 @@ namespace awkward {
   void
   OptionBuilder::maybeupdate(const BuilderPtr tmp) {
     if (tmp.get() != content_.get()) {
-      content_ = std::move(tmp);
+      content_ = tmp;
     }
   }
 }
