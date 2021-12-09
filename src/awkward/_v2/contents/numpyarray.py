@@ -17,8 +17,9 @@ class NumpyArray(Content):
     is_NumpyType = True
 
     def __init__(self, data, identifier=None, parameters=None, nplike=None):
-        self._nplike = ak.nplike.of(data) if nplike is None else nplike
-        self._data = self._nplike.asarray(data)
+        if nplike is None:
+            nplike = ak.nplike.of(data)
+        self._data = nplike.asarray(data)
 
         ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
@@ -28,7 +29,7 @@ class NumpyArray(Content):
                 )
             )
 
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def data(self):
@@ -49,10 +50,6 @@ class NumpyArray(Content):
     @property
     def dtype(self):
         return self._data.dtype
-
-    @property
-    def nplike(self):
-        return self._nplike
 
     @property
     def ptr(self):

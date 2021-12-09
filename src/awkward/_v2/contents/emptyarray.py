@@ -16,8 +16,10 @@ class EmptyArray(Content):
     is_NumpyType = True
     is_UnknownType = True
 
-    def __init__(self, identifier=None, parameters=None):
-        self._init(identifier, parameters)
+    def __init__(self, identifier=None, parameters=None, nplike=None):
+        if nplike is None:
+            nplike = numpy
+        self._init(identifier, parameters, nplike)
 
     Form = EmptyForm
 
@@ -34,10 +36,6 @@ class EmptyArray(Content):
     @property
     def typetracer(self):
         return EmptyArray(self._typetracer_identifier(), self._parameters)
-
-    @property
-    def nplike(self):
-        return ak.nplike.Numpy.instance()
 
     @property
     def length(self):

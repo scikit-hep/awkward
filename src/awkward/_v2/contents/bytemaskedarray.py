@@ -19,7 +19,9 @@ numpy = ak.nplike.Numpy.instance()
 class ByteMaskedArray(Content):
     is_OptionType = True
 
-    def __init__(self, mask, content, valid_when, identifier=None, parameters=None):
+    def __init__(
+        self, mask, content, valid_when, identifier=None, parameters=None, nplike=None
+    ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(
                 "{0} 'mask' must be an Index with dtype=int8, not {1}".format(
@@ -44,11 +46,15 @@ class ByteMaskedArray(Content):
                     type(self).__name__, len(mask), len(content)
                 )
             )
+        if nplike is None:
+            nplike = content.nplike
+        if nplike is None:
+            nplike = mask.nplike
 
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def mask(self):
@@ -61,10 +67,6 @@ class ByteMaskedArray(Content):
     @property
     def valid_when(self):
         return self._valid_when
-
-    @property
-    def nplike(self):
-        return self._mask.nplike
 
     Form = ByteMaskedForm
 

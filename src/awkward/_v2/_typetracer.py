@@ -131,13 +131,19 @@ class TypeTracerArray(object):
         return self._CTypes
 
     def __len__(self):
-        raise AssertionError("bug in Awkward Array: attempt to get length of a TypeTracerArray")
+        raise AssertionError(
+            "bug in Awkward Array: attempt to get length of a TypeTracerArray"
+        )
 
     def __setitem__(self, where, what):
-        raise AssertionError("bug in Awkward Array: attempt to set values of a TypeTracerArray")
+        raise AssertionError(
+            "bug in Awkward Array: attempt to set values of a TypeTracerArray"
+        )
 
     def __getitem__(self, where):
-        raise AssertionError("bug in Awkward Array: attempt to get values from a TypeTracerArray")
+        raise AssertionError(
+            "bug in Awkward Array: attempt to get values from a TypeTracerArray"
+        )
 
     def __lt__(self, other):
         if isinstance(other, numbers.Real):

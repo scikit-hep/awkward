@@ -24,7 +24,9 @@ numpy = ak.nplike.Numpy.instance()
 class UnionArray(Content):
     is_UnionType = True
 
-    def __init__(self, tags, index, contents, identifier=None, parameters=None):
+    def __init__(
+        self, tags, index, contents, identifier=None, parameters=None, nplike=None
+    ):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise TypeError(
                 "{0} 'tags' must be an Index with dtype=int8, not {1}".format(
@@ -64,6 +66,21 @@ class UnionArray(Content):
                     type(self).__name__, len(tags), len(index)
                 )
             )
+        if nplike is None:
+            for content in contents:
+                if nplike is None:
+                    nplike = content.nplike
+                    break
+                elif nplike is not content.nplike:
+                    raise TypeError(
+                        "{0} 'contents' must use the same array library (nplike): {1} vs {2}".format(
+                            type(self).__name__,
+                            type(nplike).__name__,
+                            type(content.nplike).__name__,
+                        )
+                    )
+        if nplike is None:
+            nplike = tags.nplike
 
         self._tags = tags
         self._index = index
@@ -84,10 +101,6 @@ class UnionArray(Content):
     @property
     def contents(self):
         return self._contents
-
-    @property
-    def nplike(self):
-        return self._tags.nplike
 
     Form = UnionForm
 

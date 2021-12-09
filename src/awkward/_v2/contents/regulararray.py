@@ -18,7 +18,15 @@ class RegularArray(Content):
     is_ListType = True
     is_RegularType = True
 
-    def __init__(self, content, size, zeros_length=0, identifier=None, parameters=None):
+    def __init__(
+        self,
+        content,
+        size,
+        zeros_length=0,
+        identifier=None,
+        parameters=None,
+        nplike=None,
+    ):
         if not isinstance(content, Content):
             raise TypeError(
                 "{0} 'content' must be a Content subtype, not {1}".format(
@@ -37,6 +45,8 @@ class RegularArray(Content):
                     type(self).__name__, zeros_length
                 )
             )
+        if nplike is None:
+            nplike = content.nplike
 
         self._content = content
         self._size = int(size)
@@ -44,7 +54,7 @@ class RegularArray(Content):
             self._length = len(content) // size  # floor division
         else:
             self._length = zeros_length
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def size(self):
@@ -53,10 +63,6 @@ class RegularArray(Content):
     @property
     def content(self):
         return self._content
-
-    @property
-    def nplike(self):
-        return self._content.nplike
 
     Form = RegularForm
 

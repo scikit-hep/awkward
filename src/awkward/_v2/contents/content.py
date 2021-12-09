@@ -26,7 +26,7 @@ class Content(object):
     is_RecordType = False
     is_UnionType = False
 
-    def _init(self, identifier, parameters):
+    def _init(self, identifier, parameters, nplike):
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
         ):
@@ -42,8 +42,16 @@ class Content(object):
                 )
             )
 
+        if nplike is not None and not isinstance(nplike, ak.nplike.NumpyLike):
+            raise TypeError(
+                "{0} 'nplike' must be an ak.nplike.NumpyLike or None, not {1}".format(
+                    type(self).__name__, repr(nplike)
+                )
+            )
+
         self._identifier = identifier
         self._parameters = parameters
+        self._nplike = nplike
 
     @property
     def identifier(self):
@@ -60,6 +68,10 @@ class Content(object):
             return None
         else:
             return self._parameters.get(key)
+
+    @property
+    def nplike(self):
+        return self._nplike
 
     @property
     def form(self):

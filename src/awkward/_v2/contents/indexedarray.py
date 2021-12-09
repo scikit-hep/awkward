@@ -18,7 +18,7 @@ numpy = ak.nplike.Numpy.instance()
 class IndexedArray(Content):
     is_IndexedType = True
 
-    def __init__(self, index, content, identifier=None, parameters=None):
+    def __init__(self, index, content, identifier=None, parameters=None, nplike=None):
         if not (
             isinstance(index, Index)
             and index.dtype
@@ -38,10 +38,14 @@ class IndexedArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
+        if nplike is None:
+            nplike = content.nplike
+        if nplike is None:
+            nplike = index.nplike
 
         self._index = index
         self._content = content
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def index(self):
@@ -50,10 +54,6 @@ class IndexedArray(Content):
     @property
     def content(self):
         return self._content
-
-    @property
-    def nplike(self):
-        return self._index.nplike
 
     Form = IndexedForm
 

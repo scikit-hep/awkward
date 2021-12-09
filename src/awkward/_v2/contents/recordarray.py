@@ -23,7 +23,15 @@ np = ak.nplike.NumpyMetadata.instance()
 class RecordArray(Content):
     is_RecordType = True
 
-    def __init__(self, contents, fields, length=None, identifier=None, parameters=None):
+    def __init__(
+        self,
+        contents,
+        fields,
+        length=None,
+        identifier=None,
+        parameters=None,
+        nplike=None,
+    ):
         if not isinstance(contents, Iterable):
             raise TypeError(
                 "{0} 'contents' must be iterable, not {1}".format(
@@ -82,11 +90,24 @@ class RecordArray(Content):
                     type(self).__name__, repr(fields)
                 )
             )
+        if nplike is None:
+            for content in contents:
+                if nplike is None:
+                    nplike = content.nplike
+                    break
+                elif nplike is not content.nplike:
+                    raise TypeError(
+                        "{0} 'contents' must use the same array library (nplike): {1} vs {2}".format(
+                            type(self).__name__,
+                            type(nplike).__name__,
+                            type(content.nplike).__name__,
+                        )
+                    )
 
         self._contents = contents
         self._fields = fields
         self._length = length
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def contents(self):
@@ -112,13 +133,6 @@ class RecordArray(Content):
             identifier=None,
             parameters=None,
         )
-
-    @property
-    def nplike(self):
-        for content in self._contents:
-            return content.nplike
-        else:
-            return ak.nplike.Numpy.instance()
 
     Form = RecordForm
 

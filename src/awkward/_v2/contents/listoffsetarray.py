@@ -18,7 +18,7 @@ numpy = ak.nplike.Numpy.instance()
 class ListOffsetArray(Content):
     is_ListType = True
 
-    def __init__(self, offsets, content, identifier=None, parameters=None):
+    def __init__(self, offsets, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
             np.dtype(np.int32),
             np.dtype(np.uint32),
@@ -41,10 +41,14 @@ class ListOffsetArray(Content):
                         type(self).__name__, len(offsets)
                     )
                 )
+        if nplike is None:
+            nplike = content.nplike
+        if nplike is None:
+            nplike = offsets.nplike
 
         self._offsets = offsets
         self._content = content
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def starts(self):
@@ -61,10 +65,6 @@ class ListOffsetArray(Content):
     @property
     def content(self):
         return self._content
-
-    @property
-    def nplike(self):
-        return self._offsets.nplike
 
     Form = ListOffsetForm
 

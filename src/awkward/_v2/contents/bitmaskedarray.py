@@ -30,6 +30,7 @@ class BitMaskedArray(Content):
         lsb_order,
         identifier=None,
         parameters=None,
+        nplike=None,
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
@@ -73,13 +74,17 @@ class BitMaskedArray(Content):
                     type(self).__name__, length, len(content)
                 )
             )
+        if nplike is None:
+            nplike = content.nplike
+        if nplike is None:
+            nplike = mask.nplike
 
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
         self._length = length
         self._lsb_order = lsb_order
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def mask(self):
@@ -96,10 +101,6 @@ class BitMaskedArray(Content):
     @property
     def lsb_order(self):
         return self._lsb_order
-
-    @property
-    def nplike(self):
-        return self._mask.nplike
 
     Form = BitMaskedForm
 

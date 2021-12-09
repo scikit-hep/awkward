@@ -15,24 +15,22 @@ np = ak.nplike.NumpyMetadata.instance()
 class UnmaskedArray(Content):
     is_OptionType = True
 
-    def __init__(self, content, identifier=None, parameters=None):
+    def __init__(self, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(content, Content):
             raise TypeError(
                 "{0} 'content' must be a Content subtype, not {1}".format(
                     type(self).__name__, repr(content)
                 )
             )
+        if nplike is None:
+            nplike = content.nplike
 
         self._content = content
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def content(self):
         return self._content
-
-    @property
-    def nplike(self):
-        return self._content.nplike
 
     Form = UnmaskedForm
 
