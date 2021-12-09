@@ -233,7 +233,9 @@ class IndexedOptionArray(Content):
         if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
-                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
+                ak._v2.contents.ListArray(
+                    slicestarts, slicestops, slicecontent, None, None, self._nplike
+                ),
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                     len(slicestarts), type(self).__name__, len(self)
                 ),
@@ -284,7 +286,9 @@ class IndexedOptionArray(Content):
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
             out = next._getitem_next(head, tail, advanced)
-            out2 = IndexedOptionArray(outindex, out, self._identifier, self._parameters, self._nplike)
+            out2 = IndexedOptionArray(
+                outindex, out, self._identifier, self._parameters, self._nplike
+            )
             return out2.simplify_optiontype()
 
         elif ak._util.isstr(head):
@@ -331,7 +335,11 @@ class IndexedOptionArray(Content):
                 )
             )
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                nextindex, self._content, self._identifier, self._parameters, self._nplike
+                nextindex,
+                self._content,
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
             return next.project()
         else:
@@ -413,7 +421,11 @@ class IndexedOptionArray(Content):
                 )
             )
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                result, self._content.content, self._identifier, self._parameters, self._nplike
+                result,
+                self._content.content,
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
 
         else:
@@ -424,7 +436,9 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         _, nextcarry, outindex = self._nextcarry_outindex(self.nplike)
         next = self._content._carry(nextcarry, False, NestedIndexError)
         out = next.num(posaxis, depth)
@@ -929,7 +943,9 @@ class IndexedOptionArray(Content):
         order,
     ):
         if len(self._index) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         nplike = self.nplike
         branch, depth = self.branch_depth
@@ -1535,7 +1551,11 @@ class IndexedOptionArray(Content):
             next_parameters = None
 
         next = ak._v2.contents.IndexedArray(
-            ak._v2.index.Index(index), self._content, None, next_parameters, self._nplike
+            ak._v2.index.Index(index),
+            self._content,
+            None,
+            next_parameters,
+            self._nplike,
         )
         return next._to_arrow(
             pyarrow,

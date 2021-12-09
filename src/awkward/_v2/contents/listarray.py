@@ -232,7 +232,9 @@ class ListArray(Content):
         if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
-                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
+                ak._v2.contents.ListArray(
+                    slicestarts, slicestops, slicecontent, None, None, self._nplike
+                ),
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                     len(slicestarts), type(self).__name__, len(self)
                 ),
@@ -328,7 +330,9 @@ class ListArray(Content):
             if len(self._starts) < len(slicestarts) and nplike.known_shape:
                 raise NestedIndexError(
                     self,
-                    ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
+                    ak._v2.contents.ListArray(
+                        slicestarts, slicestops, slicecontent, None, None, self._nplike
+                    ),
                     "jagged slice length differs from array length",
                 )
 
@@ -696,7 +700,9 @@ class ListArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         elif posaxis == depth + 1:
             tonum = ak._v2.index.Index64.empty(len(self), self.nplike)
             self._handle_error(
@@ -712,7 +718,9 @@ class ListArray(Content):
                     len(self),
                 )
             )
-            return ak._v2.contents.numpyarray.NumpyArray(tonum, None, None, self._nplike)
+            return ak._v2.contents.numpyarray.NumpyArray(
+                tonum, None, None, self._nplike
+            )
         else:
             return self.toListOffsetArray64(True).num(posaxis, depth)
 
@@ -960,7 +968,9 @@ class ListArray(Content):
         order,
     ):
         if len(self._starts) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         next = self.toListOffsetArray64(True)
         out = next._argsort_next(

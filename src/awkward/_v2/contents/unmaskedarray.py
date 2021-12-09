@@ -86,7 +86,7 @@ class UnmaskedArray(Content):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
             ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
             self._content,
-            valid_when=True,
+            True,
             self._identifier,
             self._parameters,
             self._nplike,
@@ -217,7 +217,9 @@ class UnmaskedArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         else:
             return ak._v2.contents.unmaskedarray.UnmaskedArray(
                 self._content.num(posaxis, depth), None, self._parameters, self._nplike
@@ -230,7 +232,10 @@ class UnmaskedArray(Content):
         else:
             offsets, flattened = self._content._offsets_and_flattened(posaxis, depth)
             if len(offsets) == 0:
-                return (offsets, UnmaskedArray(flattened, None, self._parameters, self._nplike))
+                return (
+                    offsets,
+                    UnmaskedArray(flattened, None, self._parameters, self._nplike),
+                )
 
             else:
                 return (offsets, flattened)
@@ -288,7 +293,10 @@ class UnmaskedArray(Content):
 
     def numbers_to_type(self, name):
         return ak._v2.contents.unmaskedarray.UnmaskedArray(
-            self._content.numbers_to_type(name), self._identifier, self._parameters, self._nplike
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+            self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -314,7 +322,9 @@ class UnmaskedArray(Content):
         order,
     ):
         if len(self._content) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         out = self._content._argsort_next(
             negaxis,
@@ -519,7 +529,9 @@ class UnmaskedArray(Content):
             raise AssertionError(result)
 
     def packed(self):
-        return UnmaskedArray(self._content.packed(), self._identifier, self._parameters, self._nplike)
+        return UnmaskedArray(
+            self._content.packed(), self._identifier, self._parameters, self._nplike
+        )
 
     def _to_list(self, behavior):
         out = self._to_list_custom(behavior)

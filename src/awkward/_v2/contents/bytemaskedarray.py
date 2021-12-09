@@ -262,7 +262,9 @@ class ByteMaskedArray(Content):
         if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
-                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
+                ak._v2.contents.ListArray(
+                    slicestarts, slicestops, slicecontent, None, None, self._nplike
+                ),
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                     len(slicestarts), type(self).__name__, len(self)
                 ),
@@ -375,7 +377,12 @@ class ByteMaskedArray(Content):
             )
             valid_when = False
             next = ByteMaskedArray(
-                nextmask, self._content, valid_when, self._identifier, self._parameters, self._nplike
+                nextmask,
+                self._content,
+                valid_when,
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
             return next.project()
 
@@ -430,7 +437,9 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         else:
             numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
@@ -579,7 +588,9 @@ class ByteMaskedArray(Content):
         order,
     ):
         if len(self._mask) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         return self.toIndexedOptionArray64()._argsort_next(
             negaxis,

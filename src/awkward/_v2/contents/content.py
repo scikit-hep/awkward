@@ -10,7 +10,7 @@ except ImportError:
 import awkward as ak
 import awkward._v2._reducers
 from awkward._v2._slicing import NestedIndexError
-from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
+from awkward._v2.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -292,7 +292,12 @@ class Content(object):
         )
 
         return ak._v2.contents.regulararray.RegularArray(
-            out.simplify_optiontype(), len(index), 1, None, self._parameters, self._nplike
+            out.simplify_optiontype(),
+            len(index),
+            1,
+            None,
+            self._parameters,
+            self._nplike,
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
@@ -337,7 +342,12 @@ class Content(object):
             outputmask, tmp, None, self._parameters, self._nplike
         )
         return ak._v2.contents.regulararray.RegularArray(
-            out.simplify_optiontype(), len(index), 1, None, self._parameters, self._nplike
+            out.simplify_optiontype(),
+            len(index),
+            1,
+            None,
+            self._parameters,
+            self._nplike,
         )
 
     def _getitem_next_missing(self, head, tail, advanced):
@@ -387,7 +397,12 @@ class Content(object):
                     )
 
             return ak._v2.contents.recordarray.RecordArray(
-                contents, nextcontent._fields, None, None, self._parameters, self._nplike
+                contents,
+                nextcontent._fields,
+                None,
+                None,
+                self._parameters,
+                self._nplike,
             )
 
         else:
@@ -424,7 +439,9 @@ class Content(object):
                     items, ak.nplike.of(*items)
                 )
 
-                next = ak._v2.contents.RegularArray(self, len(self), 1, None, None, self._nplike)
+                next = ak._v2.contents.RegularArray(
+                    self, len(self), 1, None, None, self._nplike
+                )
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
                 if len(out) == 0:
                     return out._getitem_nothing()
@@ -491,7 +508,9 @@ class Content(object):
                 if as_nplike is None:
                     return self.__getitem__(layout)
                 else:
-                    return self.__getitem__(ak._v2.contents.NumpyArray(as_nplike, None, None, layout.nplike))
+                    return self.__getitem__(
+                        ak._v2.contents.NumpyArray(as_nplike, None, None, layout.nplike)
+                    )
 
             else:
                 raise TypeError(
@@ -913,7 +932,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
         contents = []
         for ptr in tocarry:
-            contents.append(ak._v2.contents.IndexedArray(ptr, self, None, None, self._nplike))
+            contents.append(
+                ak._v2.contents.IndexedArray(ptr, self, None, None, self._nplike)
+            )
         return ak._v2.contents.recordarray.RecordArray(
             contents, recordlookup, parameters=parameters, nplike=self._nplike
         )

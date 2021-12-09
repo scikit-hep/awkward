@@ -420,7 +420,9 @@ class BitMaskedArray(Content):
         order,
     ):
         if len(self._mask) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         return self.toIndexedOptionArray64()._argsort_next(
             negaxis,

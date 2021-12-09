@@ -85,7 +85,7 @@ class UnionArray(Content):
         self._tags = tags
         self._index = index
         self._contents = contents
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def tags(self):
@@ -329,7 +329,9 @@ class UnionArray(Content):
         ):
             raise NestedIndexError(
                 self,
-                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
+                ak._v2.contents.ListArray(
+                    slicestarts, slicestops, slicecontent, None, None, self._nplike
+                ),
                 "cannot apply jagged slices to irreducible union arrays",
             )
         return simplified._getitem_next_jagged(
@@ -533,19 +535,25 @@ class UnionArray(Content):
             return contents[0]._carry(index, True, NestedIndexError)
 
         else:
-            return UnionArray(tags, index, contents, self._identifier, self._parameters, self._nplike)
+            return UnionArray(
+                tags, index, contents, self._identifier, self._parameters, self._nplike
+            )
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         else:
             contents = []
             for content in self._contents:
                 contents.append(content.num(posaxis, depth))
-            out = UnionArray(self._tags, self._index, contents, None, self._parameters, self._nplike)
+            out = UnionArray(
+                self._tags, self._index, contents, None, self._parameters, self._nplike
+            )
             return out.simplify_uniontype(True, False)
 
     def _offsets_and_flattened(self, axis, depth):
@@ -615,7 +623,9 @@ class UnionArray(Content):
 
                 return (
                     tooffsets,
-                    UnionArray(totags, toindex, contents, None, self._parameters, self._nplike),
+                    UnionArray(
+                        totags, toindex, contents, None, self._parameters, self._nplike
+                    ),
                 )
 
             else:
@@ -623,7 +633,12 @@ class UnionArray(Content):
                 return (
                     offsets,
                     UnionArray(
-                        self._tags, self._index, contents, None, self._parameters, self._nplike
+                        self._tags,
+                        self._index,
+                        contents,
+                        None,
+                        self._parameters,
+                        self._nplike,
                     ),
                 )
 
@@ -809,7 +824,12 @@ class UnionArray(Content):
         for content in self._contents:
             contents.append(content.fillna(value))
         out = UnionArray(
-            self._tags, self._index, contents, self._identifier, self._parameters, self._nplike
+            self._tags,
+            self._index,
+            contents,
+            self._identifier,
+            self._parameters,
+            self._nplike,
         )
         return out.simplify_uniontype(True, False)
 
@@ -822,7 +842,12 @@ class UnionArray(Content):
             for content in self._contents:
                 contents.append(content._localindex(posaxis, depth))
             return UnionArray(
-                self._tags, self._index, contents, self._identifier, self._parameters, self._nplike
+                self._tags,
+                self._index,
+                contents,
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -838,7 +863,12 @@ class UnionArray(Content):
                     )
                 )
             return ak._v2.unionarray.UnionArray(
-                self._tags, self._index, contents, self._identifier, self._parameters, self._nplike
+                self._tags,
+                self._index,
+                contents,
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
 
     def numbers_to_type(self, name):
@@ -846,7 +876,12 @@ class UnionArray(Content):
         for x in self._contents:
             contents.append(x.numbers_to_type(name))
         return ak._v2.contents.unionarray.UnionArray(
-            self._tags, self._index, contents, self._identifier, self._parameters, self._nplike
+            self._tags,
+            self._index,
+            contents,
+            self._identifier,
+            self._parameters,
+            self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -876,11 +911,15 @@ class UnionArray(Content):
         order,
     ):
         if len(self) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         simplified = self.simplify_uniontype(mergebool=True)
         if len(simplified) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         if isinstance(simplified, ak._v2.contents.UnionArray):
             raise ValueError("cannot argsort an irreducible UnionArray")

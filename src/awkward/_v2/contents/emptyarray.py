@@ -35,7 +35,11 @@ class EmptyArray(Content):
 
     @property
     def typetracer(self):
-        return EmptyArray(self._typetracer_identifier(), self._parameters, ak._v2._typetracer.TypeTracer.instance())
+        return EmptyArray(
+            self._typetracer_identifier(),
+            self._parameters,
+            ak._v2._typetracer.TypeTracer.instance(),
+        )
 
     @property
     def length(self):
@@ -145,7 +149,9 @@ class EmptyArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         else:
             out = ak._v2.index.Index64.empty(0, self.nplike)
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)
@@ -178,10 +184,14 @@ class EmptyArray(Content):
         return EmptyArray(None, self._parameters, self._nplike)
 
     def _localindex(self, axis, depth):
-        return ak._v2.contents.numpyarray.NumpyArray(np.empty(0, np.int64), None, None, self._nplike)
+        return ak._v2.contents.numpyarray.NumpyArray(
+            np.empty(0, np.int64), None, None, self._nplike
+        )
 
     def numbers_to_type(self, name):
-        return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters, self._nplike)
+        return ak._v2.contents.emptyarray.EmptyArray(
+            self._identifier, self._parameters, self._nplike
+        )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -201,7 +211,7 @@ class EmptyArray(Content):
         kind,
         order,
     ):
-        as_numpy = self.toNumpyArray()
+        as_numpy = self.toNumpyArray(np.float64)
         return as_numpy._argsort_next(
             negaxis,
             starts,
@@ -220,7 +230,9 @@ class EmptyArray(Content):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ak._v2.contents.emptyarray.EmptyArray(self._identifier, self._parameters, self._nplike)
+        return ak._v2.contents.emptyarray.EmptyArray(
+            self._identifier, self._parameters, self._nplike
+        )
 
     def _reduce_next(
         self,

@@ -39,10 +39,10 @@ def test_keep_None_in_place_test():
     )
 
 
-def test_keep_None_in_place_test_2():
-    v1_array = ak.Array([[3, 2, 1], [], None, [4, 5]])
-    v2_array = v1_to_v2(v1_array.layout)
-    # assert v2_array.typetracer.argsort(axis=1).form == v2_array.argsort(axis=1).form
+# def test_keep_None_in_place_test_2():
+#     v1_array = ak.Array([[3, 2, 1], [], None, [4, 5]])
+#     v2_array = v1_to_v2(v1_array.layout)
+#     assert v2_array.typetracer.argsort(axis=1).form == v2_array.argsort(axis=1).form
 
 
 def test_empty_slice():

@@ -18,6 +18,7 @@ from awkward._v2.forms.recordform import RecordForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class RecordArray(Content):
@@ -103,6 +104,8 @@ class RecordArray(Content):
                             type(content.nplike).__name__,
                         )
                     )
+        if nplike is None:
+            nplike = numpy
 
         self._contents = contents
         self._fields = fields
@@ -363,7 +366,9 @@ class RecordArray(Content):
                     slicestarts, slicestops, slicecontent, tail
                 )
             )
-        return RecordArray(contents, self._fields, self._length, None, None, self._nplike)
+        return RecordArray(
+            contents, self._fields, self._length, None, None, self._nplike
+        )
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():
@@ -409,7 +414,9 @@ class RecordArray(Content):
         if posaxis == depth:
             single = ak._v2.index.Index64.empty(1, self.nplike)
             single[0] = len(self)
-            singleton = ak._v2.contents.numpyarray.NumpyArray(single, None, None, self._nplike)
+            singleton = ak._v2.contents.numpyarray.NumpyArray(
+                single, None, None, self._nplike
+            )
             contents = [singleton] * len(self._contents)
 
             record = ak._v2.contents.recordarray.RecordArray(
@@ -421,7 +428,12 @@ class RecordArray(Content):
             for content in self._contents:
                 contents.append(content.num(posaxis, depth))
             return ak._v2.contents.recordarray.RecordArray(
-                contents, self._fields, self._length, None, self._parameters, self._nplike
+                contents,
+                self._fields,
+                self._length,
+                None,
+                self._parameters,
+                self._nplike,
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -448,7 +460,12 @@ class RecordArray(Content):
             return (
                 offsets,
                 RecordArray(
-                    contents, self._fields, self._length, None, self._parameters, self._nplike
+                    contents,
+                    self._fields,
+                    self._length,
+                    None,
+                    self._parameters,
+                    self._nplike,
                 ),
             )
 
@@ -597,7 +614,9 @@ class RecordArray(Content):
             for x in others:
                 minlength += len(x)
 
-        next = RecordArray(nextcontents, self._fields, minlength, None, parameters, self._nplike)
+        next = RecordArray(
+            nextcontents, self._fields, minlength, None, parameters, self._nplike
+        )
 
         if len(tail) == 0:
             return next
@@ -617,7 +636,12 @@ class RecordArray(Content):
         for content in self._contents:
             contents.append(content.fillna(value))
         return RecordArray(
-            contents, self._fields, self._length, self._identifier, self._parameters, self._nplike
+            contents,
+            self._fields,
+            self._length,
+            self._identifier,
+            self._parameters,
+            self._nplike,
         )
 
     def _localindex(self, axis, depth):
@@ -629,7 +653,12 @@ class RecordArray(Content):
             for content in self._contents:
                 contents.append(content._localindex(posaxis, depth))
             return RecordArray(
-                contents, self._fields, len(self), self._identifier, self._parameters, self._nplike
+                contents,
+                self._fields,
+                len(self),
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
 
     def numbers_to_type(self, name):
@@ -637,7 +666,12 @@ class RecordArray(Content):
         for x in self._contents:
             contents.append(x.numbers_to_type(name))
         return ak._v2.contents.recordarray.RecordArray(
-            contents, self._fields, self._length, self._identifier, self._parameters, self._nplike
+            contents,
+            self._fields,
+            self._length,
+            self._identifier,
+            self._parameters,
+            self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -662,7 +696,9 @@ class RecordArray(Content):
         order,
     ):
         if self._fields is None or len(self._fields) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
         else:
             raise NotImplementedError
 
@@ -670,7 +706,9 @@ class RecordArray(Content):
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         if self._fields is None or len(self._fields) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.instance().empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.instance().empty(0, np.int64), None, None, self._nplike
+            )
 
         contents = []
         for content in self._contents:
@@ -686,7 +724,9 @@ class RecordArray(Content):
                     order,
                 )
             )
-        return RecordArray(contents, self._fields, self._length, None, self._parameters, self._nplike)
+        return RecordArray(
+            contents, self._fields, self._length, None, self._parameters, self._nplike
+        )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -701,7 +741,12 @@ class RecordArray(Content):
                     )
                 )
             return ak._v2.contents.recordarray.RecordArray(
-                contents, recordlookup, len(self), self._identifier, self._parameters, self._nplike
+                contents,
+                recordlookup,
+                len(self),
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
 
     def _reduce_next(

@@ -186,7 +186,9 @@ class IndexedArray(Content):
         if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
-                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
+                ak._v2.contents.ListArray(
+                    slicestarts, slicestops, slicecontent, None, None, self._nplike
+                ),
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                     len(slicestarts), type(self).__name__, len(self)
                 ),
@@ -284,7 +286,11 @@ class IndexedArray(Content):
                 )
             )
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                nextindex, self._content, self._identifier, self._parameters, self._nplike
+                nextindex,
+                self._content,
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
             return next.project()
 
@@ -353,7 +359,11 @@ class IndexedArray(Content):
             )
             if isinstance(self._content, ak._v2.contents.indexedarray.IndexedArray):
                 return IndexedArray(
-                    result, self._content.content, self._identifier, self._parameters, self._nplike
+                    result,
+                    self._content.content,
+                    self._identifier,
+                    self._parameters,
+                    self._nplike,
                 )
 
             if isinstance(
@@ -366,7 +376,11 @@ class IndexedArray(Content):
                 ),
             ):
                 return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                    result, self._content.content, self._identifier, self._parameters, self._nplike
+                    result,
+                    self._content.content,
+                    self._identifier,
+                    self._parameters,
+                    self._nplike,
                 )
 
         else:
@@ -377,7 +391,9 @@ class IndexedArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         else:
             return self.project().num(posaxis, depth)
 
@@ -572,7 +588,11 @@ class IndexedArray(Content):
             )
 
         return IndexedArray(
-            self._index, self._content.fillna(value), None, self._parameters, self._nplike
+            self._index,
+            self._content.fillna(value),
+            None,
+            self._parameters,
+            self._nplike,
         )
 
     def _localindex(self, axis, depth):
@@ -798,7 +818,9 @@ class IndexedArray(Content):
         order,
     ):
         if len(self._index) == 0:
-            return ak._v2.contents.NumpyArray(self._nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self._nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         next = self._content._carry(self._index, False, NestedIndexError)
         return next._argsort_next(
@@ -1005,7 +1027,11 @@ class IndexedArray(Content):
             next_parameters = dict(self._parameters)
             del next_parameters["__array__"]
             next = IndexedArray(
-                self._index, self._content, self._identifier, next_parameters, self._nplike
+                self._index,
+                self._content,
+                self._identifier,
+                next_parameters,
+                self._nplike,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 

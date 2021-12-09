@@ -540,7 +540,9 @@ class RegularArray(Content):
                 multistarts, multistops, head._content, tail
             )
 
-            return RegularArray(down, len(head), self._length, None, self._parameters, self._nplike)
+            return RegularArray(
+                down, len(head), self._length, None, self._parameters, self._nplike
+            )
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)
@@ -553,7 +555,9 @@ class RegularArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         elif posaxis == depth + 1:
             tonum = ak._v2.index.Index64.empty(len(self), self.nplike)
             self._handle_error(
@@ -561,7 +565,9 @@ class RegularArray(Content):
                     tonum.to(self.nplike), self._size, len(self)
                 )
             )
-            return ak._v2.contents.numpyarray.NumpyArray(tonum, None, None, self._nplike)
+            return ak._v2.contents.numpyarray.NumpyArray(
+                tonum, None, None, self._nplike
+            )
         else:
             next = self._content.num(posaxis, depth + 1)
             return ak._v2.contents.regulararray.RegularArray(
@@ -714,7 +720,9 @@ class RegularArray(Content):
         order,
     ):
         if self._length == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         next = self.toListOffsetArray64(True)
         out = next._argsort_next(
@@ -829,10 +837,13 @@ class RegularArray(Content):
                 )
 
             contents = []
+            length = None
             for ptr in tocarry:
                 contents.append(self._content._carry(ptr, True, NestedIndexError))
+                length = len(contents[-1])
+            assert length is not None
             recordarray = ak._v2.contents.recordarray.RecordArray(
-                contents, recordlookup, len(self._content), parameters, self._nplike
+                contents, recordlookup, length, None, parameters, self._nplike
             )
             return ak._v2.contents.regulararray.RegularArray(
                 recordarray,
@@ -849,7 +860,12 @@ class RegularArray(Content):
                 n, replacement, recordlookup, parameters, posaxis, depth + 1
             )
             return ak._v2.contents.regulararray.RegularArray(
-                next, self._size, len(self), self._identifier, self._parameters, self._nplike
+                next,
+                self._size,
+                len(self),
+                self._identifier,
+                self._parameters,
+                self._nplike,
             )
 
     def _reduce_next(
@@ -1116,7 +1132,12 @@ class RegularArray(Content):
             content = self._content[:length].packed()
 
         return RegularArray(
-            content, self._size, self._length, self._identifier, self._parameters, self._nplike
+            content,
+            self._size,
+            self._length,
+            self._identifier,
+            self._parameters,
+            self._nplike,
         )
 
     def _to_list(self, behavior):

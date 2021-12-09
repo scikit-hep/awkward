@@ -139,7 +139,9 @@ class NumpyArray(Content):
 
         out = NumpyArray(self._data.reshape(-1), None, None, self._nplike)
         for i in range(len(shape) - 1, 0, -1):
-            out = ak._v2.contents.RegularArray(out, shape[i], zeroslen[i], None, None, self._nplike)
+            out = ak._v2.contents.RegularArray(
+                out, shape[i], zeroslen[i], None, None, self._nplike
+            )
         out._identifier = self._identifier
         out._parameters = self._parameters
         return out
@@ -218,7 +220,9 @@ class NumpyArray(Content):
         if self._data.ndim == 1:
             raise NestedIndexError(
                 self,
-                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
+                ak._v2.contents.ListArray(
+                    slicestarts, slicestops, slicecontent, None, None, self._nplike
+                ),
                 "too many jagged slice dimensions for array",
             )
         else:
@@ -295,7 +299,9 @@ class NumpyArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         shape = []
         reps = 1
         size = len(self)
@@ -661,7 +667,10 @@ class NumpyArray(Content):
             )
 
             return ak._v2.contents.NumpyArray(
-                nplike.asarray(out[: nextlength[0]], self.dtype), None, None, self._nplike
+                nplike.asarray(out[: nextlength[0]], self.dtype),
+                None,
+                None,
+                self._nplike,
             )
 
         # axis is not None
@@ -776,7 +785,9 @@ class NumpyArray(Content):
         order,
     ):
         if self.shape[0] == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                self.nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         if len(self.shape) == 0:
             raise TypeError(
@@ -951,7 +962,9 @@ class NumpyArray(Content):
                     stable,
                 )
             )
-            return ak._v2.contents.NumpyArray(nplike.asarray(out, self.dtype), None, None, self._nplike)
+            return ak._v2.contents.NumpyArray(
+                nplike.asarray(out, self.dtype), None, None, self._nplike
+            )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
