@@ -173,3 +173,8 @@ def test_unionarray():
     assert ak.to_list(one) == [0.0, 1.1, 2.2, 3.3, 4, 5]
     assert ak.to_list(two) == [0, 100, 200.3, 300.3, 400.4, 500.5]
     assert ak.to_list(one + two) == [0.0, 101.1, 202.5, 303.6, 404.4, 505.5]
+    assert ak.to_list(one + 100) == [100.0, 101.1, 102.2, 103.3, 104, 105]
+    assert ak.to_list(100 + one) == [100.0, 101.1, 102.2, 103.3, 104, 105]
+    assert (one + two).layout.form == (tt(one) + tt(two)).layout.form
+    assert (one + 100).layout.form == (tt(one) + 100).layout.form
+    assert (100 + one).layout.form == (100 + tt(one)).layout.form

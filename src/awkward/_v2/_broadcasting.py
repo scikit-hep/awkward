@@ -30,6 +30,7 @@ from awkward._v2.index import (
 )
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 listtypes = (ListOffsetArray, ListArray, RegularArray)
@@ -242,70 +243,114 @@ def apply_step(
 
         # Any UnionArrays?
         elif any(isinstance(x, UnionArray) for x in inputs):
-            if isinstance(nplike, ak._v2._typetracer.TypeTracer):
-                raise NotImplementedError("FIXME: broadcast unions of typetracers")
-
-            tagslist, numtags, length = [], [], None
-            for x in inputs:
-                if isinstance(x, UnionArray):
-                    tagslist.append(x.tags.to(nplike))
-                    numtags.append(len(x.contents))
-                    if length is None:
-                        length = len(tagslist[-1])
-                    elif length != len(tagslist[-1]):
-                        raise ValueError(
-                            "cannot broadcast UnionArray of length {0} "
-                            "with UnionArray of length {1}{2}".format(
-                                length, len(tagslist[-1]), in_function(options)
-                            )
-                        )
-
-            combos = nplike.stack(tagslist, axis=-1)
-
-            all_combos = nplike.array(
-                list(itertools.product(*[range(x) for x in numtags])),
-                dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
-            )
-
-            combos = combos.view(
-                [(str(i), combos.dtype) for i in range(len(tagslist))]
-            ).reshape(length)
-
-            tags = nplike.empty(length, dtype=np.int8)
-            index = nplike.empty(length, dtype=np.int64)
-            numoutputs, outcontents = None, []
-            for tag, combo in enumerate(all_combos):
-                mask = combos == combo
-                tags[mask] = tag
-                index[mask] = nplike.arange(nplike.count_nonzero(mask))
-                nextinputs = []
-                i = 0
+            if not nplike.known_data:
+                numtags, length = [], None
                 for x in inputs:
                     if isinstance(x, UnionArray):
-                        nextinputs.append(x[mask].project(combo[str(i)]))
-                        i += 1
-                    elif isinstance(x, Content):
-                        nextinputs.append(x[mask])
-                    else:
-                        nextinputs.append(x)
-                outcontents.append(
-                    apply_step(
-                        nplike,
-                        nextinputs,
-                        action,
-                        depth,
-                        copy.copy(depth_context),
-                        lateral_context,
-                        behavior,
-                        options,
-                    )
-                )
-                assert isinstance(outcontents[-1], tuple)
-                if numoutputs is not None:
-                    assert numoutputs == len(outcontents[-1])
-                numoutputs = len(outcontents[-1])
+                        numtags.append(len(x.contents))
+                        if length is None:
+                            length = x.tags.data.shape[0]
+                assert length is not None
 
-            assert numoutputs is not None
+                all_combos = list(itertools.product(*[range(x) for x in numtags]))
+
+                tags = nplike.empty(length, dtype=np.int8)
+                index = nplike.empty(length, dtype=np.int64)
+                numoutputs, outcontents = None, []
+                for combo in all_combos:
+                    nextinputs = []
+                    i = 0
+                    for x in inputs:
+                        if isinstance(x, UnionArray):
+                            nextinputs.append(x._contents[combo[i]])
+                            i += 1
+                        else:
+                            nextinputs.append(x)
+
+                    outcontents.append(
+                        apply_step(
+                            nplike,
+                            nextinputs,
+                            action,
+                            depth,
+                            copy.copy(depth_context),
+                            lateral_context,
+                            behavior,
+                            options,
+                        )
+                    )
+                    assert isinstance(outcontents[-1], tuple)
+                    if numoutputs is None:
+                        numoutputs = len(outcontents[-1])
+                    else:
+                        assert numoutputs == len(outcontents[-1])
+
+                assert numoutputs is not None
+
+            else:
+                tagslist, numtags, length = [], [], None
+                for x in inputs:
+                    if isinstance(x, UnionArray):
+                        tagslist.append(x.tags.to(nplike))
+                        numtags.append(len(x.contents))
+                        if length is None:
+                            length = len(tagslist[-1])
+                        elif length != len(tagslist[-1]):
+                            raise ValueError(
+                                "cannot broadcast UnionArray of length {0} "
+                                "with UnionArray of length {1}{2}".format(
+                                    length, len(tagslist[-1]), in_function(options)
+                                )
+                            )
+                assert length is not None
+
+                combos = nplike.stack(tagslist, axis=-1)
+
+                all_combos = nplike.array(
+                    list(itertools.product(*[range(x) for x in numtags])),
+                    dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
+                )
+
+                combos = combos.view(
+                    [(str(i), combos.dtype) for i in range(len(tagslist))]
+                ).reshape(length)
+
+                tags = nplike.empty(length, dtype=np.int8)
+                index = nplike.empty(length, dtype=np.int64)
+                numoutputs, outcontents = None, []
+                for tag, combo in enumerate(all_combos):
+                    mask = combos == combo
+                    tags[mask] = tag
+                    index[mask] = nplike.arange(nplike.count_nonzero(mask))
+                    nextinputs = []
+                    i = 0
+                    for x in inputs:
+                        if isinstance(x, UnionArray):
+                            nextinputs.append(x[mask].project(combo[str(i)]))
+                            i += 1
+                        elif isinstance(x, Content):
+                            nextinputs.append(x[mask])
+                        else:
+                            nextinputs.append(x)
+                    outcontents.append(
+                        apply_step(
+                            nplike,
+                            nextinputs,
+                            action,
+                            depth,
+                            copy.copy(depth_context),
+                            lateral_context,
+                            behavior,
+                            options,
+                        )
+                    )
+                    assert isinstance(outcontents[-1], tuple)
+                    if numoutputs is None:
+                        numoutputs = len(outcontents[-1])
+                    else:
+                        assert numoutputs == len(outcontents[-1])
+
+                assert numoutputs is not None
 
             return tuple(
                 UnionArray(
