@@ -169,8 +169,10 @@ namespace awkward {
   }
 
   void
-  ArrayBuilder::maybeupdate(const BuilderPtr builder) {
-    builder_ = std::move(builder);
+  ArrayBuilder::maybeupdate(const BuilderPtr tmp) {
+    if (tmp.get() != builder_.get()) {
+      builder_ = std::move(tmp);
+    }
   }
 
   const char* ArrayBuilder::no_encoding = nullptr;
