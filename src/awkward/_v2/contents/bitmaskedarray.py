@@ -132,6 +132,7 @@ class BitMaskedArray(Content):
             self._lsb_order,
             self._typetracer_identifier(),
             self._parameters,
+            ak._v2._typetracer.TypeTracer.instance(),
         )
 
     @property
@@ -166,6 +167,7 @@ class BitMaskedArray(Content):
             self._lsb_order,
             self._identifier,
             ak._v2._util.merge_parameters(self._parameters, parameters),
+            self._nplike,
         )
 
     def toByteMaskedArray(self):
@@ -190,6 +192,7 @@ class BitMaskedArray(Content):
             self._valid_when,
             self._identifier,
             self._parameters,
+            self._nplike,
         )
 
     def toIndexedOptionArray64(self):
@@ -213,6 +216,7 @@ class BitMaskedArray(Content):
             self._content,
             self._identifier,
             self._parameters,
+            self._nplike,
         )
 
     def mask_as_bool(self, valid_when=None, nplike=None):
@@ -266,6 +270,7 @@ class BitMaskedArray(Content):
             self._lsb_order,
             self._field_identifier(where),
             None,
+            self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -277,6 +282,7 @@ class BitMaskedArray(Content):
             self._lsb_order,
             self._fields_identifier(where),
             None,
+            self._nplike,
         )
 
     def _carry(self, carry, allow_lazy, exception):
@@ -414,7 +420,7 @@ class BitMaskedArray(Content):
         order,
     ):
         if len(self._mask) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
 
         return self.toIndexedOptionArray64()._argsort_next(
             negaxis,
@@ -528,6 +534,7 @@ class BitMaskedArray(Content):
                     self._lsb_order,
                     self._identifier,
                     self._parameters if options["keep_parameters"] else None,
+                    self._nplike,
                 )
 
         else:
@@ -570,6 +577,7 @@ class BitMaskedArray(Content):
                 content,
                 next._identifier,
                 next._parameters,
+                self._nplike,
             )
 
         else:
@@ -591,6 +599,7 @@ class BitMaskedArray(Content):
                 self._lsb_order,
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
 
     def _to_list(self, behavior):

@@ -95,6 +95,7 @@ class ByteMaskedArray(Content):
             self._valid_when,
             self._typetracer_identifier(),
             self._parameters,
+            ak._v2._typetracer.TypeTracer.instance(),
         )
 
     @property
@@ -125,6 +126,7 @@ class ByteMaskedArray(Content):
             self._valid_when,
             self._identifier,
             ak._v2._util.merge_parameters(self._parameters, parameters),
+            self._nplike,
         )
 
     def toIndexedOptionArray64(self):
@@ -144,7 +146,7 @@ class ByteMaskedArray(Content):
         )
 
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            index, self._content, self._identifier, self._parameters
+            index, self._content, self._identifier, self._parameters, self._nplike
         )
 
     def mask_as_bool(self, valid_when=None, nplike=None):
@@ -180,6 +182,7 @@ class ByteMaskedArray(Content):
             self._valid_when,
             self._range_identifier(start, stop),
             self._parameters,
+            self._nplike,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -189,6 +192,7 @@ class ByteMaskedArray(Content):
             self._valid_when,
             self._field_identifier(where),
             None,
+            self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -198,6 +202,7 @@ class ByteMaskedArray(Content):
             self._valid_when,
             self._fields_identifier(where),
             None,
+            self._nplike,
         )
 
     def _carry(self, carry, allow_lazy, exception):
@@ -217,6 +222,7 @@ class ByteMaskedArray(Content):
             self._valid_when,
             self._carry_identifier(carry, exception),
             self._parameters,
+            self._nplike,
         )
 
     def _nextcarry_outindex(self, numnull):
@@ -256,7 +262,7 @@ class ByteMaskedArray(Content):
         if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
-                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                     len(slicestarts), type(self).__name__, len(self)
                 ),
@@ -290,7 +296,7 @@ class ByteMaskedArray(Content):
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
 
         out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            outindex, out, self._identifier, self._parameters
+            outindex, out, self._identifier, self._parameters, self._nplike
         )
         return out2.simplify_optiontype()
 
@@ -315,6 +321,7 @@ class ByteMaskedArray(Content):
                 out,
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
             return out2.simplify_optiontype()
 
@@ -368,7 +375,7 @@ class ByteMaskedArray(Content):
             )
             valid_when = False
             next = ByteMaskedArray(
-                nextmask, self._content, valid_when, self._identifier, self._parameters
+                nextmask, self._content, valid_when, self._identifier, self._parameters, self._nplike
             )
             return next.project()
 
@@ -423,7 +430,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
         else:
             numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
@@ -432,7 +439,7 @@ class ByteMaskedArray(Content):
             out = next.num(posaxis, depth)
 
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                outindex, out, parameters=self.parameters
+                outindex, out, None, self.parameters, self._nplike
             )
             return out2.simplify_optiontype()
 
@@ -452,7 +459,7 @@ class ByteMaskedArray(Content):
                 return (
                     offsets,
                     ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                        outindex, flattened, None, self._parameters
+                        outindex, flattened, None, self._parameters, self._nplike
                     ),
                 )
 
@@ -531,6 +538,7 @@ class ByteMaskedArray(Content):
                 out,
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
             return out2.simplify_optiontype()
 
@@ -541,6 +549,7 @@ class ByteMaskedArray(Content):
             self._valid_when,
             self._identifier,
             self._parameters,
+            self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -570,7 +579,7 @@ class ByteMaskedArray(Content):
         order,
     ):
         if len(self._mask) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
 
         return self.toIndexedOptionArray64()._argsort_next(
             negaxis,
@@ -613,7 +622,7 @@ class ByteMaskedArray(Content):
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                outindex, out, parameters=parameters
+                outindex, out, None, parameters, self._nplike
             )
             return out2.simplify_optiontype()
 
@@ -745,6 +754,7 @@ class ByteMaskedArray(Content):
                     out.content,
                     None,
                     None,
+                    self._nplike,
                 ).simplify_optiontype()
 
                 return ak._v2.contents.ListOffsetArray(
@@ -752,6 +762,7 @@ class ByteMaskedArray(Content):
                     tmp,
                     None,
                     None,
+                    self._nplike,
                 )
 
             else:
@@ -827,6 +838,7 @@ class ByteMaskedArray(Content):
                 next.simplify_optiontype(),
                 None,
                 self._parameters,
+                self._nplike,
             )
         else:
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
@@ -835,6 +847,7 @@ class ByteMaskedArray(Content):
                 self._valid_when,
                 None,
                 self._parameters,
+                self._nplike,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -872,6 +885,7 @@ class ByteMaskedArray(Content):
                     self._valid_when,
                     self._identifier,
                     self._parameters if options["keep_parameters"] else None,
+                    self._nplike,
                 )
 
         else:
@@ -913,6 +927,7 @@ class ByteMaskedArray(Content):
                 content,
                 next._identifier,
                 next._parameters,
+                self._nplike,
             )
 
         else:
@@ -926,6 +941,7 @@ class ByteMaskedArray(Content):
                 self._valid_when,
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
 
     def _to_list(self, behavior):

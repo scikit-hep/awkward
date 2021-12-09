@@ -245,6 +245,7 @@ class Content(object):
             0,  # zeros_length is irrelevant when the size is 1 (!= 0)
             None,
             None,
+            self._nplike,
         )
 
     def _getitem_next_ellipsis(self, tail, advanced):
@@ -287,11 +288,11 @@ class Content(object):
         )
 
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            outindex, raw.content, None, self._parameters
+            outindex, raw.content, None, self._parameters, self._nplike
         )
 
         return ak._v2.contents.regulararray.RegularArray(
-            out.simplify_optiontype(), len(index), 1, None, self._parameters
+            out.simplify_optiontype(), len(index), 1, None, self._parameters, self._nplike
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
@@ -333,10 +334,10 @@ class Content(object):
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            outputmask, tmp, None, self._parameters
+            outputmask, tmp, None, self._parameters, self._nplike
         )
         return ak._v2.contents.regulararray.RegularArray(
-            out.simplify_optiontype(), len(index), 1, None, self._parameters
+            out.simplify_optiontype(), len(index), 1, None, self._parameters, self._nplike
         )
 
     def _getitem_next_missing(self, head, tail, advanced):
@@ -386,7 +387,7 @@ class Content(object):
                     )
 
             return ak._v2.contents.recordarray.RecordArray(
-                contents, nextcontent._fields, None, None, self._parameters
+                contents, nextcontent._fields, None, None, self._parameters, self._nplike
             )
 
         else:
@@ -423,7 +424,7 @@ class Content(object):
                     items, ak.nplike.of(*items)
                 )
 
-                next = ak._v2.contents.RegularArray(self, len(self), 1, None, None)
+                next = ak._v2.contents.RegularArray(self, len(self), 1, None, None, self._nplike)
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
                 if len(out) == 0:
                     return out._getitem_nothing()
@@ -490,7 +491,7 @@ class Content(object):
                 if as_nplike is None:
                     return self.__getitem__(layout)
                 else:
-                    return self.__getitem__(ak._v2.contents.NumpyArray(as_nplike))
+                    return self.__getitem__(ak._v2.contents.NumpyArray(as_nplike, None, None, layout.nplike))
 
             else:
                 raise TypeError(
@@ -521,12 +522,12 @@ class Content(object):
                 elif isinstance(x, ak._v2.index.Index64):
                     return str(x.data)
                 elif isinstance(x, Content):
-                    return str(ak.Array(v2_to_v1(x)))
+                    return str(ak._v2.highlevel.Array(x))
                 else:
                     return repr(x)
 
             try:
-                tmp = "    " + repr(ak.Array(v2_to_v1(self)))
+                tmp = "    " + repr(ak._v2.highlevel.Array(self))
             except Exception:
                 tmp = self._repr("    ", "", "")
             raise IndexError(
@@ -636,7 +637,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 len(localindex),
             )
         )
-        return ak._v2.contents.NumpyArray(localindex)
+        return ak._v2.contents.NumpyArray(localindex, None, None, localindex.nplike)
 
     def merge(self, other):
         others = [other]
@@ -670,7 +671,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
 
         return ak._v2.contents.unionarray.UnionArray(
-            tags, index, contents, None, self._parameters
+            tags, index, contents, None, self._parameters, self._nplike
         )
 
     def _merging_strategy(self, others):
@@ -912,9 +913,9 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
         contents = []
         for ptr in tocarry:
-            contents.append(ak._v2.contents.IndexedArray(ptr, self))
+            contents.append(ak._v2.contents.IndexedArray(ptr, self, None, None, self._nplike))
         return ak._v2.contents.recordarray.RecordArray(
-            contents, recordlookup, parameters=parameters
+            contents, recordlookup, parameters=parameters, nplike=self._nplike
         )
 
     def combinations(self, n, replacement=False, axis=1, fields=None, parameters=None):
@@ -1130,6 +1131,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             self,
             None,
             self._parameters,
+            self._nplike,
         )
         return next.simplify_optiontype()
 

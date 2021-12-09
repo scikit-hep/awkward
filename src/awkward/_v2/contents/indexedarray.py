@@ -81,6 +81,7 @@ class IndexedArray(Content):
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
+            ak._v2._typetracer.TypeTracer.instance(),
         )
 
     @property
@@ -108,11 +109,12 @@ class IndexedArray(Content):
             self._content,
             self._identifier,
             ak._v2._util.merge_parameters(self._parameters, parameters),
+            self._nplike,
         )
 
     def toIndexedOptionArray64(self):
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            self._index, self._content, self._identifier, self._parameters
+            self._index, self._content, self._identifier, self._parameters, self._nplike
         )
 
     def mask_as_bool(self, valid_when=True):
@@ -139,6 +141,7 @@ class IndexedArray(Content):
             self._content,
             self._range_identifier(start, stop),
             self._parameters,
+            self._nplike,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -147,6 +150,7 @@ class IndexedArray(Content):
             self._content._getitem_field(where, only_fields),
             self._field_identifier(where),
             None,
+            self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -155,6 +159,7 @@ class IndexedArray(Content):
             self._content._getitem_fields(where, only_fields),
             self._fields_identifier(where),
             None,
+            self._nplike,
         )
 
     def _carry(self, carry, allow_lazy, exception):
@@ -173,6 +178,7 @@ class IndexedArray(Content):
             self._content,
             self._carry_identifier(carry, exception),
             self._parameters,
+            self._nplike,
         )
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
@@ -180,7 +186,7 @@ class IndexedArray(Content):
         if len(slicestarts) != len(self) and nplike.known_shape:
             raise NestedIndexError(
                 self,
-                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
+                ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent, None, None, self._nplike),
                 "cannot fit jagged slice with length {0} into {1} of size {2}".format(
                     len(slicestarts), type(self).__name__, len(self)
                 ),
@@ -278,7 +284,7 @@ class IndexedArray(Content):
                 )
             )
             next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                nextindex, self._content, self._identifier, self._parameters
+                nextindex, self._content, self._identifier, self._parameters, self._nplike
             )
             return next.project()
 
@@ -347,7 +353,7 @@ class IndexedArray(Content):
             )
             if isinstance(self._content, ak._v2.contents.indexedarray.IndexedArray):
                 return IndexedArray(
-                    result, self._content.content, self._identifier, self._parameters
+                    result, self._content.content, self._identifier, self._parameters, self._nplike
                 )
 
             if isinstance(
@@ -360,7 +366,7 @@ class IndexedArray(Content):
                 ),
             ):
                 return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                    result, self._content.content, self._identifier, self._parameters
+                    result, self._content.content, self._identifier, self._parameters, self._nplike
                 )
 
         else:
@@ -371,7 +377,7 @@ class IndexedArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
         else:
             return self.project().num(posaxis, depth)
 
@@ -469,7 +475,7 @@ class IndexedArray(Content):
         parameters = ak._v2._util.merge_parameters(self._parameters, other._parameters)
 
         return ak._v2.contents.indexedarray.IndexedArray(
-            index, content, None, parameters
+            index, content, None, parameters, self._nplike
         )
 
     def mergemany(self, others):
@@ -543,7 +549,7 @@ class IndexedArray(Content):
         tail_contents = contents[1:]
         nextcontent = contents[0].mergemany(tail_contents)
         next = ak._v2.contents.indexedarray.IndexedArray(
-            nextindex, nextcontent, None, parameters
+            nextindex, nextcontent, None, parameters, self._nplike
         )
 
         if len(tail) == 0:
@@ -566,7 +572,7 @@ class IndexedArray(Content):
             )
 
         return IndexedArray(
-            self._index, self._content.fillna(value), None, self._parameters
+            self._index, self._content.fillna(value), None, self._parameters, self._nplike
         )
 
     def _localindex(self, axis, depth):
@@ -635,6 +641,7 @@ class IndexedArray(Content):
             self._content.numbers_to_type(name),
             self._identifier,
             self._parameters,
+            self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -709,6 +716,7 @@ class IndexedArray(Content):
                 unique,
                 None,
                 self._parameters,
+                self._nplike,
             ).simplify_optiontype()
 
             return out
@@ -748,6 +756,7 @@ class IndexedArray(Content):
                     unique._content,
                     None,
                     None,
+                    self._nplike,
                 )
 
                 return ak._v2.contents.ListOffsetArray(
@@ -755,6 +764,7 @@ class IndexedArray(Content):
                     tmp,
                     None,
                     None,
+                    self._nplike,
                 )
 
             elif isinstance(unique, ak._v2.contents.NumpyArray):
@@ -768,6 +778,7 @@ class IndexedArray(Content):
                     unique,
                     None,
                     self._parameters,
+                    self._nplike,
                 ).simplify_optiontype()
 
                 return out
@@ -787,7 +798,7 @@ class IndexedArray(Content):
         order,
     ):
         if len(self._index) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+            return ak._v2.contents.NumpyArray(self._nplike.empty(0, np.int64), None, None, self._nplike)
 
         next = self._content._carry(self._index, False, NestedIndexError)
         return next._argsort_next(
@@ -917,6 +928,7 @@ class IndexedArray(Content):
                     out._content,
                     None,
                     None,
+                    self._nplike,
                 )
 
                 return ak._v2.contents.ListOffsetArray(
@@ -924,6 +936,7 @@ class IndexedArray(Content):
                     tmp,
                     None,
                     None,
+                    self._nplike,
                 )
 
             else:
@@ -981,6 +994,7 @@ class IndexedArray(Content):
                 self._content._rpad(target, posaxis, depth, clip),
                 None,
                 self._parameters,
+                self._nplike,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -991,7 +1005,7 @@ class IndexedArray(Content):
             next_parameters = dict(self._parameters)
             del next_parameters["__array__"]
             next = IndexedArray(
-                self._index, self._content, self._identifier, next_parameters
+                self._index, self._content, self._identifier, next_parameters, self._nplike
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
@@ -1054,6 +1068,7 @@ class IndexedArray(Content):
                     ),
                     self._identifier,
                     self._parameters if options["keep_parameters"] else None,
+                    self._nplike,
                 )
 
         else:

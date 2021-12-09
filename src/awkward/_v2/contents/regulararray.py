@@ -88,6 +88,7 @@ class RegularArray(Content):
             self._length,
             self._typetracer_identifier(),
             self._parameters,
+            ak._v2._typetracer.TypeTracer.instance(),
         )
 
     @property
@@ -117,6 +118,7 @@ class RegularArray(Content):
             self._length,
             self._identifier,
             ak._v2._util.merge_parameters(self._parameters, parameters),
+            self._nplike,
         )
 
     def toListOffsetArray64(self, start_at_zero=False):
@@ -139,7 +141,7 @@ class RegularArray(Content):
                 content.data.reshape(shape),
                 None,
                 ak._v2._util.merge_parameters(self._parameters, content.parameters),
-                content.nplike,
+                self._nplike,
             )
 
     def _getitem_nothing(self):
@@ -164,6 +166,7 @@ class RegularArray(Content):
             zeros_length,
             self._range_identifier(start, stop),
             self._parameters,
+            self._nplike,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -173,6 +176,7 @@ class RegularArray(Content):
             self._length,
             self._field_identifier(where),
             None,
+            self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -182,6 +186,7 @@ class RegularArray(Content):
             self._length,
             self._fields_identifier(where),
             None,
+            self._nplike,
         )
 
     def _carry(self, carry, allow_lazy, exception):
@@ -226,6 +231,7 @@ class RegularArray(Content):
             len(where),
             self._carry_identifier(carry, exception),
             self._parameters,
+            self._nplike,
         )
 
     def _compact_offsets64(self, start_at_zero):
@@ -279,7 +285,7 @@ class RegularArray(Content):
             )
             nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
-                offsets, nextcontent, identifier, self._parameters
+                offsets, nextcontent, identifier, self._parameters, self._nplike
             )
 
         else:
@@ -291,7 +297,7 @@ class RegularArray(Content):
                 )
             )
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
-                offsets, self._content, self._identifier, self._parameters
+                offsets, self._content, self._identifier, self._parameters, self._nplike
             )
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
@@ -367,6 +373,7 @@ class RegularArray(Content):
                     self._length,
                     self._identifier,
                     self._parameters,
+                    self._nplike,
                 )
             else:
                 nplike = ak.nplike.of(advanced)
@@ -392,6 +399,7 @@ class RegularArray(Content):
                     self._length,
                     self._identifier,
                     self._parameters,
+                    self._nplike,
                 )
 
         elif ak._util.isstr(head):
@@ -532,7 +540,7 @@ class RegularArray(Content):
                 multistarts, multistops, head._content, tail
             )
 
-            return RegularArray(down, len(head), self._length, None, self._parameters)
+            return RegularArray(down, len(head), self._length, None, self._parameters, self._nplike)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)
@@ -545,7 +553,7 @@ class RegularArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self.nplike)
             out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[0]
         elif posaxis == depth + 1:
             tonum = ak._v2.index.Index64.empty(len(self), self.nplike)
             self._handle_error(
@@ -553,11 +561,11 @@ class RegularArray(Content):
                     tonum.to(self.nplike), self._size, len(self)
                 )
             )
-            return ak._v2.contents.numpyarray.NumpyArray(tonum)
+            return ak._v2.contents.numpyarray.NumpyArray(tonum, None, None, self._nplike)
         else:
             next = self._content.num(posaxis, depth + 1)
             return ak._v2.contents.regulararray.RegularArray(
-                next, self._size, len(self), None, self._parameters
+                next, self._size, len(self), None, self._parameters, self._nplike
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -613,6 +621,7 @@ class RegularArray(Content):
             self._length,
             self._identifier,
             self._parameters,
+            self._nplike,
         )
 
     def _localindex(self, axis, depth):
@@ -636,6 +645,7 @@ class RegularArray(Content):
                 self._length,
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
         else:
             return ak._v2.contents.RegularArray(
@@ -644,6 +654,7 @@ class RegularArray(Content):
                 self._length,
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
 
     def numbers_to_type(self, name):
@@ -653,6 +664,7 @@ class RegularArray(Content):
             len(self),
             self._identifier,
             self._parameters,
+            self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -684,6 +696,7 @@ class RegularArray(Content):
                     out._length,
                     None,
                     out._parameters,
+                    self._nplike,
                 )
 
         return out
@@ -701,7 +714,7 @@ class RegularArray(Content):
         order,
     ):
         if self._length == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64), None, None, self._nplike)
 
         next = self.toListOffsetArray64(True)
         out = next._argsort_next(
@@ -724,6 +737,7 @@ class RegularArray(Content):
                     out._length,
                     None,
                     out._parameters,
+                    self._nplike,
                 )
 
         return out
@@ -751,6 +765,7 @@ class RegularArray(Content):
         #             out._length,
         #             None,
         #             out._parameters,
+        #             self._nplike,
         #         )
 
         return out
@@ -817,7 +832,7 @@ class RegularArray(Content):
             for ptr in tocarry:
                 contents.append(self._content._carry(ptr, True, NestedIndexError))
             recordarray = ak._v2.contents.recordarray.RecordArray(
-                contents, recordlookup, parameters=parameters
+                contents, recordlookup, len(self._content), parameters, self._nplike
             )
             return ak._v2.contents.regulararray.RegularArray(
                 recordarray,
@@ -825,6 +840,7 @@ class RegularArray(Content):
                 len(self),
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
         else:
             next = self._content._getitem_range(
@@ -833,7 +849,7 @@ class RegularArray(Content):
                 n, replacement, recordlookup, parameters, posaxis, depth + 1
             )
             return ak._v2.contents.regulararray.RegularArray(
-                next, self._size, len(self), self._identifier, self._parameters
+                next, self._size, len(self), self._identifier, self._parameters, self._nplike
             )
 
     def _reduce_next(
@@ -875,6 +891,7 @@ class RegularArray(Content):
                             out._content.toRegularArray(),
                             out._identifier,
                             out._parameters,
+                            self._nplike,
                         )
                     elif isinstance(out.content, ak._v2.contents.ListArray):
                         out = ak._v2.contents.ListOffsetArray(
@@ -882,6 +899,7 @@ class RegularArray(Content):
                             out._content.toRegularArray(),
                             out._identifier,
                             out._parameters,
+                            self._nplike,
                         )
                 elif isinstance(out, ak._v2.contents.ListArray):
                     if isinstance(out.content, ak._v2.contents.ListOffsetArray):
@@ -890,6 +908,7 @@ class RegularArray(Content):
                             out._content.toRegularArray(),
                             out._identifier,
                             out._parameters,
+                            self._nplike,
                         )
                     elif isinstance(out.content, ak._v2.contents.ListArray):
                         out = ak._v2.contents.ListOffsetArray(
@@ -897,6 +916,7 @@ class RegularArray(Content):
                             out._content.toRegularArray(),
                             out._identifier,
                             out._parameters,
+                            self._nplike,
                         )
 
             if convert_shallow:
@@ -946,6 +966,7 @@ class RegularArray(Content):
                     self._content,
                     None,
                     self._parameters,
+                    self._nplike,
                 )
                 return ak._v2.contents.regulararray.RegularArray(
                     next.simplify_optiontype(),
@@ -953,6 +974,7 @@ class RegularArray(Content):
                     len(self),
                     None,
                     self._parameters,
+                    self._nplike,
                 )
         else:
             return ak._v2.contents.regulararray.RegularArray(
@@ -961,6 +983,7 @@ class RegularArray(Content):
                 len(self),
                 None,
                 self._parameters,
+                self._nplike,
             )
 
     def _to_numpy(self, allow_missing):
@@ -1055,6 +1078,7 @@ class RegularArray(Content):
                     self._length,
                     self._identifier,
                     self._parameters if options["keep_parameters"] else None,
+                    self._nplike,
                 )
 
         else:
@@ -1092,7 +1116,7 @@ class RegularArray(Content):
             content = self._content[:length].packed()
 
         return RegularArray(
-            content, self._size, self._length, self._identifier, self._parameters
+            content, self._size, self._length, self._identifier, self._parameters, self._nplike
         )
 
     def _to_list(self, behavior):
