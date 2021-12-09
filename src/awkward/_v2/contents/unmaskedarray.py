@@ -93,7 +93,7 @@ class UnmaskedArray(Content):
         )
 
     def toIndexedOptionArray64(self):
-        arange = self._content.nplike.arange(len(self._content), dtype=np.int64)
+        arange = self._nplike.arange(len(self._content), dtype=np.int64)
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             ak._v2.index.Index64(arange),
             self._content,
@@ -104,7 +104,7 @@ class UnmaskedArray(Content):
 
     def mask_as_bool(self, valid_when=True, nplike=None):
         if nplike is None:
-            nplike = self._content.nplike
+            nplike = self._nplike
 
         if valid_when:
             return nplike.ones(len(self._content), dtype=np.bool_)
@@ -215,7 +215,7 @@ class UnmaskedArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out = ak._v2.index.Index64.empty(1, self._nplike)
             out[0] = len(self)
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
                 0
@@ -323,7 +323,7 @@ class UnmaskedArray(Content):
     ):
         if len(self._content) == 0:
             return ak._v2.contents.NumpyArray(
-                self.nplike.empty(0, np.int64), None, None, self._nplike
+                self._nplike.empty(0, np.int64), None, None, self._nplike
             )
 
         out = self._content._argsort_next(
@@ -475,7 +475,7 @@ class UnmaskedArray(Content):
             self.content, allow_missing=allow_missing
         )
         if allow_missing:
-            return self.nplike.ma.MaskedArray(content)
+            return self._nplike.ma.MaskedArray(content)
         else:
             return content
 

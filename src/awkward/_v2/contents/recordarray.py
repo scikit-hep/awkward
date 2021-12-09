@@ -237,7 +237,7 @@ class RecordArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)) and self.nplike.known_shape:
+        if not (0 <= where < len(self)) and self._nplike.known_shape:
             raise NestedIndexError(self, where)
         return Record(self, where)
 
@@ -312,16 +312,16 @@ class RecordArray(Content):
         assert isinstance(carry, ak._v2.index.Index)
 
         if allow_lazy:
-            nplike, where = carry.nplike, carry.data
+            where = carry.data
 
             if allow_lazy != "copied":
                 where = where.copy()
 
             negative = where < 0
-            if nplike.any(negative, prefer=False):
+            if self._nplike.any(negative, prefer=False):
                 where[negative] += self._length
 
-            if nplike.any(where >= self._length, prefer=False):
+            if self._nplike.any(where >= self._length, prefer=False):
                 if issubclass(exception, NestedIndexError):
                     raise exception(self, where)
                 else:
@@ -412,7 +412,7 @@ class RecordArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            single = ak._v2.index.Index64.empty(1, self.nplike)
+            single = ak._v2.index.Index64.empty(1, self._nplike)
             single[0] = len(self)
             singleton = ak._v2.contents.numpyarray.NumpyArray(
                 single, None, None, self._nplike
@@ -456,7 +456,7 @@ class RecordArray(Content):
                         "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
                     )
                 contents.append(flattened)
-            offsets = ak._v2.index.Index64.zeros(1, self.nplike, dtype=np.int64)
+            offsets = ak._v2.index.Index64.zeros(1, self._nplike, dtype=np.int64)
             return (
                 offsets,
                 RecordArray(
@@ -697,7 +697,7 @@ class RecordArray(Content):
     ):
         if self._fields is None or len(self._fields) == 0:
             return ak._v2.contents.NumpyArray(
-                self.nplike.empty(0, np.int64), None, None, self._nplike
+                self._nplike.empty(0, np.int64), None, None, self._nplike
             )
         else:
             raise NotImplementedError
@@ -707,7 +707,7 @@ class RecordArray(Content):
     ):
         if self._fields is None or len(self._fields) == 0:
             return ak._v2.contents.NumpyArray(
-                self.nplike.instance().empty(0, np.int64), None, None, self._nplike
+                self._nplike.instance().empty(0, np.int64), None, None, self._nplike
             )
 
         contents = []
@@ -859,19 +859,19 @@ class RecordArray(Content):
 
     def _to_numpy(self, allow_missing):
         if self.fields is None:
-            return self.nplike.empty(len(self), dtype=[])
+            return self._nplike.empty(len(self), dtype=[])
         contents = [x._to_numpy(allow_missing) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError("cannot convert {0} into np.ndarray".format(self))
-        out = self.nplike.empty(
+        out = self._nplike.empty(
             len(contents[0]),
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
         )
         mask = None
         for n, x in zip(self.fields, contents):
-            if isinstance(x, self.nplike.ma.MaskedArray):
+            if isinstance(x, self._nplike.ma.MaskedArray):
                 if mask is None:
-                    mask = self.nplike.ma.zeros(
+                    mask = self._nplike.ma.zeros(
                         len(self), [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
@@ -879,7 +879,7 @@ class RecordArray(Content):
             out[n] = x
 
         if mask is not None:
-            out = self.nplike.ma.MaskedArray(out, mask)
+            out = self._nplike.ma.MaskedArray(out, mask)
 
         return out
 

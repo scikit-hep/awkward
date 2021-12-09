@@ -130,16 +130,15 @@ class ByteMaskedArray(Content):
         )
 
     def toIndexedOptionArray64(self):
-        nplike = self.nplike
-        index = ak._v2.index.Index64.empty(len(self._mask), nplike)
+        index = ak._v2.index.Index64.empty(len(self._mask), self._nplike)
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_ByteMaskedArray_toIndexedOptionArray",
                 index.dtype.type,
                 self._mask.dtype.type,
             ](
-                index.to(nplike),
-                self._mask.to(nplike),
+                index.to(self._nplike),
+                self._mask.to(self._nplike),
                 len(self._mask),
                 self._valid_when,
             ),
@@ -153,7 +152,7 @@ class ByteMaskedArray(Content):
         if valid_when is None:
             valid_when = self._valid_when
         if nplike is None:
-            nplike = self._mask.nplike
+            nplike = self._nplike
 
         if valid_when == self._valid_when:
             return self._mask.to(nplike) != 0
@@ -166,7 +165,7 @@ class ByteMaskedArray(Content):
     def _getitem_at(self, where):
         if where < 0:
             where += len(self)
-        if not (0 <= where < len(self)) and self.nplike.known_shape:
+        if not (0 <= where < len(self)) and self._nplike.known_shape:
             raise NestedIndexError(self, where)
         if self._mask[where] == self._valid_when:
             return self._content._getitem_at(where)
@@ -226,31 +225,30 @@ class ByteMaskedArray(Content):
         )
 
     def _nextcarry_outindex(self, numnull):
-        nplike = self.nplike
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_ByteMaskedArray_numnull",
                 numnull.dtype.type,
                 self._mask.dtype.type,
             ](
-                numnull.to(nplike),
-                self._mask.to(nplike),
+                numnull.to(self._nplike),
+                self._mask.to(self._nplike),
                 len(self._mask),
                 self._valid_when,
             )
         )
-        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
-        outindex = ak._v2.index.Index64.empty(len(self), nplike)
+        nextcarry = ak._v2.index.Index64.empty(len(self) - numnull[0], self._nplike)
+        outindex = ak._v2.index.Index64.empty(len(self), self._nplike)
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
                 nextcarry.dtype.type,
                 outindex.dtype.type,
                 self._mask.dtype.type,
             ](
-                nextcarry.to(nplike),
-                outindex.to(nplike),
-                self._mask.to(nplike),
+                nextcarry.to(self._nplike),
+                outindex.to(self._nplike),
+                self._mask.to(self._nplike),
                 len(self._mask),
                 self._valid_when,
             )
@@ -258,8 +256,7 @@ class ByteMaskedArray(Content):
         return nextcarry, outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        nplike = self.nplike
-        if len(slicestarts) != len(self) and nplike.known_shape:
+        if len(slicestarts) != len(self) and self._nplike.known_shape:
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(
@@ -270,14 +267,14 @@ class ByteMaskedArray(Content):
                 ),
             )
 
-        numnull = ak._v2.index.Index64.empty(1, nplike)
+        numnull = ak._v2.index.Index64.empty(1, self._nplike)
         nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-        reducedstarts = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
-        reducedstops = ak._v2.index.Index64.empty(len(self) - numnull[0], nplike)
+        reducedstarts = ak._v2.index.Index64.empty(len(self) - numnull[0], self._nplike)
+        reducedstops = ak._v2.index.Index64.empty(len(self) - numnull[0], self._nplike)
 
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_MaskedArray_getitem_next_jagged_project",
                 outindex.dtype.type,
                 slicestarts.dtype.type,
@@ -285,11 +282,11 @@ class ByteMaskedArray(Content):
                 reducedstarts.dtype.type,
                 reducedstops.dtype.type,
             ](
-                outindex.to(nplike),
-                slicestarts.to(nplike),
-                slicestops.to(nplike),
-                reducedstarts.to(nplike),
-                reducedstops.to(nplike),
+                outindex.to(self._nplike),
+                slicestarts.to(self._nplike),
+                slicestops.to(self._nplike),
+                reducedstarts.to(self._nplike),
+                reducedstops.to(self._nplike),
                 len(self),
             )
         )
@@ -313,7 +310,7 @@ class ByteMaskedArray(Content):
 
         elif isinstance(head, (int, slice, ak._v2.index.Index64)):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            numnull = ak._v2.index.Index64.empty(1, self.nplike)
+            numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
@@ -350,7 +347,7 @@ class ByteMaskedArray(Content):
 
     def project(self, mask=None):
         mask_length = len(self._mask)
-        numnull = ak._v2.index.Index64.zeros(1, self.nplike)
+        numnull = ak._v2.index.Index64.zeros(1, self._nplike)
 
         if mask is not None:
             if mask_length != len(mask):
@@ -360,17 +357,17 @@ class ByteMaskedArray(Content):
                     )
                 )
 
-            nextmask = ak._v2.index.Index8.zeros(mask_length, self.nplike)
+            nextmask = ak._v2.index.Index8.zeros(mask_length, self._nplike)
             self._handle_error(
-                self.nplike[
+                self._nplike[
                     "awkward_ByteMaskedArray_overlay_mask",
                     nextmask.dtype.type,
                     mask.dtype.type,
                     self._mask.dtype.type,
                 ](
-                    nextmask.to(self.nplike),
-                    mask.to(self.nplike),
-                    self._mask.to(self.nplike),
+                    nextmask.to(self._nplike),
+                    mask.to(self._nplike),
+                    self._mask.to(self._nplike),
                     mask_length,
                     self._valid_when,
                 )
@@ -393,23 +390,23 @@ class ByteMaskedArray(Content):
                     numnull.dtype.type,
                     self._mask.dtype.type,
                 ](
-                    numnull.to(self.nplike),
-                    self._mask.to(self.nplike),
+                    numnull.to(self._nplike),
+                    self._mask.to(self._nplike),
                     mask_length,
                     self._valid_when,
                 )
             )
             nextcarry = ak._v2.index.Index64.zeros(
-                mask_length - numnull[0], self.nplike
+                mask_length - numnull[0], self._nplike
             )
             self._handle_error(
-                self.nplike[
+                self._nplike[
                     "awkward_ByteMaskedArray_getitem_nextcarry",
                     nextcarry.dtype.type,
                     self._mask.dtype.type,
                 ](
-                    nextcarry.to(self.nplike),
-                    self._mask.to(self.nplike),
+                    nextcarry.to(self._nplike),
+                    self._mask.to(self._nplike),
                     mask_length,
                     self._valid_when,
                 )
@@ -435,13 +432,13 @@ class ByteMaskedArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out = ak._v2.index.Index64.empty(1, self._nplike)
             out[0] = len(self)
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
                 0
             ]
         else:
-            numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
+            numnull = ak._v2.index.Index64.empty(1, self._nplike, dtype=np.int64)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, False, NestedIndexError)
@@ -457,7 +454,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
-            numnull = ak._v2.index.Index64.empty(1, self.nplike)
+            numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, False, NestedIndexError)
@@ -474,20 +471,20 @@ class ByteMaskedArray(Content):
 
             else:
                 outoffsets = ak._v2.index.Index64.empty(
-                    len(offsets) + numnull[0], self.nplike, dtype=np.int64
+                    len(offsets) + numnull[0], self._nplike, dtype=np.int64
                 )
 
                 self._handle_error(
-                    self.nplike[
+                    self._nplike[
                         "awkward_IndexedArray_flatten_none2empty",
                         outoffsets.dtype.type,
                         outindex.dtype.type,
                         offsets.dtype.type,
                     ](
-                        outoffsets.to(self.nplike),
-                        outindex.to(self.nplike),
+                        outoffsets.to(self._nplike),
+                        outindex.to(self._nplike),
                         len(outindex),
-                        offsets.to(self.nplike),
+                        offsets.to(self._nplike),
                         len(offsets),
                     )
                 )
@@ -537,7 +534,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         else:
-            numnull = ak._v2.index.Index64.empty(1, self.nplike)
+            numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, False, NestedIndexError)
@@ -589,7 +586,7 @@ class ByteMaskedArray(Content):
     ):
         if len(self._mask) == 0:
             return ak._v2.contents.NumpyArray(
-                self.nplike.empty(0, np.int64), None, None, self._nplike
+                self._nplike.empty(0, np.int64), None, None, self._nplike
             )
 
         return self.toIndexedOptionArray64()._argsort_next(
@@ -625,7 +622,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
-            numnull = ak._v2.index.Index64.empty(1, self.nplike, dtype=np.int64)
+            numnull = ak._v2.index.Index64.empty(1, self._nplike, dtype=np.int64)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, True, NestedIndexError)
@@ -648,30 +645,28 @@ class ByteMaskedArray(Content):
         mask,
         keepdims,
     ):
-        nplike = self.nplike
-
         mask_length = len(self._mask)
 
-        numnull = ak._v2.index.Index64.zeros(1, nplike)
+        numnull = ak._v2.index.Index64.zeros(1, self._nplike)
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_ByteMaskedArray_numnull",
                 numnull.dtype.type,
                 self._mask.dtype.type,
             ](
-                numnull.to(nplike),
-                self._mask.to(nplike),
+                numnull.to(self._nplike),
+                self._mask.to(self._nplike),
                 mask_length,
                 self._valid_when,
             )
         )
 
         next_length = mask_length - numnull[0]
-        nextcarry = ak._v2.index.Index64.zeros(next_length, nplike)
-        nextparents = ak._v2.index.Index64.zeros(next_length, nplike)
-        outindex = ak._v2.index.Index64.zeros(mask_length, nplike)
+        nextcarry = ak._v2.index.Index64.zeros(next_length, self._nplike)
+        nextparents = ak._v2.index.Index64.zeros(next_length, self._nplike)
+        outindex = ak._v2.index.Index64.zeros(mask_length, self._nplike)
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_ByteMaskedArray_reduce_next_64",
                 nextcarry.dtype.type,
                 nextparents.dtype.type,
@@ -679,11 +674,11 @@ class ByteMaskedArray(Content):
                 self._mask.dtype.type,
                 parents.dtype.type,
             ](
-                nextcarry.to(nplike),
-                nextparents.to(nplike),
-                outindex.to(nplike),
-                self._mask.to(nplike),
-                parents.to(nplike),
+                nextcarry.to(self._nplike),
+                nextparents.to(self._nplike),
+                outindex.to(self._nplike),
+                self._mask.to(self._nplike),
+                parents.to(self._nplike),
                 mask_length,
                 self._valid_when,
             )
@@ -692,33 +687,33 @@ class ByteMaskedArray(Content):
         branch, depth = self.branch_depth
 
         if reducer.needs_position and (not branch and negaxis == depth):
-            nextshifts = ak._v2.index.Index64.zeros(next_length, nplike)
+            nextshifts = ak._v2.index.Index64.zeros(next_length, self._nplike)
             if shifts is None:
                 self._handle_error(
-                    nplike[
+                    self._nplike[
                         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
                         nextshifts.dtype.type,
                         self._mask.dtype.type,
                     ](
-                        nextshifts.to(nplike),
-                        self._mask.to(nplike),
+                        nextshifts.to(self._nplike),
+                        self._mask.to(self._nplike),
                         mask_length,
                         self._valid_when,
                     )
                 )
             else:
                 self._handle_error(
-                    nplike[
+                    self._nplike[
                         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
                         nextshifts.dtype.type,
                         self._mask.dtype.type,
                         shifts.dtype.type,
                     ](
-                        nextshifts.to(nplike),
-                        self._mask.to(nplike),
+                        nextshifts.to(self._nplike),
+                        self._mask.to(self._nplike),
                         mask_length,
                         self._valid_when,
-                        shifts.to(nplike),
+                        shifts.to(self._nplike),
                     )
                 )
         else:
@@ -746,15 +741,15 @@ class ByteMaskedArray(Content):
                 out = out.toListOffsetArray64(True)
 
             if isinstance(out, ak._v2.contents.ListOffsetArray):
-                outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+                outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, self._nplike)
                 self._handle_error(
-                    nplike[
+                    self._nplike[
                         "awkward_IndexedArray_reduce_next_fix_offsets_64",
                         outoffsets.dtype.type,
                         starts.dtype.type,
                     ](
-                        outoffsets.to(nplike),
-                        starts.to(nplike),
+                        outoffsets.to(self._nplike),
+                        starts.to(self._nplike),
                         len(starts),
                         len(outindex),
                     )
@@ -810,15 +805,15 @@ class ByteMaskedArray(Content):
         if not self._valid_when:
             return self._mask
         else:
-            out = ak._v2.index.Index64.empty(len(self), self.nplike)
+            out = ak._v2.index.Index64.empty(len(self), self._nplike)
             self._handle_error(
-                self.nplike[
+                self._nplike[
                     "awkward_ByteMaskedArray_mask",
                     out.dtype.type,
                     self._mask.dtype.type,
                 ](
-                    out.to(self.nplike),
-                    self._mask.to(self.nplike),
+                    out.to(self._nplike),
+                    self._mask.to(self._nplike),
                     len(self._mask),
                     self._valid_when,
                 )
@@ -831,15 +826,15 @@ class ByteMaskedArray(Content):
             return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
             mask = self.bytemask()
-            index = ak._v2.index.Index64.empty(len(mask), self.nplike)
+            index = ak._v2.index.Index64.empty(len(mask), self._nplike)
             self._handle_error(
-                self.nplike[
+                self._nplike[
                     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,
                     self._mask.dtype.type,
                 ](
-                    index.to(self.nplike),
-                    self._mask.to(self.nplike),
+                    index.to(self._nplike),
+                    self._mask.to(self._nplike),
                     len(self._mask),
                 )
             )

@@ -146,7 +146,7 @@ class NumpyArray(Content):
         out._parameters = self._parameters
         return out
 
-    def maybe_to_nplike(self, nplike):
+    def maybe_to_array(self, nplike):
         return nplike.asarray(self._data)
 
     def __array__(self, **kwargs):
@@ -232,8 +232,6 @@ class NumpyArray(Content):
             )
 
     def _getitem_next(self, head, tail, advanced):
-        nplike = self._nplike
-
         if head == ():
             return self
 
@@ -246,7 +244,7 @@ class NumpyArray(Content):
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
             if hasattr(out, "shape") and len(out.shape) != 0:
-                return NumpyArray(out, None, None, nplike)
+                return NumpyArray(out, None, None, self._nplike)
             else:
                 return out
 
@@ -256,7 +254,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self._parameters, nplike)
+            out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 
         elif ak._util.isstr(head):
@@ -269,14 +267,14 @@ class NumpyArray(Content):
             if advanced is None:
                 where = (slice(None), head.data) + tail
             else:
-                where = (nplike.asarray(advanced.data), head.data) + tail
+                where = (self._nplike.asarray(advanced.data), head.data) + tail
 
             try:
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
 
-            return NumpyArray(out, None, self._parameters, nplike)
+            return NumpyArray(out, None, self._parameters, self._nplike)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             where = (slice(None), head) + tail
@@ -284,7 +282,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise NestedIndexError(self, (head,) + tail, str(err))
-            out2 = NumpyArray(out, None, self._parameters, nplike)
+            out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
@@ -297,7 +295,7 @@ class NumpyArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out = ak._v2.index.Index64.empty(1, self._nplike)
             out[0] = len(self)
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
                 0
@@ -317,10 +315,10 @@ class NumpyArray(Content):
                 "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
             )
 
-        tonum = ak._v2.index.Index64.empty(reps, self.nplike)
+        tonum = ak._v2.index.Index64.empty(reps, self._nplike)
         self._handle_error(
-            self.nplike["awkward_RegularArray_num", tonum.dtype.type](
-                tonum.to(self.nplike), size, reps
+            self._nplike["awkward_RegularArray_num", tonum.dtype.type](
+                tonum.to(self._nplike), size, reps
             )
         )
         return ak._v2.contents.numpyarray.NumpyArray(
@@ -422,7 +420,7 @@ class NumpyArray(Content):
                     + type(array).__name__
                 )
 
-        contiguous_arrays = self.nplike.concatenate(contiguous_arrays)
+        contiguous_arrays = self._nplike.concatenate(contiguous_arrays)
 
         next = NumpyArray(contiguous_arrays, self._identifier, parameters, self._nplike)
 
@@ -477,13 +475,11 @@ class NumpyArray(Content):
         return True
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
-        nplike = self.nplike
+        is_equal = ak._v2.index.Index64.zeros(1, self._nplike)
 
-        is_equal = ak._v2.index.Index64.zeros(1, nplike)
-
-        tmp = nplike.empty(length, self.dtype)
+        tmp = self._nplike.empty(length, self.dtype)
         self._handle_error(
-            nplike[  # noqa: E231
+            self._nplike[  # noqa: E231
                 "awkward_NumpyArray_fill",
                 self.dtype.type,
                 self._data.dtype.type,
@@ -496,11 +492,11 @@ class NumpyArray(Content):
         )
 
         if not sorted:
-            tmp_beg_ptr = ak._v2.index.Index64.empty(ak._util.kMaxLevels, nplike)
-            tmp_end_ptr = ak._v2.index.Index64.empty(ak._util.kMaxLevels, nplike)
+            tmp_beg_ptr = ak._v2.index.Index64.empty(ak._util.kMaxLevels, self._nplike)
+            tmp_end_ptr = ak._v2.index.Index64.empty(ak._util.kMaxLevels, self._nplike)
 
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_quick_sort",
                     self.dtype.type,
                     tmp_beg_ptr.dtype.type,
@@ -509,17 +505,17 @@ class NumpyArray(Content):
                     stops.dtype.type,
                 ](
                     tmp,
-                    tmp_beg_ptr.to(nplike),
-                    tmp_end_ptr.to(nplike),
-                    starts.to(nplike),
-                    stops.to(nplike),
+                    tmp_beg_ptr.to(self._nplike),
+                    tmp_end_ptr.to(self._nplike),
+                    starts.to(self._nplike),
+                    stops.to(self._nplike),
                     True,
                     len(starts),
                     ak._util.kMaxLevels,
                 )
             )
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_NumpyArray_subrange_equal",
                 self.dtype.type,
                 starts.dtype.type,
@@ -527,23 +523,21 @@ class NumpyArray(Content):
                 np.bool_,
             ](
                 tmp,
-                starts.to(nplike),
-                stops.to(nplike),
+                starts.to(self._nplike),
+                stops.to(self._nplike),
                 len(starts),
-                is_equal.to(nplike),
+                is_equal.to(self._nplike),
             )
         )
 
         return True if is_equal[0] == 1 else False
 
     def _as_unique_strings(self, offsets):
-        nplike = self.nplike
-
-        outoffsets = ak._v2.index.Index64.empty(len(offsets), nplike)
-        out = nplike.empty(self.shape[0], self.dtype)
+        outoffsets = ak._v2.index.Index64.empty(len(offsets), self._nplike)
+        out = self._nplike.empty(self.shape[0], self.dtype)
 
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_NumpyArray_sort_asstrings_uint8",
                 self.dtype.type,
                 self._data.dtype.type,
@@ -552,18 +546,18 @@ class NumpyArray(Content):
             ](
                 out,
                 self._data,
-                offsets.to(nplike),
+                offsets.to(self._nplike),
                 len(offsets),
-                outoffsets.to(nplike),
+                outoffsets.to(self._nplike),
                 True,
                 False,
             )
         )
 
-        outlength = ak._v2.index.Index64.empty(1, nplike)
-        nextoffsets = ak._v2.index.Index64.empty(len(offsets), nplike)
+        outlength = ak._v2.index.Index64.empty(1, self._nplike)
+        nextoffsets = ak._v2.index.Index64.empty(len(offsets), self._nplike)
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_NumpyArray_unique_strings",
                 self.dtype.type,
                 outoffsets.dtype.type,
@@ -571,20 +565,20 @@ class NumpyArray(Content):
                 outlength.dtype.type,
             ](
                 out,
-                outoffsets.to(nplike),
+                outoffsets.to(self._nplike),
                 len(offsets),
-                nextoffsets.to(nplike),
-                outlength.to(nplike),
+                nextoffsets.to(self._nplike),
+                outlength.to(self._nplike),
             )
         )
-        out2 = NumpyArray(out, None, self._parameters, nplike)
+        out2 = NumpyArray(out, None, self._parameters, self._nplike)
 
         return out2, nextoffsets[: outlength[0]]
 
     def numbers_to_type(self, name):
         dtype = primitive_to_dtype(name)
         return NumpyArray(
-            self.nplike.asarray(self._data, dtype=dtype),
+            self._nplike.asarray(self._data, dtype=dtype),
             self._identifier,
             self._parameters,
             self._nplike,
@@ -619,24 +613,22 @@ class NumpyArray(Content):
         if len(self.shape) == 0:
             return self
 
-        nplike = self.nplike
-
         if negaxis is None:
             contiguous_self = self if self.is_contiguous else self.contiguous()
             flattened_shape = 1
             for i in range(len(contiguous_self.shape)):
                 flattened_shape = flattened_shape * self.shape[i]
 
-            offsets = ak._v2.index.Index64.zeros(2, nplike)
+            offsets = ak._v2.index.Index64.zeros(2, self._nplike)
             offsets[1] = flattened_shape
             dtype = (
                 np.dtype(np.int64)
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            out = nplike.empty(offsets[1], dtype)
+            out = self._nplike.empty(offsets[1], dtype)
             self._handle_error(
-                nplike[  # noqa: E231
+                self._nplike[  # noqa: E231
                     "awkward_sort",
                     dtype.type,
                     dtype.type,
@@ -645,7 +637,7 @@ class NumpyArray(Content):
                     out,
                     contiguous_self._data,
                     offsets[1],
-                    offsets.to(nplike),
+                    offsets.to(self._nplike),
                     2,
                     offsets[1],
                     True,
@@ -653,21 +645,21 @@ class NumpyArray(Content):
                 )
             )
 
-            nextlength = ak._v2.index.Index64.zeros(1, nplike)
+            nextlength = ak._v2.index.Index64.zeros(1, self._nplike)
             self._handle_error(
-                nplike[  # noqa: E231
+                self._nplike[  # noqa: E231
                     "awkward_unique",
                     out.dtype.type,
                     nextlength.dtype.type,
                 ](
                     out,
                     len(out),
-                    nextlength.to(nplike),
+                    nextlength.to(self._nplike),
                 )
             )
 
             return ak._v2.contents.NumpyArray(
-                nplike.asarray(out[: nextlength[0]], self.dtype),
+                self._nplike.asarray(out[: nextlength[0]], self.dtype),
                 None,
                 None,
                 self._nplike,
@@ -685,36 +677,36 @@ class NumpyArray(Content):
         else:
 
             parents_length = len(parents)
-            offsets_length = ak._v2.index.Index64.empty(1, nplike)
+            offsets_length = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_sorting_ranges_length",
                     offsets_length.dtype.type,
                     parents.dtype.type,
                 ](
-                    offsets_length.to(nplike),
-                    parents.to(nplike),
+                    offsets_length.to(self._nplike),
+                    parents.to(self._nplike),
                     parents_length,
                 )
             )
 
-            offsets = ak._v2.index.Index64.empty(offsets_length[0], nplike)
+            offsets = ak._v2.index.Index64.empty(offsets_length[0], self._nplike)
             self._handle_error(
-                nplike[  # noqa: E231
+                self._nplike[  # noqa: E231
                     "awkward_sorting_ranges",
                     offsets.dtype.type,
                     parents.dtype.type,
                 ](
-                    offsets.to(nplike),
+                    offsets.to(self._nplike),
                     offsets_length[0],
-                    parents.to(nplike),
+                    parents.to(self._nplike),
                     parents_length,
                 )
             )
 
-            out = nplike.empty(len(self._data), self.dtype)
+            out = self._nplike.empty(len(self._data), self.dtype)
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_sort",
                     out.dtype.type,
                     self._data.dtype.type,
@@ -723,7 +715,7 @@ class NumpyArray(Content):
                     out,
                     self._data,
                     self.shape[0],
-                    offsets.to(nplike),
+                    offsets.to(self._nplike),
                     offsets_length[0],
                     parents_length,
                     True,
@@ -731,9 +723,9 @@ class NumpyArray(Content):
                 )
             )
 
-            nextoffsets = ak._v2.index.Index64.zeros(len(offsets), nplike)
+            nextoffsets = ak._v2.index.Index64.zeros(len(offsets), self._nplike)
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_unique_ranges",
                     out.dtype.type,
                     offsets.dtype.type,
@@ -741,25 +733,25 @@ class NumpyArray(Content):
                 ](
                     out,
                     len(out),
-                    offsets.to(nplike),
+                    offsets.to(self._nplike),
                     len(offsets),
-                    nextoffsets.to(nplike),
+                    nextoffsets.to(self._nplike),
                 )
             )
 
-            outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, nplike)
+            outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, self._nplike)
 
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_unique_offsets",
                     outoffsets.dtype.type,
                     nextoffsets.dtype.type,
                     starts.dtype.type,
                 ](
-                    outoffsets.to(nplike),
+                    outoffsets.to(self._nplike),
                     len(nextoffsets),
-                    nextoffsets.to(nplike),
-                    starts.to(nplike),
+                    nextoffsets.to(self._nplike),
+                    starts.to(self._nplike),
                     len(starts),
                 )
             )
@@ -786,7 +778,7 @@ class NumpyArray(Content):
     ):
         if self.shape[0] == 0:
             return ak._v2.contents.NumpyArray(
-                self.nplike.empty(0, np.int64), None, None, self._nplike
+                self._nplike.empty(0, np.int64), None, None, self._nplike
             )
 
         if len(self.shape) == 0:
@@ -808,33 +800,31 @@ class NumpyArray(Content):
             )
 
         else:
-            nplike = self.nplike
-
             parents_length = len(parents)
-            offsets_length = ak._v2.index.Index64.empty(1, nplike)
+            offsets_length = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_sorting_ranges_length",
                     offsets_length.dtype.type,
                     parents.dtype.type,
                 ](
-                    offsets_length.to(nplike),
-                    parents.to(nplike),
+                    offsets_length.to(self._nplike),
+                    parents.to(self._nplike),
                     parents_length,
                 )
             )
             offsets_length = offsets_length[0]
 
-            offsets = ak._v2.index.Index64.empty(offsets_length, nplike)
+            offsets = ak._v2.index.Index64.empty(offsets_length, self._nplike)
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_sorting_ranges",
                     offsets.dtype.type,
                     parents.dtype.type,
                 ](
-                    offsets.to(nplike),
+                    offsets.to(self._nplike),
                     offsets_length,
-                    parents.to(nplike),
+                    parents.to(self._nplike),
                     parents_length,
                 )
             )
@@ -844,18 +834,18 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            nextcarry = ak._v2.index.Index64.empty(self.__len__(), nplike)
+            nextcarry = ak._v2.index.Index64.empty(self.__len__(), self._nplike)
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_argsort",
                     nextcarry.dtype.type,
                     dtype.type,
                     offsets.dtype.type,
                 ](
-                    nextcarry.to(nplike),
+                    nextcarry.to(self._nplike),
                     self._data,
                     self.__len__(),
-                    offsets.to(nplike),
+                    offsets.to(self._nplike),
                     offsets_length,
                     ascending,
                     stable,
@@ -864,7 +854,7 @@ class NumpyArray(Content):
 
             if shifts is not None:
                 self._handle_error(
-                    nplike[
+                    self._nplike[
                         "awkward_NumpyArray_rearrange_shifted",
                         nextcarry.dtype.type,
                         shifts.dtype.type,
@@ -872,14 +862,14 @@ class NumpyArray(Content):
                         parents.dtype.type,
                         starts.dtype.type,
                     ](
-                        nextcarry.to(nplike),
-                        shifts.to(nplike),
+                        nextcarry.to(self._nplike),
+                        shifts.to(self._nplike),
                         len(shifts),
-                        offsets.to(nplike),
+                        offsets.to(self._nplike),
                         offsets_length,
-                        parents.to(nplike),
+                        parents.to(self._nplike),
                         parents_length,
-                        starts.to(nplike),
+                        starts.to(self._nplike),
                         len(starts),
                     )
                 )
@@ -908,33 +898,31 @@ class NumpyArray(Content):
             )
 
         else:
-            nplike = self.nplike
-
             parents_length = len(parents)
-            offsets_length = ak._v2.index.Index64.empty(1, nplike)
+            offsets_length = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_sorting_ranges_length",
                     offsets_length.dtype.type,
                     parents.dtype.type,
                 ](
-                    offsets_length.to(nplike),
-                    parents.to(nplike),
+                    offsets_length.to(self._nplike),
+                    parents.to(self._nplike),
                     parents_length,
                 )
             )
 
-            offsets = ak._v2.index.Index64.zeros(offsets_length[0], nplike)
+            offsets = ak._v2.index.Index64.zeros(offsets_length[0], self._nplike)
 
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_sorting_ranges",
                     offsets.dtype.type,
                     parents.dtype.type,
                 ](
-                    offsets.to(nplike),
+                    offsets.to(self._nplike),
                     offsets_length[0],
-                    parents.to(nplike),
+                    parents.to(self._nplike),
                     parents_length,
                 )
             )
@@ -944,9 +932,9 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            out = nplike.empty(len(self._data), dtype)
+            out = self._nplike.empty(len(self._data), dtype)
             self._handle_error(
-                nplike[  # noqa: E231
+                self._nplike[  # noqa: E231
                     "awkward_sort",
                     dtype.type,
                     dtype.type,
@@ -955,7 +943,7 @@ class NumpyArray(Content):
                     out,
                     self._data,
                     self.shape[0],
-                    offsets.to(nplike),
+                    offsets.to(self._nplike),
                     offsets_length[0],
                     parents_length,
                     ascending,
@@ -963,7 +951,7 @@ class NumpyArray(Content):
                 )
             )
             return ak._v2.contents.NumpyArray(
-                nplike.asarray(out, self.dtype), None, None, self._nplike
+                self._nplike.asarray(out, self.dtype), None, None, self._nplike
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -988,14 +976,12 @@ class NumpyArray(Content):
         mask,
         keepdims,
     ):
-        nplike = self.nplike
-
         out = reducer.apply(self, parents, outlength)
 
         if reducer.needs_position:
             if shifts is None:
                 self._handle_error(
-                    nplike[
+                    self._nplike[
                         "awkward_NumpyArray_reduce_adjust_starts_64",
                         out.data.dtype.type,
                         parents.dtype.type,
@@ -1003,13 +989,13 @@ class NumpyArray(Content):
                     ](
                         out.data,
                         outlength,
-                        parents.to(nplike),
-                        starts.to(nplike),
+                        parents.to(self._nplike),
+                        starts.to(self._nplike),
                     )
                 )
             else:
                 self._handle_error(
-                    nplike[
+                    self._nplike[
                         "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
                         out.data.dtype.type,
                         parents.dtype.type,
@@ -1018,22 +1004,22 @@ class NumpyArray(Content):
                     ](
                         out.data,
                         outlength,
-                        parents.to(nplike),
-                        starts.to(nplike),
-                        shifts.to(nplike),
+                        parents.to(self._nplike),
+                        starts.to(self._nplike),
+                        shifts.to(self._nplike),
                     )
                 )
 
         if mask:
-            outmask = ak._v2.index.Index8.zeros(outlength, nplike)
+            outmask = ak._v2.index.Index8.zeros(outlength, self._nplike)
             self._handle_error(
-                nplike[
+                self._nplike[
                     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                     outmask.dtype.type,
                     parents.dtype.type,
                 ](
-                    outmask.to(nplike),
-                    parents.to(nplike),
+                    outmask.to(self._nplike),
+                    parents.to(self._nplike),
                     len(parents),
                     outlength,
                 )
@@ -1124,7 +1110,7 @@ class NumpyArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        out = ak.nplike.of(self).asarray(self)
+        out = self._nplike.asarray(self)
         if type(out).__module__.startswith("cupy."):
             return out.get()
         else:

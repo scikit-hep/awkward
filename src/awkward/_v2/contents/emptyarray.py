@@ -147,13 +147,13 @@ class EmptyArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
 
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self.nplike)
+            out = ak._v2.index.Index64.empty(1, self._nplike)
             out[0] = len(self)
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
                 0
             ]
         else:
-            out = ak._v2.index.Index64.empty(0, self.nplike)
+            out = ak._v2.index.Index64.empty(0, self._nplike)
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)
 
     def _offsets_and_flattened(self, axis, depth):
@@ -161,7 +161,7 @@ class EmptyArray(Content):
         if posaxis == depth:
             raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
-            offsets = ak._v2.index.Index64.zeros(1, self.nplike)
+            offsets = ak._v2.index.Index64.zeros(1, self._nplike)
             return (offsets, EmptyArray(None, self._parameters, self._nplike))
 
     def mergeable(self, other, mergebool):
@@ -298,7 +298,7 @@ class EmptyArray(Content):
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
     def _to_numpy(self, allow_missing):
-        return self.nplike.empty(0, dtype=np.float64)
+        return self._nplike.empty(0, dtype=np.float64)
 
     def _completely_flatten(self, nplike, options):
         return []
