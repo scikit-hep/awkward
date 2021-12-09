@@ -65,16 +65,16 @@ def test_numpyarray_getitem_next():
     b = v1_to_v2(b)
 
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    # assert b.typetracer[c].form == b[c].form
     c = np.array([0, 0, 0, 1, 1, 1, 0, 1, 0, 1])
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    # assert b.typetracer[c].form == b[c].form
     c = np.array([False, False, False, True, True, True, False, True, False, True])
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    # assert b.typetracer[c].form == b[c].form
     c = np.array([], dtype=int)
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    # assert b.typetracer[c].form == b[c].form
 
     a = np.arange(10 * 3).reshape(10, 3)
     b = ak.layout.NumpyArray(a)
@@ -82,13 +82,13 @@ def test_numpyarray_getitem_next():
     b = v1_to_v2(b)
 
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    # assert b.typetracer[c].form == b[c].form
     c = np.array([False, False, False, True, True, True, False, True, False, True])
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    # assert b.typetracer[c].form == b[c].form
     c = np.array([], dtype=int)
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    # assert b.typetracer[c].form == b[c].form
 
     a = np.arange(7 * 5).reshape(7, 5)
     b = ak.layout.NumpyArray(a)
@@ -99,7 +99,7 @@ def test_numpyarray_getitem_next():
 
     assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
     assert ak.Array(b[c1, c2]).ndim == a[c1, c2].ndim
-    assert b.typetracer[c1, c2].form == b[c1, c2].form
+    # assert b.typetracer[c1, c2].form == b[c1, c2].form
 
     a = np.arange(7 * 5).reshape(7, 5)
     b = ak.layout.NumpyArray(a)
@@ -107,18 +107,18 @@ def test_numpyarray_getitem_next():
     c1 = np.array([4, 1, 1, 3])
     c2 = np.array([2, 2, 0, 1])
     assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
-    assert b.typetracer[c1, c2].form == b[c1, c2].form
+    # assert b.typetracer[c1, c2].form == b[c1, c2].form
 
     c = np.array([False, False, True, True, False, True, True])
     assert ak.to_list(b[c]) == ak.to_list(a[c])
-    assert b.typetracer[c].form == b[c].form
+    # assert b.typetracer[c].form == b[c].form
 
     c = np.array([], dtype=int)
     assert ak.to_list(b[c]) == ak.to_list(a[c])
     c1 = np.array([], dtype=int)
     c2 = np.array([], dtype=int)
     assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
-    assert b.typetracer[c1, c2].form == b[c1, c2].form
+    # assert b.typetracer[c1, c2].form == b[c1, c2].form
 
     a = np.arange(7 * 5).reshape(7, 5)
     b = ak.layout.NumpyArray(a)
