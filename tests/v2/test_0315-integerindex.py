@@ -29,12 +29,12 @@ def test_integerindex_null():
     assert ak.to_list(b[d]) == [[1], None, [5], [7]]
     assert ak.to_list(b[e]) == [[1], None, None, [7]]
 
-    # assert a.typetracer[c].form == a[c].form
-    # assert a.typetracer[d].form == a[d].form
-    # assert a.typetracer[e].form == a[e].form
-    # assert b.typetracer[c].form == b[c].form
-    # assert b.typetracer[d].form == b[d].form
-    # assert b.typetracer[e].form == b[e].form
+    assert a.typetracer[c].form == a[c].form
+    assert a.typetracer[d].form == a[d].form
+    assert a.typetracer[e].form == a[e].form
+    assert b.typetracer[c].form == b[c].form
+    assert b.typetracer[d].form == b[d].form
+    assert b.typetracer[e].form == b[e].form
 
 
 def test_boolindex_null():
@@ -58,12 +58,12 @@ def test_boolindex_null():
     assert ak.to_list(b[d]) == [[1], None, [5]]
     assert ak.to_list(b[e]) == [[1], None, None]
 
-    # assert a.typetracer[c].form == a[c].form
-    # assert a.typetracer[d].form == a[d].form
-    # assert a.typetracer[e].form == a[e].form
-    # assert b.typetracer[c].form == b[c].form
-    # assert b.typetracer[d].form == b[d].form
-    # assert b.typetracer[e].form == b[e].form
+    assert a.typetracer[c].form == a[c].form
+    assert a.typetracer[d].form == a[d].form
+    assert a.typetracer[e].form == a[e].form
+    assert b.typetracer[c].form == b[c].form
+    assert b.typetracer[d].form == b[d].form
+    assert b.typetracer[e].form == b[e].form
 
     b2 = v1_to_v2(b2.layout)
 
@@ -71,9 +71,9 @@ def test_boolindex_null():
     assert ak.to_list(b2[d]) == [[1], None, [5]]
     assert ak.to_list(b2[e]) == [[1], None, None]
 
-    # assert b2.typetracer[c].form == b2[c].form
-    # assert b2.typetracer[d].form == b2[d].form
-    # assert b2.typetracer[e].form == b2[e].form
+    assert b2.typetracer[c].form == b2[c].form
+    assert b2.typetracer[d].form == b2[d].form
+    assert b2.typetracer[e].form == b2[e].form
 
 
 def test_integerindex_null_more():
@@ -90,9 +90,9 @@ def test_integerindex_null_more():
     assert ak.to_list(f[g1]) == [[None, 2, None], None, [], [None]]
     assert ak.to_list(f[g2]) == [[], None, None, []]
     assert ak.to_list(f[g3]) == [[], None, [], []]
-    # assert f.typetracer[g1].form == f[g1].form
-    # assert f.typetracer[g2].form == f[g2].form
-    # assert f.typetracer[g3].form == f[g3].form
+    assert f.typetracer[g1].form == f[g1].form
+    assert f.typetracer[g2].form == f[g2].form
+    assert f.typetracer[g3].form == f[g3].form
 
     a = ak.Array([[0, 1, 2, None], None])
     b = ak.Array([[2, 1, None, 3], None])
@@ -101,18 +101,18 @@ def test_integerindex_null_more():
     b = v1_to_v2(b.layout)
 
     assert ak.to_list(a[b]) == [[2, 1, None, None], None]
-    # assert a.typetracer[b].form == a[b].form
+    assert a.typetracer[b].form == a[b].form
 
     b = ak.Array([[2, 1, None, 3], []])
     b = v1_to_v2(b.layout)
 
     assert ak.to_list(a[b]) == [[2, 1, None, None], None]
-    # assert a.typetracer[b].form == a[b].form
+    assert a.typetracer[b].form == a[b].form
 
     b = ak.Array([[2, 1, None, 3], [0, 1]])
     b = v1_to_v2(b.layout)
     assert ak.to_list(a[b]) == [[2, 1, None, None], None]
-    # assert a.typetracer[b].form == a[b].form
+    assert a.typetracer[b].form == a[b].form
 
 
 @pytest.mark.skip(reason="FIXME: erroneous slicing case")
@@ -139,7 +139,7 @@ def test_integerindex_null_more_2():
         [None],
     ]
     assert ak.to_list(a[c]) == [[[1, None], None], [[4], None], None, [None]]
-    # assert a.typetracer[c].form == a[c].form
+    assert a.typetracer[c].form == a[c].form
 
 
 def test_silly_stuff():

@@ -72,13 +72,13 @@ def test_getitem():
     ]
     assert len(array.contents) == 2
     assert ak.to_list(array.content(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    # assert array.typetracer.content(0).form == array.content(0).form
+    assert array.typetracer.content(0).form == array.content(0).form
     assert ak.to_list(array.content(1)) == ["one", "two", "three", "four", "five"]
-    # assert array.typetracer.content(1).form == array.content(1).form
+    assert array.typetracer.content(1).form == array.content(1).form
     assert ak.to_list(array.project(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    # assert array.typetracer.project(0).form == array.project(0).form
+    assert array.typetracer.project(0).form == array.project(0).form
     assert ak.to_list(array.project(1)) == ["one", "two", "three", "five", "four"]
-    # assert array.typetracer.project(1).form == array.project(1).form
+    assert array.typetracer.project(1).form == array.project(1).form
     repr(array)
 
     assert ak.to_list(array[0]) == "one"
@@ -108,13 +108,13 @@ def test_getitem():
         [4.4, 5.5],
         "five",
     ]
-    # assert array.typetracer[1:-1].form == array[1:-1].form
+    assert array.typetracer[1:-1].form == array[1:-1].form
     assert ak.to_list(array[2:-2]) == [[1.1, 2.2, 3.3], [], "three", [4.4, 5.5]]
-    # assert array.typetracer[2:-2].form == array[2:-2].form
+    assert array.typetracer[2:-2].form == array[2:-2].form
     assert ak.to_list(array[::2]) == ["one", [1.1, 2.2, 3.3], "three", "five"]
-    # assert array.typetracer[::2].form == array[::2].form
+    assert array.typetracer[::2].form == array[::2].form
     assert ak.to_list(array[::2, 1:]) == ["ne", [2.2, 3.3], "hree", "ive"]
-    # assert array.typetracer[::2, 1:].form == array[::2, 1:].form
+    assert array.typetracer[::2, 1:].form == array[::2, 1:].form
     assert ak.to_list(array[:, :-1]) == [
         "on",
         "tw",
@@ -125,7 +125,7 @@ def test_getitem():
         "fiv",
         "fou",
     ]
-    # assert array.typetracer[:, :-1].form == array[:, :-1].form
+    assert array.typetracer[:, :-1].form == array[:, :-1].form
 
     content2 = ak.from_iter(
         [{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}],
@@ -156,7 +156,7 @@ def test_getitem():
         {"x": 3.3, "y": "three", "z": True},
     ]
     assert ak.to_list(array2["x"]) == [0.0, 1.1, 0, 1, 2.2, 2, 4.4, 3.3]
-    # assert array2.typetracer["x"].form == array2["x"].form
+    assert array2.typetracer["x"].form == array2["x"].form
     assert ak.to_list(array2["y"]) == [
         "zero",
         "one",
@@ -167,7 +167,7 @@ def test_getitem():
         "four",
         "three",
     ]
-    # assert array2.typetracer["y"].form == array2["y"].form
+    assert array2.typetracer["y"].form == array2["y"].form
     assert ak.to_list(array2[:, "y", 1:]) == [
         "ero",
         "ne",
@@ -178,7 +178,7 @@ def test_getitem():
         "our",
         "hree",
     ]
-    # assert array2.typetracer[:, "y", 1:].form == array2[:, "y", 1:].form
+    assert array2.typetracer[:, "y", 1:].form == array2[:, "y", 1:].form
     assert ak.to_list(array2["y", :, 1:]) == [
         "ero",
         "ne",
@@ -189,7 +189,7 @@ def test_getitem():
         "our",
         "hree",
     ]
-    # assert array2.typetracer["y", :, 1:].form == array2["y", :, 1:].form
+    assert array2.typetracer["y", :, 1:].form == array2["y", :, 1:].form
     with pytest.raises(IndexError) as err:
         array2[:, 1:, "y"]
     assert str(err.value).startswith("cannot slice")

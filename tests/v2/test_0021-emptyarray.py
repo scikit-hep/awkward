@@ -16,30 +16,30 @@ def test_getitem():
     a = v1_to_v2(a.layout)
 
     assert ak.to_list(a[2]) == [[], [], []]
-    # assert a.typetracer[2].form == a[2].form
+    assert a.typetracer[2].form == a[2].form
 
     assert ak.to_list(a[2, 1]) == []
-    # assert a.typetracer[2, 1].form == a[2, 1].form
+    assert a.typetracer[2, 1].form == a[2, 1].form
     with pytest.raises(ValueError):
         a[2, 1, 0]
     assert ak.to_list(a[2, 1][()]) == []
-    # assert a.typetracer[2, 1][()].form == a[2, 1][()].form
+    assert a.typetracer[2, 1][()].form == a[2, 1][()].form
     with pytest.raises(IndexError):
         a[2, 1][0]
     assert ak.to_list(a[2, 1][100:200]) == []
-    # assert a.typetracer[2, 1][100:200].form == a[2, 1][100:200].form
+    assert a.typetracer[2, 1][100:200].form == a[2, 1][100:200].form
     assert ak.to_list(a[2, 1, 100:200]) == []
-    # assert a.typetracer[2, 1, 100:200].form == a[2, 1, 100:200].form
+    assert a.typetracer[2, 1, 100:200].form == a[2, 1, 100:200].form
     assert ak.to_list(a[2, 1][np.array([], dtype=int)]) == []
-    # assert (
-    #     a.typetracer[2, 1][np.array([], dtype=int)].form
-    #     == a[2, 1][np.array([], dtype=int)].form
-    # )
+    assert (
+        a.typetracer[2, 1][np.array([], dtype=int)].form
+        == a[2, 1][np.array([], dtype=int)].form
+    )
     assert ak.to_list(a[2, 1, np.array([], dtype=int)]) == []
-    # assert (
-    #     a.typetracer[2, 1, np.array([], dtype=int)].form
-    #     == a[2, 1, np.array([], dtype=int)].form
-    # )
+    assert (
+        a.typetracer[2, 1, np.array([], dtype=int)].form
+        == a[2, 1, np.array([], dtype=int)].form
+    )
     with pytest.raises(ValueError):
         a[2, 1, np.array([0], dtype=int)]
     with pytest.raises(IndexError):
@@ -48,12 +48,12 @@ def test_getitem():
         a[2, 1][100:200, 200:300]
 
     assert ak.to_list(a[2, 1][100:200, np.array([], dtype=int)]) == []
-    # assert (
-    #     a.typetracer[2, 1][100:200, np.array([], dtype=int)].form
-    #     == a[2, 1][100:200, np.array([], dtype=int)].form
-    # )
+    assert (
+        a.typetracer[2, 1][100:200, np.array([], dtype=int)].form
+        == a[2, 1][100:200, np.array([], dtype=int)].form
+    )
 
     assert ak.to_list(a[1:, 1:]) == [[[]], [[], []]]
-    # assert a.typetracer[1:, 1:].form == a[1:, 1:].form
+    assert a.typetracer[1:, 1:].form == a[1:, 1:].form
     with pytest.raises(ValueError):
         a[1:, 1:, 0]

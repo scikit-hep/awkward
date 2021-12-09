@@ -20,11 +20,11 @@ def test_numpyarray_merge():
     assert ak.to_list(ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1])) == ak.to_list(
         np.concatenate([np1[1:, :-1, ::-1], np2[1:, :-1, ::-1]])
     )
-    # assert ak1.typetracer.merge(ak2).form == ak1.merge(ak2).form
-    # assert (
-    #     ak1[1:, :-1, ::-1].typetracer.merge(ak2[1:, :-1, ::-1]).form
-    #     == ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1]).form
-    # )
+    assert ak1.typetracer.merge(ak2).form == ak1.merge(ak2).form
+    assert (
+        ak1[1:, :-1, ::-1].typetracer.merge(ak2[1:, :-1, ::-1]).form
+        == ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1]).form
+    )
 
     for x in [
         np.bool_,
@@ -67,9 +67,9 @@ def test_numpyarray_merge():
             assert ak.to_list(one.merge(emptyarray)) == ak.to_list(one)
             assert ak.to_list(emptyarray.merge(one)) == ak.to_list(one)
 
-            # assert one.typetracer.merge(two).form == one.merge(two).form
-            # assert one.typetracer.merge(emptyarray).form == one.merge(emptyarray).form
-            # assert emptyarray.typetracer.merge(one).form == emptyarray.merge(one).form
+            assert one.typetracer.merge(two).form == one.merge(two).form
+            assert one.typetracer.merge(emptyarray).form == one.merge(emptyarray).form
+            assert emptyarray.typetracer.merge(one).form == emptyarray.merge(one).form
 
 
 def test_regulararray_merge():
@@ -84,9 +84,9 @@ def test_regulararray_merge():
     assert ak.to_list(ak1.merge(emptyarray)) == ak.to_list(ak1)
     assert ak.to_list(emptyarray.merge(ak1)) == ak.to_list(ak1)
 
-    # assert ak1.typetracer.merge(ak2).form == ak1.merge(ak2).form
-    # assert ak1.typetracer.merge(emptyarray).form == ak1.merge(emptyarray).form
-    # assert emptyarray.typetracer.merge(ak1).form == emptyarray.merge(ak1).form
+    assert ak1.typetracer.merge(ak2).form == ak1.merge(ak2).form
+    assert ak1.typetracer.merge(emptyarray).form == ak1.merge(emptyarray).form
+    assert emptyarray.typetracer.merge(ak1).form == emptyarray.merge(ak1).form
 
 
 def test_listarray_merge():
@@ -161,10 +161,10 @@ def test_listarray_merge():
         assert ak.to_list(array1.merge(emptyarray)) == ak.to_list(array1)
         assert ak.to_list(emptyarray.merge(array1)) == ak.to_list(array1)
 
-        # assert array1.typetracer.merge(array2).form == array1.merge(array2).form
-        # assert array2.typetracer.merge(array1).form == array2.merge(array1).form
-        # assert array1.typetracer.merge(emptyarray).form == array1.merge(emptyarray).form
-        # assert emptyarray.typetracer.merge(array1).form == emptyarray.merge(array1).form
+        assert array1.typetracer.merge(array2).form == array1.merge(array2).form
+        assert array2.typetracer.merge(array1).form == array2.merge(array1).form
+        assert array1.typetracer.merge(emptyarray).form == array1.merge(emptyarray).form
+        assert emptyarray.typetracer.merge(array1).form == emptyarray.merge(array1).form
 
     regulararray = v1_to_v2(ak.layout.RegularArray(content2, 2, zeros_length=0))
     assert ak.to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
@@ -270,10 +270,10 @@ def test_listoffsetarray_merge():
         assert ak.to_list(array1.merge(emptyarray)) == ak.to_list(array1)
         assert ak.to_list(emptyarray.merge(array1)) == ak.to_list(array1)
 
-        # assert array1.typetracer.merge(array2).form == array1.merge(array2).form
-        # assert array2.typetracer.merge(array1).form == array2.merge(array1).form
-        # assert array1.typetracer.merge(emptyarray).form == array1.merge(emptyarray).form
-        # assert emptyarray.typetracer.merge(array1).form == emptyarray.merge(array1).form
+        assert array1.typetracer.merge(array2).form == array1.merge(array2).form
+        assert array2.typetracer.merge(array1).form == array2.merge(array1).form
+        assert array1.typetracer.merge(emptyarray).form == array1.merge(emptyarray).form
+        assert emptyarray.typetracer.merge(array1).form == emptyarray.merge(array1).form
 
     regulararray = v1_to_v2(ak.layout.RegularArray(content2, 2, zeros_length=0))
     assert ak.to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
@@ -304,14 +304,14 @@ def test_listoffsetarray_merge():
             [4.4, 5.5],
         ]
 
-        # assert (
-        #     array1.typetracer.merge(regulararray).form
-        #     == array1.merge(regulararray).form
-        # )
-        # assert (
-        #     regulararray.typetracer.merge(array1).form
-        #     == regulararray.merge(array1).form
-        # )
+        assert (
+            array1.typetracer.merge(regulararray).form
+            == array1.merge(regulararray).form
+        )
+        assert (
+            regulararray.typetracer.merge(array1).form
+            == regulararray.merge(array1).form
+        )
 
 
 def test_recordarray_merge():
@@ -476,14 +476,14 @@ def test_recordarray_merge():
         (2.0, [2.0, 2.0]),
     ]
 
-    # assert arrayr1.typetracer.merge(arrayr2).form == arrayr1.merge(arrayr2).form
-    # assert arrayr2.typetracer.merge(arrayr1).form == arrayr2.merge(arrayr1).form
-    # assert arrayr1.typetracer.merge(arrayr4).form == arrayr1.merge(arrayr4).form
-    # assert arrayr4.typetracer.merge(arrayr1).form == arrayr4.merge(arrayr1).form
-    # assert arrayr5.typetracer.merge(arrayr6).form == arrayr5.merge(arrayr6).form
-    # assert arrayr6.typetracer.merge(arrayr5).form == arrayr6.merge(arrayr5).form
-    # assert arrayt1.typetracer.merge(arrayt2).form == arrayt1.merge(arrayt2).form
-    # assert arrayt2.typetracer.merge(arrayt1).form == arrayt2.merge(arrayt1).form
+    assert arrayr1.typetracer.merge(arrayr2).form == arrayr1.merge(arrayr2).form
+    assert arrayr2.typetracer.merge(arrayr1).form == arrayr2.merge(arrayr1).form
+    assert arrayr1.typetracer.merge(arrayr4).form == arrayr1.merge(arrayr4).form
+    assert arrayr4.typetracer.merge(arrayr1).form == arrayr4.merge(arrayr1).form
+    assert arrayr5.typetracer.merge(arrayr6).form == arrayr5.merge(arrayr6).form
+    assert arrayr6.typetracer.merge(arrayr5).form == arrayr6.merge(arrayr5).form
+    assert arrayt1.typetracer.merge(arrayt2).form == arrayt1.merge(arrayt2).form
+    assert arrayt2.typetracer.merge(arrayt1).form == arrayt2.merge(arrayt1).form
 
     assert ak.to_list(arrayr1.merge(emptyarray)) == ak.to_list(arrayr1)
     assert ak.to_list(arrayr2.merge(emptyarray)) == ak.to_list(arrayr2)
@@ -517,37 +517,37 @@ def test_recordarray_merge():
     assert ak.to_list(emptyarray.merge(arrayt6)) == ak.to_list(arrayt6)
     assert ak.to_list(emptyarray.merge(arrayt7)) == ak.to_list(arrayt7)
 
-    # assert arrayr1.typetracer.merge(emptyarray).form == arrayr1.merge(emptyarray).form
-    # assert arrayr2.typetracer.merge(emptyarray).form == arrayr2.merge(emptyarray).form
-    # assert arrayr3.typetracer.merge(emptyarray).form == arrayr3.merge(emptyarray).form
-    # assert arrayr4.typetracer.merge(emptyarray).form == arrayr4.merge(emptyarray).form
-    # assert arrayr5.typetracer.merge(emptyarray).form == arrayr5.merge(emptyarray).form
-    # assert arrayr6.typetracer.merge(emptyarray).form == arrayr6.merge(emptyarray).form
-    # assert arrayr7.typetracer.merge(emptyarray).form == arrayr7.merge(emptyarray).form
+    assert arrayr1.typetracer.merge(emptyarray).form == arrayr1.merge(emptyarray).form
+    assert arrayr2.typetracer.merge(emptyarray).form == arrayr2.merge(emptyarray).form
+    assert arrayr3.typetracer.merge(emptyarray).form == arrayr3.merge(emptyarray).form
+    assert arrayr4.typetracer.merge(emptyarray).form == arrayr4.merge(emptyarray).form
+    assert arrayr5.typetracer.merge(emptyarray).form == arrayr5.merge(emptyarray).form
+    assert arrayr6.typetracer.merge(emptyarray).form == arrayr6.merge(emptyarray).form
+    assert arrayr7.typetracer.merge(emptyarray).form == arrayr7.merge(emptyarray).form
 
-    # assert emptyarray.typetracer.merge(arrayr1).form == emptyarray.merge(arrayr1).form
-    # assert emptyarray.typetracer.merge(arrayr2).form == emptyarray.merge(arrayr2).form
-    # assert emptyarray.typetracer.merge(arrayr3).form == emptyarray.merge(arrayr3).form
-    # assert emptyarray.typetracer.merge(arrayr4).form == emptyarray.merge(arrayr4).form
-    # assert emptyarray.typetracer.merge(arrayr5).form == emptyarray.merge(arrayr5).form
-    # assert emptyarray.typetracer.merge(arrayr6).form == emptyarray.merge(arrayr6).form
-    # assert emptyarray.typetracer.merge(arrayr7).form == emptyarray.merge(arrayr7).form
+    assert emptyarray.typetracer.merge(arrayr1).form == emptyarray.merge(arrayr1).form
+    assert emptyarray.typetracer.merge(arrayr2).form == emptyarray.merge(arrayr2).form
+    assert emptyarray.typetracer.merge(arrayr3).form == emptyarray.merge(arrayr3).form
+    assert emptyarray.typetracer.merge(arrayr4).form == emptyarray.merge(arrayr4).form
+    assert emptyarray.typetracer.merge(arrayr5).form == emptyarray.merge(arrayr5).form
+    assert emptyarray.typetracer.merge(arrayr6).form == emptyarray.merge(arrayr6).form
+    assert emptyarray.typetracer.merge(arrayr7).form == emptyarray.merge(arrayr7).form
 
-    # assert arrayt1.typetracer.merge(emptyarray).form == arrayt1.merge(emptyarray).form
-    # assert arrayt2.typetracer.merge(emptyarray).form == arrayt2.merge(emptyarray).form
-    # assert arrayt3.typetracer.merge(emptyarray).form == arrayt3.merge(emptyarray).form
-    # assert arrayt4.typetracer.merge(emptyarray).form == arrayt4.merge(emptyarray).form
-    # assert arrayt5.typetracer.merge(emptyarray).form == arrayt5.merge(emptyarray).form
-    # assert arrayt6.typetracer.merge(emptyarray).form == arrayt6.merge(emptyarray).form
-    # assert arrayt7.typetracer.merge(emptyarray).form == arrayt7.merge(emptyarray).form
+    assert arrayt1.typetracer.merge(emptyarray).form == arrayt1.merge(emptyarray).form
+    assert arrayt2.typetracer.merge(emptyarray).form == arrayt2.merge(emptyarray).form
+    assert arrayt3.typetracer.merge(emptyarray).form == arrayt3.merge(emptyarray).form
+    assert arrayt4.typetracer.merge(emptyarray).form == arrayt4.merge(emptyarray).form
+    assert arrayt5.typetracer.merge(emptyarray).form == arrayt5.merge(emptyarray).form
+    assert arrayt6.typetracer.merge(emptyarray).form == arrayt6.merge(emptyarray).form
+    assert arrayt7.typetracer.merge(emptyarray).form == arrayt7.merge(emptyarray).form
 
-    # assert emptyarray.typetracer.merge(arrayt1).form == emptyarray.merge(arrayt1).form
-    # assert emptyarray.typetracer.merge(arrayt2).form == emptyarray.merge(arrayt2).form
-    # assert emptyarray.typetracer.merge(arrayt3).form == emptyarray.merge(arrayt3).form
-    # assert emptyarray.typetracer.merge(arrayt4).form == emptyarray.merge(arrayt4).form
-    # assert emptyarray.typetracer.merge(arrayt5).form == emptyarray.merge(arrayt5).form
-    # assert emptyarray.typetracer.merge(arrayt6).form == emptyarray.merge(arrayt6).form
-    # assert emptyarray.typetracer.merge(arrayt7).form == emptyarray.merge(arrayt7).form
+    assert emptyarray.typetracer.merge(arrayt1).form == emptyarray.merge(arrayt1).form
+    assert emptyarray.typetracer.merge(arrayt2).form == emptyarray.merge(arrayt2).form
+    assert emptyarray.typetracer.merge(arrayt3).form == emptyarray.merge(arrayt3).form
+    assert emptyarray.typetracer.merge(arrayt4).form == emptyarray.merge(arrayt4).form
+    assert emptyarray.typetracer.merge(arrayt5).form == emptyarray.merge(arrayt5).form
+    assert emptyarray.typetracer.merge(arrayt6).form == emptyarray.merge(arrayt6).form
+    assert emptyarray.typetracer.merge(arrayt7).form == emptyarray.merge(arrayt7).form
 
 
 def test_indexedarray_merge():
@@ -603,18 +603,18 @@ def test_indexedarray_merge():
         [4.4, 5.5],
     ]
 
-    # assert (
-    #     indexedarray1.typetracer.merge(content2).form
-    #     == indexedarray1.merge(content2).form
-    # )
-    # assert (
-    #     content2.typetracer.merge(indexedarray1).form
-    #     == content2.merge(indexedarray1).form
-    # )
-    # assert (
-    #     indexedarray1.typetracer.merge(indexedarray1).form
-    #     == indexedarray1.merge(indexedarray1).form
-    # )
+    assert (
+        indexedarray1.typetracer.merge(content2).form
+        == indexedarray1.merge(content2).form
+    )
+    assert (
+        content2.typetracer.merge(indexedarray1).form
+        == content2.merge(indexedarray1).form
+    )
+    assert (
+        indexedarray1.typetracer.merge(indexedarray1).form
+        == indexedarray1.merge(indexedarray1).form
+    )
 
 
 def test_unionarray_merge():
@@ -697,14 +697,14 @@ def test_unionarray_merge():
         {"x": 2, "y": 2.2},
     ]
 
-    # assert one.typetracer.merge(two).form == one.merge(two).form
-    # assert two.typetracer.merge(one).form == two.merge(one).form
-    # assert one.typetracer.merge(emptyarray).form == one.merge(emptyarray).form
-    # assert emptyarray.typetracer.merge(one).form == emptyarray.merge(one).form
-    # assert one.typetracer.merge(three).form == one.merge(three).form
-    # assert two.typetracer.merge(three).form == two.merge(three).form
-    # assert three.typetracer.merge(one).form == three.merge(one).form
-    # assert three.typetracer.merge(two).form == three.merge(two).form
+    assert one.typetracer.merge(two).form == one.merge(two).form
+    assert two.typetracer.merge(one).form == two.merge(one).form
+    assert one.typetracer.merge(emptyarray).form == one.merge(emptyarray).form
+    assert emptyarray.typetracer.merge(one).form == emptyarray.merge(one).form
+    assert one.typetracer.merge(three).form == one.merge(three).form
+    assert two.typetracer.merge(three).form == two.merge(three).form
+    assert three.typetracer.merge(one).form == three.merge(one).form
+    assert three.typetracer.merge(two).form == three.merge(two).form
 
 
 def test_merge_parameters():
@@ -728,18 +728,18 @@ def test_merge_parameters():
         [115, 116, 117, 102, 102],
     ]
 
-    # assert (
-    #     ak._v2.operations.structure.concatenate(
-    #         [one, two], highlevel=False
-    #     ).typetracer.form
-    #     == ak._v2.operations.structure.concatenate([one, two], highlevel=False).form
-    # )
-    # assert (
-    #     ak._v2.operations.structure.concatenate(
-    #         [two, one], highlevel=False
-    #     ).typetracer.form
-    #     == ak._v2.operations.structure.concatenate([two, one], highlevel=False).form
-    # )
+    assert (
+        ak._v2.operations.structure.concatenate(
+            [one, two], highlevel=False
+        ).typetracer.form
+        == ak._v2.operations.structure.concatenate([one, two], highlevel=False).form
+    )
+    assert (
+        ak._v2.operations.structure.concatenate(
+            [two, one], highlevel=False
+        ).typetracer.form
+        == ak._v2.operations.structure.concatenate([two, one], highlevel=False).form
+    )
 
 
 def test_mask_as_bool():
@@ -782,10 +782,10 @@ def test_indexedarray_simplify():
         == [None, None, "two", "four", None]
     )
 
-    # assert (
-    #     array2.typetracer.simplify_optiontype().form
-    #     == array2.simplify_optiontype().form
-    # )
+    assert (
+        array2.typetracer.simplify_optiontype().form
+        == array2.simplify_optiontype().form
+    )
 
 
 def test_indexedarray_simplify_more():
@@ -812,9 +812,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArray32(
         index2_32, ak.layout.IndexedArrayU32(index1_U32, content)
@@ -828,9 +828,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArray32(
         index2_32, ak.layout.IndexedArray64(index1_64, content)
@@ -844,9 +844,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedArray32(index1_32, content)
@@ -860,9 +860,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedArrayU32(index1_U32, content)
@@ -876,9 +876,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedArray64(index1_64, content)
@@ -892,9 +892,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedArray32(index1_32, content)
@@ -908,9 +908,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedArrayU32(index1_U32, content)
@@ -924,9 +924,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedArray64(index1_64, content)
@@ -940,9 +940,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     index1_32 = ak.layout.Index32(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int32))
     index1_64 = ak.layout.Index64(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int64))
@@ -963,9 +963,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArray32(
         index2_32, ak.layout.IndexedOptionArray64(index1_64, content)
@@ -980,9 +980,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedOptionArray32(index1_32, content)
@@ -997,9 +997,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArrayU32(
         index2_U32, ak.layout.IndexedOptionArray64(index1_64, content)
@@ -1014,9 +1014,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedOptionArray32(index1_32, content)
@@ -1031,9 +1031,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedArray64(
         index2_64, ak.layout.IndexedOptionArray64(index1_64, content)
@@ -1048,9 +1048,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     index1_32 = ak.layout.Index32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int32))
     index1_U32 = ak.layout.IndexU32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.uint32))
@@ -1071,9 +1071,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedOptionArray32(
         index2_32, ak.layout.IndexedArrayU32(index1_U32, content)
@@ -1088,9 +1088,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedOptionArray32(
         index2_32, ak.layout.IndexedArray64(index1_64, content)
@@ -1105,9 +1105,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedArray32(index1_32, content)
@@ -1122,9 +1122,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedArrayU32(index1_U32, content)
@@ -1139,9 +1139,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedArray64(index1_64, content)
@@ -1156,9 +1156,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     index1_32 = ak.layout.Index32(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int32))
     index1_64 = ak.layout.Index64(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int64))
@@ -1178,9 +1178,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedOptionArray32(
         index2_32, ak.layout.IndexedOptionArray64(index1_64, content)
@@ -1195,9 +1195,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedOptionArray32(index1_32, content)
@@ -1212,9 +1212,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
     array = ak.layout.IndexedOptionArray64(
         index2_64, ak.layout.IndexedOptionArray64(index1_64, content)
@@ -1229,9 +1229,9 @@ def test_indexedarray_simplify_more():
     assert isinstance(
         array.simplify_optiontype().content, ak._v2.contents.numpyarray.NumpyArray
     )
-    # assert (
-    #     array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
-    # )
+    assert (
+        array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
+    )
 
 
 def test_unionarray_simplify_one():
@@ -1277,10 +1277,10 @@ def test_unionarray_simplify_one():
     assert len(array.contents) == 3
     assert len(array.simplify_uniontype(True, False).contents) == 2
 
-    # assert (
-    #     array.typetracer.simplify_uniontype(True, False).form
-    #     == array.simplify_uniontype(True, False).form
-    # )
+    assert (
+        array.typetracer.simplify_uniontype(True, False).form
+        == array.simplify_uniontype(True, False).form
+    )
 
 
 def test_unionarray_simplify():
@@ -1338,10 +1338,10 @@ def test_unionarray_simplify():
     )
     assert len(outer.simplify_uniontype(True, False).contents) == 2
 
-    # assert (
-    #     outer.typetracer.simplify_uniontype(True, False).form
-    #     == outer.simplify_uniontype(True, False).form
-    # )
+    assert (
+        outer.typetracer.simplify_uniontype(True, False).form
+        == outer.simplify_uniontype(True, False).form
+    )
 
     tags2 = ak.layout.Index8(np.array([0, 1, 0, 1, 0, 0, 1], dtype=np.int8))
     index2 = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 3, 2], dtype=np.int64))

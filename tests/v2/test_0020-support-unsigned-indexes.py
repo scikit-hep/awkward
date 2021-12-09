@@ -31,9 +31,9 @@ def test_listarray_basic():
         [7.7, 8.8, 9.9],
     ]
     assert ak.to_list(array1[2]) == [4.4, 5.5]
-    # assert array1.typetracer[2].form == array1[2].form
+    assert array1.typetracer[2].form == array1[2].form
     assert ak.to_list(array1[1:-1]) == [[], [4.4, 5.5], [6.6]]
-    # assert array1.typetracer[1:-1].form == array1[1:-1].form
+    assert array1.typetracer[1:-1].form == array1[1:-1].form
     assert ak.to_list(array2) == [
         [[1.1, 2.2, 3.3], []],
         [[4.4, 5.5]],
@@ -41,9 +41,9 @@ def test_listarray_basic():
         [[6.6], [7.7, 8.8, 9.9]],
     ]
     assert ak.to_list(array2[1]) == [[4.4, 5.5]]
-    # assert array2.typetracer[1].form == array2[1].form
+    assert array2.typetracer[1].form == array2[1].form
     assert ak.to_list(array2[1:-1]) == [[[4.4, 5.5]], []]
-    # assert array2.typetracer[1:-1].form == array2[1:-1].form
+    assert array2.typetracer[1:-1].form == array2[1:-1].form
 
 
 def test_listoffsetarray_basic():
@@ -60,9 +60,9 @@ def test_listoffsetarray_basic():
         [7.7, 8.8, 9.9],
     ]
     assert ak.to_list(array1[2]) == [4.4, 5.5]
-    # assert array1.typetracer[2].form == array1[2].form
+    assert array1.typetracer[2].form == array1[2].form
     assert ak.to_list(array1[1:-1]) == [[], [4.4, 5.5], [6.6]]
-    # assert array1.typetracer[1:-1].form == array1[1:-1].form
+    assert array1.typetracer[1:-1].form == array1[1:-1].form
     assert ak.to_list(array2) == [
         [[1.1, 2.2, 3.3], []],
         [[4.4, 5.5]],
@@ -70,9 +70,9 @@ def test_listoffsetarray_basic():
         [[6.6], [7.7, 8.8, 9.9]],
     ]
     assert ak.to_list(array2[1]) == [[4.4, 5.5]]
-    # assert array2.typetracer[1].form == array2[1].form
+    assert array2.typetracer[1].form == array2[1].form
     assert ak.to_list(array2[1:-1]) == [[[4.4, 5.5]], []]
-    # assert array2.typetracer[1:-1].form == array2[1:-1].form
+    assert array2.typetracer[1:-1].form == array2[1:-1].form
 
 
 def test_listarray_at():
@@ -80,7 +80,7 @@ def test_listarray_at():
     array1 = v1_to_v2(array1)
 
     assert ak.to_list(array1[2]) == [4.4, 5.5]
-    # assert array1.typetracer[2].form == array1[2].form
+    assert array1.typetracer[2].form == array1[2].form
     assert (
         ak.to_list(
             array1[
@@ -89,20 +89,20 @@ def test_listarray_at():
         )
         == [4.4, 5.5]
     )
-    # assert (
-    #     array1.typetracer[
-    #         2,
-    #     ].form
-    #     == array1[
-    #         2,
-    #     ].form
-    # )
+    assert (
+        array1.typetracer[
+            2,
+        ].form
+        == array1[
+            2,
+        ].form
+    )
     assert ak.to_list(array1[2, 1:]) == [5.5]
-    # assert array1.typetracer[2, 1:].form == array1[2, 1:].form
+    assert array1.typetracer[2, 1:].form == array1[2, 1:].form
     assert ak.to_list(array1[2:, 0]) == [4.4, 6.6, 7.7]
-    # assert array1.typetracer[2:, 0].form == array1[2:, 0].form
+    assert array1.typetracer[2:, 0].form == array1[2:, 0].form
     assert ak.to_list(array1[2:, -1]) == [5.5, 6.6, 9.9]
-    # assert array1.typetracer[2:, -1].form == array1[2:, -1].form
+    assert array1.typetracer[2:, -1].form == array1[2:, -1].form
 
 
 def test_listoffsetarray_at():
@@ -116,20 +116,20 @@ def test_listoffsetarray_at():
         )
         == [4.4, 5.5]
     )
-    # assert (
-    #     array1.typetracer[
-    #         2,
-    #     ].form
-    #     == array1[
-    #         2,
-    #     ].form
-    # )
+    assert (
+        array1.typetracer[
+            2,
+        ].form
+        == array1[
+            2,
+        ].form
+    )
     assert ak.to_list(array1[2, 1:]) == [5.5]
-    # assert array1.typetracer[2, 1:].form == array1[2, 1:].form
+    assert array1.typetracer[2, 1:].form == array1[2, 1:].form
     assert ak.to_list(array1[2:, 0]) == [4.4, 6.6, 7.7]
-    # assert array1.typetracer[2:, 0].form == array1[2:, 0].form
+    assert array1.typetracer[2:, 0].form == array1[2:, 0].form
     assert ak.to_list(array1[2:, -1]) == [5.5, 6.6, 9.9]
-    # assert array1.typetracer[2:, -1].form == array1[2:, -1].form
+    assert array1.typetracer[2:, -1].form == array1[2:, -1].form
 
 
 def test_listarray_slice():
@@ -139,7 +139,7 @@ def test_listarray_slice():
     array2 = v1_to_v2(array2)
 
     assert ak.to_list(array1[1:-1]) == [[], [4.4, 5.5], [6.6]]
-    # assert array1.typetracer[1:-1].form == array1[1:-1].form
+    assert array1.typetracer[1:-1].form == array1[1:-1].form
     assert (
         ak.to_list(
             array1[
@@ -148,16 +148,16 @@ def test_listarray_slice():
         )
         == [[], [4.4, 5.5], [6.6]]
     )
-    # assert (
-    #     array1.typetracer[
-    #         1:-1,
-    #     ].form
-    #     == array1[
-    #         1:-1,
-    #     ].form
-    # )
+    assert (
+        array1.typetracer[
+            1:-1,
+        ].form
+        == array1[
+            1:-1,
+        ].form
+    )
     assert ak.to_list(array2[1:-1]) == [[[4.4, 5.5]], []]
-    # assert array2.typetracer[1:-1].form == array2[1:-1].form
+    assert array2.typetracer[1:-1].form == array2[1:-1].form
     assert (
         ak.to_list(
             array2[
@@ -166,14 +166,14 @@ def test_listarray_slice():
         )
         == [[[4.4, 5.5]], []]
     )
-    # assert (
-    #     array2.typetracer[
-    #         1:-1,
-    #     ].form
-    #     == array2[
-    #         1:-1,
-    #     ].form
-    # )
+    assert (
+        array2.typetracer[
+            1:-1,
+        ].form
+        == array2[
+            1:-1,
+        ].form
+    )
 
 
 def test_listoffsetarray_slice():
@@ -183,7 +183,7 @@ def test_listoffsetarray_slice():
     array2 = v1_to_v2(array2)
 
     assert ak.to_list(array1[1:-1]) == [[], [4.4, 5.5], [6.6]]
-    # assert array1.typetracer[1:-1].form == array1[1:-1].form
+    assert array1.typetracer[1:-1].form == array1[1:-1].form
     assert (
         ak.to_list(
             array1[
@@ -192,16 +192,16 @@ def test_listoffsetarray_slice():
         )
         == [[], [4.4, 5.5], [6.6]]
     )
-    # assert (
-    #     array1.typetracer[
-    #         1:-1,
-    #     ].form
-    #     == array1[
-    #         1:-1,
-    #     ].form
-    # )
+    assert (
+        array1.typetracer[
+            1:-1,
+        ].form
+        == array1[
+            1:-1,
+        ].form
+    )
     assert ak.to_list(array2[1:-1]) == [[[4.4, 5.5]], []]
-    # assert array2.typetracer[1:-1].form == array2[1:-1].form
+    assert array2.typetracer[1:-1].form == array2[1:-1].form
     assert (
         ak.to_list(
             array2[
@@ -210,14 +210,14 @@ def test_listoffsetarray_slice():
         )
         == [[[4.4, 5.5]], []]
     )
-    # assert (
-    #     array2.typetracer[
-    #         1:-1,
-    #     ].form
-    #     == array2[
-    #         1:-1,
-    #     ].form
-    # )
+    assert (
+        array2.typetracer[
+            1:-1,
+        ].form
+        == array2[
+            1:-1,
+        ].form
+    )
 
 
 def test_listarray_slice_slice():
@@ -225,11 +225,11 @@ def test_listarray_slice_slice():
     array1 = v1_to_v2(array1)
 
     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
-    # assert array1.typetracer[2:].form == array1[2:].form
+    assert array1.typetracer[2:].form == array1[2:].form
     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
-    # assert array1.typetracer[2:, 1:].form == array1[2:, 1:].form
+    assert array1.typetracer[2:, 1:].form == array1[2:, 1:].form
     assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
-    # assert array1.typetracer[2:, :-1].form == array1[2:, :-1].form
+    assert array1.typetracer[2:, :-1].form == array1[2:, :-1].form
 
 
 def test_listoffsetarray_slice_slice():
@@ -237,11 +237,11 @@ def test_listoffsetarray_slice_slice():
     array1 = v1_to_v2(array1)
 
     assert ak.to_list(array1[2:]) == [[4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
-    # assert array1.typetracer[2:].form == array1[2:].form
+    assert array1.typetracer[2:].form == array1[2:].form
     assert ak.to_list(array1[2:, 1:]) == [[5.5], [], [8.8, 9.9]]
-    # assert array1.typetracer[2:, 1:].form == array1[2:, 1:].form
+    assert array1.typetracer[2:, 1:].form == array1[2:, 1:].form
     assert ak.to_list(array1[2:, :-1]) == [[4.4], [], [7.7, 8.8]]
-    # assert array1.typetracer[2:, :-1].form == array1[2:, :-1].form
+    assert array1.typetracer[2:, :-1].form == array1[2:, :-1].form
 
 
 def test_listarray_ellipsis():
@@ -257,14 +257,14 @@ def test_listarray_ellipsis():
         [],
         [8.8, 9.9],
     ]
-    # assert array1.typetracer[Ellipsis, 1:].form == array1[Ellipsis, 1:].form
+    assert array1.typetracer[Ellipsis, 1:].form == array1[Ellipsis, 1:].form
     assert ak.to_list(array2[Ellipsis, 1:]) == [
         [[2.2, 3.3], []],
         [[5.5]],
         [],
         [[], [8.8, 9.9]],
     ]
-    # assert array2.typetracer[Ellipsis, 1:].form == array2[Ellipsis, 1:].form
+    assert array2.typetracer[Ellipsis, 1:].form == array2[Ellipsis, 1:].form
 
 
 def test_listoffsetarray_ellipsis():
@@ -280,14 +280,14 @@ def test_listoffsetarray_ellipsis():
         [],
         [8.8, 9.9],
     ]
-    # assert array1.typetracer[Ellipsis, 1:].form == array1[Ellipsis, 1:].form
+    assert array1.typetracer[Ellipsis, 1:].form == array1[Ellipsis, 1:].form
     assert ak.to_list(array2[Ellipsis, 1:]) == [
         [[2.2, 3.3], []],
         [[5.5]],
         [],
         [[], [8.8, 9.9]],
     ]
-    # assert array2.typetracer[Ellipsis, 1:].form == array2[Ellipsis, 1:].form
+    assert array2.typetracer[Ellipsis, 1:].form == array2[Ellipsis, 1:].form
 
 
 def test_listarray_array_slice():
@@ -304,7 +304,7 @@ def test_listarray_array_slice():
         [[4.4, 5.5]],
         [[1.1, 2.2, 3.3], []],
     ]
-    # assert array2.typetracer[[0, 0, 1, 1, 1, 0]].form == array2[[0, 0, 1, 1, 1, 0]].form
+    assert array2.typetracer[[0, 0, 1, 1, 1, 0]].form == array2[[0, 0, 1, 1, 1, 0]].form
     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :]) == [
         [[1.1, 2.2, 3.3], []],
         [[1.1, 2.2, 3.3], []],
@@ -313,10 +313,10 @@ def test_listarray_array_slice():
         [[4.4, 5.5]],
         [[1.1, 2.2, 3.3], []],
     ]
-    # assert (
-    #     array2.typetracer[[0, 0, 1, 1, 1, 0], :].form
-    #     == array2[[0, 0, 1, 1, 1, 0], :].form
-    # )
+    assert (
+        array2.typetracer[[0, 0, 1, 1, 1, 0], :].form
+        == array2[[0, 0, 1, 1, 1, 0], :].form
+    )
     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :, 1:]) == [
         [[2.2, 3.3], []],
         [[2.2, 3.3], []],
@@ -325,10 +325,10 @@ def test_listarray_array_slice():
         [[5.5]],
         [[2.2, 3.3], []],
     ]
-    # assert (
-    #     array2.typetracer[[0, 0, 1, 1, 1, 0], :, 1:].form
-    #     == array2[[0, 0, 1, 1, 1, 0], :, 1:].form
-    # )
+    assert (
+        array2.typetracer[[0, 0, 1, 1, 1, 0], :, 1:].form
+        == array2[[0, 0, 1, 1, 1, 0], :, 1:].form
+    )
 
 
 def test_listoffsetarray_array_slice():
@@ -345,7 +345,7 @@ def test_listoffsetarray_array_slice():
         [[4.4, 5.5]],
         [[1.1, 2.2, 3.3], []],
     ]
-    # assert array2.typetracer[[0, 0, 1, 1, 1, 0]].form == array2[[0, 0, 1, 1, 1, 0]].form
+    assert array2.typetracer[[0, 0, 1, 1, 1, 0]].form == array2[[0, 0, 1, 1, 1, 0]].form
     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :]) == [
         [[1.1, 2.2, 3.3], []],
         [[1.1, 2.2, 3.3], []],
@@ -354,10 +354,10 @@ def test_listoffsetarray_array_slice():
         [[4.4, 5.5]],
         [[1.1, 2.2, 3.3], []],
     ]
-    # assert (
-    #     array2.typetracer[[0, 0, 1, 1, 1, 0], :].form
-    #     == array2[[0, 0, 1, 1, 1, 0], :].form
-    # )
+    assert (
+        array2.typetracer[[0, 0, 1, 1, 1, 0], :].form
+        == array2[[0, 0, 1, 1, 1, 0], :].form
+    )
     assert ak.to_list(array2[[0, 0, 1, 1, 1, 0], :, 1:]) == [
         [[2.2, 3.3], []],
         [[2.2, 3.3], []],
@@ -366,10 +366,10 @@ def test_listoffsetarray_array_slice():
         [[5.5]],
         [[2.2, 3.3], []],
     ]
-    # assert (
-    #     array2.typetracer[[0, 0, 1, 1, 1, 0], :, 1:].form
-    #     == array2[[0, 0, 1, 1, 1, 0], :, 1:].form
-    # )
+    assert (
+        array2.typetracer[[0, 0, 1, 1, 1, 0], :, 1:].form
+        == array2[[0, 0, 1, 1, 1, 0], :, 1:].form
+    )
 
 
 def test_listarray_array():
@@ -383,20 +383,20 @@ def test_listarray_array():
         [],
         [7.7, 8.8, 9.9],
     ]
-    # assert (
-    #     array1.typetracer[np.array([2, 0, 0, 1, -1])].form
-    #     == array1[np.array([2, 0, 0, 1, -1])].form
-    # )
+    assert (
+        array1.typetracer[np.array([2, 0, 0, 1, -1])].form
+        == array1[np.array([2, 0, 0, 1, -1])].form
+    )
     assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
         5.5,
         2.2,
         1.1,
         7.7,
     ]
-    # assert (
-    #     array1.typetracer[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])].form
-    #     == array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])].form
-    # )
+    assert (
+        array1.typetracer[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])].form
+        == array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])].form
+    )
 
     content_deep = ak.layout.NumpyArray(
         np.array(
@@ -434,7 +434,7 @@ def test_listarray_array():
         )[s].tolist()
         == ak.to_list(array1_deep[s])
     )
-    # assert array1_deep.typetracer[s].form == array1_deep[s].form
+    assert array1_deep.typetracer[s].form == array1_deep[s].form
 
     s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), slice(1, None))
     assert (
@@ -447,7 +447,7 @@ def test_listarray_array():
         )[s].tolist()
         == ak.to_list(array1_deep[s])
     )
-    # assert array1_deep.typetracer[s].form == array1_deep[s].form
+    assert array1_deep.typetracer[s].form == array1_deep[s].form
 
 
 def test_listoffsetarray_array():
@@ -461,20 +461,20 @@ def test_listoffsetarray_array():
         [],
         [7.7, 8.8, 9.9],
     ]
-    # assert (
-    #     array1.typetracer[np.array([2, 0, 0, 1, -1])].form
-    #     == array1[np.array([2, 0, 0, 1, -1])].form
-    # )
+    assert (
+        array1.typetracer[np.array([2, 0, 0, 1, -1])].form
+        == array1[np.array([2, 0, 0, 1, -1])].form
+    )
     assert ak.to_list(array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])]) == [
         5.5,
         2.2,
         1.1,
         7.7,
     ]
-    # assert (
-    #     array1.typetracer[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])].form
-    #     == array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])].form
-    # )
+    assert (
+        array1.typetracer[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])].form
+        == array1[np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0])].form
+    )
 
     content_deep = ak.layout.NumpyArray(
         np.array(
@@ -512,7 +512,7 @@ def test_listoffsetarray_array():
         )[s].tolist()
         == ak.to_list(array1_deep[s])
     )
-    # assert array1_deep.typetracer[s].form == array1_deep[s].form
+    assert array1_deep.typetracer[s].form == array1_deep[s].form
 
     s = (np.array([2, 0, 0, -1]), np.array([1, 1, 0, 0]), slice(1, None))
     assert (
@@ -525,4 +525,4 @@ def test_listoffsetarray_array():
         )[s].tolist()
         == ak.to_list(array1_deep[s])
     )
-    # assert array1_deep.typetracer[s].form == array1_deep[s].form
+    assert array1_deep.typetracer[s].form == array1_deep[s].form

@@ -8,8 +8,7 @@ import awkward as ak  # noqa: F401
 
 
 def tt(highlevel):
-    return highlevel
-    # return ak._v2.highlevel.Array(highlevel.layout.typetracer)
+    return ak._v2.highlevel.Array(highlevel.layout.typetracer)
 
 
 def test_basic():

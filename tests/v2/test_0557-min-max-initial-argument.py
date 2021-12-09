@@ -15,32 +15,32 @@ def test():
     data = ak.Array([[1, 3, 5, 4, 2], [], [2, 3, 1], [5]])
     data = v1_to_v2(data.layout)
     assert ak.to_list(data.min(axis=1, initial=4)) == [1, None, 1, 4]
-    # assert (
-    #     data.typetracer.min(axis=1, initial=4).form == data.min(axis=1, initial=4).form
-    # )
+    assert (
+        data.typetracer.min(axis=1, initial=4).form == data.min(axis=1, initial=4).form
+    )
     assert ak.to_list(data.min(axis=1)) == [1, None, 1, 5]
-    # assert data.typetracer.min(axis=1).form == data.min(axis=1).form
+    assert data.typetracer.min(axis=1).form == data.min(axis=1).form
     assert ak.to_list(data.max(axis=1, initial=4)) == [5, None, 4, 5]
-    # assert (
-    #     data.typetracer.max(axis=1, initial=4).form == data.max(axis=1, initial=4).form
-    # )
+    assert (
+        data.typetracer.max(axis=1, initial=4).form == data.max(axis=1, initial=4).form
+    )
     assert ak.to_list(data.max(axis=1)) == [5, None, 3, 5]
-    # assert data.typetracer.max(axis=1).form == data.max(axis=1).form
+    assert data.typetracer.max(axis=1).form == data.max(axis=1).form
 
     data = ak.Array([[1.1, 3.3, 5.5, 4.4, 2.2], [], [2.2, 3.3, 1.1], [5.5]])
     data = v1_to_v2(data.layout)
     assert ak.to_list(data.min(axis=1, initial=4)) == [1.1, None, 1.1, 4]
-    # assert (
-    #     data.typetracer.min(axis=1, initial=4).form == data.min(axis=1, initial=4).form
-    # )
+    assert (
+        data.typetracer.min(axis=1, initial=4).form == data.min(axis=1, initial=4).form
+    )
     assert ak.to_list(data.min(axis=1)) == [1.1, None, 1.1, 5.5]
-    # assert data.typetracer.min(axis=1).form == data.min(axis=1).form
+    assert data.typetracer.min(axis=1).form == data.min(axis=1).form
     assert ak.to_list(data.max(axis=1, initial=4)) == [5.5, None, 4, 5.5]
-    # assert (
-    #     data.typetracer.max(axis=1, initial=4).form == data.max(axis=1, initial=4).form
-    # )
+    assert (
+        data.typetracer.max(axis=1, initial=4).form == data.max(axis=1, initial=4).form
+    )
     assert ak.to_list(data.max(axis=1)) == [5.5, None, 3.3, 5.5]
-    # assert data.typetracer.max(axis=1).form == data.max(axis=1).form
+    assert data.typetracer.max(axis=1).form == data.max(axis=1).form
 
     array = ak.layout.NumpyArray(np.array(primes[2 : 2 * 3 * 5], dtype=np.int32))
     array = data = v1_to_v2(array)
