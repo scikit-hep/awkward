@@ -115,6 +115,9 @@ class UnmaskedArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
+        if not self._nplike.known_data:
+            return ak._v2._typetracer.MaybeNone(self._content._getitem_at(where))
+
         return self._content._getitem_at(where)
 
     def _getitem_range(self, where):

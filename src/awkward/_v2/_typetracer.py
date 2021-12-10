@@ -79,6 +79,60 @@ class UnknownLengthType(object):
 UnknownLength = UnknownLengthType()
 
 
+class UnknownScalar(object):
+    def __init__(self, dtype):
+        self._dtype = dtype
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    def __repr__(self):
+        return "UnknownScalar({0})".format(repr(self._dtype))
+
+    def __str__(self):
+        return "unknown-{0}".format(str(self._dtype))
+
+    def __eq__(self, other):
+        return isinstance(other, UnknownScalar) and self._dtype == other._dtype
+
+
+class MaybeNone(object):
+    def __init__(self, content):
+        self._content = content
+
+    @property
+    def content(self):
+        return self._content
+
+    def __eq__(self, other):
+        if isinstance(other, MaybeNone):
+            return self._content == other._content
+        else:
+            return False
+
+    def __repr__(self):
+        return "MaybeNone({0})".format(repr(self._content))
+
+
+class OneOf(object):
+    def __init__(self, contents):
+        self._contents = contents
+
+    @property
+    def contents(self):
+        return self._contents
+
+    def __eq__(self, other):
+        if isinstance(other, OneOf):
+            return set(self._contents) == set(other._contents)
+        else:
+            return False
+
+    def __repr__(self):
+        return "OneOf({0})".format(repr(self._contents))
+
+
 class TypeTracerArray(object):
     @classmethod
     def from_array(cls, array, dtype=None):

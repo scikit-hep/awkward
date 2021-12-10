@@ -149,9 +149,10 @@ class RegularArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if where < 0:
+        if not self._nplike.known_data and where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._nplike.known_shape:
+
+        if where < 0 or where >= self.length:
             raise NestedIndexError(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))

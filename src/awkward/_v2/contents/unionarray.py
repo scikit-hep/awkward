@@ -175,9 +175,9 @@ class UnionArray(Content):
         return self._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if not self._tags.nplike.known_data:
-            raise ValueError(
-                "can't determine the type of an item selected from a union array without a concrete array"
+        if not self._nplike.known_data:
+            return ak._v2._typetracer.OneOf(
+                [x._getitem_at(where) for x in self._contents]
             )
 
         if where < 0:

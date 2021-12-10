@@ -173,8 +173,8 @@ class ListOffsetArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if not self._offsets.nplike.known_data:
-            return self._getitem_nothing()
+        if not self._nplike.known_data:
+            return self._content._getitem_range(slice(0, 0))
 
         if where < 0:
             where += self.length

@@ -165,6 +165,9 @@ class NumpyArray(Content):
         )
 
     def _getitem_at(self, where):
+        if not self._nplike.known_data and len(self._data.shape) == 1:
+            return ak._v2._typetracer.UnknownScalar(self._data.dtype)
+
         try:
             out = self._data[where]
         except IndexError as err:
