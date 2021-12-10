@@ -58,7 +58,7 @@ class UnmaskedArray(Content):
 
     @property
     def length(self):
-        return len(self._content)
+        return self._content.length
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -93,7 +93,7 @@ class UnmaskedArray(Content):
         )
 
     def toIndexedOptionArray64(self):
-        arange = self._nplike.arange(len(self._content), dtype=np.int64)
+        arange = self._nplike.arange(self._content.length, dtype=np.int64)
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             ak._v2.index.Index64(arange),
             self._content,
@@ -107,9 +107,9 @@ class UnmaskedArray(Content):
             nplike = self._nplike
 
         if valid_when:
-            return nplike.ones(len(self._content), dtype=np.bool_)
+            return nplike.ones(self._content.length, dtype=np.bool_)
         else:
-            return nplike.zeros(len(self._content), dtype=np.bool_)
+            return nplike.zeros(self._content.length, dtype=np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -118,7 +118,7 @@ class UnmaskedArray(Content):
         return self._content._getitem_at(where)
 
     def _getitem_range(self, where):
-        start, stop, step = where.indices(len(self))
+        start, stop, step = where.indices(self.length)
         assert step == 1
         return UnmaskedArray(
             self._content._getitem_range(slice(start, stop)),
@@ -216,7 +216,7 @@ class UnmaskedArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self._nplike)
-            out[0] = len(self)
+            out[0] = self.length
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
                 0
             ]
@@ -231,7 +231,7 @@ class UnmaskedArray(Content):
             raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
             offsets, flattened = self._content._offsets_and_flattened(posaxis, depth)
-            if len(offsets) == 0:
+            if offsets.length == 0:
                 return (
                     offsets,
                     UnmaskedArray(flattened, None, self._parameters, self._nplike),
@@ -300,12 +300,12 @@ class UnmaskedArray(Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if len(self._content) == 0:
+        if self._content.length == 0:
             return True
         return self._content._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if len(self._content) == 0:
+        if self._content.length == 0:
             return self
         return self._content._unique(negaxis, starts, parents, outlength)
 
@@ -321,7 +321,7 @@ class UnmaskedArray(Content):
         kind,
         order,
     ):
-        if len(self._content) == 0:
+        if self._content.length == 0:
             return ak._v2.contents.NumpyArray(
                 self._nplike.empty(0, np.int64), None, None, self._nplike
             )

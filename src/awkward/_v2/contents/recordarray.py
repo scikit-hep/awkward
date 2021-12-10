@@ -49,7 +49,7 @@ class RecordArray(Content):
                 )
             )
         elif length is None:
-            length = min(len(x) for x in contents)
+            length = min(x.length for x in contents)
         if not (ak._util.isint(length) and length >= 0):
             raise TypeError(
                 "{0} 'length' must be a non-negative integer or None, not {1}".format(
@@ -63,10 +63,10 @@ class RecordArray(Content):
                         type(self).__name__, repr(content)
                     )
                 )
-            if not len(content) >= length:
+            if not content.length >= length:
                 raise ValueError(
                     "{0} len(content) ({1}) must be <= length ({2}) for all 'contents'".format(
-                        type(self).__name__, len(content), length
+                        type(self).__name__, content.length, length
                     )
                 )
 
@@ -226,7 +226,7 @@ class RecordArray(Content):
 
     def content(self, index_or_field):
         out = self.Form.content(self, index_or_field)
-        if len(out) == self._length:
+        if out.length == self._length:
             return out
         else:
             return out[: self._length]
@@ -236,13 +236,13 @@ class RecordArray(Content):
 
     def _getitem_at(self, where):
         if where < 0:
-            where += len(self)
-        if not (0 <= where < len(self)) and self._nplike.known_shape:
+            where += self.length
+        if not (0 <= where < self.length) and self._nplike.known_shape:
             raise NestedIndexError(self, where)
         return Record(self, where)
 
     def _getitem_range(self, where):
-        start, stop, step = where.indices(len(self))
+        start, stop, step = where.indices(self.length)
         assert step == 1
         if len(self._contents) == 0:
             start = min(max(start, 0), self._length)
@@ -343,11 +343,11 @@ class RecordArray(Content):
             ]
 
             # if issubclass(carry.dtype.type, np.integer):
-            #     length = len(carry)
+            #     length = carry.length
             # else:
-            #     length = len(self)
+            #     length = self.length
             assert issubclass(carry.dtype.type, np.integer)
-            length = len(carry)
+            length = carry.length
 
             return RecordArray(
                 contents,
@@ -413,7 +413,7 @@ class RecordArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             single = ak._v2.index.Index64.empty(1, self._nplike)
-            single[0] = len(self)
+            single[0] = self.length
             singleton = ak._v2.contents.numpyarray.NumpyArray(
                 single, None, None, self._nplike
             )
@@ -449,9 +449,9 @@ class RecordArray(Content):
         else:
             contents = []
             for content in self._contents:
-                trimmed = content._getitem_range(slice(0, len(self)))
+                trimmed = content._getitem_range(slice(0, self.length))
                 offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
-                if len(offsets) != 0:
+                if offsets.length != 0:
                     raise AssertionError(
                         "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
                     )
@@ -534,7 +534,7 @@ class RecordArray(Content):
 
         for_each_field = []
         for field in self.contents:
-            trimmed = field[0 : len(self)]
+            trimmed = field[0 : self.length]
             for_each_field.append([field])
 
         if self.is_tuple:
@@ -548,7 +548,7 @@ class RecordArray(Content):
                         if len(self.contents) == len(array.contents):
                             for i in range(len(self.contents)):
                                 field = array[self.index_to_field(i)]
-                                for_each_field[i].append(field[0 : len(array)])
+                                for_each_field[i].append(field[0 : array.length])
                         else:
                             raise ValueError(
                                 "cannot merge tuples with different numbers of fields"
@@ -579,7 +579,7 @@ class RecordArray(Content):
                             for i in range(len(self.contents)):
                                 field = array[self.index_to_field(i)]
 
-                                trimmed = field[0 : len(array)]
+                                trimmed = field[0 : array.length]
                                 for_each_field[i].append(trimmed)
                         else:
                             raise AssertionError(
@@ -606,13 +606,13 @@ class RecordArray(Content):
 
             nextcontents.append(merged)
 
-            if minlength is None or len(merged) < minlength:
-                minlength = len(merged)
+            if minlength is None or merged.length < minlength:
+                minlength = merged.length
 
         if minlength is None:
-            minlength = len(self)
+            minlength = self.length
             for x in others:
-                minlength += len(x)
+                minlength += x.length
 
         next = RecordArray(
             nextcontents, self._fields, minlength, None, parameters, self._nplike
@@ -655,7 +655,7 @@ class RecordArray(Content):
             return RecordArray(
                 contents,
                 self._fields,
-                len(self),
+                self.length,
                 self._identifier,
                 self._parameters,
                 self._nplike,
@@ -743,7 +743,7 @@ class RecordArray(Content):
             return ak._v2.contents.recordarray.RecordArray(
                 contents,
                 recordlookup,
-                len(self),
+                self.length,
                 self._identifier,
                 self._parameters,
                 self._nplike,
@@ -786,7 +786,7 @@ class RecordArray(Content):
 
     def _validityerror(self, path):
         for i in range(len(self.contents)):
-            if len(self.contents[i]) < len(self):
+            if self.contents[i].length < self.length:
                 return 'at {0} ("{1}"): len(field({2})) < len(recordarray)'.format(
                     path, type(self), i
                 )
@@ -833,7 +833,7 @@ class RecordArray(Content):
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         values = [
-            (x if len(x) == length else x[:length])._to_arrow(
+            (x if x.length == length else x[:length])._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
             for x in self._contents
@@ -859,12 +859,12 @@ class RecordArray(Content):
 
     def _to_numpy(self, allow_missing):
         if self.fields is None:
-            return self._nplike.empty(len(self), dtype=[])
+            return self._nplike.empty(self.length, dtype=[])
         contents = [x._to_numpy(allow_missing) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError("cannot convert {0} into np.ndarray".format(self))
         out = self._nplike.empty(
-            len(contents[0]),
+            contents[0].shape[0],
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
         )
         mask = None
@@ -872,7 +872,7 @@ class RecordArray(Content):
             if isinstance(x, self._nplike.ma.MaskedArray):
                 if mask is None:
                     mask = self._nplike.ma.zeros(
-                        len(self), [(n, np.bool_) for n in self.fields]
+                        self.length, [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
                     mask[n] |= x.mask
@@ -954,7 +954,7 @@ class RecordArray(Content):
     def packed(self):
         return RecordArray(
             [
-                x.packed() if len(x) == self._length else x[: self._length].packed()
+                x.packed() if x.length == self._length else x[: self._length].packed()
                 for x in self._contents
             ],
             self._fields,

@@ -62,16 +62,16 @@ class BitMaskedArray(Content):
                     type(self).__name__, repr(lsb_order)
                 )
             )
-        if not length <= len(mask) * 8:
+        if not length <= mask.length * 8:
             raise ValueError(
                 "{0} 'length' ({1}) must be <= len(mask) * 8 ({2})".format(
-                    type(self).__name__, length, len(mask) * 8
+                    type(self).__name__, length, mask.length * 8
                 )
             )
-        if not length <= len(content):
+        if not length <= content.length:
             raise ValueError(
                 "{0} 'length' ({1}) must be <= len(content) ({2})".format(
-                    type(self).__name__, length, len(content)
+                    type(self).__name__, length, content.length
                 )
             )
         if nplike is None:
@@ -171,7 +171,7 @@ class BitMaskedArray(Content):
         )
 
     def toByteMaskedArray(self):
-        bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, self._nplike)
+        bytemask = ak._v2.index.Index8.empty(self._mask.length * 8, self._nplike)
         self._handle_error(
             self._nplike[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
@@ -180,7 +180,7 @@ class BitMaskedArray(Content):
             ](
                 bytemask.to(self._nplike),
                 self._mask.to(self._nplike),
-                len(self._mask),
+                self._mask.length,
                 False,  # this differs from the kernel call in 'bytemask'
                 self._lsb_order,
             )
@@ -195,7 +195,7 @@ class BitMaskedArray(Content):
         )
 
     def toIndexedOptionArray64(self):
-        index = ak._v2.index.Index64.empty(len(self._mask) * 8, self._nplike)
+        index = ak._v2.index.Index64.empty(self._mask.length * 8, self._nplike)
         self._handle_error(
             self._nplike[
                 "awkward_BitMaskedArray_to_IndexedOptionArray",
@@ -204,7 +204,7 @@ class BitMaskedArray(Content):
             ](
                 index.to(self._nplike),
                 self._mask.to(self._nplike),
-                len(self._mask),
+                self._mask.length,
                 self._valid_when,
                 self._lsb_order,
             ),
@@ -223,7 +223,7 @@ class BitMaskedArray(Content):
         if nplike is None:
             nplike = self._nplike
 
-        bytemask = ak._v2.index.Index8.empty(len(self._mask) * 8, nplike)
+        bytemask = ak._v2.index.Index8.empty(self._mask.length * 8, nplike)
         self._handle_error(
             nplike[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
@@ -232,7 +232,7 @@ class BitMaskedArray(Content):
             ](
                 bytemask.to(nplike),
                 self._mask.to(nplike),
-                len(self._mask),
+                self._mask.length,
                 0 if valid_when == self._valid_when else 1,
                 self._lsb_order,
             )
@@ -244,8 +244,8 @@ class BitMaskedArray(Content):
 
     def _getitem_at(self, where):
         if where < 0:
-            where += len(self)
-        if not (0 <= where < len(self)) and self._nplike.known_shape:
+            where += self.length
+        if not (0 <= where < self.length) and self._nplike.known_shape:
             raise NestedIndexError(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
@@ -390,14 +390,14 @@ class BitMaskedArray(Content):
         return self.toByteMaskedArray().numbers_to_type(name)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if len(self._mask) == 0:
+        if self._mask.length == 0:
             return True
         return self.toIndexedOptionArray64()._is_unique(
             negaxis, starts, parents, outlength
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if len(self._mask) == 0:
+        if self._mask.length == 0:
             return self
         out = self.toIndexedOptionArray64()._unique(negaxis, starts, parents, outlength)
         if negaxis is None:
@@ -417,7 +417,7 @@ class BitMaskedArray(Content):
         kind,
         order,
     ):
-        if len(self._mask) == 0:
+        if self._mask.length == 0:
             return ak._v2.contents.NumpyArray(
                 self._nplike.empty(0, np.int64), None, None, self._nplike
             )
@@ -476,9 +476,9 @@ class BitMaskedArray(Content):
         )
 
     def _validityerror(self, path):
-        if len(self.mask) * 8 < len(self):
+        if self.mask.length * 8 < self.length:
             return 'at {0} ("{1}"): len(mask) * 8 < length'.format(path, type(self))
-        elif len(self._content) < len(self):
+        elif self._content.length < self.length:
             return 'at {0} ("{1}"): len(content) < length'.format(path, type(self))
         elif isinstance(
             self._content,
@@ -569,7 +569,7 @@ class BitMaskedArray(Content):
             next = self.toIndexedOptionArray64()
 
             content = next._content.packed()
-            if len(content) > self._length:
+            if content.length > self._length:
                 content = content[: self._length]
 
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
@@ -582,13 +582,13 @@ class BitMaskedArray(Content):
 
         else:
             excess_length = int(math.ceil(self._length / 8.0))
-            if len(self._mask) == excess_length:
+            if self._mask.length == excess_length:
                 mask = self._mask
             else:
                 mask = self._mask[:excess_length]
 
             content = self._content.packed()
-            if len(content) > self._length:
+            if content.length > self._length:
                 content = content[: self._length]
 
             return BitMaskedArray(

@@ -82,7 +82,7 @@ class NumpyArray(Content):
 
     @property
     def length(self):
-        return len(self._data)
+        return self._data.shape[0]
 
     def to(self, nplike):
         return nplike.asarray(self._data)
@@ -176,7 +176,7 @@ class NumpyArray(Content):
             return out
 
     def _getitem_range(self, where):
-        start, stop, step = where.indices(len(self))
+        start, stop, step = where.indices(self.length)
         assert step == 1
 
         try:
@@ -296,13 +296,13 @@ class NumpyArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self._nplike)
-            out[0] = len(self)
+            out[0] = self.length
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
                 0
             ]
         shape = []
         reps = 1
-        size = len(self)
+        size = self.length
         i = 0
         while i < self._data.ndim - 1 and depth < posaxis:
             shape.append(self.shape[i])
@@ -510,7 +510,7 @@ class NumpyArray(Content):
                     starts.to(self._nplike),
                     stops.to(self._nplike),
                     True,
-                    len(starts),
+                    starts.length,
                     ak._util.kMaxLevels,
                 )
             )
@@ -525,7 +525,7 @@ class NumpyArray(Content):
                 tmp,
                 starts.to(self._nplike),
                 stops.to(self._nplike),
-                len(starts),
+                starts.length,
                 is_equal.to(self._nplike),
             )
         )
@@ -533,7 +533,7 @@ class NumpyArray(Content):
         return True if is_equal[0] == 1 else False
 
     def _as_unique_strings(self, offsets):
-        outoffsets = ak._v2.index.Index64.empty(len(offsets), self._nplike)
+        outoffsets = ak._v2.index.Index64.empty(offsets.length, self._nplike)
         out = self._nplike.empty(self.shape[0], self.dtype)
 
         self._handle_error(
@@ -547,7 +547,7 @@ class NumpyArray(Content):
                 out,
                 self._data,
                 offsets.to(self._nplike),
-                len(offsets),
+                offsets.length,
                 outoffsets.to(self._nplike),
                 True,
                 False,
@@ -555,7 +555,7 @@ class NumpyArray(Content):
         )
 
         outlength = ak._v2.index.Index64.empty(1, self._nplike)
-        nextoffsets = ak._v2.index.Index64.empty(len(offsets), self._nplike)
+        nextoffsets = ak._v2.index.Index64.empty(offsets.length, self._nplike)
         self._handle_error(
             self._nplike[
                 "awkward_NumpyArray_unique_strings",
@@ -566,7 +566,7 @@ class NumpyArray(Content):
             ](
                 out,
                 outoffsets.to(self._nplike),
-                len(offsets),
+                offsets.length,
                 nextoffsets.to(self._nplike),
                 outlength.to(self._nplike),
             )
@@ -585,10 +585,7 @@ class NumpyArray(Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if len(self._data) == 0:
-            return True
-
-        if len(self.shape) == 0:
+        if self.length == 0:
             return True
 
         elif len(self.shape) != 1 or not self.is_contiguous:
@@ -602,9 +599,9 @@ class NumpyArray(Content):
         else:
             out = self._unique(negaxis, starts, parents, outlength)
             if isinstance(out, ak._v2.contents.ListOffsetArray):
-                return len(out.content) == len(self)
+                return out.content.length == self.length
 
-            return len(out) == len(self._data)
+            return out.length == self.length
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self.shape[0] == 0:
@@ -653,7 +650,7 @@ class NumpyArray(Content):
                     nextlength.dtype.type,
                 ](
                     out,
-                    len(out),
+                    out.shape[0],
                     nextlength.to(self._nplike),
                 )
             )
@@ -676,7 +673,7 @@ class NumpyArray(Content):
             )
         else:
 
-            parents_length = len(parents)
+            parents_length = parents.length
             offsets_length = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
                 self._nplike[
@@ -704,7 +701,7 @@ class NumpyArray(Content):
                 )
             )
 
-            out = self._nplike.empty(len(self._data), self.dtype)
+            out = self._nplike.empty(self.length, self.dtype)
             self._handle_error(
                 self._nplike[
                     "awkward_sort",
@@ -723,7 +720,7 @@ class NumpyArray(Content):
                 )
             )
 
-            nextoffsets = ak._v2.index.Index64.zeros(len(offsets), self._nplike)
+            nextoffsets = ak._v2.index.Index64.zeros(offsets.length, self._nplike)
             self._handle_error(
                 self._nplike[
                     "awkward_unique_ranges",
@@ -732,14 +729,14 @@ class NumpyArray(Content):
                     nextoffsets.dtype.type,
                 ](
                     out,
-                    len(out),
+                    out.shape[0],
                     offsets.to(self._nplike),
-                    len(offsets),
+                    offsets.length,
                     nextoffsets.to(self._nplike),
                 )
             )
 
-            outoffsets = ak._v2.index.Index64.zeros(len(starts) + 1, self._nplike)
+            outoffsets = ak._v2.index.Index64.zeros(starts.length + 1, self._nplike)
 
             self._handle_error(
                 self._nplike[
@@ -749,10 +746,10 @@ class NumpyArray(Content):
                     starts.dtype.type,
                 ](
                     outoffsets.to(self._nplike),
-                    len(nextoffsets),
+                    nextoffsets.length,
                     nextoffsets.to(self._nplike),
                     starts.to(self._nplike),
-                    len(starts),
+                    starts.length,
                 )
             )
 
@@ -800,7 +797,7 @@ class NumpyArray(Content):
             )
 
         else:
-            parents_length = len(parents)
+            parents_length = parents.length
             offsets_length = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
                 self._nplike[
@@ -864,13 +861,13 @@ class NumpyArray(Content):
                     ](
                         nextcarry.to(self._nplike),
                         shifts.to(self._nplike),
-                        len(shifts),
+                        shifts.length,
                         offsets.to(self._nplike),
                         offsets_length,
                         parents.to(self._nplike),
                         parents_length,
                         starts.to(self._nplike),
-                        len(starts),
+                        starts.length,
                     )
                 )
             out = NumpyArray(nextcarry, None, None, self._nplike)
@@ -898,7 +895,7 @@ class NumpyArray(Content):
             )
 
         else:
-            parents_length = len(parents)
+            parents_length = parents.length
             offsets_length = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
                 self._nplike[
@@ -932,7 +929,7 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            out = self._nplike.empty(len(self._data), dtype)
+            out = self._nplike.empty(self.length, dtype)
             self._handle_error(
                 self._nplike[  # noqa: E231
                     "awkward_sort",
@@ -1020,7 +1017,7 @@ class NumpyArray(Content):
                 ](
                     outmask.to(self._nplike),
                     parents.to(self._nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -1038,7 +1035,7 @@ class NumpyArray(Content):
             out = ak._v2.contents.RegularArray(
                 out,
                 1,
-                len(self),
+                self.length,
                 None,
                 None,
                 self._nplike,
@@ -1070,7 +1067,7 @@ class NumpyArray(Content):
                 "axis={0} exceeds the depth of this array({1})".format(axis, depth)
             )
         if not clip:
-            if target < len(self):
+            if target < self.length:
                 return self
             else:
                 return self._rpad(target, posaxis, depth, clip=True)

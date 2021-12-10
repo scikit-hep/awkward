@@ -101,7 +101,7 @@ class EmptyArray(Content):
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
-        if len(carry) == 0:
+        if carry.length == 0:
             return self
         else:
             if issubclass(exception, NestedIndexError):
@@ -148,7 +148,7 @@ class EmptyArray(Content):
 
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self._nplike)
-            out[0] = len(self)
+            out[0] = self.length
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
                 0
             ]

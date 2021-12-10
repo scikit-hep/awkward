@@ -48,6 +48,12 @@ class UnknownLengthType(object):
     def __rsub__(self, other):
         return UnknownLength
 
+    def __mul__(self, other):
+        return UnknownLength
+
+    def __rmul__(self, other):
+        return UnknownLength
+
 
 UnknownLength = UnknownLengthType()
 
