@@ -170,7 +170,7 @@ namespace awkward {
 
   void
   ArrayBuilder::maybeupdate(const BuilderPtr tmp) {
-    if (tmp != nullptr  &&  tmp.get() != builder_.get()) {
+    if (tmp  &&  tmp.get() != builder_.get()) {
       builder_ = std::move(tmp);
     }
   }
