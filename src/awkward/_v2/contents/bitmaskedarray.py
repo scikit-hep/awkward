@@ -62,13 +62,13 @@ class BitMaskedArray(Content):
                     type(self).__name__, repr(lsb_order)
                 )
             )
-        if not length <= mask.length * 8:
+        if length > mask.length * 8:
             raise ValueError(
                 "{0} 'length' ({1}) must be <= len(mask) * 8 ({2})".format(
                     type(self).__name__, length, mask.length * 8
                 )
             )
-        if not length <= content.length:
+        if length > content.length:
             raise ValueError(
                 "{0} 'length' ({1}) must be <= len(content) ({2})".format(
                     type(self).__name__, length, content.length

@@ -248,8 +248,6 @@ class ListOffsetArray(Content):
                 self._offsets.dtype.type,
             ](out.to(self._nplike), self._offsets.to(self._nplike), offsets_len)
         )
-        if isinstance(out.data, ak._v2._typetracer.TypeTracerArray):
-            out.data.fill_other = self._content.length
         return out
 
     def _broadcast_tooffsets64(self, offsets):

@@ -370,7 +370,7 @@ class Content(object):
             )
 
         if isinstance(head.content, ak._v2.contents.listoffsetarray.ListOffsetArray):
-            if self.length != 1:
+            if self.nplike.known_shape and self.length != 1:
                 raise NotImplementedError("reached a not-well-considered code path")
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
@@ -742,6 +742,22 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         while i < len(others):
             tail.append(others[i])
             i = i + 1
+
+        if any(
+            isinstance(x.nplike, ak._v2._typetracer.TypeTracer) for x in head + tail
+        ):
+            head = [
+                x
+                if isinstance(x.nplike, ak._v2._typetracer.TypeTracer)
+                else x.typetracer
+                for x in head
+            ]
+            tail = [
+                x
+                if isinstance(x.nplike, ak._v2._typetracer.TypeTracer)
+                else x.typetracer
+                for x in tail
+            ]
 
         return (head, tail)
 

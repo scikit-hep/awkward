@@ -149,7 +149,7 @@ class RegularArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if not self._nplike.known_data and where < 0:
+        if self._nplike.known_data and where < 0:
             where += self.length
 
         if where < 0 or where >= self.length:
@@ -250,12 +250,10 @@ class RegularArray(Content):
                 self._size,
             )
         )
-        if isinstance(out.data, ak._v2._typetracer.TypeTracerArray):
-            out.data.fill_other = self._length * self._size
         return out
 
     def _broadcast_tooffsets64(self, offsets):
-        if offsets.length == 0 or offsets[0] != 0:
+        if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
             raise AssertionError(
                 "broadcast_tooffsets64 can only be used with offsets that start at 0, not {0}".format(
                     "(empty)" if offsets.length == 0 else str(offsets[0])

@@ -237,7 +237,7 @@ class RecordArray(Content):
         return self._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if not self._nplike.known_data and where < 0:
+        if self._nplike.known_data and where < 0:
             where += self.length
 
         if where < 0 or where >= self.length:

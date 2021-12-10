@@ -420,8 +420,8 @@ def prepare_tuple_bool_to_int(item):
             )
 
     elif isinstance(item, ak._v2.contents.NumpyArray):
-        assert item.shape == (item.length,)
-        return item
+        assert item.data.shape == (item.length,)
+        return item.data
 
     else:
         raise AssertionError(type(item))

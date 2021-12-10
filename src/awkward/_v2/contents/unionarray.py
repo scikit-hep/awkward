@@ -665,6 +665,22 @@ class UnionArray(Content):
         for i in range(len(others)):
             head.append(others[i])
 
+        if any(
+            isinstance(x.nplike, ak._v2._typetracer.TypeTracer) for x in head + tail
+        ):
+            head = [
+                x
+                if isinstance(x.nplike, ak._v2._typetracer.TypeTracer)
+                else x.typetracer
+                for x in head
+            ]
+            tail = [
+                x
+                if isinstance(x.nplike, ak._v2._typetracer.TypeTracer)
+                else x.typetracer
+                for x in tail
+            ]
+
         return (head, tail)
 
     def _reverse_merge(self, other):

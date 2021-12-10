@@ -226,8 +226,6 @@ class ListArray(Content):
                 starts_len,
             )
         )
-        if isinstance(out.data, ak._v2._typetracer.TypeTracerArray):
-            out.data.fill_other = self._content.length
         return out
 
     def _broadcast_tooffsets64(self, offsets):
@@ -365,10 +363,6 @@ class ListArray(Content):
             )
 
             nextcarry = ak._v2.index.Index64.empty(numvalid[0], self._nplike)
-            if isinstance(nextcarry.data, ak._v2._typetracer.TypeTracerArray):
-                nextcarry.data.shape = ak._v2._typetracer.Interval(
-                    0, slicecontent._index.length
-                )
 
             smalloffsets = ak._v2.index.Index64.empty(
                 slicestarts.length + 1, self._nplike
@@ -416,7 +410,10 @@ class ListArray(Content):
 
             if isinstance(out, ak._v2.contents.listoffsetarray.ListOffsetArray):
                 content = out._content
-                missing_trim = ak._v2.index.Index64(missing[0 : largeoffsets[-1]])
+                if largeoffsets.nplike.known_data:
+                    missing_trim = missing[0 : largeoffsets[-1]]
+                else:
+                    missing_trim = missing
                 indexedoptionarray = (
                     ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                         missing_trim, content, None, self._parameters, self._nplike
