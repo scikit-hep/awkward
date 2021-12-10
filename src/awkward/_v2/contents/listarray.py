@@ -922,7 +922,10 @@ class ListArray(Content):
             return self._localindex_axis0()
         elif posaxis == depth + 1:
             offsets = self._compact_offsets64(True)
-            innerlength = offsets[offsets.length - 1]
+            if self._nplike.known_data:
+                innerlength = offsets[offsets.length - 1]
+            else:
+                innerlength = ak._v2._typetracer.UnknownLength
             localindex = ak._v2.index.Index64.empty(innerlength, self._nplike)
             self._handle_error(
                 self._nplike[

@@ -1003,9 +1003,12 @@ class UnionArray(Content):
                 )
             if self.index.length < self.tags.length:
                 return 'at {0} ("{1}"): len(index) < len(tags)'.format(path, type(self))
+
             lencontents = self._nplike.empty(len(self.contents), dtype=np.int64)
-            for i in range(len(self.contents)):
-                lencontents[i] = self.contents[i].length
+            if self._nplike.known_shape:
+                for i in range(len(self.contents)):
+                    lencontents[i] = self.contents[i].length
+
             error = self._nplike[
                 "awkward_UnionArray_validity",
                 self.tags.dtype.type,
@@ -1018,6 +1021,7 @@ class UnionArray(Content):
                 len(self.contents),
                 lencontents,
             )
+
             if error.str is not None:
                 if error.filename is None:
                     filename = ""
@@ -1029,10 +1033,12 @@ class UnionArray(Content):
                 return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
                     path, type(self), message, error.id, filename
                 )
+
             for i in range(len(self.contents)):
                 sub = self.contents[i].validityerror(path + ".content({0})".format(i))
                 if sub != "":
                     return sub
+
             return ""
 
     def _nbytes_part(self):

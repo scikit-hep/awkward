@@ -260,7 +260,7 @@ class RegularArray(Content):
                 )
             )
 
-        if offsets.length - 1 != self._length:
+        if offsets.nplike.known_shape and offsets.length - 1 != self._length:
             raise AssertionError(
                 "cannot broadcast RegularArray of length {0} to length {1}".format(
                     self._length, offsets.length - 1
@@ -821,7 +821,8 @@ class RegularArray(Content):
             for i in range(n):
                 ptr = ak._v2.index.Index64.empty(totallen, self._nplike, dtype=np.int64)
                 tocarry.append(ptr)
-                tocarryraw[i] = ptr.ptr
+                if self._nplike.known_data:
+                    tocarryraw[i] = ptr.ptr
 
             toindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
             fromindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)

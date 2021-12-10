@@ -125,7 +125,11 @@ class ListOffsetArray(Content):
 
     def toListOffsetArray64(self, start_at_zero=False):
         if issubclass(self._offsets.dtype.type, np.int64):
-            if not start_at_zero or self._offsets[0] == 0:
+            if (
+                not self._nplike.known_data
+                or not start_at_zero
+                or self._offsets[0] == 0
+            ):
                 return self
 
             if start_at_zero:
@@ -258,7 +262,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-        if offsets.length - 1 != self.length:
+        if offsets.nplike.known_shape and offsets.length - 1 != self.length:
             raise AssertionError(
                 "cannot broadcast {0} of length {1} to length {2}".format(
                     type(self).__name__, self.length, offsets.length - 1
@@ -687,7 +691,10 @@ class ListOffsetArray(Content):
             return self._localindex_axis0()
         elif posaxis == depth + 1:
             offsets = self._compact_offsets64(True)
-            innerlength = offsets[offsets.length - 1]
+            if self._nplike.known_data:
+                innerlength = offsets[offsets.length - 1]
+            else:
+                innerlength = ak._v2._typetracer.UnknownLength
             localindex = ak._v2.index.Index64.empty(innerlength, self._nplike)
             self._handle_error(
                 self._nplike[
@@ -1393,7 +1400,8 @@ class ListOffsetArray(Content):
                     totallen[0], self._nplike, dtype=np.int64
                 )
                 tocarry.append(ptr)
-                tocarryraw[i] = ptr.ptr
+                if self._nplike.known_data:
+                    tocarryraw[i] = ptr.ptr
 
             toindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
             fromindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)

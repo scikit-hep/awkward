@@ -204,7 +204,8 @@ def test_UnmaskedArray():
     assert ak.to_list(old[0, 1:]) == [1.1, 2.2, 3.3]
     assert ak.to_list(new[0, 1:]) == [1.1, 2.2, 3.3]
     assert v1v2_equal(old[0, 1:], new[0, 1:])
-    assert new.typetracer[0, 1:].form == new[0, 1:].form
+    assert isinstance(new.typetracer[0, 1:], ak._v2._typetracer.MaybeNone)
+    assert new.typetracer[0, 1:].content.form == new[0, 1:].form
 
     with pytest.raises(IndexError):
         new[1, "hello"]

@@ -943,7 +943,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen, self._nplike, dtype=np.int64
             )
             tocarry.append(ptr)
-            tocarryraw[i] = ptr.ptr
+            if self._nplike.known_data:
+                tocarryraw[i] = ptr.ptr
 
         toindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
         fromindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)

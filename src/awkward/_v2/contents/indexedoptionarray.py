@@ -1278,7 +1278,7 @@ class IndexedOptionArray(Content):
         if inject_nones:
             out = ak._v2.contents.RegularArray(
                 out,
-                parents_length,
+                parents_length if self._nplike.known_shape else 1,
                 0,
                 None,
                 self._parameters,
