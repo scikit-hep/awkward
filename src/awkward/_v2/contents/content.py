@@ -121,7 +121,9 @@ class Content(object):
         if nplike is None:
             nplike = self._nplike
         if not nplike.known_data:
-            raise TypeError("cannot call 'to_buffers' on an array without concrete data")
+            raise TypeError(
+                "cannot call 'to_buffers' on an array without concrete data"
+            )
 
         if ak._v2._util.isstr(buffer_key):
 
@@ -445,7 +447,12 @@ class Content(object):
                 nextwhere = ak._v2._slicing.getitem_broadcast(items, self._nplike)
 
                 next = ak._v2.contents.RegularArray(
-                    self, self.length, 1, None, None, self._nplike
+                    self,
+                    self.length if self._nplike.known_shape else 1,
+                    1,
+                    None,
+                    None,
+                    self._nplike,
                 )
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
                 if out.length == 0:

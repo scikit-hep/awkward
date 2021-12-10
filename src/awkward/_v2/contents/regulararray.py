@@ -39,12 +39,13 @@ class RegularArray(Content):
                     type(self).__name__, size
                 )
             )
-        if not (ak._util.isint(zeros_length) and zeros_length >= 0):
-            raise TypeError(
-                "{0} 'zeros_length' must be a non-negative integer, not {1}".format(
-                    type(self).__name__, zeros_length
+        if not isinstance(zeros_length, ak._v2._typetracer.UnknownLengthType):
+            if not (ak._util.isint(zeros_length) and zeros_length >= 0):
+                raise TypeError(
+                    "{0} 'zeros_length' must be a non-negative integer, not {1}".format(
+                        type(self).__name__, zeros_length
+                    )
                 )
-            )
         if nplike is None:
             nplike = content.nplike
 
@@ -156,6 +157,9 @@ class RegularArray(Content):
         return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         assert step == 1
         zeros_length = stop - start
@@ -421,7 +425,9 @@ class RegularArray(Content):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = self._nplike.asarray(head.data.reshape(-1))
 
-            regular_flathead = ak._v2.index.Index64.empty(flathead.shape[0], self._nplike)
+            regular_flathead = ak._v2.index.Index64.empty(
+                flathead.shape[0], self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_getitem_next_array_regularize",

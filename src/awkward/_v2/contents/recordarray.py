@@ -242,6 +242,9 @@ class RecordArray(Content):
         return Record(self, where)
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         assert step == 1
         if len(self._contents) == 0:

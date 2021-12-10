@@ -118,6 +118,9 @@ class UnmaskedArray(Content):
         return self._content._getitem_at(where)
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         assert step == 1
         return UnmaskedArray(

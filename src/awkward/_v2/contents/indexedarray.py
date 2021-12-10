@@ -127,6 +127,9 @@ class IndexedArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
+        if not self._index.nplike.known_data:
+            return self._getitem_nothing()
+
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
@@ -134,6 +137,9 @@ class IndexedArray(Content):
         return self._content._getitem_at(self._index[where])
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         assert step == 1
         return IndexedArray(
@@ -782,7 +788,9 @@ class IndexedArray(Content):
                 )
 
             elif isinstance(unique, ak._v2.contents.NumpyArray):
-                nextoutindex = ak._v2.index.Index64(self._nplike.arange(unique.length, dtype=np.int64))
+                nextoutindex = ak._v2.index.Index64(
+                    self._nplike.arange(unique.length, dtype=np.int64)
+                )
                 out = ak._v2.contents.IndexedOptionArray(
                     nextoutindex,
                     unique,

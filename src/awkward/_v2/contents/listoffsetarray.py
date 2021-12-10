@@ -173,6 +173,9 @@ class ListOffsetArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
+        if not self._offsets.nplike.known_data:
+            return self._getitem_nothing()
+
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
@@ -181,6 +184,9 @@ class ListOffsetArray(Content):
         return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         offsets = self._offsets[start : stop + 1]
         if offsets.length == 0:
@@ -1715,7 +1721,9 @@ class ListOffsetArray(Content):
         if posaxis == depth + 1:
             if not clip:
                 tolength = ak._v2.index.Index64.zeros(1, self._nplike)
-                offsets_ = ak._v2.index.Index64.empty(self._offsets.length, self._nplike)
+                offsets_ = ak._v2.index.Index64.empty(
+                    self._offsets.length, self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListOffsetArray_rpad_length_axis1",
@@ -1891,7 +1899,9 @@ class ListOffsetArray(Content):
             )
 
         else:
-            paarray = akcontent._to_arrow(pyarrow, None, None, akcontent.length, options)
+            paarray = akcontent._to_arrow(
+                pyarrow, None, None, akcontent.length, options
+            )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
                 akcontent.is_OptionType

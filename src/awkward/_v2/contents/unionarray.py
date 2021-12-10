@@ -175,6 +175,11 @@ class UnionArray(Content):
         return self._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
+        if not self._tags.nplike.known_data:
+            raise ValueError(
+                "can't determine the type of an item selected from a union array without a concrete array"
+            )
+
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
@@ -183,6 +188,9 @@ class UnionArray(Content):
         return self._contents[tag]._getitem_at(index)
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         assert step == 1
         return UnionArray(
@@ -1137,7 +1145,9 @@ class UnionArray(Content):
     def _completely_flatten(self, nplike, options):
         out = []
         for content in self._contents:
-            out.extend(content[: self._tags.length]._completely_flatten(nplike, options))
+            out.extend(
+                content[: self._tags.length]._completely_flatten(nplike, options)
+            )
         return out
 
     def _recursively_apply(

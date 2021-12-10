@@ -54,6 +54,27 @@ class UnknownLengthType(object):
     def __rmul__(self, other):
         return UnknownLength
 
+    def __div__(self, other):
+        return UnknownLength
+
+    def __truediv__(self, other):
+        return UnknownLength
+
+    def __floordiv__(self, other):
+        return UnknownLength
+
+    def __lt__(self, other):
+        return False
+
+    def __le__(self, other):
+        return False
+
+    def __gt__(self, other):
+        return False
+
+    def __ge__(self, other):
+        return False
+
 
 UnknownLength = UnknownLengthType()
 
@@ -147,31 +168,63 @@ class TypeTracerArray(object):
         )
 
     def __getitem__(self, where):
-        raise AssertionError(
-            "bug in Awkward Array: attempt to get values from a TypeTracerArray"
-        )
+        if ak._v2._util.isint(where):
+            if len(self._shape) > 1:
+                return TypeTracerArray(self._dtype, self._shape[1:])
+            else:
+                raise AssertionError(
+                    "bug in Awkward Array: attempt to get values from a TypeTracerArray"
+                )
+
+        elif isinstance(where, slice):
+            return self
+
+        elif (
+            hasattr(where, "dtype")
+            and hasattr(where, "shape")
+            and len(where.shape) == 1
+        ):
+            return self
+
+        elif isinstance(where, tuple) and len(where) == 1:
+            return self.__getitem__(where[0])
+
+        elif isinstance(where, tuple) and all(
+            hasattr(x, "dtype") and hasattr(x, "shape") and len(x.shape) == 1
+            for x in where
+        ):
+            return TypeTracerArray(
+                self._dtype, (UnknownLength,) + self._shape[len(where) :]
+            )
+
+        else:
+            raise AssertionError(
+                "bug in Awkward Array: TypeTracerArray sliced with {0}".format(
+                    repr(where)
+                )
+            )
 
     def __lt__(self, other):
         if isinstance(other, numbers.Real):
-            return TypeTracerArray(np.bool_, self._shape, False, False)
+            return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
 
     def __le__(self, other):
         if isinstance(other, numbers.Real):
-            return TypeTracerArray(np.bool_, self._shape, False, False)
+            return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
 
     def __gt__(self, other):
         if isinstance(other, numbers.Real):
-            return TypeTracerArray(np.bool_, self._shape, False, False)
+            return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
 
     def __ge__(self, other):
         if isinstance(other, numbers.Real):
-            return TypeTracerArray(np.bool_, self._shape, False, False)
+            return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
 
@@ -257,7 +310,7 @@ class TypeTracer(ak.nplike.NumpyLike):
         # shape/len, value[, dtype=]
         if dtype is unset:
             dtype = numpy.array(value).dtype
-        return TypeTracerArray(dtype, shape, fill_zero=value, fill_other=value)
+        return TypeTracerArray(dtype, shape)
 
     def zeros_like(self, *args, **kwargs):
         # array
@@ -305,9 +358,34 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     ############################ manipulation
 
-    def broadcast_arrays(self, *args, **kwargs):
+    def broadcast_arrays(self, *arrays):
         # array1[, array2[, ...]]
-        raise NotImplementedError
+        if len(arrays) == 0:
+            return []
+        next = []
+        for x in arrays:
+            if not hasattr(x, "shape"):
+                next.append(numpy.array(x))
+            else:
+                next.append(x)
+        first, *rest = next
+        shape = list(first.shape[1:])
+        for x in rest:
+            thisshape = x.shape[1:]
+            if len(shape) < len(thisshape):
+                shape = [1] * (len(thisshape) - len(shape)) + shape
+            elif len(shape) > len(thisshape):
+                thisshape = (1,) * (len(shape) - len(thisshape)) + thisshape
+            for i in range(len(shape)):
+                if shape[i] == 1 and thisshape[i] != 1:
+                    shape[i] = thisshape[i]
+                elif shape[i] != 1 and thisshape[i] != 1 and shape[i] != thisshape[i]:
+                    raise ValueError(
+                        "shape mismatch: objects cannot be broadcast to a single shape"
+                    )
+        return [
+            TypeTracerArray(x.dtype, [UnknownLength] + shape) for x in [first] + rest
+        ]
 
     def add(self, *args, **kwargs):
         # array1, array2[, out=]
@@ -321,9 +399,9 @@ class TypeTracer(ak.nplike.NumpyLike):
         # arrays[, out=]
         raise NotImplementedError
 
-    def nonzero(self, *args, **kwargs):
+    def nonzero(self, array):
         # array
-        raise NotImplementedError
+        return (TypeTracerArray(np.int64, (UnknownLength,)),) * len(array.shape)
 
     def unique(self, *args, **kwargs):
         # array

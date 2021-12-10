@@ -176,6 +176,9 @@ class NumpyArray(Content):
             return out
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         assert step == 1
 
@@ -208,7 +211,6 @@ class NumpyArray(Content):
                 raise exception(self, carry.data, str(err))
             else:
                 raise exception(str(err))
-
         return NumpyArray(
             nextdata,
             self._carry_identifier(carry, exception),

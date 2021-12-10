@@ -41,7 +41,7 @@ class ListArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if not starts.length <= stops.length:
+        if starts.length > stops.length:
             raise ValueError(
                 "{0} len(starts) ({1}) must be <= len(stops) ({2})".format(
                     type(self).__name__, starts.length, stops.length
@@ -144,6 +144,9 @@ class ListArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
+        if not self._starts.nplike.known_data:
+            return self._getitem_nothing()
+
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
@@ -152,6 +155,9 @@ class ListArray(Content):
         return self._content._getitem_range(slice(start, stop))
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         assert step == 1
         return ListArray(
@@ -240,7 +246,9 @@ class ListArray(Content):
             )
 
         if isinstance(slicecontent, ak._v2.contents.listoffsetarray.ListOffsetArray):
-            outoffsets = ak._v2.index.Index64.empty(slicestarts.length + 1, self._nplike)
+            outoffsets = ak._v2.index.Index64.empty(
+                slicestarts.length + 1, self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_jagged_descend",
@@ -288,7 +296,9 @@ class ListArray(Content):
                 )
             )
             sliceindex = ak._v2.index.Index64(slicecontent._data)
-            outoffsets = ak._v2.index.Index64.zeros(slicestarts.length + 1, self._nplike)
+            outoffsets = ak._v2.index.Index64.zeros(
+                slicestarts.length + 1, self._nplike
+            )
             nextcarry = ak._v2.index.Index64.zeros(carrylen[0], self._nplike)
 
             self._handle_error(
@@ -475,30 +485,36 @@ class ListArray(Content):
             start = ak._util.kSliceNone if start is None else start
             stop = ak._util.kSliceNone if stop is None else stop
 
-            carrylength = ak._v2.index.Index64.empty(1, self._nplike)
-            self._handle_error(
-                self._nplike[
-                    "awkward_ListArray_getitem_next_range_carrylength",
-                    carrylength.dtype.type,
-                    self._starts.dtype.type,
-                    self._stops.dtype.type,
-                ](
-                    carrylength.to(self._nplike),
-                    self._starts.to(self._nplike),
-                    self._stops.to(self._nplike),
-                    lenstarts,
-                    start,
-                    stop,
-                    step,
+            if self._nplike.known_shape:
+                carrylength = ak._v2.index.Index64.empty(1, self._nplike)
+                self._handle_error(
+                    self._nplike[
+                        "awkward_ListArray_getitem_next_range_carrylength",
+                        carrylength.dtype.type,
+                        self._starts.dtype.type,
+                        self._stops.dtype.type,
+                    ](
+                        carrylength.to(self._nplike),
+                        self._starts.to(self._nplike),
+                        self._stops.to(self._nplike),
+                        lenstarts,
+                        start,
+                        stop,
+                        step,
+                    )
                 )
-            )
+                nextcarry = ak._v2.index.Index64.empty(carrylength[0], self._nplike)
+            else:
+                nextcarry = ak._v2.index.Index64.empty(
+                    ak._v2._typetracer.UnknownLength, self._nplike
+                )
+
             if self._starts.dtype == "int64":
                 nextoffsets = ak._v2.index.Index64.empty(lenstarts + 1, self._nplike)
             elif self._starts.dtype == "int32":
                 nextoffsets = ak._v2.index.Index32.empty(lenstarts + 1, self._nplike)
             elif self._starts.dtype == "uint32":
                 nextoffsets = ak._v2.index.IndexU32.empty(lenstarts + 1, self._nplike)
-            nextcarry = ak._v2.index.Index64.empty(carrylength[0], self._nplike)
 
             self._handle_error(
                 self._nplike[
@@ -530,20 +546,25 @@ class ListArray(Content):
                     self._nplike,
                 )
             else:
-                total = ak._v2.index.Index64.empty(1, self._nplike)
-                self._handle_error(
-                    self._nplike[
-                        "awkward_ListArray_getitem_next_range_counts",
-                        total.dtype.type,
-                        nextoffsets.dtype.type,
-                    ](
-                        total.to(self._nplike),
-                        nextoffsets.to(self._nplike),
-                        lenstarts,
+                if self._nplike.known_shape:
+                    total = ak._v2.index.Index64.empty(1, self._nplike)
+                    self._handle_error(
+                        self._nplike[
+                            "awkward_ListArray_getitem_next_range_counts",
+                            total.dtype.type,
+                            nextoffsets.dtype.type,
+                        ](
+                            total.to(self._nplike),
+                            nextoffsets.to(self._nplike),
+                            lenstarts,
+                        )
                     )
-                )
+                    nextadvanced = ak._v2.index.Index64.empty(total[0], self._nplike)
+                else:
+                    nextadvanced = ak._v2.index.Index64.empty(
+                        ak._v2._typetracer.UnknownLength, self._nplike
+                    )
 
-                nextadvanced = ak._v2.index.Index64.empty(total[0], self._nplike)
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_range_spreadadvanced",
@@ -1118,7 +1139,9 @@ class ListArray(Content):
                     starts_ = ak._v2.index.Index64.empty(
                         self._starts.length, self._nplike
                     )
-                    stops_ = ak._v2.index.Index64.empty(self._stops.length, self._nplike)
+                    stops_ = ak._v2.index.Index64.empty(
+                        self._stops.length, self._nplike
+                    )
                     self._handle_error(
                         self._nplike[
                             "awkward_ListArray_rpad_axis1",

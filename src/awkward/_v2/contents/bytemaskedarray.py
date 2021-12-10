@@ -163,6 +163,9 @@ class ByteMaskedArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
+        if not self._mask.nplike.known_data:
+            return self._getitem_nothing()
+
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
@@ -173,6 +176,9 @@ class ByteMaskedArray(Content):
             return None
 
     def _getitem_range(self, where):
+        if not self._nplike.known_shape:
+            return self
+
         start, stop, step = where.indices(self.length)
         assert step == 1
         return ByteMaskedArray(
@@ -270,8 +276,12 @@ class ByteMaskedArray(Content):
         numnull = ak._v2.index.Index64.empty(1, self._nplike)
         nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-        reducedstarts = ak._v2.index.Index64.empty(self.length - numnull[0], self._nplike)
-        reducedstops = ak._v2.index.Index64.empty(self.length - numnull[0], self._nplike)
+        reducedstarts = ak._v2.index.Index64.empty(
+            self.length - numnull[0], self._nplike
+        )
+        reducedstops = ak._v2.index.Index64.empty(
+            self.length - numnull[0], self._nplike
+        )
 
         self._handle_error(
             self._nplike[
