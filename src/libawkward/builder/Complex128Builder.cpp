@@ -99,19 +99,19 @@ namespace awkward {
   const BuilderPtr
   Complex128Builder::integer(int64_t x) {
     buffer_.append(std::complex<double>((double)x, 0));
-    return shared_from_this();
+    return nullptr; //shared_from_this();
   }
 
   const BuilderPtr
   Complex128Builder::real(double x) {
     buffer_.append(std::complex<double>((double)x, 0));
-    return shared_from_this();
+    return nullptr; // shared_from_this();
   }
 
   const BuilderPtr
   Complex128Builder::complex(std::complex<double> x) {
     buffer_.append(x);
-    return shared_from_this();
+    return nullptr; // shared_from_this();
   }
 
   const BuilderPtr

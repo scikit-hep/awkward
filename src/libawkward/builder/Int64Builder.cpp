@@ -79,7 +79,7 @@ namespace awkward {
   const BuilderPtr
   Int64Builder::integer(int64_t x) {
     buffer_.append(x);
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr

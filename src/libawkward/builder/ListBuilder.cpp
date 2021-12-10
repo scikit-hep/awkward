@@ -76,7 +76,7 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->null());
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -89,7 +89,7 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->boolean(x));
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -102,7 +102,7 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->integer(x));
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -115,7 +115,7 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->real(x));
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -128,7 +128,7 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->complex(x));
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -141,7 +141,7 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->datetime(x, unit));
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -154,7 +154,7 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->timedelta(x, unit));
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -167,7 +167,7 @@ namespace awkward {
     }
     else {
       maybeupdate(content_.get()->string(x, length, encoding));
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -221,7 +221,7 @@ namespace awkward {
     }
     else {
       content_.get()->index(index);
-      return shared_from_this();
+      return nullptr;
     }
   }
 
@@ -278,7 +278,7 @@ namespace awkward {
 
   void
   ListBuilder::maybeupdate(const BuilderPtr tmp) {
-    if (tmp.get() != content_.get()) {
+    if (tmp != nullptr  &&  tmp.get() != content_.get()) {
       content_ = std::move(tmp);
     }
   }

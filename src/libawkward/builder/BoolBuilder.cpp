@@ -65,7 +65,7 @@ namespace awkward {
   const BuilderPtr
   BoolBuilder::boolean(bool x) {
     buffer_.append(x);
-    return shared_from_this();
+    return nullptr;//shared_from_this();
   }
 
   const BuilderPtr

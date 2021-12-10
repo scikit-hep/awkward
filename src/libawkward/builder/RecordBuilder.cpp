@@ -131,7 +131,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->null();
     }
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
@@ -152,7 +152,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->boolean(x);
     }
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
@@ -173,7 +173,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->integer(x);
     }
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
@@ -194,7 +194,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->real(x);
     }
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
@@ -215,7 +215,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->complex(x);
     }
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
@@ -236,7 +236,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->datetime(x, unit);
     }
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
@@ -257,7 +257,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->timedelta(x, unit);
     }
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
@@ -281,7 +281,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->string(x, length, encoding);
     }
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
@@ -554,12 +554,12 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endrecord();
     }
-    return shared_from_this();
+    return nullptr;//shared_from_this();
   }
 
   void
   RecordBuilder::maybeupdate(int64_t i, const BuilderPtr tmp) {
-    if (tmp.get() != contents_[(size_t)i].get()) {
+    if (tmp != nullptr  &&  tmp.get() != contents_[(size_t)i].get()) {
       contents_[(size_t)i] = std::move(tmp);
     }
   }

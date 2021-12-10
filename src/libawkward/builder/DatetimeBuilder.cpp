@@ -119,7 +119,7 @@ namespace awkward {
   DatetimeBuilder::datetime(int64_t x, const std::string& unit) {
     if (unit == units_) {
       content_.append(x);
-      return shared_from_this();
+      return nullptr; // shared_from_this();
     }
     else {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
@@ -132,7 +132,7 @@ namespace awkward {
   DatetimeBuilder::timedelta(int64_t x, const std::string& unit) {
     if (unit == units_) {
       content_.append(x);
-      return shared_from_this();
+      return nullptr; // shared_from_this();
     }
     else {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
