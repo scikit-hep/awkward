@@ -63,9 +63,9 @@ class RecordArray(Content):
                         type(self).__name__, repr(content)
                     )
                 )
-            if not content.length >= length:
+            if content.length < length:
                 raise ValueError(
-                    "{0} len(content) ({1}) must be <= length ({2}) for all 'contents'".format(
+                    "{0} len(content) ({1}) must be >= length ({2}) for all 'contents'".format(
                         type(self).__name__, content.length, length
                     )
                 )

@@ -455,6 +455,7 @@ class Content(object):
                     self._nplike,
                 )
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
+
                 if out.length == 0:
                     return out._getitem_nothing()
                 else:

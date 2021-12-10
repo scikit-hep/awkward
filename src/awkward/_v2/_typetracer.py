@@ -360,14 +360,22 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def broadcast_arrays(self, *arrays):
         # array1[, array2[, ...]]
+
         if len(arrays) == 0:
             return []
+
         next = []
+        maxdim = 0
         for x in arrays:
             if not hasattr(x, "shape"):
                 next.append(numpy.array(x))
             else:
                 next.append(x)
+                maxdim = max(maxdim, len(x.shape))
+
+        if maxdim == 0:
+            return next
+
         first, *rest = next
         shape = list(first.shape[1:])
         for x in rest:
@@ -383,6 +391,7 @@ class TypeTracer(ak.nplike.NumpyLike):
                     raise ValueError(
                         "shape mismatch: objects cannot be broadcast to a single shape"
                     )
+
         return [
             TypeTracerArray(x.dtype, [UnknownLength] + shape) for x in [first] + rest
         ]

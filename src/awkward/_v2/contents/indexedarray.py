@@ -128,7 +128,7 @@ class IndexedArray(Content):
 
     def _getitem_at(self, where):
         if not self._index.nplike.known_data:
-            return self._getitem_nothing()
+            return self._content._getitem_at(where)
 
         if where < 0:
             where += self.length
