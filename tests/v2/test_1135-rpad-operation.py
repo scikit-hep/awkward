@@ -117,6 +117,7 @@ def test_rpad_numpy_array():
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
+
     assert array.typetracer.rpad(1, 0).form == array.rpad(1, 0).form
     assert ak.to_list(array.rpad(2, 0)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
@@ -802,7 +803,9 @@ def test_rpad_listoffset_array():
     ]
     assert listoffsetarray.typetracer.rpad(3, 0).form == listoffsetarray.rpad(3, 0).form
 
-    assert str(listoffsetarray.form.type) == str(listoffsetarray.rpad(3, 0).form.type)
+    assert "option[{0}]".format(str(listoffsetarray.form.type)) == str(
+        listoffsetarray.rpad(3, 0).form.type
+    )
 
     assert ak.to_list(listoffsetarray.rpad(7, 0)) == [
         [0.0, 1.1, 2.2],
@@ -896,7 +899,9 @@ def test_rpad_listoffset_array():
         [],
     ]
     assert listoffsetarray.typetracer.rpad(1, 0).form == listoffsetarray.rpad(1, 0).form
-    assert str(listoffsetarray.form.type) == str(listoffsetarray.rpad(1, 0).form.type)
+    assert "option[{0}]".format(str(listoffsetarray.form.type)) == str(
+        listoffsetarray.rpad(1, 0).form.type
+    )
 
     assert ak.to_list(listoffsetarray.rpad(6, 0)) == [
         [3.3],
@@ -986,7 +991,7 @@ def test_rpad_list_array():
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert str(array.form.type) == str(array.rpad(1, 0).form.type)
+    assert "option[{0}]".format(str(array.form.type)) == str(array.rpad(1, 0).form.type)
 
     assert ak.to_list(array.rpad(2, 0)) == [
         [0.0, 1.1, 2.2],
@@ -996,7 +1001,7 @@ def test_rpad_list_array():
         [8.8],
     ]
     assert array.typetracer.rpad(2, 0).form == array.rpad(2, 0).form
-    assert str(array.form.type) == str(array.rpad(2, 0).form.type)
+    assert "option[{0}]".format(str(array.form.type)) == str(array.rpad(2, 0).form.type)
 
     assert ak.to_list(array.rpad(7, 0)) == [
         [0.0, 1.1, 2.2],

@@ -1170,20 +1170,17 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def rpad_axis0(self, target, clip):
         if not clip and target < self.length:
-            return self
-        index = ak._v2.index.Index64.empty(target, self._nplike)
+            index = ak._v2.index.Index64(self._nplike.arange(self.length))
 
-        self._handle_error(
-            self._nplike[
-                "awkward_index_rpad_and_clip_axis0",
-                index.dtype.type,
-            ](index.to(self._nplike), target, self.length)
-        )
-        # TODO: Replace the kernel call with below code once typtracer supports arange
-        # shorter = min(target, self.length)
-        # npindex = self._nplike.full(target, -1, dtype=np.int64)
-        # npindex[:shorter] = self._nplike.arange(shorter, dtype=np.int64)
-        # index = ak._v2.index.Index64(npindex)
+        else:
+            index = ak._v2.index.Index64.empty(target, self._nplike)
+
+            self._handle_error(
+                self._nplike[
+                    "awkward_index_rpad_and_clip_axis0",
+                    index.dtype.type,
+                ](index.to(self._nplike), target, self.length)
+            )
 
         next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             index,

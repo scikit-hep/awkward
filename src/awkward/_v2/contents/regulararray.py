@@ -973,12 +973,14 @@ class RegularArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self.rpad_axis0(target, clip)
+
         elif posaxis == depth + 1:
             if not clip:
                 if target < self._size:
                     return self
                 else:
                     return self._rpad(target, posaxis, depth, True)
+
             else:
                 index = ak._v2.index.Index64.empty(self.length * target, self._nplike)
                 self._handle_error(
@@ -1001,6 +1003,7 @@ class RegularArray(Content):
                     self._parameters,
                     self._nplike,
                 )
+
         else:
             return ak._v2.contents.regulararray.RegularArray(
                 self._content._rpad(target, posaxis, depth + 1, clip),
