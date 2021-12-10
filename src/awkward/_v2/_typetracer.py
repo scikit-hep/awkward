@@ -591,7 +591,25 @@ class TypeTracer(ak.nplike.NumpyLike):
         raise NotImplementedError
 
     def concatenate(self, arrays):
-        return TypeTracerArray(arrays[0].dtype, (UnknownLength,) + arrays[0].shape[1:])
+        inner_shape = None
+        emptyarrays = []
+        for x in arrays:
+            if inner_shape is None:
+                inner_shape = x.shape[1:]
+            elif inner_shape != x.shape[1:]:
+                raise ValueError(
+                    "inner dimensions don't match in concatenate: {0} vs {1}".format(
+                        inner_shape, x.shape[1:]
+                    )
+                )
+            emptyarrays.append(_emptyarray(x))
+
+        if inner_shape is None:
+            raise ValueError("need at least one array to concatenate")
+
+        return TypeTracerArray(
+            numpy.concatenate(emptyarrays).dtype, (UnknownLength,) + inner_shape
+        )
 
     def repeat(self, *args, **kwargs):
         # array, int

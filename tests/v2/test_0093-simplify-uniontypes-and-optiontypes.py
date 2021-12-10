@@ -1337,7 +1337,6 @@ def test_unionarray_simplify():
         ak._v2.contents.listoffsetarray.ListOffsetArray,
     )
     assert len(outer.simplify_uniontype(True, False).contents) == 2
-
     assert (
         outer.typetracer.simplify_uniontype(True, False).form
         == outer.simplify_uniontype(True, False).form
