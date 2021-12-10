@@ -79,6 +79,15 @@ class UnknownLengthType(object):
 UnknownLength = UnknownLengthType()
 
 
+def _emptyarray(x):
+    if isinstance(x, UnknownScalar):
+        return numpy.empty(0, x._dtype)
+    elif hasattr(x, "dtype"):
+        return numpy.empty(0, x.dtype)
+    else:
+        return numpy.empty(0, numpy.array(x).dtype)
+
+
 class UnknownScalar(object):
     def __init__(self, dtype):
         self._dtype = dtype
@@ -95,6 +104,45 @@ class UnknownScalar(object):
 
     def __eq__(self, other):
         return isinstance(other, UnknownScalar) and self._dtype == other._dtype
+
+    def __add__(self, other):
+        return UnknownScalar((_emptyarray(self) + _emptyarray(other)).dtype)
+
+    def __radd__(self, other):
+        return UnknownScalar((_emptyarray(self) + _emptyarray(other)).dtype)
+
+    def __sub__(self, other):
+        return UnknownScalar((_emptyarray(self) - _emptyarray(other)).dtype)
+
+    def __rsub__(self, other):
+        return UnknownScalar((_emptyarray(self) - _emptyarray(other)).dtype)
+
+    def __mul__(self, other):
+        return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
+
+    def __rmul__(self, other):
+        return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
+
+    def __div__(self, other):
+        return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
+
+    def __truediv__(self, other):
+        return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
+
+    def __floordiv__(self, other):
+        return UnknownScalar((_emptyarray(self) // _emptyarray(other)).dtype)
+
+    def __lt__(self, other):
+        return False
+
+    def __le__(self, other):
+        return False
+
+    def __gt__(self, other):
+        return False
+
+    def __ge__(self, other):
+        return False
 
 
 class MaybeNone(object):
@@ -179,7 +227,11 @@ class TypeTracerArray(object):
 
     @shape.setter
     def shape(self, value):
-        if value is None or isinstance(value, (numbers.Integral, UnknownLengthType)):
+        if (
+            value is None
+            or ak._v2._util.isint(value)
+            or isinstance(value, (UnknownLengthType, UnknownScalar))
+        ):
             value = (UnknownLength,)
         elif len(value) == 0:
             value = ()
@@ -279,11 +331,12 @@ class TypeTracerArray(object):
             shapes = []
             for j in range(num_basic, len(where)):
                 wh = where[j]
-                if isinstance(wh, numbers.Integral):
+                if ak._v2._util.isint(wh):
                     shapes.append(numpy.array(0))
                 elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
                     sh = [
-                        1 if isinstance(x, UnknownLengthType) else int(x) for x in wh.shape
+                        1 if isinstance(x, UnknownLengthType) else int(x)
+                        for x in wh.shape
                     ]
                     shapes.append(
                         numpy.lib.stride_tricks.as_strided(
@@ -324,43 +377,6 @@ class TypeTracerArray(object):
         else:
             raise NotImplementedError(repr(where))
 
-    # def __getitem__(self, where):
-    #     if ak._v2._util.isint(where):
-    #         if len(self._shape) > 1:
-    #             return TypeTracerArray(self._dtype, self._shape[1:])
-    #         else:
-    #             raise AssertionError(
-    #                 "bug in Awkward Array: attempt to get values from a TypeTracerArray"
-    #             )
-
-    #     elif isinstance(where, slice):
-    #         return self
-
-    #     elif (
-    #         hasattr(where, "dtype")
-    #         and hasattr(where, "shape")
-    #         and len(where.shape) == 1
-    #     ):
-    #         return self
-
-    #     elif isinstance(where, tuple) and len(where) == 1:
-    #         return self.__getitem__(where[0])
-
-    #     elif isinstance(where, tuple) and all(
-    #         hasattr(x, "dtype") and hasattr(x, "shape") and len(x.shape) == 1
-    #         for x in where
-    #     ):
-    #         return TypeTracerArray(
-    #             self._dtype, (UnknownLength,) + self._shape[len(where) :]
-    #         )
-
-    #     else:
-    #         raise AssertionError(
-    #             "bug in Awkward Array: TypeTracerArray sliced with {0}".format(
-    #                 repr(where)
-    #             )
-    #         )
-
     def __lt__(self, other):
         if isinstance(other, numbers.Real):
             return TypeTracerArray(np.bool_, self._shape)
@@ -390,7 +406,8 @@ class TypeTracerArray(object):
             args = args[0]
 
         assert len(args) != 0
-        assert all(isinstance(x, numbers.Integral) for x in args)
+        assert ak._v2._util.isint(args[0]) or isinstance(args[0], UnknownLengthType)
+        assert all(ak._v2._util.isint(x) for x in args[1:])
         assert all(x >= 0 for x in args[1:])
 
         return TypeTracerArray(self._dtype, (UnknownLength,) + args[1:])

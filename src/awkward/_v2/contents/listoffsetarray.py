@@ -253,7 +253,7 @@ class ListOffsetArray(Content):
         return out
 
     def _broadcast_tooffsets64(self, offsets):
-        if offsets.length == 0 or offsets[0] != 0:
+        if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
             raise AssertionError(
                 "broadcast_tooffsets64 can only be used with offsets that start at 0, not {0}".format(
                     "(empty)" if offsets.length == 0 else str(offsets[0])
@@ -1449,7 +1449,7 @@ class ListOffsetArray(Content):
         mask,
         keepdims,
     ):
-        if self.offsets[0] != 0:
+        if self._offsets.nplike.known_data and self._offsets[0] != 0:
             next = self.toListOffsetArray64(True)
             return next._reduce_next(
                 reducer,

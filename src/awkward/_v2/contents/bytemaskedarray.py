@@ -40,7 +40,7 @@ class ByteMaskedArray(Content):
                     type(self).__name__, repr(valid_when)
                 )
             )
-        if not mask.length <= content.length:
+        if mask.length > content.length:
             raise ValueError(
                 "{0} len(mask) ({1}) must be <= len(content) ({2})".format(
                     type(self).__name__, mask.length, content.length

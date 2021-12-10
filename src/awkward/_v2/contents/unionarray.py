@@ -60,7 +60,7 @@ class UnionArray(Content):
                     )
                 )
 
-        if not tags.length <= index.length:
+        if tags.length > index.length:
             raise ValueError(
                 "{0} len(tags) ({1}) must be <= len(index) ({2})".format(
                     type(self).__name__, tags.length, index.length
@@ -245,7 +245,7 @@ class UnionArray(Content):
 
     def project(self, index):
         lentags = self._tags.length
-        assert self._index.length >= lentags
+        assert not self._index.length < lentags
         lenout = ak._v2.index.Index64.empty(1, self._nplike)
         tmpcarry = ak._v2.index.Index64.empty(lentags, self._nplike)
         self._handle_error(
