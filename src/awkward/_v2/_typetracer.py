@@ -133,6 +133,17 @@ class OneOf(object):
         return "OneOf({0})".format(repr(self._contents))
 
 
+def _length_after_slice(slice, original_length):
+    start, stop, step = slice.indices(original_length)
+    assert step != 0
+
+    if (step > 0 and stop - start > 0) or (step < 0 and stop - start < 0):
+        d, m = divmod(abs(start - stop), abs(step))
+        return d + (1 if m != 0 else 0)
+    else:
+        return 0
+
+
 class TypeTracerArray(object):
     @classmethod
     def from_array(cls, array, dtype=None):
@@ -222,41 +233,133 @@ class TypeTracerArray(object):
         )
 
     def __getitem__(self, where):
-        if ak._v2._util.isint(where):
-            if len(self._shape) > 1:
-                return TypeTracerArray(self._dtype, self._shape[1:])
+        if isinstance(where, tuple):
+            try:
+                i = where.index(Ellipsis)
+            except ValueError:
+                pass
             else:
-                raise AssertionError(
-                    "bug in Awkward Array: attempt to get values from a TypeTracerArray"
-                )
+                before, after = where[:i], where[i + 1 :]
+                missing = max(0, len(self._shape) - (len(before) + len(after)))
+                where = before + (slice(None, None, None),) * missing + after
+
+        if ak._v2._util.isint(where):
+            if len(self._shape) == 1:
+                if where == 0:
+                    return UnknownScalar(self._dtype)
+                else:
+                    return UnknownScalar(self._dtype)
+            else:
+                return TypeTracerArray(self._dtype, self._shape[1:])
 
         elif isinstance(where, slice):
-            return self
+            return TypeTracerArray(self._dtype, (UnknownLength,) + self._shape[1:])
 
         elif (
             hasattr(where, "dtype")
             and hasattr(where, "shape")
-            and len(where.shape) == 1
+            and issubclass(where.dtype.type, np.integer)
         ):
-            return self
+            assert len(self._shape) != 0
+            return TypeTracerArray(self._dtype, where.shape + self._shape[1:])
 
-        elif isinstance(where, tuple) and len(where) == 1:
-            return self.__getitem__(where[0])
-
-        elif isinstance(where, tuple) and all(
-            hasattr(x, "dtype") and hasattr(x, "shape") and len(x.shape) == 1
-            for x in where
+        elif isinstance(where, tuple) and any(
+            hasattr(x, "dtype") and hasattr(x, "shape") for x in where
         ):
-            return TypeTracerArray(
-                self._dtype, (UnknownLength,) + self._shape[len(where) :]
-            )
+            for num_basic, wh in enumerate(where):  # noqa: B007
+                if not isinstance(wh, slice):
+                    break
+
+            if num_basic != 0:
+                tmp = self.__getitem__(where[:num_basic])
+                basic_shape = tmp._shape[:num_basic]
+            else:
+                basic_shape = ()
+
+            shapes = []
+            for j in range(num_basic, len(where)):
+                wh = where[j]
+                if isinstance(wh, numbers.Integral):
+                    shapes.append(numpy.array(0))
+                elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
+                    sh = [
+                        1 if isinstance(x, UnknownLengthType) else int(x) for x in wh.shape
+                    ]
+                    shapes.append(
+                        numpy.lib.stride_tricks.as_strided(
+                            numpy.array(0), shape=sh, strides=[0] * len(sh)
+                        )
+                    )
+                else:
+                    raise NotImplementedError(repr(wh))
+
+            slicer_shape = numpy.broadcast_arrays(*shapes)[0].shape
+
+            shape = basic_shape + slicer_shape + self._shape[num_basic + len(shapes) :]
+            assert len(shape) != 0
+
+            return TypeTracerArray(self._dtype, (UnknownLength,) + shape[1:])
+
+        elif (
+            isinstance(where, tuple)
+            and len(where) > 0
+            and (ak._v2._util.isint(where[0]) or isinstance(where[0], slice))
+        ):
+            head, tail = where[0], where[1:]
+            next = self.__getitem__(head)
+
+            inner_shape = next.shape[1:]
+            after_shape = []
+            for i, wh in enumerate(tail):
+                if isinstance(wh, int):
+                    pass
+                elif isinstance(wh, slice):
+                    after_shape.append(_length_after_slice(wh, inner_shape[i]))
+                else:
+                    raise NotImplementedError(repr(wh))
+
+            shape = (next._shape[0],) + tuple(after_shape)
+            return TypeTracerArray(self._dtype, shape)
 
         else:
-            raise AssertionError(
-                "bug in Awkward Array: TypeTracerArray sliced with {0}".format(
-                    repr(where)
-                )
-            )
+            raise NotImplementedError(repr(where))
+
+    # def __getitem__(self, where):
+    #     if ak._v2._util.isint(where):
+    #         if len(self._shape) > 1:
+    #             return TypeTracerArray(self._dtype, self._shape[1:])
+    #         else:
+    #             raise AssertionError(
+    #                 "bug in Awkward Array: attempt to get values from a TypeTracerArray"
+    #             )
+
+    #     elif isinstance(where, slice):
+    #         return self
+
+    #     elif (
+    #         hasattr(where, "dtype")
+    #         and hasattr(where, "shape")
+    #         and len(where.shape) == 1
+    #     ):
+    #         return self
+
+    #     elif isinstance(where, tuple) and len(where) == 1:
+    #         return self.__getitem__(where[0])
+
+    #     elif isinstance(where, tuple) and all(
+    #         hasattr(x, "dtype") and hasattr(x, "shape") and len(x.shape) == 1
+    #         for x in where
+    #     ):
+    #         return TypeTracerArray(
+    #             self._dtype, (UnknownLength,) + self._shape[len(where) :]
+    #         )
+
+    #     else:
+    #         raise AssertionError(
+    #             "bug in Awkward Array: TypeTracerArray sliced with {0}".format(
+    #                 repr(where)
+    #             )
+    #         )
 
     def __lt__(self, other):
         if isinstance(other, numbers.Real):

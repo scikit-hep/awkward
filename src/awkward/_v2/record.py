@@ -23,15 +23,15 @@ class Record(object):
             raise TypeError(
                 "Record 'at' must be an integer, not {0}".format(repr(array))
             )
-        if 0 <= at < len(array):
-            self._array = array
-            self._at = at
-        else:
+        if at < 0 or at >= array.length:
             raise ValueError(
                 "Record 'at' must be >= 0 and < len(array) == {0}, not {1}".format(
-                    len(array), at
+                    array.length, at
                 )
             )
+        else:
+            self._array = array
+            self._at = at
 
     @property
     def array(self):
@@ -161,7 +161,7 @@ class Record(object):
         return self._array._getitem_fields(where)._getitem_at(self._at)
 
     def packed(self):
-        if len(self._array) == 1:
+        if self._array.length == 1:
             return Record(self._array.packed(), self._at)
         else:
             return Record(self._array[self._at : self._at + 1].packed(), 0)

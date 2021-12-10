@@ -20,7 +20,7 @@ def headtail(oldtail):
         return oldtail[0], oldtail[1:]
 
 
-def getitem_broadcast(items, nplike):
+def getitem_broadcast(items):
     lookup = []
     broadcastable = []
     for item in items:
@@ -39,12 +39,11 @@ def getitem_broadcast(items, nplike):
             or item is Ellipsis
         ):
             lookup.append(None)
-        elif isinstance(item, int):
-            lookup.append(len(broadcastable))
-            broadcastable.append(item)
         else:
             lookup.append(len(broadcastable))
-            broadcastable.append(nplike.asarray(item))
+            broadcastable.append(item)
+
+    nplike = ak.nplike.of(*broadcastable)
 
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
@@ -102,6 +101,9 @@ def prepare_tuple_item(item):
     elif isinstance(item, ak.layout.Content):
         return prepare_tuple_item(v1_to_v2(item))
 
+    elif isinstance(item, ak._v2.highlevel.Array):
+        return prepare_tuple_item(item.layout)
+
     elif isinstance(item, ak._v2.contents.EmptyArray):
         return prepare_tuple_item(item.toNumpyArray(np.int64))
 
@@ -115,12 +117,12 @@ def prepare_tuple_item(item):
         return list(item)
 
     elif isinstance(item, Iterable):
-        layout = v1_to_v2(ak.operations.convert.to_layout(item))
-        as_nplike = layout.maybe_to_array(layout.nplike)
-        if as_nplike is None:
+        layout = ak._v2.operations.convert.to_layout(item)
+        as_array = layout.maybe_to_array(layout.nplike)
+        if as_array is None:
             return prepare_tuple_item(layout)
         else:
-            return prepare_tuple_item(ak._v2.contents.NumpyArray(as_nplike))
+            return as_array
 
     else:
         raise TypeError(

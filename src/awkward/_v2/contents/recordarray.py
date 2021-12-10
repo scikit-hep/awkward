@@ -50,7 +50,9 @@ class RecordArray(Content):
             )
         elif length is None:
             length = min(x.length for x in contents)
-        if not (ak._util.isint(length) and length >= 0):
+        if not isinstance(length, ak._v2._typetracer.UnknownLengthType) and not (
+            ak._util.isint(length) and length >= 0
+        ):
             raise TypeError(
                 "{0} 'length' must be a non-negative integer or None, not {1}".format(
                     type(self).__name__, repr(length)

@@ -20,14 +20,14 @@ def test():
 
     assert ak._v2.operations.convert.to_numpy(empty1).dtype.type is np.float64
 
-    assert ak.to_list(array[empty1]) == [[], [], []]
+    assert ak.to_list(array[empty1]) == []
     assert (
         ak.to_list(
             array[
                 empty1,
             ]
         )
-        == [[], [], []]
+        == []
     )
     assert ak.to_list(array[empty2]) == [[], [], []]
     assert (

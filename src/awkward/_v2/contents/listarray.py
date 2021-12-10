@@ -606,10 +606,10 @@ class ListArray(Content):
             regular_flathead = ak._v2.index.Index64(flathead)
             if advanced is None or advanced.length == 0:
                 nextcarry = ak._v2.index.Index64.empty(
-                    lenstarts * flathead.length, self._nplike
+                    lenstarts * flathead.shape[0], self._nplike
                 )
                 nextadvanced = ak._v2.index.Index64.empty(
-                    lenstarts * flathead.length, self._nplike
+                    lenstarts * flathead.shape[0], self._nplike
                 )
                 self._handle_error(
                     self._nplike[

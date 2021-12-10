@@ -444,7 +444,8 @@ class Content(object):
                     return self
 
                 items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
-                nextwhere = ak._v2._slicing.getitem_broadcast(items, self._nplike)
+
+                nextwhere = ak._v2._slicing.getitem_broadcast(items)
 
                 next = ak._v2.contents.RegularArray(
                     self,
@@ -454,6 +455,7 @@ class Content(object):
                     None,
                     self._nplike,
                 )
+
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
                 if out.length == 0:
@@ -466,6 +468,9 @@ class Content(object):
 
             elif isinstance(where, ak.layout.Content):
                 return self.__getitem__(v1_to_v2(where))
+
+            elif isinstance(where, ak._v2.highlevel.Array):
+                return self.__getitem__(where.layout)
 
             elif (
                 isinstance(where, Content)
@@ -517,12 +522,12 @@ class Content(object):
 
             elif isinstance(where, Iterable):
                 layout = ak._v2.operations.convert.to_layout(where)
-                as_array = layout.maybe_to_array(self._nplike)
+                as_array = layout.maybe_to_array(layout.nplike)
                 if as_array is None:
                     return self.__getitem__(layout)
                 else:
                     return self.__getitem__(
-                        ak._v2.contents.NumpyArray(as_array, None, None, self._nplike)
+                        ak._v2.contents.NumpyArray(as_array, None, None, layout.nplike)
                     )
 
             else:

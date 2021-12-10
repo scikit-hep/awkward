@@ -128,7 +128,10 @@ def test_getitem_deeper():
     assert ak.to_list(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [
         [[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]
     ]
-    assert listarray.typetracer[:1, [1, 1, 0, 0], [1, 0, 1, 0]]
+    assert (
+        listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]].form
+        == listarray.typetracer[:1, [1, 1, 0, 0], [1, 0, 1, 0]].form
+    )
 
 
 content2 = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))

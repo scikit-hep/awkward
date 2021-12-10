@@ -101,7 +101,7 @@ class EmptyArray(Content):
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
-        if carry.length == 0:
+        if carry.length == 0 or not carry.nplike.known_shape:
             return self
         else:
             if issubclass(exception, NestedIndexError):
