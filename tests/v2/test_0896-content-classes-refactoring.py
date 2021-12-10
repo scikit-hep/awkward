@@ -33,7 +33,7 @@ def test_NumpyArray():
     assert a[2] == 2.2
     assert a[-2] == 2.2
     assert type(a[2]) is np.float64
-    assert type(a.typetracer[2]) is np.float64
+    assert a.typetracer[2].dtype.type is np.float64
     with pytest.raises(IndexError):
         a[4]
     with pytest.raises(IndexError):

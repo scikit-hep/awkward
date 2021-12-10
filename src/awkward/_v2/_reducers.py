@@ -75,7 +75,7 @@ class ArgMin(Reducer):
                     result,
                     array.data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -90,7 +90,7 @@ class ArgMin(Reducer):
                     result,
                     array.data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -118,7 +118,7 @@ class ArgMax(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -133,7 +133,7 @@ class ArgMax(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -154,7 +154,7 @@ class Count(Reducer):
             ](
                 result,
                 parents.to(array.nplike),
-                len(parents),
+                parents.length,
                 outlength,
             )
         )
@@ -181,7 +181,7 @@ class CountNonzero(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -196,7 +196,7 @@ class CountNonzero(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -233,7 +233,7 @@ class Sum(Reducer):
                         result,
                         array._data,
                         parents.to(array.nplike),
-                        len(parents),
+                        parents.length,
                         outlength,
                     )
                 )
@@ -248,7 +248,7 @@ class Sum(Reducer):
                         result,
                         array._data,
                         parents.to(array.nplike),
-                        len(parents),
+                        parents.length,
                         outlength,
                     )
                 )
@@ -265,7 +265,7 @@ class Sum(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -280,7 +280,7 @@ class Sum(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -319,7 +319,7 @@ class Prod(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -334,7 +334,7 @@ class Prod(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -349,7 +349,7 @@ class Prod(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -379,7 +379,7 @@ class Any(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -394,7 +394,7 @@ class Any(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -421,7 +421,7 @@ class All(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -436,7 +436,7 @@ class All(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -491,7 +491,7 @@ class Min(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -506,7 +506,7 @@ class Min(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                     cls._min_initial(cls.initial, dtype),
                 )
@@ -522,7 +522,7 @@ class Min(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                     cls._min_initial(cls.initial, dtype),
                 )
@@ -583,7 +583,7 @@ class Max(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                 )
             )
@@ -598,7 +598,7 @@ class Max(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                     cls._max_initial(cls.initial, dtype),
                 )
@@ -614,7 +614,7 @@ class Max(Reducer):
                     result,
                     array._data,
                     parents.to(array.nplike),
-                    len(parents),
+                    parents.length,
                     outlength,
                     cls._max_initial(cls.initial, dtype),
                 )

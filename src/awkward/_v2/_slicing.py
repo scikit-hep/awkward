@@ -20,7 +20,7 @@ def headtail(oldtail):
         return oldtail[0], oldtail[1:]
 
 
-def getitem_broadcast(items, nplike):
+def getitem_broadcast(items):
     lookup = []
     broadcastable = []
     for item in items:
@@ -39,12 +39,11 @@ def getitem_broadcast(items, nplike):
             or item is Ellipsis
         ):
             lookup.append(None)
-        elif isinstance(item, int):
-            lookup.append(len(broadcastable))
-            broadcastable.append(item)
         else:
             lookup.append(len(broadcastable))
-            broadcastable.append(nplike.asarray(item))
+            broadcastable.append(item)
+
+    nplike = ak.nplike.of(*broadcastable)
 
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
@@ -102,6 +101,9 @@ def prepare_tuple_item(item):
     elif isinstance(item, ak.layout.Content):
         return prepare_tuple_item(v1_to_v2(item))
 
+    elif isinstance(item, ak._v2.highlevel.Array):
+        return prepare_tuple_item(item.layout)
+
     elif isinstance(item, ak._v2.contents.EmptyArray):
         return prepare_tuple_item(item.toNumpyArray(np.int64))
 
@@ -115,12 +117,12 @@ def prepare_tuple_item(item):
         return list(item)
 
     elif isinstance(item, Iterable):
-        layout = v1_to_v2(ak.operations.convert.to_layout(item))
-        as_nplike = layout.maybe_to_nplike(layout.nplike)
-        if as_nplike is None:
+        layout = ak._v2.operations.convert.to_layout(item)
+        as_array = layout.maybe_to_array(layout.nplike)
+        if as_array is None:
             return prepare_tuple_item(layout)
         else:
-            return prepare_tuple_item(ak._v2.contents.NumpyArray(as_nplike))
+            return as_array
 
     else:
         raise TypeError(
@@ -237,7 +239,7 @@ def prepare_tuple_nested(item):
         )
 
         # content has been projected; index must agree
-        nextindex[nonnull] = item.nplike.arange(len(projected), dtype=np.int64)
+        nextindex[nonnull] = item.nplike.arange(projected.length, dtype=np.int64)
 
         return ak._v2.contents.IndexedOptionArray(
             ak._v2.index.Index64(nextindex),
@@ -261,9 +263,9 @@ def prepare_tuple_nested(item):
             ak._v2.index.Index64(positions_where_valid), False, NestedIndexError
         )
 
-        nextindex = item.nplike.full(len(is_valid), -1, np.int64)
+        nextindex = item.nplike.full(is_valid.shape[0], -1, np.int64)
         nextindex[positions_where_valid] = item.nplike.arange(
-            len(positions_where_valid), dtype=np.int64
+            positions_where_valid.shape[0], dtype=np.int64
         )
 
         return ak._v2.contents.IndexedOptionArray(
@@ -296,7 +298,7 @@ def prepare_tuple_bool_to_int(item):
         localindex = item.localindex(axis=1)
         nextcontent = localindex.content.data[item.content.data]
 
-        cumsum = item.nplike.empty(len(item.content.data) + 1, np.int64)
+        cumsum = item.nplike.empty(item.content.data.shape[0] + 1, np.int64)
         cumsum[0] = 0
         cumsum[1:] = item.nplike.cumsum(item.content.data)
         nextoffsets = cumsum[item.offsets]
@@ -321,10 +323,12 @@ def prepare_tuple_bool_to_int(item):
             safeindex = item.content.index.data
 
         # expanded is a new buffer (can be modified in-place)
-        if len(item.content.content.data) > 0:
+        if item.content.content.data.shape[0] > 0:
             expanded = item.content.content.data[safeindex]
         else:
-            expanded = item.content.content.data.nplike.ones(len(safeindex), np.bool_)
+            expanded = item.content.content.data.nplike.ones(
+                safeindex.shape[0], np.bool_
+            )
 
         localindex = item.localindex(axis=1)
 
@@ -334,7 +338,7 @@ def prepare_tuple_bool_to_int(item):
 
         # list offsets do include missing values
         expanded[isnegative] = True
-        cumsum = item.nplike.empty(len(expanded) + 1, np.int64)
+        cumsum = item.nplike.empty(expanded.shape[0] + 1, np.int64)
         cumsum[0] = 0
         cumsum[1:] = item.nplike.cumsum(expanded)
         nextoffsets = cumsum[item.offsets]
@@ -342,7 +346,7 @@ def prepare_tuple_bool_to_int(item):
         # outindex fits into the lists; non-missing are sequential
         outindex = item.nplike.full(nextoffsets[-1], -1, np.int64)
         outindex[~isnegative[expanded]] = item.nplike.arange(
-            len(nextcontent), dtype=np.int64
+            nextcontent.shape[0], dtype=np.int64
         )
 
         return ak._v2.contents.ListOffsetArray(
@@ -383,10 +387,10 @@ def prepare_tuple_bool_to_int(item):
                 safeindex = item.index.data
 
             # expanded is a new buffer (can be modified in-place)
-            if len(item.content.data) > 0:
+            if item.content.data.shape[0] > 0:
                 expanded = item.content.data[safeindex]
             else:
-                expanded = item.content.data.nplike.ones(len(safeindex), np.bool_)
+                expanded = item.content.data.nplike.ones(safeindex.shape[0], np.bool_)
 
             # nextcontent does not include missing values
             expanded[isnegative] = False
@@ -399,7 +403,7 @@ def prepare_tuple_bool_to_int(item):
             # non-missing are sequential
             outindex = item.nplike.full(lenoutindex, -1, np.int64)
             outindex[~isnegative[expanded]] = item.nplike.arange(
-                len(nextcontent), dtype=np.int64
+                nextcontent.shape[0], dtype=np.int64
             )
 
             return ak._v2.contents.IndexedOptionArray(
@@ -416,8 +420,8 @@ def prepare_tuple_bool_to_int(item):
             )
 
     elif isinstance(item, ak._v2.contents.NumpyArray):
-        assert item.shape == (len(item),)
-        return item
+        assert item.data.shape == (item.length,)
+        return item.data
 
     else:
         raise AssertionError(type(item))
@@ -425,11 +429,17 @@ def prepare_tuple_bool_to_int(item):
 
 def getitem_next_array_wrap(outcontent, shape):
     length = shape[-2] if len(shape) >= 2 else 0
-    out = ak._v2.contents.RegularArray(outcontent, shape[-1], length, None, None)
+    size = shape[-1]
+    if isinstance(size, ak._v2._typetracer.UnknownLengthType):
+        size = 1
+    out = ak._v2.contents.RegularArray(outcontent, size, length, None, None)
 
     for i in range(len(shape) - 2, -1, -1):
         length = shape[i - 1] if i > 0 else 0
-        out = ak._v2.contents.RegularArray(out, shape[i], length, None, None)
+        size = shape[i]
+        if isinstance(size, ak._v2._typetracer.UnknownLengthType):
+            size = 1
+        out = ak._v2.contents.RegularArray(out, size, length, None, None)
     return out
 
 

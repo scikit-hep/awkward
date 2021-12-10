@@ -55,9 +55,9 @@ def is_file_path(x):
 
 
 def isint(x):
-    return isinstance(
-        x, (int, numbers.Integral, np.integer, ak._v2._typetracer.Interval)
-    ) and not isinstance(x, (bool, np.bool_))
+    return isinstance(x, (int, numbers.Integral, np.integer)) and not isinstance(
+        x, (bool, np.bool_)
+    )
 
 
 def isnum(x):

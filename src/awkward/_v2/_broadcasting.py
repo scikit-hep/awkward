@@ -40,7 +40,7 @@ def broadcast_pack(inputs, isscalar):
     maxlen = -1
     for x in inputs:
         if isinstance(x, Content):
-            maxlen = max(maxlen, len(x))
+            maxlen = max(maxlen, x.length)
     if maxlen < 0:
         maxlen = 1
 
@@ -51,7 +51,11 @@ def broadcast_pack(inputs, isscalar):
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
-            nextinputs.append(RegularArray(x, len(x), 1))
+            nextinputs.append(
+                RegularArray(
+                    x, x.length if x.nplike.known_shape else 1, 1, None, None, x.nplike
+                )
+            )
             isscalar.append(False)
         else:
             nextinputs.append(x)
@@ -62,12 +66,12 @@ def broadcast_pack(inputs, isscalar):
 
 def broadcast_unpack(x, isscalar, nplike):
     if all(isscalar):
-        if not nplike.known_shape or len(x) == 0:
+        if not nplike.known_shape or x.length == 0:
             return x._getitem_nothing()._getitem_nothing()
         else:
             return x[0][0]
     else:
-        if not nplike.known_shape or len(x) == 0:
+        if not nplike.known_shape or x.length == 0:
             return x._getitem_nothing()
         else:
             return x[0]
@@ -81,15 +85,15 @@ def in_function(options):
 
 
 def checklength(inputs, options):
-    length = len(inputs[0])
+    length = inputs[0].length
     for x in inputs[1:]:
-        if len(x) != length:
+        if x.length != length:
             raise ValueError(
                 "cannot broadcast {0} of length {1} with {2} of length {3}{4}".format(
                     type(inputs[0]).__name__,
                     length,
                     type(x).__name__,
-                    len(x),
+                    x.length,
                     in_function(options),
                 )
             )
@@ -112,15 +116,15 @@ def all_same_offsets(nplike, inputs):
                 return False
 
             elif offsets is None:
-                offsets = nplike.empty(len(starts) + 1, dtype=starts.dtype)
-                if len(offsets) == 1:
+                offsets = nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
+                if offsets.shape[0] == 1:
                     offsets[0] = 0
                 else:
                     offsets[:-1] = starts
                     offsets[-1] = stops[-1]
 
             elif not nplike.array_equal(offsets[:-1], starts) or (
-                len(stops) != 0 and offsets[-1] != stops[-1]
+                stops.shape[0] != 0 and offsets[-1] != stops[-1]
             ):
                 return False
 
@@ -128,7 +132,7 @@ def all_same_offsets(nplike, inputs):
             if x.size == 0:
                 my_offsets = nplike.empty(0, dtype=np.int64)
             else:
-                my_offsets = nplike.arange(0, len(x.content), x.size)
+                my_offsets = nplike.arange(0, x.content.length, x.size)
 
             if offsets is None:
                 offsets = my_offsets
@@ -172,7 +176,7 @@ def apply_step(
             for obj in inputs:
                 if isinstance(obj, Content):
                     while obj.purelist_depth < maxdepth:
-                        obj = RegularArray(obj, 1, len(obj))
+                        obj = RegularArray(obj, 1, obj.length)
                 nextinputs.append(obj)
             if any(x is not y for x, y in zip(inputs, nextinputs)):
                 return apply_step(
@@ -294,12 +298,12 @@ def apply_step(
                         tagslist.append(x.tags.to(nplike))
                         numtags.append(len(x.contents))
                         if length is None:
-                            length = len(tagslist[-1])
-                        elif length != len(tagslist[-1]):
+                            length = tagslist[-1].shape[0]
+                        elif length != tagslist[-1].shape[0]:
                             raise ValueError(
                                 "cannot broadcast UnionArray of length {0} "
                                 "with UnionArray of length {1}{2}".format(
-                                    length, len(tagslist[-1]), in_function(options)
+                                    length, tagslist[-1].shape[0], in_function(options)
                                 )
                             )
                 assert length is not None
@@ -372,13 +376,13 @@ def apply_step(
                             mask = nplike.bitwise_or(mask, m, out=mask)
 
                 nextmask = Index8(mask.view(np.int8))
-                index = nplike.full(len(mask), -1, dtype=np.int64)
+                index = nplike.full(mask.shape[0], -1, dtype=np.int64)
                 index[~mask] = nplike.arange(
-                    len(mask) - nplike.count_nonzero(mask), dtype=np.int64
+                    mask.shape[0] - nplike.count_nonzero(mask), dtype=np.int64
                 )
                 index = Index64(index)
                 if any(not isinstance(x, optiontypes) for x in inputs):
-                    nextindex = nplike.arange(len(mask), dtype=np.int64)
+                    nextindex = nplike.arange(mask.shape[0], dtype=np.int64)
                     nextindex[mask] = -1
                     nextindex = Index64(nextindex)
 
@@ -398,7 +402,7 @@ def apply_step(
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, optiontypes):
-                        index = Index64(nplike.empty((len(x),), np.int64))
+                        index = Index64(nplike.empty((x.length,), np.int64))
                         nextinputs.append(x.content)
                     else:
                         nextinputs.append(x)
@@ -434,7 +438,7 @@ def apply_step(
                             if maxsize > 1 and x.size == 1:
                                 tmpindex = Index64(
                                     nplike.repeat(
-                                        nplike.arange(len(x), dtype=np.int64), maxsize
+                                        nplike.arange(x.length, dtype=np.int64), maxsize
                                     )
                                 )
 
@@ -444,11 +448,11 @@ def apply_step(
                             if maxsize > 1 and x.size == 1:
                                 nextinputs.append(
                                     IndexedArray(
-                                        tmpindex, x.content[: len(x) * x.size]
+                                        tmpindex, x.content[: x.length * x.size]
                                     ).project()
                                 )
                             elif x.size == maxsize:
-                                nextinputs.append(x.content[: len(x) * x.size])
+                                nextinputs.append(x.content[: x.length * x.size])
                             else:
                                 raise ValueError(
                                     "cannot broadcast RegularArray of size "
@@ -471,9 +475,9 @@ def apply_step(
                 for x in inputs:
                     if isinstance(x, Content):
                         if length is None:
-                            length = len(x)
+                            length = x.length
                         elif nplike.known_shape:
-                            assert length == len(x)
+                            assert length == x.length
                 assert length is not None
 
                 outcontent = apply_step(
@@ -537,7 +541,7 @@ def apply_step(
 
                     elif isinstance(x, ListArray):
                         starts, stops = x.starts, x.stops
-                        if len(starts) == 0 or len(stops) == 0:
+                        if starts.length == 0 or stops.length == 0:
                             nextinputs.append(x.content[:0])
                         else:
                             lencontent = nplike.max(stops)
@@ -613,7 +617,7 @@ def apply_step(
                     # Handle implicit left-broadcasting (non-NumPy-like broadcasting).
                     elif options["left_broadcast"] and isinstance(x, Content):
                         nextinputs.append(
-                            RegularArray(x, 1, len(x))
+                            RegularArray(x, 1, x.length)
                             ._broadcast_tooffsets64(offsets)
                             .content
                         )
@@ -656,12 +660,12 @@ def apply_step(
                             )
                         )
                     if length is None:
-                        length = len(x)
-                    elif length != len(x):
+                        length = x.length
+                    elif length != x.length:
                         raise ValueError(
                             "cannot broadcast RecordArray of length {0} "
                             "with RecordArray of length {1}{2}".format(
-                                length, len(x), in_function(options)
+                                length, x.length, in_function(options)
                             )
                         )
                     if not x.is_tuple:

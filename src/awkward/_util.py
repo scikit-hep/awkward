@@ -58,9 +58,9 @@ def isint(x):
     Returns True if and only if ``x`` is an integer (including NumPy, not
     including bool).
     """
-    return isinstance(
-        x, (int, numbers.Integral, np.integer, ak._v2._typetracer.Interval)
-    ) and not isinstance(x, (bool, np.bool_))
+    return isinstance(x, (int, numbers.Integral, np.integer)) and not isinstance(
+        x, (bool, np.bool_)
+    )
 
 
 def isnum(x):

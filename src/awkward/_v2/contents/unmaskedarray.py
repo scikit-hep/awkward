@@ -15,24 +15,22 @@ np = ak.nplike.NumpyMetadata.instance()
 class UnmaskedArray(Content):
     is_OptionType = True
 
-    def __init__(self, content, identifier=None, parameters=None):
+    def __init__(self, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(content, Content):
             raise TypeError(
                 "{0} 'content' must be a Content subtype, not {1}".format(
                     type(self).__name__, repr(content)
                 )
             )
+        if nplike is None:
+            nplike = content.nplike
 
         self._content = content
-        self._init(identifier, parameters)
+        self._init(identifier, parameters, nplike)
 
     @property
     def content(self):
         return self._content
-
-    @property
-    def nplike(self):
-        return self._content.nplike
 
     Form = UnmaskedForm
 
@@ -55,17 +53,19 @@ class UnmaskedArray(Content):
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
+            ak._v2._typetracer.TypeTracer.instance(),
         )
 
-    def __len__(self):
-        return len(self._content)
+    @property
+    def length(self):
+        return self._content.length
 
     def __repr__(self):
         return self._repr("", "", "")
 
     def _repr(self, indent, pre, post):
         out = [indent, pre, "<UnmaskedArray len="]
-        out.append(repr(str(len(self))))
+        out.append(repr(str(self.length)))
         out.append(">")
         out.extend(self._repr_extra(indent + "    "))
         out.append("\n")
@@ -79,48 +79,58 @@ class UnmaskedArray(Content):
             self._content,
             self._identifier,
             ak._v2._util.merge_parameters(self._parameters, parameters),
+            self._nplike,
         )
 
     def toByteMaskedArray(self):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
             ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
             self._content,
-            valid_when=True,
-            identifier=self._identifier,
-            parameters=self._parameters,
+            True,
+            self._identifier,
+            self._parameters,
+            self._nplike,
         )
 
     def toIndexedOptionArray64(self):
-        arange = self._content.nplike.arange(len(self._content), dtype=np.int64)
+        arange = self._nplike.arange(self._content.length, dtype=np.int64)
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             ak._v2.index.Index64(arange),
             self._content,
             self._identifier,
             self._parameters,
+            self._nplike,
         )
 
     def mask_as_bool(self, valid_when=True, nplike=None):
         if nplike is None:
-            nplike = self._content.nplike
+            nplike = self._nplike
 
         if valid_when:
-            return nplike.ones(len(self._content), dtype=np.bool_)
+            return nplike.ones(self._content.length, dtype=np.bool_)
         else:
-            return nplike.zeros(len(self._content), dtype=np.bool_)
+            return nplike.zeros(self._content.length, dtype=np.bool_)
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
+        if not self._nplike.known_data:
+            return ak._v2._typetracer.MaybeNone(self._content._getitem_at(where))
+
         return self._content._getitem_at(where)
 
     def _getitem_range(self, where):
-        start, stop, step = where.indices(len(self))
+        if not self._nplike.known_shape:
+            return self
+
+        start, stop, step = where.indices(self.length)
         assert step == 1
         return UnmaskedArray(
             self._content._getitem_range(slice(start, stop)),
             self._range_identifier(start, stop),
             self._parameters,
+            self._nplike,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -128,6 +138,7 @@ class UnmaskedArray(Content):
             self._content._getitem_field(where, only_fields),
             self._field_identifier(where),
             None,
+            self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -135,6 +146,7 @@ class UnmaskedArray(Content):
             self._content._getitem_fields(where, only_fields),
             self._fields_identifier(where),
             None,
+            self._nplike,
         )
 
     def _carry(self, carry, allow_lazy, exception):
@@ -142,6 +154,7 @@ class UnmaskedArray(Content):
             self._content._carry(carry, allow_lazy, exception),
             self._carry_identifier(carry, exception),
             self._parameters,
+            self._nplike,
         )
 
     def _getitem_next(self, head, tail, advanced):
@@ -153,6 +166,7 @@ class UnmaskedArray(Content):
                 self._content._getitem_next(head, tail, advanced),
                 self._identifier,
                 self._parameters,
+                self._nplike,
             ).simplify_optiontype()
 
         elif ak._util.isstr(head):
@@ -181,9 +195,10 @@ class UnmaskedArray(Content):
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
                 mask,
                 self._content,
-                valid_when=False,
-                identifier=None,
-                parameters=self._parameters,
+                False,
+                None,
+                self._parameters,
+                self._nplike,
             ).project()
         else:
             return self._content
@@ -206,12 +221,14 @@ class UnmaskedArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self.nplike)
-            out[0] = len(self)
-            return ak._v2.contents.numpyarray.NumpyArray(out)[0]
+            out = ak._v2.index.Index64.empty(1, self._nplike)
+            out[0] = self.length
+            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
+                0
+            ]
         else:
             return ak._v2.contents.unmaskedarray.UnmaskedArray(
-                self._content.num(posaxis, depth), None, self._parameters
+                self._content.num(posaxis, depth), None, self._parameters, self._nplike
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -220,8 +237,11 @@ class UnmaskedArray(Content):
             raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
             offsets, flattened = self._content._offsets_and_flattened(posaxis, depth)
-            if len(offsets) == 0:
-                return (offsets, UnmaskedArray(flattened, None, self._parameters))
+            if offsets.length == 0:
+                return (
+                    offsets,
+                    UnmaskedArray(flattened, None, self._parameters, self._nplike),
+                )
 
             else:
                 return (offsets, flattened)
@@ -274,20 +294,24 @@ class UnmaskedArray(Content):
                 self._content._localindex(posaxis, depth),
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
 
     def numbers_to_type(self, name):
         return ak._v2.contents.unmaskedarray.UnmaskedArray(
-            self._content.numbers_to_type(name), self._identifier, self._parameters
+            self._content.numbers_to_type(name),
+            self._identifier,
+            self._parameters,
+            self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        if len(self._content) == 0:
+        if self._content.length == 0:
             return True
         return self._content._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
-        if len(self._content) == 0:
+        if self._content.length == 0:
             return self
         return self._content._unique(negaxis, starts, parents, outlength)
 
@@ -303,8 +327,10 @@ class UnmaskedArray(Content):
         kind,
         order,
     ):
-        if len(self._content) == 0:
-            return ak._v2.contents.NumpyArray(self.nplike.empty(0, np.int64))
+        if self._content.length == 0:
+            return ak._v2.contents.NumpyArray(
+                self._nplike.empty(0, np.int64), None, None, self._nplike
+            )
 
         out = self._content._argsort_next(
             negaxis,
@@ -323,6 +349,7 @@ class UnmaskedArray(Content):
                 out._content,
                 None,
                 None,
+                self._nplike,
             ).simplify_optiontype()
 
             return ak._v2.contents.RegularArray(
@@ -331,6 +358,7 @@ class UnmaskedArray(Content):
                 out._length,
                 None,
                 None,
+                self._nplike,
             )
 
         else:
@@ -355,6 +383,7 @@ class UnmaskedArray(Content):
                 out._content,
                 self._identifier,
                 self._parameters,
+                self._nplike,
             ).simplify_optiontype()
 
             return ak._v2.contents.RegularArray(
@@ -363,6 +392,7 @@ class UnmaskedArray(Content):
                 out._length,
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
 
         else:
@@ -379,6 +409,7 @@ class UnmaskedArray(Content):
                 ),
                 self._identifier,
                 self._parameters,
+                self._nplike,
             )
 
     def _reduce_next(
@@ -439,6 +470,7 @@ class UnmaskedArray(Content):
                 self._content._rpad(target, posaxis, depth, clip),
                 None,
                 self._parameters,
+                self._nplike,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -449,7 +481,7 @@ class UnmaskedArray(Content):
             self.content, allow_missing=allow_missing
         )
         if allow_missing:
-            return self.nplike.ma.MaskedArray(content)
+            return self._nplike.ma.MaskedArray(content)
         else:
             return content
 
@@ -472,6 +504,7 @@ class UnmaskedArray(Content):
                     ),
                     self._identifier,
                     self._parameters if options["keep_parameters"] else None,
+                    self._nplike,
                 )
 
         else:
@@ -502,7 +535,9 @@ class UnmaskedArray(Content):
             raise AssertionError(result)
 
     def packed(self):
-        return UnmaskedArray(self._content.packed(), self._identifier, self._parameters)
+        return UnmaskedArray(
+            self._content.packed(), self._identifier, self._parameters, self._nplike
+        )
 
     def _to_list(self, behavior):
         out = self._to_list_custom(behavior)

@@ -10,7 +10,7 @@ except ImportError:
 import awkward as ak
 import awkward._v2._reducers
 from awkward._v2._slicing import NestedIndexError
-from awkward._v2.tmp_for_testing import v1_to_v2, v2_to_v1
+from awkward._v2.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -26,7 +26,7 @@ class Content(object):
     is_RecordType = False
     is_UnionType = False
 
-    def _init(self, identifier, parameters):
+    def _init(self, identifier, parameters, nplike):
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
         ):
@@ -42,8 +42,16 @@ class Content(object):
                 )
             )
 
+        if nplike is not None and not isinstance(nplike, ak.nplike.NumpyLike):
+            raise TypeError(
+                "{0} 'nplike' must be an ak.nplike.NumpyLike or None, not {1}".format(
+                    type(self).__name__, repr(nplike)
+                )
+            )
+
         self._identifier = identifier
         self._parameters = parameters
+        self._nplike = nplike
 
     @property
     def identifier(self):
@@ -60,6 +68,10 @@ class Content(object):
             return None
         else:
             return self._parameters.get(key)
+
+    @property
+    def nplike(self):
+        return self._nplike
 
     @property
     def form(self):
@@ -102,10 +114,16 @@ class Content(object):
         buffer_key="{form_key}-{attribute}",
         form_key="node{id}",
         id_start=0,
-        nplike=numpy,
+        nplike=None,
     ):
         if container is None:
             container = {}
+        if nplike is None:
+            nplike = self._nplike
+        if not nplike.known_data:
+            raise TypeError(
+                "cannot call 'to_buffers' on an array without concrete data"
+            )
 
         if ak._v2._util.isstr(buffer_key):
 
@@ -140,6 +158,9 @@ class Content(object):
 
         return form, len(self), container
 
+    def __len__(self):
+        return self.length
+
     def _repr_extra(self, indent):
         out = []
         if self._parameters is not None:
@@ -153,7 +174,7 @@ class Content(object):
             out.append(self._identifier._repr("\n" + indent, "", ""))
         return out
 
-    def maybe_to_nplike(self, nplike):
+    def maybe_to_array(self, nplike):
         return None
 
     def _handle_error(self, error, slicer=None):
@@ -203,6 +224,9 @@ class Content(object):
         )
 
     def __iter__(self):
+        if not self._nplike.known_data:
+            raise TypeError("cannot iterate on an array without concrete data")
+
         for i in range(len(self)):
             yield self._getitem_at(i)
 
@@ -230,6 +254,7 @@ class Content(object):
             0,  # zeros_length is irrelevant when the size is 1 (!= 0)
             None,
             None,
+            self._nplike,
         )
 
     def _getitem_next_ellipsis(self, tail, advanced):
@@ -256,50 +281,55 @@ class Content(object):
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        nplike = self.nplike
 
         index = ak._v2.index.Index64(head.index)
-        outindex = ak._v2.index.Index64.empty(len(index) * length, nplike)
+        outindex = ak._v2.index.Index64.empty(index.length * length, self._nplike)
 
         self._handle_error(
-            nplike["awkward_missing_repeat", outindex.dtype.type, index.dtype.type](
-                outindex.to(nplike),
-                index.to(nplike),
-                len(index),
+            self._nplike[
+                "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
+            ](
+                outindex.to(self._nplike),
+                index.to(self._nplike),
+                index.length,
                 length,
                 raw._size,
             )
         )
 
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            outindex, raw.content, None, self._parameters
+            outindex, raw.content, None, self._parameters, self._nplike
         )
 
         return ak._v2.contents.regulararray.RegularArray(
-            out.simplify_optiontype(), len(index), 1, None, self._parameters
+            out.simplify_optiontype(),
+            index.length,
+            1,
+            None,
+            self._parameters,
+            self._nplike,
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
-        nplike = self.nplike
         jagged = head.content.toListOffsetArray64()
 
         index = ak._v2.index.Index64(head._index)
         content = that._getitem_at(0)
-        if len(content) < len(index) and nplike.known_shape:
+        if content.length < index.length and self._nplike.known_shape:
             raise NestedIndexError(
                 self,
                 head,
                 "cannot fit masked jagged slice with length {0} into {1} of size {2}".format(
-                    len(index), type(that).__name__, len(content)
+                    index.length, type(that).__name__, content.length
                 ),
             )
 
-        outputmask = ak._v2.index.Index64.empty(len(index), nplike)
-        starts = ak._v2.index.Index64.empty(len(index), nplike)
-        stops = ak._v2.index.Index64.empty(len(index), nplike)
+        outputmask = ak._v2.index.Index64.empty(index.length, self._nplike)
+        starts = ak._v2.index.Index64.empty(index.length, self._nplike)
+        stops = ak._v2.index.Index64.empty(index.length, self._nplike)
 
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
                 index.dtype.type,
                 jagged._offsets.dtype.type,
@@ -307,21 +337,26 @@ class Content(object):
                 starts.dtype.type,
                 stops.dtype.type,
             ](
-                index.to(nplike),
-                jagged._offsets.to(nplike),
-                outputmask.to(nplike),
-                starts.to(nplike),
-                stops.to(nplike),
-                len(index),
+                index.to(self._nplike),
+                jagged._offsets.to(self._nplike),
+                outputmask.to(self._nplike),
+                starts.to(self._nplike),
+                stops.to(self._nplike),
+                index.length,
             )
         )
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            outputmask, tmp, None, self._parameters
+            outputmask, tmp, None, self._parameters, self._nplike
         )
         return ak._v2.contents.regulararray.RegularArray(
-            out.simplify_optiontype(), len(index), 1, None, self._parameters
+            out.simplify_optiontype(),
+            index.length,
+            1,
+            None,
+            self._parameters,
+            self._nplike,
         )
 
     def _getitem_next_missing(self, head, tail, advanced):
@@ -335,7 +370,7 @@ class Content(object):
             )
 
         if isinstance(head.content, ak._v2.contents.listoffsetarray.ListOffsetArray):
-            if len(self) != 1:
+            if self.nplike.known_shape and self.length != 1:
                 raise NotImplementedError("reached a not-well-considered code path")
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
@@ -347,7 +382,7 @@ class Content(object):
 
         if isinstance(nextcontent, ak._v2.contents.regulararray.RegularArray):
             return self._getitem_next_regular_missing(
-                head, tail, advanced, nextcontent, len(nextcontent)
+                head, tail, advanced, nextcontent, nextcontent.length
             )
 
         elif isinstance(nextcontent, ak._v2.contents.recordarray.RecordArray):
@@ -360,7 +395,7 @@ class Content(object):
                 if isinstance(content, ak._v2.contents.regulararray.RegularArray):
                     contents.append(
                         self._getitem_next_regular_missing(
-                            head, tail, advanced, content, len(content)
+                            head, tail, advanced, content, content.length
                         )
                     )
                 else:
@@ -371,7 +406,12 @@ class Content(object):
                     )
 
             return ak._v2.contents.recordarray.RecordArray(
-                contents, nextcontent._fields, None, None, self._parameters
+                contents,
+                nextcontent._fields,
+                None,
+                None,
+                self._parameters,
+                self._nplike,
             )
 
         else:
@@ -404,13 +444,21 @@ class Content(object):
                     return self
 
                 items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
-                nextwhere = ak._v2._slicing.getitem_broadcast(
-                    items, ak.nplike.of(*items)
+
+                nextwhere = ak._v2._slicing.getitem_broadcast(items)
+
+                next = ak._v2.contents.RegularArray(
+                    self,
+                    self.length if self._nplike.known_shape else 1,
+                    1,
+                    None,
+                    None,
+                    self._nplike,
                 )
 
-                next = ak._v2.contents.RegularArray(self, len(self), 1, None, None)
                 out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
-                if len(out) == 0:
+
+                if out.length == 0:
                     return out._getitem_nothing()
                 else:
                     return out._getitem_at(0)
@@ -420,6 +468,9 @@ class Content(object):
 
             elif isinstance(where, ak.layout.Content):
                 return self.__getitem__(v1_to_v2(where))
+
+            elif isinstance(where, ak._v2.highlevel.Array):
+                return self.__getitem__(where.layout)
 
             elif (
                 isinstance(where, Content)
@@ -442,11 +493,11 @@ class Content(object):
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 elif issubclass(where.dtype.type, (np.bool_, bool)):
                     if len(where.data.shape) == 1:
-                        where = where.nplike.nonzero(where.data)[0]
+                        where = self._nplike.nonzero(where.data)[0]
                         carry = ak._v2.index.Index64(where)
                         allow_lazy = "copied"  # True, but also can be modified in-place
                     else:
-                        wheres = where.nplike.nonzero(where.data)
+                        wheres = self._nplike.nonzero(where.data)
                         return self.__getitem__(wheres)
                 else:
                     raise TypeError(
@@ -458,7 +509,7 @@ class Content(object):
                 out = ak._v2._slicing.getitem_next_array_wrap(
                     self._carry(carry, allow_lazy, NestedIndexError), where.shape
                 )
-                if len(out) == 0:
+                if out.length == 0:
                     return out._getitem_nothing()
                 else:
                     return out._getitem_at(0)
@@ -470,12 +521,14 @@ class Content(object):
                 return self._getitem_fields(where)
 
             elif isinstance(where, Iterable):
-                layout = v1_to_v2(ak.operations.convert.to_layout(where))
-                as_nplike = layout.maybe_to_nplike(layout.nplike)
-                if as_nplike is None:
+                layout = ak._v2.operations.convert.to_layout(where)
+                as_array = layout.maybe_to_array(layout.nplike)
+                if as_array is None:
                     return self.__getitem__(layout)
                 else:
-                    return self.__getitem__(ak._v2.contents.NumpyArray(as_nplike))
+                    return self.__getitem__(
+                        ak._v2.contents.NumpyArray(as_array, None, None, layout.nplike)
+                    )
 
             else:
                 raise TypeError(
@@ -506,12 +559,12 @@ class Content(object):
                 elif isinstance(x, ak._v2.index.Index64):
                     return str(x.data)
                 elif isinstance(x, Content):
-                    return str(ak.Array(v2_to_v1(x)))
+                    return str(ak._v2.highlevel.Array(x))
                 else:
                     return repr(x)
 
             try:
-                tmp = "    " + repr(ak.Array(v2_to_v1(self)))
+                tmp = "    " + repr(ak._v2.highlevel.Array(self))
             except Exception:
                 tmp = self._repr("    ", "", "")
             raise IndexError(
@@ -527,7 +580,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     tmp,
                     format_slice(where),
                     type(err.array).__name__,
-                    len(err.array),
+                    err.array.length,
                     format_slice(err.slicer),
                     ""
                     if err.details is None
@@ -540,23 +593,23 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak._v2.index.Index)
 
-        result = carry.nplike.empty(1, dtype=np.bool_)
+        result = self._nplike.empty(1, dtype=np.bool_)
         self._handle_error(
-            carry.nplike[
+            self._nplike[
                 "awkward_Index_iscontiguous",  # badly named
                 np.bool_,
                 carry.dtype.type,
             ](
                 result,
-                carry.to(carry.nplike),
-                len(carry),
+                carry.to(self._nplike),
+                carry.length,
             )
         )
         if result[0]:
-            if len(carry) == len(self):
+            if carry.length == self.length:
                 return self
-            elif len(carry) < len(self):
-                return self._getitem_range(slice(0, len(carry)))
+            elif carry.length < self.length:
+                return self._getitem_range(slice(0, carry.length))
             else:
                 raise IndexError
         else:
@@ -614,52 +667,51 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return axis
 
     def _localindex_axis0(self):
-        localindex = ak._v2.index.Index64.empty(len(self), self.nplike)
+        localindex = ak._v2.index.Index64.empty(self.length, self._nplike)
         self._handle_error(
-            localindex.nplike["awkward_localindex", np.int64](
-                localindex.to(localindex.nplike),
-                len(localindex),
+            self._nplike["awkward_localindex", np.int64](
+                localindex.to(self._nplike),
+                localindex.length,
             )
         )
-        return ak._v2.contents.NumpyArray(localindex)
+        return ak._v2.contents.NumpyArray(localindex, None, None, self._nplike)
 
     def merge(self, other):
         others = [other]
         return self.mergemany(others)
 
     def merge_as_union(self, other):
-        mylength = len(self)
-        theirlength = len(other)
-        tags = ak._v2.index.Index8.empty((mylength + theirlength), self.nplike)
-        index = ak._v2.index.Index64.empty((mylength + theirlength), self.nplike)
+        mylength = self.length
+        theirlength = other.length
+        tags = ak._v2.index.Index8.empty((mylength + theirlength), self._nplike)
+        index = ak._v2.index.Index64.empty((mylength + theirlength), self._nplike)
         contents = [self, other]
         self._handle_error(
-            self.nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.to(self.nplike), 0, mylength, 0
+            self._nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.to(self._nplike), 0, mylength, 0
             )
         )
         self._handle_error(
-            self.nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.to(self.nplike), 0, mylength
+            self._nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.to(self._nplike), 0, mylength
             )
         )
         self._handle_error(
-            self.nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.to(self.nplike), mylength, theirlength, 1
+            self._nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.to(self._nplike), mylength, theirlength, 1
             )
         )
         self._handle_error(
-            self.nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.to(self.nplike), mylength, theirlength
+            self._nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.to(self._nplike), mylength, theirlength
             )
         )
 
         return ak._v2.contents.unionarray.UnionArray(
-            tags, index, contents, None, self._parameters
+            tags, index, contents, None, self._parameters, self._nplike
         )
 
     def _merging_strategy(self, others):
-
         if len(others) == 0:
             raise ValueError(
                 "to merge this array with 'others', at least one other must be provided"
@@ -690,6 +742,22 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         while i < len(others):
             tail.append(others[i])
             i = i + 1
+
+        if any(
+            isinstance(x.nplike, ak._v2._typetracer.TypeTracer) for x in head + tail
+        ):
+            head = [
+                x
+                if isinstance(x.nplike, ak._v2._typetracer.TypeTracer)
+                else x.typetracer
+                for x in head
+            ]
+            tail = [
+                x
+                if isinstance(x.nplike, ak._v2._typetracer.TypeTracer)
+                else x.typetracer
+                for x in tail
+            ]
 
         return (head, tail)
 
@@ -725,8 +793,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is {1})".format(axis, depth)
                 )
 
-        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
-        starts = ak._v2.index.Index64.zeros(1, self.nplike)
+        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
+        starts = ak._v2.index.Index64.zeros(1, self._nplike)
         shifts = None
         next = self._reduce_next(
             reducer,
@@ -797,8 +865,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is {1})".format(axis, depth)
                 )
 
-        starts = ak._v2.index.Index64.zeros(1, self.nplike)
-        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        starts = ak._v2.index.Index64.zeros(1, self._nplike)
+        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
         return self._argsort_next(
             negaxis,
             starts,
@@ -837,8 +905,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is {1})".format(axis, depth)
                 )
 
-        starts = ak._v2.index.Index64.zeros(1, self.nplike)
-        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        starts = ak._v2.index.Index64.zeros(1, self._nplike)
+        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
         return self._sort_next(
             negaxis,
             starts,
@@ -851,7 +919,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
 
     def _combinations_axis0(self, n, replacement, recordlookup, parameters):
-        size = len(self)
+        size = self.length
         if replacement:
             size = size + (n - 1)
         thisn = n
@@ -868,38 +936,45 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        nplike = self.nplike
-        tocarryraw = nplike.empty(n, dtype=np.intp)
+        tocarryraw = self._nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
-            ptr = ak._v2.index.Index64.empty(combinationslen, nplike, dtype=np.int64)
+            ptr = ak._v2.index.Index64.empty(
+                combinationslen, self._nplike, dtype=np.int64
+            )
             tocarry.append(ptr)
-            tocarryraw[i] = ptr.ptr
+            if self._nplike.known_data:
+                tocarryraw[i] = ptr.ptr
 
-        toindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
-        fromindex = ak._v2.index.Index64.empty(n, nplike, dtype=np.int64)
+        toindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
+        fromindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
 
         self._handle_error(
-            nplike[
+            self._nplike[
                 "awkward_RegularArray_combinations_64",
                 np.int64,
-                toindex.to(nplike).dtype.type,
-                fromindex.to(nplike).dtype.type,
+                toindex.to(self._nplike).dtype.type,
+                fromindex.to(self._nplike).dtype.type,
             ](
                 tocarryraw,
-                toindex.to(nplike),
-                fromindex.to(nplike),
+                toindex.to(self._nplike),
+                fromindex.to(self._nplike),
                 n,
                 replacement,
-                len(self),
+                self.length,
                 1,
             )
         )
         contents = []
+        length = None
         for ptr in tocarry:
-            contents.append(ak._v2.contents.IndexedArray(ptr, self))
+            contents.append(
+                ak._v2.contents.IndexedArray(ptr, self, None, None, self._nplike)
+            )
+            length = contents[-1].length
+        assert length is not None
         return ak._v2.contents.recordarray.RecordArray(
-            contents, recordlookup, parameters=parameters
+            contents, recordlookup, length, None, parameters, self._nplike
         )
 
     def combinations(self, n, replacement=False, axis=1, fields=None, parameters=None):
@@ -1025,8 +1100,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def is_unique(self, axis=None):
         negaxis = axis if axis is None else -axis
-        starts = ak._v2.index.Index64.zeros(1, self.nplike)
-        parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+        starts = ak._v2.index.Index64.zeros(1, self._nplike)
+        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
         return self._is_unique(negaxis, starts, parents, 1)
 
     def unique(self, axis=None):
@@ -1058,8 +1133,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                             )
                         )
 
-            starts = ak._v2.index.Index64.zeros(1, self.nplike)
-            parents = ak._v2.index.Index64.zeros(len(self), self.nplike)
+            starts = ak._v2.index.Index64.zeros(1, self._nplike)
+            parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
 
             return self._unique(negaxis, starts, parents, 1)
 
@@ -1094,27 +1169,25 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         return self.Form.dimension_optiontype.__get__(self)
 
     def rpad_axis0(self, target, clip):
-        if not clip and target < len(self):
-            return self
-        index = ak._v2.index.Index64.empty(target, self.nplike)
+        if not clip and target < self.length:
+            index = ak._v2.index.Index64(self._nplike.arange(self.length))
 
-        self._handle_error(
-            self.nplike[
-                "awkward_index_rpad_and_clip_axis0",
-                index.dtype.type,
-            ](index.to(self.nplike), target, len(self))
-        )
-        # TODO: Replace the kernel call with below code once typtracer supports arange
-        # shorter = min(target, len(self))
-        # npindex = self.nplike.full(target, -1, dtype=np.int64)
-        # npindex[:shorter] = self.nplike.arange(shorter, dtype=np.int64)
-        # index = ak._v2.index.Index64(npindex)
+        else:
+            index = ak._v2.index.Index64.empty(target, self._nplike)
+
+            self._handle_error(
+                self._nplike[
+                    "awkward_index_rpad_and_clip_axis0",
+                    index.dtype.type,
+                ](index.to(self._nplike), target, self.length)
+            )
 
         next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             index,
             self,
             None,
             self._parameters,
+            self._nplike,
         )
         return next.simplify_optiontype()
 
@@ -1138,7 +1211,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             pyarrow,
             None,
             None,
-            len(self),
+            self.length,
             {
                 "list_to32": list_to32,
                 "string_to32": string_to32,
@@ -1157,7 +1230,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         self, nplike=None, flatten_records=False, function_name=None
     ):
         if nplike is None:
-            nplike = self.nplike
+            nplike = self._nplike
         arrays = self._completely_flatten(
             nplike,
             {
@@ -1203,8 +1276,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         cls = ak._v2._util.arrayclass(self, behavior)
         if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
             array = cls(self)
-            out = [None] * len(self)
-            for i in range(len(self)):
+            out = [None] * self.length
+            for i in range(self.length):
                 out[i] = array[i]
             return out
 

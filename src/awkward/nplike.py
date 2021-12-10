@@ -15,14 +15,11 @@ def of(*arrays):
     libs = set()
     for array in arrays:
         nplike = getattr(array, "nplike", None)
-        if (
-            isinstance(array, ak._v2.highlevel.Array)
-            and isinstance(array.layout, ak._v2.contents.EmptyArray)
-        ) or isinstance(array, ak._v2.contents.EmptyArray):
-            nplike = None
-
         if nplike is not None:
             libs.add(nplike)
+
+    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in libs):
+        return ak._v2._typetracer.TypeTracer.instance()
 
     if libs == set():
         return Numpy.instance()

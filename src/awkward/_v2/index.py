@@ -18,8 +18,10 @@ _dtype_to_form = {
 class Index(object):
     _expected_dtype = None
 
-    def __init__(self, data, metadata=None):
-        self._nplike = ak.nplike.of(data)
+    def __init__(self, data, metadata=None, nplike=None):
+        if nplike is None:
+            nplike = ak.nplike.of(data)
+        self._nplike = nplike
         self._metadata = metadata
 
         self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
@@ -83,11 +85,24 @@ class Index(object):
     def ptr(self):
         return self._data.ctypes.data
 
+    @property
+    def length(self):
+        return self._data.shape[0]
+
     def __len__(self):
-        return len(self._data)
+        return self.length
 
     def to(self, nplike):
-        return nplike.asarray(self._data)
+        if nplike is self._nplike:
+            return self._data
+        else:
+            return nplike.asarray(self._data)
+
+    def on(self, nplike):
+        if nplike is self._nplike:
+            return self
+        else:
+            return Index(nplike.asarray(self._data), self._metadata, nplike)
 
     def __array__(self, *args, **kwargs):
         return self._nplike.asarray(self._data, *args, **kwargs)
