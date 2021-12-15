@@ -47,3 +47,19 @@ ignore = [
     "rapidjson/thirdparty/**",
     "rapidjson/docker/**",
 ]
+
+
+[tool.cibuildwheel]
+test-extras = ["test"]
+test-command = "pytest {project}/tests"
+skip = ["pp*win*"]
+test-skip = ["*universal2:arm64", "pp*"]
+manylinux-x86_64-image = "manylinux2014"
+build-verbosity = 1
+
+[tool.cibuildwheel.environment]
+PIP_ONLY_BINARY = "cmake,numpy"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp3?-*"
+manylinux-x86_64-image = "manylinux2010"
