@@ -43,13 +43,17 @@ jobs:
 
     strategy:
       matrix:
+        "py310-64bit":
+          python.version: "3.10"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py310-32bit":
+          python.version: "3.10"
+          python.architecture: "x86"
+          numpy.version: "latest"
         "py39-64bit":
           python.version: "3.9"
           python.architecture: "x64"
-          numpy.version: "latest"
-        "py39-32bit":
-          python.version: "3.9"
-          python.architecture: "x86"
           numpy.version: "latest"
         "py38-64bit":
           python.version: "3.8"
@@ -124,6 +128,10 @@ jobs:
 
     strategy:
       matrix:
+        "py310":
+          python.version: "3.10"
+          python.architecture: "x64"
+          numpy.version: "latest"
         "py39":
           python.version: "3.9"
           python.architecture: "x64"
@@ -197,6 +205,10 @@ jobs:
 
     strategy:
       matrix:
+        "py310-np*":
+          python.version: "3.10"
+          python.architecture: "x64"
+          numpy.version: "latest"
         "py39-np*":
           python.version: "3.9"
           python.architecture: "x64"

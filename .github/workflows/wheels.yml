@@ -7,15 +7,6 @@ on:
     - published
 
 
-env:
-  CIBW_TEST_EXTRAS: test
-  CIBW_TEST_COMMAND: pytest {project}/tests
-  CIBW_BUILD_VERBOSITY: 1
-  CIBW_SKIP: "pp27* pp36* pp*win* cp27-win*"
-  CIBW_TEST_SKIP: "*universal2:arm64 pp*"
-  CIBW_ENVIRONMENT: PIP_ONLY_BINARY=cmake,numpy
-
-
 jobs:
   make_sdist:
     name: "Make SDist"
@@ -38,9 +29,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
-        arch: [auto64, auto32]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        arch: [auto64]
         build: ["*"]
+
         include:
         - os: ubuntu-latest
           type: ManyLinux1
@@ -48,23 +40,8 @@ jobs:
           build: "cp{36,37,38}-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
 
-        - os: ubuntu-latest
-          type: ManyLinux2010
-          arch: auto64
-          build: "cp{36,37,38,39}-* pp37-*"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
-
         - os: macos-latest
-          type: 2.7-3.6
-          arch: auto
-          build: "cp{36}-*"
-
-        - os: macos-latest
-          type: 3.7-3.9 & pypy
-          arch: auto
-          build: "cp3{7,8,9}-* pp*"
-
-        - os: macos-latest
+          type: "Universal"
           arch: universal2
           build: "*"
 
@@ -77,7 +54,7 @@ jobs:
       with:
         submodules: true
 
-    - uses: pypa/cibuildwheel@v1.12.0
+    - uses: pypa/cibuildwheel@v2.3.1
       env:
         CIBW_BUILD: ${{ matrix.build }}
         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
@@ -94,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [36, 37, 38, 39]
+        python: [36, 37, 38, 39, 310]
         arch: [aarch64]
     steps:
 
@@ -104,7 +81,7 @@ jobs:
 
     - uses: docker/setup-qemu-action@v1.2.0
 
-    - uses: pypa/cibuildwheel@v1.12.0
+    - uses: pypa/cibuildwheel@v2.3.1
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
         CIBW_ARCHS: ${{ matrix.arch }}
