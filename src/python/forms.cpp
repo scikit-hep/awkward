@@ -624,14 +624,14 @@ make_RecordForm(const py::handle& m, const std::string& name) {
       .def(py::pickle([](const ak::RecordForm& self) {
         py::object recordlookup = py::none();
         if (!self.istuple()) {
-          py::tuple recordlookup_tuple(self.numfields());
+          py::tuple recordlookup_tuple((py::ssize_t) self.numfields());
           for (int64_t i = 0;  i < self.numfields();  i++) {
             recordlookup_tuple[(size_t)i] =
               py::cast(self.recordlookup().get()->at((size_t)i));
           }
           recordlookup = recordlookup_tuple;
         }
-        py::tuple contents(self.numfields());
+        py::tuple contents((py::ssize_t) self.numfields());
         for (int64_t i = 0;  i < self.numfields();  i++) {
           contents[(size_t)i] = py::cast(self.content(i));
         }
@@ -742,7 +742,7 @@ make_UnionForm(const py::handle& m, const std::string& name) {
       .def_property_readonly("numcontents", &ak::UnionForm::numcontents)
       .def("content", &ak::UnionForm::content)
       .def(py::pickle([](const ak::UnionForm& self) {
-        py::tuple contents(self.numcontents());
+        py::tuple contents((py::ssize_t) self.numcontents());
         for (int64_t i = 0;  i < self.numcontents();  i++) {
           contents[(size_t)i] = py::cast(self.content(i));
         }
