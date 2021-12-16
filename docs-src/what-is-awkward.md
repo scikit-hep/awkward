@@ -32,7 +32,7 @@ Let's illustrate this with a non-physics dataset: maps of bike routes in my home
 JSON to array
 -------------
 
-Here is a [GeoJSON of bike paths](https://github.com/Chicago/osd-bike-routes/blob/master/data/Bikeroutes.geojson) of bike paths throughout the city of Chicago.
+Here is a [GeoJSON of bike paths](https://github.com/Chicago/osd-bike-routes/blob/master/data/Bikeroutes.geojson) throughout the city of Chicago.
 
 <div style="margin-right: 15px">
   <iframe class="render-viewer " src="https://render.githubusercontent.com/view/geojson?commit=5f556dcd4ed54f5f5c926c01c34ebc6261ec7d34&amp;enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4368696361676f2f6f73642d62696b652d726f757465732f356635353664636434656435346635663563393236633031633334656263363236316563376433342f646174612f42696b65726f757465732e67656f6a736f6e&amp;nwo=Chicago%2Fosd-bike-routes&amp;path=data%2FBikeroutes.geojson&amp;repository_id=8065965&amp;repository_type=Repository#292b99b1-4187-4d13-8b0d-ce8fa6eb4ab1" sandbox="allow-scripts allow-same-origin allow-top-navigation" title="File display" width="100%" height="400px"></iframe>
