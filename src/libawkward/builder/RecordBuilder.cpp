@@ -554,7 +554,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endrecord();
     }
-    return nullptr;//shared_from_this();
+    return nullptr;
   }
 
   void
