@@ -20,9 +20,9 @@ import awkward as ak
 
 The arguments of the maxima - `argmax`, and the arguments of the minima - `argmin` are the index positions of the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) maximum or minimum elements over an axis.
 
-The result has the same shape with the dimention along the axis removed.
+For a given axis the result has the same shape with the dimention along the axis removed. When the axis argument is omited, the default axis is `None`. In this case the function returns a scalar that is calculated over all the elements in the flattened [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html).
 
-By default, reducing over empty lists results in `None`.
+Reducing over empty lists results in `None`.
 
 ```{code-cell} ipython3
 array = ak.Array([[], [], []])
@@ -33,7 +33,7 @@ ak.argmin(array, mask_identity=False, axis=1)
 ak.argmin(array, mask_identity=True, axis=1)
 ```
 
-By default, the axis is `None`. In this case the function returns a scalar that is calculated over all the elements in the flattened [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html).
+The default axis is `None`. In this case the function returns a scalar that is calculated over all the elements in the flattened [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html).
 
 Argmin
 ------
