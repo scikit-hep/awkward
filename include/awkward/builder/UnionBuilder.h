@@ -33,8 +33,8 @@ namespace awkward {
     /// {@link UnionArrayOf#index UnionArray::index}).
     /// @param contents A Builder for each of the union's possibilities.
     UnionBuilder(const ArrayBuilderOptions& options,
-                 const GrowableBuffer<int8_t>& tags,
-                 const GrowableBuffer<int64_t>& index,
+                 GrowableBuffer<int8_t> tags,
+                 GrowableBuffer<int64_t> index,
                  std::vector<BuilderPtr>& contents);
 
     /// @brief User-friendly name of this class: `"UnionBuilder"`.
@@ -99,7 +99,7 @@ namespace awkward {
     const BuilderPtr
       beginrecord(const char* name, bool check) override;
 
-    const BuilderPtr
+    void
       field(const char* key, bool check) override;
 
     const BuilderPtr

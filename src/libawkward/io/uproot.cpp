@@ -94,7 +94,7 @@ namespace awkward {
     std::vector<ssize_t> strides = { (ssize_t)sizeof(T) };
     ContentPtr outcontent = std::make_shared<NumpyArray>(Identities::none(),
                                                          util::Parameters(),
-                                                         content.ptr(),
+                                                         std::move(content.get_ptr()),
                                                          shape,
                                                          strides,
                                                          0,
@@ -103,7 +103,7 @@ namespace awkward {
                                                          dtype,
                                                          kernel::lib::cpu);
 
-    Index64 outoffsets2(offsets2.ptr(), 0, offsets2.length(), kernel::lib::cpu);
+    Index64 outoffsets2(std::move(offsets2.get_ptr()), 0, offsets2.length(), kernel::lib::cpu);
     ContentPtr outlist2 = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                               util::Parameters(),
                                                               outoffsets2,

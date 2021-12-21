@@ -34,7 +34,7 @@ namespace awkward {
     /// #beginlist and before #endlist and is #active; if `false`,
     /// it is not.
     ListBuilder(const ArrayBuilderOptions& options,
-                const GrowableBuffer<int64_t>& offsets,
+                GrowableBuffer<int64_t> offsets,
                 const BuilderPtr& content,
                 bool begun);
 
@@ -100,7 +100,7 @@ namespace awkward {
     const BuilderPtr
       beginrecord(const char* name, bool check) override;
 
-    const BuilderPtr
+    void
       field(const char* key, bool check) override;
 
     const BuilderPtr
@@ -115,15 +115,14 @@ namespace awkward {
 
     bool begun() { return begun_; }
 
+    void
+      maybeupdate(const BuilderPtr builder);
+
   private:
     const ArrayBuilderOptions options_;
     GrowableBuffer<int64_t> offsets_;
     BuilderPtr content_;
     bool begun_;
-
-  public:
-    void
-      maybeupdate(const BuilderPtr& tmp);
   };
 }
 

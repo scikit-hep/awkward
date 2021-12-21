@@ -17,7 +17,7 @@ namespace awkward {
                                                                   -1,
                                                                   nullcount);
     return std::make_shared<OptionBuilder>(options,
-                                           index,
+                                           std::move(index),
                                            content);
   }
 
@@ -27,15 +27,15 @@ namespace awkward {
     GrowableBuffer<int64_t> index =
       GrowableBuffer<int64_t>::arange(options, content->length());
     return std::make_shared<OptionBuilder>(options,
-                                           index,
+                                           std::move(index),
                                            content);
   }
 
   OptionBuilder::OptionBuilder(const ArrayBuilderOptions& options,
-                               const GrowableBuffer<int64_t>& index,
-                               const BuilderPtr& content)
+                               GrowableBuffer<int64_t> index,
+                               const BuilderPtr content)
     : options_(options)
-      , index_(index)
+      , index_(std::move(index))
       , content_(content) { }
 
   const std::string
@@ -50,7 +50,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-index",
                           index_.ptr().get(),
-                          index_.length() * sizeof(int64_t));
+                          index_.length() * (int64_t)sizeof(int64_t));
 
     return "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""
@@ -255,7 +255,7 @@ namespace awkward {
     return shared_from_this();
   }
 
-  const BuilderPtr
+  void
   OptionBuilder::field(const char* key, bool check) {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
@@ -265,7 +265,6 @@ namespace awkward {
     else {
       content_.get()->field(key, check);
     }
-    return shared_from_this();
   }
 
   const BuilderPtr
@@ -286,9 +285,9 @@ namespace awkward {
   }
 
   void
-  OptionBuilder::maybeupdate(const BuilderPtr& tmp) {
-    if (tmp.get() != content_.get()) {
-      content_ = tmp;
+  OptionBuilder::maybeupdate(const BuilderPtr tmp) {
+    if (tmp  &&  tmp.get() != content_.get()) {
+      content_ = std::move(tmp);
     }
   }
 }

@@ -153,7 +153,7 @@ namespace awkward {
     /// Record keys are checked in round-robin order. The best performance
     /// will be achieved by filling them in the same order for each record.
     /// Lookup time for random order scales with the number of fields.
-    virtual const BuilderPtr
+    virtual void
       field(const char* key, bool check) = 0;
 
     /// @brief Ends a record.

@@ -13,41 +13,41 @@ namespace awkward {
   const BuilderPtr
   Complex128Builder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<Complex128Builder>(options,
-                                              GrowableBuffer<std::complex<double>>::empty(options));
+                                              std::move(GrowableBuffer<std::complex<double>>::empty(options)));
   }
 
   const BuilderPtr
   Complex128Builder::fromint64(const ArrayBuilderOptions& options,
                                const GrowableBuffer<int64_t>& old) {
     GrowableBuffer<std::complex<double>> buffer =
-      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
+      GrowableBuffer<std::complex<double>>::empty_reserved(options, old.reserved());
     int64_t* oldraw = old.ptr().get();
     std::complex<double>* newraw = buffer.ptr().get();
     for (int64_t i = 0;  i < 2*old.length();  i++) {
       newraw[i] = {static_cast<double>(oldraw[i]), 0};
     }
     buffer.set_length(old.length());
-    return std::make_shared<Complex128Builder>(options, buffer);
+    return std::make_shared<Complex128Builder>(options, std::move(buffer));
   }
 
   const BuilderPtr
   Complex128Builder::fromfloat64(const ArrayBuilderOptions& options,
                                  const GrowableBuffer<double>& old) {
     GrowableBuffer<std::complex<double>> buffer =
-      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
+      GrowableBuffer<std::complex<double>>::empty_reserved(options, old.reserved());
     double* oldraw = old.ptr().get();
     std::complex<double>* newraw = buffer.ptr().get();
     for (int64_t i = 0;  i < old.length();  i++) {
       newraw[i] = std::complex<double>(oldraw[i], 0);
     }
     buffer.set_length(old.length());
-    return std::make_shared<Complex128Builder>(options, buffer);
+    return std::make_shared<Complex128Builder>(options, std::move(buffer));
   }
 
   Complex128Builder::Complex128Builder(const ArrayBuilderOptions& options,
-                                       const GrowableBuffer<std::complex<double>>& buffer)
+                                       GrowableBuffer<std::complex<double>> buffer)
       : options_(options)
-      , buffer_(buffer) { }
+      , buffer_(std::move(buffer)) { }
 
   const std::string
   Complex128Builder::classname() const {
@@ -61,7 +61,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           buffer_.ptr().get(),
-                          buffer_.length() * sizeof(double) * 2);
+                          buffer_.length() * (int64_t)sizeof(double) * 2);
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
            + form_key.str() + "\"}";
@@ -86,60 +86,60 @@ namespace awkward {
   Complex128Builder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::integer(int64_t x) {
     buffer_.append(std::complex<double>((double)x, 0));
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
   Complex128Builder::real(double x) {
     buffer_.append(std::complex<double>((double)x, 0));
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
   Complex128Builder::complex(std::complex<double> x) {
     buffer_.append(x);
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
   Complex128Builder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -153,7 +153,7 @@ namespace awkward {
   Complex128Builder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -174,10 +174,10 @@ namespace awkward {
   Complex128Builder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return out;
+    return std::move(out);
   }
 
-  const BuilderPtr
+  void
   Complex128Builder::field(const char* key, bool check) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")

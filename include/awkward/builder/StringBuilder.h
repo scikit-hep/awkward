@@ -36,8 +36,8 @@ namespace awkward {
     /// if `"utf-8"`, it is encoded with variable-width UTF-8.
     /// Currently, no other encodings have been defined.
     StringBuilder(const ArrayBuilderOptions& options,
-                  const GrowableBuffer<int64_t>& offsets,
-                  const GrowableBuffer<uint8_t>& content,
+                  GrowableBuffer<int64_t> offsets,
+                  GrowableBuffer<uint8_t> content,
                   const char* encoding);
 
     /// @brief If `nullptr`, the string is an unencoded bytestring;
@@ -107,7 +107,7 @@ namespace awkward {
     const BuilderPtr
       beginrecord(const char* name, bool check) override;
 
-    const BuilderPtr
+    void
       field(const char* key, bool check) override;
 
     const BuilderPtr

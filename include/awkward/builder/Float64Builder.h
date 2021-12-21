@@ -37,10 +37,10 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated real numbers.
     Float64Builder(const ArrayBuilderOptions& options,
-                   const GrowableBuffer<double>& buffer);
+                   GrowableBuffer<double> buffer);
 
     /// @brief Contains the accumulated real numbers (`double`).
-    const GrowableBuffer<double>
+    const GrowableBuffer<double>&
       buffer() const;
 
     /// @brief User-friendly name of this class: `"Float64Builder"`.
@@ -104,7 +104,7 @@ namespace awkward {
     const BuilderPtr
       beginrecord(const char* name, bool check) override;
 
-    const BuilderPtr
+    void
       field(const char* key, bool check) override;
 
     const BuilderPtr

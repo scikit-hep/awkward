@@ -19,18 +19,18 @@ namespace awkward {
     offsets.append(0);
     GrowableBuffer<uint8_t> content = GrowableBuffer<uint8_t>::empty(options);
     return std::make_shared<StringBuilder>(options,
-                                           offsets,
-                                           content,
+                                           std::move(offsets),
+                                           std::move(content),
                                            encoding);
   }
 
   StringBuilder::StringBuilder(const ArrayBuilderOptions& options,
-                               const GrowableBuffer<int64_t>& offsets,
-                               const GrowableBuffer<uint8_t>& content,
+                               GrowableBuffer<int64_t> offsets,
+                               GrowableBuffer<uint8_t> content,
                                const char* encoding)
       : options_(options)
-      , offsets_(offsets)
-      , content_(content)
+      , offsets_(std::move(offsets))
+      , content_(std::move(content))
       , encoding_(encoding) { }
 
   const std::string
@@ -52,11 +52,11 @@ namespace awkward {
 
     container.copy_buffer(outer_form_key.str() + "-offsets",
                           offsets_.ptr().get(),
-                          offsets_.length() * sizeof(int64_t));
+                          offsets_.length() * (int64_t)sizeof(int64_t));
 
     container.copy_buffer(inner_form_key.str() + "-data",
                           content_.ptr().get(),
-                          content_.length() * sizeof(uint8_t));
+                          content_.length() * (int64_t)sizeof(uint8_t));
 
     std::string char_parameter;
     std::string string_parameter;
@@ -101,49 +101,49 @@ namespace awkward {
   StringBuilder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   StringBuilder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   StringBuilder::integer(int64_t x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->integer(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   StringBuilder::real(double x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->real(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   StringBuilder::complex(std::complex<double> x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->complex(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   StringBuilder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   StringBuilder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -166,7 +166,7 @@ namespace awkward {
   StringBuilder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -180,7 +180,7 @@ namespace awkward {
   StringBuilder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -201,10 +201,10 @@ namespace awkward {
   StringBuilder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return out;
+    return std::move(out);
   }
 
-  const BuilderPtr
+  void
   StringBuilder::field(const char* key, bool check) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")

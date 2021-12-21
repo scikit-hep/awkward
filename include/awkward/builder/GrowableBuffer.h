@@ -5,6 +5,7 @@
 
 #include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
+#include "awkward/kernel-dispatch.h"
 
 #include <memory>
 
@@ -23,22 +24,13 @@ namespace awkward {
   /// data grow.
   ///
   /// When {@link ArrayBuilder#snapshot ArrayBuilder::snapshot} is called,
-  /// these buffers are shared with the new Content array. The GrowableBuffer
-  /// can still grow because the Content array only sees the part of its
-  /// reservation that existed at the time of the snapshot (new elements are
-  /// beyond its {@link Content#length Content::length}).
+  /// these buffers are copied to the new Content array.
   ///
   /// If a GrowableBuffer resizes itself by allocating a new array, it
-  /// decreases the reference counter for the shared buffer, but the Content
-  /// still owns it, and thus becomes the sole owner.
-  ///
-  /// The only disadvantage to this scheme is that the Content might forever
-  /// have a reservation that is larger than it needs and it is unable to
-  /// delete or take advantage of. However, many operations require buffers
-  /// to be rewritten; under normal circumstances, it would soon be replaced
-  /// by a more appropriately sized buffer.
+  /// copies the buffer it owns.
   template <typename T>
   class LIBAWKWARD_EXPORT_SYMBOL GrowableBuffer {
+    using UniquePtr = kernel::UniquePtr<T>;
   public:
     /// @brief Creates an empty GrowableBuffer.
     ///
@@ -53,7 +45,7 @@ namespace awkward {
     /// of `minreserve` and
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial}.
     static GrowableBuffer<T>
-      empty(const ArrayBuilderOptions& options, int64_t minreserve);
+      empty_reserved(const ArrayBuilderOptions& options, int64_t minreserve);
 
     /// @brief Creates a GrowableBuffer in which all elements are initialized
     /// to a given value.
@@ -90,7 +82,7 @@ namespace awkward {
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of reallocations.
     GrowableBuffer(const ArrayBuilderOptions& options,
-                   std::shared_ptr<T> ptr,
+                   GrowableBuffer::UniquePtr ptr,
                    int64_t length,
                    int64_t reserved);
 
@@ -99,9 +91,14 @@ namespace awkward {
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial}.
     GrowableBuffer(const ArrayBuilderOptions& options);
 
-    /// @brief Reference-counted pointer to the array buffer.
-    const std::shared_ptr<T>
+    /// @brief Reference to a unique pointer to the array buffer.
+    const GrowableBuffer::UniquePtr&
       ptr() const;
+
+    /// @brief FIXME: needed for uproot.cpp - remove when it's gone.
+    /// Note, it transfers ownership of the array buffer.
+    GrowableBuffer::UniquePtr
+      get_ptr();
 
     /// @brief Currently used number of elements.
     ///
@@ -135,10 +132,6 @@ namespace awkward {
     /// @brief Discards accumulated data, the #reserved returns to
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial},
     /// and a new #ptr is allocated.
-    ///
-    /// The old data are only discarded in the sense of decrementing their
-    /// reference count. If any old snapshots are still using the data,
-    /// they are not invalidated.
     void
       clear();
 
@@ -158,7 +151,7 @@ namespace awkward {
   private:
     const ArrayBuilderOptions options_;
     // @brief See #ptr.
-    std::shared_ptr<T> ptr_;
+    UniquePtr ptr_;
     // @brief See #length.
     int64_t length_;
     // @brief See #reserved.

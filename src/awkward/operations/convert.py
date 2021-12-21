@@ -1013,6 +1013,9 @@ def to_list(array):
     ):
         return array.to_list()
 
+    elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
+        return array.snapshot().to_list()
+
     elif isinstance(array, dict):
         return dict((n, to_list(x)) for n, x in array.items())
 

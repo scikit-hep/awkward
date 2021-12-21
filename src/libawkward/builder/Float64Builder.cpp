@@ -15,29 +15,29 @@ namespace awkward {
   const BuilderPtr
   Float64Builder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<Float64Builder>(options,
-                                            GrowableBuffer<double>::empty(options));
+                                            std::move(GrowableBuffer<double>::empty(options)));
   }
 
   const BuilderPtr
   Float64Builder::fromint64(const ArrayBuilderOptions& options,
                             const GrowableBuffer<int64_t>& old) {
     GrowableBuffer<double> buffer =
-      GrowableBuffer<double>::empty(options, old.reserved());
+      GrowableBuffer<double>::empty_reserved(options, old.reserved());
     int64_t* oldraw = old.ptr().get();
     double* newraw = buffer.ptr().get();
     for (int64_t i = 0;  i < old.length();  i++) {
       newraw[i] = (double)oldraw[i];
     }
     buffer.set_length(old.length());
-    return std::make_shared<Float64Builder>(options, buffer);
+    return std::make_shared<Float64Builder>(options, std::move(buffer));
   }
 
   Float64Builder::Float64Builder(const ArrayBuilderOptions& options,
-                                 const GrowableBuffer<double>& buffer)
+                                 GrowableBuffer<double> buffer)
       : options_(options)
-      , buffer_(buffer) { }
+      , buffer_(std::move(buffer)) { }
 
-  const GrowableBuffer<double>
+  const GrowableBuffer<double>&
   Float64Builder::buffer() const {
     return buffer_;
   }
@@ -54,7 +54,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           buffer_.ptr().get(),
-                          buffer_.length() * sizeof(double));
+                          buffer_.length() * (int64_t)sizeof(double));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \""
            + form_key.str() + "\"}";
@@ -79,61 +79,61 @@ namespace awkward {
   Float64Builder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::integer(int64_t x) {
     buffer_.append((double)x);
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
   Float64Builder::real(double x) {
     buffer_.append(x);
-    return shared_from_this();
+    return nullptr;
   }
 
   const BuilderPtr
   Float64Builder::complex(std::complex<double> x) {
-    BuilderPtr out = Complex128Builder::fromfloat64(options_, buffer_);
+    BuilderPtr out = Complex128Builder::fromfloat64(options_, std::move(buffer_));
     out.get()->complex(x);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
   Float64Builder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -147,7 +147,7 @@ namespace awkward {
   Float64Builder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return out;
+    return std::move(out);
   }
 
   const BuilderPtr
@@ -168,10 +168,10 @@ namespace awkward {
   Float64Builder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return out;
+    return std::move(out);
   }
 
-  const BuilderPtr
+  void
   Float64Builder::field(const char* key, bool check) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")

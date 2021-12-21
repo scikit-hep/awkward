@@ -118,7 +118,7 @@ namespace awkward {
     const BuilderPtr
       beginrecord(const char* name, bool check) override;
 
-    const BuilderPtr
+    void
       field(const char* key, bool check) override;
 
     const BuilderPtr
@@ -135,11 +135,14 @@ namespace awkward {
 
     int64_t nextindex() { return nextindex_; }
 
+    void
+      maybeupdate(int64_t i, const BuilderPtr builder);
+
   private:
-    const BuilderPtr
+    void
       field_fast(const char* key);
 
-    const BuilderPtr
+    void
       field_check(const char* key);
 
     const ArrayBuilderOptions options_;
@@ -153,10 +156,6 @@ namespace awkward {
     int64_t nextindex_;
     int64_t nexttotry_;
     int64_t keys_size_;
-
-  public:
-    void
-      maybeupdate(int64_t i, const BuilderPtr& tmp);
   };
 }
 
