@@ -1,7 +1,7 @@
 exclude: ^(docs|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.0.1
+  rev: v4.1.0
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
