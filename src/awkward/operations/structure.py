@@ -2244,7 +2244,7 @@ def _pack_layout(layout):
 
     # Project indexed arrays
     elif isinstance(layout, ak._util.indexedtypes):
-        return layout.project()
+        return _pack_layout(layout.project())
 
     # ListArray performs both ordering and resizing
     elif isinstance(
