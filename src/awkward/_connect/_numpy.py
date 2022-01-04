@@ -6,6 +6,11 @@ from __future__ import absolute_import
 
 import sys
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 import numpy
 
 import awkward as ak
@@ -23,21 +28,9 @@ implemented = {}
 
 
 def _to_rectilinear(arg):
-    if isinstance(
-        arg,
-        (
-            ak.Array,
-            ak.Record,
-            ak.ArrayBuilder,
-            ak.layout.Content,
-            ak.layout.Record,
-            ak.layout.ArrayBuilder,
-            ak.layout.LayoutBuilder32,
-            ak.layout.LayoutBuilder64,
-        ),
-    ):
+    if isinstance(arg, Iterable):
         nplike = ak.nplike.of(arg)
-        return nplike.to_rectilinear(arg)
+        return nplike.to_rectilinear(arg, allow_missing=False)
     else:
         return arg
 
