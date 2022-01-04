@@ -2935,7 +2935,9 @@ def singletons(array, highlevel=True, behavior=None):
                 ak.layout.Index64(offsets), layout.project()
             )
 
-        elif isinstance(layout, ak.layout.IndexedArray32):
+        elif isinstance(layout, ak.layout.IndexedArray32) and isinstance(
+            layout.content, (ak.layout.EmptyArray, ak.layout.NumpyArray)
+        ):
             return getfunction(
                 ak.layout.IndexedOptionArray32(
                     layout.index,
@@ -2945,7 +2947,9 @@ def singletons(array, highlevel=True, behavior=None):
                 )
             )
 
-        elif isinstance(layout, ak.layout.IndexedArrayU32):
+        elif isinstance(layout, ak.layout.IndexedArrayU32) and isinstance(
+            layout.content, (ak.layout.EmptyArray, ak.layout.NumpyArray)
+        ):
             return getfunction(
                 ak.layout.IndexedOptionArray64(
                     ak.layout.Index64(layout.index),
@@ -2955,7 +2959,9 @@ def singletons(array, highlevel=True, behavior=None):
                 )
             )
 
-        elif isinstance(layout, ak.layout.IndexedArray64):
+        elif isinstance(layout, ak.layout.IndexedArray64) and isinstance(
+            layout.content, (ak.layout.EmptyArray, ak.layout.NumpyArray)
+        ):
             return getfunction(
                 ak.layout.IndexedOptionArray64(
                     layout.index,
