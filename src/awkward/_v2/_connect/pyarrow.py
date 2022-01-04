@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import distutils
 import json
 
 try:
@@ -33,9 +32,9 @@ or
 """
 
 else:
-    if distutils.version.LooseVersion(
-        pyarrow.__version__
-    ) < distutils.version.LooseVersion("6.0.0"):
+    if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
+        "6.0.0"
+    ):
         pyarrow = None
         error_message = "pyarrow 6.0.0 or later required for {0}"
 

@@ -7,7 +7,6 @@
 
 # import warnings
 # import sys
-# import distutils.version
 # import types
 
 # import awkward as ak
@@ -30,9 +29,9 @@
 #     conda install numexpr"""
 #         )
 #     else:
-#         if not checked_version and distutils.version.LooseVersion(
+#         if not checked_version and ak._v2._util.parse_version(
 #             numexpr.__version__
-#         ) < distutils.version.LooseVersion("2.7.1"):
+#         ) < ak._v2._util.parse_version("2.7.1"):
 #             warnings.warn(
 #                 "Awkward Array is only known to work with numexpr 2.7.1 or later"
 #                 "(you have version {0})".format(numexpr.__version__),

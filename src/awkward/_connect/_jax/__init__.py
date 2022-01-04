@@ -4,7 +4,6 @@
 
 from __future__ import absolute_import
 
-import distutils.version
 import types
 
 import awkward as ak
@@ -27,9 +26,9 @@ or
     conda install jax jaxlib"""
         )
     else:
-        if not checked_version and distutils.version.LooseVersion(
+        if not checked_version and ak._v2._util.parse_version(
             jax.__version__
-        ) < distutils.version.LooseVersion("0.2.7"):
+        ) < ak._v2._util.parse_version("0.2.7"):
             raise ImportError(
                 "Awkward Array can only work with jax 0.2.7 or later "
                 "(you have version {0})".format(jax.__version__)

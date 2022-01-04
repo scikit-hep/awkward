@@ -8,7 +8,7 @@ from __future__ import absolute_import
 # import re
 # import os.path
 # import warnings
-import distutils
+import setuptools
 import os
 import numbers
 
@@ -34,12 +34,14 @@ kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
 
 
+def parse_version(version):
+    return setuptools.extern.packaging.version.parse(version)
+
+
 def numpy_at_least(version):
     import numpy
 
-    return distutils.version.LooseVersion(
-        numpy.__version__
-    ) >= distutils.version.LooseVersion(version)
+    return parse_version(numpy.__version__) >= parse_version(version)
 
 
 def in_module(obj, modulename):
