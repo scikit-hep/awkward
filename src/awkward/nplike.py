@@ -6,6 +6,11 @@ from __future__ import absolute_import
 
 import ctypes
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 import numpy
 
 import awkward as ak
@@ -383,7 +388,26 @@ class NumpyKernel(object):
 
 class Numpy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
-        return ak.operations.convert.to_numpy(array, *args, **kwargs)
+        if isinstance(
+            array,
+            (
+                ak.Array,
+                ak.Record,
+                ak.ArrayBuilder,
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.layout.ArrayBuilder,
+                ak.layout.LayoutBuilder32,
+                ak.layout.LayoutBuilder64,
+            ),
+        ):
+            return ak.operations.convert.to_numpy(array, *args, **kwargs)
+
+        elif isinstance(array, Iterable):
+            return [self.to_rectilinear(x, *args, **kwargs) for x in array]
+
+        else:
+            raise TypeError("to_rectilinear argument must be iterable")
 
     def __getitem__(self, name_and_types):
         return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
