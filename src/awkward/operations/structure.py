@@ -2934,6 +2934,43 @@ def singletons(array, highlevel=True, behavior=None):
             return lambda: ak.layout.ListOffsetArray64(
                 ak.layout.Index64(offsets), layout.project()
             )
+
+        elif isinstance(layout, ak.layout.IndexedArray32):
+            return getfunction(
+                ak.layout.IndexedOptionArray32(
+                    layout.index,
+                    layout.content,
+                    layout.identities,
+                    layout.parameters,
+                )
+            )
+
+        elif isinstance(layout, ak.layout.IndexedArrayU32):
+            return getfunction(
+                ak.layout.IndexedOptionArray64(
+                    ak.layout.Index64(layout.index),
+                    layout.content,
+                    layout.identities,
+                    layout.parameters,
+                )
+            )
+
+        elif isinstance(layout, ak.layout.IndexedArray64):
+            return getfunction(
+                ak.layout.IndexedOptionArray64(
+                    layout.index,
+                    layout.content,
+                    layout.identities,
+                    layout.parameters,
+                )
+            )
+
+        elif isinstance(layout, ak.layout.EmptyArray):
+            return getfunction(ak.layout.UnmaskedArray(layout.toNumpyArray()))
+
+        elif isinstance(layout, ak.layout.NumpyArray):
+            return getfunction(ak.layout.UnmaskedArray(layout))
+
         else:
             return None
 

@@ -35,15 +35,52 @@ def singletons(array, highlevel=True, behavior=None):
 #     def getfunction(layout):
 #         nplike = ak.nplike.of(layout)
 
-#         if isinstance(layout, ak._v2._util.optiontypes):
+#         if isinstance(layout, ak._util.optiontypes):
 #             nulls = nplike.asarray(layout.bytemask()).view(np.bool_)
 #             offsets = nplike.ones(len(layout) + 1, dtype=np.int64)
 #             offsets[0] = 0
 #             offsets[1:][nulls] = 0
 #             nplike.cumsum(offsets, out=offsets)
-#             return lambda: ak._v2.contents.ListOffsetArray64(
-#                 ak._v2.index.Index64(offsets), layout.project()
+#             return lambda: ak.layout.ListOffsetArray64(
+#                 ak.layout.Index64(offsets), layout.project()
 #             )
+
+#         elif isinstance(layout, ak.layout.IndexedArray32):
+#             return getfunction(
+#                 ak.layout.IndexedOptionArray32(
+#                     layout.index,
+#                     layout.content,
+#                     layout.identities,
+#                     layout.parameters,
+#                 )
+#             )
+
+#         elif isinstance(layout, ak.layout.IndexedArrayU32):
+#             return getfunction(
+#                 ak.layout.IndexedOptionArray64(
+#                     ak.layout.Index64(layout.index),
+#                     layout.content,
+#                     layout.identities,
+#                     layout.parameters,
+#                 )
+#             )
+
+#         elif isinstance(layout, ak.layout.IndexedArray64):
+#             return getfunction(
+#                 ak.layout.IndexedOptionArray64(
+#                     layout.index,
+#                     layout.content,
+#                     layout.identities,
+#                     layout.parameters,
+#                 )
+#             )
+
+#         elif isinstance(layout, ak.layout.EmptyArray):
+#             return getfunction(ak.layout.UnmaskedArray(layout.toNumpyArray()))
+
+#         elif isinstance(layout, ak.layout.NumpyArray):
+#             return getfunction(ak.layout.UnmaskedArray(layout))
+
 #         else:
 #             return None
 
