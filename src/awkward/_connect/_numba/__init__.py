@@ -4,7 +4,6 @@
 
 from __future__ import absolute_import
 
-import distutils.version
 import types
 
 import awkward as ak
@@ -27,9 +26,9 @@ or
     conda install numba"""
         )
     else:
-        if not checked_version and distutils.version.LooseVersion(
+        if not checked_version and ak._v2._util.parse_version(
             numba.__version__
-        ) < distutils.version.LooseVersion("0.50"):
+        ) < ak._v2._util.parse_version("0.50"):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
                 "(you have version {0})".format(numba.__version__)

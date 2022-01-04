@@ -10,7 +10,6 @@ import collections
 import math
 import os
 import threading
-import distutils.version
 import glob
 import re
 
@@ -1999,9 +1998,9 @@ or
             )
         )
     else:
-        if distutils.version.LooseVersion(
-            pyarrow.__version__
-        ) < distutils.version.LooseVersion("2.0.0"):
+        if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
+            "2.0.0"
+        ):
             raise ImportError("pyarrow 2.0.0 or later required for {0}".format(name))
         return pyarrow
 
@@ -5429,7 +5428,6 @@ __all__ = [
         "math",
         "os",
         "threading",
-        "distutils",
         "glob",
         "re",
         "Iterable",
