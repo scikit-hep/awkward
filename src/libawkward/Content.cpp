@@ -1730,16 +1730,17 @@ namespace awkward {
       int64_t posaxis = depth + axis;
       if (posaxis < 0) {
         throw std::invalid_argument(
-          std::string("axis == ") + std::to_string(axis)
-                      + std::string(" exceeds the depth == ") + std::to_string(depth)
-                      + std::string(" of this array") + FILENAME(__LINE__));
+          std::string("axis=") + std::to_string(axis)
+                      + std::string(" exceeds the depth (") + std::to_string(depth)
+                      + std::string(") of this array") + FILENAME(__LINE__));
       }
       return posaxis;
     } else if (mindepth + axis == 0) {
       throw std::invalid_argument(
-        std::string("axis == ") + std::to_string(axis)
-                    + std::string(" exceeds the min depth == ") + std::to_string(mindepth)
-                    + std::string(" of this array") + FILENAME(__LINE__));
+        std::string("axis=") + std::to_string(axis)
+                    + std::string(" exceeds the depth (") + std::to_string(mindepth)
+                    + std::string(") of at least one record field (or union possibility) of this array")
+                    + FILENAME(__LINE__));
     }
     return axis;
   }

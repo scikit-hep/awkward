@@ -35,7 +35,7 @@ def test_array_3d():
 
     with pytest.raises(ValueError) as err:
         assert ak.num(array, axis=-4)
-    assert str(err.value).startswith("axis == -4 exceeds the depth == 3 of this array")
+    assert str(err.value).startswith("axis=-4 exceeds the depth (3) of this array")
 
 
 def test_list_array():
@@ -61,7 +61,7 @@ def test_list_array():
     assert ak.num(array, axis=-3) == 3
     with pytest.raises(ValueError) as err:
         assert ak.num(array, axis=-4)
-    assert str(err.value).startswith("axis == -4 exceeds the depth == 3 of this array")
+    assert str(err.value).startswith("axis=-4 exceeds the depth (3) of this array")
 
 
 def test_record_array():
@@ -102,9 +102,9 @@ def test_record_array_axis_out_of_range():
     with pytest.raises(ValueError) as err:
         assert ak.num(array, axis=-2)
     assert str(err.value).startswith(
-        "axis == -2 exceeds the min depth == 2 of this array"
+        "axis=-2 exceeds the depth (2) of at least one record field"
     )
 
     with pytest.raises(ValueError) as err:
         assert ak.num(array, axis=-3)
-    assert str(err.value).startswith("axis == -3 exceeds the depth == 2 of this array")
+    assert str(err.value).startswith("axis=-3 exceeds the depth (2) of this array")
