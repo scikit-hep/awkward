@@ -2307,7 +2307,7 @@ namespace awkward {
           //
           // But the regular case should become a jump table with CODE_CASE_REGULAR.
 
-          for (int64_t i = 0;  i < (int64_t)ofs.size();  i++) {
+          for (std::size_t i = 0;  i < ofs.size();  i++) {
             auto pred = dictionary.begin() + (predicates[i] - BOUND_DICTIONARY);
             pred->push_back(CODE_OVER);  // append "over"
             pred->push_back(CODE_EQ);    // append "="
@@ -2318,7 +2318,7 @@ namespace awkward {
           alt->push_back(CODE_DROP);  // append "drop"
 
           I bytecode2 = alternate;
-          for (int64_t i = (int64_t)ofs.size() - 1;  i >= 0;  i--) {
+          for (std::size_t i = ofs.size(); i--;) {
             I bytecode1 = consequents[i];
 
             I ifthenelse_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
