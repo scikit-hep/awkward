@@ -1008,12 +1008,10 @@ def to_list(array):
             ak._v2.highlevel.Record,
             ak._v2.contents.Content,
             ak._v2.record.Record,
+            ak._v2.highlevel.ArrayBuilder,
         ),
     ):
-        return array.to_list()
-
-    elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
-        return array.snapshot().to_list()
+        raise TypeError("use ak._v2.operations.convert.to_list for v2 arrays (for now)")
 
     elif isinstance(array, dict):
         return dict((n, to_list(x)) for n, x in array.items())

@@ -477,7 +477,7 @@ class Content(object):
                 and where._parameters is not None
                 and (where._parameters.get("__array__") in ("string", "bytestring"))
             ):
-                return self._getitem_fields(ak.to_list(where))
+                return self._getitem_fields(ak._v2.operations.convert.to_list(where))
 
             elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
                 return where.toNumpyArray(np.int64)
