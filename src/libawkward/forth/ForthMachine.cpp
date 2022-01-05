@@ -591,7 +591,7 @@ namespace awkward {
           int64_t stop = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 3];
           std::stringstream out;
           out << input_names_[(IndexTypeOf<int64_t>)in_num] << " enum";
-          for (int64_t i = start;  i < stop;  i++) {
+          for (std::size_t i = (size_t)start;  i < (size_t)stop;  i++) {
             out << " s\" " << strings_[i] << "\"";
           }
           return out.str();
@@ -602,7 +602,7 @@ namespace awkward {
           int64_t stop = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 3];
           std::stringstream out;
           out << input_names_[(IndexTypeOf<int64_t>)in_num] << " enumonly";
-          for (int64_t i = start;  i < stop;  i++) {
+          for (std::size_t i = (size_t)start;  i < (size_t)stop;  i++) {
             out << " s\" " << strings_[i] << "\"";
           }
           return out.str();
@@ -2202,7 +2202,7 @@ namespace awkward {
             + FILENAME(__LINE__)
           );
         }
-        for (int64_t i = 0;  i < ofs.size();  i++) {
+        for (std::size_t i = 0;  i < ofs.size();  i++) {
           if (ofs[i] > endofs[i]) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, stop, "in 'case' .. 'endcase', there must be an 'endof' for every 'of'")
@@ -2218,7 +2218,7 @@ namespace awkward {
         I first_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
         bool can_specialize = true;
         int64_t substart = pos + 1;
-        for (int64_t i = 0;  i < ofs.size();  i++) {
+        for (std::size_t i = 0;  i < ofs.size();  i++) {
           I pred_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> pred;
           dictionary.push_back(pred);
