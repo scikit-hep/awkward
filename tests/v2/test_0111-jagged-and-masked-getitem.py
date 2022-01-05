@@ -180,7 +180,9 @@ def test_array_slice_1():
         check_valid=True,
     ).layout
     array = v1_to_v2(array)
-    assert to_list(array[ak.from_iter(["y", "x"], highlevel=False)]) == [
+    assert to_list(
+        array[ak._v2.operations.convert.from_iter(["y", "x"], highlevel=False)]
+    ) == [
         {"y": 1.1, "x": 1},
         {"y": 2.2, "x": 2},
         {"y": 3.3, "x": 3},
