@@ -8,17 +8,19 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_empty_array_slice():
     # inspired by PR021::test_getitem
     a = ak.from_json("[[], [[], []], [[], [], []]]")
     a = v1_to_v2(a.layout)
-    assert ak.to_list(a[2, 1, np.array([], dtype=int)]) == []
+    assert to_list(a[2, 1, np.array([], dtype=int)]) == []
     assert (
         a.typetracer[2, 1, np.array([], dtype=int)].form
         == a[2, 1, np.array([], dtype=int)].form
     )
-    assert ak.to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == [[]]
+    assert to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == [[]]
     assert (
         a.typetracer[2, np.array([1], dtype=int), np.array([], dtype=int)].form
         == a[2, np.array([1], dtype=int), np.array([], dtype=int)].form
@@ -35,7 +37,7 @@ def test_empty_array_slice():
     )
     content = v1_to_v2(content)
     listarray = v1_to_v2(listarray)
-    assert ak.to_list(listarray[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]]) == [
+    assert to_list(listarray[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]]) == [
         8.8,
         5.5,
         0.0,
@@ -45,16 +47,16 @@ def test_empty_array_slice():
         listarray.typetracer[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]].form
         == listarray[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]].form
     )
-    assert ak.to_list(listarray[2, 1, np.array([], dtype=int)]) == []
+    assert to_list(listarray[2, 1, np.array([], dtype=int)]) == []
     assert (
         listarray.typetracer[2, 1, np.array([], dtype=int)].form
         == listarray[2, 1, np.array([], dtype=int)].form
     )
-    assert ak.to_list(listarray[2, 1, []]) == []
+    assert to_list(listarray[2, 1, []]) == []
     assert listarray.typetracer[2, 1, []].form == listarray[2, 1, []].form
-    assert ak.to_list(listarray[2, [1], []]) == []
+    assert to_list(listarray[2, [1], []]) == []
     assert listarray.typetracer[2, [1], []].form == listarray[2, [1], []].form
-    assert ak.to_list(listarray[2, [], []]) == []
+    assert to_list(listarray[2, [], []]) == []
     assert listarray.typetracer[2, [], []].form == listarray[2, [], []].form
 
 
@@ -69,17 +71,17 @@ def test_nonflat_slice():
     )
     listoffsetarray = v1_to_v2(listoffsetarray)
 
-    assert ak.to_list(
+    assert to_list(
         array[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
     ) == [27, 4, 22, 24, 25, 1]
-    assert ak.to_list(
+    assert to_list(
         array[
             [[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]
         ]
     ) == [[27, 4], [22, 24], [25, 1]]
 
     one = listoffsetarray[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
-    assert ak.to_list(one) == [27, 4, 22, 24, 25, 1]
+    assert to_list(one) == [27, 4, 22, 24, 25, 1]
     assert (
         listoffsetarray.typetracer[
             [1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]
@@ -104,7 +106,7 @@ def test_nonflat_slice_2():
     two = listoffsetarray[
         [[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]
     ]
-    assert ak.to_list(two) == [[27, 4], [22, 24], [25, 1]]
+    assert to_list(two) == [[27, 4], [22, 24], [25, 1]]
 
 
 def test_newaxis():
@@ -118,12 +120,12 @@ def test_newaxis():
     )
     listoffsetarray = v1_to_v2(listoffsetarray)
 
-    assert ak.to_list(array[:, np.newaxis]) == [
+    assert to_list(array[:, np.newaxis]) == [
         [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]],
         [[[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]],
     ]
 
-    assert ak.to_list(listoffsetarray[:, np.newaxis]) == [
+    assert to_list(listoffsetarray[:, np.newaxis]) == [
         [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]],
         [[[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]],
     ]

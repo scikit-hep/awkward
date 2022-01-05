@@ -2240,6 +2240,26 @@ class ArrayBuilder(Sized):
         else:
             raise TypeError("behavior must be None or a dict")
 
+    def tolist(self):
+        """
+        Converts this Array into Python objects; same as #ak.to_list
+        (but without the underscore, like NumPy's
+        [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
+        """
+        return self.to_list()
+
+    def to_list(self):
+        """
+        Converts this Array into Python objects; same as #ak.to_list.
+        """
+        return self.snapshot().to_list()
+
+    def to_numpy(self, allow_missing=True):
+        """
+        Converts this Array into a NumPy array, if possible; same as #ak.to_numpy.
+        """
+        return self.snapshot().to_numpy(allow_missing=allow_missing)
+
     @property
     def type(self):
         """

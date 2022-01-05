@@ -10,6 +10,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1v2_equal, v1_to_v2, v2_to_v1
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def newform(oldform):
     if isinstance(oldform, dict):
@@ -66,7 +68,7 @@ def test_EmptyArray():
     v2a = ak._v2.contents.emptyarray.EmptyArray()
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == []
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -75,7 +77,7 @@ def test_NumpyArray():
     v2a = ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [0.0, 1.1, 2.2, 3.3]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
     v1b = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5))
@@ -84,7 +86,10 @@ def test_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
-    assert ak.to_list(v1b) == ak.to_list(v2b)
+    assert to_list(v2b) == [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+    ]
     assert newform(json.loads(v1b.form.tojson())) == v2b.form.tolist()
 
 
@@ -101,7 +106,7 @@ def test_RegularArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
     v1b = ak.layout.RegularArray(ak.layout.EmptyArray(), 0, zeros_length=10)
@@ -110,7 +115,7 @@ def test_RegularArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
-    assert ak.to_list(v1b) == ak.to_list(v2b)
+    assert to_list(v2b) == [[], [], [], [], [], [], [], [], [], []]
     assert newform(json.loads(v1b.form.tojson())) == v2b.form.tolist()
 
 
@@ -129,7 +134,7 @@ def test_ListArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -144,7 +149,7 @@ def test_ListOffsetArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -169,7 +174,13 @@ def test_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        {"x": 0, "y": 0.0},
+        {"x": 1, "y": 1.1},
+        {"x": 2, "y": 2.2},
+        {"x": 3, "y": 3.3},
+        {"x": 4, "y": 4.4},
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
     v1b = ak.layout.RecordArray(
@@ -192,21 +203,21 @@ def test_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
-    assert ak.to_list(v1b) == ak.to_list(v2b)
+    assert to_list(v2b) == [(0, 0.0), (1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4)]
     assert newform(json.loads(v1b.form.tojson())) == v2b.form.tolist()
 
     v1c = ak.layout.RecordArray([], [], 10)
     v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
     assert v1v2_equal(v1c, v2c)
     assert v1v2_equal(v2_to_v1(v2c), v1_to_v2(v1c))
-    assert ak.to_list(v1c) == ak.to_list(v2c)
+    assert to_list(v2c) == [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
     assert newform(json.loads(v1c.form.tojson())) == v2c.form.tolist()
 
     v1d = ak.layout.RecordArray([], None, 10)
     v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
     assert v1v2_equal(v1d, v2d)
     assert v1v2_equal(v2_to_v1(v2d), v1_to_v2(v1d))
-    assert ak.to_list(v1d) == ak.to_list(v2d)
+    assert to_list(v2d) == [(), (), (), (), (), (), (), (), (), ()]
     assert newform(json.loads(v1c.form.tojson())) == v2c.form.tolist()
 
 
@@ -221,7 +232,7 @@ def test_IndexedArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [3.3, 3.3, 1.1, 2.2, 5.5, 6.6, 5.5]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -236,7 +247,7 @@ def test_IndexedOptionArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [3.3, 3.3, None, 2.2, None, 6.6, 5.5]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -253,7 +264,7 @@ def test_ByteMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [1.1, None, 3.3, None, 5.5]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
     v1b = ak.layout.ByteMaskedArray(
@@ -268,7 +279,7 @@ def test_ByteMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
-    assert ak.to_list(v1b) == ak.to_list(v2b)
+    assert to_list(v2b) == [1.1, None, 3.3, None, 5.5]
     assert newform(json.loads(v1b.form.tojson())) == v2b.form.tolist()
 
 
@@ -339,7 +350,21 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        None,
+        None,
+        None,
+        None,
+        1.1,
+        None,
+        3.3,
+        None,
+        5.5,
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
     v1b = ak.layout.BitMaskedArray(
@@ -408,7 +433,21 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
-    assert ak.to_list(v1b) == ak.to_list(v2b)
+    assert to_list(v2b) == [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        None,
+        None,
+        None,
+        None,
+        1.1,
+        None,
+        3.3,
+        None,
+        5.5,
+    ]
     assert newform(json.loads(v1b.form.tojson())) == v2b.form.tolist()
 
     v1c = ak.layout.BitMaskedArray(
@@ -483,7 +522,21 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1c, v2c)
     assert v1v2_equal(v2_to_v1(v2c), v1_to_v2(v1c))
-    assert ak.to_list(v1c) == ak.to_list(v2c)
+    assert to_list(v2c) == [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        None,
+        None,
+        None,
+        None,
+        1.1,
+        None,
+        3.3,
+        None,
+        5.5,
+    ]
     assert newform(json.loads(v1c.form.tojson())) == v2c.form.tolist()
 
     v1d = ak.layout.BitMaskedArray(
@@ -558,7 +611,21 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1d, v2d)
     assert v1v2_equal(v2_to_v1(v2d), v1_to_v2(v1d))
-    assert ak.to_list(v1d) == ak.to_list(v2d)
+    assert to_list(v2d) == [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        None,
+        None,
+        None,
+        None,
+        1.1,
+        None,
+        3.3,
+        None,
+        5.5,
+    ]
     assert newform(json.loads(v1d.form.tojson())) == v2d.form.tolist()
 
 
@@ -569,7 +636,7 @@ def test_UnmaskedArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [0.0, 1.1, 2.2, 3.3]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -592,7 +659,7 @@ def test_UnionArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [5.5, 4.4, 1, 2, 3.3, 3, 5.5]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -617,7 +684,10 @@ def test_RegularArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        [{"nest": 0.0}, {"nest": 1.1}, {"nest": 2.2}],
+        [{"nest": 3.3}, {"nest": 4.4}, {"nest": 5.5}],
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
     v1b = ak.layout.RegularArray(
@@ -634,7 +704,7 @@ def test_RegularArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
-    assert ak.to_list(v1b) == ak.to_list(v2b)
+    assert to_list(v2b) == [[], [], [], [], [], [], [], [], [], []]
     assert newform(json.loads(v1b.form.tojson())) == v2b.form.tolist()
 
 
@@ -661,7 +731,11 @@ def test_ListArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        [{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}],
+        [],
+        [{"nest": 4.4}, {"nest": 5.5}],
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -686,7 +760,11 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        [{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}],
+        [],
+        [{"nest": 4.4}, {"nest": 5.5}],
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -711,7 +789,15 @@ def test_IndexedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        {"nest": 3.3},
+        {"nest": 3.3},
+        {"nest": 1.1},
+        {"nest": 2.2},
+        {"nest": 5.5},
+        {"nest": 6.6},
+        {"nest": 5.5},
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -736,7 +822,15 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        {"nest": 3.3},
+        {"nest": 3.3},
+        None,
+        {"nest": 2.2},
+        None,
+        {"nest": 6.6},
+        {"nest": 5.5},
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -763,7 +857,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [{"nest": 1.1}, None, {"nest": 3.3}, None, {"nest": 5.5}]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
     v1b = ak.layout.ByteMaskedArray(
@@ -788,7 +882,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
-    assert ak.to_list(v1b) == ak.to_list(v2b)
+    assert to_list(v2b) == [{"nest": 1.1}, None, {"nest": 3.3}, None, {"nest": 5.5}]
     assert newform(json.loads(v1b.form.tojson())) == v2b.form.tolist()
 
 
@@ -897,7 +991,21 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        {"nest": 0.0},
+        {"nest": 1.0},
+        {"nest": 2.0},
+        {"nest": 3.0},
+        None,
+        None,
+        None,
+        None,
+        {"nest": 1.1},
+        None,
+        {"nest": 3.3},
+        None,
+        {"nest": 5.5},
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
     v1b = ak.layout.BitMaskedArray(
@@ -1006,7 +1114,21 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1b, v2b)
     assert v1v2_equal(v2_to_v1(v2b), v1_to_v2(v1b))
-    assert ak.to_list(v1b) == ak.to_list(v2b)
+    assert to_list(v2b) == [
+        {"nest": 0.0},
+        {"nest": 1.0},
+        {"nest": 2.0},
+        {"nest": 3.0},
+        None,
+        None,
+        None,
+        None,
+        {"nest": 1.1},
+        None,
+        {"nest": 3.3},
+        None,
+        {"nest": 5.5},
+    ]
     assert newform(json.loads(v1b.form.tojson())) == v2b.form.tolist()
 
     v1c = ak.layout.BitMaskedArray(
@@ -1121,7 +1243,21 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1c, v2c)
     assert v1v2_equal(v2_to_v1(v2c), v1_to_v2(v1c))
-    assert ak.to_list(v1c) == ak.to_list(v2c)
+    assert to_list(v2c) == [
+        {"nest": 0.0},
+        {"nest": 1.0},
+        {"nest": 2.0},
+        {"nest": 3.0},
+        None,
+        None,
+        None,
+        None,
+        {"nest": 1.1},
+        None,
+        {"nest": 3.3},
+        None,
+        {"nest": 5.5},
+    ]
     assert newform(json.loads(v1c.form.tojson())) == v2c.form.tolist()
 
     v1d = ak.layout.BitMaskedArray(
@@ -1236,7 +1372,21 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1d, v2d)
     assert v1v2_equal(v2_to_v1(v2d), v1_to_v2(v1d))
-    assert ak.to_list(v1d) == ak.to_list(v2d)
+    assert to_list(v2d) == [
+        {"nest": 0.0},
+        {"nest": 1.0},
+        {"nest": 2.0},
+        {"nest": 3.0},
+        None,
+        None,
+        None,
+        None,
+        {"nest": 1.1},
+        None,
+        {"nest": 3.3},
+        None,
+        {"nest": 5.5},
+    ]
     assert newform(json.loads(v1d.form.tojson())) == v2d.form.tolist()
 
 
@@ -1255,7 +1405,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [{"nest": 0.0}, {"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()
 
 
@@ -1297,5 +1447,13 @@ def test_UnionArray_RecordArray_NumpyArray():
     )
     assert v1v2_equal(v1a, v2a)
     assert v1v2_equal(v2_to_v1(v2a), v1_to_v2(v1a))
-    assert ak.to_list(v1a) == ak.to_list(v2a)
+    assert to_list(v2a) == [
+        {"nest": 5.5},
+        {"nest": 4.4},
+        {"nest": 1},
+        {"nest": 2},
+        {"nest": 3.3},
+        {"nest": 3},
+        {"nest": 5.5},
+    ]
     assert newform(json.loads(v1a.form.tojson())) == v2a.form.tolist()

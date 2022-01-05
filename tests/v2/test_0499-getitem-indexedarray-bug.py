@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test():
     one_content = ak.Array(
@@ -17,7 +19,7 @@ def test():
     one_stops = ak.layout.Index64(np.array([2, 3, 3, 5], dtype=np.int64))
     one = ak.layout.ListArray64(one_starts, one_stops, one_content)
     one = v1_to_v2(one)
-    assert ak.to_list(one) == [
+    assert to_list(one) == [
         [[1.1, 2.2, 3.3], []],
         [[4.4, 5.5]],
         [],
@@ -42,14 +44,14 @@ def test():
     two = ak.layout.ListArray64(two_starts, two_stops, two_content)
 
     two = v1_to_v2(two)
-    assert ak.to_list(two) == [
+    assert to_list(two) == [
         [[1.1, 2.2, 3.3], []],
         [[4.4, 5.5]],
         [],
         [[6.6], [7.7, 8.8, 9.9, 10.0]],
     ]
 
-    assert ak.to_list(one[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]]) == [
+    assert to_list(one[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]]) == [
         [[1.1, 2.2, 3.3], []],
         [[4.4, 5.5]],
         [],
@@ -59,7 +61,7 @@ def test():
         one.typetracer[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]].form
         == one[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]].form
     )
-    assert ak.to_list(two[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]]) == [
+    assert to_list(two[[[[0, 1, 2], []], [[0, 1]], [], [[0], [0, 1, 2, 3]]]]) == [
         [[1.1, 2.2, 3.3], []],
         [[4.4, 5.5]],
         [],

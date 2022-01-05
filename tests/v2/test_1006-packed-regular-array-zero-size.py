@@ -6,6 +6,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test():
     array = ak._v2.contents.RegularArray(
@@ -14,4 +16,4 @@ def test():
         zeros_length=1,
     )
     packed = ak._v2.operations.structure.packed(array)
-    assert ak.to_list(packed) == [[]]
+    assert to_list(packed) == [[]]

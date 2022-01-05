@@ -6,6 +6,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test():
     def _apply_ufunc(ufunc, method, inputs, kwargs):
@@ -35,7 +37,7 @@ def test():
             parameters={"__array__": "categorical"},
         )
     )
-    assert ak.to_list(array * 10) == [3210, 11, 1230, 11, 9990, 11, 20]
+    assert to_list(array * 10) == [3210, 11, 1230, 11, 9990, 11, 20]
 
     array = ak.Array(["HAL"])
     with pytest.raises(ValueError):

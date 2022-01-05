@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_fillna_empty_array():
     empty = ak.layout.EmptyArray()
@@ -16,10 +18,10 @@ def test_fillna_empty_array():
     empty = v1_to_v2(empty)
     value = v1_to_v2(value)
 
-    assert ak.to_list(empty) == []
+    assert to_list(empty) == []
     array = empty.rpad(5, 0)
-    assert ak.to_list(array) == [None, None, None, None, None]
-    assert ak.to_list(array.fillna(value)) == [10, 10, 10, 10, 10]
+    assert to_list(array) == [None, None, None, None, None]
+    assert to_list(array.fillna(value)) == [10, 10, 10, 10, 10]
 
 
 def test_fillna_numpy_array():
@@ -30,16 +32,16 @@ def test_fillna_numpy_array():
     value = v1_to_v2(value)
 
     array = content.rpad(3, 0)
-    assert ak.to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None]
-    assert ak.to_list(array.fillna(value)) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 0]
+    assert to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None]
+    assert to_list(array.fillna(value)) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 0]
 
     array = content.rpad(5, 1)
-    assert ak.to_list(array) == [
+    assert to_list(array) == [
         [1.1, 2.2, 3.3, None, None],
         [4.4, 5.5, 6.6, None, None],
     ]
 
-    assert ak.to_list(array.fillna(value)) == [
+    assert to_list(array.fillna(value)) == [
         [1.1, 2.2, 3.3, 0, 0],
         [4.4, 5.5, 6.6, 0, 0],
     ]
@@ -81,9 +83,9 @@ def test_fillna_regular_array():
     regarray = v1_to_v2(regarray)
     value = v1_to_v2(value)
 
-    assert ak.to_list(regarray) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
+    assert to_list(regarray) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
 
-    assert ak.to_list(regarray.fillna(value)) == [
+    assert to_list(regarray.fillna(value)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, 666, 6.7],
@@ -102,7 +104,7 @@ def test_fillna_listarray_array():
     listarray = v1_to_v2(listarray)
     value = v1_to_v2(value)
 
-    assert ak.to_list(listarray) == [
+    assert to_list(listarray) == [
         [0.0, 1.1, 2.2],
         [],
         [4.4, 5.5],
@@ -110,7 +112,7 @@ def test_fillna_listarray_array():
         [8.8],
     ]
 
-    assert ak.to_list(listarray.fillna(value)) == [
+    assert to_list(listarray.fillna(value)) == [
         [0.0, 1.1, 2.2],
         [],
         [4.4, 5.5],
@@ -130,10 +132,10 @@ def test_fillna_unionarray():
     array = v1_to_v2(array)
     value = v1_to_v2(value)
 
-    assert ak.to_list(array) == [[], [2, 2], [1.1], [1], [2.2, 2.2], []]
+    assert to_list(array) == [[], [2, 2], [1.1], [1], [2.2, 2.2], []]
 
     padded_array = array.rpad(2, 1)
-    assert ak.to_list(padded_array) == [
+    assert to_list(padded_array) == [
         [None, None],
         [2, 2],
         [1.1, None],
@@ -142,7 +144,7 @@ def test_fillna_unionarray():
         [None, None],
     ]
 
-    assert ak.to_list(padded_array.fillna(value)) == [
+    assert to_list(padded_array.fillna(value)) == [
         [777, 777],
         [2, 2],
         [1.1, 777],
@@ -156,24 +158,22 @@ def test_highlevel():
     array = ak.Array([[1.1, 2.2, None, 3.3], [], [4.4, None, 5.5]])
 
     array = v1_to_v2(array.layout)
-    assert ak.to_list(ak._v2.operations.structure.fill_none(array, 999, axis=1)) == [
+    assert to_list(ak._v2.operations.structure.fill_none(array, 999, axis=1)) == [
         [1.1, 2.2, 999, 3.3],
         [],
         [4.4, 999, 5.5],
     ]
-    assert ak.to_list(
-        ak._v2.operations.structure.fill_none(array, [1, 2, 3], axis=1)
-    ) == [
+    assert to_list(ak._v2.operations.structure.fill_none(array, [1, 2, 3], axis=1)) == [
         [1.1, 2.2, [1, 2, 3], 3.3],
         [],
         [4.4, [1, 2, 3], 5.5],
     ]
-    assert ak.to_list(ak._v2.operations.structure.fill_none(array, [], axis=1)) == [
+    assert to_list(ak._v2.operations.structure.fill_none(array, [], axis=1)) == [
         [1.1, 2.2, [], 3.3],
         [],
         [4.4, [], 5.5],
     ]
-    assert ak.to_list(
+    assert to_list(
         ak._v2.operations.structure.fill_none(array, {"x": 999}, axis=1)
     ) == [
         [1.1, 2.2, {"x": 999}, 3.3],
@@ -184,23 +184,21 @@ def test_highlevel():
     array = ak.Array([[1.1, 2.2, 3.3], None, [], None, [4.4, 5.5]])
 
     array = v1_to_v2(array.layout)
-    assert ak.to_list(ak._v2.operations.structure.fill_none(array, 999, axis=0)) == [
+    assert to_list(ak._v2.operations.structure.fill_none(array, 999, axis=0)) == [
         [1.1, 2.2, 3.3],
         999,
         [],
         999,
         [4.4, 5.5],
     ]
-    assert ak.to_list(
-        ak._v2.operations.structure.fill_none(array, [1, 2, 3], axis=0)
-    ) == [
+    assert to_list(ak._v2.operations.structure.fill_none(array, [1, 2, 3], axis=0)) == [
         [1.1, 2.2, 3.3],
         [1, 2, 3],
         [],
         [1, 2, 3],
         [4.4, 5.5],
     ]
-    assert ak.to_list(
+    assert to_list(
         ak._v2.operations.structure.fill_none(array, {"x": 999}, axis=0)
     ) == [
         [1.1, 2.2, 3.3],
@@ -209,7 +207,7 @@ def test_highlevel():
         {"x": 999},
         [4.4, 5.5],
     ]
-    assert ak.to_list(ak._v2.operations.structure.fill_none(array, [], axis=0)) == [
+    assert to_list(ak._v2.operations.structure.fill_none(array, [], axis=0)) == [
         [1.1, 2.2, 3.3],
         [],
         [],

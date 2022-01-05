@@ -10,6 +10,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+to_list = ak._v2.operations.convert.to_list
+
 content = ak.layout.NumpyArray(
     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
 )
@@ -25,7 +27,7 @@ listarray = v1_to_v2(listarray)
 
 
 def test_iteration():
-    assert ak.to_list(regulararray) == [
+    assert to_list(regulararray) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
@@ -33,28 +35,28 @@ def test_iteration():
 
 
 def test_getitem_at():
-    assert ak.to_list(regulararray[0]) == [[0.0, 1.1, 2.2], []]
-    assert ak.to_list(regulararray[1]) == [[3.3, 4.4], [5.5]]
-    assert ak.to_list(regulararray[2]) == [[6.6, 7.7, 8.8, 9.9], []]
+    assert to_list(regulararray[0]) == [[0.0, 1.1, 2.2], []]
+    assert to_list(regulararray[1]) == [[3.3, 4.4], [5.5]]
+    assert to_list(regulararray[2]) == [[6.6, 7.7, 8.8, 9.9], []]
     assert regulararray.typetracer[2].form == regulararray[2].form
 
 
 def test_getitem_range():
-    assert ak.to_list(regulararray[1:]) == [
+    assert to_list(regulararray[1:]) == [
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]
     assert regulararray.typetracer[1:].form == regulararray[1:].form
-    assert ak.to_list(regulararray[:-1]) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
+    assert to_list(regulararray[:-1]) == [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]]
     assert regulararray.typetracer[:-1].form == regulararray[:-1].form
 
 
 def test_getitem():
-    assert ak.to_list(regulararray[(0,)]) == [[0.0, 1.1, 2.2], []]
-    assert ak.to_list(regulararray[(1,)]) == [[3.3, 4.4], [5.5]]
-    assert ak.to_list(regulararray[(2,)]) == [[6.6, 7.7, 8.8, 9.9], []]
+    assert to_list(regulararray[(0,)]) == [[0.0, 1.1, 2.2], []]
+    assert to_list(regulararray[(1,)]) == [[3.3, 4.4], [5.5]]
+    assert to_list(regulararray[(2,)]) == [[6.6, 7.7, 8.8, 9.9], []]
     assert regulararray.typetracer[(2,)].form == regulararray[(2,)].form
-    assert ak.to_list(regulararray[(slice(1, None, None),)]) == [
+    assert to_list(regulararray[(slice(1, None, None),)]) == [
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]
@@ -62,7 +64,7 @@ def test_getitem():
         regulararray.typetracer[(slice(1, None, None),)].form
         == regulararray[(slice(1, None, None),)].form
     )
-    assert ak.to_list(regulararray[(slice(None, -1, None),)]) == [
+    assert to_list(regulararray[(slice(None, -1, None),)]) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
     ]
@@ -73,59 +75,59 @@ def test_getitem():
 
 
 def test_getitem_deeper():
-    assert ak.to_list(listarray) == [
+    assert to_list(listarray) == [
         [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]],
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
     ]
 
-    assert ak.to_list(listarray[0, 0, 0]) == [0.0, 1.1, 2.2]
-    assert ak.to_list(listarray[0, 0, 1]) == []
-    assert ak.to_list(listarray[0, 1, 0]) == [3.3, 4.4]
-    assert ak.to_list(listarray[0, 1, 1]) == [5.5]
-    assert ak.to_list(listarray[1, 0, 0]) == [3.3, 4.4]
-    assert ak.to_list(listarray[1, 0, 1]) == [5.5]
-    assert ak.to_list(listarray[1, 1, 0]) == [6.6, 7.7, 8.8, 9.9]
-    assert ak.to_list(listarray[1, 1, 1]) == []
+    assert to_list(listarray[0, 0, 0]) == [0.0, 1.1, 2.2]
+    assert to_list(listarray[0, 0, 1]) == []
+    assert to_list(listarray[0, 1, 0]) == [3.3, 4.4]
+    assert to_list(listarray[0, 1, 1]) == [5.5]
+    assert to_list(listarray[1, 0, 0]) == [3.3, 4.4]
+    assert to_list(listarray[1, 0, 1]) == [5.5]
+    assert to_list(listarray[1, 1, 0]) == [6.6, 7.7, 8.8, 9.9]
+    assert to_list(listarray[1, 1, 1]) == []
     assert listarray.typetracer[1, 1, 1].form == listarray[1, 1, 1].form
 
-    assert ak.to_list(listarray[0, 0, 0:]) == [[0.0, 1.1, 2.2], []]
-    assert ak.to_list(listarray[0, 0, 1:]) == [[]]
-    assert ak.to_list(listarray[0, 1, 0:]) == [[3.3, 4.4], [5.5]]
-    assert ak.to_list(listarray[0, 1, 1:]) == [[5.5]]
-    assert ak.to_list(listarray[1, 0, 0:]) == [[3.3, 4.4], [5.5]]
-    assert ak.to_list(listarray[1, 0, 1:]) == [[5.5]]
-    assert ak.to_list(listarray[1, 1, 0:]) == [[6.6, 7.7, 8.8, 9.9], []]
-    assert ak.to_list(listarray[1, 1, 1:]) == [[]]
+    assert to_list(listarray[0, 0, 0:]) == [[0.0, 1.1, 2.2], []]
+    assert to_list(listarray[0, 0, 1:]) == [[]]
+    assert to_list(listarray[0, 1, 0:]) == [[3.3, 4.4], [5.5]]
+    assert to_list(listarray[0, 1, 1:]) == [[5.5]]
+    assert to_list(listarray[1, 0, 0:]) == [[3.3, 4.4], [5.5]]
+    assert to_list(listarray[1, 0, 1:]) == [[5.5]]
+    assert to_list(listarray[1, 1, 0:]) == [[6.6, 7.7, 8.8, 9.9], []]
+    assert to_list(listarray[1, 1, 1:]) == [[]]
     assert listarray.typetracer[1, 1, 1:].form == listarray[1, 1, 1:].form
 
-    assert ak.to_list(listarray[[1], 0, 0:]) == [[[3.3, 4.4], [5.5]]]
+    assert to_list(listarray[[1], 0, 0:]) == [[[3.3, 4.4], [5.5]]]
     assert listarray.typetracer[[1], 0, 0:].form == listarray[[1], 0, 0:].form
-    assert ak.to_list(listarray[[1, 0], 0, 0:]) == [
+    assert to_list(listarray[[1, 0], 0, 0:]) == [
         [[3.3, 4.4], [5.5]],
         [[0.0, 1.1, 2.2], []],
     ]
     assert listarray.typetracer[[1, 0], 0, 0:].form == listarray[[1, 0], 0, 0:].form
 
-    assert ak.to_list(listarray[:, :, [0, 1]]) == [
+    assert to_list(listarray[:, :, [0, 1]]) == [
         [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]],
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
     ]
-    assert ak.to_list(listarray[:, :, [1, 0]]) == [
+    assert to_list(listarray[:, :, [1, 0]]) == [
         [[[], [0.0, 1.1, 2.2]], [[5.5], [3.3, 4.4]]],
         [[[5.5], [3.3, 4.4]], [[], [6.6, 7.7, 8.8, 9.9]]],
     ]
-    assert ak.to_list(listarray[:, :, [1, 0, 1]]) == [
+    assert to_list(listarray[:, :, [1, 0, 1]]) == [
         [[[], [0.0, 1.1, 2.2], []], [[5.5], [3.3, 4.4], [5.5]]],
         [[[5.5], [3.3, 4.4], [5.5]], [[], [6.6, 7.7, 8.8, 9.9], []]],
     ]
-    assert ak.to_list(listarray[:, :2, [0, 1]]) == [
+    assert to_list(listarray[:, :2, [0, 1]]) == [
         [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]],
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
     ]
-    assert ak.to_list(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [
+    assert to_list(listarray[:1, [0, 0, 1, 1], [0, 1, 0, 1]]) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5]]
     ]
-    assert ak.to_list(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [
+    assert to_list(listarray[:1, [1, 1, 0, 0], [1, 0, 1, 0]]) == [
         [[5.5], [3.3, 4.4], [], [0.0, 1.1, 2.2]]
     ]
     assert (
@@ -145,12 +147,12 @@ regulararrayB = v1_to_v2(regulararrayB)
 
 
 def test_numpy():
-    assert ak.to_list(regulararrayA) == ak.to_list(modelA)
-    assert ak.to_list(regulararrayB) == ak.to_list(modelB)
+    assert to_list(regulararrayA) == to_list(modelA)
+    assert to_list(regulararrayB) == to_list(modelB)
 
     for depth in 0, 1, 2, 3:
         for cuts in itertools.permutations((0, 1, 4, -5), depth):
-            assert ak.to_list(modelA[cuts]) == ak.to_list(regulararrayA[cuts])
+            assert to_list(modelA[cuts]) == to_list(regulararrayA[cuts])
             if depth < 3:
                 assert regulararrayA.typetracer[cuts].form == regulararrayA[cuts].form
 
@@ -158,7 +160,7 @@ def test_numpy():
         for cuts in itertools.permutations(
             (slice(None), slice(1, None), slice(None, -1), slice(None, None, 2)), depth
         ):
-            assert ak.to_list(modelA[cuts]) == ak.to_list(regulararrayA[cuts])
+            assert to_list(modelA[cuts]) == to_list(regulararrayA[cuts])
             if depth < 3:
                 assert regulararrayA.typetracer[cuts].form == regulararrayA[cuts].form
 
@@ -166,7 +168,7 @@ def test_numpy():
         for cuts in itertools.permutations(
             (slice(1, None), slice(None, -1), 2, -2), depth
         ):
-            assert ak.to_list(modelA[cuts]) == ak.to_list(regulararrayA[cuts])
+            assert to_list(modelA[cuts]) == to_list(regulararrayA[cuts])
             if depth < 3:
                 assert regulararrayA.typetracer[cuts].form == regulararrayA[cuts].form
 
@@ -174,7 +176,7 @@ def test_numpy():
         for cuts in itertools.permutations(
             ([2, 0, 0, 1], [1, -2, 0, -1], 2, -2), depth
         ):
-            assert ak.to_list(modelA[cuts]) == ak.to_list(regulararrayA[cuts])
+            assert to_list(modelA[cuts]) == to_list(regulararrayA[cuts])
             if depth < 3:
                 assert regulararrayA.typetracer[cuts].form == regulararrayA[cuts].form
 
@@ -189,13 +191,13 @@ def test_numpy():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert ak.to_list(modelA[cuts]) == ak.to_list(regulararrayA[cuts])
+            assert to_list(modelA[cuts]) == to_list(regulararrayA[cuts])
             if depth < 3:
                 assert regulararrayA.typetracer[cuts].form == regulararrayA[cuts].form
 
     for depth in 0, 1, 2, 3, 4:
         for cuts in itertools.permutations((-2, -1, 0, 1, 1), depth):
-            assert ak.to_list(modelB[cuts]) == ak.to_list(regulararrayB[cuts])
+            assert to_list(modelB[cuts]) == to_list(regulararrayB[cuts])
             if depth < 4:
                 assert regulararrayB.typetracer[cuts].form == regulararrayB[cuts].form
 
@@ -203,7 +205,7 @@ def test_numpy():
         for cuts in itertools.permutations(
             (-1, 0, 1, slice(1, None), slice(None, -1)), depth
         ):
-            assert ak.to_list(modelB[cuts]) == ak.to_list(regulararrayB[cuts])
+            assert to_list(modelB[cuts]) == to_list(regulararrayB[cuts])
             if depth < 4:
                 assert regulararrayB.typetracer[cuts].form == regulararrayB[cuts].form
 
@@ -218,6 +220,6 @@ def test_numpy():
                 cuts = cuts[:-1]
             if any(isinstance(x, slice) for x in cuts):
                 continue
-            assert ak.to_list(modelB[cuts]) == ak.to_list(regulararrayB[cuts])
+            assert to_list(modelB[cuts]) == to_list(regulararrayB[cuts])
             if depth < 4:
                 assert regulararrayB.typetracer[cuts].form == regulararrayB[cuts].form

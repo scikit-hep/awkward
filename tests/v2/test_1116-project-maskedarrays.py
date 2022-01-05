@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2, v1_to_v2_index
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_bytemaskedarray():
     array = ak.from_iter(
@@ -19,10 +21,17 @@ def test_bytemaskedarray():
     maskedarray2 = v1_to_v2(maskedarray)
     mask2 = v1_to_v2_index(mask)
 
-    assert ak.to_list(maskedarray.project()) == ak.to_list(maskedarray2.project())
-    assert ak.to_list(maskedarray.project(mask)) == ak.to_list(
-        maskedarray2.project(mask2)
-    )
+    assert to_list(maskedarray2.project()) == [
+        [0.0, 1.1, 2.2],
+        [5.5],
+        [6.6, 7.7, 8.8, 9.9],
+    ]
+
+    assert to_list(maskedarray2.project(mask2)) == [
+        [0.0, 1.1, 2.2],
+        [5.5],
+        [6.6, 7.7, 8.8, 9.9],
+    ]
 
 
 def test_bitmaskedarray():
@@ -36,7 +45,12 @@ def test_bitmaskedarray():
 
     maskedarray2 = v1_to_v2(maskedarray)
 
-    assert ak.to_list(maskedarray.project()) == ak.to_list(maskedarray2.project())
+    assert to_list(maskedarray2.project()) == [
+        [0.0, 1.1, 2.2],
+        [3.3, 4.4],
+        [5.5],
+        [6.6, 7.7, 8.8, 9.9],
+    ]
 
 
 def test_unmasked():
@@ -47,7 +61,12 @@ def test_unmasked():
 
     unmaskedarray2 = v1_to_v2(unmaskedarray)
 
-    assert ak.to_list(unmaskedarray.project()) == ak.to_list(unmaskedarray2.project())
+    assert to_list(unmaskedarray2.project()) == [
+        [0.0, 1.1, 2.2],
+        [3.3, 4.4],
+        [5.5],
+        [6.6, 7.7, 8.8, 9.9],
+    ]
 
 
 def test_indexed():
@@ -57,5 +76,5 @@ def test_indexed():
     array2 = v1_to_v2(array)
     mask2 = v1_to_v2_index(mask)
 
-    assert ak.to_list(array.project()) == ak.to_list(array2.project())
-    assert ak.to_list(array.project(mask)) == ak.to_list(array2.project(mask2))
+    assert to_list(array2.project()) == [1, 2, 3, 4, 5]
+    assert to_list(array2.project(mask2)) == [1, 3]

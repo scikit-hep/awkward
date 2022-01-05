@@ -6,9 +6,11 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test():
-    assert ak.to_list(
+    assert to_list(
         ak._v2.operations.reducers.prod(
             ak._v2.highlevel.Array([[[2, 3, 5]], [[7], [11]], [[]]]), axis=-1
         )
@@ -18,7 +20,7 @@ def test():
         [1],
     ]
 
-    assert ak.to_list(
+    assert to_list(
         ak._v2.operations.reducers.prod(
             ak._v2.highlevel.Array([[[2, 3, 5]], [[7], [11]], []]), axis=-1
         )

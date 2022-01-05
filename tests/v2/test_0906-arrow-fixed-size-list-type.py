@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 pyarrow = pytest.importorskip("pyarrow")
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test():
     import awkward._v2._connect.pyarrow
@@ -28,7 +30,7 @@ def test():
     )
     as_awkward = awkward._v2._connect.pyarrow.handle_arrow(array)
 
-    assert ak.to_list(as_awkward) == [
+    assert to_list(as_awkward) == [
         {"x": [1.1, 2.1], "y": [3.1, 4.1]},
         {"x": [1.2, 2.2], "y": [3.2, 4.2]},
         {"x": [1.3, 2.3], "y": [3.3, 4.3]},
