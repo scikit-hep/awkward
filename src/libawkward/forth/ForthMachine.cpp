@@ -535,7 +535,7 @@ namespace awkward {
           out << "case ( regular )\n";
           for (int64_t i = 0;  i < num_cases;  i++) {
             out << indent << "  " << i << " of";
-            I consequent = start + (i << 1) + 1;
+            I consequent = (I)(start + (i << 1) + 1);
             if (segment_nonempty(consequent)) {
               out << "\n" << indent << "    ";
               out << decompiled_segment(consequent, indent + "    ");
@@ -2307,7 +2307,7 @@ namespace awkward {
           //
           // But the regular case should become a jump table with CODE_CASE_REGULAR.
 
-          for (int64_t i = 0;  i < ofs.size();  i++) {
+          for (int64_t i = 0;  i < (int64_t)ofs.size();  i++) {
             auto pred = dictionary.begin() + (predicates[i] - BOUND_DICTIONARY);
             pred->push_back(CODE_OVER);  // append "over"
             pred->push_back(CODE_EQ);    // append "="
@@ -3538,7 +3538,7 @@ namespace awkward {
               }
               else {
                 stack_depth_--;
-                which = start + (*value << 1) + 1;
+                which = (I)(start + (*value << 1) + 1);
               }
 
               if (recursion_current_depth_ == recursion_max_depth_) {
@@ -3693,7 +3693,7 @@ namespace awkward {
               bytecodes_pointer_where()++;
               I stop = bytecode_get();
               bytecodes_pointer_where()++;
-              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop);
+              T result = (T)(current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop));
               if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
@@ -3709,7 +3709,7 @@ namespace awkward {
               bytecodes_pointer_where()++;
               I stop = bytecode_get();
               bytecodes_pointer_where()++;
-              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop);
+              T result = (T)(current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop));
               if (result == -1) {
                 current_error_ = util::ForthError::enumeration_missing;
                 return;
