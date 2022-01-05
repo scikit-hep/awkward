@@ -517,7 +517,7 @@ namespace awkward {
                                     false,
                                     output_initial_size,
                                     output_resize_factor);
-        int64_t counti = counters_.size();
+        int64_t counti = (int64_t)counters_.size();
         counters_.push_back(0);
         instructions_.push_back(FillIndexedOptionArray);
         instructions_.push_back(outi);
@@ -606,7 +606,7 @@ namespace awkward {
                                     false,
                                     output_initial_size,
                                     output_resize_factor);
-        int64_t start = strings.size();
+        int64_t start = (int64_t)strings.size();
         for (auto& x : item[3].GetArray()) {
           if (!x.IsString()) {
             throw std::invalid_argument(
@@ -616,7 +616,7 @@ namespace awkward {
           }
           strings.push_back(x.GetString());
         }
-        int64_t stop = strings.size();
+        int64_t stop = (int64_t)strings.size();
         if (std::string("FillEnumString") == item[0].GetString()) {
           instructions_.push_back(FillEnumString);
         }
@@ -674,7 +674,7 @@ namespace awkward {
             "KeyTableItem arguments: key:str jump_to:int" + FILENAME(__LINE__)
           );
         }
-        int64_t stringi = strings.size();
+        int64_t stringi = (int64_t)strings.size();
         strings.push_back(item[1].GetString());
         instructions_.push_back(KeyTableItem);
         instructions_.push_back(stringi);
@@ -695,7 +695,7 @@ namespace awkward {
 
     string_offsets_.push_back(0);
     for (auto string : strings) {
-      string_offsets_.push_back(string_offsets_[string_offsets_.size() - 1] + string.length());
+      string_offsets_.push_back(string_offsets_[string_offsets_.size() - 1] + (int64_t)string.length());
       for (auto c : string) {
         characters_.push_back(c);
       }
@@ -706,7 +706,7 @@ namespace awkward {
 
   const std::shared_ptr<ForthOutputBuffer>
   SpecializedJSON::output_at(const std::string& name) const {
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (std::size_t i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return outputs_[i];
       }
@@ -718,7 +718,7 @@ namespace awkward {
 
   util::dtype
   SpecializedJSON::dtype_at(const std::string& name) const {
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (std::size_t i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return output_dtypes_[i];
       }
@@ -745,21 +745,21 @@ namespace awkward {
     rj::StringStream stream(source);
     SpecializedJSONHandler handler(this);
     bool out = reader.Parse<rj::kParseDefaultFlags>(stream, handler);
-    json_position_ = stream.Tell();
+    json_position_ = (int64_t)stream.Tell();
     return out;
   }
 
   std::string
   SpecializedJSON::debug() const noexcept {
     std::stringstream out;
-    out << "at " << current_instruction_ << " | " << instructions_[current_instruction_ * 4] << " stack";
-    for (int64_t i = 0;  i < instruction_stack_.size();  i++) {
-      if (i == current_stack_depth_) {
+    out << "at " << current_instruction_ << " | " << instructions_[(size_t)(current_instruction_ * 4)] << " stack";
+    for (std::size_t i = 0;  i < instruction_stack_.size();  i++) {
+      if ((int64_t)i == current_stack_depth_) {
         out << " ;";
       }
       out << " " << instruction_stack_.data()[i];
     }
-    if (current_stack_depth_ == instruction_stack_.size()) {
+    if (current_stack_depth_ == (int64_t)instruction_stack_.size()) {
       out << " ;";
     }
     return out.str();
@@ -768,7 +768,7 @@ namespace awkward {
   std::string
   SpecializedJSON::debug_listing() const noexcept {
     std::stringstream out;
-    for (int64_t i = 0;  i < instructions_.size() / 4;  i++) {
+    for (std::size_t i = 0;  i < instructions_.size() / 4;  i++) {
       out << i << " | " << instructions_[i * 4];
       switch (instructions_[i * 4]) {
         case TopLevelArray:
@@ -825,10 +825,10 @@ namespace awkward {
   SpecializedJSON::reset() noexcept {
     current_instruction_ = 0;
     current_stack_depth_ = 0;
-    for (int64_t i = 0;  i < counters_.size();  i++) {
+    for (std::size_t i = 0;  i < counters_.size();  i++) {
       counters_[i] = 0;
     }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (std::size_t i = 0;  i < output_names_.size();  i++) {
       outputs_[i].get()->reset();
       if (output_leading_zero_[i]) {
         outputs_[i].get()->write_one_int64(0, false);
@@ -843,7 +843,7 @@ namespace awkward {
                                 bool leading_zero,
                                 int64_t init,
                                 double resize) {
-    int64_t i = output_names_.size();
+    int64_t i = (int64_t)output_names_.size();
     output_names_.push_back(name);
     output_dtypes_.push_back(dtype);
     output_leading_zero_.push_back(leading_zero);

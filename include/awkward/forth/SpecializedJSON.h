@@ -58,23 +58,23 @@ namespace awkward {
     }
 
     /// @brief HERE
-    inline int64_t instruction() const noexcept {
-      return instructions_.data()[current_instruction_ * 4];
+    inline std::size_t instruction() const noexcept {
+      return (std::size_t)instructions_.data()[current_instruction_ * 4];
     }
 
     /// @brief HERE
-    inline int64_t argument1() const noexcept {
-      return instructions_.data()[current_instruction_ * 4 + 1];
+    inline std::size_t argument1() const noexcept {
+      return (std::size_t)instructions_.data()[current_instruction_ * 4 + 1];
     }
 
     /// @brief HERE
-    inline int64_t argument2() const noexcept {
-      return instructions_.data()[current_instruction_ * 4 + 2];
+    inline std::size_t argument2() const noexcept {
+      return (std::size_t)instructions_.data()[current_instruction_ * 4 + 2];
     }
 
     /// @brief HERE
-    inline int64_t argument3() const noexcept {
-      return instructions_.data()[current_instruction_ * 4 + 3];
+    inline std::size_t argument3() const noexcept {
+      return (std::size_t)instructions_.data()[current_instruction_ * 4 + 3];
     }
 
     /// @brief HERE
@@ -104,14 +104,14 @@ namespace awkward {
     inline int64_t find_enum(const char* str) noexcept {
       int64_t* offsets = string_offsets_.data();
       char* chars = characters_.data();
-      int64_t stringsstart = argument2();
+      std::size_t stringsstart = argument2();
       int64_t start;
       int64_t stop;
-      for (int64_t i = stringsstart;  i < argument3();  i++) {
+      for (std::size_t i = stringsstart;  i < argument3();  i++) {
         start = offsets[i];
         stop = offsets[i + 1];
-        if (strncmp(str, &chars[start], stop - start) == 0) {
-          return i - stringsstart;
+        if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
+          return (int64_t)(i - stringsstart);
         }
       }
       return -1;
@@ -124,11 +124,11 @@ namespace awkward {
       int64_t stringi;
       int64_t start;
       int64_t stop;
-      for (int64_t i = current_instruction_ + 1;  i <= current_instruction_ + argument1();  i++) {
+      for (int64_t i = current_instruction_ + 1;  i <= current_instruction_ + (int64_t)argument1();  i++) {
         stringi = instructions_.data()[i * 4 + 1];
         start = offsets[stringi];
         stop = offsets[stringi + 1];
-        if (strncmp(str, &chars[start], stop - start) == 0) {
+        if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
           return instructions_.data()[i * 4 + 2];
         }
       }
@@ -136,37 +136,37 @@ namespace awkward {
     }
 
     /// @brief HERE
-    inline void write_int8(int64_t index, int8_t x) noexcept {
+    inline void write_int8(std::size_t index, int8_t x) noexcept {
       outputs_[index].get()->write_one_int8(x, false);
     }
 
     /// @brief HERE
-    inline void write_int64(int64_t index, int64_t x) noexcept {
+    inline void write_int64(std::size_t index, int64_t x) noexcept {
       outputs_[index].get()->write_one_int64(x, false);
     }
 
     /// @brief HERE
-    inline void write_uint64(int64_t index, int64_t x) noexcept {
+    inline void write_uint64(std::size_t index, uint64_t x) noexcept {
       outputs_[index].get()->write_one_uint64(x, false);
     }
 
     /// @brief HERE
-    inline void write_many_uint8(int64_t index, int64_t num_items, const uint8_t* values) noexcept {
+    inline void write_many_uint8(std::size_t index, int64_t num_items, const uint8_t* values) noexcept {
       outputs_[index].get()->write_const_uint8(num_items, values);
     }
 
     /// @brief HERE
-    inline void write_add_int64(int64_t index, int64_t x) noexcept {
+    inline void write_add_int64(std::size_t index, int64_t x) noexcept {
       outputs_[index].get()->write_add_int64(x);
     }
 
     /// @brief HERE
-    inline void write_float64(int64_t index, double x) noexcept {
+    inline void write_float64(std::size_t index, double x) noexcept {
       outputs_[index].get()->write_one_float64(x, false);
     }
 
     /// @brief HERE
-    inline int64_t get_and_increment(int64_t index) noexcept {
+    inline int64_t get_and_increment(std::size_t index) noexcept {
       return counters_[index]++;
     }
 
