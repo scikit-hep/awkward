@@ -6,6 +6,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_mixing_lists_and_none():
     def add(a, b):
@@ -81,7 +83,7 @@ def test_mixing_lists_and_none():
 
     for a in (a00, a01, a02, a10, a11, a12, a20, a21, a22):
         for b in (b00, b01, b02, b10, b11, b12, b20, b21, b22):
-            assert ak.to_list(a + b) == add(a, b)
+            assert to_list(a + b) == add(a, b)
 
 
 def test_explicit_broadcasting():
@@ -90,30 +92,30 @@ def test_explicit_broadcasting():
     rgarray = ak._v2.highlevel.Array(nparray, check_valid=True)
 
     # explicit left-broadcasting
-    assert ak.to_list(rgarray + np.array([[[100]], [[200]]])) == ak.to_list(
+    assert to_list(rgarray + np.array([[[100]], [[200]]])) == to_list(
         nparray + np.array([[[100]], [[200]]])
     )
-    assert ak.to_list(lsarray + np.array([[[100]], [[200]]])) == ak.to_list(
+    assert to_list(lsarray + np.array([[[100]], [[200]]])) == to_list(
         nparray + np.array([[[100]], [[200]]])
     )
-    assert ak.to_list(np.array([[[100]], [[200]]]) + rgarray) == ak.to_list(
+    assert to_list(np.array([[[100]], [[200]]]) + rgarray) == to_list(
         np.array([[[100]], [[200]]]) + nparray
     )
-    assert ak.to_list(np.array([[[100]], [[200]]]) + lsarray) == ak.to_list(
+    assert to_list(np.array([[[100]], [[200]]]) + lsarray) == to_list(
         np.array([[[100]], [[200]]]) + nparray
     )
 
     # explicit right-broadcasting
-    assert ak.to_list(rgarray + np.array([[[100, 200, 300, 400, 500]]])) == ak.to_list(
+    assert to_list(rgarray + np.array([[[100, 200, 300, 400, 500]]])) == to_list(
         nparray + np.array([[[100, 200, 300, 400, 500]]])
     )
-    assert ak.to_list(lsarray + np.array([[[100, 200, 300, 400, 500]]])) == ak.to_list(
+    assert to_list(lsarray + np.array([[[100, 200, 300, 400, 500]]])) == to_list(
         nparray + np.array([[[100, 200, 300, 400, 500]]])
     )
-    assert ak.to_list(np.array([[[100, 200, 300, 400, 500]]]) + rgarray) == ak.to_list(
+    assert to_list(np.array([[[100, 200, 300, 400, 500]]]) + rgarray) == to_list(
         np.array([[[100, 200, 300, 400, 500]]]) + nparray
     )
-    assert ak.to_list(np.array([[[100, 200, 300, 400, 500]]]) + lsarray) == ak.to_list(
+    assert to_list(np.array([[[100, 200, 300, 400, 500]]]) + lsarray) == to_list(
         np.array([[[100, 200, 300, 400, 500]]]) + nparray
     )
 
@@ -123,17 +125,17 @@ def test_implicit_broadcasting():
     lsarray = ak._v2.highlevel.Array(nparray.tolist(), check_valid=True)
     rgarray = ak._v2.highlevel.Array(nparray, check_valid=True)
 
-    assert ak.to_list(rgarray + np.array([100, 200, 300, 400, 500])) == ak.to_list(
+    assert to_list(rgarray + np.array([100, 200, 300, 400, 500])) == to_list(
         nparray + np.array([100, 200, 300, 400, 500])
     )
-    assert ak.to_list(np.array([100, 200, 300, 400, 500]) + rgarray) == ak.to_list(
+    assert to_list(np.array([100, 200, 300, 400, 500]) + rgarray) == to_list(
         np.array([100, 200, 300, 400, 500]) + nparray
     )
 
-    assert ak.to_list(lsarray + np.array([100, 200])) == ak.to_list(
+    assert to_list(lsarray + np.array([100, 200])) == to_list(
         nparray + np.array([[[100]], [[200]]])
     )
-    assert ak.to_list(np.array([100, 200]) + lsarray) == ak.to_list(
+    assert to_list(np.array([100, 200]) + lsarray) == to_list(
         np.array([[[100]], [[200]]]) + nparray
     )
 
@@ -335,6 +337,7 @@ def test_where_FIXME():
     assert isinstance(ak.where(condition)[0], ak._v2.highlevel.Array)
 
 
+@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.where must be implemented")
 def test_where():
     one = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
@@ -347,9 +350,9 @@ def test_where():
         check_valid=True,
     )
 
-    assert ak.to_list(ak.where(condition)[0]) == [5, 7, 9]
+    assert to_list(ak._v2.operations.structure.where(condition)[0]) == [5, 7, 9]
 
-    assert ak.to_list(ak.where(condition, one, two)) == ak.to_list(
+    assert to_list(ak._v2.operations.structure.where(condition, one, two)) == to_list(
         np.where(np.asarray(condition), np.asarray(one), np.asarray(two))
     )
 
@@ -360,4 +363,4 @@ def test_where():
 def test_string_equal():
     one = ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)
     two = ak._v2.highlevel.Array(["ONE", "two", "four"], check_valid=True)
-    assert ak.to_list(one == two) == [False, True, False]
+    assert to_list(one == two) == [False, True, False]

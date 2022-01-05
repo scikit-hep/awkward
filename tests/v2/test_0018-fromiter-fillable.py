@@ -10,6 +10,8 @@ pytestmark = pytest.mark.skipif(
     ak._util.py27, reason="No Python 2.7 support in Awkward 2.x"
 )
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_types():
     t0 = ak.types.UnknownType()
@@ -44,10 +46,10 @@ def test_boolean():
     a.boolean(True)
     a.boolean(False)
     a.boolean(True)
-    assert ak.to_list(a.snapshot()) == [True, True, False, True]
-    assert ak.to_list(a) == [True, True, False, True]
+    assert to_list(a.snapshot()) == [True, True, False, True]
+    assert to_list(a) == [True, True, False, True]
     # FIXME: TypeError: 'ArrayBuilder' object is not subscriptable
-    assert ak.to_list(a.snapshot()[1:-1]) == [True, False]
+    assert to_list(a.snapshot()[1:-1]) == [True, False]
 
 
 def test_big():
@@ -56,8 +58,8 @@ def test_big():
         if i == 200:
             tmp = a.snapshot()
         a.boolean(i % 2 == 0)
-    assert ak.to_list(a) == [True, False] * 1000
-    assert ak.to_list(tmp) == [True, False] * 100
+    assert to_list(a) == [True, False] * 1000
+    assert to_list(tmp) == [True, False] * 100
 
 
 def test_integer():
@@ -67,9 +69,9 @@ def test_integer():
     a.integer(8)
     a.integer(7)
     a.integer(6)
-    assert ak.to_list(a.snapshot()) == [10, 9, 8, 7, 6]
-    assert ak.to_list(a) == [10, 9, 8, 7, 6]
-    assert ak.to_list(a.snapshot()[1:-1]) == [9, 8, 7]
+    assert to_list(a.snapshot()) == [10, 9, 8, 7, 6]
+    assert to_list(a) == [10, 9, 8, 7, 6]
+    assert to_list(a.snapshot()[1:-1]) == [9, 8, 7]
 
 
 def test_real():
@@ -79,9 +81,9 @@ def test_real():
     a.real(3.3)
     a.real(4.4)
     a.real(5.5)
-    assert ak.to_list(a.snapshot()) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert ak.to_list(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert ak.to_list(a.snapshot()[1:-1]) == [2.2, 3.3, 4.4]
+    assert to_list(a.snapshot()) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert to_list(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert to_list(a.snapshot()[1:-1]) == [2.2, 3.3, 4.4]
 
 
 def test_integer_real():
@@ -91,9 +93,9 @@ def test_integer_real():
     a.real(3.3)
     a.integer(4)
     a.integer(5)
-    assert ak.to_list(a.snapshot()) == [1.0, 2.0, 3.3, 4.0, 5.0]
-    assert ak.to_list(a) == [1.0, 2.0, 3.3, 4.0, 5.0]
-    assert ak.to_list(a.snapshot()[1:-1]) == [2.0, 3.3, 4.0]
+    assert to_list(a.snapshot()) == [1.0, 2.0, 3.3, 4.0, 5.0]
+    assert to_list(a) == [1.0, 2.0, 3.3, 4.0, 5.0]
+    assert to_list(a.snapshot()[1:-1]) == [2.0, 3.3, 4.0]
 
 
 def test_real_integer():
@@ -103,9 +105,9 @@ def test_real_integer():
     a.integer(3)
     a.real(4.4)
     a.real(5.5)
-    assert ak.to_list(a.snapshot()) == [1.1, 2.2, 3.0, 4.4, 5.5]
-    assert ak.to_list(a) == [1.1, 2.2, 3.0, 4.4, 5.5]
-    assert ak.to_list(a.snapshot()[1:-1]) == [2.2, 3.0, 4.4]
+    assert to_list(a.snapshot()) == [1.1, 2.2, 3.0, 4.4, 5.5]
+    assert to_list(a) == [1.1, 2.2, 3.0, 4.4, 5.5]
+    assert to_list(a.snapshot()[1:-1]) == [2.2, 3.0, 4.4]
 
 
 def test_list_real():
@@ -121,10 +123,10 @@ def test_list_real():
     a.real(4.4)
     a.real(5.5)
     a.end_list()
-    assert ak.to_list(a.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    assert ak.to_list(a) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-    assert ak.to_list(a.snapshot()[1:-1]) == [[]]
-    assert ak.to_list(a.snapshot()[1:]) == [[], [4.4, 5.5]]
+    assert to_list(a.snapshot()) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert to_list(a) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert to_list(a.snapshot()[1:-1]) == [[]]
+    assert to_list(a.snapshot()[1:]) == [[], [4.4, 5.5]]
 
 
 def test_list_list_real():
@@ -154,17 +156,17 @@ def test_list_list_real():
     a.real(9.9)
     a.end_list()
     a.end_list()
-    assert ak.to_list(a.snapshot()) == [
+    assert to_list(a.snapshot()) == [
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
         [],
         [[6.6, 7.7], [8.8, 9.9]],
     ]
-    assert ak.to_list(a) == [
+    assert to_list(a) == [
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
         [],
         [[6.6, 7.7], [8.8, 9.9]],
     ]
-    assert ak.to_list(a.snapshot()[1:]) == [[], [[6.6, 7.7], [8.8, 9.9]]]
+    assert to_list(a.snapshot()[1:]) == [[], [[6.6, 7.7], [8.8, 9.9]]]
 
 
 def test_list_errors():
@@ -202,6 +204,6 @@ def test_list_errors():
     a.begin_list()
     a.real(4.4)
     a.real(5.5)
-    assert ak.to_list(a.snapshot()) == [[1.1, 2.2, 3.3]]
-    assert ak.to_list(a) == [[1.1, 2.2, 3.3]]
-    assert ak.to_list(a.snapshot()[1:]) == []
+    assert to_list(a.snapshot()) == [[1.1, 2.2, 3.3]]
+    assert to_list(a) == [[1.1, 2.2, 3.3]]
+    assert to_list(a.snapshot()[1:]) == []

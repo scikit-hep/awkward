@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2  # noqa: F401
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_concatenate_number():
 
@@ -16,13 +18,13 @@ def test_concatenate_number():
     a2 = v1_to_v2(ak.Array([[[1.1], [2.2, 3.3]], [[]], [[4.4], [5.5]]]).layout)
     a3 = v1_to_v2(ak.Array([[123], [223], [323]]).layout)
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([a1, 999], axis=1)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([a1, 999], axis=1)) == [
         [1, 2, 3, 999],
         [999],
         [4, 5, 999],
     ]
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([a2, 999], axis=2)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([a2, 999], axis=2)) == [
         [[1.1, 999.0], [2.2, 3.3, 999.0]],
         [[999.0]],
         [[4.4, 999.0], [5.5, 999.0]],
@@ -41,7 +43,7 @@ def test_concatenate_number():
         == "3 * var * int64"
     )
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([a1, a3], axis=1)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([a1, a3], axis=1)) == [
         [1, 2, 3, 123],
         [223],
         [4, 5, 323],
@@ -71,7 +73,7 @@ def test_list_offset_array_concatenate():
     four = v1_to_v2(four)
 
     padded_one = one.rpad(7, 0)
-    assert ak.to_list(padded_one) == [
+    assert to_list(padded_one) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
@@ -81,7 +83,7 @@ def test_list_offset_array_concatenate():
         None,
     ]
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
@@ -96,7 +98,7 @@ def test_list_offset_array_concatenate():
         [0.99],
     ]
 
-    assert ak.to_list(
+    assert to_list(
         ak._v2.operations.structure.concatenate([padded_one, two], axis=1)
     ) == [
         [0.0, 1.1, 2.2, 0.11, 0.22],
@@ -109,9 +111,9 @@ def test_list_offset_array_concatenate():
     ]
 
     with pytest.raises(ValueError):
-        assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 2))
+        assert to_list(ak._v2.operations.structure.concatenate([one, two], 2))
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([three, four], 0)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([three, four], 0)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         [[5.5], [6.6, 7.7, 8.8, 9.9]],
@@ -125,7 +127,7 @@ def test_list_offset_array_concatenate():
 
     padded = three.rpad(6, 0)
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([padded, four], 1)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([padded, four], 1)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [0.33], []],
         [[0.44, 0.55]],
         [[5.5], [6.6, 7.7, 8.8, 9.9]],
@@ -134,7 +136,7 @@ def test_list_offset_array_concatenate():
         [],
     ]
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([four, four], 2)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([four, four], 2)) == [
         [[0.33, 0.33], []],
         [[0.44, 0.55, 0.44, 0.55]],
         [],
@@ -154,7 +156,7 @@ def test_list_array_concatenate():
     one = v1_to_v2(one)
     two = v1_to_v2(two)
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         [1, 2, 3],
         [],
         [4, 5],
@@ -162,7 +164,7 @@ def test_list_array_concatenate():
         [3.3, 4.4],
         [5.5],
     ]
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 1)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([one, two], 1)) == [
         [1, 2, 3, 1.1, 2.2],
         [3.3, 4.4],
         [4, 5, 5.5],
@@ -178,7 +180,7 @@ def test_records_concatenate():
     one = v1_to_v2(one)
     two = v1_to_v2(two)
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         {"x": 1, "y": [1]},
         {"x": 2, "y": [1, 2]},
         {"x": 3, "y": [1, 2, 3]},
@@ -186,10 +188,10 @@ def test_records_concatenate():
         {"y": [3, 2, 1], "x": 5},
     ]
     with pytest.raises(ValueError):
-        ak.to_list(ak._v2.operations.structure.concatenate([one, two], 1))
+        to_list(ak._v2.operations.structure.concatenate([one, two], 1))
 
     with pytest.raises(ValueError):
-        ak.to_list(ak._v2.operations.structure.concatenate([one, two], 2))
+        to_list(ak._v2.operations.structure.concatenate([one, two], 2))
 
 
 def test_indexed_array_concatenate():
@@ -203,7 +205,7 @@ def test_indexed_array_concatenate():
     three = v1_to_v2(three)
     four = v1_to_v2(four)
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         [1, 2, 3],
         [None, 4],
         None,
@@ -214,9 +216,9 @@ def test_indexed_array_concatenate():
     ]
 
     with pytest.raises(ValueError):
-        ak.to_list(ak._v2.operations.structure.concatenate([one, three], 1))
+        to_list(ak._v2.operations.structure.concatenate([one, three], 1))
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, four], 1)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([one, four], 1)) == [
         [1, 2, 3, 6.6],
         [None, 4, 7.7, 8.8],
         [],
@@ -233,7 +235,7 @@ def test_bytemasked_concatenate():
     one = v1_to_v2(one)
     two = v1_to_v2(two)
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         1,
         2,
         None,
@@ -248,7 +250,7 @@ def test_bytemasked_concatenate():
     ]
 
     with pytest.raises(ValueError):
-        ak.to_list(ak._v2.operations.structure.concatenate([one, two], 1))
+        to_list(ak._v2.operations.structure.concatenate([one, two], 1))
 
 
 def test_listoffsetarray_concatenate():
@@ -258,7 +260,7 @@ def test_listoffsetarray_concatenate():
 
     one = v1_to_v2(one)
 
-    assert ak.to_list(one) == [[1, 2, 3], [], [4, 5], [6, 7, 8, 9]]
+    assert to_list(one) == [[1, 2, 3], [], [4, 5], [6, 7, 8, 9]]
 
     content_two = ak.layout.NumpyArray(np.array([100, 200, 300, 400, 500]))
     offsets_two = ak.layout.Index64(np.array([0, 2, 4, 4, 5]))
@@ -266,8 +268,8 @@ def test_listoffsetarray_concatenate():
 
     two = v1_to_v2(two)
 
-    assert ak.to_list(two) == [[100, 200], [300, 400], [], [500]]
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
+    assert to_list(two) == [[100, 200], [300, 400], [], [500]]
+    assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         [1, 2, 3],
         [],
         [4, 5],
@@ -277,7 +279,7 @@ def test_listoffsetarray_concatenate():
         [],
         [500],
     ]
-    assert ak.to_list(ak._v2.operations.structure.concatenate([one, two], 1)) == [
+    assert to_list(ak._v2.operations.structure.concatenate([one, two], 1)) == [
         [1, 2, 3, 100, 200],
         [300, 400],
         [4, 5],
@@ -294,15 +296,15 @@ def test_numpyarray_concatenate_axis0():
     ak1 = v1_to_v2(ak1)
     ak2 = v1_to_v2(ak2)
 
-    assert ak.to_list(
+    assert to_list(
         ak._v2.operations.structure.concatenate([np1, np2, np1, np2], 0)
-    ) == ak.to_list(np.concatenate([np1, np2, np1, np2], 0))
-    assert ak.to_list(
-        ak._v2.operations.structure.concatenate([ak1, ak2], 0)
-    ) == ak.to_list(np.concatenate([np.asarray(ak1), np.asarray(ak2)], 0))
-    assert ak.to_list(
+    ) == to_list(np.concatenate([np1, np2, np1, np2], 0))
+    assert to_list(ak._v2.operations.structure.concatenate([ak1, ak2], 0)) == to_list(
         np.concatenate([np.asarray(ak1), np.asarray(ak2)], 0)
-    ) == ak.to_list(ak._v2.operations.structure.concatenate([np1, np2], 0))
+    )
+    assert to_list(np.concatenate([np.asarray(ak1), np.asarray(ak2)], 0)) == to_list(
+        ak._v2.operations.structure.concatenate([np1, np2], 0)
+    )
 
 
 def test_numpyarray_concatenate():
@@ -315,19 +317,19 @@ def test_numpyarray_concatenate():
     ak1 = v1_to_v2(ak1)
     ak2 = v1_to_v2(ak2)
 
-    assert ak.to_list(np.concatenate([np1, np2], 1)) == ak.to_list(
+    assert to_list(np.concatenate([np1, np2], 1)) == to_list(
         ak._v2.operations.structure.concatenate([ak1, ak2], 1)
     )
-    assert ak.to_list(np.concatenate([np2, np1], 1)) == ak.to_list(
+    assert to_list(np.concatenate([np2, np1], 1)) == to_list(
         ak._v2.operations.structure.concatenate([ak2, ak1], 1)
     )
-    assert ak.to_list(np.concatenate([np1, np2], 2)) == ak.to_list(
+    assert to_list(np.concatenate([np1, np2], 2)) == to_list(
         ak._v2.operations.structure.concatenate([ak1, ak2], 2)
     )
-    assert ak.to_list(np.concatenate([np2, np1], 2)) == ak.to_list(
+    assert to_list(np.concatenate([np2, np1], 2)) == to_list(
         ak._v2.operations.structure.concatenate([ak2, ak1], 2)
     )
-    assert ak.to_list(np.concatenate([np2, np1], -1)) == ak.to_list(
+    assert to_list(np.concatenate([np2, np1], -1)) == to_list(
         ak._v2.operations.structure.concatenate([ak2, ak1], -1)
     )
 
@@ -391,7 +393,7 @@ def test_numbers_and_records_concatenate():
         ),
     ]
 
-    assert ak.to_list(
+    assert to_list(
         ak._v2.operations.structure.concatenate([numbers[0], records[0]], 1)
     ) == [
         [1.1, 2.2, 3.3, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
@@ -400,7 +402,7 @@ def test_numbers_and_records_concatenate():
         [6.6, 7.7, 8.8, 9.9, {"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
     ]
 
-    assert ak.to_list(
+    assert to_list(
         ak._v2.operations.structure.concatenate([numbers[0], numbers[1]], axis=1)
     ) == [
         [1.1, 2.2, 3.3, 10, 20],
@@ -409,14 +411,14 @@ def test_numbers_and_records_concatenate():
         [6.6, 7.7, 8.8, 9.9, 40, 50, 60],
     ]
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate(numbers, axis=1)) == [
+    assert to_list(ak._v2.operations.structure.concatenate(numbers, axis=1)) == [
         [1.1, 2.2, 3.3, 10, 20, 101, 102, 103],
         [30, 201, 202, 203],
         [4.4, 5.5, 301, 302, 303],
         [6.6, 7.7, 8.8, 9.9, 40, 50, 60, 401, 402, 403],
     ]
 
-    assert ak.to_list(ak._v2.operations.structure.concatenate(records, axis=1)) == [
+    assert to_list(ak._v2.operations.structure.concatenate(records, axis=1)) == [
         [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 0.0, "y": []}],
         [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
         [{"x": 2.2, "y": [1, 2]}],
@@ -428,7 +430,7 @@ def test_numbers_and_records_concatenate():
     ]
 
     with pytest.raises(ValueError) as err:
-        ak.to_list(ak.concatenate([numbers, records], axis=1))
+        to_list(ak.concatenate([numbers, records], axis=1))
     assert str(err.value).startswith("cannot broadcast")
 
 

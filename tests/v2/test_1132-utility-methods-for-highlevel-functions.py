@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_from_regular():
     array = ak._v2.contents.NumpyArray(
@@ -23,9 +25,9 @@ def test_from_regular():
         array, axis=None, highlevel=False
     )
 
-    assert ak.to_list(irregular1) == ak.to_list(array)
-    assert ak.to_list(irregular2) == ak.to_list(array)
-    assert ak.to_list(irregularNone) == ak.to_list(array)
+    assert to_list(irregular1) == to_list(array)
+    assert to_list(irregular2) == to_list(array)
+    assert to_list(irregularNone) == to_list(array)
 
     assert str(array.form.type) == "3 * 5 * int64"
     assert str(irregular1.form.type) == "var * 5 * int64"
@@ -49,9 +51,9 @@ def test_from_regular():
         array, axis=None, highlevel=False
     )
 
-    assert ak.to_list(irregular1) == ak.to_list(array)
-    assert ak.to_list(irregular2) == ak.to_list(array)
-    assert ak.to_list(irregularNone) == ak.to_list(array)
+    assert to_list(irregular1) == to_list(array)
+    assert to_list(irregular2) == to_list(array)
+    assert to_list(irregularNone) == to_list(array)
 
     assert str(array.form.type) == "3 * 5 * int64"
     assert str(irregular1.form.type) == "var * 5 * int64"
@@ -85,9 +87,9 @@ def test_from_regular():
         array, axis=None, highlevel=False
     )
 
-    assert ak.to_list(irregular1) == ak.to_list(array)
-    assert ak.to_list(irregular2) == ak.to_list(array)
-    assert ak.to_list(irregularNone) == ak.to_list(array)
+    assert to_list(irregular1) == to_list(array)
+    assert to_list(irregular2) == to_list(array)
+    assert to_list(irregularNone) == to_list(array)
 
     assert str(array.form.type) == "option[3 * option[5 * int64]]"
     assert str(irregular1.form.type) == "option[var * option[5 * int64]]"
@@ -109,9 +111,9 @@ def test_to_regular():
         array, axis=None, highlevel=False
     )
 
-    assert ak.to_list(regular1) == ak.to_list(array)
-    assert ak.to_list(regular2) == ak.to_list(array)
-    assert ak.to_list(regularNone) == ak.to_list(array)
+    assert to_list(regular1) == to_list(array)
+    assert to_list(regular2) == to_list(array)
+    assert to_list(regularNone) == to_list(array)
 
     assert str(array.form.type) == "var * var * int64"
     assert str(regular1.form.type) == "3 * var * int64"
@@ -143,9 +145,9 @@ def test_to_regular():
         array, axis=None, highlevel=False
     )
 
-    assert ak.to_list(regular1) == ak.to_list(array)
-    assert ak.to_list(regular2) == ak.to_list(array)
-    assert ak.to_list(regularNone) == ak.to_list(array)
+    assert to_list(regular1) == to_list(array)
+    assert to_list(regular2) == to_list(array)
+    assert to_list(regularNone) == to_list(array)
 
     assert str(array.form.type) == "option[var * option[var * int64]]"
     assert str(regular1.form.type) == "option[3 * option[var * int64]]"
@@ -156,7 +158,7 @@ def test_to_regular():
 def test_isclose():
     one = v1_to_v2(ak.from_iter([0.99999, 1.99999, 2.99999], highlevel=False))
     two = v1_to_v2(ak.from_iter([1.00001, 2.00001, 3.00001], highlevel=False))
-    assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
+    assert to_list(ak._v2.operations.structure.isclose(one, two)) == [
         False,
         True,
         True,
@@ -164,7 +166,7 @@ def test_isclose():
 
     one = v1_to_v2(ak.from_iter([[0.99999, 1.99999], [], [2.99999]], highlevel=False))
     two = v1_to_v2(ak.from_iter([[1.00001, 2.00001], [], [3.00001]], highlevel=False))
-    assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
+    assert to_list(ak._v2.operations.structure.isclose(one, two)) == [
         [False, True],
         [],
         [True],
@@ -176,7 +178,7 @@ def test_isclose():
     two = v1_to_v2(
         ak.from_iter([[1.00001, 2.00001, None], [], [3.00001]], highlevel=False)
     )
-    assert ak.to_list(ak._v2.operations.structure.isclose(one, two)) == [
+    assert to_list(ak._v2.operations.structure.isclose(one, two)) == [
         [False, True, None],
         [],
         [True],

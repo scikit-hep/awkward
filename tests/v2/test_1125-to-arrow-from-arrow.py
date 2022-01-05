@@ -11,11 +11,13 @@ import awkward as ak  # noqa: F401
 pyarrow = pytest.importorskip("pyarrow")
 pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def arrow_round_trip(akarray, paarray, extensionarray):
-    assert ak.to_list(akarray) == paarray.to_pylist()
+    assert to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-    assert ak.to_list(akarray2) == ak.to_list(akarray)
+    assert to_list(akarray2) == to_list(akarray)
     if extensionarray:
         assert akarray2.form.type == akarray.form.type
     akarray3 = ak._v2._connect.pyarrow.handle_arrow(
@@ -30,7 +32,7 @@ def parquet_round_trip(akarray, paarray, extensionarray, tmp_path):
     pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
     table = pyarrow_parquet.read_table(filename)
     akarray4 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-    assert ak.to_list(akarray4) == ak.to_list(akarray)
+    assert to_list(akarray4) == to_list(akarray)
     if extensionarray:
         assert akarray4.form.type == akarray.form.type
 
@@ -245,13 +247,13 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
     if extensionarray:
         paarray = akarray.to_arrow(extensionarray=extensionarray, emptyarray_to="f8")
         akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-        assert ak.to_list(akarray2) == ak.to_list(akarray)
+        assert to_list(akarray2) == to_list(akarray)
 
         filename = os.path.join(tmp_path, "whatever.parquet")
         pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
         table = pyarrow_parquet.read_table(filename)
         akarray4 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-        assert ak.to_list(akarray4) == ak.to_list(akarray)
+        assert to_list(akarray4) == to_list(akarray)
 
     else:
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)

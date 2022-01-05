@@ -8,20 +8,14 @@ import awkward as ak  # noqa: F401
 
 pandas = pytest.importorskip("pandas")
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_from_pandas():
     values = {"time": ["20190902093000", "20190913093000", "20190921200000"]}
     df = pandas.DataFrame(values, columns=["time"])
     df["time"] = pandas.to_datetime(df["time"], format="%Y%m%d%H%M%S")
-    array = ak.layout.NumpyArray(df)
-    assert ak.to_list(array) == [
-        np.datetime64("2019-09-02T09:30:00"),
-        np.datetime64("2019-09-13T09:30:00"),
-        np.datetime64("2019-09-21T20:00:00"),
-    ]
-    array2 = ak.Array(df.values)
-    assert ak.to_list(array2) == [
-        np.datetime64("2019-09-02T09:30:00"),
-        np.datetime64("2019-09-13T09:30:00"),
-        np.datetime64("2019-09-21T20:00:00"),
-    ]
+    array = ak._v2.contents.NumpyArray(df["time"].values)
+    assert to_list(array) == df["time"].values.tolist()
+    array2 = ak._v2.highlevel.Array(df["time"].values)
+    assert to_list(array2) == df["time"].values.tolist()

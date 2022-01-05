@@ -7,13 +7,15 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_ListOffsetArray():
     array = ak.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
     )
     v2_array = v1_to_v2(array.layout)
-    assert ak.to_list(v2_array.combinations(2, replacement=False)) == [
+    assert to_list(v2_array.combinations(2, replacement=False)) == [
         [(0.0, 1.1), (0.0, 2.2), (0.0, 3.3), (1.1, 2.2), (1.1, 3.3), (2.2, 3.3)],
         [],
         [(4.4, 5.5), (4.4, 6.6), (5.5, 6.6)],
@@ -35,9 +37,7 @@ def test_ListOffsetArray():
         v2_array.typetracer.combinations(2, replacement=False).form
         == v2_array.combinations(2, replacement=False).form
     )
-    assert ak.to_list(
-        v2_array.combinations(2, replacement=False, fields=["x", "y"])
-    ) == [
+    assert to_list(v2_array.combinations(2, replacement=False, fields=["x", "y"])) == [
         [
             {"x": 0.0, "y": 1.1},
             {"x": 0.0, "y": 2.2},
@@ -82,7 +82,7 @@ def test_ListOffsetArray():
         ).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, replacement=True)) == [
+    assert to_list(v2_array.combinations(2, replacement=True)) == [
         [
             (0.0, 0.0),
             (0.0, 1.1),
@@ -121,7 +121,7 @@ def test_ListOffsetArray():
         == v2_array.combinations(2, replacement=True).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, replacement=False)) == [
+    assert to_list(v2_array.combinations(3, replacement=False)) == [
         [(0.0, 1.1, 2.2), (0.0, 1.1, 3.3), (0.0, 2.2, 3.3), (1.1, 2.2, 3.3)],
         [],
         [(4.4, 5.5, 6.6)],
@@ -144,7 +144,7 @@ def test_ListOffsetArray():
         == v2_array.combinations(3, replacement=False).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, replacement=True)) == [
+    assert to_list(v2_array.combinations(3, replacement=True)) == [
         [
             (0.0, 0.0, 0.0),
             (0.0, 0.0, 1.1),
@@ -229,7 +229,7 @@ def test_RegularArray():
     array = ak.Array(np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]]))
     v2_array = v1_to_v2(array.layout)
 
-    assert ak.to_list(v2_array.combinations(2, replacement=False)) == [
+    assert to_list(v2_array.combinations(2, replacement=False)) == [
         [(0.0, 1.1), (0.0, 2.2), (0.0, 3.3), (1.1, 2.2), (1.1, 3.3), (2.2, 3.3)],
         [(4.4, 5.5), (4.4, 6.6), (4.4, 7.7), (5.5, 6.6), (5.5, 7.7), (6.6, 7.7)],
     ]
@@ -238,9 +238,7 @@ def test_RegularArray():
         == v2_array.combinations(2, replacement=False).form
     )
 
-    assert ak.to_list(
-        v2_array.combinations(2, replacement=False, fields=["x", "y"])
-    ) == [
+    assert to_list(v2_array.combinations(2, replacement=False, fields=["x", "y"])) == [
         [
             {"x": 0.0, "y": 1.1},
             {"x": 0.0, "y": 2.2},
@@ -278,7 +276,7 @@ def test_RegularArray():
         ).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, replacement=True)) == [
+    assert to_list(v2_array.combinations(2, replacement=True)) == [
         [
             (0.0, 0.0),
             (0.0, 1.1),
@@ -309,7 +307,7 @@ def test_RegularArray():
         == v2_array.combinations(2, replacement=True).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, replacement=False)) == [
+    assert to_list(v2_array.combinations(3, replacement=False)) == [
         [(0.0, 1.1, 2.2), (0.0, 1.1, 3.3), (0.0, 2.2, 3.3), (1.1, 2.2, 3.3)],
         [(4.4, 5.5, 6.6), (4.4, 5.5, 7.7), (4.4, 6.6, 7.7), (5.5, 6.6, 7.7)],
     ]
@@ -318,7 +316,7 @@ def test_RegularArray():
         == v2_array.combinations(3, replacement=False).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, replacement=True)) == [
+    assert to_list(v2_array.combinations(3, replacement=True)) == [
         [
             (0.0, 0.0, 0.0),
             (0.0, 0.0, 1.1),
@@ -374,7 +372,7 @@ def test_axis0():
     array = ak.Array([0.0, 1.1, 2.2, 3.3])
     v2_array = v1_to_v2(array.layout)
 
-    assert ak.to_list(v2_array.combinations(2, replacement=False, axis=0)) == [
+    assert to_list(v2_array.combinations(2, replacement=False, axis=0)) == [
         (0.0, 1.1),
         (0.0, 2.2),
         (0.0, 3.3),
@@ -387,7 +385,7 @@ def test_axis0():
         == v2_array.combinations(2, replacement=False, axis=0).form
     )
 
-    assert ak.to_list(
+    assert to_list(
         v2_array.combinations(2, replacement=False, axis=0, fields=["x", "y"])
     ) == [
         {"x": 0.0, "y": 1.1},
@@ -419,7 +417,7 @@ def test_axis0():
         ).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, replacement=False, axis=0)) == [
+    assert to_list(v2_array.combinations(3, replacement=False, axis=0)) == [
         (0.0, 1.1, 2.2),
         (0.0, 1.1, 3.3),
         (0.0, 2.2, 3.3),
@@ -445,7 +443,7 @@ def test_IndexedArray():
     )
     v2_array = v1_to_v2(array.layout)
 
-    assert ak.to_list(v2_array.combinations(2, replacement=False)) == [
+    assert to_list(v2_array.combinations(2, replacement=False)) == [
         [(0.0, 1.1), (0.0, 2.2), (0.0, 3.3), (1.1, 2.2), (1.1, 3.3), (2.2, 3.3)],
         [],
         [(4.4, 5.5), (4.4, 6.6), (5.5, 6.6)],
@@ -481,7 +479,7 @@ def test_axis2():
     )
     v2_array = v1_to_v2(array.layout)
 
-    assert ak.to_list(v2_array.combinations(2, axis=1, replacement=False)) == [
+    assert to_list(v2_array.combinations(2, axis=1, replacement=False)) == [
         [
             ([0.0, 1.1, 2.2, 3.3], []),
             ([0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6]),
@@ -495,7 +493,7 @@ def test_axis2():
         == v2_array.combinations(2, axis=1, replacement=False).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=2, replacement=False)) == [
+    assert to_list(v2_array.combinations(2, axis=2, replacement=False)) == [
         [
             [(0.0, 1.1), (0.0, 2.2), (0.0, 3.3), (1.1, 2.2), (1.1, 3.3), (2.2, 3.3)],
             [],
@@ -533,7 +531,7 @@ def test_ByteMaskedArray():
     array = ak.Array(ak.layout.ByteMaskedArray(mask, content, valid_when=False))
     v2_array = v1_to_v2(array.layout)
 
-    assert ak.to_list(v2_array.combinations(2, axis=0)) == [
+    assert to_list(v2_array.combinations(2, axis=0)) == [
         ([[0, 1, 2], [], [3, 4]], []),
         ([[0, 1, 2], [], [3, 4]], None),
         ([[0, 1, 2], [], [3, 4]], None),
@@ -550,7 +548,7 @@ def test_ByteMaskedArray():
         == v2_array.combinations(2, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-3)) == [
+    assert to_list(v2_array.combinations(2, axis=-3)) == [
         ([[0, 1, 2], [], [3, 4]], []),
         ([[0, 1, 2], [], [3, 4]], None),
         ([[0, 1, 2], [], [3, 4]], None),
@@ -567,7 +565,7 @@ def test_ByteMaskedArray():
         == v2_array.combinations(2, axis=-3).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=1)) == [
+    assert to_list(v2_array.combinations(2, axis=1)) == [
         [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
         [],
         None,
@@ -579,7 +577,7 @@ def test_ByteMaskedArray():
         == v2_array.combinations(2, axis=1).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-2)) == [
+    assert to_list(v2_array.combinations(2, axis=-2)) == [
         [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
         [],
         None,
@@ -591,7 +589,7 @@ def test_ByteMaskedArray():
         == v2_array.combinations(2, axis=-2).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=2)) == [
+    assert to_list(v2_array.combinations(2, axis=2)) == [
         [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
         [],
         None,
@@ -603,7 +601,7 @@ def test_ByteMaskedArray():
         == v2_array.combinations(2, axis=2).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-1)) == [
+    assert to_list(v2_array.combinations(2, axis=-1)) == [
         [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
         [],
         None,
@@ -625,7 +623,7 @@ def test_IndexedOptionArray():
     array = ak.Array(ak.layout.IndexedOptionArray64(index, content))
     v2_array = v1_to_v2(array.layout)
 
-    assert ak.to_list(v2_array.combinations(2, axis=0)) == [
+    assert to_list(v2_array.combinations(2, axis=0)) == [
         ([[0, 1, 2], [], [3, 4]], []),
         ([[0, 1, 2], [], [3, 4]], None),
         ([[0, 1, 2], [], [3, 4]], None),
@@ -642,7 +640,7 @@ def test_IndexedOptionArray():
         == v2_array.combinations(2, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-3)) == [
+    assert to_list(v2_array.combinations(2, axis=-3)) == [
         ([[0, 1, 2], [], [3, 4]], []),
         ([[0, 1, 2], [], [3, 4]], None),
         ([[0, 1, 2], [], [3, 4]], None),
@@ -659,7 +657,7 @@ def test_IndexedOptionArray():
         == v2_array.combinations(2, axis=-3).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=1)) == [
+    assert to_list(v2_array.combinations(2, axis=1)) == [
         [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
         [],
         None,
@@ -671,7 +669,7 @@ def test_IndexedOptionArray():
         == v2_array.combinations(2, axis=1).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-2)) == [
+    assert to_list(v2_array.combinations(2, axis=-2)) == [
         [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
         [],
         None,
@@ -683,7 +681,7 @@ def test_IndexedOptionArray():
         == v2_array.combinations(2, axis=-2).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=2)) == [
+    assert to_list(v2_array.combinations(2, axis=2)) == [
         [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
         [],
         None,
@@ -695,7 +693,7 @@ def test_IndexedOptionArray():
         == v2_array.combinations(2, axis=2).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-1)) == [
+    assert to_list(v2_array.combinations(2, axis=-1)) == [
         [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
         [],
         None,
@@ -713,7 +711,7 @@ def test_NumpyArray():
         np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=0)) == [
+    assert to_list(v2_array.combinations(2, axis=0)) == [
         (0.0, 1.1),
         (0.0, 2.2),
         (0.0, 3.3),
@@ -726,7 +724,7 @@ def test_NumpyArray():
         == v2_array.combinations(2, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-1)) == [
+    assert to_list(v2_array.combinations(2, axis=-1)) == [
         (0.0, 1.1),
         (0.0, 2.2),
         (0.0, 3.3),
@@ -739,7 +737,7 @@ def test_NumpyArray():
         == v2_array.combinations(2, axis=-1).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, axis=-1)) == [
+    assert to_list(v2_array.combinations(3, axis=-1)) == [
         (0.0, 1.1, 2.2),
         (0.0, 1.1, 3.3),
         (0.0, 2.2, 3.3),
@@ -750,7 +748,7 @@ def test_NumpyArray():
         == v2_array.combinations(3, axis=-1).form
     )
 
-    assert ak.to_list(v2_array.combinations(4, axis=-1)) == [(0.0, 1.1, 2.2, 3.3)]
+    assert to_list(v2_array.combinations(4, axis=-1)) == [(0.0, 1.1, 2.2, 3.3)]
     assert (
         v2_array.typetracer.combinations(4, axis=-1).form
         == v2_array.combinations(4, axis=-1).form
@@ -791,7 +789,7 @@ def test_BitMaskedArray():
         lsb_order=False,
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=0)) == [
+    assert to_list(v2_array.combinations(2, axis=0)) == [
         (0.0, 1.0),
         (0.0, 2.0),
         (0.0, 3.0),
@@ -876,7 +874,7 @@ def test_BitMaskedArray():
         == v2_array.combinations(2, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, axis=0)) == [
+    assert to_list(v2_array.combinations(3, axis=0)) == [
         (0.0, 1.0, 2.0),
         (0.0, 1.0, 3.0),
         (0.0, 1.0, None),
@@ -1173,7 +1171,7 @@ def test_BitMaskedArray():
 def test_EmptyArray():
     v2_array = ak._v2.contents.emptyarray.EmptyArray()
 
-    assert ak.to_list(v2_array.combinations(2, axis=0)) == []
+    assert to_list(v2_array.combinations(2, axis=0)) == []
     assert (
         v2_array.typetracer.combinations(2, axis=0).form
         == v2_array.combinations(2, axis=0).form
@@ -1194,7 +1192,7 @@ def test_RecordArray():
         ),
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=0)) == [
+    assert to_list(v2_array.combinations(2, axis=0)) == [
         ([{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}], []),
         ([{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}], [{"nest": 4.4}, {"nest": 5.5}]),
         ([], [{"nest": 4.4}, {"nest": 5.5}]),
@@ -1204,7 +1202,7 @@ def test_RecordArray():
         == v2_array.combinations(2, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=1)) == [
+    assert to_list(v2_array.combinations(2, axis=1)) == [
         [
             ({"nest": 1.1}, {"nest": 2.2}),
             ({"nest": 1.1}, {"nest": 3.3}),
@@ -1218,7 +1216,7 @@ def test_RecordArray():
         == v2_array.combinations(2, axis=1).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, axis=1)) == [
+    assert to_list(v2_array.combinations(3, axis=1)) == [
         [({"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3})],
         [],
         [],
@@ -1228,7 +1226,7 @@ def test_RecordArray():
         == v2_array.combinations(3, axis=1).form
     )
 
-    assert ak.to_list(v2_array.combinations(4, axis=1)) == [[], [], []]
+    assert to_list(v2_array.combinations(4, axis=1)) == [[], [], []]
     assert (
         v2_array.typetracer.combinations(4, axis=1).form
         == v2_array.combinations(4, axis=1).form
@@ -1254,7 +1252,7 @@ def test_UnionArray():
         ],
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=0)) == [
+    assert to_list(v2_array.combinations(2, axis=0)) == [
         ({"nest": 5.5}, {"nest": 4.4}),
         ({"nest": 5.5}, {"nest": 1}),
         ({"nest": 5.5}, {"nest": 2}),
@@ -1282,7 +1280,7 @@ def test_UnionArray():
         == v2_array.combinations(2, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, axis=0)) == [
+    assert to_list(v2_array.combinations(3, axis=0)) == [
         ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}),
         ({"nest": 5.5}, {"nest": 4.4}, {"nest": 2}),
         ({"nest": 5.5}, {"nest": 4.4}, {"nest": 3.3}),
@@ -1324,7 +1322,7 @@ def test_UnionArray():
         == v2_array.combinations(3, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(4, axis=0)) == [
+    assert to_list(v2_array.combinations(4, axis=0)) == [
         ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}, {"nest": 2}),
         ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}, {"nest": 3.3}),
         ({"nest": 5.5}, {"nest": 4.4}, {"nest": 1}, {"nest": 3}),
@@ -1366,7 +1364,7 @@ def test_UnionArray():
         == v2_array.combinations(4, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-1)) == [
+    assert to_list(v2_array.combinations(2, axis=-1)) == [
         ({"nest": 5.5}, {"nest": 4.4}),
         ({"nest": 5.5}, {"nest": 1}),
         ({"nest": 5.5}, {"nest": 2}),
@@ -1402,7 +1400,7 @@ def test_UnmaskedArray():
         )
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=0)) == [
+    assert to_list(v2_array.combinations(2, axis=0)) == [
         (0.0, 1.1),
         (0.0, 2.2),
         (0.0, 3.3),
@@ -1415,7 +1413,7 @@ def test_UnmaskedArray():
         == v2_array.combinations(2, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(3, axis=0)) == [
+    assert to_list(v2_array.combinations(3, axis=0)) == [
         (0.0, 1.1, 2.2),
         (0.0, 1.1, 3.3),
         (0.0, 2.2, 3.3),
@@ -1426,13 +1424,13 @@ def test_UnmaskedArray():
         == v2_array.combinations(3, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(4, axis=0)) == [(0.0, 1.1, 2.2, 3.3)]
+    assert to_list(v2_array.combinations(4, axis=0)) == [(0.0, 1.1, 2.2, 3.3)]
     assert (
         v2_array.typetracer.combinations(4, axis=0).form
         == v2_array.combinations(4, axis=0).form
     )
 
-    assert ak.to_list(v2_array.combinations(2, axis=-1)) == [
+    assert to_list(v2_array.combinations(2, axis=-1)) == [
         (0.0, 1.1),
         (0.0, 2.2),
         (0.0, 3.3),

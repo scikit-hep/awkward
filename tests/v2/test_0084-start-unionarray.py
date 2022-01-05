@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2, v1_to_v2_index
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_getitem():
     content0 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
@@ -66,31 +68,31 @@ def test_getitem():
     assert np.asarray(array.index).tolist() == [0, 1, 0, 1, 2, 2, 4, 3]
     assert np.asarray(array.index).dtype == np.dtype(np.int32)
     assert type(array.contents) is list
-    assert [ak.to_list(x) for x in array.contents] == [
+    assert [to_list(x) for x in array.contents] == [
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
         ["one", "two", "three", "four", "five"],
     ]
     assert len(array.contents) == 2
-    assert ak.to_list(array.content(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert to_list(array.content(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert array.typetracer.content(0).form == array.content(0).form
-    assert ak.to_list(array.content(1)) == ["one", "two", "three", "four", "five"]
+    assert to_list(array.content(1)) == ["one", "two", "three", "four", "five"]
     assert array.typetracer.content(1).form == array.content(1).form
-    assert ak.to_list(array.project(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    assert to_list(array.project(0)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert array.typetracer.project(0).form == array.project(0).form
-    assert ak.to_list(array.project(1)) == ["one", "two", "three", "five", "four"]
+    assert to_list(array.project(1)) == ["one", "two", "three", "five", "four"]
     assert array.typetracer.project(1).form == array.project(1).form
     repr(array)
 
-    assert ak.to_list(array[0]) == "one"
-    assert ak.to_list(array[1]) == "two"
-    assert ak.to_list(array[2]) == [1.1, 2.2, 3.3]
-    assert ak.to_list(array[3]) == []
-    assert ak.to_list(array[4]) == "three"
-    assert ak.to_list(array[5]) == [4.4, 5.5]
-    assert ak.to_list(array[6]) == "five"
-    assert ak.to_list(array[7]) == "four"
+    assert to_list(array[0]) == "one"
+    assert to_list(array[1]) == "two"
+    assert to_list(array[2]) == [1.1, 2.2, 3.3]
+    assert to_list(array[3]) == []
+    assert to_list(array[4]) == "three"
+    assert to_list(array[5]) == [4.4, 5.5]
+    assert to_list(array[6]) == "five"
+    assert to_list(array[7]) == "four"
 
-    assert ak.to_list(array) == [
+    assert to_list(array) == [
         "one",
         "two",
         [1.1, 2.2, 3.3],
@@ -100,7 +102,7 @@ def test_getitem():
         "five",
         "four",
     ]
-    assert ak.to_list(array[1:-1]) == [
+    assert to_list(array[1:-1]) == [
         "two",
         [1.1, 2.2, 3.3],
         [],
@@ -109,13 +111,13 @@ def test_getitem():
         "five",
     ]
     assert array.typetracer[1:-1].form == array[1:-1].form
-    assert ak.to_list(array[2:-2]) == [[1.1, 2.2, 3.3], [], "three", [4.4, 5.5]]
+    assert to_list(array[2:-2]) == [[1.1, 2.2, 3.3], [], "three", [4.4, 5.5]]
     assert array.typetracer[2:-2].form == array[2:-2].form
-    assert ak.to_list(array[::2]) == ["one", [1.1, 2.2, 3.3], "three", "five"]
+    assert to_list(array[::2]) == ["one", [1.1, 2.2, 3.3], "three", "five"]
     assert array.typetracer[::2].form == array[::2].form
-    assert ak.to_list(array[::2, 1:]) == ["ne", [2.2, 3.3], "hree", "ive"]
+    assert to_list(array[::2, 1:]) == ["ne", [2.2, 3.3], "hree", "ive"]
     assert array.typetracer[::2, 1:].form == array[::2, 1:].form
-    assert ak.to_list(array[:, :-1]) == [
+    assert to_list(array[:, :-1]) == [
         "on",
         "tw",
         [1.1, 2.2],
@@ -145,7 +147,7 @@ def test_getitem():
 
     array2 = v1_to_v2(array2)
 
-    assert ak.to_list(array2) == [
+    assert to_list(array2) == [
         {"x": 0.0, "y": "zero", "z": False},
         {"x": 1.1, "y": "one", "z": True},
         {"x": 0, "y": []},
@@ -155,9 +157,9 @@ def test_getitem():
         {"x": 4.4, "y": "four", "z": False},
         {"x": 3.3, "y": "three", "z": True},
     ]
-    assert ak.to_list(array2["x"]) == [0.0, 1.1, 0, 1, 2.2, 2, 4.4, 3.3]
+    assert to_list(array2["x"]) == [0.0, 1.1, 0, 1, 2.2, 2, 4.4, 3.3]
     assert array2.typetracer["x"].form == array2["x"].form
-    assert ak.to_list(array2["y"]) == [
+    assert to_list(array2["y"]) == [
         "zero",
         "one",
         [],
@@ -168,7 +170,7 @@ def test_getitem():
         "three",
     ]
     assert array2.typetracer["y"].form == array2["y"].form
-    assert ak.to_list(array2[:, "y", 1:]) == [
+    assert to_list(array2[:, "y", 1:]) == [
         "ero",
         "ne",
         [],
@@ -179,7 +181,7 @@ def test_getitem():
         "hree",
     ]
     assert array2.typetracer[:, "y", 1:].form == array2[:, "y", 1:].form
-    assert ak.to_list(array2["y", :, 1:]) == [
+    assert to_list(array2["y", :, 1:]) == [
         "ero",
         "ne",
         [],

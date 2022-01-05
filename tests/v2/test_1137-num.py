@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 
 from awkward._v2.tmp_for_testing import v1_to_v2
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test_bytemaskedarray_num():
     content = ak.from_iter(
@@ -25,7 +27,7 @@ def test_bytemaskedarray_num():
 
     array = v1_to_v2(array)
 
-    assert ak.to_list(array) == [
+    assert to_list(array) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
@@ -34,18 +36,18 @@ def test_bytemaskedarray_num():
     ]
     assert array.num(axis=0) == 5
     assert array.num(axis=-3) == 5
-    assert ak.to_list(array.num(axis=1)) == [3, 0, None, None, 2]
-    assert ak.to_list(array.num(axis=-2)) == [3, 0, None, None, 2]
-    assert ak.to_list(array.num(axis=2)) == [[3, 0, 2], [], None, None, [0, 3]]
-    assert ak.to_list(array.num(axis=-1)) == [[3, 0, 2], [], None, None, [0, 3]]
+    assert to_list(array.num(axis=1)) == [3, 0, None, None, 2]
+    assert to_list(array.num(axis=-2)) == [3, 0, None, None, 2]
+    assert to_list(array.num(axis=2)) == [[3, 0, 2], [], None, None, [0, 3]]
+    assert to_list(array.num(axis=-1)) == [[3, 0, 2], [], None, None, [0, 3]]
 
 
 def test_emptyarray():
     array = ak.layout.EmptyArray()
     array = v1_to_v2(array)
-    assert ak.to_list(array.num(0)) == 0
-    assert ak.to_list(array.num(1)) == []
-    assert ak.to_list(array.num(2)) == []
+    assert to_list(array.num(0)) == 0
+    assert to_list(array.num(1)) == []
+    assert to_list(array.num(2)) == []
 
 
 def test_numpyarray():
@@ -53,9 +55,9 @@ def test_numpyarray():
     array = v1_to_v2(array)
 
     assert array.num(0) == 2
-    assert ak.to_list(array.num(1)) == [3, 3]
-    assert ak.to_list(array.num(axis=2)) == [[5, 5, 5], [5, 5, 5]]
-    assert ak.to_list(array.num(3)) == [
+    assert to_list(array.num(1)) == [3, 3]
+    assert to_list(array.num(axis=2)) == [[5, 5, 5], [5, 5, 5]]
+    assert to_list(array.num(3)) == [
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
     ]
@@ -72,9 +74,9 @@ def test_regulararray():
     array = v1_to_v2(array)
 
     assert array.num(0) == 2
-    assert ak.to_list(array.num(1)) == [3, 3]
-    assert ak.to_list(array.num(2)) == [[5, 5, 5], [5, 5, 5]]
-    assert ak.to_list(array.num(3)) == [
+    assert to_list(array.num(1)) == [3, 3]
+    assert to_list(array.num(2)) == [[5, 5, 5], [5, 5, 5]]
+    assert to_list(array.num(3)) == [
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
         [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]],
     ]
@@ -91,8 +93,8 @@ def test_regulararray():
     empty = v1_to_v2(empty.layout)
 
     assert empty.num(axis=0) == 0
-    assert ak.to_list(empty.num(axis=1)) == []
-    assert ak.to_list(empty.num(axis=2)) == []
+    assert to_list(empty.num(axis=1)) == []
+    assert to_list(empty.num(axis=2)) == []
 
 
 def test_listarray():
@@ -103,7 +105,7 @@ def test_listarray():
 
     array = v1_to_v2(array)
 
-    assert ak.to_list(array) == [
+    assert to_list(array) == [
         [
             [[0, 1], [2, 3], [4, 5]],
             [[6, 7], [8, 9], [10, 11]],
@@ -113,10 +115,10 @@ def test_listarray():
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
     ]
 
-    assert ak.to_list(array.num(0)) == 3
-    assert ak.to_list(array.num(1)) == [3, 0, 2]
-    assert ak.to_list(array.num(2)) == [[3, 3, 3], [], [3, 3]]
-    assert ak.to_list(array.num(3)) == [
+    assert to_list(array.num(0)) == 3
+    assert to_list(array.num(1)) == [3, 0, 2]
+    assert to_list(array.num(2)) == [[3, 3, 3], [], [3, 3]]
+    assert to_list(array.num(3)) == [
         [[2, 2, 2], [2, 2, 2], [2, 2, 2]],
         [],
         [[2, 2, 2], [2, 2, 2]],
@@ -133,7 +135,7 @@ def test_listoffsetarray():
 
     array = v1_to_v2(array)
 
-    assert ak.to_list(array) == [
+    assert to_list(array) == [
         [
             [[0, 1], [2, 3], [4, 5]],
             [[6, 7], [8, 9], [10, 11]],
@@ -143,10 +145,10 @@ def test_listoffsetarray():
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
     ]
 
-    assert ak.to_list(array.num(0)) == 3
-    assert ak.to_list(array.num(1)) == [3, 0, 2]
-    assert ak.to_list(array.num(2)) == [[3, 3, 3], [], [3, 3]]
-    assert ak.to_list(array.num(3)) == [
+    assert to_list(array.num(0)) == 3
+    assert to_list(array.num(1)) == [3, 0, 2]
+    assert to_list(array.num(2)) == [[3, 3, 3], [], [3, 3]]
+    assert to_list(array.num(3)) == [
         [[2, 2, 2], [2, 2, 2], [2, 2, 2]],
         [],
         [[2, 2, 2], [2, 2, 2]],
@@ -165,7 +167,7 @@ def test_indexedarray():
 
     array = v1_to_v2(array)
 
-    assert ak.to_list(array) == [
+    assert to_list(array) == [
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
         [],
@@ -176,10 +178,10 @@ def test_indexedarray():
         ],
     ]
 
-    assert ak.to_list(array.num(0)) == 4
-    assert ak.to_list(array.num(1)) == [2, 2, 0, 3]
-    assert ak.to_list(array.num(2)) == [[3, 3], [3, 3], [], [3, 3, 3]]
-    assert ak.to_list(array.num(3)) == [
+    assert to_list(array.num(0)) == 4
+    assert to_list(array.num(1)) == [2, 2, 0, 3]
+    assert to_list(array.num(2)) == [[3, 3], [3, 3], [], [3, 3, 3]]
+    assert to_list(array.num(3)) == [
         [[2, 2, 2], [2, 2, 2]],
         [[2, 2, 2], [2, 2, 2]],
         [],
@@ -200,7 +202,7 @@ def test_indexedoptionarray():
 
     array = v1_to_v2(array)
 
-    assert ak.to_list(array) == [
+    assert to_list(array) == [
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
         None,
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
@@ -213,10 +215,10 @@ def test_indexedoptionarray():
         ],
     ]
 
-    assert ak.to_list(array.num(0)) == 6
-    assert ak.to_list(array.num(1)) == [2, None, 2, 0, None, 3]
-    assert ak.to_list(array.num(2)) == [[3, 3], None, [3, 3], [], None, [3, 3, 3]]
-    assert ak.to_list(array.num(3)) == [
+    assert to_list(array.num(0)) == 6
+    assert to_list(array.num(1)) == [2, None, 2, 0, None, 3]
+    assert to_list(array.num(2)) == [[3, 3], None, [3, 3], [], None, [3, 3, 3]]
+    assert to_list(array.num(3)) == [
         [[2, 2, 2], [2, 2, 2]],
         None,
         [[2, 2, 2], [2, 2, 2]],
@@ -243,7 +245,7 @@ def test_recordarray():
 
     array = v1_to_v2(array)
 
-    assert ak.to_list(array.num(0)) == {"x": 4, "y": 4}
+    assert to_list(array.num(0)) == {"x": 4, "y": 4}
 
     array = ak.from_iter(
         [
@@ -257,14 +259,14 @@ def test_recordarray():
 
     array = v1_to_v2(array)
 
-    assert ak.to_list(array.num(0)) == {"x": 4, "y": 4}
-    assert ak.to_list(array.num(1)) == [
+    assert to_list(array.num(0)) == {"x": 4, "y": 4}
+    assert to_list(array.num(1)) == [
         {"x": 3, "y": 0},
         {"x": 2, "y": 1},
         {"x": 1, "y": 2},
         {"x": 0, "y": 3},
     ]
-    assert ak.to_list(array.num(1)[2]) == {"x": 1, "y": 2}
+    assert to_list(array.num(1)[2]) == {"x": 1, "y": 2}
 
     array = ak.from_iter(
         [
@@ -278,14 +280,14 @@ def test_recordarray():
 
     array = v1_to_v2(array)
 
-    assert ak.to_list(array.num(0)) == {"x": 4, "y": 4}
-    assert ak.to_list(array.num(1)) == [
+    assert to_list(array.num(0)) == {"x": 4, "y": 4}
+    assert to_list(array.num(1)) == [
         {"x": 1, "y": 0},
         {"x": 1, "y": 1},
         {"x": 1, "y": 2},
         {"x": 1, "y": 3},
     ]
-    assert ak.to_list(array.num(1)[2]) == {"x": 1, "y": 2}
+    assert to_list(array.num(1)[2]) == {"x": 1, "y": 2}
 
 
 def test_unionarray():
@@ -294,7 +296,8 @@ def test_unionarray():
     tags = ak.layout.Index8(np.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=np.int8))
     index = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int64))
     array = ak.layout.UnionArray8_64(tags, index, [content1, content2])
-    assert ak.to_list(array) == [
+    array = v1_to_v2(array)
+    assert to_list(array) == [
         [],
         [3.3, 3.3, 3.3],
         [1],
@@ -306,13 +309,15 @@ def test_unionarray():
     ]
 
     assert array.num(0) == 8
-    assert isinstance(array.num(1), ak.layout.NumpyArray)
-    assert ak.to_list(array.num(1)) == [0, 3, 1, 2, 2, 1, 3, 0]
+    assert isinstance(array.num(1), ak._v2.contents.NumpyArray)
+    assert to_list(array.num(1)) == [0, 3, 1, 2, 2, 1, 3, 0]
 
 
+@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.num not implemented")
 def test_highlevel():
     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    assert ak.to_list(ak.num(array)) == [3, 0, 2]
+    array = ak._v2.highlevel.Array(v1_to_v2(array.layout))
+    assert to_list(ak._v2.operations.structure.num(array)) == [3, 0, 2]
 
 
 def test_array_3d():
@@ -320,14 +325,14 @@ def test_array_3d():
 
     array = v1_to_v2(array.layout)
 
-    assert ak.to_list(array) == [
+    assert to_list(array) == [
         [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]],
         [[10, 11], [12, 13], [14, 15], [16, 17], [18, 19]],
         [[20, 21], [22, 23], [24, 25], [26, 27], [28, 29]],
     ]
     assert array.num(axis=0) == 3
-    assert ak.to_list(array.num(axis=1)) == [5, 5, 5]
-    assert ak.to_list(array.num(axis=2)) == [
+    assert to_list(array.num(axis=1)) == [5, 5, 5]
+    assert to_list(array.num(axis=2)) == [
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
@@ -336,12 +341,12 @@ def test_array_3d():
         assert array.num(axis=3)
         assert str(err.value).startswith("axis=3 exceeds the depth of this array (2)")
 
-    assert ak.to_list(array.num(axis=-1)) == [
+    assert to_list(array.num(axis=-1)) == [
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
     ]
-    assert ak.to_list(array.num(axis=-2)) == [5, 5, 5]
+    assert to_list(array.num(axis=-2)) == [5, 5, 5]
     assert array.num(axis=-3) == 3
 
     with pytest.raises(ValueError) as err:
@@ -386,8 +391,8 @@ def test_recordarray_negative_axis_wrap():
 
     array = v1_to_v2(array.layout)
 
-    assert ak.to_list(array.num(axis=0)) == {"x": 3, "y": 3}
-    assert ak.to_list(array.num(axis=1)) == [
+    assert to_list(array.num(axis=0)) == {"x": 3, "y": 3}
+    assert to_list(array.num(axis=1)) == [
         {"x": 1, "y": 2},
         {"x": 2, "y": 3},
         {"x": 3, "y": 4},
@@ -396,7 +401,7 @@ def test_recordarray_negative_axis_wrap():
         assert array.num(axis=2)
     assert str(err.value).startswith("axis=2 exceeds the depth of this array (1)")
 
-    assert ak.to_list(array.num(axis=-1)) == [
+    assert to_list(array.num(axis=-1)) == [
         {"x": 1, "y": [0, 1]},
         {"x": 2, "y": [0, 1, 2]},
         {"x": 3, "y": [0, 1, 2, 3]},

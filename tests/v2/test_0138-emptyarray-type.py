@@ -6,6 +6,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+to_list = ak._v2.operations.convert.to_list
+
 
 def test():
     empty1 = ak._v2.highlevel.Array(ak._v2.contents.EmptyArray(), check_valid=True)
@@ -20,18 +22,18 @@ def test():
 
     assert ak._v2.operations.convert.to_numpy(empty1).dtype.type is np.float64
 
-    assert ak.to_list(array[empty1]) == []
+    assert to_list(array[empty1]) == []
     assert (
-        ak.to_list(
+        to_list(
             array[
                 empty1,
             ]
         )
         == []
     )
-    assert ak.to_list(array[empty2]) == [[], [], []]
+    assert to_list(array[empty2]) == [[], [], []]
     assert (
-        ak.to_list(
+        to_list(
             array[
                 empty2,
             ]
