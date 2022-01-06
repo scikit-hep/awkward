@@ -124,7 +124,9 @@ class RegularArray(Content):
 
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
-        return self._broadcast_tooffsets64(offsets)
+        tmp = self._broadcast_tooffsets64(offsets)
+        tmp._represents_regular = True
+        return tmp
 
     def toRegularArray(self):
         return self
@@ -900,7 +902,7 @@ class RegularArray(Content):
         )
 
         if not self._content.dimension_optiontype:
-            branch, depth = self._content.branch_depth
+            branch, depth = self.branch_depth
             convert_shallow = negaxis == depth
             convert_deep = negaxis + 2 == depth
 

@@ -1054,6 +1054,7 @@ namespace awkward {
                             int64_t outlength,
                             bool mask,
                             bool keepdims) const {
+
     ContentPtr out = toListOffsetArray64(true).get()->reduce_next(reducer,
                                                                   negaxis,
                                                                   starts,
@@ -1068,6 +1069,7 @@ namespace awkward {
 
       bool convert_shallow = (negaxis == branchdepth.second);
       bool convert_deep = (negaxis + 2 == branchdepth.second);
+
       if (keepdims) {
         convert_shallow = false;
         convert_deep = true;

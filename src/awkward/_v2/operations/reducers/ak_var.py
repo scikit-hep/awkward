@@ -78,7 +78,7 @@ def var(
 
     with np.errstate(invalid="ignore"):
         xmean = ak._v2.operations.reducers.mean(
-            x, weight=weight, axis=axis, keepdims=True, mask_identity=mask_identity
+            x, weight=weight, axis=axis, keepdims=False, mask_identity=mask_identity
         )
         if weight is None:
             sumw = ak._v2.operations.reducers.count(
@@ -90,7 +90,6 @@ def var(
                 keepdims=keepdims,
                 mask_identity=mask_identity,
             )
-
         else:
             sumw = ak._v2.operations.reducers.sum(
                 x * 0 + weight,

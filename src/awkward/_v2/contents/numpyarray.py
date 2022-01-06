@@ -978,7 +978,7 @@ class NumpyArray(Content):
         mask,
         keepdims,
     ):
-        if len(self._data.shape) != 1:
+        if len(self._data.shape) != 1 or not self.is_contiguous:
             return self.toRegularArray()._reduce_next(
                 reducer,
                 negaxis,

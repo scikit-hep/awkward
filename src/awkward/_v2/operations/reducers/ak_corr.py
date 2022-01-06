@@ -72,10 +72,10 @@ def corr(
 
     with np.errstate(invalid="ignore"):
         xmean = ak._v2.operations.reducers.mean(
-            x, weight=weight, axis=axis, keepdims=True, mask_identity=mask_identity
+            x, weight=weight, axis=axis, keepdims=False, mask_identity=mask_identity
         )
         ymean = ak._v2.operations.reducers.mean(
-            y, weight=weight, axis=axis, keepdims=True, mask_identity=mask_identity
+            y, weight=weight, axis=axis, keepdims=False, mask_identity=mask_identity
         )
         xdiff = x - xmean
         ydiff = y - ymean

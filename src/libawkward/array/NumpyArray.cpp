@@ -3291,6 +3291,7 @@ namespace awkward {
           std::string("cannot apply reducers to NumpyArray with format \"")
           + format_ + std::string("\"") + FILENAME(__LINE__));
       }
+
       if (reducer.returns_positions()) {
         struct Error err3;
         if (shifts.length() == 0) {

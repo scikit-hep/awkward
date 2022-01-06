@@ -1645,6 +1645,7 @@ class ListOffsetArray(Content):
 
             trimmed = self._content[self.offsets[0] : self.offsets[-1]]
             nextstarts = self.offsets[:-1]
+
             outcontent = trimmed._reduce_next(
                 reducer,
                 negaxis,
@@ -1655,6 +1656,7 @@ class ListOffsetArray(Content):
                 mask,
                 keepdims,
             )
+
             outoffsets = ak._v2.index.Index64.empty(outlength + 1, self._nplike)
             self._handle_error(
                 self._nplike[
@@ -1669,9 +1671,12 @@ class ListOffsetArray(Content):
                 )
             )
 
+            represents_regular = getattr(self, "_represents_regular", False)
+
             if (
-                keepdims and self._content.dimension_optiontype
-            ):  # FIXME not self._represents_regular
+                keepdims
+                and (not represents_regular or self._content.dimension_optiontype)
+            ):
                 if isinstance(outcontent, ak._v2.contents.RegularArray):
                     outcontent = outcontent.toListOffsetArray64(False)
 
