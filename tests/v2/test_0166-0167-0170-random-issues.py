@@ -12,8 +12,19 @@ to_list = ak._v2.operations.convert.to_list
 
 
 def test_0166_IndexedOptionArray():
-    array = ak._v2.highlevel.Array([[2, 3, 5], None, [], [7, 11], None, [13], None, [17, 19]])
-    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [30, None, 1, 77, None, 13, None, 323]
+    array = ak._v2.highlevel.Array(
+        [[2, 3, 5], None, [], [7, 11], None, [13], None, [17, 19]]
+    )
+    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [
+        30,
+        None,
+        1,
+        77,
+        None,
+        13,
+        None,
+        323,
+    ]
 
     array = ak._v2.highlevel.Array(
         [[[2, 3], [5]], None, [], [[7], [11]], None, [[13]], None, [[17, 19]]]
@@ -29,7 +40,9 @@ def test_0166_IndexedOptionArray():
         [323],
     ]
 
-    array = ak._v2.highlevel.Array([[[2, 3], None, [5]], [], [[7], [11]], [[13]], [None, [17], [19]]])
+    array = ak._v2.highlevel.Array(
+        [[[2, 3], None, [5]], [], [[7], [11]], [[13]], [None, [17], [19]]]
+    )
     assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [
         [6, None, 5],
         [],
@@ -39,7 +52,13 @@ def test_0166_IndexedOptionArray():
     ]
 
     array = ak._v2.highlevel.Array([[6, None, 5], [], [7, 11], [13], [None, 17, 19]])
-    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [30, 1, 77, 13, 323]
+    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [
+        30,
+        1,
+        77,
+        13,
+        323,
+    ]
 
 
 def test_0166_ByteMaskedArray():
@@ -47,7 +66,9 @@ def test_0166_ByteMaskedArray():
         [[2, 3, 5], [999], [], [7, 11], [], [13], [123, 999], [17, 19]], highlevel=False
     )
     mask = ak._v2.index.Index8(np.array([0, 1, 0, 0, 1, 0, 1, 0], dtype=np.int8))
-    array = ak._v2.highlevel.Array(ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False))
+    array = ak._v2.highlevel.Array(
+        ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
+    )
     assert to_list(array) == [
         [2, 3, 5],
         None,
@@ -58,7 +79,16 @@ def test_0166_ByteMaskedArray():
         None,
         [17, 19],
     ]
-    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [30, None, 1, 77, None, 13, None, 323]
+    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [
+        30,
+        None,
+        1,
+        77,
+        None,
+        13,
+        None,
+        323,
+    ]
 
     content = ak._v2.operations.convert.from_iter(
         [
@@ -74,7 +104,9 @@ def test_0166_ByteMaskedArray():
         highlevel=False,
     )
     mask = ak._v2.index.Index8(np.array([0, 1, 0, 0, 1, 0, 1, 0], dtype=np.int8))
-    array = ak._v2.highlevel.Array(ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False))
+    array = ak._v2.highlevel.Array(
+        ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
+    )
     assert to_list(array) == [
         [[2, 3], [5]],
         None,
@@ -103,7 +135,9 @@ def test_0166_ByteMaskedArray():
     bytemasked = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
     array = ak._v2.highlevel.Array(ak._v2.contents.ListOffsetArray(offsets, bytemasked))
-    array = ak._v2.highlevel.Array([[[2, 3], None, [5]], [], [[7], [11]], [[13]], [None, [17], [19]]])
+    array = ak._v2.highlevel.Array(
+        [[[2, 3], None, [5]], [], [[7], [11]], [[13]], [None, [17], [19]]]
+    )
     assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [
         [6, None, 5],
         [],
@@ -112,18 +146,28 @@ def test_0166_ByteMaskedArray():
         [None, 17, 19],
     ]
 
-    content = ak._v2.operations.convert.from_iter([6, None, 5, 7, 11, 13, None, 17, 19], highlevel=False)
+    content = ak._v2.operations.convert.from_iter(
+        [6, None, 5, 7, 11, 13, None, 17, 19], highlevel=False
+    )
     mask = ak._v2.index.Index8(np.array([0, 1, 0, 0, 0, 0, 1, 0, 0], dtype=np.int8))
     bytemasked = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
     array = ak._v2.highlevel.Array(ak._v2.contents.ListOffsetArray(offsets, bytemasked))
     assert to_list(array) == [[6, None, 5], [], [7, 11], [13], [None, 17, 19]]
-    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [30, 1, 77, 13, 323]
+    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [
+        30,
+        1,
+        77,
+        13,
+        323,
+    ]
 
 
 @pytest.mark.skip(reason="FIXME: needs string behavioral overloads")
 def test_0167_strings():
-    array = ak._v2.highlevel.Array(["one", "two", "three", "two", "two", "one", "three"])
+    array = ak._v2.highlevel.Array(
+        ["one", "two", "three", "two", "two", "one", "three"]
+    )
     assert to_list(array == "two") == [False, True, False, True, True, False, False]
     assert to_list("two" == array) == [False, True, False, True, True, False, False]
     assert to_list(array == ["two"]) == [
@@ -163,7 +207,9 @@ def test_0167_strings():
         False,
     ]
 
-    array = ak._v2.highlevel.Array([["one", "two", "three"], [], ["two"], ["two", "one"], ["three"]])
+    array = ak._v2.highlevel.Array(
+        [["one", "two", "three"], [], ["two"], ["two", "one"], ["three"]]
+    )
     assert to_list(array == "two") == [
         [False, True, False],
         [],
@@ -207,7 +253,9 @@ def test_0167_strings():
         [False],
     ]
 
-    array = ak._v2.highlevel.Array([["one", "two", "three"], [], ["two"], ["two", "one"], ["three"]])
+    array = ak._v2.highlevel.Array(
+        [["one", "two", "three"], [], ["two"], ["two", "one"], ["three"]]
+    )
     assert to_list(array == ["three", "two", "one", "one", "three"]) == [
         [False, False, True],
         [],
@@ -222,14 +270,18 @@ def test_0167_strings():
         [False, True],
         [True],
     ]
-    assert to_list(array == ak._v2.highlevel.Array(["three", "two", "one", "one", "three"])) == [
+    assert to_list(
+        array == ak._v2.highlevel.Array(["three", "two", "one", "one", "three"])
+    ) == [
         [False, False, True],
         [],
         [False],
         [False, True],
         [True],
     ]
-    assert to_list(ak._v2.highlevel.Array(["three", "two", "one", "one", "three"]) == array) == [
+    assert to_list(
+        ak._v2.highlevel.Array(["three", "two", "one", "one", "three"]) == array
+    ) == [
         [False, False, True],
         [],
         [False],
@@ -240,7 +292,9 @@ def test_0167_strings():
 
 @pytest.mark.skip(reason="FIXME: needs string behavioral overloads")
 def test_0167_bytestrings():
-    array = ak._v2.highlevel.Array([b"one", b"two", b"three", b"two", b"two", b"one", b"three"])
+    array = ak._v2.highlevel.Array(
+        [b"one", b"two", b"three", b"two", b"two", b"one", b"three"]
+    )
     assert to_list(array == b"two") == [False, True, False, True, True, False, False]
     assert to_list(b"two" == array) == [False, True, False, True, True, False, False]
     assert to_list(array == [b"two"]) == [

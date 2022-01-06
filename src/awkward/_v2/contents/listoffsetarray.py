@@ -1673,9 +1673,8 @@ class ListOffsetArray(Content):
 
             represents_regular = getattr(self, "_represents_regular", False)
 
-            if (
-                keepdims
-                and (not represents_regular or self._content.dimension_optiontype)
+            if keepdims and (
+                not represents_regular or self._content.dimension_optiontype
             ):
                 if isinstance(outcontent, ak._v2.contents.RegularArray):
                     outcontent = outcontent.toListOffsetArray64(False)

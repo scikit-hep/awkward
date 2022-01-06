@@ -29,8 +29,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -38,8 +44,14 @@ def test_jagged_axis1():
             [[], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [5, 4, 3]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [5, 4, 3],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -47,8 +59,14 @@ def test_jagged_axis1():
             [[], [], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [6, 5, 4]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [6, 5, 4],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -56,8 +74,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [5, 4, 3]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [5, 4, 3],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -65,8 +89,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [5, 4, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [5, 4, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -74,8 +104,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [5, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [5, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -83,8 +119,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0], []],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -92,8 +134,14 @@ def test_jagged_axis1():
             [[1.1, 999, 999], [1.1, 2.2, 999], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -101,8 +149,14 @@ def test_jagged_axis1():
             [[1.1, 999, 999, 999], [1.1, 2.2, 999], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3, 999]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[4, 3, 2], [4, 3, 2, 0]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3, 999],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [4, 3, 2],
+        [4, 3, 2, 0],
+    ]
 
     # first is [[], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]]
 
@@ -112,8 +166,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -121,8 +181,14 @@ def test_jagged_axis1():
             [[], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [5, 4, 3]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [5, 4, 3],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -130,8 +196,14 @@ def test_jagged_axis1():
             [[], [], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [6, 5, 4]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [6, 5, 4],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -139,8 +211,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [5, 4, 3]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [5, 4, 3],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -148,8 +226,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [5, 4, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [5, 4, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -157,8 +241,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [5, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [5, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -166,8 +256,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0], []],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -175,8 +271,14 @@ def test_jagged_axis1():
             [[1.1, 999, 999], [1.1, 2.2, 999], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -184,8 +286,14 @@ def test_jagged_axis1():
             [[1.1, 999, 999, 999], [1.1, 2.2, 999], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3, 999]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 3], [4, 3, 2, 0]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3, 999],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 3],
+        [4, 3, 2, 0],
+    ]
 
     # first is [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [], [999, 2.0], [1.0]]
 
@@ -195,8 +303,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -204,8 +318,14 @@ def test_jagged_axis1():
             [[], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [5, 4, 3]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [5, 4, 3],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -213,8 +333,14 @@ def test_jagged_axis1():
             [[], [], [1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [6, 5, 4]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [6, 5, 4],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -222,8 +348,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [5, 4, 3]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [5, 4, 3],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -231,8 +363,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [5, 4, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [5, 4, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -240,8 +378,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [5, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [5, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -249,8 +393,14 @@ def test_jagged_axis1():
             [[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [999, 2.0], [1.0], []],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -258,8 +408,14 @@ def test_jagged_axis1():
             [[1.1, 999, 999], [1.1, 2.2, 999], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [4, 3, 2]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [4, 3, 2],
+    ]
 
     array = ak._v2.highlevel.Array(
         [
@@ -267,8 +423,14 @@ def test_jagged_axis1():
             [[1.1, 999, 999, 999], [1.1, 2.2, 999], [1.1, 2.2, 3.3], [999, 2.0], [1.0]],
         ]
     )
-    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3, 999]]
-    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [[5, 4, 2], [4, 3, 2, 0]]
+    assert ak._v2.operations.reducers.min(array, axis=1).tolist() == [
+        [1, 2, 3.3],
+        [1, 2, 3.3, 999],
+    ]
+    assert ak._v2.operations.reducers.argmin(array, axis=1).tolist() == [
+        [5, 4, 2],
+        [4, 3, 2, 0],
+    ]
 
 
 def test_IndexedOptionArray():
@@ -302,7 +464,9 @@ def test_IndexedOptionArray():
 
 def test_ByteMaskedArray():
     content = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 999, 999, 4.4, 5.5]).layout
-    mask = ak._v2.index.Index8(np.array([False, False, False, True, True, False, False]))
+    mask = ak._v2.index.Index8(
+        np.array([False, False, False, True, True, False, False])
+    )
     bytemaskedarray = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     array = ak._v2.highlevel.Array(bytemaskedarray)
     assert array.tolist() == [1.1, 2.2, 3.3, None, None, 4.4, 5.5]

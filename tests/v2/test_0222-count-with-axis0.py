@@ -593,4 +593,6 @@ def test():
         for inner in outer:
             sample[-1].append([0] * inner)
 
-    assert ak._v2.operations.describe.is_valid(ak._v2.operations.reducers.count(sample, axis=0))
+    assert ak._v2.operations.describe.is_valid(
+        ak._v2.operations.reducers.count(sample, axis=0)
+    )
