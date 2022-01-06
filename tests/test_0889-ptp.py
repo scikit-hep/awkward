@@ -17,6 +17,8 @@ def test_regular():
     assert ak.ptp(ak_data, axis=0).tolist() == np.ptp(np_data, axis=0).tolist()
     assert ak.ptp(ak_data) == np.ptp(np_data)
 
+    raise Exception
+
 
 def test_jagged():
     data = ak.Array(
@@ -31,3 +33,5 @@ def test_jagged():
     assert ak.ptp(data, axis=1).tolist() == [4, None, 2, 0]
     assert ak.ptp(data, axis=0).tolist() == [4, 0, 4, 0, 0]
     assert ak.ptp(data) == 4
+
+    raise Exception
