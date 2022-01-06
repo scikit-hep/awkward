@@ -87,10 +87,6 @@ def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=Fa
 
         if not keepdims:
             posaxis = out.layout.axis_wrap_if_negative(axis)
-
-            print("out", out.layout)
-            print("slice", (slice(None, None),) * posaxis + (0,))
-
             out = out[(slice(None, None),) * posaxis + (0,)]
 
     return out
