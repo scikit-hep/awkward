@@ -661,8 +661,12 @@ def test_more():
     akarray = ak._v2.highlevel.Array(nparray)
 
     assert (akarray[1:] - akarray[:-1]).tolist() == [np.timedelta64(60, "m")]
-    assert ak.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(60, "m")
-    assert ak.sum(akarray[1:] - akarray[:-1], axis=0) == [np.timedelta64(60, "m")]
+    assert ak._v2.operations.reducers.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(
+        60, "m"
+    )
+    assert ak._v2.operations.reducers.sum(akarray[1:] - akarray[:-1], axis=0) == [
+        np.timedelta64(60, "m")
+    ]
 
 
 def test_ufunc_sum():

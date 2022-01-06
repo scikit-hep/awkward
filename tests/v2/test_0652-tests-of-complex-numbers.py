@@ -177,7 +177,7 @@ def test_reducers():
     assert ak._v2.operations.reducers.count_nonzero(
         ak._v2.operations.convert.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
     ).tolist() == [2, 0, 1]
-    assert ak.any(
+    assert ak._v2.operations.reducers.any(
         ak._v2.operations.convert.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
     ).tolist() == [
         True,

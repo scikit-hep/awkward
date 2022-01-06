@@ -978,6 +978,18 @@ class NumpyArray(Content):
         mask,
         keepdims,
     ):
+        if len(self._data.shape) != 1:
+            return self.toRegularArray()._reduce_next(
+                reducer,
+                negaxis,
+                starts,
+                shifts,
+                parents,
+                outlength,
+                mask,
+                keepdims,
+            )
+
         out = reducer.apply(self, parents, outlength)
 
         if reducer.needs_position:
