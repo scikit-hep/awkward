@@ -7,7 +7,14 @@ import sys
 import numpy
 
 import awkward as ak
+from awkward._v2._util import numpy_at_least
 from awkward._v2.contents.numpyarray import NumpyArray
+
+# NumPy 1.13.1 introduced NEP13, without which Awkward ufuncs won't work, which
+# would be worse than lacking a feature: it would cause unexpected output.
+# NumPy 1.17.0 introduced NEP18, which is optional (use ak.* instead of np.*).
+if not numpy_at_least("1.13.1"):
+    raise ImportError("NumPy 1.13.1 or later required")
 
 
 # def convert_to_array(layout, args, kwargs):
