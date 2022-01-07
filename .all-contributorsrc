@@ -265,10 +265,10 @@
       "profile": "http://lizards.opensuse.org/author/bmwiedemann/",
       "contributions": [
         "maintenance"
-       ]
+      ]
     },
     {
-    "login": "matthewfeickert",
+      "login": "matthewfeickert",
       "name": "Matthew Feickert",
       "avatar_url": "https://avatars.githubusercontent.com/u/5142394?v=4",
       "profile": "http://www.matthewfeickert.com/",
@@ -283,6 +283,15 @@
       "profile": "https://github.com/SantamRC",
       "contributions": [
         "test"
+      ]
+    },
+    {
+      "login": "BioGeek",
+      "name": "Jeroen Van Goey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59344?v=4",
+      "profile": "http://jeroen.vangoey.be",
+      "contributions": [
+        "doc"
       ]
     }
   ],
