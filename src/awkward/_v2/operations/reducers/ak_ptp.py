@@ -72,21 +72,25 @@ def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=Fa
 
     else:
         maxi = ak._v2.operations.reducers.max(
-            array, axis=axis, mask_identity=mask_identity, keepdims=keepdims
+            array, axis=axis, mask_identity=True, keepdims=True
         )
         mini = ak._v2.operations.reducers.min(
-            array, axis=axis, mask_identity=mask_identity, keepdims=keepdims
+            array, axis=axis, mask_identity=True, keepdims=True
         )
-        if maxi is not None and mini is not None:
-            out = maxi - mini
-        else:
+
+        if maxi is None or mini is None:
             out = None
 
-        if not mask_identity:
-            out = ak._v2.operations.structure.fill_none(out, 0, axis=-1)
+        else:
+            out = maxi - mini
 
-        if not keepdims:
-            posaxis = out.layout.axis_wrap_if_negative(axis)
-            out = out[(slice(None, None),) * posaxis + (0,)]
+            if not mask_identity:
+                out = ak._v2.highlevel.Array(
+                    ak._v2.operations.structure.fill_none(out, 0, axis=-1)
+                )
+
+            if not keepdims:
+                posaxis = out.layout.axis_wrap_if_negative(axis)
+                out = out[(slice(None, None),) * posaxis + (0,)]
 
     return out
