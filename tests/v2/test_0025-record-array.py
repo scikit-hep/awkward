@@ -8,24 +8,20 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_basic():
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
-    content2 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content2)
-    recordarray = ak.layout.RecordArray(
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content2)
+    recordarray = ak._v2.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
-        keys=["one", "two", "2", "wonky"],
+        fields=["one", "two", "2", "wonky"],
     )
-
-    recordarray = v1_to_v2(recordarray)
 
     assert to_list(recordarray.content(0)) == [1, 2, 3, 4, 5]
     assert recordarray.typetracer.content(0).form == recordarray.content(0).form
@@ -195,18 +191,15 @@ def test_basic():
 
 
 def test_scalar_record():
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
-    content2 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content2)
-    recordarray = ak.layout.RecordArray(
-        [content1, listoffsetarray], keys=["one", "two"]
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content2)
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray], fields=["one", "two"]
     )
-
-    listoffsetarray = v1_to_v2(listoffsetarray)
-    recordarray = v1_to_v2(recordarray)
 
     str(recordarray)
     str(recordarray[2])
@@ -228,14 +221,15 @@ def test_getitem():
         == '[array([1]), array([2]), array([3]), "four", ["five", "six"], 7:8:9]'
     )
 
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
-    content2 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content2)
-    recordarray = ak.layout.RecordArray([content1, listoffsetarray, content2])
-    recordarray = v1_to_v2(recordarray)
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content2)
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray, content2], None
+    )
 
     assert to_list(recordarray["2"]) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert recordarray.typetracer["2"].form == recordarray["2"].form
@@ -276,10 +270,9 @@ def test_getitem():
         == recordarray[2][["1", "0"]].array.form
     )
 
-    recordarray = ak.layout.RecordArray(
-        {"one": content1, "two": listoffsetarray, "three": content2}
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray, content2], ["one", "two", "three"]
     )
-    recordarray = v1_to_v2(recordarray)
 
     assert not recordarray.is_tuple
 
@@ -328,20 +321,18 @@ def test_getitem():
 
 
 def test_getitem_other_types():
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
-    content2 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
-    listoffsetarray1 = ak.layout.ListOffsetArray64(offsets1, content2)
-    recordarray = ak.layout.RecordArray(
-        {"one": content1, "two": listoffsetarray1, "three": content2}
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
+    listoffsetarray1 = ak._v2.contents.ListOffsetArray(offsets1, content2)
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray1, content2], ["one", "two", "three"]
     )
 
-    offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
-    listoffsetarray2 = ak.layout.ListOffsetArray64(offsets2, recordarray)
-
-    listoffsetarray2 = v1_to_v2(listoffsetarray2)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
+    listoffsetarray2 = ak._v2.contents.ListOffsetArray(offsets2, recordarray)
 
     assert to_list(listoffsetarray2["one"]) == [[1, 2, 3], [], [4, 5]]
     assert listoffsetarray2.typetracer["one"].form == listoffsetarray2["one"].form
@@ -367,10 +358,9 @@ def test_getitem_other_types():
         == listoffsetarray2[["two", "three"]].form
     )
 
-    starts2 = ak.layout.Index64(np.array([0, 3, 3], dtype=np.int64))
-    stops2 = ak.layout.Index64(np.array([3, 3, 5], dtype=np.int64))
-    listarray2 = ak.layout.ListArray64(starts2, stops2, recordarray)
-    listarray2 = v1_to_v2(listarray2)
+    starts2 = ak._v2.index.Index64(np.array([0, 3, 3], dtype=np.int64))
+    stops2 = ak._v2.index.Index64(np.array([3, 3, 5], dtype=np.int64))
+    listarray2 = ak._v2.contents.ListArray(starts2, stops2, recordarray)
 
     assert to_list(listarray2["one"]) == [[1, 2, 3], [], [4, 5]]
     assert listarray2.typetracer["one"].form == listarray2["one"].form
@@ -396,8 +386,7 @@ def test_getitem_other_types():
         == listarray2[["two", "three"]].form
     )
 
-    regulararray2 = ak.layout.RegularArray(recordarray, 1, zeros_length=0)
-    regulararray2 = v1_to_v2(regulararray2)
+    regulararray2 = ak._v2.contents.RegularArray(recordarray, 1, zeros_length=0)
 
     assert to_list(regulararray2["one"]) == [[1], [2], [3], [4], [5]]
     assert regulararray2.typetracer["one"].form == regulararray2["one"].form
@@ -425,28 +414,22 @@ def test_getitem_other_types():
 
 
 def test_getitem_next():
-    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
-    content2 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
     )
-    content3 = ak.layout.NumpyArray(
+    content3 = ak._v2.contents.NumpyArray(
         np.array([1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.float64)
     )
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
-    listoffsetarray1 = ak.layout.ListOffsetArray64(offsets1, content2)
-    listoffsetarray3 = ak.layout.ListOffsetArray64(offsets1, content3)
-    recordarray = ak.layout.RecordArray(
-        {
-            "one": content1,
-            "two": listoffsetarray1,
-            "three": content2,
-            "four": listoffsetarray3,
-        }
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
+    listoffsetarray1 = ak._v2.contents.ListOffsetArray(offsets1, content2)
+    listoffsetarray3 = ak._v2.contents.ListOffsetArray(offsets1, content3)
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray1, content2, listoffsetarray3],
+        ["one", "two", "three", "four"],
     )
-    offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
-    listoffsetarray2 = ak.layout.ListOffsetArray64(offsets2, recordarray)
-
-    listoffsetarray2 = v1_to_v2(listoffsetarray2)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
+    listoffsetarray2 = ak._v2.contents.ListOffsetArray(offsets2, recordarray)
 
     assert to_list(listoffsetarray2[2, "one"]) == [4, 5]
     assert listoffsetarray2.typetracer[2, "one"].form == listoffsetarray2[2, "one"].form

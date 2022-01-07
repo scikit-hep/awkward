@@ -6,17 +6,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_fillna_empty_array():
-    empty = ak.layout.EmptyArray()
-    value = ak.layout.NumpyArray(np.array([10]))
-
-    empty = v1_to_v2(empty)
-    value = v1_to_v2(value)
+    empty = ak._v2.contents.EmptyArray()
+    value = ak._v2.contents.NumpyArray(np.array([10]))
 
     assert to_list(empty) == []
     array = empty.rpad(5, 0)
@@ -25,11 +20,8 @@ def test_fillna_empty_array():
 
 
 def test_fillna_numpy_array():
-    content = ak.layout.NumpyArray(np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
-    value = ak.layout.NumpyArray(np.array([0]))
-
-    content = v1_to_v2(content)
-    value = v1_to_v2(value)
+    content = ak._v2.contents.NumpyArray(np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+    value = ak._v2.contents.NumpyArray(np.array([0]))
 
     array = content.rpad(3, 0)
     assert to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None]
@@ -48,7 +40,7 @@ def test_fillna_numpy_array():
 
 
 def test_fillna_regular_array():
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array(
             [
                 2.1,
@@ -73,15 +65,12 @@ def test_fillna_regular_array():
             ]
         )
     )
-    index = ak.layout.Index64(
+    index = ak._v2.index.Index64(
         np.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=np.int64)
     )
-    indexedarray = ak.layout.IndexedOptionArray64(index, content)
-    regarray = ak.layout.RegularArray(indexedarray, 3, zeros_length=0)
-    value = ak.layout.NumpyArray(np.array([666]))
-
-    regarray = v1_to_v2(regarray)
-    value = v1_to_v2(value)
+    indexedarray = ak._v2.contents.IndexedOptionArray(index, content)
+    regarray = ak._v2.contents.RegularArray(indexedarray, 3, zeros_length=0)
+    value = ak._v2.contents.NumpyArray(np.array([666]))
 
     assert to_list(regarray) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
 
@@ -93,16 +82,13 @@ def test_fillna_regular_array():
 
 
 def test_fillna_listarray_array():
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    starts = ak.layout.Index64(np.array([0, 3, 4, 5, 8]))
-    stops = ak.layout.Index64(np.array([3, 3, 6, 8, 9]))
-    listarray = ak.layout.ListArray64(starts, stops, content)
-    value = ak.layout.NumpyArray(np.array([55]))
-
-    listarray = v1_to_v2(listarray)
-    value = v1_to_v2(value)
+    starts = ak._v2.index.Index64(np.array([0, 3, 4, 5, 8]))
+    stops = ak._v2.index.Index64(np.array([3, 3, 6, 8, 9]))
+    listarray = ak._v2.contents.ListArray(starts, stops, content)
+    value = ak._v2.contents.NumpyArray(np.array([55]))
 
     assert to_list(listarray) == [
         [0.0, 1.1, 2.2],
@@ -122,15 +108,14 @@ def test_fillna_listarray_array():
 
 
 def test_fillna_unionarray():
-    content1 = ak.from_iter([[], [1.1], [2.2, 2.2]], highlevel=False)
-    content2 = ak.from_iter([[2, 2], [1], []], highlevel=False)
-    tags = ak.layout.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
-    index = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 2], dtype=np.int64))
-    array = ak.layout.UnionArray8_64(tags, index, [content1, content2])
-    value = ak.layout.NumpyArray(np.array([777]))
-
-    array = v1_to_v2(array)
-    value = v1_to_v2(value)
+    content1 = ak._v2.operations.convert.from_iter(
+        [[], [1.1], [2.2, 2.2]], highlevel=False
+    )
+    content2 = ak._v2.operations.convert.from_iter([[2, 2], [1], []], highlevel=False)
+    tags = ak._v2.index.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
+    index = ak._v2.index.Index64(np.array([0, 0, 1, 1, 2, 2], dtype=np.int64))
+    array = ak._v2.contents.UnionArray(tags, index, [content1, content2])
+    value = ak._v2.contents.NumpyArray(np.array([777]))
 
     assert to_list(array) == [[], [2, 2], [1.1], [1], [2.2, 2.2], []]
 
@@ -155,9 +140,7 @@ def test_fillna_unionarray():
 
 
 def test_highlevel():
-    array = ak.Array([[1.1, 2.2, None, 3.3], [], [4.4, None, 5.5]])
-
-    array = v1_to_v2(array.layout)
+    array = ak._v2.highlevel.Array([[1.1, 2.2, None, 3.3], [], [4.4, None, 5.5]]).layout
     assert to_list(ak._v2.operations.structure.fill_none(array, 999, axis=1)) == [
         [1.1, 2.2, 999, 3.3],
         [],
@@ -181,9 +164,7 @@ def test_highlevel():
         [4.4, {"x": 999}, 5.5],
     ]
 
-    array = ak.Array([[1.1, 2.2, 3.3], None, [], None, [4.4, 5.5]])
-
-    array = v1_to_v2(array.layout)
+    array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], None, [], None, [4.4, 5.5]]).layout
     assert to_list(ak._v2.operations.structure.fill_none(array, 999, axis=0)) == [
         [1.1, 2.2, 3.3],
         999,

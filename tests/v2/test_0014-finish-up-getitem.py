@@ -8,54 +8,48 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
-content = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
+content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
 
 offsetsA = np.arange(0, 2 * 3 * 5 + 5, 5)
 offsetsB = np.arange(0, 2 * 3 + 3, 3)
 startsA, stopsA = offsetsA[:-1], offsetsA[1:]
 startsB, stopsB = offsetsB[:-1], offsetsB[1:]
 
-listoffsetarrayA64 = ak.layout.ListOffsetArray64(ak.layout.Index64(offsetsA), content)
-
-listarrayA64 = ak.layout.ListArray64(
-    ak.layout.Index64(startsA), ak.layout.Index64(stopsA), content
+listoffsetarrayA64 = ak._v2.contents.ListOffsetArray(
+    ak._v2.index.Index64(offsetsA), content
 )
-content = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7, dtype=np.int32).reshape(-1, 7))
-listoffsetarrayA32 = ak.layout.ListOffsetArray32(ak.layout.Index32(offsetsA), content)
-listarrayA32 = ak.layout.ListArray32(
-    ak.layout.Index32(startsA), ak.layout.Index32(stopsA), content
+
+listarrayA64 = ak._v2.contents.ListArray(
+    ak._v2.index.Index64(startsA), ak._v2.index.Index64(stopsA), content
+)
+content = ak._v2.contents.NumpyArray(
+    np.arange(2 * 3 * 5 * 7, dtype=np.int32).reshape(-1, 7)
+)
+listoffsetarrayA32 = ak._v2.contents.ListOffsetArray(
+    ak._v2.index.Index32(offsetsA), content
+)
+listarrayA32 = ak._v2.contents.ListArray(
+    ak._v2.index.Index32(startsA), ak._v2.index.Index32(stopsA), content
 )
 
 modelA = np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7)
 
-listoffsetarrayB64 = ak.layout.ListOffsetArray64(
-    ak.layout.Index64(offsetsB), listoffsetarrayA64
+listoffsetarrayB64 = ak._v2.contents.ListOffsetArray(
+    ak._v2.index.Index64(offsetsB), listoffsetarrayA64
 )
-listoffsetarrayB32 = ak.layout.ListOffsetArray32(
-    ak.layout.Index32(offsetsB), listoffsetarrayA32
+listoffsetarrayB32 = ak._v2.contents.ListOffsetArray(
+    ak._v2.index.Index32(offsetsB), listoffsetarrayA32
 )
-listarrayB64 = ak.layout.ListArray64(
-    ak.layout.Index64(startsB), ak.layout.Index64(stopsB), listarrayA64
+listarrayB64 = ak._v2.contents.ListArray(
+    ak._v2.index.Index64(startsB), ak._v2.index.Index64(stopsB), listarrayA64
 )
-listarrayB32 = ak.layout.ListArray32(
-    ak.layout.Index32(startsB), ak.layout.Index32(stopsB), listarrayA32
+listarrayB32 = ak._v2.contents.ListArray(
+    ak._v2.index.Index32(startsB), ak._v2.index.Index32(stopsB), listarrayA32
 )
 
 modelB = np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
-
-listoffsetarrayA64 = v1_to_v2(listoffsetarrayA64)
-listoffsetarrayA32 = v1_to_v2(listoffsetarrayA32)
-listarrayA64 = v1_to_v2(listarrayA64)
-listarrayA32 = v1_to_v2(listarrayA32)
-
-listoffsetarrayB64 = v1_to_v2(listoffsetarrayB64)
-listoffsetarrayB32 = v1_to_v2(listoffsetarrayB32)
-listarrayB64 = v1_to_v2(listarrayB64)
-listarrayB32 = v1_to_v2(listarrayB32)
 
 
 def test_basic():

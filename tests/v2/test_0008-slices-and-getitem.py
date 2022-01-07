@@ -6,15 +6,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_numpyarray_getitem_bystrides():
     a = np.arange(10)
-    b = ak.layout.NumpyArray(a)
-    b = v1_to_v2(b)
+    b = ak._v2.contents.NumpyArray(a)
 
     assert b[3] == a[3]
     assert b[-3] == a[-3]
@@ -33,8 +30,7 @@ def test_numpyarray_getitem_bystrides():
     assert to_list(b[slice(-2, None, -2)]) == to_list(a[slice(-2, None, -2)])
 
     a = np.arange(7 * 5).reshape(7, 5)
-    b = ak.layout.NumpyArray(a)
-    b = v1_to_v2(b)
+    b = ak._v2.contents.NumpyArray(a)
 
     assert to_list(b[()]) == to_list(a[()])
     assert to_list(b[3]) == to_list(a[3])
@@ -62,9 +58,8 @@ def test_numpyarray_getitem_bystrides():
 
 def test_numpyarray_getitem_next():
     a = np.arange(10)
-    b = ak.layout.NumpyArray(a)
+    b = ak._v2.contents.NumpyArray(a)
     c = np.array([7, 3, 3, 5])
-    b = v1_to_v2(b)
 
     assert to_list(b[c]) == to_list(a[c])
     assert b.typetracer[c].form == b[c].form
@@ -79,9 +74,8 @@ def test_numpyarray_getitem_next():
     assert b.typetracer[c].form == b[c].form
 
     a = np.arange(10 * 3).reshape(10, 3)
-    b = ak.layout.NumpyArray(a)
+    b = ak._v2.contents.NumpyArray(a)
     c = np.array([7, 3, 3, 5])
-    b = v1_to_v2(b)
 
     assert to_list(b[c]) == to_list(a[c])
     assert b.typetracer[c].form == b[c].form
@@ -93,8 +87,7 @@ def test_numpyarray_getitem_next():
     assert b.typetracer[c].form == b[c].form
 
     a = np.arange(7 * 5).reshape(7, 5)
-    b = ak.layout.NumpyArray(a)
-    b = v1_to_v2(b)
+    b = ak._v2.contents.NumpyArray(a)
 
     c1 = np.array([], np.int64)
     c2 = np.array([], np.int64)
@@ -104,8 +97,7 @@ def test_numpyarray_getitem_next():
     assert b.typetracer[c1, c2].form == b[c1, c2].form
 
     a = np.arange(7 * 5).reshape(7, 5)
-    b = ak.layout.NumpyArray(a)
-    b = v1_to_v2(b)
+    b = ak._v2.contents.NumpyArray(a)
     c1 = np.array([4, 1, 1, 3])
     c2 = np.array([2, 2, 0, 1])
     assert to_list(b[c1, c2]) == to_list(a[c1, c2])
@@ -123,8 +115,7 @@ def test_numpyarray_getitem_next():
     assert b.typetracer[c1, c2].form == b[c1, c2].form
 
     a = np.arange(7 * 5).reshape(7, 5)
-    b = ak.layout.NumpyArray(a)
-    b = v1_to_v2(b)
+    b = ak._v2.contents.NumpyArray(a)
     c = np.array([2, 0, 0, 1])
     assert to_list(b[1:4, c]) == to_list(a[1:4, c])
     assert to_list(b[c, 1:4]) == to_list(a[c, 1:4])
@@ -142,8 +133,7 @@ def test_numpyarray_getitem_next():
 
 def test_numpyarray_getitem_next_2():
     a = np.arange(7 * 5).reshape(7, 5)
-    b = ak.layout.NumpyArray(a)
-    b = v1_to_v2(b)
+    b = ak._v2.contents.NumpyArray(a)
 
     c1 = np.array([[4, 1], [1, 3], [0, 4]])
     c2 = np.array([[2, 2], [0, 1], [1, 3]])
