@@ -1777,7 +1777,6 @@ def test_highlevel():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: implement non-reducer reducers")
 def test_nonreducers():
     x = ak._v2.highlevel.Array([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]], check_valid=True)
     y = ak._v2.highlevel.Array(
@@ -1803,9 +1802,9 @@ def test_nonreducers():
     assert ak._v2.operations.reducers.moment(y, 1) == np.mean(
         ak._v2.operations.convert.to_numpy(y)
     )
-    assert ak._v2.operations.reducers.moment(y - ak.mean(y), 2) == np.var(
-        ak._v2.operations.convert.to_numpy(y)
-    )
+    assert ak._v2.operations.reducers.moment(
+        y - ak._v2.operations.reducers.mean(y), 2
+    ) == np.var(ak._v2.operations.convert.to_numpy(y))
     assert ak._v2.operations.reducers.covar(y, y) == np.var(
         ak._v2.operations.convert.to_numpy(y)
     )
@@ -1842,7 +1841,9 @@ def test_nonreducers():
         to_list(np.mean(ak._v2.operations.convert.to_numpy(y), axis=-1))
     )
     assert to_list(
-        ak._v2.operations.reducers.moment(y - ak.mean(y, axis=-1), 2, axis=-1)
+        ak._v2.operations.reducers.moment(
+            y - ak._v2.operations.reducers.mean(y, axis=-1), 2, axis=-1
+        )
     ) == pytest.approx(to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1)))
     assert to_list(ak._v2.operations.reducers.covar(y, y, axis=-1)) == pytest.approx(
         to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1))
@@ -1873,7 +1874,6 @@ def test_nonreducers():
     )
 
 
-@pytest.mark.skip(reason="FIXME: implement non-reducer reducers")
 def test_softmax():
     array = ak._v2.highlevel.Array(
         [[np.log(2), np.log(2), np.log(4)], [], [np.log(5), np.log(5)]],

@@ -456,7 +456,7 @@ def apply_step(
                             else:
                                 raise ValueError(
                                     "cannot broadcast RegularArray of size "
-                                    "{0} with RegularArray of size {1}{2}".format(
+                                    "{0} with RegularArray of size {1} {2}".format(
                                         x.size, maxsize, in_function(options)
                                     )
                                 )

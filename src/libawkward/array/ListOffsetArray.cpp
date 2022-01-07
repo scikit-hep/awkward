@@ -1366,6 +1366,7 @@ namespace awkward {
     int64_t outlength,
     bool mask,
     bool keepdims) const {
+
     if (offsets_.getitem_at_nowrap(0) != 0) {
       ContentPtr next = toListOffsetArray64(true);
       return next.get()->reduce_next(
@@ -1520,6 +1521,7 @@ namespace awkward {
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
+
       ContentPtr outcontent = trimmed.get()->reduce_next(reducer,
                                                          negaxis,
                                                          util::make_starts(offsets_),

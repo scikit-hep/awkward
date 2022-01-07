@@ -56,7 +56,6 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
     The values could be floating-point numbers or strings.
     """
-
     arraylayout = ak._v2.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
@@ -113,6 +112,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
         def action(layout, depth, depth_context, **kwargs):
             posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
+            depth_context["posaxis"] = posaxis
             if posaxis + 1 < depth:
                 return layout
             elif posaxis + 1 == depth:
@@ -121,4 +121,6 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
     depth_context = {"posaxis": axis}
     out = arraylayout.recursively_apply(action, depth_context=depth_context)
 
-    return ak._v2._util.wrap(out, array, behavior, highlevel)
+    return ak._v2._util.wrap(
+        out, ak._v2._util.behavior_of(array, behavior=behavior), highlevel
+    )
