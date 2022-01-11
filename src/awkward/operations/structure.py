@@ -1258,6 +1258,11 @@ def broadcast_arrays(*arrays, **kwargs):
             right-broadcasting, as described below.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
+        promote_scalar_to_record (bool, default is True): If True,
+            scalar values will be promoted to records using the record keys,
+            e.g. `(10.0, {'eta': 1.4})` becomes `({'eta': 10}, {'eta': 1.4})`.
+            Otherwise, preserve scalars i.e. `(10.0, {'eta': 1.4})` remains
+            unchanged.
 
     Like NumPy's
     [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
@@ -1351,10 +1356,20 @@ def broadcast_arrays(*arrays, **kwargs):
     #ak.Array.type, but it is lost when converting an array into JSON or
     Python objects.
     """
-    (highlevel, left_broadcast, right_broadcast) = ak._util.extra(
+    (
+        highlevel,
+        left_broadcast,
+        right_broadcast,
+        promote_scalar_to_record,
+    ) = ak._util.extra(
         (),
         kwargs,
-        [("highlevel", True), ("left_broadcast", True), ("right_broadcast", True)],
+        [
+            ("highlevel", True),
+            ("left_broadcast", True),
+            ("right_broadcast", True),
+            ("promote_scalar_to_record", True),
+        ],
     )
 
     inputs = []
@@ -1366,10 +1381,19 @@ def broadcast_arrays(*arrays, **kwargs):
             y = ak.layout.NumpyArray(ak.nplike.of(*arrays).array([y]))
         inputs.append(y)
 
+    # We do not want the (scalar, record, ...)  promotion behavior of `broadcast_and_apply` to occur
+    # in the case of (record, record) in this routine. Otherwise, we would raise an error when
+    # broadcasting (A, B), where A and B have different fields. Therefore, we exit early if we
+    # encounter (record, record, ..., record), or (scalar, record, ...) and the user has opted out
+    # from this promotion behavior.
+    should_not_broadcast_fields = all if promote_scalar_to_record else any
+
     def getfunction(inputs):
         if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
             return lambda: tuple(inputs)
-        elif all(isinstance(x, ak.layout.RecordArray) for x in inputs):
+        elif should_not_broadcast_fields(
+            isinstance(x, ak.layout.RecordArray) for x in inputs
+        ):
             return lambda: tuple(inputs)
         else:
             return None
