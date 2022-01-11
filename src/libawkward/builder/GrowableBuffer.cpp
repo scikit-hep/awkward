@@ -3,7 +3,7 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 #include "awkward/builder/GrowableBuffer.h"
-#include "awkward/kernel-dispatch.h"
+#include "awkward/kernel-utils.h"
 
 #include <complex>
 #include <cmath>
@@ -13,61 +13,60 @@ namespace awkward {
   template <typename T>
   GrowableBuffer<T>
   GrowableBuffer<T>::empty(const ArrayBuilderOptions& options) {
-    return GrowableBuffer<T>::empty_reserved(options, 0);
+    return GrowableBuffer<T>::empty(options, 0);
   }
 
   template <typename T>
   GrowableBuffer<T>
-  GrowableBuffer<T>::empty_reserved(const ArrayBuilderOptions& options,
-                           int64_t minreserve) {
+  GrowableBuffer<T>::empty(const ArrayBuilderOptions& options,
+                           size_t minreserve) {
     size_t actual = (size_t)options.initial();
     if (actual < (size_t)minreserve) {
       actual = (size_t)minreserve;
     }
-    UniquePtr ptr = kernel::unique_malloc<T>(kernel::lib::cpu, (int64_t)(actual*sizeof(T)));
     return GrowableBuffer(options,
-      std::move(ptr),
-      0, (int64_t)actual);
+      UniquePtr(reinterpret_cast<T*>(awkward_malloc((int64_t)(actual*sizeof(T))))),
+      0, actual);
   }
 
   template <typename T>
   GrowableBuffer<T>
   GrowableBuffer<T>::full(const ArrayBuilderOptions& options,
                           T value,
-                          int64_t length) {
+                          size_t length) {
     size_t actual = (size_t)options.initial();
-    if (actual < (size_t)length) {
-      actual = (size_t)length;
+    if (actual < length) {
+      actual = length;
     }
-    UniquePtr ptr = kernel::unique_malloc<T>(kernel::lib::cpu, (int64_t)(actual*sizeof(T)));
+    UniquePtr ptr(reinterpret_cast<T*>(awkward_malloc((int64_t)(actual*sizeof(T)))));
     T* rawptr = ptr.get();
-    for (int64_t i = 0;  i < length;  i++) {
+    for (size_t i = 0;  i < length;  i++) {
       rawptr[i] = value;
     }
-    return GrowableBuffer<T>(options, std::move(ptr), length, (int64_t)actual);
+    return GrowableBuffer<T>(options, std::move(ptr), length, actual);
   }
 
   template <typename T>
   GrowableBuffer<T>
   GrowableBuffer<T>::arange(const ArrayBuilderOptions& options,
-                            int64_t length) {
+                            size_t length) {
     size_t actual = (size_t)options.initial();
-    if (actual < (size_t)length) {
-      actual = (size_t)length;
+    if (actual < length) {
+      actual = length;
     }
-    UniquePtr ptr(kernel::unique_malloc<T>(kernel::lib::cpu, (int64_t)(actual*sizeof(T))));
+    UniquePtr ptr(reinterpret_cast<T*>(awkward_malloc((int64_t)(actual*sizeof(T)))));
     T* rawptr = ptr.get();
-    for (int64_t i = 0;  i < length;  i++) {
+    for (size_t i = 0;  i < length;  i++) {
       rawptr[i] = (T)i;
     }
-    return GrowableBuffer(options, std::move(ptr), length, (int64_t)actual);
+    return GrowableBuffer(options, std::move(ptr), length, actual);
   }
 
   template <typename T>
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options,
                                     UniquePtr ptr,
-                                    int64_t length,
-                                    int64_t reserved)
+                                    size_t length,
+                                    size_t reserved)
       : options_(options)
       , ptr_(std::move(ptr))
       , length_(length)
@@ -76,31 +75,31 @@ namespace awkward {
   template <typename T>
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options)
       : GrowableBuffer(options,
-                       kernel::unique_malloc<T>(kernel::lib::cpu, options.initial()*(int64_t)sizeof(T)),
+                       UniquePtr(reinterpret_cast<T*>(awkward_malloc(options.initial()*(int64_t)sizeof(T)))),
                        0,
-                       options.initial()) { }
+                       (size_t) options.initial()) { }
 
   template <typename T>
-  const kernel::UniquePtr<T>&
+  const typename GrowableBuffer<T>::UniquePtr&
   GrowableBuffer<T>::ptr() const {
     return ptr_;
   }
 
   template <typename T>
-  kernel::UniquePtr<T>
+  typename GrowableBuffer<T>::UniquePtr
   GrowableBuffer<T>::get_ptr() {
     return std::move(ptr_);
   }
 
   template <typename T>
-  int64_t
+  size_t
   GrowableBuffer<T>::length() const {
     return length_;
   }
 
   template <typename T>
   void
-  GrowableBuffer<T>::set_length(int64_t newlength) {
+  GrowableBuffer<T>::set_length(size_t newlength) {
     if (newlength > reserved_) {
       set_reserved(newlength);
     }
@@ -108,17 +107,17 @@ namespace awkward {
   }
 
   template <typename T>
-  int64_t
+  size_t
   GrowableBuffer<T>::reserved() const {
     return reserved_;
   }
 
   template <typename T>
   void
-  GrowableBuffer<T>::set_reserved(int64_t minreserved) {
+  GrowableBuffer<T>::set_reserved(size_t minreserved) {
     if (minreserved > reserved_) {
-      UniquePtr ptr(kernel::unique_malloc<T>(kernel::lib::cpu, minreserved*(int64_t)sizeof(T)));
-      memcpy(ptr.get(), ptr_.get(), (size_t)length_ * sizeof(T));
+      UniquePtr ptr(reinterpret_cast<T*>(awkward_malloc((int64_t)(minreserved*sizeof(T)))));
+      memcpy(ptr.get(), ptr_.get(), length_ * sizeof(T));
       ptr_ = std::move(ptr);
       reserved_ = minreserved;
     }
@@ -128,15 +127,15 @@ namespace awkward {
   void
   GrowableBuffer<T>::clear() {
     length_ = 0;
-    reserved_ = options_.initial();
-    ptr_ = std::move(kernel::unique_malloc<T>(kernel::lib::cpu, options_.initial()*(int64_t)sizeof(T)));
+    reserved_ = (size_t) options_.initial();
+    ptr_ = nullptr;
   }
 
   template <typename T>
   void
   GrowableBuffer<T>::append(T datum) {
     if (length_ == reserved_) {
-      set_reserved((int64_t)ceil(reserved_ * options_.resize()));
+      set_reserved((size_t)ceil(reserved_ * options_.resize()));
     }
     ptr_.get()[length_] = datum;
     length_++;
