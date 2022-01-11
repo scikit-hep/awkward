@@ -26,7 +26,7 @@ def test():
         for x in ak.broadcast_arrays(
             [1, 2, 3],
             [[], [{"x": 1}], [{"x": 1}, {"x": 2}]],
-            promote_scalar_to_record=False,
+            stop_at_record=True,
         )
     ] == [
         [[], [2], [3, 3]],
