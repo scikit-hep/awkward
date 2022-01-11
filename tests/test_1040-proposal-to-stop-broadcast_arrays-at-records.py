@@ -24,6 +24,18 @@ def test():
     assert [
         x.tolist()
         for x in ak.broadcast_arrays(
+            [1, 2, 3],
+            [[], [{"x": 1}], [{"x": 1}, {"x": 2}]],
+            promote_scalar_to_record=False,
+        )
+    ] == [
+        [[], [2], [3, 3]],
+        [[], [{"x": 1}], [{"x": 1}, {"x": 2}]],
+    ]
+
+    assert [
+        x.tolist()
+        for x in ak.broadcast_arrays(
             [{"y": 1}, {"y": 2}, {"y": 3}], [[], [{"x": 1}], [{"x": 1}, {"x": 2}]]
         )
     ] == [
