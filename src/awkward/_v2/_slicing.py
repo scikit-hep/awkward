@@ -111,7 +111,11 @@ def prepare_tuple_item(item):
         return item.data
 
     elif isinstance(item, ak._v2.contents.Content):
-        return prepare_tuple_bool_to_int(prepare_tuple_nested(item))
+        out = prepare_tuple_bool_to_int(prepare_tuple_nested(item))
+        if isinstance(out, ak._v2.contents.NumpyArray):
+            return out.data
+        else:
+            return out
 
     elif isinstance(item, Iterable) and all(ak._util.isstr(x) for x in item):
         return list(item)
@@ -295,13 +299,20 @@ def prepare_tuple_bool_to_int(item):
         and isinstance(item.content, ak._v2.contents.NumpyArray)
         and issubclass(item.content.dtype.type, (bool, np.bool_))
     ):
-        localindex = item.localindex(axis=1)
-        nextcontent = localindex.content.data[item.content.data]
+        if item.nplike.known_data or item.nplike.known_shape:
+            localindex = item.localindex(axis=1)
+            nextcontent = localindex.content.data[item.content.data]
 
-        cumsum = item.nplike.empty(item.content.data.shape[0] + 1, np.int64)
-        cumsum[0] = 0
-        cumsum[1:] = item.nplike.cumsum(item.content.data)
-        nextoffsets = cumsum[item.offsets]
+            cumsum = item.nplike.empty(item.content.data.shape[0] + 1, np.int64)
+            cumsum[0] = 0
+            cumsum[1:] = item.nplike.cumsum(item.content.data)
+            nextoffsets = cumsum[item.offsets]
+
+        else:
+            nextoffsets = item.offsets
+            nextcontent = item.nplike.empty(
+                (ak._v2._typetracer.UnknownLength,), dtype=np.int64
+            )
 
         return ak._v2.contents.ListOffsetArray(
             ak._v2.index.Index64(nextoffsets),
@@ -314,40 +325,48 @@ def prepare_tuple_bool_to_int(item):
         and isinstance(item.content.content, ak._v2.contents.NumpyArray)
         and issubclass(item.content.content.dtype.type, (bool, np.bool_))
     ):
-        # missing values as any integer other than -1 are extremely rare
-        isnegative = item.content.index.data < 0
-        if item.nplike.any(item.content.index.data < -1):
-            safeindex = item.content.index.data.copy()
-            safeindex[isnegative] = -1
-        else:
-            safeindex = item.content.index.data
+        if item.nplike.known_data or item.nplike.known_shape:
+            # missing values as any integer other than -1 are extremely rare
+            isnegative = item.content.index.data < 0
+            if item.nplike.any(item.content.index.data < -1):
+                safeindex = item.content.index.data.copy()
+                safeindex[isnegative] = -1
+            else:
+                safeindex = item.content.index.data
 
-        # expanded is a new buffer (can be modified in-place)
-        if item.content.content.data.shape[0] > 0:
-            expanded = item.content.content.data[safeindex]
-        else:
-            expanded = item.content.content.data.nplike.ones(
-                safeindex.shape[0], np.bool_
+            # expanded is a new buffer (can be modified in-place)
+            if item.content.content.data.shape[0] > 0:
+                expanded = item.content.content.data[safeindex]
+            else:
+                expanded = item.content.content.data.nplike.ones(
+                    safeindex.shape[0], np.bool_
+                )
+
+            localindex = item.localindex(axis=1)
+
+            # nextcontent does not include missing values
+            expanded[isnegative] = False
+            nextcontent = localindex.content.data[expanded]
+
+            # list offsets do include missing values
+            expanded[isnegative] = True
+            cumsum = item.nplike.empty(expanded.shape[0] + 1, np.int64)
+            cumsum[0] = 0
+            cumsum[1:] = item.nplike.cumsum(expanded)
+            nextoffsets = cumsum[item.offsets]
+
+            # outindex fits into the lists; non-missing are sequential
+            outindex = item.nplike.full(nextoffsets[-1], -1, np.int64)
+            outindex[~isnegative[expanded]] = item.nplike.arange(
+                nextcontent.shape[0], dtype=np.int64
             )
 
-        localindex = item.localindex(axis=1)
-
-        # nextcontent does not include missing values
-        expanded[isnegative] = False
-        nextcontent = localindex.content.data[expanded]
-
-        # list offsets do include missing values
-        expanded[isnegative] = True
-        cumsum = item.nplike.empty(expanded.shape[0] + 1, np.int64)
-        cumsum[0] = 0
-        cumsum[1:] = item.nplike.cumsum(expanded)
-        nextoffsets = cumsum[item.offsets]
-
-        # outindex fits into the lists; non-missing are sequential
-        outindex = item.nplike.full(nextoffsets[-1], -1, np.int64)
-        outindex[~isnegative[expanded]] = item.nplike.arange(
-            nextcontent.shape[0], dtype=np.int64
-        )
+        else:
+            nextoffsets = item.offsets
+            outindex = item.content.index
+            nextcontent = item.nplike.empty(
+                (ak._v2._typetracer.UnknownLength,), dtype=np.int64
+            )
 
         return ak._v2.contents.ListOffsetArray(
             ak._v2.index.Index64(nextoffsets),
@@ -359,52 +378,54 @@ def prepare_tuple_bool_to_int(item):
 
     elif isinstance(item, ak._v2.contents.ListOffsetArray):
         return ak._v2.contents.ListOffsetArray(
-            item.offsets,
-            item.content,
-            identifier=item.identifier,
-            parameters=item.parameters,
+            item.offsets, prepare_tuple_bool_to_int(item.content)
         )
 
     elif isinstance(item, ak._v2.contents.IndexedOptionArray):
         if isinstance(item.content, ak._v2.contents.ListOffsetArray):
-            content = prepare_tuple_bool_to_int(item.content)
             return ak._v2.contents.IndexedOptionArray(
-                item.index,
-                content,
-                identifier=item.identifier,
-                parameters=item.parameters,
+                item.index, prepare_tuple_bool_to_int(item.content)
             )
 
         if isinstance(item.content, ak._v2.contents.NumpyArray) and issubclass(
             item.content.dtype.type, (bool, np.bool_)
         ):
-            # missing values as any integer other than -1 are extremely rare
-            isnegative = item.index.data < 0
-            if item.nplike.any(item.index.data < -1):
-                safeindex = item.index.data.copy()
-                safeindex[isnegative] = -1
+            if item.nplike.known_data or item.nplike.known_shape:
+                # missing values as any integer other than -1 are extremely rare
+                isnegative = item.index.data < 0
+                if item.nplike.any(item.index.data < -1):
+                    safeindex = item.index.data.copy()
+                    safeindex[isnegative] = -1
+                else:
+                    safeindex = item.index.data
+
+                # expanded is a new buffer (can be modified in-place)
+                if item.content.data.shape[0] > 0:
+                    expanded = item.content.data[safeindex]
+                else:
+                    expanded = item.content.data.nplike.ones(
+                        safeindex.shape[0], np.bool_
+                    )
+
+                # nextcontent does not include missing values
+                expanded[isnegative] = False
+                nextcontent = item.nplike.nonzero(expanded)[0]
+
+                # outindex does include missing values
+                expanded[isnegative] = True
+                lenoutindex = item.nplike.count_nonzero(expanded)
+
+                # non-missing are sequential
+                outindex = item.nplike.full(lenoutindex, -1, np.int64)
+                outindex[~isnegative[expanded]] = item.nplike.arange(
+                    nextcontent.shape[0], dtype=np.int64
+                )
+
             else:
-                safeindex = item.index.data
-
-            # expanded is a new buffer (can be modified in-place)
-            if item.content.data.shape[0] > 0:
-                expanded = item.content.data[safeindex]
-            else:
-                expanded = item.content.data.nplike.ones(safeindex.shape[0], np.bool_)
-
-            # nextcontent does not include missing values
-            expanded[isnegative] = False
-            nextcontent = item.nplike.nonzero(expanded)[0]
-
-            # outindex does include missing values
-            expanded[isnegative] = True
-            lenoutindex = item.nplike.count_nonzero(expanded)
-
-            # non-missing are sequential
-            outindex = item.nplike.full(lenoutindex, -1, np.int64)
-            outindex[~isnegative[expanded]] = item.nplike.arange(
-                nextcontent.shape[0], dtype=np.int64
-            )
+                outindex = item.index
+                nextcontent = item.nplike.empty(
+                    (ak._v2._typetracer.UnknownLength,), dtype=np.int64
+                )
 
             return ak._v2.contents.IndexedOptionArray(
                 ak._v2.index.Index(outindex),
@@ -413,15 +434,12 @@ def prepare_tuple_bool_to_int(item):
 
         else:
             return ak._v2.contents.IndexedOptionArray(
-                item.index,
-                item.content,
-                identifier=item.identifier,
-                parameters=item.parameters,
+                item.index, prepare_tuple_bool_to_int(item.content)
             )
 
     elif isinstance(item, ak._v2.contents.NumpyArray):
         assert item.data.shape == (item.length,)
-        return item.data
+        return item
 
     else:
         raise AssertionError(type(item))
