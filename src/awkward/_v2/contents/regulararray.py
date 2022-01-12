@@ -33,12 +33,15 @@ class RegularArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if not (ak._util.isint(size) and size >= 0):
-            raise TypeError(
-                "{0} 'size' must be a non-negative integer, not {1}".format(
-                    type(self).__name__, size
+        if not isinstance(size, ak._v2._typetracer.UnknownLengthType):
+            if not (ak._util.isint(size) and size >= 0):
+                raise TypeError(
+                    "{0} 'size' must be a non-negative integer, not {1}".format(
+                        type(self).__name__, size
+                    )
                 )
-            )
+            else:
+                size = int(size)
         if not isinstance(zeros_length, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(zeros_length) and zeros_length >= 0):
                 raise TypeError(
@@ -50,7 +53,7 @@ class RegularArray(Content):
             nplike = content.nplike
 
         self._content = content
-        self._size = int(size)
+        self._size = size
         if size != 0:
             self._length = content.length // size  # floor division
         else:
