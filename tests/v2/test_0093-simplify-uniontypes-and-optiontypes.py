@@ -1407,15 +1407,15 @@ def test_concatenate():
     )
 
 
-@pytest.mark.skip(reason="</NumpyArray> cannot be converted into an Awkward Array")
 def test_where():
-    condition = v1_to_v2(
-        ak.Array([True, False, True, False, True], check_valid=True).layout
+    condition = ak._v2.highlevel.Array(
+        [True, False, True, False, True],
+        check_valid=True,
     )
-    one = v1_to_v2(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True).layout)
-    two = v1_to_v2(ak.Array([False, False, False, True, True], check_valid=True).layout)
-    three = v1_to_v2(
-        ak.Array([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], check_valid=True).layout
+    one = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)
+    two = ak._v2.highlevel.Array([False, False, False, True, True], check_valid=True)
+    three = ak._v2.highlevel.Array(
+        [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], check_valid=True
     )
 
     assert to_list(ak._v2.operations.structure.where(condition, one, two)) == [

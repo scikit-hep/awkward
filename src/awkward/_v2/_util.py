@@ -491,17 +491,17 @@ def wrap(content, behavior=None, highlevel=True, like=None):
     return content
 
 
-# def extra(args, kwargs, defaults):
-#     out = []
-#     for i in range(len(defaults)):
-#         name, default = defaults[i]
-#         if i < len(args):
-#             out.append(args[i])
-#         elif name in kwargs:
-#             out.append(kwargs[name])
-#         else:
-#             out.append(default)
-#     return out
+def extra(args, kwargs, defaults):
+    out = []
+    for i in range(len(defaults)):
+        name, default = defaults[i]
+        if i < len(args):
+            out.append(args[i])
+        elif name in kwargs:
+            out.append(kwargs[name])
+        else:
+            out.append(default)
+    return out
 
 
 # def key2index(keys, key):
