@@ -99,7 +99,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
     nplike = ak.nplike.of(layout)
 
     if axis is None:
-        out = ak._v2._util.completely_flatten(layout)
+        out = (layout.completely_flatten(),)
 
         assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 

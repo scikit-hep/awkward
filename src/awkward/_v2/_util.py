@@ -625,41 +625,6 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 #         return ak._v2.contents.RecordArray(all_fields, all_names, len(unionarray))
 
 
-def completely_flatten(array):
-    if array.is_UnknownType:
-        return (ak.nplike.of(array).array([], dtype=np.bool_),)
-
-    elif array.is_IndexedType:
-        return completely_flatten(array.project())
-
-    elif array.is_UnionType:
-        out = []
-        for i in range(array.numcontents):
-            tmp = completely_flatten(array.project(i))
-            assert isinstance(tmp, tuple)
-            for x in tmp:
-                out.append(x)
-        return tuple(out)
-
-    elif array.is_OptionType:
-        return completely_flatten(array.project())
-
-    elif array.is_ListType:
-        return completely_flatten(array.flatten(axis=1))
-
-    elif array.is_RecordType:
-        out = []
-        for i in range(array.numfields):
-            out.extend(completely_flatten(array.field(i)))
-        return tuple(out)
-
-    elif isinstance(array, ak._v2.contents.NumpyArray):
-        return (ak.nplike.of(array).asarray(array).reshape(-1),)
-
-    else:
-        raise RuntimeError("cannot completely flatten: {0}".format(type(array)))
-
-
 def direct_Content_subclass(node):
     if node is None:
         return None
