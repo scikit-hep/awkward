@@ -315,6 +315,14 @@ class TypeTracerArray(object):
             assert len(self._shape) != 0
             return TypeTracerArray(self._dtype, where.shape + self._shape[1:])
 
+        elif (
+            hasattr(where, "dtype")
+            and hasattr(where, "shape")
+            and issubclass(where.dtype.type, (np.bool_, bool))
+        ):
+            assert len(self._shape) != 0
+            return TypeTracerArray(self._dtype, (UnknownLength,) + self._shape[1:])
+
         elif isinstance(where, tuple) and any(
             hasattr(x, "dtype") and hasattr(x, "shape") for x in where
         ):
