@@ -8,8 +8,6 @@ import awkward as ak  # noqa: F401
 
 import datetime
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
@@ -52,8 +50,7 @@ def test_time_delta():
 
     numpy_array = np.array(["41", "1", "20"], "timedelta64[D]")
 
-    array = ak.Array(numpy_array)
-    array = v1_to_v2(array.layout)
+    array = ak._v2.highlevel.Array(numpy_array).layout
     assert str(array.form.type) == "timedelta64[D]"
     assert to_list(array) == [
         np.timedelta64("41", "D"),
@@ -419,7 +416,7 @@ def test_prod():
 
 
 def test_min_max():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 np.datetime64("2020-03-27T10:41:11"),
@@ -440,8 +437,7 @@ def test_min_max():
                 np.datetime64("2020-01-27T10:41:11"),
             ],
         ]
-    )
-    array = v1_to_v2(array.layout)
+    ).layout
 
     assert to_list(array) == [
         [
@@ -598,11 +594,9 @@ def test_date_time_units():
     array2 = np.array(
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[25s]"
     )
-    ak_a1 = ak.Array(array1)
-    ak_a1 = v1_to_v2(ak_a1.layout)
+    ak_a1 = ak._v2.highlevel.Array(array1).layout
 
-    ak_a2 = ak.Array(array2)
-    ak_a2 = v1_to_v2(ak_a2.layout)
+    ak_a2 = ak._v2.highlevel.Array(array2).layout
 
     np_ar1 = ak._v2.operations.convert.to_numpy(ak_a1)
     np_ar2 = ak._v2.operations.convert.to_numpy(ak_a2)
@@ -692,11 +686,12 @@ def test_ufunc_mul():
 
 
 def test_NumpyArray_layout_as_objects():
-    array = ak.layout.NumpyArray(
-        ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"]
-    )
     with pytest.raises(TypeError):
-        v1_to_v2(array)
+        ak._v2.highlevel.Array(
+            ak._v2.contents.NumpyArray(
+                ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"]
+            )
+        )
 
     array0 = ak._v2.contents.NumpyArray(
         np.array(
