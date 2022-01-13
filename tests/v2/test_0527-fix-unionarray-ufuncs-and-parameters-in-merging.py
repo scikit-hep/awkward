@@ -214,7 +214,9 @@ def test_0522():
     content2 = ak._v2.highlevel.Array([0, 100, 200, 300, 400]).layout
     tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 0, 0, 1, 1, 1], np.int8))
     index = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 3, 4, 2, 3, 4], np.int64))
-    unionarray = ak.Array(ak._v2.contents.UnionArray(tags, index, [content1, content2]))
+    unionarray = ak._v2.highlevel.Array(
+        ak._v2.contents.UnionArray(tags, index, [content1, content2])
+    )
     assert unionarray.tolist() == [0.0, 1.1, 2.2, 0, 100, 3.3, 4.4, 200, 300, 400]
 
     assert (unionarray + 10).tolist() == [
@@ -292,7 +294,7 @@ def test_0522():
         490,
     ]
 
-    assert (unionarray + ak.Array(np.arange(0, 100, 10))).tolist() == [
+    assert (unionarray + ak._v2.highlevel.Array(np.arange(0, 100, 10))).tolist() == [
         0.0,
         11.1,
         22.2,
@@ -304,7 +306,7 @@ def test_0522():
         380,
         490,
     ]
-    assert (ak.Array(np.arange(0, 100, 10)) + unionarray).tolist() == [
+    assert (ak._v2.highlevel.Array(np.arange(0, 100, 10)) + unionarray).tolist() == [
         0.0,
         11.1,
         22.2,

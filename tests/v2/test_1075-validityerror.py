@@ -5,49 +5,46 @@ from __future__ import absolute_import
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
-from awkward._v2.tmp_for_testing import v1_to_v2
 
 
 def test_ListOffsetArray():
-    array = ak.Array(
+    v2_array = ak._v2.highlevel.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
-    )
-    v2_array = v1_to_v2(array.layout)
+    ).layout
 
     assert v2_array.validityerror() == ""
     assert v2_array.typetracer.validityerror() == ""
 
-    array = ak.Array(
+    v2_array = ak._v2.highlevel.Array(
         [
             [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6]],
             [],
             [[7.7], [8.8, 9.9, 10.0, 11.1, 12.2]],
         ]
-    )
-    v2_array = v1_to_v2(array.layout)
+    ).layout
 
     assert v2_array.validityerror() == ""
     assert v2_array.typetracer.validityerror() == ""
 
 
 def test_RegularArray():
-    array = ak.Array(np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]]))
-    v2_array = v1_to_v2(array.layout)
+    v2_array = ak._v2.highlevel.Array(
+        np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]])
+    ).layout
 
     assert v2_array.validityerror() == ""
     assert v2_array.typetracer.validityerror() == ""
 
 
 def test_NumpyArray():
-    array = ak.Array([0.0, 1.1, 2.2, 3.3])
-    v2_array = v1_to_v2(array.layout)
+    v2_array = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3]).layout
 
     assert v2_array.validityerror() == ""
     assert v2_array.typetracer.validityerror() == ""
 
 
 def test_IndexedArray():
-    array = ak.Array(
+    v2_array = ak._v2.highlevel.Array(
         [
             [0.0, 1.1, 2.2, 3.3],
             [],
@@ -57,34 +54,31 @@ def test_IndexedArray():
             None,
             [8.8, 9.9, 10.0, 11.1, 12.2],
         ]
-    )
-    v2_array = v1_to_v2(array.layout)
+    ).layout
 
     assert v2_array.validityerror() == ""
     assert v2_array.typetracer.validityerror() == ""
 
 
 def test_ByteMaskedArray():
-    content = ak.from_iter(
+    content = ak._v2.operations.convert.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
     )
-    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    array = ak.Array(ak.layout.ByteMaskedArray(mask, content, valid_when=False))
-    v2_array = v1_to_v2(array.layout)
+    mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    v2_array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
 
     assert v2_array.validityerror() == ""
     assert v2_array.typetracer.validityerror() == ""
 
 
 def test_IndexedOptionArray():
-    content = ak.from_iter(
+    content = ak._v2.operations.convert.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
     )
-    index = ak.layout.Index64(np.array([0, 1, -1, -1, 4], dtype=np.int64))
-    array = ak.Array(ak.layout.IndexedOptionArray64(index, content))
-    v2_array = v1_to_v2(array.layout)
+    index = ak._v2.index.Index64(np.array([0, 1, -1, -1, 4], dtype=np.int64))
+    v2_array = ak._v2.contents.IndexedOptionArray(index, content)
 
     assert v2_array.validityerror() == ""
     assert v2_array.typetracer.validityerror() == ""

@@ -6,8 +6,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 
 def test_EmptyArray():
     a = ak._v2.contents.emptyarray.EmptyArray()
@@ -41,7 +39,9 @@ def test_EmptyArray():
 
 
 def test_NumpyArray_toRegularArray():
-    a = v1_to_v2(ak.from_numpy(np.arange(2 * 3 * 5).reshape(2, 3, 5)).layout)
+    a = ak._v2.operations.convert.from_numpy(
+        np.arange(2 * 3 * 5).reshape(2, 3, 5)
+    ).layout
     b = a.toRegularArray()
     assert isinstance(b, ak._v2.contents.RegularArray)
     assert len(b) == len(a) == 2
@@ -53,7 +53,9 @@ def test_NumpyArray_toRegularArray():
     assert len(b.content.content) == 30
     assert a.typetracer.toRegularArray().form == b.form
 
-    a = v1_to_v2(ak.from_numpy(np.arange(2 * 0 * 5).reshape(2, 0, 5)).layout)
+    a = ak._v2.operations.convert.from_numpy(
+        np.arange(2 * 0 * 5).reshape(2, 0, 5)
+    ).layout
     b = a.toRegularArray()
     assert isinstance(b, ak._v2.contents.RegularArray)
     assert len(b) == len(a) == 2

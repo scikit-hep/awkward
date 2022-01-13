@@ -185,7 +185,7 @@ class EmptyArray(Content):
 
     def _localindex(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(
-            np.empty(0, np.int64), None, None, self._nplike
+            self._nplike.empty(0, np.int64), None, None, self._nplike
         )
 
     def numbers_to_type(self, name):

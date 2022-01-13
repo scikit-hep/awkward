@@ -325,6 +325,20 @@ def test_numpy_array_FIXME():
     )
 
 
+@pytest.mark.skip(
+    reason="assert isinstance(ak.where(condition)[0], ak._v2.highlevel.Array) AssertionError: assert False"
+)
+def test_where_FIXME():
+    condition = ak._v2.highlevel.Array(
+        [False, False, False, False, False, True, False, True, False, True],
+        check_valid=True,
+    )
+
+    assert isinstance(
+        ak._v2.operations.structure.where(condition)[0], ak._v2.highlevel.Array
+    )
+
+
 def test_where():
     one = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True

@@ -8,13 +8,11 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 pyarrow = pytest.importorskip("pyarrow")
 
 
 def test_issue1():
-    null_array = v1_to_v2(ak.Array({"null_col": [None]}).layout)
+    null_array = ak._v2.highlevel.Array({"null_col": [None]}).layout
     tpe = null_array.to_arrow().storage.field("null_col").type
     assert tpe.storage_type == pyarrow.null()
 

@@ -6,19 +6,16 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test():
-    one_content = ak.Array(
+    one_content = ak._v2.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9, 10.0]]
     ).layout
-    one_starts = ak.layout.Index64(np.array([0, 2, 3, 3], dtype=np.int64))
-    one_stops = ak.layout.Index64(np.array([2, 3, 3, 5], dtype=np.int64))
-    one = ak.layout.ListArray64(one_starts, one_stops, one_content)
-    one = v1_to_v2(one)
+    one_starts = ak._v2.index.Index64(np.array([0, 2, 3, 3], dtype=np.int64))
+    one_stops = ak._v2.index.Index64(np.array([2, 3, 3, 5], dtype=np.int64))
+    one = ak._v2.contents.ListArray(one_starts, one_stops, one_content)
     assert to_list(one) == [
         [[1.1, 2.2, 3.3], []],
         [[4.4, 5.5]],
@@ -26,7 +23,7 @@ def test():
         [[6.6], [7.7, 8.8, 9.9, 10.0]],
     ]
 
-    two_content = ak.Array(
+    two_content = ak._v2.highlevel.Array(
         [
             [123],
             [1.1, 2.2, 3.3],
@@ -39,11 +36,10 @@ def test():
             [456],
         ]
     ).layout
-    two_starts = ak.layout.Index64(np.array([1, 4, 5, 6], dtype=np.int64))
-    two_stops = ak.layout.Index64(np.array([3, 5, 5, 8], dtype=np.int64))
-    two = ak.layout.ListArray64(two_starts, two_stops, two_content)
+    two_starts = ak._v2.index.Index64(np.array([1, 4, 5, 6], dtype=np.int64))
+    two_stops = ak._v2.index.Index64(np.array([3, 5, 5, 8], dtype=np.int64))
+    two = ak._v2.contents.ListArray(two_starts, two_stops, two_content)
 
-    two = v1_to_v2(two)
     assert to_list(two) == [
         [[1.1, 2.2, 3.3], []],
         [[4.4, 5.5]],
