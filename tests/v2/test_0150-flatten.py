@@ -720,7 +720,6 @@ def test_fix_corner_case_0585():
 
     array = ak._v2.highlevel.Array([1, 2, 3, 4, 5]).layout
 
-
     assert ak._v2.operations.structure.flatten(array, axis=0).tolist() == [
         1,
         2,
@@ -750,26 +749,26 @@ def test_flatten_allow_regulararray_size_zero_0590():
 
 @pytest.mark.skip(reason="ak.repartition() not implemented yet")
 def test_0612():
-  assert ak._v2.operations.structure.flatten(
-      ak.repartition(ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]), 3)
-  ).tolist() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    assert ak._v2.operations.structure.flatten(
+        ak.repartition(ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]), 3)
+    ).tolist() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 @pytest.mark.skip(reason="ak.repartition() not implemented yet")
 def test_0724():
-  a = ak.layout.NumpyArray(np.empty(0))
-  idx = ak.layout.Index64([])
-  a = ak.layout.IndexedOptionArray64(idx, a)
-  idx = ak.layout.Index64([0])
-  a = ak.layout.ListOffsetArray64(idx, a)
-  idx = ak.layout.Index64([175990832])
-  a = ak.layout.ListOffsetArray64(idx, a)
+    a = ak.layout.NumpyArray(np.empty(0))
+    idx = ak.layout.Index64([])
+    a = ak.layout.IndexedOptionArray64(idx, a)
+    idx = ak.layout.Index64([0])
+    a = ak.layout.ListOffsetArray64(idx, a)
+    idx = ak.layout.Index64([175990832])
+    a = ak.layout.ListOffsetArray64(idx, a)
 
-  a = v1_to_v2(a)
-  assert ak._v2.operations.structure.flatten(a, axis=2).tolist() == []
-  assert (
-      str(ak._v2.operations.structure.flatten(a, axis=2).type) == "0 * var * ?float64"
-  )
+    a = v1_to_v2(a)
+    assert ak._v2.operations.structure.flatten(a, axis=2).tolist() == []
+    assert (
+        str(ak._v2.operations.structure.flatten(a, axis=2).type) == "0 * var * ?float64"
+    )
 
 
 @pytest.mark.skip(reason="ak.where() not implemented yet")
