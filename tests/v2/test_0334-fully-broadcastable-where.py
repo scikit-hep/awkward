@@ -26,9 +26,9 @@ def test():
     ]
 
 
-pytestmark = pytest.mark.skip(reason="ak.broadcast_arrays to be implemented.")
-
-
+@pytest.mark.skip(
+    reason="ak._v2.operations.structure.broadcast_arrays to be implemented."
+)
 def test_issue_334():
     a = ak._v2.highlevel.Array([1, 2, 3, 4])
     b = ak._v2.highlevel.Array([-1])
@@ -36,9 +36,9 @@ def test_issue_334():
 
     assert ak._v2.operations.structure.where(c, a, b).tolist() == [1, -1, 3, 4]
     assert ak._v2.operations.structure.where(
-        *ak.broadcast_arrays(c, a, b)
+        *ak._v2.operations.structure.broadcast_arrays(c, a, b)
     ).tolist() == [1, -1, 3, 4]
     assert ak._v2.operations.structure.where(c, a, -1).tolist() == [1, -1, 3, 4]
     assert ak._v2.operations.structure.where(
-        *ak.broadcast_arrays(c, a, -1)
+        *ak._v2.operations.structure.broadcast_arrays(c, a, -1)
     ).tolist() == [1, -1, 3, 4]
