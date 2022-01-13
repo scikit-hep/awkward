@@ -8,13 +8,24 @@ import awkward as ak  # noqa: F401
 
 to_list = ak._v2.operations.convert.to_list
 
+
 @pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.zip must be implemented")
 def test():
     array = ak._v2.highlevel.Array(
         [[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [], [[5.5], [], [6.6, 7.7, 8.8, 9.9]]]
     )
-    assert to_list(ak._v2.operations.structure.local_index(array, axis=0)) == [0, 1, 2, 3]
-    assert to_list(ak._v2.operations.structure.local_index(array, axis=1)) == [[0, 1], [0], [], [0, 1, 2]]
+    assert to_list(ak._v2.operations.structure.local_index(array, axis=0)) == [
+        0,
+        1,
+        2,
+        3,
+    ]
+    assert to_list(ak._v2.operations.structure.local_index(array, axis=1)) == [
+        [0, 1],
+        [0],
+        [],
+        [0, 1, 2],
+    ]
     assert to_list(ak._v2.operations.structure.local_index(array, axis=2)) == [
         [[0, 1, 2], []],
         [[0, 1]],
@@ -27,8 +38,18 @@ def test():
         [],
         [[0], [], [0, 1, 2, 3]],
     ]
-    assert to_list(ak._v2.operations.structure.local_index(array, axis=-2)) == [[0, 1], [0], [], [0, 1, 2]]
-    assert to_list(ak._v2.operations.structure.local_index(array, axis=-3)) == [0, 1, 2, 3]
+    assert to_list(ak._v2.operations.structure.local_index(array, axis=-2)) == [
+        [0, 1],
+        [0],
+        [],
+        [0, 1, 2],
+    ]
+    assert to_list(ak._v2.operations.structure.local_index(array, axis=-3)) == [
+        0,
+        1,
+        2,
+        3,
+    ]
 
     assert to_list(
         ak.zip(
