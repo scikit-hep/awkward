@@ -103,10 +103,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 
         assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
-        if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
-            out = ak._v2.contents.NumpyArray(nplike.ma.concatenate(out))
-        else:
-            out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
+        out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
 
     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
