@@ -71,27 +71,9 @@ def test_flatten_ListOffsetArray():
         == np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5 * 7).tolist()
     )
 
-    def toListArray(x):
-        if isinstance(x, ak.layout.ListOffsetArray64):
-            starts = ak.layout.Index64(np.asarray(x.offsets)[:-1])
-            stops = ak.layout.Index64(np.asarray(x.offsets)[1:])
-            return ak.layout.ListArray64(starts, stops, toListArray(x.content))
-        elif isinstance(x, ak.layout.ListOffsetArray32):
-            starts = ak.layout.Index64(np.asarray(x.offsets)[:-1])
-            stops = ak.layout.Index64(np.asarray(x.offsets)[1:])
-            return ak.layout.ListArray32(starts, stops, toListArray(x.content))
-        elif isinstance(x, ak.layout.ListOffsetArrayU32):
-            starts = ak.layout.Index64(np.asarray(x.offsets)[:-1])
-            stops = ak.layout.Index64(np.asarray(x.offsets)[1:])
-            return ak.layout.ListArrayU32(starts, stops, toListArray(x.content))
-        else:
-            return x
-
     array = ak._v2.highlevel.Array(
-        toListArray(
-            ak._v2.operations.convert.from_iter(
-                np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist(), highlevel=False
-            )
+        ak._v2.operations.convert.from_iter(
+            np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist(), highlevel=False
         )
     ).layout
 
@@ -596,11 +578,9 @@ def test_fix_corner_case():
 
 @pytest.mark.skip(reason="ak.flatten() not implemented yet")
 def test_flatten_allow_regulararray_size_zero():
-    empty = ak._v2.highlevel.Array(
-        ak.layout.RegularArray(
-            ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
-        )
-    ).layout
+    empty = ak._v2.contents.RegularArray(
+        ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
+    )
 
     assert empty.flatten(axis=0).tolist() == []
     assert empty.flatten(axis=1).tolist() == []
