@@ -770,8 +770,7 @@ def test_flatten_axis_none_0866():
     assert set(ak.flatten(union, axis=None)) == set([1, 2, 3, 4, 5, 6, 9, 12])
 
 
-@pytest.mark.skip(reason="ak.from_numpy not implemented yet")
 def test_0973():
-    array = ak.from_numpy(np.zeros((3, 3, 5)))
-    flattened = ak.flatten(array, axis=None)
+    array = ak._v2.operations.convert.from_numpy(np.zeros((3, 3, 5)))
+    flattened = ak._v2.operations.structure.flatten(array, axis=None)
     assert flattened.ndim == 1
