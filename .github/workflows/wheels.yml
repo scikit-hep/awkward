@@ -72,7 +72,7 @@ jobs:
     strategy:
       matrix:
         python: [36, 37, 38, 39, 310]
-        arch: [aarch64]
+        arch: [aarch64, ppc64le]
     steps:
 
     - uses: actions/checkout@v2
