@@ -64,7 +64,9 @@ def test_ByteMaskedArray_jaggedslice0():
         [5.5],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert to_list(indexedarray[ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]])]) == [
+    assert to_list(
+        indexedarray[ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]])]
+    ) == [
         [0.0, 2.2],
         [3.3],
         [],
@@ -91,7 +93,9 @@ def test_ByteMaskedArray_jaggedslice1():
     model = ak._v2.highlevel.Array(
         [[0.0, 1.1, None, 2.2], [], [3.3, None, 4.4], [5.5], [6.6, 7.7, None, 8.8, 9.9]]
     )
-    assert to_list(model[ak._v2.highlevel.Array([[3, 2, 1, 1, 0], [], [1], [0, 0], [1, 2]])]) == [
+    assert to_list(
+        model[ak._v2.highlevel.Array([[3, 2, 1, 1, 0], [], [1], [0, 0], [1, 2]])]
+    ) == [
         [2.2, None, 1.1, 1.1, 0.0],
         [],
         [None],
@@ -107,7 +111,9 @@ def test_ByteMaskedArray_jaggedslice1():
     )
     maskedarray = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     offsets = ak._v2.index.Index64(np.array([0, 4, 4, 7, 8, 13], dtype=np.int64))
-    listarray = ak._v2.highlevel.Array(ak._v2.contents.ListOffsetArray(offsets, maskedarray))
+    listarray = ak._v2.highlevel.Array(
+        ak._v2.contents.ListOffsetArray(offsets, maskedarray)
+    )
     assert to_list(listarray) == to_list(model)
     assert to_list(
         listarray[ak._v2.highlevel.Array([[3, 2, 1, 1, 0], [], [1], [0, 0], [1, 2]])]
@@ -124,7 +130,9 @@ def test_ByteMaskedArray_jaggedslice2():
         ]
     )
     assert to_list(
-        model[ak._v2.highlevel.Array([[[3, 2, 1, 1, 0], [], [1]], [], [[0, 0]], [[1, 2]]])]
+        model[
+            ak._v2.highlevel.Array([[[3, 2, 1, 1, 0], [], [1]], [], [[0, 0]], [[1, 2]]])
+        ]
     ) == [[[2.2, None, 1.1, 1.1, 0.0], [], [None]], [], [[5.5, 5.5]], [[7.7, None]]]
 
     content = ak._v2.contents.NumpyArray(
@@ -137,10 +145,14 @@ def test_ByteMaskedArray_jaggedslice2():
     offsets = ak._v2.index.Index64(np.array([0, 4, 4, 7, 8, 13], dtype=np.int64))
     sublistarray = ak._v2.contents.ListOffsetArray(offsets, maskedarray)
     offsets2 = ak._v2.index.Index64(np.array([0, 3, 3, 4, 5], dtype=np.int64))
-    listarray = ak._v2.highlevel.Array(ak._v2.contents.ListOffsetArray(offsets2, sublistarray))
+    listarray = ak._v2.highlevel.Array(
+        ak._v2.contents.ListOffsetArray(offsets2, sublistarray)
+    )
     assert to_list(listarray) == to_list(model)
     assert to_list(
-        listarray[ak._v2.highlevel.Array([[[3, 2, 1, 1, 0], [], [1]], [], [[0, 0]], [[1, 2]]])]
+        listarray[
+            ak._v2.highlevel.Array([[[3, 2, 1, 1, 0], [], [1]], [], [[0, 0]], [[1, 2]]])
+        ]
     ) == [[[2.2, None, 1.1, 1.1, 0.0], [], [None]], [], [[5.5, 5.5]], [[7.7, None]]]
 
 
@@ -152,7 +164,11 @@ def test_ByteMaskedArray_jaggedslice3():
         ]
     )
     assert to_list(
-        model[ak._v2.highlevel.Array([[[[3, 2, 1, 1, 0], [], [1]], []], [[[0, 0]], [[1, 2]]]])]
+        model[
+            ak._v2.highlevel.Array(
+                [[[[3, 2, 1, 1, 0], [], [1]], []], [[[0, 0]], [[1, 2]]]]
+            )
+        ]
     ) == [[[[2.2, None, 1.1, 1.1, 0.0], [], [None]], []], [[[5.5, 5.5]], [[7.7, None]]]]
 
     content = ak._v2.contents.NumpyArray(
@@ -167,15 +183,23 @@ def test_ByteMaskedArray_jaggedslice3():
     offsets2 = ak._v2.index.Index64(np.array([0, 3, 3, 4, 5], dtype=np.int64))
     sublistarray = ak._v2.contents.ListOffsetArray(offsets2, subsublistarray)
     offsets3 = ak._v2.index.Index64(np.array([0, 2, 4], dtype=np.int64))
-    listarray = ak._v2.highlevel.Array(ak._v2.contents.ListOffsetArray(offsets3, sublistarray))
+    listarray = ak._v2.highlevel.Array(
+        ak._v2.contents.ListOffsetArray(offsets3, sublistarray)
+    )
     assert to_list(listarray) == to_list(model)
     assert to_list(
-        listarray[ak._v2.highlevel.Array([[[[3, 2, 1, 1, 0], [], [1]], []], [[[0, 0]], [[1, 2]]]])]
+        listarray[
+            ak._v2.highlevel.Array(
+                [[[[3, 2, 1, 1, 0], [], [1]], []], [[[0, 0]], [[1, 2]]]]
+            )
+        ]
     ) == [[[[2.2, None, 1.1, 1.1, 0.0], [], [None]], []], [[[5.5, 5.5]], [[7.7, None]]]]
 
 
 def test_ByteMaskedArray_to_slice():
-    content = ak._v2.contents.NumpyArray(np.array([5, 2, 999, 3, 9, 123, 1], dtype=np.int64))
+    content = ak._v2.contents.NumpyArray(
+        np.array([5, 2, 999, 3, 9, 123, 1], dtype=np.int64)
+    )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 0, 0, 1, 0], dtype=np.int8))
     maskedarray = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     assert to_list(maskedarray) == [5, 2, None, 3, 9, None, 1]
@@ -190,9 +214,13 @@ def test_ByteMaskedArray_as_slice():
     array = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
     )
-    slicecontent = ak._v2.operations.convert.from_iter([3, 6, 999, 123, -2, 6], highlevel=False)
+    slicecontent = ak._v2.operations.convert.from_iter(
+        [3, 6, 999, 123, -2, 6], highlevel=False
+    )
     slicemask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0, 0], dtype=np.int8))
-    slicearray = ak._v2.contents.ByteMaskedArray(slicemask, slicecontent, valid_when=False)
+    slicearray = ak._v2.contents.ByteMaskedArray(
+        slicemask, slicecontent, valid_when=False
+    )
 
     assert to_list(array[slicearray]) == [3.3, 6.6, None, None, 8.8, 6.6]
 
@@ -208,6 +236,7 @@ def test_ByteMaskedArray_setidentities():
 
     assert ak._v2.operations.describe.is_valid(ak._v2.highlevel.Array(array))
 
+
 @pytest.mark.skip(reason="FIXME: ak._v2.operations.num not implemented")
 def test_ByteMaskedArray_num():
     content = ak._v2.operations.convert.from_iter(
@@ -221,7 +250,9 @@ def test_ByteMaskedArray_num():
         highlevel=False,
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    array = ak._v2.highlevel.Array(ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False))
+    array = ak._v2.highlevel.Array(
+        ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
+    )
     assert to_list(array) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
@@ -236,6 +267,7 @@ def test_ByteMaskedArray_num():
     assert to_list(ak.num(array, axis=2)) == [[3, 0, 2], [], None, None, [0, 3]]
     assert to_list(ak.num(array, axis=-1)) == [[3, 0, 2], [], None, None, [0, 3]]
 
+
 @pytest.mark.skip(reason="FIXME: flatten not merged yet")
 def test_ByteMaskedArray_flatten():
     content = ak._v2.operations.convert.from_iter(
@@ -249,7 +281,9 @@ def test_ByteMaskedArray_flatten():
         highlevel=False,
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    array = ak._v2.highlevel.Array(ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False))
+    array = ak._v2.highlevel.Array(
+        ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
+    )
     assert to_list(array) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
@@ -285,6 +319,7 @@ def test_ByteMaskedArray_flatten():
         None,
         [10.0, 11.1, 12.2],
     ]
+
 
 @pytest.mark.skip(reason="FIXME: ak.pad_none not implemented")
 def test_IndexedOptionArray_pad_none():
@@ -383,6 +418,7 @@ def test_IndexedOptionArray_pad_none():
         [[None, None], [10.0, 11.1]],
     ]
 
+
 @pytest.mark.skip(reason="FIXME: ak.pad_none not implemented")
 def test_ByteMaskedArray_pad_none():
     content = ak._v2.operations.convert.from_iter(
@@ -396,7 +432,9 @@ def test_ByteMaskedArray_pad_none():
         highlevel=False,
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    array = ak._v2.highlevel.Array(ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False))
+    array = ak._v2.highlevel.Array(
+        ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
+    )
     assert to_list(array) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
@@ -528,12 +566,16 @@ def test_ByteMaskedArray_reduce():
             dtype=np.int64,
         )
     )
-    offsets1 = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
+    )
     listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, content)
     # index = ak.layout.Index64(np.array([0, -1, 2, 3, -1, 5], dtype=np.int64))
     # optionarray = ak.layout.IndexedOptionArray64(index, listoffsetarray)
     mask = ak._v2.index.Index8(np.array([0, 1, 0, 0, 1, 0], dtype=np.int8))
-    optionarray = ak._v2.contents.ByteMaskedArray(mask, listoffsetarray, valid_when=False)
+    optionarray = ak._v2.contents.ByteMaskedArray(
+        mask, listoffsetarray, valid_when=False
+    )
     offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
     depth2 = ak._v2.contents.ListOffsetArray(offsets2, optionarray)
     assert to_list(depth2) == [
@@ -634,7 +676,9 @@ def test_ByteMaskedArray_reduce():
         )
     )
     optionarray = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
-    offsets1 = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
+    )
     listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, optionarray)
     offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
     depth2 = ak._v2.contents.ListOffsetArray(offsets2, listoffsetarray)
@@ -703,6 +747,7 @@ def test_ByteMaskedArray_localindex():
         [[], [0, 1, 2]],
     ]
 
+
 @pytest.mark.skip(reason="FIXME: ak.combinations not implemented")
 def test_ByteMaskedArray_combinations():
     content = ak._v2.operations.convert.from_iter(
@@ -710,7 +755,9 @@ def test_ByteMaskedArray_combinations():
         highlevel=False,
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    array = ak._v2.highlevel.Array(ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False))
+    array = ak._v2.highlevel.Array(
+        ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
+    )
     assert to_list(array) == [
         [[0, 1, 2], [], [3, 4]],
         [],
@@ -770,6 +817,7 @@ def test_ByteMaskedArray_combinations():
         None,
         [[], [(10, 11), (10, 12), (11, 12)]],
     ]
+
 
 @pytest.mark.skip(reason="FIXME: ak.pad_none not implemented")
 def test_IndexedOptionArray_combinations():
@@ -847,7 +895,9 @@ def test_merge():
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
     array1 = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     assert to_list(array1) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
-    array2 = ak._v2.highlevel.Array([[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]])
+    array2 = ak._v2.highlevel.Array(
+        [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
+    )
     array12 = ak._v2.operations.structure.concatenate([array1, array2], highlevel=False)
     assert to_list(array12) == [
         [0.0, 1.1, 2.2],
@@ -885,6 +935,7 @@ def test_merge():
         8.8,
         9.9,
     ]
+
 
 @pytest.mark.skip(reason="FIXME: ak.to_json not implemented")
 def test_BitMaskedArray():
@@ -1048,6 +1099,7 @@ def test_BitMaskedArray():
     ]
     assert ak.to_list(array[8:]) == [None, None, 10, None, None]
 
+
 @pytest.mark.skip(reason="FIXME: ak.type not implemented")
 def test_UnmaskedArray():
     content = ak._v2.contents.NumpyArray(
@@ -1062,7 +1114,9 @@ def test_UnmaskedArray():
 
 
 def test_tomask():
-    array = ak._v2.highlevel.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
+    array = ak._v2.highlevel.Array(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+    )
     mask1 = ak._v2.highlevel.Array([True, True, False, False, True])
     assert to_list(array[mask1]) == [[0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
     assert to_list(ak._v2.operations.structure.mask(array, mask1)) == [

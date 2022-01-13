@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 
 to_list = ak._v2.operations.convert.to_list
 
+
 def test():
     array = ak._v2.highlevel.Array(
         ak._v2.contents.RegularArray(
@@ -20,4 +21,8 @@ def test():
         )
     )
 
-    assert ak._v2.operations.structure.mask(array, mask).to_list() == [[1, 2, 3], [4, 5, None], [7, None, 9]]
+    assert ak._v2.operations.structure.mask(array, mask).to_list() == [
+        [1, 2, 3],
+        [4, 5, None],
+        [7, None, 9],
+    ]
