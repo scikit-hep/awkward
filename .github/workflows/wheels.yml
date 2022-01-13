@@ -73,6 +73,12 @@ jobs:
       matrix:
         python: [36, 37, 38, 39, 310]
         arch: [aarch64, ppc64le]
+        exclude:
+          - arch: ppc64le
+            python: 36
+          - arch: ppc64le
+            python: 37
+
     steps:
 
     - uses: actions/checkout@v2
