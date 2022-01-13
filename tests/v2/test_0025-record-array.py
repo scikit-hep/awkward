@@ -181,7 +181,21 @@ def test_basic():
         "parameters": {},
         "form_key": None,
     }
-    assert json.loads(ak.to_json(recordarray.as_tuple)) == [
+
+
+@pytest.mark.skip(reason="FIXME: highlevel v2 ak.to_json")
+def test_basic_tofrom_json():
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
+    content2 = ak._v2.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
+    )
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9], dtype=np.int64))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content2)
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray, content2, content1],
+        fields=["one", "two", "2", "wonky"],
+    )
+    assert json.loads(ak._v2.operations.convert.to_json(recordarray.as_tuple)) == [
         {"0": 1, "1": [1.1, 2.2, 3.3], "2": 1.1, "3": 1},
         {"0": 2, "1": [], "2": 2.2, "3": 2},
         {"0": 3, "1": [4.4, 5.5], "2": 3.3, "3": 3},

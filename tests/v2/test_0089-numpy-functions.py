@@ -334,7 +334,9 @@ def test_where_FIXME():
         check_valid=True,
     )
 
-    assert isinstance(ak.where(condition)[0], ak._v2.highlevel.Array)
+    assert isinstance(
+        ak._v2.operations.structure.where(condition)[0], ak._v2.highlevel.Array
+    )
 
 
 @pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.where must be implemented")

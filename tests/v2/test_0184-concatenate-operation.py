@@ -395,7 +395,7 @@ def test_numbers_and_records_concatenate():
     ]
 
     with pytest.raises(ValueError) as err:
-        to_list(ak.concatenate([numbers, records], axis=1))
+        to_list(ak._v2.operations.structure.concatenate([numbers, records], axis=1))
     assert str(err.value).startswith("cannot broadcast")
 
 
