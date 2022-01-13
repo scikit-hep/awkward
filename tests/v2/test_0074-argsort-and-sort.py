@@ -6,14 +6,11 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_bool_sort():
-    array = ak.layout.NumpyArray(np.array([True, False, True, False, False]))
-    array = v1_to_v2(array)
+    array = ak._v2.contents.NumpyArray(np.array([True, False, True, False, False]))
     assert to_list(array.sort(axis=0, ascending=True, stable=False)) == [
         False,
         False,
@@ -24,8 +21,7 @@ def test_bool_sort():
 
 
 def test_keep_None_in_place_test():
-    array = ak.Array([[3, 2, 1], [], None, [4, 5]])
-    array = v1_to_v2(array.layout)
+    array = ak._v2.highlevel.Array([[3, 2, 1], [], None, [4, 5]]).layout
 
     assert to_list(array.argsort(axis=1)) == [
         [2, 1, 0],
@@ -44,40 +40,34 @@ def test_keep_None_in_place_test():
 
 def test_slicing_FIXME():
     # awkward/_v2/_slicing.py:218:
-    array = ak.Array([[3, 2, 1], [], None, [4, 5]])
-    array = v1_to_v2(array.layout)
+    array = ak._v2.highlevel.Array([[3, 2, 1], [], None, [4, 5]]).layout
 
     assert to_list(array[array.argsort(axis=1)]) == to_list(array.sort(axis=1))
 
 
 def test_EmptyArray():
-    array = ak.layout.EmptyArray()
-    array = v1_to_v2(array)
+    array = ak._v2.contents.EmptyArray()
 
     assert to_list(array.sort()) == []
     assert to_list(array.argsort()) == []
 
-    array2 = ak.Array([[], [], []])
-    array2 = v1_to_v2(array2.layout)
+    array2 = ak._v2.highlevel.Array([[], [], []]).layout
 
     assert to_list(array2.argsort()) == [[], [], []]
 
 
 def test_EmptyArray_type_FIXME():
-    array = ak.layout.EmptyArray()
-    array = v1_to_v2(array)
+    array = ak._v2.contents.EmptyArray()
 
     assert str(array.sort().form.type) == "unknown"
     assert str(array.argsort().form.type) == "int64"
 
-    array2 = ak.Array([[], [], []])
-    array2 = v1_to_v2(array2.layout)
+    array2 = ak._v2.highlevel.Array([[], [], []]).layout
     assert str(array2.argsort().form.type) == "var * int64"
 
 
 def test_NumpyArray():
-    array = ak.layout.NumpyArray(np.array([3.3, 2.2, 1.1, 5.5, 4.4]))
-    array = v1_to_v2(array)
+    array = ak._v2.contents.NumpyArray(np.array([3.3, 2.2, 1.1, 5.5, 4.4]))
 
     assert to_list(array.argsort(axis=0, ascending=True, stable=False)) == [
         2,
@@ -109,8 +99,7 @@ def test_NumpyArray():
         1.1,
     ]
 
-    array2 = ak.layout.NumpyArray(np.array([[3.3, 2.2, 4.4], [1.1, 5.5, 3.3]]))
-    array2 = v1_to_v2(array2)
+    array2 = ak._v2.contents.NumpyArray(np.array([[3.3, 2.2, 4.4], [1.1, 5.5, 3.3]]))
 
     assert to_list(array2.sort(axis=1, ascending=True, stable=False)) == to_list(
         np.sort(np.asarray(array2), axis=1)
@@ -135,7 +124,7 @@ def test_NumpyArray():
 
 
 def test_IndexedOptionArray():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [None, None, 2.2, 1.1, 3.3],
             [None, None, None],
@@ -143,8 +132,7 @@ def test_IndexedOptionArray():
             [5.5, None, None],
             [-4.4, -5.5, -6.6],
         ]
-    )
-    array = v1_to_v2(array.layout)
+    ).layout
 
     assert to_list(array.sort(axis=0, ascending=True, stable=False)) == [
         [-4.4, -5.5, -6.6, 1.1, 3.3],
@@ -233,8 +221,7 @@ def test_IndexedOptionArray():
         [0, 1, 2],
     ]
 
-    array2 = ak.Array([None, None, 1, -1, 30])
-    array2 = v1_to_v2(array2.layout)
+    array2 = ak._v2.highlevel.Array([None, None, 1, -1, 30]).layout
 
     assert to_list(array2.argsort(axis=0, ascending=True, stable=True)) == [
         3,
@@ -244,10 +231,9 @@ def test_IndexedOptionArray():
         1,
     ]
 
-    array3 = ak.Array(
+    array3 = ak._v2.highlevel.Array(
         [[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]]
     ).layout
-    array3 = v1_to_v2(array3)
 
     assert to_list(array3.sort(axis=1, ascending=False, stable=False)) == [
         [3.3, 2.2, 1.1],
@@ -267,10 +253,9 @@ def test_IndexedOptionArray():
 
 
 def test_IndexedArray():
-    content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    index1 = ak.layout.Index32(np.array([1, 2, 3, 4], dtype=np.int32))
-    indexedarray1 = ak.layout.IndexedArray32(index1, content)
-    indexedarray1 = v1_to_v2(indexedarray1)
+    content = ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    index1 = ak._v2.index.Index32(np.array([1, 2, 3, 4], dtype=np.int32))
+    indexedarray1 = ak._v2.contents.IndexedArray(index1, content)
 
     assert to_list(indexedarray1.argsort(axis=0, ascending=True, stable=False)) == [
         0,
@@ -298,7 +283,7 @@ def test_IndexedArray():
 
 
 def test_3d():
-    array = ak.layout.NumpyArray(
+    array = ak._v2.contents.NumpyArray(
         np.array(
             [
                 # axis 2:    0       1       2       3       4         # axis 1:
@@ -315,7 +300,6 @@ def test_3d():
             ]
         )
     )  # 5
-    array = v1_to_v2(array)
 
     sorted = array.argsort(axis=1, ascending=True, stable=False)
     assert to_list(sorted) == to_list(np.argsort(np.asarray(array), 1))
@@ -356,12 +340,11 @@ def test_3d():
 
 
 def test_ByteMaskedArray():
-    content = ak.from_iter(
+    content = ak._v2.operations.convert.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-    array = v1_to_v2(array)
+    mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     sorted = array.argsort(axis=0, ascending=True, stable=False)
     assert to_list(sorted) == [
         [0, 0, 0],
@@ -406,22 +389,24 @@ def test_ByteMaskedArray():
 
 
 def test_UnionArray():
-    content0 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
-    content1 = ak.from_iter(
+    content0 = ak._v2.operations.convert.from_iter(
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
+    )
+    content1 = ak._v2.operations.convert.from_iter(
         [["one"], ["two"], ["three"], ["four"], ["five"]], highlevel=False
     )
-    tags = ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
-    index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    array = ak.layout.UnionArray8_32(tags, index, [content0, content1])
-    array = v1_to_v2(array)
+    tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak._v2.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak._v2.contents.UnionArray(tags, index, [content0, content1])
 
     with pytest.raises(ValueError):
         array.sort(axis=1, ascending=True, stable=False)
 
 
 def test_sort_strings():
-    content = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
-    content = v1_to_v2(content)
+    content = ak._v2.operations.convert.from_iter(
+        ["one", "two", "three", "four", "five"], highlevel=False
+    )
 
     assert to_list(content.sort(axis=0, ascending=True, stable=False)) == [
         "five",
@@ -440,10 +425,9 @@ def test_sort_strings():
 
 
 def test_sort_bytestrings():
-    array = ak.from_iter(
+    array = ak._v2.operations.convert.from_iter(
         [b"one", b"two", b"three", b"two", b"two", b"one", b"three"], highlevel=False
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [
         b"one",
         b"two",
@@ -476,62 +460,59 @@ def test_sort_bytestrings():
 
 
 def test_sort_zero_length_arrays():
-    array = ak.layout.IndexedArray64(
-        ak.layout.Index64([]), ak.layout.NumpyArray([1, 2, 3])
+    array = ak._v2.contents.IndexedArray(
+        ak._v2.index.Index64([]), ak._v2.contents.NumpyArray([1, 2, 3])
     )
-    array = v1_to_v2(array)
     assert to_list(array) == []
     assert to_list(array.sort()) == []
     assert to_list(array.argsort()) == []
 
-    content = ak.from_iter(
+    content = ak._v2.operations.convert.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    mask = ak.layout.Index8([])
-    array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-    array = v1_to_v2(array)
+    mask = ak._v2.index.Index8([])
+    array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     assert to_list(array) == []
     assert to_list(array.sort()) == []
     assert to_list(array.argsort()) == []
 
-    array = ak.layout.NumpyArray([])
-    array = v1_to_v2(array)
+    array = ak._v2.contents.NumpyArray([])
     assert to_list(array) == []
     assert to_list(array.sort()) == []
     assert to_list(array.argsort()) == []
 
-    array = ak.layout.RecordArray([])
-    array = v1_to_v2(array)
+    array = ak._v2.contents.RecordArray([], None, length=0)
     assert to_list(array) == []
     assert to_list(array.sort()) == []
     assert to_list(array.argsort()) == []
 
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    starts1 = ak.layout.Index64([])
-    stops1 = ak.layout.Index64([])
-    offsets1 = ak.layout.Index64(np.array([0]))
-    array = ak.layout.ListArray64(starts1, stops1, content)
-    array = v1_to_v2(array)
+    starts1 = ak._v2.index.Index64([])
+    stops1 = ak._v2.index.Index64([])
+    offsets1 = ak._v2.index.Index64(np.array([0]))
+    array = ak._v2.contents.ListArray(starts1, stops1, content)
     assert to_list(array) == []
     assert to_list(array.sort()) == []
     assert to_list(array.argsort()) == []
 
-    array = ak.layout.ListOffsetArray64(offsets1, content)
-    array = v1_to_v2(array)
+    array = ak._v2.contents.ListOffsetArray(offsets1, content)
     assert to_list(array) == []
     assert to_list(array.sort()) == []
     assert to_list(array.argsort()) == []
 
 
 def test_UnionArray_FIXME():
-    content0 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
-    content1 = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
-    tags = ak.layout.Index8([])
-    index = ak.layout.Index32([])
-    array = ak.layout.UnionArray8_32(tags, index, [content0, content1])
-    array = v1_to_v2(array)
+    content0 = ak._v2.operations.convert.from_iter(
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
+    )
+    content1 = ak._v2.operations.convert.from_iter(
+        ["one", "two", "three", "four", "five"], highlevel=False
+    )
+    tags = ak._v2.index.Index8([])
+    index = ak._v2.index.Index32([])
+    array = ak._v2.contents.UnionArray(tags, index, [content0, content1])
     assert to_list(array) == []
 
     assert to_list(array.sort()) == []

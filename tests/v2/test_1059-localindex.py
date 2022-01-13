@@ -6,16 +6,13 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_listoffsetarray_localindex():
-    v1_array = ak.from_iter(
+    v2_array = ak._v2.operations.convert.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    v2_array = v1_to_v2(v1_array)
     assert to_list(v2_array.localindex(0)) == [0, 1, 2, 3, 4]
     assert v2_array.typetracer.localindex(0).form == v2_array.localindex(0).form
     assert to_list(v2_array.localindex(1)) == [
@@ -42,11 +39,10 @@ def test_listoffsetarray_localindex():
     with pytest.raises(IndexError):
         v2_array.localindex(2)
 
-    v1_array = ak.from_iter(
+    v2_array = ak._v2.operations.convert.from_iter(
         [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[6.6, 7.7, 8.8, 9.9]]],
         highlevel=False,
     )
-    v2_array = v1_to_v2(v1_array)
     assert to_list(v2_array.localindex(0)) == [0, 1, 2, 3]
     assert v2_array.typetracer.localindex(0).form == v2_array.localindex(0).form
     assert to_list(v2_array.localindex(1)) == [[0, 1, 2], [], [0], [0]]
@@ -77,10 +73,9 @@ def test_listoffsetarray_localindex():
 
 
 def test_regulararray_localindex():
-    v1_array = ak.from_numpy(
+    v2_array = ak._v2.operations.convert.from_numpy(
         np.arange(2 * 3 * 5).reshape(2, 3, 5), regulararray=True, highlevel=False
     )
-    v2_array = v1_to_v2(v1_array)
     assert to_list(v2_array.localindex(0)) == [0, 1]
     assert v2_array.typetracer.localindex(0).form == v2_array.localindex(0).form
     assert to_list(v2_array.localindex(1)) == [[0, 1, 2], [0, 1, 2]]
@@ -105,12 +100,11 @@ def test_regulararray_localindex():
     with pytest.raises(IndexError):
         v2_array.localindex(3)
 
-    v1_array = ak.from_numpy(
+    v2_array = ak._v2.operations.convert.from_numpy(
         np.arange(2 * 3 * 5 * 10).reshape(2, 3, 5, 10),
         regulararray=True,
         highlevel=False,
     )
-    v2_array = v1_to_v2(v1_array)
     assert to_list(v2_array.localindex(0)) == [0, 1]
     assert v2_array.typetracer.localindex(0).form == v2_array.localindex(0).form
     assert to_list(v2_array.localindex(1)) == [[0, 1, 2], [0, 1, 2]]
@@ -233,12 +227,12 @@ def test_regulararray_localindex():
     with pytest.raises(IndexError):
         v2_array.localindex(4)
 
-    v1_array = ak.Array(
-        ak.layout.RegularArray(
-            ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
+    v2_array = ak._v2.highlevel.Array(
+        ak._v2.contents.RegularArray(
+            ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
         )
     ).layout
-    v2_array = v1_to_v2(v1_array)
+
     assert to_list(v2_array.localindex(0)) == []
     assert v2_array.typetracer.localindex(0).form == v2_array.localindex(0).form
     assert to_list(v2_array.localindex(1)) == []
@@ -259,7 +253,7 @@ def test_regulararray_localindex():
 
 
 def test_bytemaskedarray_localindex():
-    content = ak.from_iter(
+    content = ak._v2.operations.convert.from_iter(
         [
             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
             [],
@@ -269,9 +263,8 @@ def test_bytemaskedarray_localindex():
         ],
         highlevel=False,
     )
-    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    v1_array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-    v2_array = v1_to_v2(v1_array)
+    mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    v2_array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
 
     assert to_list(v2_array) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],

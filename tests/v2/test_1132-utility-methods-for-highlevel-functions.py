@@ -6,8 +6,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
@@ -156,27 +154,35 @@ def test_to_regular():
 
 
 def test_isclose():
-    one = v1_to_v2(ak.from_iter([0.99999, 1.99999, 2.99999], highlevel=False))
-    two = v1_to_v2(ak.from_iter([1.00001, 2.00001, 3.00001], highlevel=False))
+    one = ak._v2.operations.convert.from_iter(
+        [0.99999, 1.99999, 2.99999], highlevel=False
+    )
+    two = ak._v2.operations.convert.from_iter(
+        [1.00001, 2.00001, 3.00001], highlevel=False
+    )
     assert to_list(ak._v2.operations.structure.isclose(one, two)) == [
         False,
         True,
         True,
     ]
 
-    one = v1_to_v2(ak.from_iter([[0.99999, 1.99999], [], [2.99999]], highlevel=False))
-    two = v1_to_v2(ak.from_iter([[1.00001, 2.00001], [], [3.00001]], highlevel=False))
+    one = ak._v2.operations.convert.from_iter(
+        [[0.99999, 1.99999], [], [2.99999]], highlevel=False
+    )
+    two = ak._v2.operations.convert.from_iter(
+        [[1.00001, 2.00001], [], [3.00001]], highlevel=False
+    )
     assert to_list(ak._v2.operations.structure.isclose(one, two)) == [
         [False, True],
         [],
         [True],
     ]
 
-    one = v1_to_v2(
-        ak.from_iter([[0.99999, 1.99999, None], [], [2.99999]], highlevel=False)
+    one = ak._v2.operations.convert.from_iter(
+        [[0.99999, 1.99999, None], [], [2.99999]], highlevel=False
     )
-    two = v1_to_v2(
-        ak.from_iter([[1.00001, 2.00001, None], [], [3.00001]], highlevel=False)
+    two = ak._v2.operations.convert.from_iter(
+        [[1.00001, 2.00001, None], [], [3.00001]], highlevel=False
     )
     assert to_list(ak._v2.operations.structure.isclose(one, two)) == [
         [False, True, None],
