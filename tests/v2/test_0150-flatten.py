@@ -747,7 +747,6 @@ def test_flatten_allow_regulararray_size_zero_0590():
     assert ak._v2.operations.structure.flatten(empty, axis=2).tolist() == []
 
 
-@pytest.mark.skip(reason="ak.repartition() not implemented yet")
 def test_0724():
     a = ak._v2.contents.NumpyArray(np.empty(0))
     idx = ak._v2.index.Index64([])
