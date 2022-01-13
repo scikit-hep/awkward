@@ -149,9 +149,8 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 
         out = apply(layout)
 
-        return ak._v2._util.wrap(out, array, behavior, highlevel)
+        return ak._v2._util.wrap(out, behavior, highlevel)
 
     else:
         out = layout.flatten(axis)
-
-    return ak._v2._util.wrap(out, array, behavior, highlevel)
+    return ak._v2._util.wrap(out, behavior, highlevel)
