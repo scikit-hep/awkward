@@ -697,8 +697,8 @@ def test_fix_flatten_of_sliced_array_0446():
 )
 def test_flatten_None_axis():
     array = ak.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
+    array2 = ak._v2.highlevel.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
 
-    array2 = v1_to_v2(array.layout)
     assert ak.flatten(array, axis=None) == ak._v2.operations.structure.flatten(
         array2, axis=None
     )
@@ -756,15 +756,14 @@ def test_0612():
 
 @pytest.mark.skip(reason="ak.repartition() not implemented yet")
 def test_0724():
-    a = ak.layout.NumpyArray(np.empty(0))
-    idx = ak.layout.Index64([])
-    a = ak.layout.IndexedOptionArray64(idx, a)
-    idx = ak.layout.Index64([0])
-    a = ak.layout.ListOffsetArray64(idx, a)
-    idx = ak.layout.Index64([175990832])
-    a = ak.layout.ListOffsetArray64(idx, a)
+    a = ak._v2.contents.NumpyArray(np.empty(0))
+    idx = ak._v2.index.Index64([])
+    a = ak._v2.contents.IndexedOptionArray(idx, a)
+    idx = ak._v2.index.Index64([0])
+    a = ak._v2.contents.ListOffsetArray(idx, a)
+    idx = ak._v2.index.Index64([175990832])
+    a = ak._v2.contents.ListOffsetArray(idx, a)
 
-    a = v1_to_v2(a)
     assert ak._v2.operations.structure.flatten(a, axis=2).tolist() == []
     assert (
         str(ak._v2.operations.structure.flatten(a, axis=2).type) == "0 * var * ?float64"
