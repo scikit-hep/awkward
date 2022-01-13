@@ -748,13 +748,6 @@ def test_flatten_allow_regulararray_size_zero_0590():
 
 
 @pytest.mark.skip(reason="ak.repartition() not implemented yet")
-def test_0612():
-    assert ak._v2.operations.structure.flatten(
-        ak.repartition(ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]), 3)
-    ).tolist() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-
-@pytest.mark.skip(reason="ak.repartition() not implemented yet")
 def test_0724():
     a = ak._v2.contents.NumpyArray(np.empty(0))
     idx = ak._v2.index.Index64([])
