@@ -26,6 +26,9 @@ def test():
     ]
 
 
+pytestmark = pytest.mark.skip(reason="ak.broadcast_arrays to be implemented.")
+
+
 def test_issue_334():
     a = ak._v2.highlevel.Array([1, 2, 3, 4])
     b = ak._v2.highlevel.Array([-1])
