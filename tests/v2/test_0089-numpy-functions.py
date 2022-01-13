@@ -339,7 +339,6 @@ def test_where_FIXME():
     )
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.where must be implemented")
 def test_where():
     one = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
@@ -352,8 +351,12 @@ def test_where():
         check_valid=True,
     )
 
-    assert to_list(ak._v2.operations.structure.where(condition)[0]) == [5, 7, 9]
+    assert isinstance(
+        ak._v2.operations.structure.where(condition)[0], ak._v2.highlevel.Array
+    )
 
+    assert to_list(ak._v2.operations.structure.where(condition)[0]) == [5, 7, 9]
+    print(to_list(np.where(np.asarray(condition), np.asarray(one), np.asarray(two))))
     assert to_list(ak._v2.operations.structure.where(condition, one, two)) == to_list(
         np.where(np.asarray(condition), np.asarray(one), np.asarray(two))
     )
