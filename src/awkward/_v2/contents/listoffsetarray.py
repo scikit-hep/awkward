@@ -597,7 +597,7 @@ class ListOffsetArray(Content):
                 )
 
             elif self._offsets.length == 1:
-                tooffsets = inneroffsets._getitem_range(slice(0, 1))
+                tooffsets = ak._v2.index.Index64([inneroffsets[0]])
                 return (
                     offsets,
                     ListOffsetArray(
