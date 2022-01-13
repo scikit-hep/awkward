@@ -6,17 +6,13 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2  # noqa: F401
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_concatenate_number():
-
-    a1 = ak.Array([[1, 2, 3], [], [4, 5]])
-    a1 = v1_to_v2(ak.Array([[1, 2, 3], [], [4, 5]]).layout)
-    a2 = v1_to_v2(ak.Array([[[1.1], [2.2, 3.3]], [[]], [[4.4], [5.5]]]).layout)
-    a3 = v1_to_v2(ak.Array([[123], [223], [323]]).layout)
+    a1 = ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
+    a2 = ak._v2.highlevel.Array([[[1.1], [2.2, 3.3]], [[]], [[4.4], [5.5]]]).layout
+    a3 = ak._v2.highlevel.Array([[123], [223], [323]]).layout
 
     assert to_list(ak._v2.operations.structure.concatenate([a1, 999], axis=1)) == [
         [1, 2, 3, 999],
@@ -51,26 +47,23 @@ def test_concatenate_number():
 
 
 def test_list_offset_array_concatenate():
-    content_one = ak.layout.NumpyArray(
+    content_one = ak._v2.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    content_two = ak.layout.NumpyArray(
+    content_two = ak._v2.contents.NumpyArray(
         np.array([999.999, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 0.99])
     )
-    offsets_one = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64))
-    offsets_two = ak.layout.Index64(np.array([1, 3, 4, 4, 6, 9, 9, 10], dtype=np.int64))
-    offsets_three = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
-    offsets_four = ak.layout.Index64(np.array([1, 3, 4, 4, 6, 7, 7], dtype=np.int64))
+    offsets_one = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64))
+    offsets_two = ak._v2.index.Index64(
+        np.array([1, 3, 4, 4, 6, 9, 9, 10], dtype=np.int64)
+    )
+    offsets_three = ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
+    offsets_four = ak._v2.index.Index64(np.array([1, 3, 4, 4, 6, 7, 7], dtype=np.int64))
 
-    one = ak.layout.ListOffsetArray64(offsets_one, content_one)
-    two = ak.layout.ListOffsetArray64(offsets_two, content_two)
-    three = ak.layout.ListOffsetArray64(offsets_three, one)
-    four = ak.layout.ListOffsetArray64(offsets_four, two)
-
-    one = v1_to_v2(one)
-    two = v1_to_v2(two)
-    three = v1_to_v2(three)
-    four = v1_to_v2(four)
+    one = ak._v2.contents.ListOffsetArray(offsets_one, content_one)
+    two = ak._v2.contents.ListOffsetArray(offsets_two, content_two)
+    three = ak._v2.contents.ListOffsetArray(offsets_three, one)
+    four = ak._v2.contents.ListOffsetArray(offsets_four, two)
 
     padded_one = one.rpad(7, 0)
     assert to_list(padded_one) == [
@@ -147,14 +140,11 @@ def test_list_offset_array_concatenate():
 
 
 def test_list_array_concatenate():
-    one = ak.Array([[1, 2, 3], [], [4, 5]]).layout
-    two = ak.Array([[1.1, 2.2], [3.3, 4.4], [5.5]]).layout
+    one = ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
+    two = ak._v2.highlevel.Array([[1.1, 2.2], [3.3, 4.4], [5.5]]).layout
 
-    one = ak.layout.ListArray64(one.starts, one.stops, one.content)
-    two = ak.layout.ListArray64(two.starts, two.stops, two.content)
-
-    one = v1_to_v2(one)
-    two = v1_to_v2(two)
+    one = ak._v2.contents.ListArray(one.starts, one.stops, one.content)
+    two = ak._v2.contents.ListArray(two.starts, two.stops, two.content)
 
     assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         [1, 2, 3],
@@ -172,13 +162,10 @@ def test_list_array_concatenate():
 
 
 def test_records_concatenate():
-    one = ak.Array(
+    one = ak._v2.highlevel.Array(
         [{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}]
     ).layout
-    two = ak.Array([{"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}]).layout
-
-    one = v1_to_v2(one)
-    two = v1_to_v2(two)
+    two = ak._v2.highlevel.Array([{"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}]).layout
 
     assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         {"x": 1, "y": [1]},
@@ -195,15 +182,10 @@ def test_records_concatenate():
 
 
 def test_indexed_array_concatenate():
-    one = ak.Array([[1, 2, 3], [None, 4], None, [None, 5]]).layout
-    two = ak.Array([6, 7, 8]).layout
-    three = ak.Array([[6.6], [7.7, 8.8]]).layout
-    four = ak.Array([[6.6], [7.7, 8.8], None, [9.9]]).layout
-
-    one = v1_to_v2(one)
-    two = v1_to_v2(two)
-    three = v1_to_v2(three)
-    four = v1_to_v2(four)
+    one = ak._v2.highlevel.Array([[1, 2, 3], [None, 4], None, [None, 5]]).layout
+    two = ak._v2.highlevel.Array([6, 7, 8]).layout
+    three = ak._v2.highlevel.Array([[6.6], [7.7, 8.8]]).layout
+    four = ak._v2.highlevel.Array([[6.6], [7.7, 8.8], None, [9.9]]).layout
 
     assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         [1, 2, 3],
@@ -227,13 +209,16 @@ def test_indexed_array_concatenate():
 
 
 def test_bytemasked_concatenate():
-    one = (
-        ak.Array([1, 2, 3, 4, 5, 6]).mask[[True, True, False, True, False, True]].layout
+    one = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8([True, True, False, True, False, True]),
+        ak._v2.highlevel.Array([1, 2, 3, 4, 5, 6]).layout,
+        valid_when=True,
     )
-    two = ak.Array([7, 99, 999, 8, 9]).mask[[True, False, False, True, True]].layout
-
-    one = v1_to_v2(one)
-    two = v1_to_v2(two)
+    two = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8([True, False, False, True, True]),
+        ak._v2.highlevel.Array([7, 99, 999, 8, 9]).layout,
+        valid_when=True,
+    )
 
     assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
         1,
@@ -254,19 +239,15 @@ def test_bytemasked_concatenate():
 
 
 def test_listoffsetarray_concatenate():
-    content_one = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
-    offsets_one = ak.layout.Index64(np.array([0, 3, 3, 5, 9]))
-    one = ak.layout.ListOffsetArray64(offsets_one, content_one)
-
-    one = v1_to_v2(one)
+    content_one = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
+    offsets_one = ak._v2.index.Index64(np.array([0, 3, 3, 5, 9]))
+    one = ak._v2.contents.ListOffsetArray(offsets_one, content_one)
 
     assert to_list(one) == [[1, 2, 3], [], [4, 5], [6, 7, 8, 9]]
 
-    content_two = ak.layout.NumpyArray(np.array([100, 200, 300, 400, 500]))
-    offsets_two = ak.layout.Index64(np.array([0, 2, 4, 4, 5]))
-    two = ak.layout.ListOffsetArray64(offsets_two, content_two)
-
-    two = v1_to_v2(two)
+    content_two = ak._v2.contents.NumpyArray(np.array([100, 200, 300, 400, 500]))
+    offsets_two = ak._v2.index.Index64(np.array([0, 2, 4, 4, 5]))
+    two = ak._v2.contents.ListOffsetArray(offsets_two, content_two)
 
     assert to_list(two) == [[100, 200], [300, 400], [], [500]]
     assert to_list(ak._v2.operations.structure.concatenate([one, two], 0)) == [
@@ -290,11 +271,8 @@ def test_listoffsetarray_concatenate():
 def test_numpyarray_concatenate_axis0():
     np1 = np.arange(2 * 7 * 5, dtype=np.float64).reshape(2, 7, 5)
     np2 = np.arange(3 * 7 * 5, dtype=np.int64).reshape(3, 7, 5)
-    ak1 = ak.layout.NumpyArray(np1)
-    ak2 = ak.layout.NumpyArray(np2)
-
-    ak1 = v1_to_v2(ak1)
-    ak2 = v1_to_v2(ak2)
+    ak1 = ak._v2.contents.NumpyArray(np1)
+    ak2 = ak._v2.contents.NumpyArray(np2)
 
     assert to_list(
         ak._v2.operations.structure.concatenate([np1, np2, np1, np2], 0)
@@ -311,11 +289,8 @@ def test_numpyarray_concatenate():
 
     np1 = np.arange(2 * 7 * 5, dtype=np.float64).reshape(2, 7, 5)
     np2 = np.arange(2 * 7 * 5, dtype=np.int64).reshape(2, 7, 5)
-    ak1 = ak.layout.NumpyArray(np1)
-    ak2 = ak.layout.NumpyArray(np2)
-
-    ak1 = v1_to_v2(ak1)
-    ak2 = v1_to_v2(ak2)
+    ak1 = ak._v2.contents.NumpyArray(np1)
+    ak2 = ak._v2.contents.NumpyArray(np2)
 
     assert to_list(np.concatenate([np1, np2], 1)) == to_list(
         ak._v2.operations.structure.concatenate([ak1, ak2], 1)
@@ -336,61 +311,51 @@ def test_numpyarray_concatenate():
 
 def test_numbers_and_records_concatenate():
     numbers = [
-        v1_to_v2(
-            ak.Array(
+        ak._v2.highlevel.Array(
+            [
+                [1.1, 2.2, 3.3],
+                [],
+                [4.4, 5.5],
+                [6.6, 7.7, 8.8, 9.9],
+            ]
+        ).layout,
+        ak._v2.highlevel.Array(
+            [
+                [10, 20],
+                [30],
+                [],
+                [40, 50, 60],
+            ]
+        ).layout,
+        ak._v2.highlevel.Array(
+            np.array(
                 [
-                    [1.1, 2.2, 3.3],
-                    [],
-                    [4.4, 5.5],
-                    [6.6, 7.7, 8.8, 9.9],
+                    [101, 102, 103],
+                    [201, 202, 203],
+                    [301, 302, 303],
+                    [401, 402, 403],
                 ]
-            ).layout
-        ),
-        v1_to_v2(
-            ak.Array(
-                [
-                    [10, 20],
-                    [30],
-                    [],
-                    [40, 50, 60],
-                ]
-            ).layout
-        ),
-        v1_to_v2(
-            ak.Array(
-                np.array(
-                    [
-                        [101, 102, 103],
-                        [201, 202, 203],
-                        [301, 302, 303],
-                        [401, 402, 403],
-                    ]
-                )
-            ).layout
-        ),
+            )
+        ).layout,
     ]
 
     records = [
-        v1_to_v2(
-            ak.Array(
-                [
-                    [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
-                    [],
-                    [{"x": 2.2, "y": [1, 2]}],
-                    [{"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
-                ]
-            ).layout
-        ),
-        v1_to_v2(
-            ak.Array(
-                [
-                    [{"x": 0.0, "y": []}],
-                    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
-                    [],
-                    [{"x": 3.3, "y": [1, 2, 3]}],
-                ]
-            ).layout
-        ),
+        ak._v2.highlevel.Array(
+            [
+                [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
+                [],
+                [{"x": 2.2, "y": [1, 2]}],
+                [{"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
+            ]
+        ).layout,
+        ak._v2.highlevel.Array(
+            [
+                [{"x": 0.0, "y": []}],
+                [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
+                [],
+                [{"x": 3.3, "y": [1, 2, 3]}],
+            ]
+        ).layout,
     ]
 
     assert to_list(
@@ -430,18 +395,18 @@ def test_numbers_and_records_concatenate():
     ]
 
     with pytest.raises(ValueError) as err:
-        to_list(ak.concatenate([numbers, records], axis=1))
+        to_list(ak._v2.operations.structure.concatenate([numbers, records], axis=1))
     assert str(err.value).startswith("cannot broadcast")
 
 
 def test_broadcast_and_apply_levels():
     arrays = [
-        v1_to_v2(
-            ak.Array(
-                [[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]
-            ).layout
-        ),
-        v1_to_v2(ak.Array([[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]).layout),
+        ak._v2.highlevel.Array(
+            [[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]
+        ).layout,
+        ak._v2.highlevel.Array(
+            [[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]
+        ).layout,
     ]
     # nothing is required to have the same length
     assert ak._v2.operations.structure.concatenate(arrays, axis=0).tolist() == [
@@ -467,14 +432,12 @@ def test_broadcast_and_apply_levels():
 
 
 def test_negative_axis_concatenate():
-    one = v1_to_v2(
-        ak.Array(
-            [[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]
-        ).layout
-    )
-    two = v1_to_v2(
-        ak.Array([[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]).layout
-    )
+    one = ak._v2.highlevel.Array(
+        [[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]
+    ).layout
+    two = ak._v2.highlevel.Array(
+        [[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]
+    ).layout
     arrays = [one, two]
 
     assert ak._v2.operations.structure.concatenate(arrays, axis=-1).tolist() == [
@@ -500,17 +463,13 @@ def test_negative_axis_concatenate():
 
 
 def test_even_more():
-    dim1 = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
-    dim1a = ak.Array([[1.1], [2.2], [3.3], [4.4], [5.5]])
-    dim1b = ak.Array(np.array([[1.1], [2.2], [3.3], [4.4], [5.5]]))
-    dim2 = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
-    dim3 = ak.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]], []])
-
-    dim1 = v1_to_v2(dim1.layout)
-    dim1a = v1_to_v2(dim1a.layout)
-    dim1b = v1_to_v2(dim1b.layout)
-    dim2 = v1_to_v2(dim2.layout)
-    dim3 = v1_to_v2(dim3.layout)
+    dim1 = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5]).layout
+    dim1a = ak._v2.highlevel.Array([[1.1], [2.2], [3.3], [4.4], [5.5]]).layout
+    dim1b = ak._v2.highlevel.Array(np.array([[1.1], [2.2], [3.3], [4.4], [5.5]])).layout
+    dim2 = ak._v2.highlevel.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]).layout
+    dim3 = ak._v2.highlevel.Array(
+        [[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]], []]
+    ).layout
 
     assert ak._v2.operations.structure.concatenate([dim1, 999]).tolist() == [
         1.1,
@@ -882,7 +841,7 @@ def test_even_more():
         [],
     ]
 
-    rec1 = ak.Array(
+    rec1 = ak._v2.highlevel.Array(
         [
             {"x": [1, 2], "y": [1.1]},
             {"x": [], "y": [2.2, 3.3]},
@@ -890,8 +849,8 @@ def test_even_more():
             {"x": [5, 6, 7], "y": []},
             {"x": [8, 9], "y": [4.4, 5.5]},
         ]
-    )
-    rec2 = ak.Array(
+    ).layout
+    rec2 = ak._v2.highlevel.Array(
         [
             {"x": [100], "y": [10, 20]},
             {"x": [200], "y": []},
@@ -899,10 +858,7 @@ def test_even_more():
             {"x": [], "y": [40, 50]},
             {"x": [400, 500], "y": [60]},
         ]
-    )
-
-    rec1 = v1_to_v2(rec1.layout)
-    rec2 = v1_to_v2(rec2.layout)
+    ).layout
 
     assert ak._v2.operations.structure.concatenate([rec1, rec2]).tolist() == [
         {"x": [1, 2], "y": [1.1]},

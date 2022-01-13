@@ -8,8 +8,6 @@ import awkward as ak  # noqa: F401
 
 import datetime
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
@@ -62,8 +60,7 @@ def test_time_delta_sort_argsort_unique():
 
     numpy_array = np.array(["41", "1", "20"], "timedelta64[D]")
 
-    array = ak.Array(numpy_array)
-    array = v1_to_v2(array.layout)
+    array = ak._v2.highlevel.Array(numpy_array).layout
     assert str(array.form.type) == "timedelta64[D]"
     assert to_list(array) == [
         np.timedelta64("41", "D"),

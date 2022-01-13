@@ -6,30 +6,30 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 primes = [x for x in range(2, 1000) if all(x % n != 0 for n in range(2, x))]
 
 
 def test_ListOffsetArray_to_RegularArray():
-    content = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
-    listoffsetarray = v1_to_v2(listoffsetarray)
+    content = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
+    )
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, content)
     regulararray = listoffsetarray.toRegularArray()
     assert to_list(listoffsetarray) == to_list(regulararray)
 
 
 def test_dimension_optiontype():
-    content = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
-    index = ak.layout.Index64(np.array([5, -1, 3, 2, -1, 0], dtype=np.int64))
-    indexedarray = ak.layout.IndexedOptionArray64(index, listoffsetarray)
-    depth2 = ak.layout.RegularArray(indexedarray, 3)
-    depth2 = v1_to_v2(depth2)
+    content = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
+    )
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, content)
+    index = ak._v2.index.Index64(np.array([5, -1, 3, 2, -1, 0], dtype=np.int64))
+    indexedarray = ak._v2.contents.IndexedOptionArray(index, listoffsetarray)
+    depth2 = ak._v2.contents.RegularArray(indexedarray, 3)
     assert to_list(depth2) == [
         [[101, 103, 107, 109, 113], None, [53, 59, 61, 67, 71]],
         [[31, 37, 41, 43, 47], None, [2, 3, 5, 7, 11]],
@@ -43,13 +43,14 @@ def test_dimension_optiontype():
         [[31 * 37 * 41 * 43 * 47], None, [2 * 3 * 5 * 7 * 11]],
     ]
 
-    content = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
-    index = ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0], dtype=np.int64))
-    indexedarray = ak.layout.IndexedArray64(index, listoffsetarray)
-    depth2 = ak.layout.RegularArray(indexedarray, 3)
-    depth2 = v1_to_v2(depth2)
+    content = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
+    )
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, content)
+    index = ak._v2.index.Index64(np.array([5, 4, 3, 2, 1, 0], dtype=np.int64))
+    indexedarray = ak._v2.contents.IndexedArray(index, listoffsetarray)
+    depth2 = ak._v2.contents.RegularArray(indexedarray, 3)
     assert to_list(depth2) == [
         [[101, 103, 107, 109, 113], [73, 79, 83, 89, 97], [53, 59, 61, 67, 71]],
         [[31, 37, 41, 43, 47], [13, 17, 19, 23, 29], [2, 3, 5, 7, 11]],
@@ -69,13 +70,14 @@ def test_dimension_optiontype():
 
 
 def test_reproduce_numpy():
-    content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
         [[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]],
@@ -116,10 +118,9 @@ def test_reproduce_numpy():
     ]
     assert depth2.typetracer.prod(axis=0).form == depth2.prod(axis=0).form
 
-    content2 = ak.layout.NumpyArray(np.array(primes[:12], dtype=np.int64))
-    offsets3 = ak.layout.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(np.array(primes[:12], dtype=np.int64))
+    offsets3 = ak._v2.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
     assert to_list(depth1.prod(-1)) == [
         2 * 3 * 5 * 7,
         11 * 13 * 17 * 19,
@@ -150,17 +151,16 @@ def test_reproduce_numpy():
 
 
 def test_gaps():
-    content1 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(
         np.array([123] + primes[: 2 * 3 * 5], dtype=np.int64)
     )
-    offsets1 = ak.layout.Index64(
+    offsets1 = ak._v2.index.Index64(
         np.array([0, 1, 6, 11, 16, 21, 26, 31], dtype=np.int64)
     )
-    offsets2 = ak.layout.Index64(np.array([1, 4, 7], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    offsets2 = ak._v2.index.Index64(np.array([1, 4, 7], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -174,13 +174,16 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5 - 1], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 29], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(
+        np.array(primes[: 2 * 3 * 5 - 1], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 29], dtype=np.int64)
+    )
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -203,13 +206,16 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5 - 2], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 28], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(
+        np.array(primes[: 2 * 3 * 5 - 2], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 28], dtype=np.int64)
+    )
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -231,7 +237,7 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(
         np.array(
             [
                 2,
@@ -266,12 +272,13 @@ def test_gaps():
             dtype=np.int64,
         )
     )
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 24, 28], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 24, 28], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -294,13 +301,14 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[1 : 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 4, 9, 14, 19, 24, 29], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(
+        np.array(primes[1 : 2 * 3 * 5], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets1 = ak._v2.index.Index64(np.array([0, 4, 9, 14, 19, 24, 29], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
 
     assert to_list(depth2) == [
         [[3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -314,13 +322,14 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[2 : 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 3, 8, 13, 18, 23, 28], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(
+        np.array(primes[2 : 2 * 3 * 5], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 8, 13, 18, 23, 28], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
 
     assert to_list(depth2) == [
         [[5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -334,7 +343,7 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(
         np.array(
             [
                 3,
@@ -369,12 +378,11 @@ def test_gaps():
             dtype=np.int64,
         )
     )
-    offsets1 = ak.layout.Index64(np.array([0, 3, 8, 13, 18, 23, 28], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 8, 13, 18, 23, 28], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [
         [
@@ -396,7 +404,7 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(
         np.array(
             [
                 3,
@@ -431,12 +439,11 @@ def test_gaps():
             dtype=np.int64,
         )
     )
-    offsets1 = ak.layout.Index64(np.array([0, 4, 8, 13, 18, 23, 28], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    offsets1 = ak._v2.index.Index64(np.array([0, 4, 8, 13, 18, 23, 28], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [
         [[3, 5, 7, 11], [13, 17, 19, 23], [31, 37, 41, 43, 47]],
@@ -450,7 +457,7 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(
         np.array(
             [
                 2,
@@ -485,12 +492,13 @@ def test_gaps():
             dtype=np.int64,
         )
     )
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 14, 19, 24, 28], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 14, 19, 24, 28], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43]],
@@ -504,7 +512,7 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(
+    content1 = ak._v2.contents.NumpyArray(
         np.array(
             [
                 2,
@@ -539,12 +547,11 @@ def test_gaps():
             dtype=np.int64,
         )
     )
-    offsets1 = ak.layout.Index64(np.array([0, 5, 9, 14, 19, 23, 28], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    offsets1 = ak._v2.index.Index64(np.array([0, 5, 9, 14, 19, 23, 28], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23], [31, 37, 41, 43, 47]],
@@ -558,78 +565,74 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[:9], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 3, 4, 6, 6, 7, 9], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 2, 4, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[:9], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 4, 6, 6, 7, 9], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 2, 4, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [[[2, 3, 5], [7]], [[11, 13], []], [[17], [19, 23]]]
 
     assert to_list(depth2.prod(-3)) == [[2 * 11 * 17, 3 * 13, 5], [7 * 19, 23]]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[:9], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 3, 4, 6, 7, 9], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 2, 3, 5], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[:9], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 4, 6, 7, 9], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 2, 3, 5], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [[[2, 3, 5], [7]], [[11, 13]], [[17], [19, 23]]]
 
     assert to_list(depth2.prod(-3)) == [[2 * 11 * 17, 3 * 13, 5], [7 * 19, 23]]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[:10], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 3, 5, 6, 8, 9, 10], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[:10], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 5, 6, 8, 9, 10], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [[[2, 3, 5], [7, 11], [13]], [[17, 19], [23], [29]]]
 
     assert to_list(depth2.prod(-3)) == [[34, 57, 5], [161, 11], [377]]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[:9], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 8, 9], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 4, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[:9], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 8, 9], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 4, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [[17, 19], [23]]]
 
     assert to_list(depth2.prod(-3)) == [[34, 57, 5], [23], [7, 11], [13]]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[:9], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 8, 9], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 4, 4, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[:9], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 8, 9], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 4, 4, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]]
 
     assert to_list(depth2.prod(-3)) == [[34, 57, 5], [23], [7, 11], [13]]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -648,13 +651,12 @@ def test_gaps():
     ]
     assert depth2.typetracer.prod(-2).form == depth2.prod(-2).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[:9], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 8, 9], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 4, 4, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[:9], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 8, 9], dtype=np.int64))
+    offsets2 = ak._v2.index.Index64(np.array([0, 4, 4, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
     )
-    depth2 = v1_to_v2(depth2)
 
     assert to_list(depth2) == [
         [[2, 3, 5], [], [7, 11], [13]],
@@ -677,23 +679,22 @@ def test_gaps():
 
 
 def test_complicated():
-    offsets1 = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
-    content1 = ak.layout.ListOffsetArray64(
-        offsets1, ak.layout.NumpyArray(np.array(primes[:5], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
+    content1 = ak._v2.contents.ListOffsetArray(
+        offsets1, ak._v2.contents.NumpyArray(np.array(primes[:5], dtype=np.int64))
     )
-    offsets2 = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 8, 9], dtype=np.int64))
-    offsets3 = ak.layout.Index64(np.array([0, 4, 4, 6], dtype=np.int64))
-    content2 = ak.layout.ListOffsetArray64(
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 8, 9], dtype=np.int64))
+    offsets3 = ak._v2.index.Index64(np.array([0, 4, 4, 6], dtype=np.int64))
+    content2 = ak._v2.contents.ListOffsetArray(
         offsets3,
-        ak.layout.ListOffsetArray64(
-            offsets2, ak.layout.NumpyArray(np.array(primes[:9], dtype=np.int64))
+        ak._v2.contents.ListOffsetArray(
+            offsets2, ak._v2.contents.NumpyArray(np.array(primes[:9], dtype=np.int64))
         ),
     )
-    offsets4 = ak.layout.Index64(np.array([0, 1, 1, 3], dtype=np.int64))
-    complicated = ak.layout.ListOffsetArray64(
-        offsets4, ak.layout.RecordArray([content1, content2], ["x", "y"])
+    offsets4 = ak._v2.index.Index64(np.array([0, 1, 1, 3], dtype=np.int64))
+    complicated = ak._v2.contents.ListOffsetArray(
+        offsets4, ak._v2.contents.RecordArray([content1, content2], ["x", "y"])
     )
-    complicated = v1_to_v2(complicated)
 
     assert to_list(complicated) == [
         [{"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}],
@@ -752,20 +753,18 @@ def test_complicated():
 
 
 def test_EmptyArray():
-    offsets = ak.layout.Index64(np.array([0, 0, 0, 0], dtype=np.int64))
-    array = ak.layout.ListOffsetArray64(offsets, ak.layout.EmptyArray())
-    array = v1_to_v2(array)
+    offsets = ak._v2.index.Index64(np.array([0, 0, 0, 0], dtype=np.int64))
+    array = ak._v2.contents.ListOffsetArray(offsets, ak._v2.contents.EmptyArray())
 
     assert to_list(array) == [[], [], []]
 
     assert to_list(array.prod(-1)) == [1, 1, 1]
     assert array.typetracer.prod(-1).form == array.prod(-1).form
 
-    offsets = ak.layout.Index64(np.array([0, 0, 0, 0], dtype=np.int64))
-    array = ak.layout.ListOffsetArray64(
-        offsets, ak.layout.NumpyArray(np.array([], dtype=np.int64))
+    offsets = ak._v2.index.Index64(np.array([0, 0, 0, 0], dtype=np.int64))
+    array = ak._v2.contents.ListOffsetArray(
+        offsets, ak._v2.contents.NumpyArray(np.array([], dtype=np.int64))
     )
-    array = v1_to_v2(array)
 
     assert to_list(array) == [[], [], []]
 
@@ -774,14 +773,15 @@ def test_EmptyArray():
 
 
 def test_IndexedOptionArray():
-    content = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
-    index = ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0], dtype=np.int64))
-    indexedarray = ak.layout.IndexedArray64(index, listoffsetarray)
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(offsets2, indexedarray)
-    depth2 = v1_to_v2(depth2)
+    content = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
+    )
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, content)
+    index = ak._v2.index.Index64(np.array([5, 4, 3, 2, 1, 0], dtype=np.int64))
+    indexedarray = ak._v2.contents.IndexedArray(index, listoffsetarray)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(offsets2, indexedarray)
 
     assert to_list(depth2) == [
         [[101, 103, 107, 109, 113], [73, 79, 83, 89, 97], [53, 59, 61, 67, 71]],
@@ -807,7 +807,7 @@ def test_IndexedOptionArray():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array(
             [
                 2,
@@ -834,13 +834,12 @@ def test_IndexedOptionArray():
             dtype=np.int64,
         )
     )
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, content)
-    index = ak.layout.Index64(np.array([3, -1, 2, 1, -1, 0], dtype=np.int64))
-    indexedoptionarray = ak.layout.IndexedOptionArray64(index, listoffsetarray)
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(offsets2, indexedoptionarray)
-    depth2 = v1_to_v2(depth2)
+    offsets1 = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20], dtype=np.int64))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, content)
+    index = ak._v2.index.Index64(np.array([3, -1, 2, 1, -1, 0], dtype=np.int64))
+    indexedoptionarray = ak._v2.contents.IndexedOptionArray(index, listoffsetarray)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(offsets2, indexedoptionarray)
 
     assert to_list(depth2) == [
         [[101, 103, 107, 109, 113], None, [53, 59, 61, 67, 71]],
@@ -866,7 +865,7 @@ def test_IndexedOptionArray():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array(
             [
                 2,
@@ -893,7 +892,7 @@ def test_IndexedOptionArray():
             dtype=np.int64,
         )
     )
-    index = ak.layout.Index64(
+    index = ak._v2.index.Index64(
         np.array(
             [
                 15,
@@ -930,12 +929,13 @@ def test_IndexedOptionArray():
             dtype=np.int64,
         )
     )
-    indexedoptionarray = ak.layout.IndexedOptionArray64(index, content)
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, indexedoptionarray)
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(offsets2, listoffsetarray)
-    depth2 = v1_to_v2(depth2)
+    indexedoptionarray = ak._v2.contents.IndexedOptionArray(index, content)
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
+    )
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, indexedoptionarray)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(offsets2, listoffsetarray)
 
     assert to_list(depth2) == [
         [
@@ -965,7 +965,7 @@ def test_IndexedOptionArray():
     ]
     assert depth2.typetracer.prod(-3).form == depth2.prod(-3).form
 
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array(
             [
                 2,
@@ -992,7 +992,7 @@ def test_IndexedOptionArray():
             dtype=np.int64,
         )
     )
-    index = ak.layout.Index64(
+    index = ak._v2.index.Index64(
         np.array(
             [
                 15,
@@ -1021,12 +1021,11 @@ def test_IndexedOptionArray():
             dtype=np.int64,
         )
     )
-    indexedoptionarray = ak.layout.IndexedOptionArray64(index, content)
-    offsets1 = ak.layout.Index64(np.array([0, 5, 6, 11, 16, 17, 22], dtype=np.int64))
-    listoffsetarray = ak.layout.ListOffsetArray64(offsets1, indexedoptionarray)
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(offsets2, listoffsetarray)
-    depth2 = v1_to_v2(depth2)
+    indexedoptionarray = ak._v2.contents.IndexedOptionArray(index, content)
+    offsets1 = ak._v2.index.Index64(np.array([0, 5, 6, 11, 16, 17, 22], dtype=np.int64))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, indexedoptionarray)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(offsets2, listoffsetarray)
 
     assert to_list(depth2) == [
         [[101, 103, 107, 109, 113], [None], [53, 59, 61, 67, 71]],
@@ -1054,19 +1053,18 @@ def test_IndexedOptionArray():
 
 
 def test_UnionArray():
-    content1 = ak.from_iter(
+    content1 = ak._v2.operations.convert.from_iter(
         [[[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]]],
         highlevel=False,
     )
-    content2 = ak.from_iter(
+    content2 = ak._v2.operations.convert.from_iter(
         [[[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]]],
         highlevel=False,
     )
 
-    tags = ak.layout.Index8(np.array([0, 1], dtype=np.int8))
-    index = ak.layout.Index64(np.array([0, 0], dtype=np.int64))
-    depth2 = ak.layout.UnionArray8_64(tags, index, [content1, content2])
-    depth2 = v1_to_v2(depth2)
+    tags = ak._v2.index.Index8(np.array([0, 1], dtype=np.int8))
+    index = ak._v2.index.Index64(np.array([0, 0], dtype=np.int64))
+    depth2 = ak._v2.contents.UnionArray(tags, index, [content1, content2])
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -1108,22 +1106,21 @@ def test_UnionArray():
     ]
     assert depth2.typetracer.prod(axis=0).form == depth2.prod(axis=0).form
 
-    content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1a = ak.layout.Index64(np.array([0, 5, 10, 15], dtype=np.int64))
-    offsets1b = ak.layout.Index64(np.array([15, 20, 25, 30], dtype=np.int64))
-    tags = ak.layout.Index8(np.array([0, 0, 0, 1, 1, 1], dtype=np.int8))
-    index = ak.layout.Index64(np.array([0, 1, 2, 0, 1, 2], dtype=np.int64))
-    unionarray = ak.layout.UnionArray8_64(
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1a = ak._v2.index.Index64(np.array([0, 5, 10, 15], dtype=np.int64))
+    offsets1b = ak._v2.index.Index64(np.array([15, 20, 25, 30], dtype=np.int64))
+    tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1], dtype=np.int8))
+    index = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 2], dtype=np.int64))
+    unionarray = ak._v2.contents.UnionArray(
         tags,
         index,
         [
-            ak.layout.ListOffsetArray64(offsets1a, content1),
-            ak.layout.ListOffsetArray64(offsets1b, content1),
+            ak._v2.contents.ListOffsetArray(offsets1a, content1),
+            ak._v2.contents.ListOffsetArray(offsets1b, content1),
         ],
     )
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(offsets2, unionarray)
-    depth2 = v1_to_v2(depth2)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(offsets2, unionarray)
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],
@@ -1167,12 +1164,11 @@ def test_UnionArray():
 
 
 def test_sum():
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048], dtype=np.int64)
     )
-    offsets3 = ak.layout.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1.sum(-1)) == [
         1 + 2 + 4 + 8,
@@ -1205,10 +1201,9 @@ def test_sum():
 
 def test_sumprod_types_FIXME():
     array = np.array([[True, False, False], [True, False, False]])
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
 
@@ -1221,19 +1216,17 @@ def test_sumprod_types():
         return out
 
     array = np.array([[True, False, False], [True, False, False]])
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert sum(to_list(np.sum(array, axis=-1))) == sum(to_list(depth1.sum(axis=-1)))
     assert prod(to_list(np.prod(array, axis=-1))) == prod(to_list(depth1.prod(axis=-1)))
 
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int8)
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
@@ -1241,10 +1234,9 @@ def test_sumprod_types():
     assert prod(to_list(np.prod(array, axis=-1))) == prod(to_list(depth1.prod(axis=-1)))
 
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint8)
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
@@ -1252,10 +1244,9 @@ def test_sumprod_types():
     assert prod(to_list(np.prod(array, axis=-1))) == prod(to_list(depth1.prod(axis=-1)))
 
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int16)
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
@@ -1263,10 +1254,9 @@ def test_sumprod_types():
     assert prod(to_list(np.prod(array, axis=-1))) == prod(to_list(depth1.prod(axis=-1)))
 
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint16)
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
@@ -1274,10 +1264,9 @@ def test_sumprod_types():
     assert prod(to_list(np.prod(array, axis=-1))) == prod(to_list(depth1.prod(axis=-1)))
 
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int32)
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
@@ -1285,10 +1274,9 @@ def test_sumprod_types():
     assert prod(to_list(np.prod(array, axis=-1))) == prod(to_list(depth1.prod(axis=-1)))
 
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint32)
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
@@ -1296,10 +1284,9 @@ def test_sumprod_types():
     assert prod(to_list(np.prod(array, axis=-1))) == prod(to_list(depth1.prod(axis=-1)))
 
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
@@ -1307,10 +1294,9 @@ def test_sumprod_types():
     assert prod(to_list(np.prod(array, axis=-1))) == prod(to_list(depth1.prod(axis=-1)))
 
     array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint64)
-    content2 = ak.layout.NumpyArray(array.reshape(-1))
-    offsets3 = ak.layout.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    content2 = ak._v2.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert np.sum(array, axis=-1).dtype == np.asarray(depth1.sum(axis=-1)).dtype
     assert np.prod(array, axis=-1).dtype == np.asarray(depth1.prod(axis=-1)).dtype
@@ -1319,12 +1305,11 @@ def test_sumprod_types():
 
 
 def test_any():
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 0.0, 0.0, 0.0])
     )
-    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1) == [
         [1.1, 2.2, 3.3],
@@ -1344,12 +1329,11 @@ def test_any():
 
 
 def test_all():
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
     )
-    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1) == [
         [1.1, 2.2, 3.3],
@@ -1369,12 +1353,11 @@ def test_all():
 
 
 def test_count():
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
     )
-    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1) == [
         [1.1, 2.2, 3.3],
@@ -1394,12 +1377,11 @@ def test_count():
 
 
 def test_count_nonzero():
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
     )
-    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1) == [
         [1.1, 2.2, 3.3],
@@ -1419,12 +1401,11 @@ def test_count_nonzero():
 
 
 def test_count_min():
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
     )
-    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1) == [
         [1.1, 2.2, 3.3],
@@ -1442,12 +1423,11 @@ def test_count_min():
     assert to_list(depth1.min(0)) == [0.0, 2.2, 0.0, 4.4]
     assert depth1.typetracer.min(0).form == depth1.min(0).form
 
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([True, True, True, False, True, False, False, True, False, True])
     )
-    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1) == [
         [True, True, True],
@@ -1467,12 +1447,11 @@ def test_count_min():
 
 
 def test_count_max():
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
     )
-    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1) == [
         [1.1, 2.2, 3.3],
@@ -1490,12 +1469,11 @@ def test_count_max():
     assert to_list(depth1.max(0)) == [1.1, 2.2, 3.3, 4.4]
     assert depth1.typetracer.max(0).form == depth1.max(0).form
 
-    content2 = ak.layout.NumpyArray(
+    content2 = ak._v2.contents.NumpyArray(
         np.array([False, True, True, False, True, False, False, False, False, False])
     )
-    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
-    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
-    depth1 = v1_to_v2(depth1)
+    offsets3 = ak._v2.index.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak._v2.contents.ListOffsetArray(offsets3, content2)
 
     assert to_list(depth1) == [
         [False, True, True],
@@ -1515,12 +1493,11 @@ def test_count_max():
 
 
 def test_mask():
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 6, 6, 9], dtype=np.int64))
-    array = ak.layout.ListOffsetArray64(offsets, content)
-    array = v1_to_v2(array)
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 6, 6, 9], dtype=np.int64))
+    array = ak._v2.contents.ListOffsetArray(offsets, content)
 
     assert to_list(array.min(axis=-1, mask=False)) == [
         1.1,
@@ -1551,7 +1528,7 @@ def test_mask():
 
 
 def test_ByteMaskedArray():
-    content = ak.from_iter(
+    content = ak._v2.operations.convert.from_iter(
         [
             [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
             [],
@@ -1561,9 +1538,8 @@ def test_ByteMaskedArray():
         ],
         highlevel=False,
     )
-    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    v1_array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-    v2_array = v1_to_v2(v1_array)
+    mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    v2_array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
 
     assert to_list(v2_array) == [
         [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
@@ -1584,13 +1560,14 @@ def test_ByteMaskedArray():
 
 def test_keepdims():
     nparray = np.array(primes[: 2 * 3 * 5], dtype=np.int64).reshape(2, 3, 5)
-    content1 = ak.layout.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
-    offsets1 = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
-    offsets2 = ak.layout.Index64(np.array([0, 3, 6], dtype=np.int64))
-    depth2 = ak.layout.ListOffsetArray64(
-        offsets2, ak.layout.ListOffsetArray64(offsets1, content1)
+    content1 = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.int64))
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
     )
-    depth2 = v1_to_v2(depth2)
+    offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
+    depth2 = ak._v2.contents.ListOffsetArray(
+        offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
+    )
 
     assert to_list(depth2) == [
         [[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]],

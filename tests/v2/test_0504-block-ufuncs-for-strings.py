@@ -39,6 +39,6 @@ def test():
     )
     assert to_list(array * 10) == [3210, 11, 1230, 11, 9990, 11, 20]
 
-    array = ak.Array(["HAL"])
-    with pytest.raises(ValueError):
+    array = ak._v2.highlevel.Array(["HAL"])
+    with pytest.raises(TypeError):
         array + 1

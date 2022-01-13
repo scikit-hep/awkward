@@ -6,13 +6,11 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_bytemaskedarray_num():
-    content = ak.from_iter(
+    content = ak._v2.operations.convert.from_iter(
         [
             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
             [],
@@ -22,10 +20,8 @@ def test_bytemaskedarray_num():
         ],
         highlevel=False,
     )
-    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-
-    array = v1_to_v2(array)
+    mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
 
     assert to_list(array) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
@@ -43,16 +39,14 @@ def test_bytemaskedarray_num():
 
 
 def test_emptyarray():
-    array = ak.layout.EmptyArray()
-    array = v1_to_v2(array)
+    array = ak._v2.contents.EmptyArray()
     assert to_list(array.num(0)) == 0
     assert to_list(array.num(1)) == []
     assert to_list(array.num(2)) == []
 
 
 def test_numpyarray():
-    array = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
-    array = v1_to_v2(array)
+    array = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
 
     assert array.num(0) == 2
     assert to_list(array.num(1)) == [3, 3]
@@ -67,11 +61,9 @@ def test_numpyarray():
 
 
 def test_regulararray():
-    array = ak.layout.NumpyArray(
+    array = ak._v2.contents.NumpyArray(
         np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
     ).toRegularArray()
-
-    array = v1_to_v2(array)
 
     assert array.num(0) == 2
     assert to_list(array.num(1)) == [3, 3]
@@ -84,13 +76,9 @@ def test_regulararray():
         array.num(4)
     assert str(err.value).startswith("axis=4 exceeds the depth of this array (3)")
 
-    empty = ak.Array(
-        ak.layout.RegularArray(
-            ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
-        )
+    empty = ak._v2.contents.RegularArray(
+        ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
     )
-
-    empty = v1_to_v2(empty.layout)
 
     assert empty.num(axis=0) == 0
     assert to_list(empty.num(axis=1)) == []
@@ -98,12 +86,10 @@ def test_regulararray():
 
 
 def test_listarray():
-    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
-    starts = ak.layout.Index64(np.array([0, 3, 3], dtype=np.int64))
-    stops = ak.layout.Index64(np.array([3, 3, 5], dtype=np.int64))
-    array = ak.layout.ListArray64(starts, stops, content)
-
-    array = v1_to_v2(array)
+    content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
+    starts = ak._v2.index.Index64(np.array([0, 3, 3], dtype=np.int64))
+    stops = ak._v2.index.Index64(np.array([3, 3, 5], dtype=np.int64))
+    array = ak._v2.contents.ListArray(starts, stops, content)
 
     assert to_list(array) == [
         [
@@ -129,11 +115,9 @@ def test_listarray():
 
 
 def test_listoffsetarray():
-    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
-    array = ak.layout.ListOffsetArray64(offsets, content)
-
-    array = v1_to_v2(array)
+    content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
+    array = ak._v2.contents.ListOffsetArray(offsets, content)
 
     assert to_list(array) == [
         [
@@ -159,13 +143,11 @@ def test_listoffsetarray():
 
 
 def test_indexedarray():
-    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
-    listarray = ak.layout.ListOffsetArray64(offsets, content)
-    index = ak.layout.Index64(np.array([2, 2, 1, 0], dtype=np.int64))
-    array = ak.layout.IndexedArray64(index, listarray)
-
-    array = v1_to_v2(array)
+    content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
+    listarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    index = ak._v2.index.Index64(np.array([2, 2, 1, 0], dtype=np.int64))
+    array = ak._v2.contents.IndexedArray(index, listarray)
 
     assert to_list(array) == [
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
@@ -194,13 +176,11 @@ def test_indexedarray():
 
 
 def test_indexedoptionarray():
-    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
-    offsets = ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
-    listarray = ak.layout.ListOffsetArray64(offsets, content)
-    index = ak.layout.Index64(np.array([2, -1, 2, 1, -1, 0], dtype=np.int64))
-    array = ak.layout.IndexedOptionArray64(index, listarray)
-
-    array = v1_to_v2(array)
+    content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(5, 3, 2))
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64))
+    listarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    index = ak._v2.index.Index64(np.array([2, -1, 2, 1, -1, 0], dtype=np.int64))
+    array = ak._v2.contents.IndexedOptionArray(index, listarray)
 
     assert to_list(array) == [
         [[[18, 19], [20, 21], [22, 23]], [[24, 25], [26, 27], [28, 29]]],
@@ -233,7 +213,7 @@ def test_indexedoptionarray():
 
 
 def test_recordarray():
-    array = ak.from_iter(
+    array = ak._v2.operations.convert.from_iter(
         [
             {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
@@ -243,11 +223,9 @@ def test_recordarray():
         highlevel=False,
     )
 
-    array = v1_to_v2(array)
-
     assert to_list(array.num(0)) == {"x": 4, "y": 4}
 
-    array = ak.from_iter(
+    array = ak._v2.operations.convert.from_iter(
         [
             {"x": [3.3, 3.3, 3.3], "y": []},
             {"x": [2.2, 2.2], "y": [1]},
@@ -256,8 +234,6 @@ def test_recordarray():
         ],
         highlevel=False,
     )
-
-    array = v1_to_v2(array)
 
     assert to_list(array.num(0)) == {"x": 4, "y": 4}
     assert to_list(array.num(1)) == [
@@ -268,7 +244,7 @@ def test_recordarray():
     ]
     assert to_list(array.num(1)[2]) == {"x": 1, "y": 2}
 
-    array = ak.from_iter(
+    array = ak._v2.operations.convert.from_iter(
         [
             {"x": [[3.3, 3.3, 3.3]], "y": []},
             {"x": [[2.2, 2.2]], "y": [1]},
@@ -277,8 +253,6 @@ def test_recordarray():
         ],
         highlevel=False,
     )
-
-    array = v1_to_v2(array)
 
     assert to_list(array.num(0)) == {"x": 4, "y": 4}
     assert to_list(array.num(1)) == [
@@ -291,12 +265,15 @@ def test_recordarray():
 
 
 def test_unionarray():
-    content1 = ak.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
-    content2 = ak.from_iter([[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []], highlevel=False)
-    tags = ak.layout.Index8(np.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=np.int8))
-    index = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int64))
-    array = ak.layout.UnionArray8_64(tags, index, [content1, content2])
-    array = v1_to_v2(array)
+    content1 = ak._v2.operations.convert.from_iter(
+        [[], [1], [2, 2], [3, 3, 3]], highlevel=False
+    )
+    content2 = ak._v2.operations.convert.from_iter(
+        [[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []], highlevel=False
+    )
+    tags = ak._v2.index.Index8(np.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=np.int8))
+    index = ak._v2.index.Index64(np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int64))
+    array = ak._v2.contents.UnionArray(tags, index, [content1, content2])
     assert to_list(array) == [
         [],
         [3.3, 3.3, 3.3],
@@ -315,15 +292,12 @@ def test_unionarray():
 
 @pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.num not implemented")
 def test_highlevel():
-    array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    array = ak._v2.highlevel.Array(v1_to_v2(array.layout))
+    array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     assert to_list(ak._v2.operations.structure.num(array)) == [3, 0, 2]
 
 
 def test_array_3d():
-    array = ak.Array(np.arange(3 * 5 * 2).reshape(3, 5, 2))
-
-    array = v1_to_v2(array.layout)
+    array = ak._v2.highlevel.Array(np.arange(3 * 5 * 2).reshape(3, 5, 2)).layout
 
     assert to_list(array) == [
         [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]],
@@ -354,42 +328,41 @@ def test_array_3d():
         assert str(err.value).startswith("axis=-4 exceeds the depth of this array (3)")
 
 
+@pytest.mark.skip(reason="FIXME: implement highlevel v2 ak.num")
 def test_listarray_negative_axis_wrap():
-    array = ak.Array(np.arange(3 * 5 * 2).reshape(3, 5, 2).tolist())
-    assert ak.num(array, axis=0) == 3
-    assert ak.num(array, axis=1).tolist() == [5, 5, 5]
-    assert ak.num(array, axis=2).tolist() == [
+    array = ak._v2.highlevel.Array(np.arange(3 * 5 * 2).reshape(3, 5, 2).tolist())
+    assert ak._v2.operations.structure.num(array, axis=0) == 3
+    assert ak._v2.operations.structure.num(array, axis=1).tolist() == [5, 5, 5]
+    assert ak._v2.operations.structure.num(array, axis=2).tolist() == [
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
     ]
 
     with pytest.raises(ValueError) as err:
-        assert ak.num(array, axis=3)
+        assert ak._v2.operations.structure.num(array, axis=3)
         assert str(err.value).startswith("axis=3 exceeds the depth of this array (2)")
 
-    assert ak.num(array, axis=-1).tolist() == [
+    assert ak._v2.operations.structure.num(array, axis=-1).tolist() == [
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
         [2, 2, 2, 2, 2],
     ]
-    assert ak.num(array, axis=-2).tolist() == [5, 5, 5]
-    assert ak.num(array, axis=-3) == 3
+    assert ak._v2.operations.structure.num(array, axis=-2).tolist() == [5, 5, 5]
+    assert ak._v2.operations.structure.num(array, axis=-3) == 3
     with pytest.raises(ValueError) as err:
-        assert ak.num(array, axis=-4)
+        assert ak._v2.operations.structure.num(array, axis=-4)
         assert str(err.value).startswith("axis=-4 exceeds the depth of this array (3)")
 
 
 def test_recordarray_negative_axis_wrap():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             {"x": [1], "y": [[], [1]]},
             {"x": [1, 2], "y": [[], [1], [1, 2]]},
             {"x": [1, 2, 3], "y": [[], [1], [1, 2], [1, 2, 3]]},
         ]
-    )
-
-    array = v1_to_v2(array.layout)
+    ).layout
 
     assert to_list(array.num(axis=0)) == {"x": 3, "y": 3}
     assert to_list(array.num(axis=1)) == [
@@ -409,15 +382,13 @@ def test_recordarray_negative_axis_wrap():
 
 
 def test_recordarray_axis_out_of_range():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             {"x": [1], "y": [[], [1]]},
             {"x": [1, 2], "y": [[], [1], [1, 2]]},
             {"x": [1, 2, 3], "y": [[], [1], [1, 2], [1, 2, 3]]},
         ]
-    )
-
-    array = v1_to_v2(array.layout)
+    ).layout
 
     with pytest.raises(ValueError) as err:
         assert array.num(axis=-2)

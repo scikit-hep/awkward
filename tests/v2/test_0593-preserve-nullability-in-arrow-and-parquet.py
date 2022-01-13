@@ -8,15 +8,13 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 pyarrow = pytest.importorskip("pyarrow")
 
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_list_to_arrow():
-    ak_array = v1_to_v2(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout)
+    ak_array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     pa_array = ak_array.to_arrow()
     assert isinstance(pa_array.type.storage_type, pyarrow.LargeListType)
     assert pa_array.to_pylist() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
@@ -28,15 +26,15 @@ def test_list_to_arrow():
     assert isinstance(pa_array.type.storage_type, pyarrow.LargeListType)
     assert pa_array.to_pylist() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-    ak_array = v1_to_v2(ak.Array([[1.1, 2.2, None], [], [4.4, 5.5]]).layout)
+    ak_array = ak._v2.highlevel.Array([[1.1, 2.2, None], [], [4.4, 5.5]]).layout
     pa_array = ak_array.to_arrow()
     assert isinstance(pa_array.type.storage_type, pyarrow.LargeListType)
     assert pa_array.to_pylist() == [[1.1, 2.2, None], [], [4.4, 5.5]]
 
 
 def test_record_to_arrow():
-    x_content = v1_to_v2(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5]).layout)
-    z_content = v1_to_v2(ak.Array([1, 2, 3, None, 5]).layout)
+    x_content = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5]).layout
+    z_content = ak._v2.highlevel.Array([1, 2, 3, None, 5]).layout
 
     ak_array = ak._v2.contents.RecordArray(
         [
@@ -58,44 +56,44 @@ def test_record_to_arrow():
 
 
 def test_union_to_arrow():
-    ak_array = v1_to_v2(ak.Array([1.1, 2.2, None, [1, 2, 3], "hello"]).layout)
+    ak_array = ak._v2.highlevel.Array([1.1, 2.2, None, [1, 2, 3], "hello"]).layout
     pa_array = ak_array.to_arrow()
     assert isinstance(pa_array.type.storage_type, pyarrow.DenseUnionType)
     assert pa_array.to_pylist() == [1.1, 2.2, None, [1, 2, 3], "hello"]
 
     ak_array = ak._v2.contents.UnmaskedArray(
-        v1_to_v2(ak.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout)
+        ak._v2.highlevel.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout
     )
     pa_array = ak_array.to_arrow()
     assert isinstance(pa_array.type.storage_type, pyarrow.DenseUnionType)
     assert pa_array.to_pylist() == [1.1, 2.2, [1, 2, 3], "hello"]
 
-    ak_array = v1_to_v2(ak.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout)
+    ak_array = ak._v2.highlevel.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout
     pa_array = ak_array.to_arrow()
     assert isinstance(pa_array.type.storage_type, pyarrow.DenseUnionType)
     assert pa_array.to_pylist() == [1.1, 2.2, [1, 2, 3], "hello"]
 
 
 def test_list_from_arrow():
-    original = v1_to_v2(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout)
+    original = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     pa_array = original.to_arrow()
     reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
     assert str(reconstituted.form.type) == "var * float64"
     assert to_list(reconstituted) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-    original = v1_to_v2(ak.Array([[1.1, 2.2, None], [], [4.4, 5.5]]).layout)
+    original = ak._v2.highlevel.Array([[1.1, 2.2, None], [], [4.4, 5.5]]).layout
     pa_array = original.to_arrow()
     reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
     assert str(reconstituted.form.type) == "var * ?float64"
     assert to_list(reconstituted) == [[1.1, 2.2, None], [], [4.4, 5.5]]
 
-    original = v1_to_v2(ak.Array([[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]).layout)
+    original = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]).layout
     pa_array = original.to_arrow()
     reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
     assert str(reconstituted.form.type) == "option[var * float64]"
     assert to_list(reconstituted) == [[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]
 
-    original = v1_to_v2(ak.Array([[1.1, 2.2, None], [], None, [4.4, 5.5]]).layout)
+    original = ak._v2.highlevel.Array([[1.1, 2.2, None], [], None, [4.4, 5.5]]).layout
     pa_array = original.to_arrow()
     reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
     assert str(reconstituted.form.type) == "option[var * ?float64]"
@@ -103,8 +101,8 @@ def test_list_from_arrow():
 
 
 def test_record_from_arrow():
-    x_content = v1_to_v2(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5]).layout)
-    z_content = v1_to_v2(ak.Array([1, 2, 3, None, 5]).layout)
+    x_content = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5]).layout
+    z_content = ak._v2.highlevel.Array([1, 2, 3, None, 5]).layout
 
     original = ak._v2.contents.RecordArray(
         [
@@ -143,13 +141,13 @@ def test_record_from_arrow():
 
 
 def test_union_from_arrow():
-    original = v1_to_v2(ak.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout)
+    original = ak._v2.highlevel.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout
     pa_array = original.to_arrow()
     reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
     assert str(reconstituted.form.type) == "union[float64, var * int64, string]"
     assert to_list(reconstituted) == [1.1, 2.2, [1, 2, 3], "hello"]
 
-    original = v1_to_v2(ak.Array([1.1, 2.2, None, [1, 2, 3], "hello"]).layout)
+    original = ak._v2.highlevel.Array([1.1, 2.2, None, [1, 2, 3], "hello"]).layout
     pa_array = original.to_arrow()
     reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
     assert (
