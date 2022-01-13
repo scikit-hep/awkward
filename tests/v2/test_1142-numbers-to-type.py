@@ -6,18 +6,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 
 def test_numbers_to_type():
-    one, two, three = (
-        ak.Array([1, 2, 3]).layout,
-        ak.Array([4, 5]).layout,
-        ak.Array([6]).layout,
+    one, two = (
+        ak._v2.highlevel.Array([1, 2, 3]).layout,
+        ak._v2.highlevel.Array([4, 5]).layout,
     )
-    one = v1_to_v2(one)
-    two = v1_to_v2(two)
-    three = v1_to_v2(three)
 
     assert np.asarray(one.numbers_to_type("bool")).dtype == np.dtype(np.bool_)
     assert np.asarray(one.numbers_to_type("int8")).dtype == np.dtype(np.int8)

@@ -6,13 +6,10 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 
 def test():
     np_data = np.random.random(size=(4, 100 * 1024 * 1024 // 8 // 4))
-    array = ak.from_numpy(np_data, regulararray=False)
-    array = v1_to_v2(array.layout)
+    array = ak._v2.operations.convert.from_numpy(np_data, regulararray=False)
 
     assert np_data.nbytes == array.nbytes
 
@@ -31,7 +28,7 @@ def test_NumpyArray_nbytes():
 
 
 def test_ByteMaskedArray_nbytes():
-    content = ak.from_iter(
+    content = ak._v2.operations.convert.from_iter(
         [
             [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
             [],
@@ -41,11 +38,10 @@ def test_ByteMaskedArray_nbytes():
         ],
         highlevel=False,
     )
-    mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
-    v1_array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
-    v2_array = v1_to_v2(v1_array)
+    mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
+    array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
 
-    assert v2_array.nbytes == v1_array.nbytes
+    assert array.nbytes == 221
 
 
 def test_BitMaskedArray_nbytes():

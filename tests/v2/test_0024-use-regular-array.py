@@ -6,15 +6,14 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_empty_array_slice():
     # inspired by PR021::test_getitem
-    a = ak.from_json("[[], [[], []], [[], [], []]]")
-    a = v1_to_v2(a.layout)
+    a = ak._v2.operations.convert.from_iter(
+        [[], [[], []], [[], [], []]], highlevel=False
+    )
     assert to_list(a[2, 1, np.array([], dtype=int)]) == []
     assert (
         a.typetracer[2, 1, np.array([], dtype=int)].form
@@ -27,16 +26,14 @@ def test_empty_array_slice():
     )
 
     # inspired by PR015::test_deep_numpy
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]])
     )
-    listarray = ak.layout.ListArray64(
-        ak.layout.Index64(np.array([0, 3, 3])),
-        ak.layout.Index64(np.array([3, 3, 5])),
+    listarray = ak._v2.contents.ListArray(
+        ak._v2.index.Index64(np.array([0, 3, 3])),
+        ak._v2.index.Index64(np.array([3, 3, 5])),
         content,
     )
-    content = v1_to_v2(content)
-    listarray = v1_to_v2(listarray)
     assert to_list(listarray[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]]) == [
         8.8,
         5.5,
@@ -63,13 +60,12 @@ def test_empty_array_slice():
 def test_nonflat_slice():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
 
-    content = ak.layout.NumpyArray(array.reshape(-1))
-    inneroffsets = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
-    outeroffsets = ak.layout.Index64(np.array([0, 3, 6]))
-    listoffsetarray = ak.layout.ListOffsetArray64(
-        outeroffsets, ak.layout.ListOffsetArray64(inneroffsets, content)
+    content = ak._v2.contents.NumpyArray(array.reshape(-1))
+    inneroffsets = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
+    outeroffsets = ak._v2.index.Index64(np.array([0, 3, 6]))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(
+        outeroffsets, ak._v2.contents.ListOffsetArray(inneroffsets, content)
     )
-    listoffsetarray = v1_to_v2(listoffsetarray)
 
     assert to_list(
         array[[1, 0, 1, 1, 1, 0], [2, 0, 1, 1, 2, 0], [2, 4, 2, 4, 0, 1]]
@@ -95,13 +91,12 @@ def test_nonflat_slice():
 )
 def test_nonflat_slice_2():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
-    content = ak.layout.NumpyArray(array.reshape(-1))
-    inneroffsets = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
-    outeroffsets = ak.layout.Index64(np.array([0, 3, 6]))
-    listoffsetarray = ak.layout.ListOffsetArray64(
-        outeroffsets, ak.layout.ListOffsetArray64(inneroffsets, content)
+    content = ak._v2.contents.NumpyArray(array.reshape(-1))
+    inneroffsets = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
+    outeroffsets = ak._v2.index.Index64(np.array([0, 3, 6]))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(
+        outeroffsets, ak._v2.contents.ListOffsetArray(inneroffsets, content)
     )
-    listoffsetarray = v1_to_v2(listoffsetarray)
 
     two = listoffsetarray[
         [[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]
@@ -112,13 +107,12 @@ def test_nonflat_slice_2():
 def test_newaxis():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
 
-    content = ak.layout.NumpyArray(array.reshape(-1))
-    inneroffsets = ak.layout.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
-    outeroffsets = ak.layout.Index64(np.array([0, 3, 6]))
-    listoffsetarray = ak.layout.ListOffsetArray64(
-        outeroffsets, ak.layout.ListOffsetArray64(inneroffsets, content)
+    content = ak._v2.contents.NumpyArray(array.reshape(-1))
+    inneroffsets = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
+    outeroffsets = ak._v2.index.Index64(np.array([0, 3, 6]))
+    listoffsetarray = ak._v2.contents.ListOffsetArray(
+        outeroffsets, ak._v2.contents.ListOffsetArray(inneroffsets, content)
     )
-    listoffsetarray = v1_to_v2(listoffsetarray)
 
     assert to_list(array[:, np.newaxis]) == [
         [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]]],

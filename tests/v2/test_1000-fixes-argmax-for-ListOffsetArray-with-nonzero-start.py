@@ -21,7 +21,7 @@ def test_mine():
     assert (
         ak._v2.operations.reducers.argmax(array, axis=-1).tolist()
         == ak._v2.operations.reducers.argmax(
-            ak.Array([[1.1], [2.2, 3.3], [4.4, 5.5, 6.6]]), axis=-1
+            ak._v2.highlevel.Array([[1.1], [2.2, 3.3], [4.4, 5.5, 6.6]]), axis=-1
         ).tolist()
     )
 

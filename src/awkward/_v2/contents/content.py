@@ -208,6 +208,31 @@ class Content(object):
                 else:
                     raise NestedIndexError(self, slicer, message)
 
+    @staticmethod
+    def _selfless_handle_error(error):
+        if error.str is not None:
+            if error.filename is None:
+                filename = ""
+            else:
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
+
+            message = error.str.decode(errors="surrogateescape")
+
+            if error.pass_through:
+                raise ValueError(message + filename)
+
+            else:
+                if error.attempt != ak._util.kSliceNone:
+                    message += " while attempting to get index {0}".format(
+                        error.attempt
+                    )
+
+                message += filename
+
+                raise ValueError(message)
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         raise TypeError(
             "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"

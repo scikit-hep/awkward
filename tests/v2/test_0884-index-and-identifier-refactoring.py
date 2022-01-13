@@ -8,36 +8,32 @@ import awkward as ak  # noqa: F401
 
 
 def test_index32():
-    cpp_array = ak.layout.Index32(np.zeros(10))
     py_array = ak._v2.index.Index.zeros(10, np, np.int32)
 
-    assert len(cpp_array) == len(py_array)
+    assert len(py_array) == 10
     assert "i32" == py_array.form
 
 
 def test_index64():
-    cpp_array = ak.layout.Index64(np.zeros(10))
     py_array = ak._v2.index.Index.zeros(10, np, np.int64)
 
-    assert len(cpp_array) == len(py_array)
+    assert len(py_array) == 10
     assert "i64" == py_array.form
 
 
 def test_identifier32():
-    cpp_array = ak.layout.Identities32(123, [(1, "one"), (2, "two")], 10, 5)
     py_array = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int32
     )
 
-    assert len(cpp_array) == len(py_array)
+    assert len(py_array) == 5
     assert py_array._data.dtype == np.dtype(np.int32)
 
 
 def test_identifier64():
-    cpp_array = ak.layout.Identities64(123, [(1, "one"), (2, "two")], 10, 5)
     py_array = ak._v2.identifier.Identifier.zeros(
         123, {1: "one", 2: "two"}, 5, 10, np, np.int64
     )
 
-    assert len(cpp_array) == len(py_array)
+    assert len(py_array) == 5
     assert py_array._data.dtype == np.dtype(np.int64)

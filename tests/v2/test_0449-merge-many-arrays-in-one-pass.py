@@ -6,8 +6,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2  # noqa: F401
-
 to_list = ak._v2.operations.convert.to_list
 
 
@@ -47,63 +45,63 @@ def test_numpyarray():
                     four = np.array([4, 5, 0, 6, 7], dtype=dtype4)
                     combined = np.concatenate([one, two, three, four])
 
-                    ak_combined = v1_to_v2(ak.layout.NumpyArray(one)).mergemany(
+                    ak_combined = ak._v2.contents.NumpyArray(one).mergemany(
                         [
-                            v1_to_v2(ak.layout.NumpyArray(two)),
-                            v1_to_v2(ak.layout.NumpyArray(three)),
-                            v1_to_v2(ak.layout.NumpyArray(four)),
+                            ak._v2.contents.NumpyArray(two),
+                            ak._v2.contents.NumpyArray(three),
+                            ak._v2.contents.NumpyArray(four),
                         ]
                     )
 
                     assert to_list(ak_combined) == combined.tolist()
                     assert ak_combined.dtype == combined.dtype
 
-                    # assert v1_to_v2(ak.layout.NumpyArray(one)).typetracer.mergemany(
+                    # assert ak._v2.contents.NumpyArray(one).typetracer.mergemany(
                     #     [
-                    #         v1_to_v2(ak.layout.NumpyArray(two)),
-                    #         v1_to_v2(ak.layout.NumpyArray(three)),
-                    #         v1_to_v2(ak.layout.NumpyArray(four)),
+                    #         ak._v2.contents.NumpyArray(two),
+                    #         ak._v2.contents.NumpyArray(three),
+                    #         ak._v2.contents.NumpyArray(four),
                     #     ]
-                    # ).form == v1_to_v2(ak.layout.NumpyArray(one)).mergemany(
+                    # ).form == ak._v2.contents.NumpyArray(one).mergemany(
                     #     [
-                    #         v1_to_v2(ak.layout.NumpyArray(two)),
-                    #         v1_to_v2(ak.layout.NumpyArray(three)),
-                    #         v1_to_v2(ak.layout.NumpyArray(four)),
+                    #         ak._v2.contents.NumpyArray(two),
+                    #         ak._v2.contents.NumpyArray(three),
+                    #         ak._v2.contents.NumpyArray(four),
                     #     ]
                     # ).form
 
-                    ak_combined = v1_to_v2(ak.layout.NumpyArray(one)).mergemany(
+                    ak_combined = ak._v2.contents.NumpyArray(one).mergemany(
                         [
-                            v1_to_v2(ak.layout.NumpyArray(two)),
-                            v1_to_v2(ak.layout.EmptyArray()),
-                            v1_to_v2(ak.layout.NumpyArray(four)),
+                            ak._v2.contents.NumpyArray(two),
+                            ak._v2.contents.EmptyArray(),
+                            ak._v2.contents.NumpyArray(four),
                         ]
                     )
 
                     assert to_list(ak_combined) == combined.tolist()
                     assert ak_combined.dtype == np.concatenate([one, two, four]).dtype
 
-                    # assert v1_to_v2(ak.layout.NumpyArray(one)).typetracer.mergemany(
+                    # assert ak._v2.contents.NumpyArray(one).typetracer.mergemany(
                     #     [
-                    #         v1_to_v2(ak.layout.NumpyArray(two)),
-                    #         v1_to_v2(ak.layout.EmptyArray()),
-                    #         v1_to_v2(ak.layout.NumpyArray(four)),
+                    #         ak._v2.contents.NumpyArray(two),
+                    #         ak._v2.contents.EmptyArray(),
+                    #         ak._v2.contents.NumpyArray(four),
                     #     ]
-                    # ).form == v1_to_v2(ak.layout.NumpyArray(one)).mergemany(
+                    # ).form == ak._v2.contents.NumpyArray(one).mergemany(
                     #     [
-                    #         v1_to_v2(ak.layout.NumpyArray(two)),
-                    #         v1_to_v2(ak.layout.EmptyArray()),
-                    #         v1_to_v2(ak.layout.NumpyArray(four)),
+                    #         ak._v2.contents.NumpyArray(two),
+                    #         ak._v2.contents.EmptyArray(),
+                    #         ak._v2.contents.NumpyArray(four),
                     #     ]
                     # ).form
 
 
 def test_lists():
-    one = v1_to_v2(ak.Array([[1, 2, 3], [], [4, 5]]).layout)
-    two = v1_to_v2(ak.Array([[1.1, 2.2], [3.3, 4.4]]).layout)
-    three = v1_to_v2(ak.layout.EmptyArray())
-    four = v1_to_v2(
-        ak.from_numpy(np.array([[10], [20]]), regulararray=True, highlevel=False)
+    one = ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
+    two = ak._v2.highlevel.Array([[1.1, 2.2], [3.3, 4.4]]).layout
+    three = ak._v2.contents.EmptyArray()
+    four = ak._v2.operations.convert.from_numpy(
+        np.array([[10], [20]]), regulararray=True, highlevel=False
     )
     assert to_list(one.mergemany([two, three, four])) == [
         [1.0, 2.0, 3.0],
@@ -132,10 +130,10 @@ def test_lists():
         == four.mergemany([three, four, one]).form
     )
 
-    one = ak.Array([[1, 2, 3], [], [4, 5]]).layout
-    two = ak.Array([[1.1, 2.2], [3.3, 4.4]]).layout
-    one = v1_to_v2(ak.layout.ListArray64(one.starts, one.stops, one.content))
-    two = v1_to_v2(ak.layout.ListArray64(two.starts, two.stops, two.content))
+    one = ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
+    two = ak._v2.highlevel.Array([[1.1, 2.2], [3.3, 4.4]]).layout
+    one = ak._v2.contents.ListArray(one.starts, one.stops, one.content)
+    two = ak._v2.contents.ListArray(two.starts, two.stops, two.content)
     assert to_list(one.mergemany([two, three, four])) == [
         [1.0, 2.0, 3.0],
         [],
@@ -167,15 +165,13 @@ def test_lists():
 
 
 def test_records():
-    one = v1_to_v2(
-        ak.Array(
-            [{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}]
-        ).layout
-    )
-    two = v1_to_v2(ak.Array([{"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}]).layout)
+    one = ak._v2.highlevel.Array(
+        [{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}]
+    ).layout
+    two = ak._v2.highlevel.Array([{"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}]).layout
     three = two[0:0]
-    four = v1_to_v2(ak.Array([{"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]).layout)
-    ak.Array([{"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]).layout
+    four = ak._v2.highlevel.Array([{"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]).layout
+    # ak._v2.highlevel.Array([{"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]).layout
     assert to_list(one.mergemany([two, three, four])) == [
         {"x": 1, "y": [1]},
         {"x": 2, "y": [1, 2]},
@@ -190,7 +186,7 @@ def test_records():
         == one.mergemany([two, three, four]).form
     )
 
-    three = v1_to_v2(ak.layout.EmptyArray())
+    three = ak._v2.contents.EmptyArray()
     assert to_list(one.mergemany([two, three, four])) == [
         {"x": 1, "y": [1]},
         {"x": 2, "y": [1, 2]},
@@ -207,10 +203,10 @@ def test_records():
 
 
 def test_tuples():
-    one = v1_to_v2(ak.Array([(1, [1]), (2, [1, 2]), (3, [1, 2, 3])]).layout)
-    two = v1_to_v2(ak.Array([(4, []), (5, [3, 2, 1])]).layout)
+    one = ak._v2.highlevel.Array([(1, [1]), (2, [1, 2]), (3, [1, 2, 3])]).layout
+    two = ak._v2.highlevel.Array([(4, []), (5, [3, 2, 1])]).layout
     three = two[0:0]
-    four = v1_to_v2(ak.Array([(6, [1]), (7, [1, 2])]).layout)
+    four = ak._v2.highlevel.Array([(6, [1]), (7, [1, 2])]).layout
     assert to_list(one.mergemany([two, three, four])) == [
         (1, [1]),
         (2, [1, 2]),
@@ -225,7 +221,7 @@ def test_tuples():
         == one.mergemany([two, three, four]).form
     )
 
-    three = v1_to_v2(ak.layout.EmptyArray())
+    three = ak._v2.contents.EmptyArray()
     assert to_list(one.mergemany([two, three, four])) == [
         (1, [1]),
         (2, [1, 2]),
@@ -242,10 +238,10 @@ def test_tuples():
 
 
 def test_indexed():
-    one = v1_to_v2(ak.Array([1, 2, 3, None, 4, None, None, 5]).layout)
-    two = v1_to_v2(ak.Array([6, 7, 8]).layout)
-    three = v1_to_v2(ak.layout.EmptyArray())
-    four = v1_to_v2(ak.Array([9, None, None]).layout)
+    one = ak._v2.highlevel.Array([1, 2, 3, None, 4, None, None, 5]).layout
+    two = ak._v2.highlevel.Array([6, 7, 8]).layout
+    three = ak._v2.contents.EmptyArray()
+    four = ak._v2.highlevel.Array([9, None, None]).layout
     assert to_list(one.mergemany([two, three, four])) == [
         1,
         2,
@@ -269,15 +265,15 @@ def test_indexed():
 
 
 def test_reverse_indexed():
-    one = v1_to_v2(ak.Array([1, 2, 3]).layout)
-    two = v1_to_v2(ak.Array([4, 5]).layout)
-    three = v1_to_v2(ak.Array([None, 6, None]).layout)
+    one = ak._v2.highlevel.Array([1, 2, 3]).layout
+    two = ak._v2.highlevel.Array([4, 5]).layout
+    three = ak._v2.highlevel.Array([None, 6, None]).layout
     assert to_list(one.mergemany([two, three])) == [1, 2, 3, 4, 5, None, 6, None]
     assert (
         one.typetracer.mergemany([two, three]).form == one.mergemany([two, three]).form
     )
 
-    four = v1_to_v2(ak.Array([7, 8, None, None, 9]).layout)
+    four = ak._v2.highlevel.Array([7, 8, None, None, 9]).layout
     assert to_list(one.mergemany([two, three, four])) == [
         1,
         2,
@@ -300,14 +296,18 @@ def test_reverse_indexed():
 
 
 def test_bytemasked():
-    one = v1_to_v2(
-        ak.Array([1, 2, 3, 4, 5, 6]).mask[[True, True, False, True, False, True]].layout
+    one = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8([True, True, False, True, False, True]),
+        ak._v2.highlevel.Array([1, 2, 3, 4, 5, 6]).layout,
+        valid_when=True,
     )
-    two = v1_to_v2(
-        ak.Array([7, 99, 999, 8, 9]).mask[[True, False, False, True, True]].layout
+    two = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8([True, False, False, True, True]),
+        ak._v2.highlevel.Array([7, 99, 999, 8, 9]).layout,
+        valid_when=True,
     )
-    three = v1_to_v2(ak.Array([100, 200, 300]).layout)
-    four = v1_to_v2(ak.Array([None, None, 123, None]).layout)
+    three = ak._v2.highlevel.Array([100, 200, 300]).layout
+    four = ak._v2.highlevel.Array([None, None, 123, None]).layout
     assert to_list(one.mergemany([two, three, four])) == [
         1,
         2,
@@ -446,10 +446,10 @@ def test_bytemasked():
 
 
 def test_empty():
-    one = v1_to_v2(ak.layout.EmptyArray())
-    two = v1_to_v2(ak.layout.EmptyArray())
-    three = v1_to_v2(ak.Array([1, 2, 3]).layout)
-    four = v1_to_v2(ak.Array([4, 5]).layout)
+    one = ak._v2.contents.EmptyArray()
+    two = ak._v2.contents.EmptyArray()
+    three = ak._v2.highlevel.Array([1, 2, 3]).layout
+    four = ak._v2.highlevel.Array([4, 5]).layout
     assert to_list(one.mergemany([two])) == []
     assert to_list(one.mergemany([two, one, two, one, two])) == []
     assert to_list(one.mergemany([two, three])) == [1, 2, 3]
@@ -491,9 +491,9 @@ def test_empty():
 
 
 def test_union():
-    one = v1_to_v2(ak.Array([1, 2, [], [3, 4]]).layout)
-    two = v1_to_v2(ak.Array([100, 200, 300]).layout)
-    three = v1_to_v2(ak.Array([{"x": 1}, {"x": 2}, 5, 6, 7]).layout)
+    one = ak._v2.highlevel.Array([1, 2, [], [3, 4]]).layout
+    two = ak._v2.highlevel.Array([100, 200, 300]).layout
+    three = ak._v2.highlevel.Array([{"x": 1}, {"x": 2}, 5, 6, 7]).layout
 
     assert to_list(one.mergemany([two, three])) == [
         1,
@@ -601,9 +601,9 @@ def test_union():
 
 
 def test_union_option():
-    one = v1_to_v2(ak.Array([1, 2, [], [3, 4]]).layout)
-    two = v1_to_v2(ak.Array([100, None, 300]).layout)
-    three = v1_to_v2(ak.Array([{"x": 1}, {"x": 2}, 5, 6, 7]).layout)
+    one = ak._v2.highlevel.Array([1, 2, [], [3, 4]]).layout
+    two = ak._v2.highlevel.Array([100, None, 300]).layout
+    three = ak._v2.highlevel.Array([{"x": 1}, {"x": 2}, 5, 6, 7]).layout
 
     assert to_list(one.mergemany([two, three])) == [
         1,
@@ -709,9 +709,9 @@ def test_union_option():
         three.typetracer.mergemany([two, one]).form == three.mergemany([two, one]).form
     )
 
-    one = v1_to_v2(ak.Array([1, 2, [], [3, 4]]).layout)
-    two = v1_to_v2(ak.Array([100, None, 300]).layout)
-    three = v1_to_v2(ak.Array([{"x": 1}, {"x": 2}, 5, None, 7]).layout)
+    one = ak._v2.highlevel.Array([1, 2, [], [3, 4]]).layout
+    two = ak._v2.highlevel.Array([100, None, 300]).layout
+    three = ak._v2.highlevel.Array([{"x": 1}, {"x": 2}, 5, None, 7]).layout
 
     assert to_list(one.mergemany([two, three])) == [
         1,
@@ -817,9 +817,9 @@ def test_union_option():
         three.typetracer.mergemany([two, one]).form == three.mergemany([two, one]).form
     )
 
-    one = v1_to_v2(ak.Array([1, 2, [], [3, 4]]).layout)
-    two = v1_to_v2(ak.Array([100, 200, 300]).layout)
-    three = v1_to_v2(ak.Array([{"x": 1}, {"x": 2}, 5, None, 7]).layout)
+    one = ak._v2.highlevel.Array([1, 2, [], [3, 4]]).layout
+    two = ak._v2.highlevel.Array([100, 200, 300]).layout
+    three = ak._v2.highlevel.Array([{"x": 1}, {"x": 2}, 5, None, 7]).layout
 
     assert to_list(one.mergemany([two, three])) == [
         1,
@@ -927,9 +927,9 @@ def test_union_option():
 
 
 def test_strings():
-    one = v1_to_v2(ak.Array(["uno", "dos", "tres"]).layout)
-    two = v1_to_v2(ak.Array(["un", "deux", "trois", "quatre"]).layout)
-    three = v1_to_v2(ak.Array(["onay", "ootay", "eethray"]).layout)
+    one = ak._v2.highlevel.Array(["uno", "dos", "tres"]).layout
+    two = ak._v2.highlevel.Array(["un", "deux", "trois", "quatre"]).layout
+    three = ak._v2.highlevel.Array(["onay", "ootay", "eethray"]).layout
     assert to_list(one.mergemany([two, three])) == [
         "uno",
         "dos",
@@ -949,10 +949,10 @@ def test_strings():
 
 
 def test_concatenate():
-    one = v1_to_v2(ak.Array([1, 2, 3]).layout)
-    two = v1_to_v2(ak.Array([4.4, 5.5]).layout)
-    three = v1_to_v2(ak.Array([6, 7, 8]).layout)
-    four = v1_to_v2(ak.Array([[9, 9, 9], [10, 10, 10]]).layout)
+    one = ak._v2.highlevel.Array([1, 2, 3]).layout
+    two = ak._v2.highlevel.Array([4.4, 5.5]).layout
+    three = ak._v2.highlevel.Array([6, 7, 8]).layout
+    four = ak._v2.highlevel.Array([[9, 9, 9], [10, 10, 10]]).layout
 
     assert to_list(
         ak._v2.operations.structure.concatenate([one, two, three, four])
@@ -997,7 +997,7 @@ def test_concatenate():
         8,
     ]
 
-    five = v1_to_v2(ak.Array(["nine", "ten"]).layout)
+    five = ak._v2.highlevel.Array(["nine", "ten"]).layout
     assert to_list(
         ak._v2.operations.structure.concatenate([one, two, three, five])
     ) == [

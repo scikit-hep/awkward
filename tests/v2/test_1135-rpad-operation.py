@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
-from awkward._v2.tmp_for_testing import v1_to_v2  # noqa: F401
 
 to_list = ak._v2.operations.convert.to_list
 

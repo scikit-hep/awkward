@@ -8,22 +8,17 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
-content = ak.layout.NumpyArray(
+content = ak._v2.contents.NumpyArray(
     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
 )
-offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
-starts = ak.layout.Index64(np.array([0, 1]))
-stops = ak.layout.Index64(np.array([2, 3]))
-listarray = ak.layout.ListArray64(starts, stops, regulararray)
-
-regulararray = v1_to_v2(regulararray)
-listarray = v1_to_v2(listarray)
+offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+starts = ak._v2.index.Index64(np.array([0, 1]))
+stops = ak._v2.index.Index64(np.array([2, 3]))
+listarray = ak._v2.contents.ListArray(starts, stops, regulararray)
 
 
 def test_iteration():
@@ -136,14 +131,11 @@ def test_getitem_deeper():
     )
 
 
-content2 = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
-regulararrayA = ak.layout.RegularArray(content2, 5, zeros_length=0)
-regulararrayB = ak.layout.RegularArray(regulararrayA, 3, zeros_length=0)
+content2 = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
+regulararrayA = ak._v2.contents.RegularArray(content2, 5, zeros_length=0)
+regulararrayB = ak._v2.contents.RegularArray(regulararrayA, 3, zeros_length=0)
 modelA = np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7)
 modelB = np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
-
-regulararrayA = v1_to_v2(regulararrayA)
-regulararrayB = v1_to_v2(regulararrayB)
 
 
 def test_numpy():

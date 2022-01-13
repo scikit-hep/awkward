@@ -10,665 +10,879 @@ import awkward as ak  # noqa: F401
 
 
 def test_EmptyArray():
-    a = ak.layout.EmptyArray()
-    v1 = json.loads(a.form.tojson())
+    v1 = json.loads(
+        '{"class":"EmptyArray","has_identities":false,"parameters":{},"form_key":null}'
+    )
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "EmptyArray",
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_NumpyArray():
-    a = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
-    v1 = json.loads(a.form.tojson())
+    v1 = json.loads(
+        '{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}'
+    )
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "NumpyArray",
+        "primitive": "float64",
+        "inner_shape": [],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    b = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5))
-    v1 = json.loads(b.form.tojson())
+    v1 = json.loads(
+        '{"class":"NumpyArray","inner_shape":[3,5],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null}'
+    )
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
+    assert v2 == {
+        "class": "NumpyArray",
+        "primitive": "int64",
+        "inner_shape": [3, 5],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_RegularArray_NumpyArray():
-    a = ak.layout.RegularArray(
-        ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-        3,
+    v1 = json.loads(
+        '{"class":"RegularArray","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"size":3,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "RegularArray",
+        "size": 3,
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    b = ak.layout.RegularArray(ak.layout.EmptyArray(), 0, zeros_length=10)
-    v1 = json.loads(b.form.tojson())
+    v1 = json.loads(
+        '{"class":"RegularArray","content":{"class":"EmptyArray","has_identities":false,"parameters":{},"form_key":null},"size":0,"has_identities":false,"parameters":{},"form_key":null}'
+    )
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
+    assert v2 == {
+        "class": "RegularArray",
+        "size": 0,
+        "content": {
+            "class": "EmptyArray",
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_ListArray_NumpyArray():
-    a = ak.layout.ListArray64(
-        ak.layout.Index64(np.array([4, 100, 1], dtype=np.int64)),
-        ak.layout.Index64(np.array([7, 100, 3, 200], dtype=np.int64)),
-        ak.layout.NumpyArray(np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])),
+    v1 = json.loads(
+        '{"class":"ListArray64","starts":"i64","stops":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "ListArray",
+        "starts": "i64",
+        "stops": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_ListOffsetArray_NumpyArray():
-    a = ak.layout.ListOffsetArray64(
-        ak.layout.Index64(np.array([1, 4, 4, 6], dtype=np.int64)),
-        ak.layout.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+    v1 = json.loads(
+        '{"class":"ListOffsetArray64","offsets":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "ListOffsetArray",
+        "offsets": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_RecordArray_NumpyArray():
-    a = ak.layout.RecordArray(
-        [
-            ak.layout.NumpyArray(np.array([0, 1, 2, 3, 4], dtype=np.int64)),
-            ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
-        ],
-        ["x", "y"],
+    v1 = json.loads(
+        '{"class":"RecordArray","contents":{"x":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null},"y":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "RecordArray",
+        "contents": {
+            "x": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            "y": {
+                "class": "NumpyArray",
+                "primitive": "float64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    b = ak.layout.RecordArray(
-        [
-            ak.layout.NumpyArray(np.array([0, 1, 2, 3, 4], dtype=np.int64)),
-            ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
-        ],
-        None,
+    v1 = json.loads(
+        '{"class":"RecordArray","contents":[{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null},{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}],"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(b.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
+    assert v2 == {
+        "class": "RecordArray",
+        "contents": [
+            {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "float64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    c = ak.layout.RecordArray([], [], 10)
-    v1 = json.loads(c.form.tojson())
+    v1 = json.loads(
+        '{"class":"RecordArray","contents":{},"has_identities":false,"parameters":{},"form_key":null}'
+    )
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == c.form
+    assert v2 == {
+        "class": "RecordArray",
+        "contents": {},
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    d = ak.layout.RecordArray([], None, 10)
-    v1 = json.loads(d.form.tojson())
+    v1 = json.loads(
+        '{"class":"RecordArray","contents":[],"has_identities":false,"parameters":{},"form_key":null}'
+    )
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == d.form
+    assert v2 == {
+        "class": "RecordArray",
+        "contents": [],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_IndexedArray_NumpyArray():
-    a = ak.layout.IndexedArray64(
-        ak.layout.Index64(np.array([2, 2, 0, 1, 4, 5, 4], dtype=np.int64)),
-        ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    v1 = json.loads(
+        '{"class":"IndexedArray64","index":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "IndexedArray",
+        "index": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_IndexedOptionArray_NumpyArray():
-    a = ak.layout.IndexedOptionArray64(
-        ak.layout.Index64(np.array([2, 2, -1, 1, -1, 5, 4], dtype=np.int64)),
-        ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    v1 = json.loads(
+        '{"class":"IndexedOptionArray64","index":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "IndexedOptionArray",
+        "index": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_ByteMaskedArray_NumpyArray():
-    a = ak.layout.ByteMaskedArray(
-        ak.layout.Index8(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
-        ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-        valid_when=True,
+    v1 = json.loads(
+        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": True,
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    b = ak.layout.ByteMaskedArray(
-        ak.layout.Index8(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
-        ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-        valid_when=False,
+    v1 = json.loads(
+        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(b.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
+    assert v2 == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": False,
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_BitMaskedArray_NumpyArray():
-    a = ak.layout.BitMaskedArray(
-        ak.layout.IndexU8(
-            np.packbits(
-                np.array(
-                    [
-                        1,
-                        1,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        1,
-                        0,
-                        1,
-                    ],
-                    dtype=np.uint8,
-                )
-            )
-        ),
-        ak.layout.NumpyArray(
-            np.array(
-                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-            )
-        ),
-        valid_when=True,
-        length=13,
-        lsb_order=False,
+    v1 = json.loads(
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"lsb_order":false,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": False,
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    b = ak.layout.BitMaskedArray(
-        ak.layout.IndexU8(
-            np.packbits(
-                np.array(
-                    [
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        1,
-                        1,
-                        1,
-                        0,
-                        1,
-                        0,
-                        1,
-                        0,
-                    ],
-                    dtype=np.uint8,
-                )
-            )
-        ),
-        ak.layout.NumpyArray(
-            np.array(
-                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-            )
-        ),
-        valid_when=False,
-        length=13,
-        lsb_order=False,
+    v1 = json.loads(
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"lsb_order":false,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(b.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
+    assert v2 == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": False,
+        "lsb_order": False,
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    c = ak.layout.BitMaskedArray(
-        ak.layout.IndexU8(
-            np.packbits(
-                np.array(
-                    [
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        1,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        1,
-                        0,
-                        1,
-                    ],
-                    dtype=np.uint8,
-                )
-            )
-        ),
-        ak.layout.NumpyArray(
-            np.array(
-                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-            )
-        ),
-        valid_when=True,
-        length=13,
-        lsb_order=True,
+    v1 = json.loads(
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"lsb_order":true,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(c.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == c.form
+    assert v2 == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": True,
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    d = ak.layout.BitMaskedArray(
-        ak.layout.IndexU8(
-            np.packbits(
-                np.array(
-                    [
-                        1,
-                        1,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        1,
-                        0,
-                    ],
-                    dtype=np.uint8,
-                )
-            )
-        ),
-        ak.layout.NumpyArray(
-            np.array(
-                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-            )
-        ),
-        valid_when=False,
-        length=13,
-        lsb_order=True,
+    v1 = json.loads(
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"lsb_order":true,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(d.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == d.form
+    assert v2 == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": False,
+        "lsb_order": True,
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_UnmaskedArray_NumpyArray():
-    a = ak.layout.UnmaskedArray(ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3])))
-    v1 = json.loads(a.form.tojson())
+    v1 = json.loads(
+        '{"class":"UnmaskedArray","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+    )
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "UnmaskedArray",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "float64",
+            "inner_shape": [],
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_UnionArray_NumpyArray():
-    a = ak.layout.UnionArray8_64(
-        ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
-        ak.layout.Index64(np.array([4, 3, 0, 1, 2, 2, 4, 100], dtype=np.int64)),
-        [
-            ak.layout.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
-        ],
+    v1 = json.loads(
+        '{"class":"UnionArray8_64","tags":"i8","index":"i64","contents":[{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null},{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}],"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "i64",
+        "contents": [
+            {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "float64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_RegularArray_RecordArray_NumpyArray():
-    a = ak.layout.RegularArray(
-        ak.layout.RecordArray(
-            [ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]))],
-            ["nest"],
-        ),
-        3,
+    v1 = json.loads(
+        '{"class":"RegularArray","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"size":3,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "RegularArray",
+        "size": 3,
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    b = ak.layout.RegularArray(
-        ak.layout.RecordArray([ak.layout.EmptyArray()], ["nest"]),
-        0,
-        zeros_length=10,
+    v1 = json.loads(
+        '{"class":"RegularArray","content":{"class":"RecordArray","contents":{"nest":{"class":"EmptyArray","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"size":0,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(b.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
+    assert v2 == {
+        "class": "RegularArray",
+        "size": 0,
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "EmptyArray",
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_ListArray_RecordArray_NumpyArray():
-    a = ak.layout.ListArray64(
-        ak.layout.Index64(np.array([4, 100, 1], dtype=np.int64)),
-        ak.layout.Index64(np.array([7, 100, 3, 200], dtype=np.int64)),
-        ak.layout.RecordArray(
-            [ak.layout.NumpyArray(np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8]))],
-            ["nest"],
-        ),
+    v1 = json.loads(
+        '{"class":"ListArray64","starts":"i64","stops":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "ListArray",
+        "starts": "i64",
+        "stops": "i64",
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
-    a = ak.layout.ListOffsetArray64(
-        ak.layout.Index64(np.array([1, 4, 4, 6], dtype=np.int64)),
-        ak.layout.RecordArray(
-            [ak.layout.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
-            ["nest"],
-        ),
+    v1 = json.loads(
+        '{"class":"ListOffsetArray64","offsets":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "ListOffsetArray",
+        "offsets": "i64",
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_IndexedArray_RecordArray_NumpyArray():
-    a = ak.layout.IndexedArray64(
-        ak.layout.Index64(np.array([2, 2, 0, 1, 4, 5, 4], dtype=np.int64)),
-        ak.layout.RecordArray(
-            [ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6]))],
-            ["nest"],
-        ),
+    v1 = json.loads(
+        '{"class":"IndexedArray64","index":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "IndexedArray",
+        "index": "i64",
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
-    a = ak.layout.IndexedOptionArray64(
-        ak.layout.Index64(np.array([2, 2, -1, 1, -1, 5, 4], dtype=np.int64)),
-        ak.layout.RecordArray(
-            [ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6]))],
-            ["nest"],
-        ),
+    v1 = json.loads(
+        '{"class":"IndexedOptionArray64","index":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "IndexedOptionArray",
+        "index": "i64",
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
-    a = ak.layout.ByteMaskedArray(
-        ak.layout.Index8(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
-        ak.layout.RecordArray(
-            [ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6]))],
-            ["nest"],
-        ),
-        valid_when=True,
+    v1 = json.loads(
+        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": True,
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    b = ak.layout.ByteMaskedArray(
-        ak.layout.Index8(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
-        ak.layout.RecordArray(
-            [ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6]))],
-            ["nest"],
-        ),
-        valid_when=False,
+    v1 = json.loads(
+        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(b.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
+    assert v2 == {
+        "class": "ByteMaskedArray",
+        "mask": "i8",
+        "valid_when": False,
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
-    a = ak.layout.BitMaskedArray(
-        ak.layout.IndexU8(
-            np.packbits(
-                np.array(
-                    [
-                        True,
-                        True,
-                        True,
-                        True,
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                        True,
-                    ]
-                )
-            )
-        ),
-        ak.layout.RecordArray(
-            [
-                ak.layout.NumpyArray(
-                    np.array(
-                        [
-                            0.0,
-                            1.0,
-                            2.0,
-                            3.0,
-                            4.0,
-                            5.0,
-                            6.0,
-                            7.0,
-                            1.1,
-                            2.2,
-                            3.3,
-                            4.4,
-                            5.5,
-                            6.6,
-                        ]
-                    )
-                )
-            ],
-            ["nest"],
-        ),
-        valid_when=True,
-        length=13,
-        lsb_order=False,
+    v1 = json.loads(
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"lsb_order":false,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": False,
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    b = ak.layout.BitMaskedArray(
-        ak.layout.IndexU8(
-            np.packbits(
-                np.array(
-                    [
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        1,
-                        1,
-                        1,
-                        0,
-                        1,
-                        0,
-                        1,
-                        0,
-                    ],
-                    dtype=np.uint8,
-                )
-            )
-        ),
-        ak.layout.RecordArray(
-            [
-                ak.layout.NumpyArray(
-                    np.array(
-                        [
-                            0.0,
-                            1.0,
-                            2.0,
-                            3.0,
-                            4.0,
-                            5.0,
-                            6.0,
-                            7.0,
-                            1.1,
-                            2.2,
-                            3.3,
-                            4.4,
-                            5.5,
-                            6.6,
-                        ]
-                    )
-                )
-            ],
-            ["nest"],
-        ),
-        valid_when=False,
-        length=13,
-        lsb_order=False,
+    v1 = json.loads(
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"lsb_order":false,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(b.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == b.form
+    assert v2 == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": False,
+        "lsb_order": False,
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    c = ak.layout.BitMaskedArray(
-        ak.layout.IndexU8(
-            np.packbits(
-                np.array(
-                    [
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        1,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        1,
-                        0,
-                        1,
-                    ],
-                    dtype=np.uint8,
-                )
-            )
-        ),
-        ak.layout.RecordArray(
-            [
-                ak.layout.NumpyArray(
-                    np.array(
-                        [
-                            0.0,
-                            1.0,
-                            2.0,
-                            3.0,
-                            4.0,
-                            5.0,
-                            6.0,
-                            7.0,
-                            1.1,
-                            2.2,
-                            3.3,
-                            4.4,
-                            5.5,
-                            6.6,
-                        ]
-                    )
-                )
-            ],
-            ["nest"],
-        ),
-        valid_when=True,
-        length=13,
-        lsb_order=True,
+    v1 = json.loads(
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"lsb_order":true,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(c.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == c.form
+    assert v2 == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": True,
+        "lsb_order": True,
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
-    d = ak.layout.BitMaskedArray(
-        ak.layout.IndexU8(
-            np.packbits(
-                np.array(
-                    [
-                        1,
-                        1,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        1,
-                        0,
-                    ],
-                    dtype=np.uint8,
-                )
-            )
-        ),
-        ak.layout.RecordArray(
-            [
-                ak.layout.NumpyArray(
-                    np.array(
-                        [
-                            0.0,
-                            1.0,
-                            2.0,
-                            3.0,
-                            4.0,
-                            5.0,
-                            6.0,
-                            7.0,
-                            1.1,
-                            2.2,
-                            3.3,
-                            4.4,
-                            5.5,
-                            6.6,
-                        ]
-                    )
-                )
-            ],
-            ["nest"],
-        ),
-        valid_when=False,
-        length=13,
-        lsb_order=True,
+    v1 = json.loads(
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"lsb_order":true,"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(d.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == d.form
+    assert v2 == {
+        "class": "BitMaskedArray",
+        "mask": "u8",
+        "valid_when": False,
+        "lsb_order": True,
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
-    a = ak.layout.UnmaskedArray(
-        ak.layout.RecordArray(
-            [ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))],
-            ["nest"],
-        )
+    v1 = json.loads(
+        '{"class":"UnmaskedArray","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "UnmaskedArray",
+        "content": {
+            "class": "RecordArray",
+            "contents": {
+                "nest": {
+                    "class": "NumpyArray",
+                    "primitive": "float64",
+                    "inner_shape": [],
+                    "has_identifier": False,
+                    "parameters": {},
+                    "form_key": None,
+                }
+            },
+            "has_identifier": False,
+            "parameters": {},
+            "form_key": None,
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
 
 
 def test_UnionArray_RecordArray_NumpyArray():
-    a = ak.layout.UnionArray8_64(
-        ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
-        ak.layout.Index64(np.array([4, 3, 0, 1, 2, 2, 4, 100], dtype=np.int64)),
-        [
-            ak.layout.RecordArray(
-                [ak.layout.NumpyArray(np.array([1, 2, 3], dtype=np.int64))], ["nest"]
-            ),
-            ak.layout.RecordArray(
-                [ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))],
-                ["nest"],
-            ),
-        ],
+    v1 = json.loads(
+        '{"class":"UnionArray8_64","tags":"i8","index":"i64","contents":[{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null}],"has_identities":false,"parameters":{},"form_key":null}'
     )
-    v1 = json.loads(a.form.tojson())
     v2 = ak._v2.forms.from_iter(v1).tolist()
-    assert ak.forms.Form.fromjson(json.dumps(v2)) == a.form
+    assert v2 == {
+        "class": "UnionArray",
+        "tags": "i8",
+        "index": "i64",
+        "contents": [
+            {
+                "class": "RecordArray",
+                "contents": {
+                    "nest": {
+                        "class": "NumpyArray",
+                        "primitive": "int64",
+                        "inner_shape": [],
+                        "has_identifier": False,
+                        "parameters": {},
+                        "form_key": None,
+                    }
+                },
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "RecordArray",
+                "contents": {
+                    "nest": {
+                        "class": "NumpyArray",
+                        "primitive": "float64",
+                        "inner_shape": [],
+                        "has_identifier": False,
+                        "parameters": {},
+                        "form_key": None,
+                    }
+                },
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
