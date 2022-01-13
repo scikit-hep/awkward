@@ -93,7 +93,7 @@ def test_numpyarray_getitem_next():
     c2 = np.array([], np.int64)
 
     assert to_list(b[c1, c2]) == to_list(a[c1, c2])
-    assert ak.Array(b[c1, c2]).ndim == a[c1, c2].ndim
+    assert a[c1, c2].ndim == 1
     assert b.typetracer[c1, c2].form == b[c1, c2].form
 
     a = np.arange(7 * 5).reshape(7, 5)

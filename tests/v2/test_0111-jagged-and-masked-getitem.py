@@ -9,6 +9,33 @@ import awkward as ak  # noqa: F401
 to_list = ak._v2.operations.convert.to_list
 
 
+@pytest.mark.skip(reason="FIXME: need to implement UnionArray as a slice")
+def test_array_slice_with_union():
+    array = ak._v2.highlevel.Array(
+        [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
+    ).layout
+
+    content0 = ak._v2.contents.NumpyArray(np.array([5, 2, 2]))
+    content1 = ak._v2.contents.NumpyArray(np.array([3, 9, 0, 1]))
+    tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
+    index2 = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
+    unionarray = ak._v2.contents.UnionArray(tags, index2, [content0, content1])
+
+    assert to_list(array[ak._v2.highlevel.Array(unionarray, check_valid=True)]) == [
+        5.5,
+        2.2,
+        2.2,
+        3.3,
+        9.9,
+        0.0,
+        1.1,
+    ]
+    assert (
+        array.typetracer[ak._v2.highlevel.Array(unionarray)].form
+        == array[ak._v2.highlevel.Array(unionarray)].form
+    )
+
+
 def test_array_slice():
     array = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
@@ -46,18 +73,26 @@ def test_array_slice():
     assert array.typetracer[array2].form == array[array2].form
     assert to_list(
         array[
-            ak.Array(np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True)
+            ak._v2.highlevel.Array(
+                np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True
+            )
         ]
     ) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert (
         array.typetracer[
-            ak.Array(np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True)
+            ak._v2.highlevel.Array(
+                np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True
+            )
         ].form
         == array[
-            ak.Array(np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True)
+            ak._v2.highlevel.Array(
+                np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True
+            )
         ].form
     )
-    assert to_list(array[ak.Array([5, 2, 2, 3, 9, 0, 1], check_valid=True)]) == [
+    assert to_list(
+        array[ak._v2.highlevel.Array([5, 2, 2, 3, 9, 0, 1], check_valid=True)]
+    ) == [
         5.5,
         2.2,
         2.2,
@@ -67,8 +102,8 @@ def test_array_slice():
         1.1,
     ]
     assert (
-        array.typetracer[ak.Array([5, 2, 2, 3, 9, 0, 1])].form
-        == array[ak.Array([5, 2, 2, 3, 9, 0, 1])].form
+        array.typetracer[ak._v2.highlevel.Array([5, 2, 2, 3, 9, 0, 1])].form
+        == array[ak._v2.highlevel.Array([5, 2, 2, 3, 9, 0, 1])].form
     )
 
     array3 = ak._v2.contents.NumpyArray(
@@ -85,7 +120,7 @@ def test_array_slice():
 
     assert to_list(array[indexedarray]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert array.typetracer[indexedarray].form == array[indexedarray].form
-    assert to_list(array[ak.Array(indexedarray, check_valid=True)]) == [
+    assert to_list(array[ak._v2.highlevel.Array(indexedarray, check_valid=True)]) == [
         5.5,
         2.2,
         2.2,
@@ -95,33 +130,14 @@ def test_array_slice():
         1.1,
     ]
     assert (
-        array.typetracer[ak.Array(indexedarray)].form
-        == array[ak.Array(indexedarray)].form
+        array.typetracer[ak._v2.highlevel.Array(indexedarray)].form
+        == array[ak._v2.highlevel.Array(indexedarray)].form
     )
 
     emptyarray = ak._v2.contents.EmptyArray()
 
     assert to_list(array[emptyarray]) == []
     assert array.typetracer[emptyarray].form == array[emptyarray].form
-
-    content0 = ak._v2.contents.NumpyArray(np.array([5, 2, 2]))
-    content1 = ak._v2.contents.NumpyArray(np.array([3, 9, 0, 1]))
-    tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
-    index2 = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak._v2.contents.UnionArray(tags, index2, [content0, content1])
-
-    assert to_list(array[ak.Array(unionarray, check_valid=True)]) == [
-        5.5,
-        2.2,
-        2.2,
-        3.3,
-        9.9,
-        0.0,
-        1.1,
-    ]
-    assert (
-        array.typetracer[ak.Array(unionarray)].form == array[ak.Array(unionarray)].form
-    )
 
     array = ak._v2.highlevel.Array(
         np.array([[0.0, 1.1, 2.2, 3.3, 4.4], [5.5, 6.6, 7.7, 8.8, 9.9]]),
@@ -504,17 +520,6 @@ def test_missing():
 def test_bool_missing():
     data = [1.1, 2.2, 3.3, 4.4, 5.5]
     array = ak._v2.contents.NumpyArray(np.array(data))
-
-    assert (
-        ak._ext._slice_tostring(
-            ak.Array([True, False, None, True, False], check_valid=True)
-        )
-        == "[missing([0, -1, 1], array([0, 3]))]"
-    )
-    assert (
-        ak._ext._slice_tostring(ak.Array([None, None, None], check_valid=True))
-        == "[missing([-1, -1, -1], array([]))]"
-    )
 
     x1, x2, x3, x4, x5 = True, True, True, False, None
     mask = [x1, x2, x3, x4, x5]
@@ -962,11 +967,13 @@ def test_indexedarray():
     ]
 
     assert to_list(
-        indexedarray[ak.Array([[0, -1], [0], [], [1, 1]], check_valid=True)]
+        indexedarray[
+            ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]], check_valid=True)
+        ]
     ) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
     assert (
-        indexedarray.typetracer[ak.Array([[0, -1], [0], [], [1, 1]])].form
-        == indexedarray[ak.Array([[0, -1], [0], [], [1, 1]])].form
+        indexedarray.typetracer[ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]])].form
+        == indexedarray[ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]])].form
     )
 
     array1 = ak._v2.highlevel.Array(
@@ -1095,8 +1102,8 @@ def test_bitmaskedarray2b():
 
 def test_indexedarray3():
     array = ak._v2.highlevel.Array([0.0, 1.1, 2.2, None, 4.4, None, None, 7.7]).layout
-    assert to_list(array[ak.Array([4, 3, 2])]) == [4.4, None, 2.2]
-    assert to_list(array[ak.Array([4, 3, 2, None, 1])]) == [
+    assert to_list(array[ak._v2.highlevel.Array([4, 3, 2])]) == [4.4, None, 2.2]
+    assert to_list(array[ak._v2.highlevel.Array([4, 3, 2, None, 1])]) == [
         4.4,
         None,
         2.2,

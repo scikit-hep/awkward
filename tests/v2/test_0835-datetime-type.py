@@ -163,7 +163,7 @@ def test_highlevel_timedelta64_ArrayBuilder():
 
 
 def test_count_axis_None():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -180,7 +180,7 @@ def test_count_axis_None():
 
 
 def test_count():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -226,7 +226,7 @@ def test_count():
 
 
 def test_count_nonzeroaxis_None():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -243,7 +243,7 @@ def test_count_nonzeroaxis_None():
 
 
 def test_count_nonzero():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -269,7 +269,7 @@ def test_count_nonzero():
 
 
 def test_all_nonzero():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -297,7 +297,7 @@ def test_all_nonzero():
 
 @pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.fill_none")
 def test_argmin_argmax_axis_None():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -315,7 +315,7 @@ def test_argmin_argmax_axis_None():
 
 
 def test_argmin_argmax():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -381,7 +381,7 @@ def test_argmin_argmax():
 
 
 def test_any_all():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -408,7 +408,7 @@ def test_any_all():
 
 
 def test_prod():
-    array = ak.Array(
+    array = ak._v2.highlevel.Array(
         np.array(["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]")
     )
     with pytest.raises(ValueError):
