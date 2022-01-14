@@ -100,7 +100,6 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 
     if axis is None:
         out = (layout.completely_flatten(),)
-
         assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
         out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
