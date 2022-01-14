@@ -8,6 +8,10 @@ import awkward as ak  # noqa: F401
 
 to_list = ak._v2.operations.convert.to_list
 
+
 def test():
-    
-    assert isinstance(ak._v2.operations.structure.zip({"x": 1, "y": 0, "z": 0}), ak._v2.highlevel.Record)
+
+    assert isinstance(
+        ak._v2.operations.structure.zip({"x": 1, "y": 0, "z": 0}),
+        ak._v2.highlevel.Record,
+    )
