@@ -1253,9 +1253,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def to_numpy(self, allow_missing):
         return self._to_numpy(allow_missing)
 
-    def completely_flatten(
-        self, nplike=None, flatten_records=False, function_name=None
-    ):
+    def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
         if nplike is None:
             nplike = self._nplike
         arrays = self._completely_flatten(

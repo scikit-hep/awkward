@@ -692,15 +692,11 @@ def test_fix_flatten_of_sliced_array_0446():
     ]
 
 
-@pytest.mark.skip(
-    reason="attempting to use both a 'cpu' array and a 'cuda' array in the same operation"
-)
 def test_flatten_None_axis():
-    array = ak.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
     array2 = ak._v2.highlevel.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
 
-    assert ak.flatten(array, axis=None) == ak._v2.operations.structure.flatten(
-        array2, axis=None
+    assert to_list(ak._v2.operations.structure.flatten(array2, axis=None)) == to_list(
+        np.arange(2 * 3 * 5 * 7)
     )
 
 
@@ -762,12 +758,17 @@ def test_0724():
     )
 
 
-@pytest.mark.skip(reason="ak.where() not implemented yet")
 def test_flatten_axis_none_0866():
-    a1 = ak.zip({"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1")
-    a2 = ak.zip({"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2")
-    union = ak.where([True, False, True], a1, a2)
-    assert set(ak.flatten(union, axis=None)) == set([1, 2, 3, 4, 5, 6, 9, 12])
+    a1 = ak._v2.operations.structure.zip(
+        {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
+    )
+    a2 = ak._v2.operations.structure.zip(
+        {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
+    )
+    union = ak._v2.operations.structure.where([True, False, True], a1, a2)
+    assert set(ak._v2.operations.structure.flatten(union, axis=None)) == set(
+        [1, 2, 3, 4, 5, 6, 9, 12]
+    )
 
 
 def test_0973():

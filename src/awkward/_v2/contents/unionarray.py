@@ -353,11 +353,7 @@ class UnionArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         simplified = self.simplify_uniontype()
-        if (
-            simplified.index.dtype == np.dtype(np.int32)
-            or simplified.index.dtype == np.dtype(np.uint32)
-            or simplified.index.dtype == np.dtype(np.int64)
-        ):
+        if isinstance(simplified, ak._v2.contents.UnionArray):
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(
@@ -1192,9 +1188,12 @@ class UnionArray(Content):
 
     def _completely_flatten(self, nplike, options):
         out = []
-        for content in self._contents:
+        for i in range(len(self._contents)):
+            index = self._index[self._tags.data == i]
             out.extend(
-                content[: self._tags.length]._completely_flatten(nplike, options)
+                self._contents[i]
+                ._carry(index, False, NestedIndexError)
+                ._completely_flatten(nplike, options)
             )
         return out
 

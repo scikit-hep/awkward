@@ -594,8 +594,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         )
                     else:
                         yield x
-                else:
+                elif isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record)):
                     yield ak._v2._util.wrap(x, self._behavior)
+                else:
+                    yield x
 
     def __getitem__(self, where):
         """
@@ -1018,7 +1020,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 return ak._v2._util.tobytes(out.to(numpy)).decode(
                     errors="surrogateescape"
                 )
-        return ak._v2._util.wrap(out, self._behavior)
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, self._behavior)
+        else:
+            return out
 
     def __setitem__(self, where, what):
         """
@@ -1740,7 +1745,10 @@ class Record(NDArrayOperatorsMixin):
                 return ak._v2._util.tobytes(out.to(numpy)).decode(
                     errors="surrogateescape"
                 )
-        return ak._v2._util.wrap(out, self._behavior)
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, self._behavior)
+        else:
+            return out
 
     def __setitem__(self, where, what):
         """
