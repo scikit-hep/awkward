@@ -290,7 +290,6 @@ def test_unionarray():
     assert to_list(array.num(1)) == [0, 3, 1, 2, 2, 1, 3, 0]
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.num not implemented")
 def test_highlevel():
     array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     assert to_list(ak._v2.operations.structure.num(array)) == [3, 0, 2]
@@ -326,74 +325,3 @@ def test_array_3d():
     with pytest.raises(ValueError) as err:
         assert array.num(axis=-4)
         assert str(err.value).startswith("axis=-4 exceeds the depth of this array (3)")
-
-
-@pytest.mark.skip(reason="FIXME: implement highlevel v2 ak.num")
-def test_listarray_negative_axis_wrap():
-    array = ak._v2.highlevel.Array(np.arange(3 * 5 * 2).reshape(3, 5, 2).tolist())
-    assert ak._v2.operations.structure.num(array, axis=0) == 3
-    assert ak._v2.operations.structure.num(array, axis=1).tolist() == [5, 5, 5]
-    assert ak._v2.operations.structure.num(array, axis=2).tolist() == [
-        [2, 2, 2, 2, 2],
-        [2, 2, 2, 2, 2],
-        [2, 2, 2, 2, 2],
-    ]
-
-    with pytest.raises(ValueError) as err:
-        assert ak._v2.operations.structure.num(array, axis=3)
-        assert str(err.value).startswith("axis=3 exceeds the depth of this array (2)")
-
-    assert ak._v2.operations.structure.num(array, axis=-1).tolist() == [
-        [2, 2, 2, 2, 2],
-        [2, 2, 2, 2, 2],
-        [2, 2, 2, 2, 2],
-    ]
-    assert ak._v2.operations.structure.num(array, axis=-2).tolist() == [5, 5, 5]
-    assert ak._v2.operations.structure.num(array, axis=-3) == 3
-    with pytest.raises(ValueError) as err:
-        assert ak._v2.operations.structure.num(array, axis=-4)
-        assert str(err.value).startswith("axis=-4 exceeds the depth of this array (3)")
-
-
-def test_recordarray_negative_axis_wrap():
-    array = ak._v2.highlevel.Array(
-        [
-            {"x": [1], "y": [[], [1]]},
-            {"x": [1, 2], "y": [[], [1], [1, 2]]},
-            {"x": [1, 2, 3], "y": [[], [1], [1, 2], [1, 2, 3]]},
-        ]
-    ).layout
-
-    assert to_list(array.num(axis=0)) == {"x": 3, "y": 3}
-    assert to_list(array.num(axis=1)) == [
-        {"x": 1, "y": 2},
-        {"x": 2, "y": 3},
-        {"x": 3, "y": 4},
-    ]
-    with pytest.raises(ValueError) as err:
-        assert array.num(axis=2)
-    assert str(err.value).startswith("axis=2 exceeds the depth of this array (1)")
-
-    assert to_list(array.num(axis=-1)) == [
-        {"x": 1, "y": [0, 1]},
-        {"x": 2, "y": [0, 1, 2]},
-        {"x": 3, "y": [0, 1, 2, 3]},
-    ]
-
-
-def test_recordarray_axis_out_of_range():
-    array = ak._v2.highlevel.Array(
-        [
-            {"x": [1], "y": [[], [1]]},
-            {"x": [1, 2], "y": [[], [1], [1, 2]]},
-            {"x": [1, 2, 3], "y": [[], [1], [1, 2], [1, 2, 3]]},
-        ]
-    ).layout
-
-    with pytest.raises(ValueError) as err:
-        assert array.num(axis=-2)
-        assert str(err.value).startswith("axis=-2 exceeds the depth of this array (2)")
-
-    with pytest.raises(ValueError) as err:
-        assert array.num(axis=-3)
-        assert str(err.value).startswith("axis=-2 exceeds the depth of this array (2)")

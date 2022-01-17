@@ -237,7 +237,6 @@ def test_ByteMaskedArray_setidentities():
     assert ak._v2.operations.describe.is_valid(ak._v2.highlevel.Array(array))
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.num not implemented")
 def test_ByteMaskedArray_num():
     content = ak._v2.operations.convert.from_iter(
         [

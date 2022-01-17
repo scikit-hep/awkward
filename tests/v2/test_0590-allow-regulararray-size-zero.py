@@ -42,7 +42,6 @@ def test_carry():
     assert empty[[]].tolist() == []
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.num must be implemented")
 def test_num():
     assert ak._v2.operations.structure.num(empty, axis=0) == 0
     assert ak._v2.operations.structure.num(empty, axis=1).tolist() == []
