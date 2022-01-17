@@ -8,7 +8,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def num(array, axis=1, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data containing nested lists to count.
@@ -73,4 +72,7 @@ def num(array, axis=1, highlevel=True, behavior=None):
         array, allow_record=False, allow_other=False
     )
     out = layout.num(axis=axis)
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+        return ak._v2._util.wrap(out, behavior, highlevel)
+    else:
+        return out
