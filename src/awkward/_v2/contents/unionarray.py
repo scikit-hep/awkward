@@ -353,7 +353,7 @@ class UnionArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         simplified = self.simplify_uniontype()
-        if hasattr(simplified, "index"):
+        if isinstance(simplified, ak._v2.contents.UnionArray):
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(
