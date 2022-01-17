@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 
 to_list = ak._v2.operations.convert.to_list
 
+
 def test_array_3d():
     array = ak._v2.highlevel.Array(np.arange(3 * 5 * 2).reshape(3, 5, 2))
     assert to_list(array) == [
@@ -102,9 +103,7 @@ def test_record_array_axis_out_of_range():
 
     with pytest.raises(ValueError) as err:
         assert ak._v2.operations.structure.num(array, axis=-2)
-        assert str(err.value).startswith(
-            "axis=-2 exceeds the depth of this array (2)"
-        )
+        assert str(err.value).startswith("axis=-2 exceeds the depth of this array (2)")
 
     with pytest.raises(ValueError) as err:
         assert ak._v2.operations.structure.num(array, axis=-3)
