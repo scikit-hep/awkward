@@ -45,18 +45,17 @@ def test_carry():
     assert empty[[]].tolist() == []
 
 
-@pytest.mark.skip(reason="FIXME: ak.num must be implemented")
 def test_num():
-    assert ak.num(empty, axis=0) == 0
-    assert ak.num(empty, axis=1).tolist() == []
-    assert ak.num(empty, axis=2).tolist() == []
+    assert ak._v2.operations.structure.num(empty, axis=0) == 0
+    assert ak._v2.operations.structure.num(empty, axis=1).tolist() == []
+    assert ak._v2.operations.structure.num(empty, axis=2).tolist() == []
 
 
-@pytest.mark.skip(reason="FIXME: ak.flatten must be merged")
+@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.flatten must be merged")
 def test_flatten():
-    assert ak.flatten(empty, axis=0).tolist() == []
-    assert ak.flatten(empty, axis=1).tolist() == []
-    assert ak.flatten(empty, axis=2).tolist() == []
+    assert ak._v2.operations.structure.flatten(empty, axis=0).tolist() == []
+    assert ak._v2.operations.structure.flatten(empty, axis=1).tolist() == []
+    assert ak._v2.operations.structure.flatten(empty, axis=2).tolist() == []
 
 
 def test_mergeable():
