@@ -237,7 +237,6 @@ def test_ByteMaskedArray_setidentities():
     assert ak._v2.operations.describe.is_valid(ak._v2.highlevel.Array(array))
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.num not implemented")
 def test_ByteMaskedArray_num():
     content = ak._v2.operations.convert.from_iter(
         [
@@ -260,12 +259,36 @@ def test_ByteMaskedArray_num():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert ak.num(array, axis=0) == 5
-    assert ak.num(array, axis=-3) == 5
-    assert to_list(ak.num(array, axis=1)) == [3, 0, None, None, 2]
-    assert to_list(ak.num(array, axis=-2)) == [3, 0, None, None, 2]
-    assert to_list(ak.num(array, axis=2)) == [[3, 0, 2], [], None, None, [0, 3]]
-    assert to_list(ak.num(array, axis=-1)) == [[3, 0, 2], [], None, None, [0, 3]]
+    assert ak._v2.operations.structure.num(array, axis=0) == 5
+    assert ak._v2.operations.structure.num(array, axis=-3) == 5
+    assert to_list(ak._v2.operations.structure.num(array, axis=1)) == [
+        3,
+        0,
+        None,
+        None,
+        2,
+    ]
+    assert to_list(ak._v2.operations.structure.num(array, axis=-2)) == [
+        3,
+        0,
+        None,
+        None,
+        2,
+    ]
+    assert to_list(ak._v2.operations.structure.num(array, axis=2)) == [
+        [3, 0, 2],
+        [],
+        None,
+        None,
+        [0, 3],
+    ]
+    assert to_list(ak._v2.operations.structure.num(array, axis=-1)) == [
+        [3, 0, 2],
+        [],
+        None,
+        None,
+        [0, 3],
+    ]
 
 
 @pytest.mark.skip(reason="FIXME: flatten not merged yet")
