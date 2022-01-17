@@ -1189,8 +1189,11 @@ class UnionArray(Content):
     def _completely_flatten(self, nplike, options):
         out = []
         for i in range(len(self._contents)):
+            index = self._index[self._tags.data == i]
             out.extend(
-                self._contents[i][self._tags[i] :]._completely_flatten(nplike, options)
+                self._contents[i]
+                ._carry(index, False, NestedIndexError)
+                ._completely_flatten(nplike, options)
             )
         return out
 
