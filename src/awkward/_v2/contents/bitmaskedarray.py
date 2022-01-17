@@ -354,7 +354,7 @@ class BitMaskedArray(Content):
         if isinstance(
             other,
             (
-                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.emptyarray.EmptyArray,
                 ak._v2.contents.unionarray.UnionArray,
             ),
         ):
