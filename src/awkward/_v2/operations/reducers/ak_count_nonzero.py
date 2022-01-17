@@ -56,7 +56,8 @@ def count_nonzero(
 
     else:
         behavior = ak._v2._util.behavior_of(array)
-        return ak._v2._util.wrap(
-            layout.count_nonzero(axis=axis, mask=mask_identity, keepdims=keepdims),
-            behavior,
-        )
+        out = layout.count_nonzero(axis=axis, mask=mask_identity, keepdims=keepdims)
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, behavior)
+        else:
+            return out

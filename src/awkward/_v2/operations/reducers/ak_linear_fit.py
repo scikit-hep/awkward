@@ -193,4 +193,7 @@ def linear_fit(
         if scalar:
             out = out[0]
 
-        return ak._v2._util.wrap(out, ak._v2._util.behavior_of(x, y))
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, ak._v2._util.behavior_of(x, y))
+        else:
+            return out

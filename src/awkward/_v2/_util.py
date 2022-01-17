@@ -480,7 +480,7 @@ def behavior_of(*arrays, **kwargs):
 # maybe_wrap and maybe_wrap_like go here
 def wrap(content, behavior=None, highlevel=True, like=None):
     assert content is None or isinstance(
-        content, (np.generic, ak._v2.contents.Content, ak._v2.record.Record)
+        content, (ak._v2.contents.Content, ak._v2.record.Record)
     )
     assert behavior is None or isinstance(behavior, Mapping)
     assert isinstance(highlevel, bool)
