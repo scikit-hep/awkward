@@ -851,11 +851,11 @@ class ByteMaskedArray(Content):
             next = self.project()._rpad(target, posaxis, depth, clip)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
-                next.simplify_optiontype(),
+                next,
                 None,
                 self._parameters,
                 self._nplike,
-            )
+            ).simplify_optiontype()
         else:
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
                 self._mask,

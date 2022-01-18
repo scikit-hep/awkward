@@ -343,7 +343,6 @@ def test_ByteMaskedArray_flatten():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.pad_none not implemented")
 def test_IndexedOptionArray_pad_none():
     array = ak._v2.highlevel.Array(
         [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], None, None, [[], [10.0, 11.1, 12.2]]]
@@ -453,7 +452,6 @@ def test_IndexedOptionArray_pad_none():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.pad_none not implemented")
 def test_ByteMaskedArray_pad_none():
     content = ak._v2.operations.convert.from_iter(
         [
@@ -867,7 +865,9 @@ def test_ByteMaskedArray_combinations():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.pad_none not implemented")
+@pytest.mark.skip(
+    reason="FIXME: ak._v2.operations.structure.combinations not implemented"
+)
 def test_IndexedOptionArray_combinations():
     content = ak._v2.operations.convert.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
@@ -985,7 +985,7 @@ def test_merge():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.to_json not implemented")
+@pytest.mark.skip(reason="FIXME: ak._v2.operations.convert.to_json not implemented")
 def test_BitMaskedArray():
     content = ak._v2.contents.NumpyArray(np.arange(13))
     mask = ak._v2.index.IndexU8(np.array([58, 59], dtype=np.uint8))
@@ -1053,7 +1053,7 @@ def test_BitMaskedArray():
         None,
     ]
     assert (
-        ak._v2.operations.structure.to_json(array)
+        ak._v2.operaticonvertture.to_json(array)
         == "[0,1,null,null,null,5,null,7,8,9,null,null,null]"
     )
     assert to_list(array[1:-1]) == [
@@ -1135,7 +1135,7 @@ def test_BitMaskedArray():
         None,
     ]
     assert (
-        ak._v2.operations.structure.to_json(array)
+        ak._v2.operaticonvertture.to_json(array)
         == "[0,null,2,null,null,null,6,7,null,null,10,null,null]"
     )
     assert to_list(array[1:-1]) == [
