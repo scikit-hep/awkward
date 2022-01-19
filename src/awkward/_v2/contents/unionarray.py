@@ -661,8 +661,7 @@ class UnionArray(Content):
                 )
 
             else:
-                offsets = ak._v2.index.Index64.empty(1, self._nplike, dtype=np.int64)
-                offsets[0] = 0
+                offsets = ak._v2.index.Index64.zeros(1, self._nplike, dtype=np.int64)
                 return (
                     offsets,
                     UnionArray(

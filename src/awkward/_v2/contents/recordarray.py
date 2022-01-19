@@ -462,8 +462,7 @@ class RecordArray(Content):
                         "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
                     )
                 contents.append(flattened)
-            offsets = ak._v2.index.Index64.empty(1, self._nplike, dtype=np.int64)
-            offsets[0] = 0
+            offsets = ak._v2.index.Index64.zeros(1, self._nplike, dtype=np.int64)
             return (
                 offsets,
                 RecordArray(

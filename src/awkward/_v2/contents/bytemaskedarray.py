@@ -357,8 +357,7 @@ class ByteMaskedArray(Content):
 
     def project(self, mask=None):
         mask_length = self._mask.length
-        numnull = ak._v2.index.Index64.empty(1, self._nplike)
-        numnull[0] = 0
+        numnull = ak._v2.index.Index64.zeros(1, self._nplike)
 
         if mask is not None:
             if mask_length != mask.length:
@@ -368,7 +367,6 @@ class ByteMaskedArray(Content):
                     )
                 )
 
-            # FIXME?
             nextmask = ak._v2.index.Index8.empty(mask_length, self._nplike)
             self._handle_error(
                 self._nplike[
@@ -384,7 +382,6 @@ class ByteMaskedArray(Content):
                     self._valid_when,
                 )
             )
-
             valid_when = False
             next = ByteMaskedArray(
                 nextmask,

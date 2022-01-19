@@ -480,8 +480,7 @@ class NumpyArray(Content):
         return True
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
-        is_equal = ak._v2.index.Index64.empty(1, self._nplike)
-        is_equal[0] = 0
+        is_equal = ak._v2.index.Index64.zeros(1, self._nplike)
 
         tmp = self._nplike.empty(length, self.dtype)
         self._handle_error(
@@ -622,8 +621,7 @@ class NumpyArray(Content):
             for i in range(len(contiguous_self.shape)):
                 flattened_shape = flattened_shape * self.shape[i]
 
-            offsets = ak._v2.index.Index64.empty(2, self._nplike)
-            offsets[0] = 0
+            offsets = ak._v2.index.Index64.zeros(2, self._nplike)
             offsets[1] = flattened_shape
             dtype = (
                 np.dtype(np.int64)

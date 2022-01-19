@@ -624,8 +624,7 @@ class IndexedArray(Content):
 
     def _unique_index(self, index, sorted=True):
         next = ak._v2.index.Index64.empty(self.length, self._nplike)
-        length = ak._v2.index.Index64.empty(1, self._nplike)
-        length[0] = 0
+        length = ak._v2.index.Index64.zeros(1, self._nplike)
 
         if not sorted:
             next = self._index
@@ -723,7 +722,6 @@ class IndexedArray(Content):
                 index_length,
             )
         )
-
         next = self._content._carry(nextcarry, False, NestedIndexError)
         unique = next._unique(
             negaxis,
@@ -751,16 +749,13 @@ class IndexedArray(Content):
                 )
             )
 
-            out = ak._v2.contents.IndexedOptionArray(
+            return ak._v2.contents.IndexedOptionArray(
                 nextoutindex,
                 unique,
                 None,
                 self._parameters,
                 self._nplike,
-            )
-            out = out.simplify_optiontype()
-
-            return out
+            ).simplify_optiontype()
 
         if not branch and negaxis == depth:
             return unique

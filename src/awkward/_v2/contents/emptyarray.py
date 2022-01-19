@@ -161,8 +161,7 @@ class EmptyArray(Content):
         if posaxis == depth:
             raise np.AxisError(self, "axis=0 not allowed for flatten")
         else:
-            offsets = ak._v2.index.Index64.empty(1, self._nplike)
-            offsets[0] = 0
+            offsets = ak._v2.index.Index64.zeros(1, self._nplike)
             return (offsets, EmptyArray(None, self._parameters, self._nplike))
 
     def mergeable(self, other, mergebool):

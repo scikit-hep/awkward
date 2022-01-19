@@ -976,8 +976,9 @@ class ListArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         if self._starts.length == 0:
             return self
-        out = self.toListOffsetArray64(True)
-        return out._unique(negaxis, starts, parents, outlength)
+        return self.toListOffsetArray64(True)._unique(
+            negaxis, starts, parents, outlength
+        )
 
     def _argsort_next(
         self,
