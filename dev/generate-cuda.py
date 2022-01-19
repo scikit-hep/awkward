@@ -199,15 +199,9 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
     elif node.__class__.__name__ == "Mult":
         code = "*"
     elif node.__class__.__name__ == "Subscript":
-        if (
-            node.slice.__class__.__name__ == "Name"
-            and node.slice.id in forvars
-        ):
+        if node.slice.__class__.__name__ == "Name" and node.slice.id in forvars:
             code = (
-                node.value.id
-                + "["
-                + getthread_dim(forvars.index(node.slice.id))
-                + "]"
+                node.value.id + "[" + getthread_dim(forvars.index(node.slice.id)) + "]"
             )
         elif (
             node.slice.__class__.__name__ == "Constant"
