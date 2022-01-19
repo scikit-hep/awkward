@@ -750,7 +750,6 @@ class IndexedArray(Content):
                     next_length,
                 )
             )
-            # FIXME: occasionally it produses a wrong index as -1
 
             out = ak._v2.contents.IndexedOptionArray(
                 nextoutindex,
