@@ -47,7 +47,7 @@ jobs:
 
         - os: windows-latest
           arch: auto32
-          build: "*"
+          build: "cp{36,37,38,39}-*"
 
     steps:
     - uses: actions/checkout@v2
