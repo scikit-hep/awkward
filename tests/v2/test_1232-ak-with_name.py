@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 
 to_list = ak._v2.operations.convert.to_list
 
+
 def test_with_name():
     array = ak._v2.highlevel.Array(
         [
@@ -23,12 +24,15 @@ def test_with_name():
     assert one.layout.parameters["__record__"] == "Wilbur"
 
     array2 = ak._v2.operations.convert.from_iter(
-        [[[1], 2.2, [2, 2], 3.3, [3, 3, 3], 4.4, [4, 4, 4, 4]], [
-            {"x": 0.0, "y": []},
-            {"x": 1.1, "y": [1]},
-            {"x": 2.2, "y": [2, 2]},
-            {"x": 3.3, "y": [3, 3, 3]},
-        ]],
+        [
+            [[1], 2.2, [2, 2], 3.3, [3, 3, 3], 4.4, [4, 4, 4, 4]],
+            [
+                {"x": 0.0, "y": []},
+                {"x": 1.1, "y": [1]},
+                {"x": 2.2, "y": [2, 2]},
+                {"x": 3.3, "y": [3, 3, 3]},
+            ],
+        ],
         highlevel=False,
     )
     one = ak._v2.operations.structure.with_name(array2, "Wilbur")
@@ -36,7 +40,7 @@ def test_with_name():
 
     array = ak._v2.highlevel.Array(
         [
-            {"a": [[0.0, 4.5],[], None], "b": []},
+            {"a": [[0.0, 4.5], [], None], "b": []},
             {"a": 1.1, "b": [[1]]},
         ]
     )
@@ -51,10 +55,12 @@ def test_simplify_unionarray_with_name():
         [[], [1], [2, 2], [3, 3, 3]], highlevel=False
     )
     three = ak._v2.operations.convert.from_iter(
-            [{"x": 0.0, "y": []},
+        [
+            {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
             {"x": 2.2, "y": [2, 2]},
-            {"x": 3.3, "y": [3, 3, 3]}],
+            {"x": 3.3, "y": [3, 3, 3]},
+        ],
         highlevel=False,
     )
 
@@ -70,5 +76,4 @@ def test_simplify_unionarray_with_name():
     outer = ak._v2.contents.UnionArray(tags1, index1, [one, inner])
     one = ak._v2.operations.structure.with_name(outer, "James")
 
-    assert outer.contents[1].is_UnionType !=  one.layout.contents[1].is_UnionType
-
+    assert outer.contents[1].is_UnionType != one.layout.contents[1].is_UnionType
