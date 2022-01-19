@@ -534,11 +534,11 @@ def extra(args, kwargs, defaults):
 # key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 
-# def highlevel_type(layout, behavior, isarray):
-#     if isarray:
-#         return ak.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
-#     else:
-#         return layout.type(typestrs(behavior))
+def highlevel_type(layout, behavior, isarray):
+    if isarray:
+        return layout.form.type_from_behavior(behavior), len(layout)
+    else:
+        return layout.form.type
 
 
 # def make_union(tags, index, contents, identities, parameters):
