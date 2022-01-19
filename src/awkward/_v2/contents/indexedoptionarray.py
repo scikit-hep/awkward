@@ -907,7 +907,7 @@ class IndexedOptionArray(Content):
             )
 
             out = ak._v2.contents.IndexedOptionArray(
-                newindex,  # [: newoffsets[-1]],
+                newindex[: newoffsets[-1]],
                 out._content,
                 None,
                 self._parameters,
