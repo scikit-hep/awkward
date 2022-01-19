@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
-import numbers # noqa: F401
+import numbers  # noqa: F401
 import awkward as ak  # noqa: F401
 
 to_list = ak._v2.operations.convert.to_list
@@ -161,8 +161,12 @@ def test_mask_complex():
 
 def test_keepdims_complex():
     nparray = np.array(primes[: 2 * 3 * 5], dtype=np.complex64).reshape(2, 3, 5)
-    content1 = ak._v2.contents.NumpyArray(np.array(primes[: 2 * 3 * 5], dtype=np.complex64))
-    offsets1 = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
+    content1 = ak._v2.contents.NumpyArray(
+        np.array(primes[: 2 * 3 * 5], dtype=np.complex64)
+    )
+    offsets1 = ak._v2.index.Index64(
+        np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
+    )
     offsets2 = ak._v2.index.Index64(np.array([0, 3, 6], dtype=np.int64))
     depth2 = ak._v2.contents.ListOffsetArray(
         offsets2, ak._v2.contents.ListOffsetArray(offsets1, content1)
@@ -192,9 +196,8 @@ def test_keepdims_complex():
         nparray.prod(axis=-3, keepdims=True)
     )
 
-@pytest.mark.skip(
-    reason="Fixme on values_astype for complex"
-)
+
+@pytest.mark.skip(reason="Fixme on values_astype for complex")
 def test_astype_complex():
     content_float64 = ak._v2.contents.NumpyArray(
         np.array([0.25, 0.5, 3.5, 4.5, 5.5], dtype=np.float64)

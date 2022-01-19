@@ -24,7 +24,9 @@ def test_UnmaskedArray():
     assert np.can_cast(np.float64, np.float32, "unsafe") is True
     assert np.can_cast(np.float64, np.int8, "unsafe") is True
 
-    content_float32 = ak._v2.operations.structure.values_astype(content_float64, "float32", highlevel=False)
+    content_float32 = ak._v2.operations.structure.values_astype(
+        content_float64, "float32", highlevel=False
+    )
     array_float32 = ak._v2.contents.UnmaskedArray(content_float32)
     assert to_list(array_float32) == [0.25, 0.5, 3.5, 4.5, 5.5]
     assert str(ak._v2.operations.describe.type(content_float32)) == "float32"
@@ -32,7 +34,9 @@ def test_UnmaskedArray():
     assert str(ak._v2.operations.describe.type(array_float32)) == "?float32"
     # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float32))) == "5 * ?float32"
 
-    content_int8 = ak._v2.operations.structure.values_astype(content_float64, "int8", highlevel=False)
+    content_int8 = ak._v2.operations.structure.values_astype(
+        content_float64, "int8", highlevel=False
+    )
     array_int8 = ak._v2.contents.UnmaskedArray(content_int8)
     assert to_list(array_int8) == [0, 0, 3, 4, 5]
     assert str(ak._v2.operations.describe.type(content_int8)) == "int8"
@@ -40,7 +44,9 @@ def test_UnmaskedArray():
     assert str(ak._v2.operations.describe.type(array_int8)) == "?int8"
     # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_int8))) == "5 * ?int8"
 
-    content_from_int8 = ak._v2.operations.structure.values_astype(content_int8, "float64", highlevel=False)
+    content_from_int8 = ak._v2.operations.structure.values_astype(
+        content_int8, "float64", highlevel=False
+    )
     array_from_int8 = ak._v2.contents.UnmaskedArray(content_from_int8)
     assert to_list(array_from_int8) == [0, 0, 3, 4, 5]
     assert str(ak._v2.operations.describe.type(content_from_int8)) == "float64"
@@ -64,21 +70,29 @@ def test_RegularArray_and_ListArray():
     assert str(ak._v2.operations.describe.type(regulararray)) == "2 * var * float64"
     assert str(ak._v2.operations.describe.type(listarray)) == "var * 2 * var * float64"
 
-    regulararray_int8 = ak._v2.operations.structure.values_astype(regulararray, "int8", highlevel=False)
+    regulararray_int8 = ak._v2.operations.structure.values_astype(
+        regulararray, "int8", highlevel=False
+    )
     assert str(ak._v2.operations.describe.type(regulararray_int8)) == "2 * var * int8"
 
-    listarray_bool = ak._v2.operations.structure.values_astype(listarray, "bool", highlevel=False)
-    assert str(ak._v2.operations.describe.type(listarray_bool)) == "var * 2 * var * bool"
+    listarray_bool = ak._v2.operations.structure.values_astype(
+        listarray, "bool", highlevel=False
+    )
+    assert (
+        str(ak._v2.operations.describe.type(listarray_bool)) == "var * 2 * var * bool"
+    )
 
 
 def test_ufunc_afterward():
     assert (
-        ak._v2.operations.structure.values_astype(ak._v2.highlevel.Array([{"x": 1.1}, {"x": 3.3}]), np.float32)["x"] + 1
+        ak._v2.operations.structure.values_astype(
+            ak._v2.highlevel.Array([{"x": 1.1}, {"x": 3.3}]), np.float32
+        )["x"]
+        + 1
     ).tolist() == [2.0999999046325684, 4.300000190734863]
 
-@pytest.mark.skip(
-    reason="Fixme on values_astype float and string"
-)
+
+@pytest.mark.skip(reason="Fixme on values_astype float and string")
 def test_string():
     assert ak._v2.operations.structure.values_astype(
         ak._v2.highlevel.Array([{"x": 1.1, "y": "hello"}]), np.float32
