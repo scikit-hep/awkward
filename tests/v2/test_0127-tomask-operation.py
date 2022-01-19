@@ -1053,7 +1053,7 @@ def test_BitMaskedArray():
         None,
     ]
     assert (
-        ak._v2.operaticonvertture.to_json(array)
+        ak._v2.operations.structure.to_json(array)
         == "[0,1,null,null,null,5,null,7,8,9,null,null,null]"
     )
     assert to_list(array[1:-1]) == [
@@ -1135,7 +1135,7 @@ def test_BitMaskedArray():
         None,
     ]
     assert (
-        ak._v2.operaticonvertture.to_json(array)
+        ak._v2.operations.structure.to_json(array)
         == "[0,null,2,null,null,null,6,7,null,null,10,null,null]"
     )
     assert to_list(array[1:-1]) == [
