@@ -724,7 +724,6 @@ class NumpyArray(Content):
                     False,
                 )
             )
-            out = ak._v2.contents.NumpyArray(out)
 
             nextoffsets = ak._v2.index.Index64.empty(offsets.length, self._nplike)
             self._handle_error(
@@ -734,7 +733,7 @@ class NumpyArray(Content):
                     offsets.dtype.type,
                     nextoffsets.dtype.type,
                 ](
-                    out.to(self._nplike),
+                    out,
                     out.shape[0],
                     offsets.to(self._nplike),
                     offsets.length,
@@ -761,7 +760,7 @@ class NumpyArray(Content):
 
             return ak._v2.contents.ListOffsetArray(
                 outoffsets,
-                out,
+                ak._v2.contents.NumpyArray(out),
                 None,
                 self._parameters,
                 self._nplike,
