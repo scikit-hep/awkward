@@ -606,7 +606,7 @@ class ListOffsetArray(Content):
                 )
 
             else:
-                tooffsets = ak._v2.index.Index64.zeros(
+                tooffsets = ak._v2.index.Index64.empty(
                     self._offsets.length, self._nplike, dtype=np.int64
                 )
                 self._handle_error(
@@ -1730,7 +1730,7 @@ class ListOffsetArray(Content):
             return self.rpad_axis0(target, clip)
         if posaxis == depth + 1:
             if not clip:
-                tolength = ak._v2.index.Index64.zeros(1, self._nplike)
+                tolength = ak._v2.index.Index64.empty(1, self._nplike)
                 offsets_ = ak._v2.index.Index64.empty(
                     self._offsets.length, self._nplike
                 )

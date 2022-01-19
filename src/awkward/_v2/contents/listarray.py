@@ -294,10 +294,10 @@ class ListArray(Content):
                 )
             )
             sliceindex = ak._v2.index.Index64(slicecontent._data)
-            outoffsets = ak._v2.index.Index64.zeros(
+            outoffsets = ak._v2.index.Index64.empty(
                 slicestarts.length + 1, self._nplike
             )
-            nextcarry = ak._v2.index.Index64.zeros(carrylen[0], self._nplike)
+            nextcarry = ak._v2.index.Index64.empty(carrylen[0], self._nplike)
 
             self._handle_error(
                 self._nplike[
@@ -976,7 +976,6 @@ class ListArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         if self._starts.length == 0:
             return self
-
         return self.toListOffsetArray64(True)._unique(
             negaxis, starts, parents, outlength
         )
@@ -1119,7 +1118,7 @@ class ListArray(Content):
                 if target < min_[0]:
                     return self
                 else:
-                    tolength = ak._v2.index.Index64.zeros(1, self._nplike)
+                    tolength = ak._v2.index.Index64.empty(1, self._nplike)
                     self._handle_error(
                         self._nplike[
                             "awkward_ListArray_rpad_and_clip_length_axis1",

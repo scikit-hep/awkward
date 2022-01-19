@@ -403,7 +403,7 @@ class IndexedOptionArray(Content):
                 ),
             ):
                 inner = self._content.index
-                result = ak._v2.index.Index64.zeros(self.index.length, self._nplike)
+                result = ak._v2.index.Index64.empty(self.index.length, self._nplike)
             elif isinstance(
                 self._content,
                 (
@@ -475,7 +475,7 @@ class IndexedOptionArray(Content):
                 )
 
             else:
-                outoffsets = ak._v2.index.Index64.zeros(
+                outoffsets = ak._v2.index.Index64.empty(
                     offsets.length + numnull, self._nplike, dtype=np.int64
                 )
 
@@ -870,7 +870,7 @@ class IndexedOptionArray(Content):
             ).simplify_optiontype()
 
         if isinstance(out, ak._v2.contents.ListOffsetArray):
-            newnulls = ak._v2.index.Index64.zeros(self._index.length, self._nplike)
+            newnulls = ak._v2.index.Index64.empty(self._index.length, self._nplike)
             len_newnulls = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
                 self._nplike[
@@ -886,10 +886,10 @@ class IndexedOptionArray(Content):
                 )
             )
 
-            newindex = ak._v2.index.Index64.zeros(
+            newindex = ak._v2.index.Index64.empty(
                 out._offsets[-1] + len_newnulls[0], self._nplike
             )
-            newoffsets = ak._v2.index.Index64.zeros(out._offsets.length, self._nplike)
+            newoffsets = ak._v2.index.Index64.empty(out._offsets.length, self._nplike)
             self._handle_error(
                 self._nplike[
                     "awkward_IndexedArray_unique_next_index_and_offsets_64",

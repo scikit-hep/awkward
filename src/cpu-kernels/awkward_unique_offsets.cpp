@@ -14,17 +14,15 @@ ERROR awkward_unique_offsets(
   int64_t j = 0;
   for (int64_t i = 0;  i < length;  i++) {
     tooffsets[j] = fromoffsets[i];
-    while (starts[j] == starts[j + 1]) {
-      tooffsets[j + 1] = fromoffsets[i];
-      if (j < startslength - 1) {
+    for (int64_t k = j; k < startslength - 1; k++) {
+      if (starts[j] == starts[j + 1]) {
+        tooffsets[j + 1] = fromoffsets[i];
         j++;
-      } else {
-        break;
       }
     }
     j++;
   }
-  tooffsets[j - 1] = fromoffsets[length - 1];
+  tooffsets[startslength] = fromoffsets[length - 1];
 
   return success();
 }
