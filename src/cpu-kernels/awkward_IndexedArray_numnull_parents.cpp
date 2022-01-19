@@ -16,6 +16,9 @@ ERROR awkward_IndexedArray_numnull_parents(
       numnull[i] = 1;
       *tolength = *tolength + 1;
     }
+    else {
+      numnull[i] = 0;
+    }
   }
   return success();
 }
