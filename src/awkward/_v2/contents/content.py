@@ -1167,7 +1167,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
         parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
 
-            return self._unique(negaxis, starts, parents, 1)
+        return self._unique(negaxis, starts, parents, 1)
 
         raise np.AxisError(
             "unique expects axis 'None' or '-1', got axis={0} that is not supported yet".format(
