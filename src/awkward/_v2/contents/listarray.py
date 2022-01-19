@@ -1179,7 +1179,7 @@ class ListArray(Content):
                 return ak._v2.contents.listarray.ListArray(
                     self._starts,
                     self._stops,
-                    self._content._rpad(target, posaxis, depth + 1),
+                    self._content._rpad(target, posaxis, depth + 1, clip),
                     None,
                     self._parameters,
                     self._nplike,

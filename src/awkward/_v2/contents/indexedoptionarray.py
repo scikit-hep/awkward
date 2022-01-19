@@ -1557,7 +1557,13 @@ class IndexedOptionArray(Content):
                 self._nplike,
             ).simplify_optiontype()
         else:
-            return self.project()._rpad(target, posaxis, depth, clip)
+            return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                self._index,
+                self._content._rpad(target, posaxis, depth, clip),
+                None,
+                self._parameters,
+                self._nplike,
+            )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         index = numpy.array(self._index, copy=True)

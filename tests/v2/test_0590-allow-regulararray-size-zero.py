@@ -15,9 +15,6 @@ empty = ak._v2.highlevel.Array(
 )
 
 
-@pytest.mark.skip(
-    reason="FIXME: ak._v2.operations.structure.pad_none must be implemented"
-)
 def test_ListOffsetArray_rpad_and_clip():
     array = ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]])
     assert ak._v2.operations.structure.pad_none(array, 0, clip=True).tolist() == [
@@ -62,7 +59,6 @@ def test_fillna():
     assert ak._v2.operations.structure.fill_none(empty, 5, axis=0).tolist() == []
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.pad_none must be merged")
 def test_pad_none():
     assert ak._v2.operations.structure.pad_none(empty, 0, axis=0).tolist() == []
     assert ak._v2.operations.structure.pad_none(empty, 0, axis=1).tolist() == []
