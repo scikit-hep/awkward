@@ -480,7 +480,8 @@ class NumpyArray(Content):
         return True
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
-        is_equal = ak._v2.index.Index64.zeros(1, self._nplike)
+        is_equal = ak._v2.index.Index64.empty(1, self._nplike)
+        is_equal[0] = 0
 
         tmp = self._nplike.empty(length, self.dtype)
         self._handle_error(
@@ -621,7 +622,8 @@ class NumpyArray(Content):
             for i in range(len(contiguous_self.shape)):
                 flattened_shape = flattened_shape * self.shape[i]
 
-            offsets = ak._v2.index.Index64.zeros(2, self._nplike)
+            offsets = ak._v2.index.Index64.empty(2, self._nplike)
+            offsets[0] = 0
             offsets[1] = flattened_shape
             dtype = (
                 np.dtype(np.int64)
@@ -647,7 +649,7 @@ class NumpyArray(Content):
                 )
             )
 
-            nextlength = ak._v2.index.Index64.zeros(1, self._nplike)
+            nextlength = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
                 self._nplike[  # noqa: E231
                     "awkward_unique",
@@ -724,8 +726,9 @@ class NumpyArray(Content):
                     False,
                 )
             )
+            out = ak._v2.contents.NumpyArray(out)
 
-            nextoffsets = ak._v2.index.Index64.zeros(offsets.length, self._nplike)
+            nextoffsets = ak._v2.index.Index64.empty(offsets.length, self._nplike)
             self._handle_error(
                 self._nplike[
                     "awkward_unique_ranges",
@@ -733,7 +736,7 @@ class NumpyArray(Content):
                     offsets.dtype.type,
                     nextoffsets.dtype.type,
                 ](
-                    out,
+                    out.to(self._nplike),
                     out.shape[0],
                     offsets.to(self._nplike),
                     offsets.length,
@@ -741,7 +744,7 @@ class NumpyArray(Content):
                 )
             )
 
-            outoffsets = ak._v2.index.Index64.zeros(starts.length + 1, self._nplike)
+            outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
 
             self._handle_error(
                 self._nplike[
@@ -760,7 +763,7 @@ class NumpyArray(Content):
 
             return ak._v2.contents.ListOffsetArray(
                 outoffsets,
-                ak._v2.contents.NumpyArray(out),
+                out,
                 None,
                 self._parameters,
                 self._nplike,
@@ -914,7 +917,7 @@ class NumpyArray(Content):
                 )
             )
 
-            offsets = ak._v2.index.Index64.zeros(offsets_length[0], self._nplike)
+            offsets = ak._v2.index.Index64.empty(offsets_length[0], self._nplike)
 
             self._handle_error(
                 self._nplike[
@@ -1025,7 +1028,7 @@ class NumpyArray(Content):
                 )
 
         if mask:
-            outmask = ak._v2.index.Index8.zeros(outlength, self._nplike)
+            outmask = ak._v2.index.Index8.empty(outlength, self._nplike)
             self._handle_error(
                 self._nplike[
                     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",

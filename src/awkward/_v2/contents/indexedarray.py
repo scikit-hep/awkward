@@ -199,7 +199,7 @@ class IndexedArray(Content):
                 ),
             )
 
-        nextcarry = ak._v2.index.Index64.zeros(self.length, self._nplike)
+        nextcarry = ak._v2.index.Index64.empty(self.length, self._nplike)
         self._handle_error(
             self._nplike[
                 "awkward_IndexedArray_getitem_nextcarry",
@@ -415,7 +415,7 @@ class IndexedArray(Content):
         if isinstance(
             other,
             (
-                ak._v2.contents.emptyArray.EmptyArray,
+                ak._v2.contents.emptyarray.EmptyArray,
                 ak._v2.contents.unionarray.UnionArray,
             ),
         ):
@@ -625,10 +625,12 @@ class IndexedArray(Content):
     def _unique_index(self, index, sorted=True):
         next = ak._v2.index.Index64.empty(self.length, self._nplike)
         length = ak._v2.index.Index64.empty(1, self._nplike)
+        length[0] = 0
 
         if not sorted:
             next = self._index
-            offsets = ak._v2.index.Index64.zeros(2, self._nplike)
+            offsets = ak._v2.index.Index64.empty(2, self._nplike)
+            offsets[0] = 0
             offsets[1] = next.length
             self._handle_error(
                 self._nplike[
@@ -701,9 +703,9 @@ class IndexedArray(Content):
         parents_length = parents.length
         next_length = index_length
 
-        nextcarry = ak._v2.index.Index64.zeros(index_length, self._nplike)
-        nextparents = ak._v2.index.Index64.zeros(index_length, self._nplike)
-        outindex = ak._v2.index.Index64.zeros(index_length, self._nplike)
+        nextcarry = ak._v2.index.Index64.empty(index_length, self._nplike)
+        nextparents = ak._v2.index.Index64.empty(index_length, self._nplike)
+        outindex = ak._v2.index.Index64.empty(index_length, self._nplike)
         self._handle_error(
             self._nplike[
                 "awkward_IndexedArray_reduce_next_64",
@@ -721,6 +723,7 @@ class IndexedArray(Content):
                 index_length,
             )
         )
+
         next = self._content._carry(nextcarry, False, NestedIndexError)
         unique = next._unique(
             negaxis,
@@ -747,6 +750,7 @@ class IndexedArray(Content):
                     next_length,
                 )
             )
+            # FIXME: occasionally it produses a wrong index as -1
 
             out = ak._v2.contents.IndexedOptionArray(
                 nextoutindex,
@@ -754,14 +758,14 @@ class IndexedArray(Content):
                 None,
                 self._parameters,
                 self._nplike,
-            ).simplify_optiontype()
+            )
+            out = out.simplify_optiontype()
 
             return out
 
         if not branch and negaxis == depth:
             return unique
         else:
-
             if isinstance(unique, ak._v2.contents.RegularArray):
                 unique = unique.toListOffsetArray64(True)
 
@@ -897,9 +901,9 @@ class IndexedArray(Content):
 
         index_length = self._index.length
 
-        nextcarry = ak._v2.index.Index64.zeros(index_length, self._nplike)
-        nextparents = ak._v2.index.Index64.zeros(index_length, self._nplike)
-        outindex = ak._v2.index.Index64.zeros(index_length, self._nplike)
+        nextcarry = ak._v2.index.Index64.empty(index_length, self._nplike)
+        nextparents = ak._v2.index.Index64.empty(index_length, self._nplike)
+        outindex = ak._v2.index.Index64.empty(index_length, self._nplike)
         self._handle_error(
             self._nplike[
                 "awkward_IndexedArray_reduce_next_64",

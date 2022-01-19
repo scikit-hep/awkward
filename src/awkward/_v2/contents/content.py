@@ -820,8 +820,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is {1})".format(axis, depth)
                 )
 
-        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
-        starts = ak._v2.index.Index64.zeros(1, self._nplike)
+        starts = ak._v2.index.Index64.empty(1, self._nplike)
+        starts[0] = 0
+        parents = ak._v2.index.Index64.empty(self.length, self._nplike)
+        for i in range(self.length):
+            parents[i] = 0
+
         shifts = None
         next = self._reduce_next(
             reducer,
@@ -892,8 +896,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is {1})".format(axis, depth)
                 )
 
-        starts = ak._v2.index.Index64.zeros(1, self._nplike)
-        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
+        starts = ak._v2.index.Index64.empty(1, self._nplike)
+        starts[0] = 0
+        parents = ak._v2.index.Index64.empty(self.length, self._nplike)
+        for i in range(self.length):
+            parents[i] = 0
+
         return self._argsort_next(
             negaxis,
             starts,
@@ -932,8 +940,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is {1})".format(axis, depth)
                 )
 
-        starts = ak._v2.index.Index64.zeros(1, self._nplike)
-        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
+        starts = ak._v2.index.Index64.empty(1, self._nplike)
+        starts[0] = 0
+        parents = ak._v2.index.Index64.empty(self.length, self._nplike)
+        for i in range(self.length):
+            parents[i] = 0
+
         return self._sort_next(
             negaxis,
             starts,
@@ -1127,8 +1139,12 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
 
     def is_unique(self, axis=None):
         negaxis = axis if axis is None else -axis
-        starts = ak._v2.index.Index64.zeros(1, self._nplike)
-        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
+        starts = ak._v2.index.Index64.empty(1, self._nplike)
+        starts[0] = 0
+        parents = ak._v2.index.Index64.empty(self.length, self._nplike)
+        for i in range(parents.length):
+            parents[i] = 0
+
         return self._is_unique(negaxis, starts, parents, 1)
 
     def unique(self, axis=None):
@@ -1160,8 +1176,11 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                             )
                         )
 
-            starts = ak._v2.index.Index64.zeros(1, self._nplike)
-            parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
+            starts = ak._v2.index.Index64.empty(1, self._nplike)
+            starts[0] = 0
+            parents = ak._v2.index.Index64.empty(self.length, self._nplike)
+            for i in range(parents.length):
+                parents[i] = 0
 
             return self._unique(negaxis, starts, parents, 1)
 
