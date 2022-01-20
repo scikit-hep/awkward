@@ -12,32 +12,31 @@ pytestmark = pytest.mark.skipif(
 
 to_list = ak._v2.operations.convert.to_list
 
-
 def test_types():
-    t0 = ak.types.UnknownType()
-    t1 = ak.types.PrimitiveType("int32")
-    t2 = ak.types.OptionType(t1)
-    t3 = ak.types.UnionType((t1, ak.types.PrimitiveType("float64")))
-    t4 = ak.types.ListType(t1)
-    t4b = ak.types.ListType(ak.types.PrimitiveType("int32"))
-    t5 = ak.types.ListType(t4)
-    t6 = ak.types.OptionType(t4)
-    assert repr(t0) == "unknown"
-    assert repr(t1) == "int32"
-    assert repr(t2) == "?int32"
-    assert repr(t3) == "union[int32, float64]"
-    assert repr(t4) == "var * int32"
-    assert repr(t4b) == "var * int32"
-    assert repr(t5) == "var * var * int32"
-    assert repr(t6) == "option[var * int32]"
-    assert repr(t2.type) == "int32"
-    assert t3.numtypes == 2
-    assert repr(t3.type(0)) == "int32"
-    assert repr(t3.type(1)) == "float64"
-    assert [repr(x) for x in t3.types] == ["int32", "float64"]
-    assert repr(t4.type) == "int32"
-    assert repr(t4b.type) == "int32"
-    assert repr(t5.type) == "var * int32"
+    t0 = ak._v2.types.UnknownType()
+    t1 = ak._v2.types.NumpyType("int32")
+    t2 = ak._v2.types.OptionType(t1)
+    t3 = ak._v2.types.UnionType((t1, ak._v2.types.NumpyType("float64")))
+    t4 = ak._v2.types.ListType(t1)
+    t4b = ak._v2.types.ListType(ak._v2.types.NumpyType("int32"))
+    t5 = ak._v2.types.ListType(t4)
+    t6 = ak._v2.types.OptionType(t4)
+    assert str(t0) == "unknown"
+    assert str(t1) == "int32"
+    assert str(t2) == "?int32"
+    assert str(t3) == "union[int32, float64]"
+    assert str(t4) == "var * int32"
+    assert str(t4b) == "var * int32"
+    assert str(t5) == "var * var * int32"
+    assert str(t6) == "option[var * int32]"
+    assert str(t2.content) == "int32"
+    assert len(t3.contents) == 2
+    assert str(t3.contents[0]) == "int32"
+    assert str(t3.contents[1]) == "float64"
+    assert [str(x) for x in t3.contents] == ["int32", "float64"]
+    assert str(t4.content) == "int32"
+    assert str(t4b.content) == "int32"
+    assert str(t5.content) == "var * int32"
 
 
 def test_boolean():
@@ -48,7 +47,6 @@ def test_boolean():
     a.boolean(True)
     assert to_list(a.snapshot()) == [True, True, False, True]
     assert to_list(a) == [True, True, False, True]
-    # FIXME: TypeError: 'ArrayBuilder' object is not subscriptable
     assert to_list(a.snapshot()[1:-1]) == [True, False]
 
 

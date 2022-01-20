@@ -61,7 +61,7 @@ def type(array):
 
     elif isinstance(
         array,
-        [x.type for x in ak._v2.types.numpytype._dtype_to_primitive_dict],
+        tuple(x.type for x in ak._v2.types.numpytype._dtype_to_primitive_dict.keys()),
     ):
         return ak._v2.types.PrimitiveType(ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype])
 
@@ -89,12 +89,12 @@ def type(array):
             return type(array.reshape((1,))[0])
         else:
             try:
-                out = type.dtype2primitive[array.dtype.type]
+                out = ak._v2.types.numpytype._dtype_to_primitive_dict[to_dtype]
             except KeyError:
                 raise TypeError(
                     "numpy array type is unrecognized by awkward: %r" % array.dtype.type
                 )
-            out = ak._v2.types.PrimitiveType(out)
+            out = ak._v2.types.NumpyType(out)
             for x in array.shape[-1:0:-1]:
                 out = ak._v2.types.RegularType(out, x)
             return ak._v2.types.ArrayType(out, array.shape[0])
@@ -119,22 +119,3 @@ def type(array):
 
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))
-
-
-type.dtype2primitive = {
-    np.bool_: "bool",
-    np.int8: "int8",
-    np.int16: "int16",
-    np.int32: "int32",
-    np.int64: "int64",
-    np.uint8: "uint8",
-    np.uint16: "uint16",
-    np.uint32: "uint32",
-    np.uint64: "uint64",
-    np.float32: "float32",
-    np.float64: "float64",
-    np.complex64: "complex64",
-    np.complex128: "complex128",
-    np.datetime64: "datetime64",
-    np.timedelta64: "timedelta64",
-}
