@@ -9,6 +9,7 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.contents.content import Content
+from awkward._v2.forms.recordform import RecordForm
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -32,6 +33,8 @@ class Record(object):
         else:
             self._array = array
             self._at = at
+
+    Form = RecordForm
 
     @property
     def array(self):

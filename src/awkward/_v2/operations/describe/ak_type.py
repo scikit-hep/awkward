@@ -63,18 +63,18 @@ def type(array):
         array,
         tuple(x.type for x in ak._v2.types.numpytype._dtype_to_primitive_dict.keys()),
     ):
-        return ak._v2.types.PrimitiveType(
+        return ak._v2.types.NumpyType(
             ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype]
         )
 
     elif isinstance(array, (bool, np.bool_)):
-        return ak._v2.types.PrimitiveType("bool")
+        return ak._v2.types.NumpyType("bool")
 
     elif isinstance(array, numbers.Integral):
-        return ak._v2.types.PrimitiveType("int64")
+        return ak._v2.types.NumpyType("int64")
 
     elif isinstance(array, numbers.Real):
-        return ak._v2.types.PrimitiveType("float64")
+        return ak._v2.types.NumpyType("float64")
 
     elif isinstance(
         array,
@@ -91,7 +91,7 @@ def type(array):
             return type(array.reshape((1,))[0])
         else:
             try:
-                out = ak._v2.types.numpytype._dtype_to_primitive_dict[to_dtype]
+                out = ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype.type]
             except KeyError:
                 raise TypeError(
                     "numpy array type is unrecognized by awkward: %r" % array.dtype.type
