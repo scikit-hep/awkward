@@ -199,40 +199,34 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
     elif node.__class__.__name__ == "Mult":
         code = "*"
     elif node.__class__.__name__ == "Subscript":
-        if (
-            node.slice.value.__class__.__name__ == "Name"
-            and node.slice.value.id in forvars
-        ):
+        if node.slice.__class__.__name__ == "Name" and node.slice.id in forvars:
             code = (
-                node.value.id
-                + "["
-                + getthread_dim(forvars.index(node.slice.value.id))
-                + "]"
+                node.value.id + "[" + getthread_dim(forvars.index(node.slice.id)) + "]"
             )
         elif (
-            node.slice.value.__class__.__name__ == "Constant"
-            or node.slice.value.__class__.__name__ == "BinOp"
-            or node.slice.value.__class__.__name__ == "Subscript"
-            or node.slice.value.__class__.__name__ == "Name"
-            or node.slice.value.__class__.__name__ == "Num"
+            node.slice.__class__.__name__ == "Constant"
+            or node.slice.__class__.__name__ == "BinOp"
+            or node.slice.__class__.__name__ == "Subscript"
+            or node.slice.__class__.__name__ == "Name"
+            or node.slice.__class__.__name__ == "Num"
         ) and hasattr(node.value, "id"):
             code = (
                 node.value.id
                 + "["
-                + traverse(node.slice.value, args, copy.copy(forvars), declared)
+                + str(traverse(node.slice, args, copy.copy(forvars), declared))
                 + "]"
             )
         elif node.value.__class__.__name__ == "Subscript":
             code = (
                 traverse(node.value.value)
                 + "["
-                + traverse(node.value.slice.value)
+                + traverse(node.value.slice)
                 + "]["
-                + traverse(node.slice.value)
+                + traverse(node.slice)
                 + "]"
             )
         else:
-            code = traverse(node.slice.value, args, copy.copy(forvars), declared)
+            code = traverse(node.slice, args, copy.copy(forvars), declared)
     elif node.__class__.__name__ == "Call":
         assert len(node.args) == 1
         if node.func.id == "uint8":
