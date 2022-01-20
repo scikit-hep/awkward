@@ -13,6 +13,8 @@ jobs:
         with:
           cuda: '11.5.1'
 
+      - run: python --version
+
       - run: python dev/generate-cuda.py && ./cuda-build.sh --install
 
       - run: python -c "import awkward_cuda_kernels"
