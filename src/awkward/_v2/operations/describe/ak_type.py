@@ -90,18 +90,15 @@ def type(array):
         return ak._v2.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
 
     elif isinstance(array, ak._v2.highlevel.Array):
-        return ak._v2._util.highlevel_type(array.layout, array.behavior, True)
+        return array.layout.form.type_from_behavior(array.behavior), len(array.layout)
 
     elif isinstance(array, ak._v2.highlevel.Record):
-        return ak._v2._util.highlevel_type(array.layout, array.behavior, False)
+        return array.layout.form.type
 
     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
-        return ak._v2._util.highlevel_type(
-            array.snapshot().layout, array.behavior, True
+        return array.snapshot().form.type_from_behavior(array.behavior), len(
+            array.snapshot()
         )
-
-    elif isinstance(array, ak._v2.record.Record):
-        return array.type(ak._v2._util.typestrs(None))
 
     elif isinstance(array, np.ndarray):
         if len(array.shape) == 0:
@@ -118,11 +115,22 @@ def type(array):
                 out = ak._v2.types.RegularType(out, x)
             return ak._v2.types.ArrayType(out, array.shape[0])
 
-    elif isinstance(array, ak.layout.ArrayBuilder):
-        return array.type(ak._v2._util.typestrs(None))
-
-    elif isinstance(array, ak._v2.contents.Content):
+    elif isinstance(
+        array, (ak._v2.contents.Content, ak._v2.record.Record, ak.layout.ArrayBuilder)
+    ):
         return array.form.type
+
+    elif isinstance(
+        array,
+        (
+            ak.highlevel.Array,
+            ak.highlevel.Record,
+            ak.highlevel.ArrayBuilder,
+            ak.layout.Content,
+            ak.layout.Record,
+        ),
+    ):
+        raise TypeError("do not use ak._v2.operations.convert.to_list on v1 arrays")
 
     else:
         raise TypeError("unrecognized array type: {0}".format(repr(array)))

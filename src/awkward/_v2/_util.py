@@ -534,13 +534,6 @@ def extra(args, kwargs, defaults):
 # key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 
-def highlevel_type(layout, behavior, isarray):
-    if isarray:
-        return layout.form.type_from_behavior(behavior), len(layout)
-    else:
-        return layout.form.type
-
-
 # def make_union(tags, index, contents, identities, parameters):
 #     if isinstance(index, ak._v2.contents.Index32):
 #         return ak._v2.contents.UnionArray8_32(tags, index, contents, identities, parameters)

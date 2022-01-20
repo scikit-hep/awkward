@@ -16,7 +16,10 @@ def test_UnmaskedArray():
     array_float64 = ak._v2.contents.UnmaskedArray(content_float64)
     assert to_list(array_float64) == [0.25, 0.5, 3.5, 4.5, 5.5]
     assert str(ak._v2.operations.describe.type(content_float64)) == "float64"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_float64))) == "5 * float64"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_float64)))
+        == "5 * float64"
+    )
     assert str(ak._v2.operations.describe.type(array_float64)) == "?float64"
     # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float64))) == "5 * ?float64"
 
