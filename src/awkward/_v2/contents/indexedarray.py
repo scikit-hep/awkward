@@ -528,7 +528,7 @@ class IndexedArray(Content):
         contentlength_so_far = 0
         length_so_far = 0
         nextindex = ak._v2.index.Index64.empty(total_length, self._nplike)
-        parameters = {}
+        parameters = self._parameters
 
         for array in head:
             parameters = ak._v2._util.merge_parameters(
