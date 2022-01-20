@@ -1,8 +1,15 @@
 name: CUDA Kernels Build
+
 on: [push]
+
 jobs:
-  print-hello-world:
+  setup-cuda-toolkit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: echo "Hello World"
+
+      - uses: Jimver/cuda-toolkit@v0.2.5
+        id: cuda-toolkit
+        with:
+          cuda: '11.5.1'
+      - run: nvcc -V
