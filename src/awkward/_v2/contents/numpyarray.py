@@ -585,6 +585,7 @@ class NumpyArray(Content):
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
             or self.parameter("__array__") == "char"
+            or self.parameter("__array__") == "byte"
         ):
             return self
         else:
