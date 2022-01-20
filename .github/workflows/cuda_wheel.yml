@@ -1,21 +1,8 @@
 name: CUDA Kernels Build
-
-on:
-  push:
-
-env:
-  CUDA_VERSION: 11.5
-  PYTHON_VERSION: 3.6
-
+on: [push]
 jobs:
-  hello_world:
-    name: "Hello World"
+  print-hello-world:
     runs-on: ubuntu-latest
     steps:
-    - uses: action/checkout@v2
-      with:
-        submodules: true
-        ref: swishdiff/cuda-build-wheel
-
-    - name: Print Hello World
-      run: echo "Hello World"
+      - uses: actions/checkout@v2
+      - run: echo "Hello World"
