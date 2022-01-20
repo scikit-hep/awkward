@@ -782,7 +782,7 @@ class UnionArray(Content):
 
         nextcontents = []
         length_so_far = 0
-        parameters = {}
+        parameters = self._parameters
 
         for array in head:
             parameters = ak._v2._util.merge_parameters(
