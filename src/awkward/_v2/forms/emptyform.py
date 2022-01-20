@@ -31,6 +31,9 @@ class EmptyForm(Form):
             and self._form_key == other._form_key
         )
 
+    def toNumpyForm(self, dtype):
+        return ak._v2.forms.numpyform.from_dtype(dtype, self._parameters)
+
     def generated_compatibility(self, other):
         if other is None:
             return True

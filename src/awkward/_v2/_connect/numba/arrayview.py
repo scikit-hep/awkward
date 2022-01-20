@@ -29,8 +29,8 @@ def code_to_function(code, function_name, externals=None, debug=False):
 
 class Lookup(object):
     def __init__(self, layout):
-        arrays = []
-        tolookup(layout, arrays)
+        positions = []
+        tolookup(layout, positions)
 
         def arrayptr(x):
             if isinstance(x, int):
@@ -39,47 +39,63 @@ class Lookup(object):
                 return x.ctypes.data
 
         self.nplike = layout.nplike
-        self.arrays = arrays
-        self.arrayptrs = self.nplike.array([arrayptr(x) for x in arrays], dtype=np.intp)
+        self.positions = positions
+        self.arrayptrs = self.nplike.array(
+            [arrayptr(x) for x in positions], dtype=np.intp
+        )
 
 
-def tolookup(layout, arrays):
-    if isinstance(layout, ak._v2.contents.NumpyArray):
-        return ak._v2._connect.numba.layout.NumpyArrayType.tolookup(layout, arrays)
+def tolookup(layout, positions):
+    if isinstance(layout, ak._v2.contents.EmptyArray):
+        return tolookup(layout.toNumpyArray(np.dtype(np.float64)), positions)
+
+    elif isinstance(layout, ak._v2.contents.NumpyArray):
+        if len(layout.shape) == 1:
+            return ak._v2._connect.numba.layout.NumpyArrayType.tolookup(
+                layout, positions
+            )
+        else:
+            return tolookup(layout.toRegularArray(), positions)
 
     elif isinstance(layout, ak._v2.contents.RegularArray):
-        return ak._v2._connect.numba.layout.RegularArrayType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.RegularArrayType.tolookup(layout, positions)
 
     elif isinstance(
         layout, (ak._v2.contents.ListArray, ak._v2.contents.ListOffsetArray)
     ):
-        return ak._v2._connect.numba.layout.ListArrayType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.ListArrayType.tolookup(layout, positions)
 
     elif isinstance(layout, ak._v2.contents.IndexedArray):
-        return ak._v2._connect.numba.layout.IndexedArrayType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.IndexedArrayType.tolookup(layout, positions)
 
     elif isinstance(layout, ak._v2.contents.IndexedOptionArray):
         return ak._v2._connect.numba.layout.IndexedOptionArrayType.tolookup(
-            layout, arrays
+            layout, positions
         )
 
     elif isinstance(layout, ak._v2.contents.ByteMaskedArray):
-        return ak._v2._connect.numba.layout.ByteMaskedArrayType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.ByteMaskedArrayType.tolookup(
+            layout, positions
+        )
 
     elif isinstance(layout, ak._v2.contents.BitMaskedArray):
-        return ak._v2._connect.numba.layout.BitMaskedArrayType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.BitMaskedArrayType.tolookup(
+            layout, positions
+        )
 
     elif isinstance(layout, ak._v2.contents.UnmaskedArray):
-        return ak._v2._connect.numba.layout.UnmaskedArrayType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.UnmaskedArrayType.tolookup(
+            layout, positions
+        )
 
     elif isinstance(layout, ak._v2.contents.RecordArray):
-        return ak._v2._connect.numba.layout.RecordArrayType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.RecordArrayType.tolookup(layout, positions)
 
     elif isinstance(layout, ak._v2.record.Record):
-        return ak._v2._connect.numba.layout.RecordType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.RecordType.tolookup(layout, positions)
 
     elif isinstance(layout, ak._v2.contents.UnionArray):
-        return ak._v2._connect.numba.layout.UnionArrayType.tolookup(layout, arrays)
+        return ak._v2._connect.numba.layout.UnionArrayType.tolookup(layout, positions)
 
     else:
         raise AssertionError("unrecognized Content or Record: {0}".format(type(layout)))
@@ -87,12 +103,13 @@ def tolookup(layout, arrays):
 
 def tonumbatype(form):
     if isinstance(form, ak._v2.forms.EmptyForm):
-        return ak._v2._connect.numba.layout.NumpyArrayType.from_form(
-            ak._v2.forms.numpyform.from_dtype(np.dtype(np.float64))
-        )
+        return tonumbatype(form.toEmptyForm(np.dtype(np.float64)))
 
     elif isinstance(form, ak._v2.forms.NumpyForm):
-        return ak._v2._connect.numba.layout.NumpyArrayType.from_form(form)
+        if len(form.inner_shape) == 0:
+            return ak._v2._connect.numba.layout.NumpyArrayType.from_form(form)
+        else:
+            return tonumbatype(form.toRegularForm())
 
     elif isinstance(form, ak._v2.forms.RegularForm):
         return ak._v2._connect.numba.layout.RegularArrayType.from_form(form)
@@ -172,10 +189,6 @@ class ArrayView(object):
             allow_other=False,
             numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
         )
-
-        if isinstance(layout, ak._v2.contents.NumpyArray) and len(layout.shape) != 1:
-            layout = layout.toRegularArray()
-
         return ArrayView(
             tonumbatype(layout.form), behavior, Lookup(layout), 0, 0, len(layout), ()
         )
