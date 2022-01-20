@@ -15,6 +15,7 @@ jobs:
     - uses: action/checkout@v2
       with:
         submodules: true
+        ref: swishdiff/cuda-build-wheel
 
     - name: Print Hello World
       run: echo "Hello World"
