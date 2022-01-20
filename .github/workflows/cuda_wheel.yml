@@ -1,0 +1,20 @@
+name: CUDA Kernels Build
+
+on:
+  push:
+
+env:
+  CUDA_VERSION: 11.5
+  PYTHON_VERSION: 3.6
+
+jobs:
+  hello_world:
+    name: "Hello World"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: action/checkout@v2
+      with:
+        submodules: true
+
+    - name: Print Hello World
+      run: echo "Hello World"
