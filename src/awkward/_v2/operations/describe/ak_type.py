@@ -63,7 +63,7 @@ def type(array):
         array,
         [x.type for x in ak._v2.types.numpytype._dtype_to_primitive_dict],
     ):
-        return ak._v2.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
+        return ak._v2.types.PrimitiveType(ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype])
 
     elif isinstance(array, (bool, np.bool_)):
         return ak._v2.types.PrimitiveType("bool")
