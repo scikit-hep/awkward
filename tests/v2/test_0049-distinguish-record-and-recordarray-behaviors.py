@@ -12,6 +12,7 @@ class Point(ak._v2.record.Record):
         return "<{} {}>".format(self["x"], self["y"])
 
 
+@pytest.mark.skip(reason="Missing check for overridden __repr__")
 def test():
     behavior = {}
     behavior["__typestr__", "Point"] = "P"

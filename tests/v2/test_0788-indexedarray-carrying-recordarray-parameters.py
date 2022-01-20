@@ -13,16 +13,17 @@ def test():
     assert (
         str(
             ak._v2.operations.structure.with_name(
-                ak.operations.structure.concatenate([one, two], axis=1), "All"
+                ak._v2.operations.structure.concatenate([one, two], axis=1), "All"
             ).type
         )
-        == '3 * var * All["x": float64]'
+        == "3 * var * All[x: float64]"
     )
     assert (
         str(
-            ak.operations.structure.with_name(
-                ak.operations.structure.concatenate([one[1:], two[1:]], axis=1), "All"
+            ak._v2.operations.structure.with_name(
+                ak._v2.operations.structure.concatenate([one[1:], two[1:]], axis=1),
+                "All",
             ).type
         )
-        == '2 * var * All["x": float64]'
+        == "2 * var * All[x: float64]"
     )
