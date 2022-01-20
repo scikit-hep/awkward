@@ -3,7 +3,7 @@ name: CUDA Kernels Build
 on: [push]
 
 jobs:
-  setup-cuda-toolkit:
+  setup-cuda-build-process:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -12,4 +12,8 @@ jobs:
         id: cuda-toolkit
         with:
           cuda: '11.5.1'
-      - run: nvcc -V
+
+      - run: python dev/generate-cuda.py
+             ./cuda-build.sh --install
+
+      - run: python -c "import awkward_cuda_kernels"
