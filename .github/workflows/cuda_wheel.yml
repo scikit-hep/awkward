@@ -19,6 +19,8 @@ jobs:
 
       - run: python --version
 
+      - run: pip install -r requirements-dev.txt
+
       - run: python dev/generate-cuda.py && ./cuda-build.sh --install
 
       - run: python -c "import awkward_cuda_kernels"
