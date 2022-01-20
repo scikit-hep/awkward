@@ -197,7 +197,6 @@ def test_keepdims_complex():
     )
 
 
-@pytest.mark.skip(reason="Fixme on values_astype for complex")
 def test_astype_complex():
     content_float64 = ak._v2.contents.NumpyArray(
         np.array([0.25, 0.5, 3.5, 4.5, 5.5], dtype=np.float64)
@@ -208,9 +207,15 @@ def test_astype_complex():
     array_float64 = ak._v2.contents.UnmaskedArray(content_float64)
     assert to_list(array_float64) == [0.25, 0.5, 3.5, 4.5, 5.5]
     assert str(ak._v2.operations.describe.type(content_float64)) == "float64"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_float64))) == "5 * float64"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_float64)))
+        == "5 * float64"
+    )
     assert str(ak._v2.operations.describe.type(array_float64)) == "?float64"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float64))) == "5 * ?float64"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float64)))
+        == "5 * ?float64"
+    )
 
     assert np.can_cast(np.float32, np.float64) is True
     assert np.can_cast(np.float64, np.float32, "unsafe") is True
@@ -220,7 +225,9 @@ def test_astype_complex():
     assert np.can_cast(np.complex64, np.float64, "unsafe") is True
     assert np.can_cast(np.complex128, np.float64, "unsafe") is True
 
-    content_complex64 = ak.values_astype(content_float64, "complex64", highlevel=False)
+    content_complex64 = ak._v2.operations.structure.values_astype(
+        content_float64, "complex64", highlevel=False
+    )
     array_complex64 = ak._v2.contents.UnmaskedArray(content_complex64)
     assert to_list(content_complex64) == [
         (0.25 + 0j),
@@ -229,7 +236,9 @@ def test_astype_complex():
         (4.5 + 0j),
         (5.5 + 0j),
     ]
-    assert to_list(ak.nplike.of(array_complex64).asarray(array_complex64)) == [
+    assert to_list(
+        ak.nplike.of(array_complex64).asarray(ak._v2.highlevel.Array(array_complex64))
+    ) == [
         (0.25 + 0.0j),
         (0.5 + 0.0j),
         (3.5 + 0.0j),
@@ -237,9 +246,15 @@ def test_astype_complex():
         (5.5 + 0.0j),
     ]
     assert str(ak._v2.operations.describe.type(content_complex64)) == "complex64"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_complex64))) == "5 * complex64"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_complex64)))
+        == "5 * complex64"
+    )
     assert str(ak._v2.operations.describe.type(array_complex64)) == "?complex64"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_complex64))) == "5 * ?complex64"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_complex64)))
+        == "5 * ?complex64"
+    )
     content = ak._v2.contents.NumpyArray(
         np.array([1, (2.2 + 0.1j), 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )

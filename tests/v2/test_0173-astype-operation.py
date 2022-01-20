@@ -21,7 +21,10 @@ def test_UnmaskedArray():
         == "5 * float64"
     )
     assert str(ak._v2.operations.describe.type(array_float64)) == "?float64"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float64))) == "5 * ?float64"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float64)))
+        == "5 * ?float64"
+    )
 
     assert np.can_cast(np.float32, np.float64) is True
     assert np.can_cast(np.float64, np.float32, "unsafe") is True
@@ -33,9 +36,15 @@ def test_UnmaskedArray():
     array_float32 = ak._v2.contents.UnmaskedArray(content_float32)
     assert to_list(array_float32) == [0.25, 0.5, 3.5, 4.5, 5.5]
     assert str(ak._v2.operations.describe.type(content_float32)) == "float32"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_float32))) == "5 * float32"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_float32)))
+        == "5 * float32"
+    )
     assert str(ak._v2.operations.describe.type(array_float32)) == "?float32"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float32))) == "5 * ?float32"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float32)))
+        == "5 * ?float32"
+    )
 
     content_int8 = ak._v2.operations.structure.values_astype(
         content_float64, "int8", highlevel=False
@@ -43,9 +52,15 @@ def test_UnmaskedArray():
     array_int8 = ak._v2.contents.UnmaskedArray(content_int8)
     assert to_list(array_int8) == [0, 0, 3, 4, 5]
     assert str(ak._v2.operations.describe.type(content_int8)) == "int8"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_int8))) == "5 * int8"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_int8)))
+        == "5 * int8"
+    )
     assert str(ak._v2.operations.describe.type(array_int8)) == "?int8"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_int8))) == "5 * ?int8"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_int8)))
+        == "5 * ?int8"
+    )
 
     content_from_int8 = ak._v2.operations.structure.values_astype(
         content_int8, "float64", highlevel=False
@@ -53,9 +68,15 @@ def test_UnmaskedArray():
     array_from_int8 = ak._v2.contents.UnmaskedArray(content_from_int8)
     assert to_list(array_from_int8) == [0, 0, 3, 4, 5]
     assert str(ak._v2.operations.describe.type(content_from_int8)) == "float64"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_from_int8))) == "5 * float64"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_from_int8)))
+        == "5 * float64"
+    )
     assert str(ak._v2.operations.describe.type(array_from_int8)) == "?float64"
-    # assert str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_from_int8))) == "5 * ?float64"
+    assert (
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_from_int8)))
+        == "5 * ?float64"
+    )
 
 
 def test_RegularArray_and_ListArray():
@@ -95,8 +116,9 @@ def test_ufunc_afterward():
     ).tolist() == [2.0999999046325684, 4.300000190734863]
 
 
-@pytest.mark.skip(reason="Fixme on values_astype float and string")
 def test_string():
-    assert ak._v2.operations.structure.values_astype(
-        ak._v2.highlevel.Array([{"x": 1.1, "y": "hello"}]), np.float32
-    ).tolist() == [{"x": 1.100000023841858, "y": "hello"}]
+    assert to_list(
+        ak._v2.operations.structure.values_astype(
+            ak._v2.highlevel.Array([{"x": 1.1, "y": "hello"}]), np.float32
+        )
+    ) == [{"x": 1.100000023841858, "y": "hello"}]

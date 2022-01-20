@@ -64,7 +64,6 @@ def values_astype(array, to, highlevel=True, behavior=None):
         array, allow_record=False, allow_other=False
     )
     out = layout.numbers_to_type(to_str)
-
     return ak._v2._util.wrap(out, behavior, highlevel)
 
 

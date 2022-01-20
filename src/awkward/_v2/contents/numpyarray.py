@@ -581,13 +581,20 @@ class NumpyArray(Content):
         return out2, nextoffsets[: outlength[0]]
 
     def numbers_to_type(self, name):
-        dtype = primitive_to_dtype(name)
-        return NumpyArray(
-            self._nplike.asarray(self._data, dtype=dtype),
-            self._identifier,
-            self._parameters,
-            self._nplike,
-        )
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+            or self.parameter("__array__") == "char"
+        ):
+            return self
+        else:
+            dtype = primitive_to_dtype(name)
+            return NumpyArray(
+                self._nplike.asarray(self._data, dtype=dtype),
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self.length == 0:

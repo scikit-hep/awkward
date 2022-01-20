@@ -59,15 +59,6 @@ def type(array):
     if array is None:
         return ak._v2.types.UnknownType()
 
-    elif isinstance(array, (bool, np.bool_)):
-        return ak._v2.types.PrimitiveType("bool")
-
-    elif isinstance(array, numbers.Integral):
-        return ak._v2.types.PrimitiveType("int64")
-
-    elif isinstance(array, numbers.Real):
-        return ak._v2.types.PrimitiveType("float64")
-
     elif isinstance(
         array,
         (
@@ -89,16 +80,24 @@ def type(array):
     ):
         return ak._v2.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
 
-    elif isinstance(array, ak._v2.highlevel.Array):
-        return array.layout.form.type_from_behavior(array.behavior), len(array.layout)
+    elif isinstance(array, (bool, np.bool_)):
+        return ak._v2.types.PrimitiveType("bool")
 
-    elif isinstance(array, ak._v2.highlevel.Record):
-        return array.layout.form.type
+    elif isinstance(array, numbers.Integral):
+        return ak._v2.types.PrimitiveType("int64")
 
-    elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
-        return array.snapshot().form.type_from_behavior(array.behavior), len(
-            array.snapshot()
-        )
+    elif isinstance(array, numbers.Real):
+        return ak._v2.types.PrimitiveType("float64")
+
+    elif isinstance(
+        array,
+        (
+            ak._v2.highlevel.Array,
+            ak._v2.highlevel.Record,
+            ak._v2.highlevel.ArrayBuilder,
+        ),
+    ):
+        return array.type
 
     elif isinstance(array, np.ndarray):
         if len(array.shape) == 0:
@@ -115,9 +114,10 @@ def type(array):
                 out = ak._v2.types.RegularType(out, x)
             return ak._v2.types.ArrayType(out, array.shape[0])
 
-    elif isinstance(
-        array, (ak._v2.contents.Content, ak._v2.record.Record, ak.layout.ArrayBuilder)
-    ):
+    elif isinstance(array, ak.layout.ArrayBuilder):
+        return NotImplementedError
+
+    elif isinstance(array, (ak._v2.contents.Content, ak._v2.record.Record)):
         return array.form.type
 
     elif isinstance(
