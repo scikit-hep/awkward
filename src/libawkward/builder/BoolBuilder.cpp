@@ -42,7 +42,7 @@ namespace awkward {
 
   int64_t
   BoolBuilder::length() const {
-    return buffer_.length();
+    return (int64_t)buffer_.length();
   }
 
   void
