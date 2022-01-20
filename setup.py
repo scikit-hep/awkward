@@ -193,6 +193,11 @@ class Install(setuptools.command.install.install):
         print("--- build directory -------------------------------------------")
         tree("build")
 
+        print("--- copying includes ------------------------------------------")
+        shutil.copytree(
+            os.path.join("include"), os.path.join(outerdir, "awkward", "include")
+        )
+
         print("--- outerdir after copy ---------------------------------------")
         tree(outerdir)
 
