@@ -50,7 +50,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
 
     See also #ak.strings_astype.
     """
-    
+
     to_dtype = np.dtype(to)
     to_str = ak._v2.types.numpytype._dtype_to_primitive_dict.get(to_dtype)
 

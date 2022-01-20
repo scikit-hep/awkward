@@ -12,6 +12,7 @@ pytestmark = pytest.mark.skipif(
 
 to_list = ak._v2.operations.convert.to_list
 
+
 def test_types():
     t0 = ak._v2.types.UnknownType()
     t1 = ak._v2.types.NumpyType("int32")
