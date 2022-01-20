@@ -61,22 +61,7 @@ def type(array):
 
     elif isinstance(
         array,
-        (
-            np.int8,
-            np.int16,
-            np.int32,
-            np.int64,
-            np.uint8,
-            np.uint16,
-            np.uint32,
-            np.uint64,
-            np.float32,
-            np.float64,
-            np.complex64,
-            np.complex128,
-            np.datetime64,
-            np.timedelta64,
-        ),
+        [x.type for x in ak._v2.types.numpytype._dtype_to_primitive_dict],
     ):
         return ak._v2.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
 
