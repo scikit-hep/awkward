@@ -128,7 +128,7 @@ namespace awkward {
   GrowableBuffer<T>::clear() {
     length_ = 0;
     reserved_ = (size_t) options_.initial();
-    ptr_ = nullptr;
+    ptr_ = UniquePtr(reinterpret_cast<T*>(awkward_malloc(options_.initial()*(int64_t)sizeof(T))));
   }
 
   template <typename T>
