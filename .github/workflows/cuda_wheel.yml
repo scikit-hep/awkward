@@ -13,6 +13,10 @@ jobs:
         with:
           cuda: '11.5.1'
 
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
       - run: python --version
 
       - run: python dev/generate-cuda.py && ./cuda-build.sh --install
