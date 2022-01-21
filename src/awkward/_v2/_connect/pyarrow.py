@@ -3,10 +3,7 @@
 
 import json
 
-try:
-    from collections.abc import Iterable, Sized
-except ImportError:
-    from collections import Iterable, Sized
+from collections.abc import Iterable, Sized
 
 import numpy
 
@@ -19,7 +16,7 @@ try:
 
     error_message = None
 
-except ImportError:
+except ModuleNotFoundError:
     pyarrow = None
     error_message = """to use {0}, you must install pyarrow:
 

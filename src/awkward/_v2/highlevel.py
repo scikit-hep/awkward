@@ -28,14 +28,9 @@ import sys
 import re
 import keyword
 
-try:
-    from collections.abc import Iterable
-    from collections.abc import Sized
-    from collections.abc import Mapping
-except ImportError:
-    from collections import Iterable
-    from collections import Sized
-    from collections import Mapping
+from collections.abc import Iterable
+from collections.abc import Sized
+from collections.abc import Mapping
 
 import awkward as ak
 from awkward._v2._connect.numpy import NDArrayOperatorsMixin

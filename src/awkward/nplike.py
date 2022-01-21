@@ -5,10 +5,7 @@
 
 import ctypes
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import numpy
 
@@ -453,8 +450,8 @@ class Cupy(NumpyLike):
     def __init__(self):
         try:
             import cupy
-        except ImportError:
-            raise ImportError(
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
                 """to use CUDA arrays in Python, install the 'cupy' package with:
 
     pip install cupy --upgrade
@@ -462,7 +459,7 @@ class Cupy(NumpyLike):
 or
 
     conda install cupy"""
-            )
+            ) from None
         self._module = cupy
 
     @property

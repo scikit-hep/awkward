@@ -312,7 +312,7 @@ def smart_decorator(f, create_decorator):
 
 try:
     import regex
-except ImportError:
+except ModuleNotFoundError:
     regex = None
 
 import sre_parse

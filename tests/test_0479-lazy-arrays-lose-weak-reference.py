@@ -1,10 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 
-try:
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import MutableMapping
+from collections.abc import MutableMapping
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401

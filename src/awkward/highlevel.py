@@ -6,12 +6,8 @@
 import re
 import keyword
 
-try:
-    from collections.abc import Iterable
-    from collections.abc import Sized
-except ImportError:
-    from collections import Iterable
-    from collections import Sized
+from collections.abc import Iterable
+from collections.abc import Sized
 
 import awkward as ak
 

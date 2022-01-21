@@ -314,7 +314,7 @@ def smart_decorator(f, create_decorator):
 
 try:
     import regex
-except ImportError:
+except ModuleNotFoundError:
     regex = None
 
 import sre_parse
@@ -332,7 +332,7 @@ def get_regexp_width(expr):
         regexp_final = re.sub(categ_pattern, 'A', expr)
     else:
         if re.search(categ_pattern, expr):
-            raise ImportError('`regex` module must be installed in order to use Unicode categories.', expr)
+            raise ModuleNotFoundError('`regex` module must be installed in order to use Unicode categories.', expr)
         regexp_final = expr
     try:
         return [int(x) for x in sre_parse.parse(regexp_final).getwidth()]
@@ -2251,7 +2251,7 @@ class Lark(Serialize):
             if regex:
                 re_module = regex
             else:
-                raise ImportError('`regex` module must be installed if calling `Lark(regex=True)`.')
+                raise ModuleNotFoundError('`regex` module must be installed if calling `Lark(regex=True)`.')
         else:
             re_module = re
 

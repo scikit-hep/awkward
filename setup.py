@@ -20,7 +20,7 @@ try:
     import cmake
 
     CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
-except ImportError:
+except ModuleNotFoundError:
     CMAKE = "cmake"
 
 PYTHON = sys.executable

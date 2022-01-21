@@ -11,12 +11,8 @@ import warnings
 import itertools
 import numbers
 
-try:
-    from collections.abc import Mapping
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import Mapping
-    from collections import MutableMapping
+from collections.abc import Mapping
+from collections.abc import MutableMapping
 
 import awkward as ak
 

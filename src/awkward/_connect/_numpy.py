@@ -3,10 +3,7 @@
 # v2: replace with src/awkward/_v2/_connect/numpy.py
 
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import numpy
 

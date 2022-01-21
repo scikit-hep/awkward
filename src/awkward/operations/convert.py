@@ -12,12 +12,8 @@ import threading
 import glob
 import re
 
-try:
-    from collections.abc import Iterable, Sized
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import Iterable, Sized
-    from collections import MutableMapping
+from collections.abc import Iterable, Sized
+from collections.abc import MutableMapping
 
 import awkward as ak
 
@@ -613,13 +609,13 @@ def to_jax(array):
     """
     try:
         import jax
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """to use {0}, you must install jax:
 
                 pip install jax jaxlib
             """
-        )
+        ) from None
 
     if isinstance(array, (bool, numbers.Number)):
         return jax.numpy.array([array])[0]
@@ -1966,19 +1962,17 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True, behavior=None
 def _import_pyarrow(name):
     try:
         import pyarrow
-    except ImportError:
-        raise ImportError(
-            """to use {}, you must install pyarrow:
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            f"""to use {name}, you must install pyarrow:
 
     pip install pyarrow
 
 or
 
     conda install -c conda-forge pyarrow
-""".format(
-                name
-            )
-        )
+"""
+        ) from None
     else:
         if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
             "2.0.0"
@@ -2952,7 +2946,7 @@ def to_parquet(
     list_to32=False,
     string_to32=True,
     bytestring_to32=True,
-    **options
+    **options,
 ):
     """
     Args:
@@ -3843,7 +3837,7 @@ def from_parquet(
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options
+    **options,
 ):
     """
     Args:
@@ -5251,8 +5245,8 @@ def to_pandas(
     """
     try:
         import pandas
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """install the 'pandas' package with:
 
     pip install pandas --upgrade
@@ -5260,7 +5254,7 @@ def to_pandas(
 or
 
     conda install pandas"""
-        )
+        ) from None
 
     if how is not None:
         out = None

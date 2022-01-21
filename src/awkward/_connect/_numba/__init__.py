@@ -14,8 +14,8 @@ def register_and_check():
     global checked_version
     try:
         import numba
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """install the 'numba' package with:
 
     pip install numba --upgrade
@@ -23,7 +23,7 @@ def register_and_check():
 or
 
     conda install numba"""
-        )
+        ) from None
     else:
         if not checked_version and ak._v2._util.parse_version(
             numba.__version__
