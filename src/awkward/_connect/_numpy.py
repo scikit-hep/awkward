@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numpy.py
 
-from __future__ import absolute_import
 
 import sys
 
@@ -39,7 +38,7 @@ def array_function(func, types, args, kwargs):
     function = implemented.get(func)
     if function is None:
         args = tuple(_to_rectilinear(x) for x in args)
-        kwargs = dict((k, _to_rectilinear(v)) for k, v in kwargs.items())
+        kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
         out = func(*args, **kwargs)
         nplike = ak.nplike.of(out)
         if isinstance(out, nplike.ndarray) and len(out.shape) != 0:
@@ -245,7 +244,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 else:
                     custom_types.append(type(x).__name__)
             raise ValueError(
-                "no overloads for custom types: {0}({1})".format(
+                "no overloads for custom types: {}({})".format(
                     ufunc.__name__,
                     ", ".join(custom_types),
                 )
@@ -295,8 +294,8 @@ def matmul_for_numba(lefts, rights, dtype):
 
         if colsA != rowsB:
             raise ValueError(
-                u"one of the pairs of matrices in np.matmul do not match shape: "
-                u"(n \u00d7 k) @ (k \u00d7 m)"
+                "one of the pairs of matrices in np.matmul do not match shape: "
+                "(n \u00d7 k) @ (k \u00d7 m)"
             )
 
         total_outer += 1
@@ -400,7 +399,7 @@ except AttributeError:
                 return NotImplemented
             return ufunc(self, other)
 
-        func.__name__ = "__{}__".format(name)
+        func.__name__ = f"__{name}__"
         return func
 
     def _reflected_binary_method(ufunc, name):
@@ -409,14 +408,14 @@ except AttributeError:
                 return NotImplemented
             return ufunc(other, self)
 
-        func.__name__ = "__r{}__".format(name)
+        func.__name__ = f"__r{name}__"
         return func
 
     def _inplace_binary_method(ufunc, name):
         def func(self, other):
             return ufunc(self, other, out=(self,))
 
-        func.__name__ = "__i{}__".format(name)
+        func.__name__ = f"__i{name}__"
         return func
 
     def _numeric_methods(ufunc, name):
@@ -430,10 +429,10 @@ except AttributeError:
         def func(self):
             return ufunc(self)
 
-        func.__name__ = "__{}__".format(name)
+        func.__name__ = f"__{name}__"
         return func
 
-    class NDArrayOperatorsMixin(object):
+    class NDArrayOperatorsMixin:
         __lt__ = _binary_method(um.less, "lt")
         __le__ = _binary_method(um.less_equal, "le")
         __eq__ = _binary_method(um.equal, "eq")

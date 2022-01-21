@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import copy
 
@@ -29,12 +28,12 @@ class IndexedArray(Content):
             )
         ):
             raise TypeError(
-                "{0} 'index' must be an Index with dtype in (int32, uint32, int64), "
-                "not {1}".format(type(self).__name__, repr(index))
+                "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                "not {}".format(type(self).__name__, repr(index))
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{0} 'content' must be a Content subtype, not {1}".format(
+                "{} 'content' must be a Content subtype, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
@@ -194,7 +193,7 @@ class IndexedArray(Content):
                 ak._v2.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
                 ),
-                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                "cannot fit jagged slice with length {} into {} of size {}".format(
                     slicestarts.length, type(self).__name__, self.length
                 ),
             )
@@ -270,7 +269,7 @@ class IndexedArray(Content):
         if mask is not None:
             if self._index.length != mask.length:
                 raise ValueError(
-                    "mask length ({0}) is not equal to {1} length ({2})".format(
+                    "mask length ({}) is not equal to {} length ({})".format(
                         mask.length(), type(self).__name__, self._index.length
                     )
                 )
@@ -603,9 +602,7 @@ class IndexedArray(Content):
 
     def fillna(self, value):
         if value.length != 1:
-            raise ValueError(
-                "fillna value length ({0}) is not equal to 1".format(value.length)
-            )
+            raise ValueError(f"fillna value length ({value.length}) is not equal to 1")
 
         return IndexedArray(
             self._index,
@@ -767,7 +764,7 @@ class IndexedArray(Content):
                 if starts.length > 0 and starts[0] != 0:
                     raise AssertionError(
                         "reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray64 whose offsets start at zero ({0})".format(
+                        "ListOffsetArray64 whose offsets start at zero ({})".format(
                             starts[0]
                         )
                     )
@@ -938,7 +935,7 @@ class IndexedArray(Content):
                 if starts.length > 0 and starts[0] != 0:
                     raise AssertionError(
                         "reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray64 whose offsets start at zero ({0})".format(
+                        "ListOffsetArray64 whose offsets start at zero ({})".format(
                             starts[0]
                         )
                     )
@@ -992,7 +989,7 @@ class IndexedArray(Content):
                     errors="surrogateescape"
                 ).lstrip("\n").lstrip("(")
             message = error.str.decode(errors="surrogateescape")
-            return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+            return 'at {} ("{}"): {} at i={}{}'.format(
                 path, type(self), message, error.id, filename
             )
 

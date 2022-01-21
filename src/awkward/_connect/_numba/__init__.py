@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numba/__init__.py.
 
-from __future__ import absolute_import
 
 import types
 
@@ -31,7 +30,7 @@ or
         ) < ak._v2._util.parse_version("0.50"):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
-                "(you have version {0})".format(numba.__version__)
+                "(you have version {})".format(numba.__version__)
             )
         checked_version = True
         register()
@@ -97,7 +96,7 @@ def castint(context, builder, fromtype, totype, val):
             fromtype = numba.int64
     if not isinstance(fromtype, numba.types.Integer):
         raise AssertionError(
-            "unrecognized integer type: {0}".format(repr(fromtype))
+            f"unrecognized integer type: {repr(fromtype)}"
             + ak._util.exception_suffix(__file__)
         )
 

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -11,7 +10,7 @@ behavior = {}
 
 
 @ak.mixin_class(behavior, "1030_point")
-class AVeryVeryVeryLargeClassName(object):
+class AVeryVeryVeryLargeClassName:
     @property
     def mag2(self):
         return self.x ** 2 + self.y ** 2

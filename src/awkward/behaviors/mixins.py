@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/behaviors/mixins.py
 
-from __future__ import absolute_import
 
 import sys
 

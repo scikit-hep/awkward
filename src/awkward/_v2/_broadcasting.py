@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import copy
 import itertools
@@ -89,7 +88,7 @@ def checklength(inputs, options):
     for x in inputs[1:]:
         if x.length != length:
             raise ValueError(
-                "cannot broadcast {0} of length {1} with {2} of length {3}{4}".format(
+                "cannot broadcast {} of length {} with {} of length {}{}".format(
                     type(inputs[0]).__name__,
                     length,
                     type(x).__name__,
@@ -301,8 +300,8 @@ def apply_step(
                             length = tagslist[-1].shape[0]
                         elif length != tagslist[-1].shape[0]:
                             raise ValueError(
-                                "cannot broadcast UnionArray of length {0} "
-                                "with UnionArray of length {1}{2}".format(
+                                "cannot broadcast UnionArray of length {} "
+                                "with UnionArray of length {}{}".format(
                                     length, tagslist[-1].shape[0], in_function(options)
                                 )
                             )
@@ -430,7 +429,7 @@ def apply_step(
                 isinstance(x, RegularArray) or not isinstance(x, listtypes)
                 for x in inputs
             ):
-                maxsize = max([x.size for x in inputs if isinstance(x, RegularArray)])
+                maxsize = max(x.size for x in inputs if isinstance(x, RegularArray))
 
                 if nplike.known_data:
                     for x in inputs:
@@ -456,7 +455,7 @@ def apply_step(
                             else:
                                 raise ValueError(
                                     "cannot broadcast RegularArray of size "
-                                    "{0} with RegularArray of size {1} {2}".format(
+                                    "{} with RegularArray of size {} {}".format(
                                         x.size, maxsize, in_function(options)
                                     )
                                 )
@@ -574,7 +573,7 @@ def apply_step(
                     )
                 else:
                     raise AssertionError(
-                        "unexpected offsets, starts: {0}, {1}".format(
+                        "unexpected offsets, starts: {}, {}".format(
                             type(offsets), type(starts)
                         )
                     )
@@ -641,9 +640,7 @@ def apply_step(
         # Any RecordArrays?
         elif any(isinstance(x, RecordArray) for x in inputs):
             if not options["allow_records"]:
-                raise ValueError(
-                    "cannot broadcast records{0}".format(in_function(options))
-                )
+                raise ValueError(f"cannot broadcast records{in_function(options)}")
 
             fields, length, istuple = None, None, True
             for x in inputs:
@@ -653,7 +650,7 @@ def apply_step(
                     elif set(fields) != set(x.fields):
                         raise ValueError(
                             "cannot broadcast records because fields don't "
-                            "match{0}:\n    {1}\n    {2}".format(
+                            "match{}:\n    {}\n    {}".format(
                                 in_function(options),
                                 ", ".join(sorted(fields)),
                                 ", ".join(sorted(x.fields)),
@@ -663,8 +660,8 @@ def apply_step(
                         length = x.length
                     elif length != x.length:
                         raise ValueError(
-                            "cannot broadcast RecordArray of length {0} "
-                            "with RecordArray of length {1}{2}".format(
+                            "cannot broadcast RecordArray of length {} "
+                            "with RecordArray of length {}{}".format(
                                 length, x.length, in_function(options)
                             )
                         )
@@ -698,7 +695,7 @@ def apply_step(
 
         else:
             raise ValueError(
-                "cannot broadcast: {0}{1}".format(
+                "cannot broadcast: {}{}".format(
                     ", ".join(repr(type(x)) for x in inputs), in_function(options)
                 )
             )

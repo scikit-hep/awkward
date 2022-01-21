@@ -2,7 +2,6 @@
 
 # v2: keep this file, but modify it to only get objects that exist!
 
-from __future__ import absolute_import
 
 # NumPy-like alternatives
 import awkward.nplike

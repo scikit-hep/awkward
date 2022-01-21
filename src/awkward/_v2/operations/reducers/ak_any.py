@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -44,10 +43,20 @@ def any(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     )
 
     if axis is None:
-        return layout.nplike.any(
-            layout.completely_flatten(
-                function_name="ak.any", flatten_records=flatten_records
-            )
+
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs[0]
+            else:
+                return layout.nplike.logical_or(xs[0], reduce(xs[1:]))
+
+        return reduce(
+            [
+                layout.nplike.any(x)
+                for x in layout.completely_flatten(
+                    function_name="ak.any", flatten_records=flatten_records
+                )
+            ]
         )
 
     else:

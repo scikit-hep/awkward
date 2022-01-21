@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2._slicing import NestedIndexError
@@ -24,7 +23,7 @@ class NumpyArray(Content):
         ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
             raise TypeError(
-                "{0} 'data' must be an array, not {1}".format(
+                "{} 'data' must be an array, not {}".format(
                     type(self).__name__, repr(data)
                 )
             )
@@ -97,7 +96,7 @@ class NumpyArray(Content):
             out.append(" len=" + repr(str(self._data.shape[0])))
         else:
             out.append(
-                " shape='({0})'".format(", ".join(str(x) for x in self._data.shape))
+                " shape='({})'".format(", ".join(str(x) for x in self._data.shape))
             )
 
         extra = self._repr_extra(indent + "    ")
@@ -316,9 +315,7 @@ class NumpyArray(Content):
             i += 1
             depth += 1
         if posaxis > depth:
-            raise np.AxisError(
-                "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
         tonum = ak._v2.index.Index64.empty(reps, self._nplike)
         self._handle_error(
@@ -581,13 +578,21 @@ class NumpyArray(Content):
         return out2, nextoffsets[: outlength[0]]
 
     def numbers_to_type(self, name):
-        dtype = primitive_to_dtype(name)
-        return NumpyArray(
-            self._nplike.asarray(self._data, dtype=dtype),
-            self._identifier,
-            self._parameters,
-            self._nplike,
-        )
+        if (
+            self.parameter("__array__") == "string"
+            or self.parameter("__array__") == "bytestring"
+            or self.parameter("__array__") == "char"
+            or self.parameter("__array__") == "byte"
+        ):
+            return self
+        else:
+            dtype = primitive_to_dtype(name)
+            return NumpyArray(
+                self._nplike.asarray(self._data, dtype=dtype),
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self.length == 0:
@@ -784,9 +789,7 @@ class NumpyArray(Content):
             )
 
         if len(self.shape) == 0:
-            raise TypeError(
-                "{0} attempting to argsort a scalar ".format(type(self).__name__)
-            )
+            raise TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._argsort_next(
@@ -882,9 +885,7 @@ class NumpyArray(Content):
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         if len(self.shape) == 0:
-            raise TypeError(
-                "{0} attempting to sort a scalar ".format(type(self).__name__)
-            )
+            raise TypeError(f"{type(self).__name__} attempting to sort a scalar ")
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
@@ -1062,13 +1063,13 @@ class NumpyArray(Content):
 
     def _validityerror(self, path):
         if len(self.shape) == 0:
-            return 'at {0} ("{1}"): shape is zero-dimensional'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): shape is zero-dimensional'
         for i in range(len(self.shape)):
             if self.shape[i] < 0:
-                return 'at {0} ("{1}"): shape[{2}] < 0'.format(path, type(self), i)
+                return f'at {path} ("{type(self)}"): shape[{i}] < 0'
         for i in range(len(self.strides)):
             if self.strides[i] % self.dtype.itemsize != 0:
-                return 'at {0} ("{1}"): shape[{2}] % itemsize != 0'.format(
+                return 'at {} ("{}"): shape[{}] % itemsize != 0'.format(
                     path, type(self), i
                 )
         return ""
@@ -1080,9 +1081,7 @@ class NumpyArray(Content):
             return self.toRegularArray()._rpad(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise np.AxisError(
-                "axis={0} exceeds the depth of this array({1})".format(axis, depth)
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
         if not clip:
             if target < self.length:
                 return self

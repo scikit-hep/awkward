@@ -1,22 +1,21 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 import awkward._v2.types.type
 
 
-class ArrayType(object):
+class ArrayType:
     def __init__(self, content, length):
         if not isinstance(content, awkward._v2.types.type.Type):
             raise TypeError(
-                "{0} all 'contents' must be Type subclasses, not {1}".format(
+                "{} all 'contents' must be Type subclasses, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
         if not ak._util.isint(length) or length < 0:
             raise ValueError(
-                "{0} 'length' must be of a positive integer, not {1}".format(
+                "{} 'length' must be of a positive integer, not {}".format(
                     type(self).__name__, repr(length)
                 )
             )
@@ -36,7 +35,7 @@ class ArrayType(object):
 
     def __repr__(self):
         args = [repr(self._content), repr(self._length)]
-        return "{0}({1})".format(type(self).__name__, ", ".join(args))
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):
         if isinstance(other, ArrayType):

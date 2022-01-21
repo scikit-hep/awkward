@@ -2,7 +2,6 @@
 
 # v2: replace with all the src/awkward/_v2/operations/reducers/*.py files.
 
-from __future__ import absolute_import
 
 import awkward as ak
 

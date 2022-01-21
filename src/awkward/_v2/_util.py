@@ -3,7 +3,6 @@
 # First, transition all the _v2 code to start using implementations in this file.
 # Then build up the high-level replacements.
 
-from __future__ import absolute_import
 
 # import re
 # import os.path
@@ -170,8 +169,7 @@ class Behavior(Mapping):
                 yield n, x
 
     def __iter__(self):
-        for x in self.keys():
-            yield x
+        yield from self.keys()
 
     def __len__(self):
         return len(set(self.defaults) | set(self.overrides))
@@ -532,13 +530,6 @@ def extra(args, kwargs, defaults):
 
 
 # key2index._pattern = re.compile(r"^[1-9][0-9]*$")
-
-
-# def highlevel_type(layout, behavior, isarray):
-#     if isarray:
-#         return ak.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
-#     else:
-#         return layout.type(typestrs(behavior))
 
 
 # def make_union(tags, index, contents, identities, parameters):

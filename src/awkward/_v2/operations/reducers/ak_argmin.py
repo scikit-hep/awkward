@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -52,13 +51,18 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True, flatten_records
         layout = ak._v2.operations.structure.fill_none(
             layout, np.inf, axis=-1, highlevel=False
         )
-        flat = layout.completely_flatten(
+
+        best_index = None
+        best_value = None
+        for tmp in layout.completely_flatten(
             function_name="ak.argmin", flatten_records=flatten_records
-        )
-        if len(flat) == 0:
-            return None
-        else:
-            return layout.nplike.argmin(flat)
+        ):
+            # FIXME: this isn't going to survive a type-tracer!
+            out = layout.nplike.argmin(tmp, axis=None)
+            if best_index is None or tmp[out] < best_value:
+                best_index = out
+                best_value = tmp[out]
+        return best_index
 
     else:
         behavior = ak._v2._util.behavior_of(array)

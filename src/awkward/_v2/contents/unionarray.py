@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import copy
 import ctypes
@@ -31,7 +30,7 @@ class UnionArray(Content):
     ):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
             raise TypeError(
-                "{0} 'tags' must be an Index with dtype=int8, not {1}".format(
+                "{} 'tags' must be an Index with dtype=int8, not {}".format(
                     type(self).__name__, repr(tags)
                 )
             )
@@ -41,13 +40,13 @@ class UnionArray(Content):
             np.dtype(np.int64),
         ):
             raise TypeError(
-                "{0} 'index' must be an Index with dtype in (int32, uint32, int64), "
-                "not {1}".format(type(self).__name__, repr(index))
+                "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                "not {}".format(type(self).__name__, repr(index))
             )
 
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{0} 'contents' must be iterable, not {1}".format(
+                "{} 'contents' must be iterable, not {}".format(
                     type(self).__name__, repr(contents)
                 )
             )
@@ -57,14 +56,14 @@ class UnionArray(Content):
         for content in contents:
             if not isinstance(content, Content):
                 raise TypeError(
-                    "{0} all 'contents' must be Content subclasses, not {1}".format(
+                    "{} all 'contents' must be Content subclasses, not {}".format(
                         type(self).__name__, repr(content)
                     )
                 )
 
         if tags.length > index.length:
             raise ValueError(
-                "{0} len(tags) ({1}) must be <= len(index) ({2})".format(
+                "{} len(tags) ({}) must be <= len(index) ({})".format(
                     type(self).__name__, tags.length, index.length
                 )
             )
@@ -75,7 +74,7 @@ class UnionArray(Content):
                     break
                 elif nplike is not content.nplike:
                     raise TypeError(
-                        "{0} 'contents' must use the same array library (nplike): {1} vs {2}".format(
+                        "{} 'contents' must use the same array library (nplike): {} vs {}".format(
                             type(self).__name__,
                             type(nplike).__name__,
                             type(content.nplike).__name__,
@@ -155,9 +154,9 @@ class UnionArray(Content):
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
 
         for i, x in enumerate(self._contents):
-            out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
+            out.append(f"{indent}    <content index={repr(str(i))}>\n")
             out.append(x._repr(indent + "        ", "", "\n"))
-            out.append("{0}    </content>\n".format(indent))
+            out.append(f"{indent}    </content>\n")
 
         out.append(indent + "</UnionArray>")
         out.append(post)
@@ -1003,7 +1002,7 @@ class UnionArray(Content):
         simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, UnionArray):
             raise ValueError(
-                "cannot call ak.{0} on an irreducible UnionArray".format(reducer.name)
+                f"cannot call ak.{reducer.name} on an irreducible UnionArray"
             )
 
         return simplified._reduce_next(
@@ -1020,11 +1019,11 @@ class UnionArray(Content):
     def _validityerror(self, path):
         for i in range(len(self.contents)):
             if isinstance(self.contents[i], ak._v2.contents.unionarray.UnionArray):
-                return "{0} contains {1}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
+                return "{} contains {}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
                     type(self), type(self.contents[i])
                 )
             if self.index.length < self.tags.length:
-                return 'at {0} ("{1}"): len(index) < len(tags)'.format(path, type(self))
+                return f'at {path} ("{type(self)}"): len(index) < len(tags)'
 
             lencontents = self._nplike.empty(len(self.contents), dtype=np.int64)
             if self._nplike.known_shape:
@@ -1052,12 +1051,12 @@ class UnionArray(Content):
                         errors="surrogateescape"
                     ).lstrip("\n").lstrip("(")
                 message = error.str.decode(errors="surrogateescape")
-                return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+                return 'at {} ("{}"): {} at i={}{}'.format(
                     path, type(self), message, error.id, filename
                 )
 
             for i in range(len(self.contents)):
-                sub = self.contents[i].validityerror(path + ".content({0})".format(i))
+                sub = self.contents[i].validityerror(path + f".content({i})")
                 if sub != "":
                     return sub
 
@@ -1171,14 +1170,12 @@ class UnionArray(Content):
             try:
                 out = self._nplike.ma.concatenate(contents)
             except Exception:
-                raise ValueError(
-                    "cannot convert {0} into numpy.ma.MaskedArray".format(self)
-                )
+                raise ValueError(f"cannot convert {self} into numpy.ma.MaskedArray")
         else:
             try:
                 out = numpy.concatenate(contents)
             except Exception:
-                raise ValueError("cannot convert {0} into np.ndarray".format(self))
+                raise ValueError(f"cannot convert {self} into np.ndarray")
 
         tags = numpy.asarray(self.tags)
         for tag, content in enumerate(contents):

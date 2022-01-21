@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 try:
     from collections.abc import MutableMapping
@@ -26,8 +25,7 @@ class Cache(MutableMapping):
         del self.data[where]
 
     def __iter__(self):
-        for x in self.data:
-            yield x
+        yield from self.data
 
     def __len__(self):
         return len(self.data)

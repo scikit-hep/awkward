@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
 
@@ -158,7 +157,7 @@ def from_iter(input):
 
     else:
         raise ValueError(
-            "Input class: {0} was not recognised".format(repr(input["class"]))
+            "Input class: {} was not recognised".format(repr(input["class"]))
         )
 
 
@@ -215,23 +214,23 @@ def _parameters_update(one, two):
             one[k] = v
 
 
-class Form(object):
+class Form:
     def _init(self, has_identifier, parameters, form_key):
         if not isinstance(has_identifier, bool):
             raise TypeError(
-                "{0} 'has_identifier' must be of type bool, not {1}".format(
+                "{} 'has_identifier' must be of type bool, not {}".format(
                     type(self).__name__, repr(has_identifier)
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
-                "{0} 'parameters' must be of type dict or None, not {1}".format(
+                "{} 'parameters' must be of type dict or None, not {}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
         if form_key is not None and not ak._util.isstr(form_key):
             raise TypeError(
-                "{0} 'form_key' must be of type string or None, not {1}".format(
+                "{} 'form_key' must be of type string or None, not {}".format(
                     type(self).__name__, repr(form_key)
                 )
             )

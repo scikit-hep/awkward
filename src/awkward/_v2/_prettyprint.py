@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import math
 import re
@@ -148,9 +147,9 @@ def valuestr_horiz(data, limit_cols):
         elif isinstance(data, numbers.Integral):
             out = str(data)
         elif isinstance(data, numbers.Real):
-            out = "{0:.3g}".format(data)
+            out = f"{data:.3g}"
         elif isinstance(data, numbers.Complex):
-            out = "{0:.2g}+{1:.2g}j".format(data.real, data.imag)
+            out = f"{data.real:.2g}+{data.imag:.2g}j"
         else:
             out = str(data)
 

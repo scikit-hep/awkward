@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -28,13 +27,15 @@ def test_concatenate_number():
 
     assert (
         str(
-            ak._v2.operations.structure.concatenate(
-                [
-                    a1,
-                    a3,
-                ],
-                axis=1,
-            ).type
+            ak._v2.operations.describe.type(
+                ak._v2.operations.structure.concatenate(
+                    [
+                        ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]),
+                        ak._v2.highlevel.Array([[123], [223], [323]]),
+                    ],
+                    axis=1,
+                )
+            )
         )
         == "3 * var * int64"
     )

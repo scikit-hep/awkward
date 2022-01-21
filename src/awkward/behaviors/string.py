@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/behaviors/string.py
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -26,8 +25,7 @@ class ByteBehavior(ak.highlevel.Array):
         return repr(self.__bytes__())
 
     def __iter__(self):
-        for x in self.__bytes__():
-            yield x
+        yield from self.__bytes__()
 
     def __eq__(self, other):
         if isinstance(other, (bytes, ByteBehavior)):
@@ -68,8 +66,7 @@ class CharBehavior(ak.highlevel.Array):
         return repr(self.__bytes__().decode("utf-8", "surrogateescape"))
 
     def __iter__(self):
-        for x in self.__str__():
-            yield x
+        yield from self.__str__()
 
     def __eq__(self, other):
         if isinstance(other, (str, CharBehavior)):
@@ -103,7 +100,7 @@ class ByteStringBehavior(ak.highlevel.Array):
     __name__ = "Array"
 
     def __iter__(self):
-        for x in super(ByteStringBehavior, self).__iter__():
+        for x in super().__iter__():
             yield x.__bytes__()
 
 
@@ -111,7 +108,7 @@ class StringBehavior(ak.highlevel.Array):
     __name__ = "Array"
 
     def __iter__(self):
-        for x in super(StringBehavior, self).__iter__():
+        for x in super().__iter__():
             yield x.__str__()
 
 

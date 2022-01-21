@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
 import re
@@ -31,7 +30,7 @@ def primitive_to_dtype(primitive):
         out = _primitive_to_dtype_dict.get(primitive)
         if out is None:
             raise TypeError(
-                "unrecognized primitive: {0}. Must be one of\n\n    {1}\n\nor a "
+                "unrecognized primitive: {}. Must be one of\n\n    {}\n\nor a "
                 "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
                     repr(primitive), ", ".join(_primitive_to_dtype_dict)
                 )
@@ -46,7 +45,7 @@ def dtype_to_primitive(dtype):
         out = _dtype_to_primitive_dict.get(dtype)
         if out is None:
             raise TypeError(
-                "unsupported dtype: {0}. Must be one of\n\n    {1}\n\nor a "
+                "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
                 "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
                     repr(dtype), ", ".join(_primitive_to_dtype_dict)
                 )
@@ -96,13 +95,13 @@ class NumpyType(Type):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
-                "{0} 'parameters' must be of type dict or None, not {1}".format(
+                "{} 'parameters' must be of type dict or None, not {}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
             raise TypeError(
-                "{0} 'typestr' must be of type string or None, not {1}".format(
+                "{} 'typestr' must be of type string or None, not {}".format(
                     type(self).__name__, repr(typestr)
                 )
             )
@@ -151,7 +150,7 @@ class NumpyType(Type):
 
     def __repr__(self):
         args = [repr(self._primitive)] + self._repr_args()
-        return "{0}({1})".format(type(self).__name__, ", ".join(args))
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):
         if isinstance(other, NumpyType):

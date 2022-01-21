@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
 import copy
@@ -24,25 +23,25 @@ class ByteMaskedArray(Content):
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise TypeError(
-                "{0} 'mask' must be an Index with dtype=int8, not {1}".format(
+                "{} 'mask' must be an Index with dtype=int8, not {}".format(
                     type(self).__name__, repr(mask)
                 )
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{0} 'content' must be a Content subtype, not {1}".format(
+                "{} 'content' must be a Content subtype, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
         if not isinstance(valid_when, bool):
             raise TypeError(
-                "{0} 'valid_when' must be boolean, not {1}".format(
+                "{} 'valid_when' must be boolean, not {}".format(
                     type(self).__name__, repr(valid_when)
                 )
             )
         if mask.length > content.length:
             raise ValueError(
-                "{0} len(mask) ({1}) must be <= len(content) ({2})".format(
+                "{} len(mask) ({}) must be <= len(content) ({})".format(
                     type(self).__name__, mask.length, content.length
                 )
             )
@@ -268,7 +267,7 @@ class ByteMaskedArray(Content):
                 ak._v2.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
                 ),
-                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                "cannot fit jagged slice with length {} into {} of size {}".format(
                     slicestarts.length, type(self).__name__, self.length
                 ),
             )
@@ -362,7 +361,7 @@ class ByteMaskedArray(Content):
         if mask is not None:
             if mask_length != mask.length:
                 raise ValueError(
-                    "mask length ({0}) is not equal to {1} length ({2})".format(
+                    "mask length ({}) is not equal to {} length ({})".format(
                         mask.length, type(self).__name__, mask_length
                     )
                 )
@@ -790,7 +789,7 @@ class ByteMaskedArray(Content):
 
     def _validityerror(self, path):
         if self._content.length < self.mask.length:
-            return 'at {0} ("{1}"): len(content) < len(mask)'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): len(content) < len(mask)'
         elif isinstance(
             self._content,
             (

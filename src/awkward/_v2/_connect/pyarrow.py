@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
 
@@ -84,13 +83,13 @@ if pyarrow is not None:
             self._mask_parameters = mask_parameters
             self._node_parameters = node_parameters
             self._record_is_tuple = record_is_tuple
-            super(AwkwardArrowType, self).__init__(storage_type, "awkward")
+            super().__init__(storage_type, "awkward")
 
         def __str__(self):
             return "ak:" + str(self.storage_type)
 
         def __repr__(self):
-            return "awkward<{0}>".format(repr(self.storage_type))
+            return f"awkward<{repr(self.storage_type)}>"
 
         @property
         def mask_type(self):
@@ -554,7 +553,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     else:
-        raise TypeError("unrecognized Arrow array type: {0}".format(repr(storage_type)))
+        raise TypeError(f"unrecognized Arrow array type: {repr(storage_type)}")
 
 
 def to_awkwardarrow_type(storage_type, use_extensionarray, mask, node):
@@ -694,4 +693,4 @@ def handle_arrow(obj, pass_empty_field=False):
         return ak._v2.contents.RecordArray([], [], length=0)
 
     else:
-        raise TypeError("unrecognized Arrow type: {0}".format(type(obj)))
+        raise TypeError(f"unrecognized Arrow type: {type(obj)}")

@@ -137,8 +137,7 @@ def walk(directory):
         f = os.path.join(directory, x)
         yield f
         if os.path.isdir(f):
-            for y in walk(f):
-                yield y
+            yield from walk(f)
 
 
 # Build Python (copy sources to executable tree).
