@@ -208,10 +208,6 @@ class NumpyLike(Singleton):
         # array1[, array2[, ...]]
         return self._module.broadcast_arrays(*args, **kwargs)
 
-    def add(self, *args, **kwargs):
-        # array1, array2[, out=]
-        return self._module.add(*args, **kwargs)
-
     def cumsum(self, *args, **kwargs):
         # arrays[, out=]
         return self._module.cumsum(*args, **kwargs)
@@ -271,6 +267,22 @@ class NumpyLike(Singleton):
 
     ############################ ufuncs
 
+    def add(self, *args, **kwargs):
+        # array1, array2
+        return self._module.add(*args, **kwargs)
+
+    def multiply(self, *args, **kwargs):
+        # array1, array2
+        return self._module.multiply(*args, **kwargs)
+
+    def logical_or(self, *args, **kwargs):
+        # array1, array2
+        return self._module.logical_or(*args, **kwargs)
+
+    def logical_and(self, *args, **kwargs):
+        # array1, array2
+        return self._module.logical_and(*args, **kwargs)
+
     def sqrt(self, *args, **kwargs):
         # array
         return self._module.sqrt(*args, **kwargs)
@@ -287,10 +299,6 @@ class NumpyLike(Singleton):
         # array1, array2[, out=output]
         return self._module.bitwise_or(*args, **kwargs)
 
-    def logical_and(self, *args, **kwargs):
-        # array1, array2
-        return self._module.logical_and(*args, **kwargs)
-
     def equal(self, *args, **kwargs):
         # array1, array2
         return self._module.equal(*args, **kwargs)
@@ -298,6 +306,14 @@ class NumpyLike(Singleton):
     def ceil(self, *args, **kwargs):
         # array
         return self._module.ceil(*args, **kwargs)
+
+    def minimum(self, *args, **kwargs):
+        # array1, array2
+        return self._module.minimum(*args, **kwargs)
+
+    def maximum(self, *args, **kwargs):
+        # array1, array2
+        return self._module.maximum(*args, **kwargs)
 
     ############################ almost-ufuncs
 

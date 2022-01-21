@@ -55,13 +55,19 @@ def max(
     )
 
     if axis is None:
-        flat = layout.completely_flatten(
+
+        def reduce(xs):
+            if len(xs) == 0:
+                return None
+            elif len(xs) == 1:
+                return xs[0]
+            else:
+                return layout.nplike.maximum(xs[0], reduce(xs[1:]))
+
+        tmp = layout.completely_flatten(
             function_name="ak.max", flatten_records=flatten_records
         )
-        if len(flat) == 0:
-            return None if mask_identity else np.iinfo(flat.dtype.type).min
-        else:
-            return layout.nplike.max(flat)
+        return reduce([layout.nplike.max(x) for x in tmp if len(x) > 0])
 
     else:
         behavior = ak._v2._util.behavior_of(array)
