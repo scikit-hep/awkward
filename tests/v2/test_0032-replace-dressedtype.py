@@ -12,7 +12,7 @@ to_list = ak._v2.operations.convert.to_list
 @pytest.mark.skip(reason="FIXME: Fix params for types")
 def test_types_with_parameters():
     t = ak._v2.types.UnknownType()
-    assert t.parameters == None
+    assert t.parameters is None
     t.parameters["__array__"] = ["val", "ue"]
     assert t.parameters == {"__array__": ["val", "ue"]}
     t = ak._v2.types.UnknownType(parameters={"__array__": ["val", "ue"]})
@@ -63,7 +63,7 @@ def test_types_with_parameters():
     assert t != ak._v2.types.UnknownType(parameters={"__array__": ["val", "ue"]})
 
 
-@pytest.mark.skip(reason="FIXME: Fix params for types")
+@pytest.mark.skip(reason="FIXME: Fix repr printout for params")
 def test_dress():
     class Dummy(ak.highlevel.Array):
         def __repr__(self):
@@ -72,17 +72,17 @@ def test_dress():
     ns = {"Dummy": Dummy}
 
     x = ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    x.setparameter("__array__", "Dummy")
-    a = ak.Array(x, behavior=ns, check_valid=True)
+    x.parameters["__array__"] = "Dummy"
+    a = ak._v2.highlevel.Array(x, behavior=ns, check_valid=True)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
-    x2 = ak._v2.contents.ListOffsetArray64(
+    x2 = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64)),
         ak._v2.contents.NumpyArray(
             np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__array__": "Dummy"}
         ),
     )
-    a2 = ak.Array(x2, behavior=ns, check_valid=True)
+    a2 = ak._v2.highlevel.Array(x2, behavior=ns, check_valid=True)
     assert (
         repr(a2)
         == "<Array [<Dummy [1.1, 2.2, 3.3]>, ... ] type='3 * var * float64[parameters={\"__ar...'>"
@@ -92,32 +92,33 @@ def test_dress():
     assert repr(a2[2]) == "<Dummy [4.4, 5.5]>"
 
 
-@pytest.mark.skip(reason="FIXME: Fix params for types")
+@pytest.mark.skip(reason="FIXME: snapshot returns an ArrayType ")
 def test_record_name():
     typestrs = {}
-    builder = ak._v2.contents.ArrayBuilder()
+    builder = ak._v2.highlevel.ArrayBuilder()
 
-    builder.beginrecord("Dummy")
+    builder.begin_record("Dummy")
     builder.field("one")
     builder.integer(1)
     builder.field("two")
     builder.real(1.1)
-    builder.endrecord()
+    builder.end_record()
 
-    builder.beginrecord("Dummy")
+    builder.begin_record("Dummy")
     builder.field("two")
     builder.real(2.2)
     builder.field("one")
     builder.integer(2)
-    builder.endrecord()
+    builder.end_record()
 
     a = builder.snapshot()
     assert repr(a.type(typestrs)) == 'Dummy["one": int64, "two": float64]'
     assert a.type(typestrs).parameters == {"__record__": "Dummy"}
 
 
+@pytest.mark.skip(reason="FIXME: ak.to_json not implemented")
 def test_builder_string():
-    builder = ak.ArrayBuilder()
+    builder = ak._v2.highlevel.ArrayBuilder()
 
     builder.bytestring(b"one")
     builder.bytestring(b"two")
@@ -125,12 +126,12 @@ def test_builder_string():
 
     a = builder.snapshot()
     assert str(a) == "[b'one', b'two', b'three']"
-    assert ak.to_list(a) == [b"one", b"two", b"three"]
-    assert ak.to_json(a) == '["one","two","three"]'
+    assert to_list(a) == [b"one", b"two", b"three"]
+    # assert ak._v2.operations.convert.to_json(a) == '["one","two","three"]'
     assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
-    assert repr(ak.type(a)) == "3 * bytes"
+    assert str(ak._v2.operations.describe.type(a)) == "3 * bytes"
 
-    builder = ak.ArrayBuilder()
+    builder = ak._v2.highlevel.ArrayBuilder()
 
     builder.string("one")
     builder.string("two")
@@ -138,12 +139,12 @@ def test_builder_string():
 
     a = builder.snapshot()
     assert str(a) == "['one', 'two', 'three']"
-    assert ak.to_list(a) == ["one", "two", "three"]
-    assert ak.to_json(a) == '["one","two","three"]'
+    assert to_list(a) == ["one", "two", "three"]
+    # assert ak._v2.operations.convert.to_json(a) == '["one","two","three"]'
     assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
-    assert repr(ak.type(a)) == "3 * string"
+    assert str(ak._v2.operations.describe.type(a)) == "3 * string"
 
-    builder = ak.ArrayBuilder()
+    builder = ak._v2.highlevel.ArrayBuilder()
 
     builder.begin_list()
     builder.string("one")
@@ -161,22 +162,27 @@ def test_builder_string():
 
     a = builder.snapshot()
     assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
-    assert ak.to_list(a) == [["one", "two", "three"], [], ["four", "five"]]
-    assert ak.to_json(a) == '[["one","two","three"],[],["four","five"]]'
-    assert repr(ak.type(a)) == "3 * var * string"
+    assert to_list(a) == [["one", "two", "three"], [], ["four", "five"]]
+    # assert ak._v2.operations.convert.to_json(a) == '[["one","two","three"],[],["four","five"]]'
+    assert str(ak._v2.operations.describe.type(a)) == "3 * var * string"
 
 
 def test_fromiter_fromjson():
-    assert ak.to_list(ak.from_iter(["one", "two", "three"])) == ["one", "two", "three"]
-    assert ak.to_list(
-        ak.from_iter([["one", "two", "three"], [], ["four", "five"]])
+    assert to_list(ak._v2.from_iter(["one", "two", "three"])) == ["one", "two", "three"]
+    assert to_list(
+        ak._v2.from_iter([["one", "two", "three"], [], ["four", "five"]])
     ) == [["one", "two", "three"], [], ["four", "five"]]
 
-    assert ak.to_list(ak.from_json('["one", "two", "three"]')) == [
+
+@pytest.mark.skip(reason="FIXME: ak.from_json not implemented")
+def test_fromjson():
+    assert to_list(ak._v2.operations.convert.from_json('["one", "two", "three"]')) == [
         "one",
         "two",
         "three",
     ]
-    assert ak.to_list(
-        ak.from_json('[["one", "two", "three"], [], ["four", "five"]]')
+    assert to_list(
+        ak._v2.operations.convert.from_json(
+            '[["one", "two", "three"], [], ["four", "five"]]'
+        )
     ) == [["one", "two", "three"], [], ["four", "five"]]

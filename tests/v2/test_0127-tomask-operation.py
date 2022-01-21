@@ -1154,21 +1154,20 @@ def test_BitMaskedArray():
     assert to_list(array[8:]) == [None, None, 10, None, None]
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.type not implemented")
 def test_UnmaskedArray():
     content = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
     )
     array = ak._v2.contents.UnmaskedArray(content)
     assert to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert str(ak._v2.operations.structure.type(content)) == "float64"
+    assert str(ak._v2.operations.describe.type(content)) == "float64"
     assert (
-        str(ak._v2.operations.structure.type(ak._v2.highlevel.Array(content)))
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content)))
         == "5 * float64"
     )
-    assert str(ak._v2.operations.structure.type(array)) == "?float64"
+    assert str(ak._v2.operations.describe.type(array)) == "?float64"
     assert (
-        str(ak._v2.operations.structure.type(ak._v2.highlevel.Array(array)))
+        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array)))
         == "5 * ?float64"
     )
 

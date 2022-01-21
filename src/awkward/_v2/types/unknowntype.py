@@ -48,3 +48,6 @@ class UnknownType(Type):
             )
         else:
             return False
+
+    def empty(self):
+        return ak._v2.contents.EmptyArray()
