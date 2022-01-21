@@ -999,7 +999,7 @@ def test_rpad_list_array():
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert "option[{}]".format(str(ak._v2.operations.describe.type(array))) == str(
+    assert f"option[{str(ak._v2.operations.describe.type(array))}]" == str(
         ak._v2.operations.describe.type(array.rpad(1, 0))
     )
 
@@ -1010,7 +1010,7 @@ def test_rpad_list_array():
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert "option[{}]".format(str(ak._v2.operations.describe.type(array))) == str(
+    assert f"option[{str(ak._v2.operations.describe.type(array))}]" == str(
         ak._v2.operations.describe.type(array.rpad(2, 0))
     )
 

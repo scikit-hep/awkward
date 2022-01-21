@@ -196,7 +196,7 @@ class Content:
                     pass
 
                 if error.attempt != ak._util.kSliceNone:
-                    message += " while attempting to get index {}".format(error.attempt)
+                    message += f" while attempting to get index {error.attempt}"
 
                 message += filename
 
@@ -222,7 +222,7 @@ class Content:
 
             else:
                 if error.attempt != ak._util.kSliceNone:
-                    message += " while attempting to get index {}".format(error.attempt)
+                    message += f" while attempting to get index {error.attempt}"
 
                 message += filename
 
@@ -436,7 +436,7 @@ class Content:
 
         else:
             raise NotImplementedError(
-                "FIXME: unhandled case of SliceMissing with {}".format(nextcontent)
+                f"FIXME: unhandled case of SliceMissing with {nextcontent}"
             )
 
     def __getitem__(self, where):
@@ -675,7 +675,7 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
             posaxis = depth + axis
             if posaxis < 0:
                 raise np.AxisError(
-                    "axis={} exceeds the depth ({}) of this array".format(axis, depth)
+                    f"axis={axis} exceeds the depth ({depth}) of this array"
                 )
             return posaxis
 

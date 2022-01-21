@@ -96,7 +96,7 @@ def castint(context, builder, fromtype, totype, val):
             fromtype = numba.int64
     if not isinstance(fromtype, numba.types.Integer):
         raise AssertionError(
-            "unrecognized integer type: {}".format(repr(fromtype))
+            f"unrecognized integer type: {repr(fromtype)}"
             + ak._util.exception_suffix(__file__)
         )
 

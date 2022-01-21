@@ -173,7 +173,7 @@ def v1v2_equal(v1, v2):
         raise AssertionError("VirtualArray is v1 only")
 
     else:
-        raise AssertionError("{} vs {}".format(type(v1), type(v2)))
+        raise AssertionError(f"{type(v1)} vs {type(v2)}")
 
 
 def v1_to_v2_id(v1):

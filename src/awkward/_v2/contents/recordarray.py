@@ -189,7 +189,7 @@ class RecordArray(Content):
 
         if self._fields is None:
             for i, x in enumerate(self._contents):
-                out.append("{}    <content index={}>\n".format(indent, repr(str(i))))
+                out.append(f"{indent}    <content index={repr(str(i))}>\n")
                 out.append(x._repr(indent + "        ", "", "\n"))
                 out.append(indent + "    </content>\n")
         else:
@@ -796,7 +796,7 @@ class RecordArray(Content):
                     path, type(self), i
                 )
         for i in range(len(self.contents)):
-            sub = self.contents[i].validityerror(path + ".field({})".format(i))
+            sub = self.contents[i].validityerror(path + f".field({i})")
             if sub != "":
                 return sub
         return ""
@@ -867,7 +867,7 @@ class RecordArray(Content):
             return self._nplike.empty(self.length, dtype=[])
         contents = [x._to_numpy(allow_missing) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
-            raise ValueError("cannot convert {} into np.ndarray".format(self))
+            raise ValueError(f"cannot convert {self} into np.ndarray")
         out = self._nplike.empty(
             contents[0].shape[0],
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],

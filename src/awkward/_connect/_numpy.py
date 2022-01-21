@@ -399,7 +399,7 @@ except AttributeError:
                 return NotImplemented
             return ufunc(self, other)
 
-        func.__name__ = "__{}__".format(name)
+        func.__name__ = f"__{name}__"
         return func
 
     def _reflected_binary_method(ufunc, name):
@@ -408,14 +408,14 @@ except AttributeError:
                 return NotImplemented
             return ufunc(other, self)
 
-        func.__name__ = "__r{}__".format(name)
+        func.__name__ = f"__r{name}__"
         return func
 
     def _inplace_binary_method(ufunc, name):
         def func(self, other):
             return ufunc(self, other, out=(self,))
 
-        func.__name__ = "__i{}__".format(name)
+        func.__name__ = f"__i{name}__"
         return func
 
     def _numeric_methods(ufunc, name):
@@ -429,7 +429,7 @@ except AttributeError:
         def func(self):
             return ufunc(self)
 
-        func.__name__ = "__{}__".format(name)
+        func.__name__ = f"__{name}__"
         return func
 
     class NDArrayOperatorsMixin:

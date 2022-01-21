@@ -564,7 +564,7 @@ def key2index(keys, key):
 
     if attempt is None:
         raise ValueError(
-            "key {} not found in record".format(repr(key)) + exception_suffix(__file__)
+            f"key {repr(key)} not found in record" + exception_suffix(__file__)
         )
     else:
         return attempt
@@ -624,8 +624,7 @@ def completely_flatten(array):
 
     else:
         raise RuntimeError(
-            "cannot completely flatten: {}".format(type(array))
-            + exception_suffix(__file__)
+            f"cannot completely flatten: {type(array)}" + exception_suffix(__file__)
         )
 
 
@@ -1319,8 +1318,7 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
 
     else:
         raise AssertionError(
-            "unrecognized Content type: {}".format(type(layout))
-            + exception_suffix(__file__)
+            f"unrecognized Content type: {type(layout)}" + exception_suffix(__file__)
         )
 
 
@@ -1519,8 +1517,7 @@ def transform_child_layouts(transform, layout, depth, user=None, keep_parameters
 
     else:
         raise AssertionError(
-            "unrecognized Content type: {}".format(type(layout))
-            + exception_suffix(__file__)
+            f"unrecognized Content type: {type(layout)}" + exception_suffix(__file__)
         )
 
 
@@ -1623,7 +1620,7 @@ def minimally_touching_string(limit_length, layout, behavior):
             elif isinstance(x, (np.datetime64, np.timedelta64)):
                 yield space + str(x)
             elif isinstance(x, (float, np.floating)):
-                yield space + "{:.3g}".format(x)
+                yield space + f"{x:.3g}"
             else:
                 yield space + repr(x)
 
@@ -1690,7 +1687,7 @@ def minimally_touching_string(limit_length, layout, behavior):
             elif isinstance(x, (np.datetime64, np.timedelta64)):
                 yield str(x) + space
             elif isinstance(x, (float, np.floating)):
-                yield "{:.3g}".format(x) + space
+                yield f"{x:.3g}" + space
             else:
                 yield repr(x) + space
 

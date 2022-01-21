@@ -269,7 +269,7 @@ class PartitionedArray:
                     head += len(self)
                 if not 0 <= head < len(self):
                     raise ValueError(
-                        "{} index out of range".format(type(self).__name__)
+                        f"{type(self).__name__} index out of range"
                         + ak._util.exception_suffix(__file__)
                     )
                 partitionid, index = self._ext.partitionid_index_at(head)

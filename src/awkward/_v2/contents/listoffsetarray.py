@@ -1688,7 +1688,7 @@ class ListOffsetArray(Content):
 
     def _validityerror(self, path):
         if self.offsets.length < 1:
-            return 'at {} ("{}"): len(offsets) < 1'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): len(offsets) < 1'
         error = self._nplike[
             "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
         ](

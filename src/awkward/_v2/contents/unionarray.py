@@ -154,9 +154,9 @@ class UnionArray(Content):
         out.append(self._index._repr(indent + "    ", "<index>", "</index>\n"))
 
         for i, x in enumerate(self._contents):
-            out.append("{}    <content index={}>\n".format(indent, repr(str(i))))
+            out.append(f"{indent}    <content index={repr(str(i))}>\n")
             out.append(x._repr(indent + "        ", "", "\n"))
-            out.append("{}    </content>\n".format(indent))
+            out.append(f"{indent}    </content>\n")
 
         out.append(indent + "</UnionArray>")
         out.append(post)
@@ -1002,7 +1002,7 @@ class UnionArray(Content):
         simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, UnionArray):
             raise ValueError(
-                "cannot call ak.{} on an irreducible UnionArray".format(reducer.name)
+                f"cannot call ak.{reducer.name} on an irreducible UnionArray"
             )
 
         return simplified._reduce_next(
@@ -1023,7 +1023,7 @@ class UnionArray(Content):
                     type(self), type(self.contents[i])
                 )
             if self.index.length < self.tags.length:
-                return 'at {} ("{}"): len(index) < len(tags)'.format(path, type(self))
+                return f'at {path} ("{type(self)}"): len(index) < len(tags)'
 
             lencontents = self._nplike.empty(len(self.contents), dtype=np.int64)
             if self._nplike.known_shape:
@@ -1056,7 +1056,7 @@ class UnionArray(Content):
                 )
 
             for i in range(len(self.contents)):
-                sub = self.contents[i].validityerror(path + ".content({})".format(i))
+                sub = self.contents[i].validityerror(path + f".content({i})")
                 if sub != "":
                     return sub
 
@@ -1170,14 +1170,12 @@ class UnionArray(Content):
             try:
                 out = self._nplike.ma.concatenate(contents)
             except Exception:
-                raise ValueError(
-                    "cannot convert {} into numpy.ma.MaskedArray".format(self)
-                )
+                raise ValueError(f"cannot convert {self} into numpy.ma.MaskedArray")
         else:
             try:
                 out = numpy.concatenate(contents)
             except Exception:
-                raise ValueError("cannot convert {} into np.ndarray".format(self))
+                raise ValueError(f"cannot convert {self} into np.ndarray")
 
         tags = numpy.asarray(self.tags)
         for tag, content in enumerate(contents):

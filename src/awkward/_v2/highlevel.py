@@ -1137,7 +1137,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     )
             else:
-                raise AttributeError("no field named {}".format(repr(where)))
+                raise AttributeError(f"no field named {repr(where)}")
 
     def __dir__(self):
         """
@@ -1264,7 +1264,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
-        return "<{}{} type={}>".format(pytype, valuestr, typestr)
+        return f"<{pytype}{valuestr} type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """
@@ -1449,7 +1449,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         length,
                         container,
                         highlevel=False,
-                        buffer_key="part{0}-{{form_key}}-{{attribute}}".format(i),
+                        buffer_key=f"part{i}-{{form_key}}-{{attribute}}",
                     )
                     for i in length
                 ]
@@ -1817,7 +1817,7 @@ class Record(NDArrayOperatorsMixin):
                         "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     )
             else:
-                raise AttributeError("no field named {}".format(repr(where)))
+                raise AttributeError(f"no field named {repr(where)}")
 
     def __dir__(self):
         """
@@ -1961,7 +1961,7 @@ class Record(NDArrayOperatorsMixin):
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
-        return "<{}{} type={}>".format(pytype, valuestr, typestr)
+        return f"<{pytype}{valuestr} type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """
@@ -2057,7 +2057,7 @@ class Record(NDArrayOperatorsMixin):
                         length,
                         container,
                         highlevel=False,
-                        buffer_key="part{0}-{{form_key}}-{{attribute}}".format(i),
+                        buffer_key=f"part{i}-{{form_key}}-{{attribute}}",
                     )
                     for i in length
                 ]
@@ -2326,7 +2326,7 @@ class ArrayBuilder(Sized):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<ArrayBuilder type={}>".format(typestr)
+        return f"<ArrayBuilder type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """
@@ -2624,7 +2624,7 @@ class ArrayBuilder(Sized):
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<ArrayBuilder.{} type={}>".format(self._name, typestr)
+            return f"<ArrayBuilder.{self._name} type={typestr}>"
 
     class List(_Nested):
         _name = "list"

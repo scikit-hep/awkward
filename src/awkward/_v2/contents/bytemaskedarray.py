@@ -789,7 +789,7 @@ class ByteMaskedArray(Content):
 
     def _validityerror(self, path):
         if self._content.length < self.mask.length:
-            return 'at {} ("{}"): len(content) < len(mask)'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): len(content) < len(mask)'
         elif isinstance(
             self._content,
             (

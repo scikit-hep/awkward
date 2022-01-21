@@ -687,9 +687,7 @@ class IndexedOptionArray(Content):
 
     def fillna(self, value):
         if value.length != 1:
-            raise ValueError(
-                "fillna value length ({}) is not equal to 1".format(value.length)
-            )
+            raise ValueError(f"fillna value length ({value.length}) is not equal to 1")
 
         contents = [self._content, value]
         tags = self.bytemask()

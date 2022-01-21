@@ -94,7 +94,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
         else:
             raise Exception("Cannot handle more than triply nested loops")
         if len(node.iter.args) == 1:
-            code = "if ({0} < {1}) {{\n".format(thread_var, traverse(node.iter.args[0]))
+            code = f"if ({thread_var} < {traverse(node.iter.args[0])}) {{\n"
         elif len(node.iter.args) == 2:
             code = "if (({0} < {1}) && ({0} >= {2})) {{\n".format(
                 thread_var, traverse(node.iter.args[1]), traverse(node.iter.args[0])
@@ -107,17 +107,17 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
     elif node.__class__.__name__ == "While":
         assert node.test.__class__.__name__ == "Compare"
         assert len(node.test.ops) == 1
-        code = "while ({0}) {{\n".format(traverse(node.test))
+        code = f"while ({traverse(node.test)}) {{\n"
         for subnode in node.body:
             code += traverse(subnode, args, copy.copy(forvars), declared)
         code += "}\n"
     elif node.__class__.__name__ == "Raise":
         if sys.version_info[0] == 2:
-            code = 'err->str = "{}";\n'.format(node.type.args[0].s)
+            code = f'err->str = "{node.type.args[0].s}";\n'
         elif sys.version_info[0] == 3 and sys.version_info[1] in [5, 6, 7]:
-            code = 'err->str = "{}";\n'.format(node.exc.args[0].s)
+            code = f'err->str = "{node.exc.args[0].s}";\n'
         else:
-            code = 'err->str = "{}";\n'.format(node.exc.args[0].value)
+            code = f'err->str = "{node.exc.args[0].value}";\n'
         code += "err->filename = FILENAME(__LINE__);\nerr->pass_through=true;\n"
     elif node.__class__.__name__ == "If":
         code = ""
@@ -159,7 +159,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
         elif node.value is False:
             code = "false"
         else:
-            raise Exception("Unhandled NameConstant value {}".format(node.value))
+            raise Exception(f"Unhandled NameConstant value {node.value}")
     elif node.__class__.__name__ == "Num":
         code = str(node.n)
     elif node.__class__.__name__ == "BinOp":
@@ -295,7 +295,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
                 operator = "<<="
             else:
                 raise Exception(
-                    "Unhandled AugAssign node {}".format(node.op.__class__.__name__)
+                    f"Unhandled AugAssign node {node.op.__class__.__name__}"
                 )
             targetnode = node.target
         left = traverse(targetnode, args, copy.copy(forvars), declared)
@@ -397,7 +397,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
                     traverse(node.value, args, copy.copy(forvars), declared),
                 )
     else:
-        raise Exception("Unhandled node {}".format(node.__class__.__name__))
+        raise Exception(f"Unhandled node {node.__class__.__name__}")
     return code
 
 

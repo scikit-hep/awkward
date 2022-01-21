@@ -291,7 +291,7 @@ class ContentType(numba.types.Type):
             return numba.types.Array(numba.int64, 1, "C")
         else:
             raise AssertionError(
-                "unrecognized Form index type: {}".format(index_string)
+                f"unrecognized Form index type: {index_string}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -315,7 +315,7 @@ class ContentType(numba.types.Type):
             return ak.layout.Index64
         else:
             raise AssertionError(
-                "no Index* type for array: {}".format(arraytype)
+                f"no Index* type for array: {arraytype}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -336,7 +336,7 @@ class ContentType(numba.types.Type):
             )
         else:
             raise TypeError(
-                "array does not have a field with key {}".format(repr(key))
+                f"array does not have a field with key {repr(key)}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -566,7 +566,7 @@ class NumpyArrayType(ContentType):
             arraytype = numba.types.Array(numba.boolean, 1, "A")
         else:
             raise ValueError(
-                "unrecognized NumpyForm.primitive type: {}".format(form.primitive)
+                f"unrecognized NumpyForm.primitive type: {form.primitive}"
                 + ak._util.exception_suffix(__file__)
             )
         return NumpyArrayType(
@@ -898,7 +898,7 @@ class ListArrayType(ContentType):
             return ak.layout.ListArray64
         else:
             raise AssertionError(
-                "no ListArray* type for array: {}".format(self.indextype)
+                f"no ListArray* type for array: {self.indextype}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1064,7 +1064,7 @@ class IndexedArrayType(ContentType):
             return ak.layout.IndexedArray64
         else:
             raise AssertionError(
-                "no IndexedArray* type for array: {}".format(self.indextype)
+                f"no IndexedArray* type for array: {self.indextype}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1235,7 +1235,7 @@ class IndexedOptionArrayType(ContentType):
             return ak.layout.IndexedOptionArray64
         else:
             raise AssertionError(
-                "no IndexedOptionArray* type for array: {}".format(self.indextype)
+                f"no IndexedOptionArray* type for array: {self.indextype}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2365,12 +2365,12 @@ class UnionArrayType(ContentType):
                 return ak.layout.UnionArray8_64
             else:
                 raise AssertionError(
-                    "no UnionArray* type for index array: {}".format(self.indextype)
+                    f"no UnionArray* type for index array: {self.indextype}"
                     + ak._util.exception_suffix(__file__)
                 )
         else:
             raise AssertionError(
-                "no UnionArray* type for tags array: {}".format(self.tagstype)
+                f"no UnionArray* type for tags array: {self.tagstype}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2652,7 +2652,7 @@ class VirtualArrayType(ContentType):
 
             else:
                 raise AssertionError(
-                    "unrecognized Form type: {}".format(type(form))
+                    f"unrecognized Form type: {type(form)}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -2839,7 +2839,7 @@ def inner_dtype_of_form(form):
 
     else:
         raise AssertionError(
-            "unrecognized Form type: {}".format(type(form))
+            f"unrecognized Form type: {type(form)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -2881,7 +2881,7 @@ def optiontype_of_form(form):
 
     else:
         raise AssertionError(
-            "unrecognized Form type: {}".format(type(form))
+            f"unrecognized Form type: {type(form)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -2925,6 +2925,6 @@ def recordtype_of_form(form):
 
     else:
         raise AssertionError(
-            "unrecognized Form type: {}".format(type(form))
+            f"unrecognized Form type: {type(form)}"
             + ak._util.exception_suffix(__file__)
         )

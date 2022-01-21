@@ -223,7 +223,7 @@ def tolookup(layout, positions, sharedptrs, arrays):
 
     else:
         raise AssertionError(
-            "unrecognized Content or Form type: {}".format(type(layout))
+            f"unrecognized Content or Form type: {type(layout)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -264,7 +264,7 @@ def tonumbatype(form):
 
     else:
         raise AssertionError(
-            "unrecognized Form type: {}".format(type(form))
+            f"unrecognized Form type: {type(form)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -667,7 +667,7 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
 class IteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, viewtype):
         super().__init__(
-            "ak.Iterator({})".format(viewtype.name),
+            f"ak.Iterator({viewtype.name})",
             viewtype.type.getitem_at_check(viewtype),
         )
         self.viewtype = viewtype
@@ -781,7 +781,7 @@ def typeof_RecordView(obj, c):
 
 class RecordViewType(numba.types.Type):
     def __init__(self, arrayviewtype):
-        super().__init__(name="ak.RecordViewType({})".format(arrayviewtype.name))
+        super().__init__(name=f"ak.RecordViewType({arrayviewtype.name})")
         self.arrayviewtype = arrayviewtype
 
     @property
@@ -920,7 +920,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                                     if isinstance(x, numba.types.Literal)
                                     else x
                                     for x in args
-                                ]
+                                ],
                             )(lower)
                             return sig
 
@@ -1066,9 +1066,7 @@ def overload_contains(obj, element):
                         "({0} is not None and element == {0}): return True".format(name)
                     )
                 else:
-                    statements.append(
-                        indent + "if element == {}: return True".format(name)
-                    )
+                    statements.append(indent + f"if element == {name}: return True")
 
             else:
                 if arraytype.is_optiontype:
@@ -1077,9 +1075,7 @@ def overload_contains(obj, element):
                         "({0} is not None and element in {0}): return True".format(name)
                     )
                 else:
-                    statements.append(
-                        indent + "if element in {}: return True".format(name)
-                    )
+                    statements.append(indent + f"if element in {name}: return True")
 
         if isinstance(obj, ArrayViewType):
             add_statement("", "obj", obj.type, True)
@@ -1127,7 +1123,7 @@ def overload_np_array(array, dtype=None):
             ensure_shape = []
             array_name = "array"
             for i in range(ndim - 1):
-                declare_shape.append("shape{} = -1".format(i))
+                declare_shape.append(f"shape{i} = -1")
                 compute_shape.append(
                     "{}for x{} in {}:".format("    " * i, i, array_name)
                 )
@@ -1142,9 +1138,9 @@ def overload_np_array(array, dtype=None):
                     "{}        raise ValueError('cannot convert to NumPy because "
                     "subarray lengths are not regular')".format("    " * i)
                 )
-                specify_shape.append("shape{}".format(i))
+                specify_shape.append(f"shape{i}")
                 ensure_shape.append("if shape{0} == -1: shape{0} = 0".format(i))
-                array_name = "x{}".format(i)
+                array_name = f"x{i}"
 
             fill_array = []
             index = []
@@ -1155,8 +1151,8 @@ def overload_np_array(array, dtype=None):
                         "    " * i, i, array_name
                     )
                 )
-                index.append("i{}".format(i))
-                array_name = "x{}".format(i)
+                index.append(f"i{i}")
+                array_name = f"x{i}"
 
             fill_array.append(
                 "{}out[{}] = x{}".format("    " * ndim, "][".join(index), ndim - 1)
@@ -1176,7 +1172,7 @@ def array_impl(array, dtype=None):
                     "\n    ".join(compute_shape),
                     "\n    ".join(ensure_shape),
                     ", ".join(specify_shape),
-                    "numpy.{}".format(inner_dtype) if dtype is None else "dtype",
+                    f"numpy.{inner_dtype}" if dtype is None else "dtype",
                     "\n    ".join(fill_array),
                 ),
                 "array_impl",
@@ -1729,7 +1725,7 @@ def lower_getattr_generic_partitioned(
 class PartitionedIteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, partviewtype):
         super().__init__(
-            "ak.PartitionedIterator({})".format(partviewtype.name),
+            f"ak.PartitionedIterator({partviewtype.name})",
             partviewtype.type.getitem_at_check(partviewtype.toArrayViewType()),
         )
         self.partviewtype = partviewtype

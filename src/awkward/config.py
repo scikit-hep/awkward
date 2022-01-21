@@ -64,16 +64,16 @@ if __name__ == "__main__":
     # loop over original sys.argv to get optional arguments in order
     for arg in sys.argv:
         if arg == "--cflags":
-            output.append("-std=c++11 -I{}".format(incdir))
+            output.append(f"-std=c++11 -I{incdir}")
 
         if arg == "--libs":
-            output.append("-L{} -l{} -l{} -ldl".format(libdir, libawkward, cpu_kernels))
+            output.append(f"-L{libdir} -l{libawkward} -l{cpu_kernels} -ldl")
 
         if arg == "--libs-only-L":
-            output.append("-L{}".format(libdir))
+            output.append(f"-L{libdir}")
 
         if arg == "--libs-only-l":
-            output.append("-l{} -l{} -ldl".format(libawkward, cpu_kernels))
+            output.append(f"-l{libawkward} -l{cpu_kernels} -ldl")
 
         if arg == "--static-libs":
             output.append(
@@ -83,15 +83,13 @@ if __name__ == "__main__":
             )
 
         if arg == "--static-libs-only-L":
-            output.append("-L{}".format(libdir))
+            output.append(f"-L{libdir}")
 
         if arg == "--static-libs-only-l":
-            output.append(
-                "-l{}-static -l{}-static -ldl".format(libawkward, cpu_kernels)
-            )
+            output.append(f"-l{libawkward}-static -l{cpu_kernels}-static -ldl")
 
         if arg == "--cflags-only-I":
-            output.append("-I{}".format(incdir))
+            output.append(f"-I{incdir}")
 
         if arg == "--incdir":
             output.append(incdir)

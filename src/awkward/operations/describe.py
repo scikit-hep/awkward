@@ -71,8 +71,7 @@ def validity_error(array, exception=False):
 
     else:
         raise TypeError(
-            "not an awkward array: {}".format(repr(array))
-            + ak._util.exception_suffix(__file__)
+            f"not an awkward array: {repr(array)}" + ak._util.exception_suffix(__file__)
         )
 
 
@@ -190,7 +189,7 @@ def type(array):
 
     else:
         raise TypeError(
-            "unrecognized array type: {}".format(repr(array))
+            f"unrecognized array type: {repr(array)}"
             + ak._util.exception_suffix(__file__)
         )
 

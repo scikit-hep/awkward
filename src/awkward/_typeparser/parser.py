@@ -84,7 +84,7 @@ def toast(ptnode, high_level, categorical):
                 typestr="bytes",
             )
         else:
-            raise Exception("Unhandled typestring {}".format(ptnode.children[0]))
+            raise Exception(f"Unhandled typestring {ptnode.children[0]}")
     elif ptnode.data == "primitive":
         if len(ptnode.children) == 1:
             parms = {}

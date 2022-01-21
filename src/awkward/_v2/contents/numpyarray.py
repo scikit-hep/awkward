@@ -315,9 +315,7 @@ class NumpyArray(Content):
             i += 1
             depth += 1
         if posaxis > depth:
-            raise np.AxisError(
-                "axis={} exceeds the depth of this array ({})".format(axis, depth)
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
 
         tonum = ak._v2.index.Index64.empty(reps, self._nplike)
         self._handle_error(
@@ -791,9 +789,7 @@ class NumpyArray(Content):
             )
 
         if len(self.shape) == 0:
-            raise TypeError(
-                "{} attempting to argsort a scalar ".format(type(self).__name__)
-            )
+            raise TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._argsort_next(
@@ -889,9 +885,7 @@ class NumpyArray(Content):
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         if len(self.shape) == 0:
-            raise TypeError(
-                "{} attempting to sort a scalar ".format(type(self).__name__)
-            )
+            raise TypeError(f"{type(self).__name__} attempting to sort a scalar ")
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
@@ -1069,10 +1063,10 @@ class NumpyArray(Content):
 
     def _validityerror(self, path):
         if len(self.shape) == 0:
-            return 'at {} ("{}"): shape is zero-dimensional'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): shape is zero-dimensional'
         for i in range(len(self.shape)):
             if self.shape[i] < 0:
-                return 'at {} ("{}"): shape[{}] < 0'.format(path, type(self), i)
+                return f'at {path} ("{type(self)}"): shape[{i}] < 0'
         for i in range(len(self.strides)):
             if self.strides[i] % self.dtype.itemsize != 0:
                 return 'at {} ("{}"): shape[{}] % itemsize != 0'.format(
@@ -1087,9 +1081,7 @@ class NumpyArray(Content):
             return self.toRegularArray()._rpad(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise np.AxisError(
-                "axis={} exceeds the depth of this array({})".format(axis, depth)
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
         if not clip:
             if target < self.length:
                 return self

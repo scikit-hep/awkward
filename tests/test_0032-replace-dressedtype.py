@@ -62,7 +62,7 @@ def test_types_with_parameters():
 def test_dress():
     class Dummy(ak.highlevel.Array):
         def __repr__(self):
-            return "<Dummy {}>".format(str(self))
+            return f"<Dummy {str(self)}>"
 
     ns = {"Dummy": Dummy}
 

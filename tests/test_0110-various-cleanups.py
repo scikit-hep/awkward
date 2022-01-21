@@ -29,7 +29,7 @@ def test_na_union():
 
 class DummyRecord(ak.Record):
     def __repr__(self):
-        return "<{}>".format(self.x)
+        return f"<{self.x}>"
 
 
 class DummyArray(ak.Array):

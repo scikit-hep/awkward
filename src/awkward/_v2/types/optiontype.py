@@ -45,11 +45,11 @@ class OptionType(Type):
             params = self._str_parameters()
             if params is None:
                 if not isinstance(self._content, (RegularType, ListType)):
-                    out = "?{}".format(str(self._content))
+                    out = f"?{str(self._content)}"
                 else:
-                    out = "option[{}]".format(str(self._content))
+                    out = f"option[{str(self._content)}]"
             else:
-                out = "option[{}, {}]".format(str(self._content), params)
+                out = f"option[{str(self._content)}, {params}]"
 
         return self._str_categorical_begin() + out + self._str_categorical_end()
 

@@ -85,7 +85,7 @@ def _jaxtracers_getitem(array, where):
                 return recurse(array[where[:-1]], where[len(where) - 1])
 
             else:
-                raise ValueError("Can't slice the array with {}".format(where))
+                raise ValueError(f"Can't slice the array with {where}")
 
         child = [recurse(array, where)]
         return ak.Array._internal_for_jax(out, child, isscalar=True)
@@ -108,9 +108,7 @@ def _jaxtracers_getitem(array, where):
             elif isinstance(outlayout, ak._util.indexedtypes):
                 return fetch_indices_and_fieldloc_layout(outlayout.project())
             elif isinstance(outlayout, ak._util.uniontypes):
-                raise ValueError(
-                    "Can't differentiate an UnionArray type {}".format(outlayout)
-                )
+                raise ValueError(f"Can't differentiate an UnionArray type {outlayout}")
             elif isinstance(outlayout, ak._util.recordtypes):
                 indices = []
                 for content in outlayout.contents:
@@ -185,9 +183,7 @@ def _jaxtracers_getitem(array, where):
             elif isinstance(outlayout, ak._util.listtypes):
                 return fetch_children_tracer(outlayout.content, preslice_identities)
             elif isinstance(outlayout, ak._util.uniontypes):
-                raise ValueError(
-                    "Can't differentiate an UnionArray type {}".format(outlayout)
-                )
+                raise ValueError(f"Can't differentiate an UnionArray type {outlayout}")
             elif isinstance(outlayout, ak._util.recordtypes):
                 children = []
                 for content in outlayout.contents:

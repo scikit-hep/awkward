@@ -63,7 +63,7 @@ def to_regular(array, axis=1, highlevel=True, behavior=None):
                 return layout.toRegularArray()
             elif posaxis == 0:
                 raise np.AxisError(
-                    "axis={} exceeds the depth of this array ({})".format(axis, depth)
+                    f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
             depth_context["posaxis"] = posaxis

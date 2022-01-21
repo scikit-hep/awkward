@@ -119,4 +119,4 @@ def type(array):
         raise TypeError("do not use ak._v2.operations.convert.to_list on v1 arrays")
 
     else:
-        raise TypeError("unrecognized array type: {}".format(repr(array)))
+        raise TypeError(f"unrecognized array type: {repr(array)}")

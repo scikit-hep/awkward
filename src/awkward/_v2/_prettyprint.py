@@ -147,9 +147,9 @@ def valuestr_horiz(data, limit_cols):
         elif isinstance(data, numbers.Integral):
             out = str(data)
         elif isinstance(data, numbers.Real):
-            out = "{:.3g}".format(data)
+            out = f"{data:.3g}"
         elif isinstance(data, numbers.Complex):
-            out = "{:.2g}+{:.2g}j".format(data.real, data.imag)
+            out = f"{data.real:.2g}+{data.imag:.2g}j"
         else:
             out = str(data)
 

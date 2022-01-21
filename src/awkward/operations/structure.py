@@ -767,8 +767,7 @@ def to_regular(array, axis=1, highlevel=True, behavior=None):
             return lambda: layout.toRegularArray()
         elif posaxis == 0:
             raise ValueError(
-                "array has no axis {}".format(axis)
-                + ak._util.exception_suffix(__file__)
+                f"array has no axis {axis}" + ak._util.exception_suffix(__file__)
             )
         else:
             return posaxis
@@ -823,8 +822,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
             return lambda: layout
         elif posaxis == 0:
             raise ValueError(
-                "array has no axis {}".format(axis)
-                + ak._util.exception_suffix(__file__)
+                f"array has no axis {axis}" + ak._util.exception_suffix(__file__)
             )
         else:
             return posaxis
@@ -4581,7 +4579,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
             to_str = to_dtype.name
         else:
             raise ValueError(
-                "cannot use {} to cast the numeric type of an array".format(to_dtype)
+                f"cannot use {to_dtype} to cast the numeric type of an array"
                 + ak._util.exception_suffix(__file__)
             )
 

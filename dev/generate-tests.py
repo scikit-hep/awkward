@@ -520,7 +520,7 @@ def gencpukerneltests(specdict):
                             f.write(" " * 4 + "assert {0} == pytest_{0}\n".format(arg))
                     f.write(" " * 4 + "assert not ret_pass.str\n")
                 else:
-                    f.write(" " * 4 + "assert funcC({}).str\n".format(args))
+                    f.write(" " * 4 + f"assert funcC({args}).str\n")
                 f.write("\n")
 
 
@@ -651,10 +651,7 @@ class Error(ctypes.Structure):
                             f.write(" " * 4 + "d_" + arg + " = " + str(val) + "\n")
                     f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
                     f.write(" " * 4 + "funcC.restype = Error\n")
-                    f.write(
-                        " " * 4
-                        + "funcC.argtypes = {}\n".format(getctypelist(spec.args))
-                    )
+                    f.write(" " * 4 + f"funcC.argtypes = {getctypelist(spec.args)}\n")
                     args = ""
                     count = 0
                     for arg in spec.args:
@@ -682,8 +679,7 @@ class Error(ctypes.Structure):
                             )
                             if isinstance(val, list):
                                 f.write(
-                                    " " * 4
-                                    + "for x in range(len(pytest_{})):\n".format(arg)
+                                    " " * 4 + f"for x in range(len(pytest_{arg})):\n"
                                 )
                                 f.write(
                                     " " * 8
@@ -695,7 +691,7 @@ class Error(ctypes.Structure):
                                 )
                         f.write(" " * 4 + "assert not ret_pass.str\n")
                     else:
-                        f.write(" " * 4 + "assert funcC({}).str\n".format(args))
+                        f.write(" " * 4 + f"assert funcC({args}).str\n")
                     f.write("\n")
 
 

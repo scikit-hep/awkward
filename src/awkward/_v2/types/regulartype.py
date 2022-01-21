@@ -50,17 +50,17 @@ class RegularType(Type):
             out = self._typestr
 
         elif self.parameter("__array__") == "string":
-            return "string[{}]".format(self._size)
+            return f"string[{self._size}]"
 
         elif self.parameter("__array__") == "bytestring":
-            return "bytes[{}]".format(self._size)
+            return f"bytes[{self._size}]"
 
         else:
             params = self._str_parameters()
             if params is None:
-                out = "{} * {}".format(self._size, str(self._content))
+                out = f"{self._size} * {str(self._content)}"
             else:
-                out = "[{} * {}, {}]".format(self._size, str(self._content), params)
+                out = f"[{self._size} * {str(self._content)}, {params}]"
 
         return self._str_categorical_begin() + out + self._str_categorical_end()
 

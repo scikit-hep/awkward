@@ -15,13 +15,9 @@ np = ak.nplike.NumpyMetadata.instance()
 class Record:
     def __init__(self, array, at):
         if not isinstance(array, ak._v2.contents.recordarray.RecordArray):
-            raise TypeError(
-                "Record 'array' must be a RecordArray, not {}".format(repr(array))
-            )
+            raise TypeError(f"Record 'array' must be a RecordArray, not {repr(array)}")
         if not ak._util.isint(at):
-            raise TypeError(
-                "Record 'at' must be an integer, not {}".format(repr(array))
-            )
+            raise TypeError(f"Record 'at' must be an integer, not {repr(array)}")
         if at < 0 or at >= array.length:
             raise ValueError(
                 "Record 'at' must be >= 0 and < len(array) == {}, not {}".format(

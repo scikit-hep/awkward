@@ -46,7 +46,7 @@ def test_string2():
 def test_dress():
     class Dummy(ak.highlevel.Array):
         def __repr__(self):
-            return "<Dummy {}>".format(str(self))
+            return f"<Dummy {str(self)}>"
 
     ns = {"Dummy": Dummy}
 

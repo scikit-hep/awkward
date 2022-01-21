@@ -96,10 +96,10 @@ class UnknownScalar:
         return self._dtype
 
     def __repr__(self):
-        return "UnknownScalar({})".format(repr(self._dtype))
+        return f"UnknownScalar({repr(self._dtype)})"
 
     def __str__(self):
-        return "unknown-{}".format(str(self._dtype))
+        return f"unknown-{str(self._dtype)}"
 
     def __eq__(self, other):
         return isinstance(other, UnknownScalar) and self._dtype == other._dtype
@@ -159,7 +159,7 @@ class MaybeNone:
             return False
 
     def __repr__(self):
-        return "MaybeNone({})".format(repr(self._content))
+        return f"MaybeNone({repr(self._content)})"
 
 
 class OneOf:
@@ -177,7 +177,7 @@ class OneOf:
             return False
 
     def __repr__(self):
-        return "OneOf({})".format(repr(self._contents))
+        return f"OneOf({repr(self._contents)})"
 
 
 def _length_after_slice(slice, original_length):
@@ -214,7 +214,7 @@ class TypeTracerArray:
         shape = ""
         if self._shape != (UnknownLength,):
             shape = ", " + repr(self._shape)
-        return "TypeTracerArray({}{})".format(dtype, shape)
+        return f"TypeTracerArray({dtype}{shape})"
 
     @property
     def dtype(self):

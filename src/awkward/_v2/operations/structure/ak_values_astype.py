@@ -58,7 +58,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
             to_str = to_dtype.name
         else:
             raise ValueError(
-                "cannot use {} to cast the numeric type of an array".format(to_dtype)
+                f"cannot use {to_dtype} to cast the numeric type of an array"
             )
 
     layout = ak._v2.operations.convert.to_layout(

@@ -192,7 +192,7 @@ def test_fromawkward0():
             self.x, self.y = x, y
 
         def __repr__(self):
-            return "Point({}, {})".format(self.x, self.y)
+            return f"Point({self.x}, {self.y})"
 
     array = awkward0.fromiter([Point(1.1, 10), Point(2.2, 20), Point(3.3, 30)])
     assert ak.to_list(ak.from_awkward0(array)) == [

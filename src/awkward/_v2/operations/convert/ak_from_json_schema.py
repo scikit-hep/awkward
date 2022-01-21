@@ -68,9 +68,7 @@ def from_json_schema(
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
-        raise TypeError(
-            "malformed JSONSchema: expected dict, got {}".format(repr(schema))
-        )
+        raise TypeError(f"malformed JSONSchema: expected dict, got {repr(schema)}")
 
     container = {}
     instructions = []
@@ -134,12 +132,10 @@ def from_json_schema(
 
 def build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
-        raise TypeError(
-            "unrecognized JSONSchema: expected dict, got {}".format(repr(schema))
-        )
+        raise TypeError(f"unrecognized JSONSchema: expected dict, got {repr(schema)}")
 
     if "type" not in schema is None:
-        raise TypeError("unrecognized JSONSchema: no 'type' in {}".format(repr(schema)))
+        raise TypeError(f"unrecognized JSONSchema: no 'type' in {repr(schema)}")
 
     tpe = schema["type"]
 
@@ -167,9 +163,9 @@ def build_assembly(schema, container, instructions):
             primitive = dtype = "float64"
 
         if is_optional:
-            mask = "node{}".format(len(container))
+            mask = f"node{len(container)}"
             container[mask + "-mask"] = None
-            node = "node{}".format(len(container))
+            node = f"node{len(container)}"
             container[node + "-data"] = None
             instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
             instructions.append([instruction, node + "-data", dtype])
@@ -181,7 +177,7 @@ def build_assembly(schema, container, instructions):
             )
 
         else:
-            node = "node{}".format(len(container))
+            node = f"node{len(container)}"
             container[node + "-data"] = None
             instructions.append([instruction, node + "-data", dtype])
             return ak._v2.forms.NumpyForm(primitive, form_key=node)
@@ -195,15 +191,15 @@ def build_assembly(schema, container, instructions):
             assert all(ak._v2._util.isstr(x) for x in strings)
             bytestrings = [x.encode("utf-8", errors="surrogateescape") for x in strings]
 
-            index = "node{}".format(len(container))
+            index = f"node{len(container)}"
             container[index + "-index"] = None
-            offsets = "node{}".format(len(container))
+            offsets = f"node{len(container)}"
             container[offsets + "-offsets"] = numpy.empty(len(strings) + 1, np.int64)
             container[offsets + "-offsets"][0] = 0
             container[offsets + "-offsets"][1:] = numpy.cumsum(
                 [len(x) for x in bytestrings]
             )
-            node = "container{}".format(len(container))
+            node = f"container{len(container)}"
             container[node + "-data"] = b"".join(bytestrings)
 
             if is_optional:
@@ -231,13 +227,13 @@ def build_assembly(schema, container, instructions):
 
         else:
             if is_optional:
-                mask = "node{}".format(container)
+                mask = f"node{container}"
                 container[mask + "-mask"] = None
                 instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
 
-            offsets = "node{}".format(len(container))
+            offsets = f"node{len(container)}"
             container[offsets + "-offsets"] = None
-            node = "node{}".format(len(container))
+            node = f"node{len(container)}"
             container[node + "-data"] = None
             instructions.append(
                 ["FillString", offsets + "-offsets", "int64", node + "-data", "uint8"]
@@ -270,7 +266,7 @@ def build_assembly(schema, container, instructions):
             assert ak._v2._util.isint(schema.get("minItems"))
 
             if is_optional:
-                mask = "node{}".format(len(container))
+                mask = f"node{len(container)}"
                 container[mask + "-index"] = None
                 instructions.append(
                     ["FillIndexedOptionArray", mask + "-index", "int64"]
@@ -288,11 +284,11 @@ def build_assembly(schema, container, instructions):
 
         else:
             if is_optional:
-                mask = "node{}".format(len(container))
+                mask = f"node{len(container)}"
                 container[mask + "-mask"] = None
                 instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
 
-            offsets = "node{}".format(len(container))
+            offsets = f"node{len(container)}"
             container[offsets + "-offsets"] = None
             instructions.append(["VarLengthList", offsets + "-offsets", "int64"])
 
@@ -321,7 +317,7 @@ def build_assembly(schema, container, instructions):
             subschemas.append(subschema)
 
         if is_optional:
-            mask = "node{}".format(len(container))
+            mask = f"node{len(container)}"
             container[mask + "-index"] = None
             instructions.append(["FillIndexedOptionArray", mask + "-index", "int64"])
 
@@ -347,4 +343,4 @@ def build_assembly(schema, container, instructions):
         raise NotImplementedError("arbitrary unions of types are not yet supported")
 
     else:
-        raise TypeError("unrecognized JSONSchema: {}".format(repr(tpe)))
+        raise TypeError(f"unrecognized JSONSchema: {repr(tpe)}")

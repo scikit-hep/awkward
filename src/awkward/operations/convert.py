@@ -262,7 +262,7 @@ def to_numpy(array, allow_missing=True):
                 out = numpy.ma.concatenate(contents)
             except Exception:
                 raise ValueError(
-                    "cannot convert {} into numpy.ma.MaskedArray".format(array)
+                    f"cannot convert {array} into numpy.ma.MaskedArray"
                     + ak._util.exception_suffix(__file__)
                 )
         else:
@@ -270,7 +270,7 @@ def to_numpy(array, allow_missing=True):
                 out = numpy.concatenate(contents)
             except Exception:
                 raise ValueError(
-                    "cannot convert {} into np.ndarray".format(array)
+                    f"cannot convert {array} into np.ndarray"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -340,7 +340,7 @@ def to_numpy(array, allow_missing=True):
         ]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(
-                "cannot convert {} into np.ndarray".format(array)
+                f"cannot convert {array} into np.ndarray"
                 + ak._util.exception_suffix(__file__)
             )
         out = numpy.empty(
@@ -373,7 +373,7 @@ def to_numpy(array, allow_missing=True):
 
     elif isinstance(array, ak.layout.Content):
         raise AssertionError(
-            "unrecognized Content type: {}".format(type(array))
+            f"unrecognized Content type: {type(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -382,7 +382,7 @@ def to_numpy(array, allow_missing=True):
 
     else:
         raise ValueError(
-            "cannot convert {} into np.ndarray".format(array)
+            f"cannot convert {array} into np.ndarray"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -541,7 +541,7 @@ def to_cupy(array):
 
     elif isinstance(array, ak.layout.Content):
         raise AssertionError(
-            "unrecognized Content type: {}".format(type(array))
+            f"unrecognized Content type: {type(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -550,7 +550,7 @@ def to_cupy(array):
 
     else:
         raise ValueError(
-            "cannot convert {} into cp.ndarray".format(array)
+            f"cannot convert {array} into cp.ndarray"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -673,7 +673,7 @@ def to_jax(array):
         array = array.simplify()
         if isinstance(array, ak._util.uniontypes):
             raise ValueError(
-                "cannot convert {} into jax.numpy.array".format(array)
+                f"cannot convert {array} into jax.numpy.array"
                 + ak._util.exception_suffix(__file__)
             )
         return to_jax(array)
@@ -715,7 +715,7 @@ def to_jax(array):
 
     elif isinstance(array, ak.layout.Content):
         raise AssertionError(
-            "unrecognized Content type: {}".format(type(array))
+            f"unrecognized Content type: {type(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -724,7 +724,7 @@ def to_jax(array):
 
     else:
         raise ValueError(
-            "cannot convert {} into jax.numpy.array".format(array)
+            f"cannot convert {array} into jax.numpy.array"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -1020,7 +1020,7 @@ def to_list(array):
 
     else:
         raise TypeError(
-            "unrecognized array type: {}".format(type(array))
+            f"unrecognized array type: {type(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -1116,7 +1116,7 @@ def from_json(
             exc = IOError
         else:
             exc = FileNotFoundError
-        raise exc("file not found or not a regular file: {}".format(source))
+        raise exc(f"file not found or not a regular file: {source}")
 
     def getfunction(recordnode):
         if isinstance(recordnode, ak.layout.RecordArray):
@@ -1236,7 +1236,7 @@ def to_json(
 
     else:
         raise TypeError(
-            "unrecognized array type: {}".format(repr(array))
+            f"unrecognized array type: {repr(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -1591,7 +1591,7 @@ def from_awkward0(
                 out.setparameter("__array__", "string")
             else:
                 raise ValueError(
-                    "unsupported encoding: {}".format(repr(array.encoding))
+                    f"unsupported encoding: {repr(array.encoding)}"
                     + ak._util.exception_suffix(__file__)
                 )
             return out
@@ -1651,7 +1651,7 @@ def from_awkward0(
 
         else:
             raise TypeError(
-                "not an awkward0 array: {}".format(repr(array))
+                f"not an awkward0 array: {repr(array)}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1860,7 +1860,7 @@ def to_awkward0(array, keep_layout=False):
 
         else:
             raise AssertionError(
-                "missing converter for {}".format(type(layout).__name__)
+                f"missing converter for {type(layout).__name__}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1915,7 +1915,7 @@ def to_layout(
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
             raise ValueError(
-                "NumPy {} not allowed".format(repr(array.dtype))
+                f"NumPy {repr(array.dtype)} not allowed"
                 + ak._util.exception_suffix(__file__)
             )
         return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
@@ -1935,7 +1935,7 @@ def to_layout(
 
     elif not allow_other:
         raise TypeError(
-            "{} cannot be converted into an Awkward Array".format(array)
+            f"{array} cannot be converted into an Awkward Array"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -1998,7 +1998,7 @@ or
         if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
             "2.0.0"
         ):
-            raise ImportError("pyarrow 2.0.0 or later required for {}".format(name))
+            raise ImportError(f"pyarrow 2.0.0 or later required for {name}")
         return pyarrow
 
 
@@ -2519,7 +2519,7 @@ def to_arrow(
 
         else:
             raise TypeError(
-                "unrecognized array type: {}".format(repr(layout))
+                f"unrecognized array type: {repr(layout)}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2744,7 +2744,7 @@ def _from_arrow(
                 assert tpe.num_buffers == 3
             else:
                 raise TypeError(
-                    "unrecognized Arrow union array mode: {}".format(repr(tpe.mode))
+                    f"unrecognized Arrow union array mode: {repr(tpe.mode)}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -2869,7 +2869,7 @@ def _from_arrow(
 
         else:
             raise TypeError(
-                "unrecognized Arrow array type: {}".format(repr(tpe))
+                f"unrecognized Arrow array type: {repr(tpe)}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2953,7 +2953,7 @@ def _from_arrow(
 
         else:
             raise TypeError(
-                "unrecognized Arrow type: {}".format(type(obj))
+                f"unrecognized Arrow type: {type(obj)}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2967,7 +2967,7 @@ def to_parquet(
     list_to32=False,
     string_to32=True,
     bytestring_to32=True,
-    **options  # NOTE: a comma after **options breaks Python 2
+    **options,  # NOTE: a comma after **options breaks Python 2
 ):
     """
     Args:
@@ -3130,13 +3130,13 @@ def _to_parquet_dataset(directory, filenames=None, filename_extension=".parquet"
     directory = _regularize_path(directory)
     if not os.path.isdir(directory):
         raise ValueError(
-            "{} is not a local filesystem directory".format(repr(directory))
+            f"{repr(directory)} is not a local filesystem directory"
             + ak._util.exception_suffix(__file__)
         )
 
     if filenames is None:
         filenames = sorted(
-            glob.glob(directory + "/**/*{}".format(filename_extension), recursive=True)
+            glob.glob(directory + f"/**/*{filename_extension}", recursive=True)
         )
     else:
         filenames = [_regularize_path(x) for x in filenames]
@@ -3309,7 +3309,7 @@ class _LazyDatasetGenerator:
 
             else:
                 raise AssertionError(
-                    "unexpected Form: {}".format(type(form))
+                    f"unexpected Form: {type(form)}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -3431,7 +3431,7 @@ class _LazyDatasetGenerator:
                 out = ak.layout.ListOffsetArray64(off, out)
             else:
                 raise AssertionError(
-                    "unexpected Index type: {}".format(off)
+                    f"unexpected Index type: {off}"
                     + ak._util.exception_suffix(__file__)
                 )
         return out
@@ -3750,7 +3750,7 @@ def _partial_schema_from_columns(schema, columns):
     for x in columns:
         if x not in schema.names:
             raise ValueError(
-                "column {} not found in schema".format(repr(x))
+                f"column {repr(x)} not found in schema"
                 + ak._util.exception_suffix(__file__)
             )
         pa_fields.append(schema.field(x))
@@ -3843,7 +3843,7 @@ def _regularize_lazy_cache(lazy_cache):
 
 def _regularize_parquet_lazy_cache_key(lazy_cache_key):
     if lazy_cache_key is None:
-        lazy_cache_key = "ak.from_parquet:{}".format(_from_parquet_key())
+        lazy_cache_key = f"ak.from_parquet:{_from_parquet_key()}"
     return lazy_cache_key
 
 
@@ -3858,7 +3858,7 @@ def from_parquet(
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options  # NOTE: a comma after **options breaks Python 2
+    **options,  # NOTE: a comma after **options breaks Python 2
 ):
     """
     Args:
@@ -4934,7 +4934,7 @@ def _form_to_layout(
         if isinstance(form.form, (ak.forms.NumpyForm, ak.forms.EmptyForm)):
             # If it's a leaf node, the node_cache_key completely determines
             # uniqueness of the subtree (because it's the whole subtree).
-            nested_cache_key = "{}({})".format(lazy_cache_key, node_cache_key)
+            nested_cache_key = f"{lazy_cache_key}({node_cache_key})"
         else:
             # Otherwise, the node_cache_key for the root of the subtree might
             # be the same in two places whereas the nested content differs.
@@ -5090,7 +5090,7 @@ def from_buffers(
             lazy_cache = ak.layout.ArrayCache(hold_cache)
 
         if lazy_cache_key is None:
-            lazy_cache_key = "ak.from_buffers:{}".format(_from_buffers_key())
+            lazy_cache_key = f"ak.from_buffers:{_from_buffers_key()}"
 
     if length is None or isinstance(length, (numbers.Integral, np.integer)):
         if length is None:
@@ -5122,7 +5122,7 @@ def from_buffers(
             args = (form, container, partnum, key_format)
 
             if lazy:
-                lazy_cache_key_part = "{}[{}]".format(lazy_cache_key, partnum)
+                lazy_cache_key_part = f"{lazy_cache_key}[{partnum}]"
                 generator = ak.layout.ArrayGenerator(
                     _form_to_layout,
                     args + (partlen, lazy_cache, lazy_cache_key_part),

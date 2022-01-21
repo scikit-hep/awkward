@@ -423,7 +423,7 @@ class Array(
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<{}.mask{} {} type={}>".format(name, suffix, value, typestr)
+            return f"<{name}.mask{suffix} {value} type={typestr}>"
 
         def __getitem__(self, where):
             return ak.operations.structure.mask(self._array, where, self._valid_when)
@@ -1126,7 +1126,7 @@ class Array(
                     )
             else:
                 raise AttributeError(
-                    "no field named {}".format(repr(where))
+                    f"no field named {repr(where)}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -1327,7 +1327,7 @@ class Array(
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{}{} {} type={}>".format(name, suffix, value, typestr)
+        return f"<{name}{suffix} {value} type={typestr}>"
 
     def __array__(self, *args, **kwargs):
         """
@@ -1849,7 +1849,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                     )
             else:
                 raise AttributeError(
-                    "no field named {}".format(repr(where))
+                    f"no field named {repr(where)}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -2018,7 +2018,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{}{} {} type={}>".format(name, suffix, value, typestr)
+        return f"<{name}{suffix} {value} type={typestr}>"
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -2367,7 +2367,7 @@ class ArrayBuilder(Iterable, Sized):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<ArrayBuilder {} type={}>".format(value, typestr)
+        return f"<ArrayBuilder {value} type={typestr}>"
 
     def __array__(self, *args, **kwargs):
         """
@@ -2668,7 +2668,7 @@ class ArrayBuilder(Iterable, Sized):
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<ArrayBuilder.{} {} type={}>".format(self._name, value, typestr)
+            return f"<ArrayBuilder.{self._name} {value} type={typestr}>"
 
     class List(_Nested):
         _name = "list"

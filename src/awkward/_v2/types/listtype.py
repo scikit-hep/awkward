@@ -47,9 +47,9 @@ class ListType(Type):
         else:
             params = self._str_parameters()
             if params is None:
-                out = "var * {}".format(str(self._content))
+                out = f"var * {str(self._content)}"
             else:
-                out = "[var * {}, {}]".format(str(self._content), params)
+                out = f"[var * {str(self._content)}, {params}]"
 
         return self._str_categorical_begin() + out + self._str_categorical_end()
 

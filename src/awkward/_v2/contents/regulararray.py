@@ -958,7 +958,7 @@ class RegularArray(Content):
 
     def _validityerror(self, path):
         if self.size < 0:
-            return 'at {} ("{}"): size < 0'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): size < 0'
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"

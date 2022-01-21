@@ -640,9 +640,7 @@ def apply_step(
         # Any RecordArrays?
         elif any(isinstance(x, RecordArray) for x in inputs):
             if not options["allow_records"]:
-                raise ValueError(
-                    "cannot broadcast records{}".format(in_function(options))
-                )
+                raise ValueError(f"cannot broadcast records{in_function(options)}")
 
             fields, length, istuple = None, None, True
             for x in inputs:
