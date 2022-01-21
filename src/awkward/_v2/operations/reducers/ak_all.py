@@ -44,10 +44,20 @@ def all(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     )
 
     if axis is None:
-        return layout.nplike.all(
-            layout.completely_flatten(
-                function_name="ak.all", flatten_records=flatten_records
-            )
+
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs[0]
+            else:
+                return layout.nplike.logical_and(xs[0], reduce(xs[1:]))
+
+        return reduce(
+            [
+                layout.nplike.all(x)
+                for x in layout.completely_flatten(
+                    function_name="ak.all", flatten_records=flatten_records
+                )
+            ]
         )
 
     else:

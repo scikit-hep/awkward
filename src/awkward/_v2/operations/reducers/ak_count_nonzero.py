@@ -48,10 +48,20 @@ def count_nonzero(
     )
 
     if axis is None:
-        return layout.nplike.count_nonzero(
-            layout.completely_flatten(
-                function_name="ak.count_nonzero", flatten_records=flatten_records
-            )
+
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs[0]
+            else:
+                return layout.nplike.add(xs[0], reduce(xs[1:]))
+
+        return reduce(
+            [
+                layout.nplike.count_nonzero(x)
+                for x in layout.completely_flatten(
+                    function_name="ak.count_nonzero", flatten_records=flatten_records
+                )
+            ]
         )
 
     else:

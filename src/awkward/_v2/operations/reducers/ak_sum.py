@@ -187,10 +187,20 @@ def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     )
 
     if axis is None:
-        return layout.nplike.sum(
-            layout.completely_flatten(
-                function_name="ak.sum", flatten_records=flatten_records
-            )
+
+        def reduce(xs):
+            if len(xs) == 1:
+                return xs[0]
+            else:
+                return layout.nplike.add(xs[0], reduce(xs[1:]))
+
+        return reduce(
+            [
+                layout.nplike.sum(x)
+                for x in layout.completely_flatten(
+                    function_name="ak.sum", flatten_records=flatten_records
+                )
+            ]
         )
 
     else:
