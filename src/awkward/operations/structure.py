@@ -2,7 +2,6 @@
 
 # v2: replace with all the src/awkward/_v2/operations/structure/*.py files.
 
-from __future__ import absolute_import
 
 import numbers
 import json
@@ -158,7 +157,7 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
             if not issubclass(m.dtype.type, (bool, np.bool_)):
                 raise ValueError(
                     "mask must have boolean type, not "
-                    "{0}".format(repr(m.dtype)) + ak._util.exception_suffix(__file__)
+                    "{}".format(repr(m.dtype)) + ak._util.exception_suffix(__file__)
                 )
             bytemask = ak.layout.Index8(m.view(np.int8))
             return lambda: (
@@ -768,7 +767,7 @@ def to_regular(array, axis=1, highlevel=True, behavior=None):
             return lambda: layout.toRegularArray()
         elif posaxis == 0:
             raise ValueError(
-                "array has no axis {0}".format(axis)
+                "array has no axis {}".format(axis)
                 + ak._util.exception_suffix(__file__)
             )
         else:
@@ -824,7 +823,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
             return lambda: layout
         elif posaxis == 0:
             raise ValueError(
-                "array has no axis {0}".format(axis)
+                "array has no axis {}".format(axis)
                 + ak._util.exception_suffix(__file__)
             )
         else:
@@ -1490,22 +1489,20 @@ def concatenate(
     ][0]
     posaxis = first_content.axis_wrap_if_negative(axis)
     maxdepth = max(
-        [
-            x.minmax_depth[1]
-            for x in contents
-            if isinstance(
-                x,
-                (
-                    ak.layout.Content,
-                    ak.partition.PartitionedArray,
-                    ak._v2.contents.Content,
-                ),
-            )
-        ]
+        x.minmax_depth[1]
+        for x in contents
+        if isinstance(
+            x,
+            (
+                ak.layout.Content,
+                ak.partition.PartitionedArray,
+                ak._v2.contents.Content,
+            ),
+        )
     )
     if not 0 <= posaxis < maxdepth:
         raise ValueError(
-            "axis={0} is beyond the depth of this array or the depth of this array "
+            "axis={} is beyond the depth of this array or the depth of this array "
             "is ambiguous".format(axis) + ak._util.exception_suffix(__file__)
         )
     for x in contents:
@@ -1513,7 +1510,7 @@ def concatenate(
             if x.axis_wrap_if_negative(axis) != posaxis:
                 raise ValueError(
                     "arrays to concatenate do not have the same depth for negative "
-                    "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+                    "axis={}".format(axis) + ak._util.exception_suffix(__file__)
                 )
 
     if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):
@@ -1620,9 +1617,7 @@ def concatenate(
             ):
                 nplike = ak.nplike.of(*inputs)
 
-                length = max(
-                    [len(x) for x in inputs if isinstance(x, ak.layout.Content)]
-                )
+                length = max(len(x) for x in inputs if isinstance(x, ak.layout.Content))
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, ak.layout.Content):
@@ -1673,7 +1668,7 @@ def concatenate(
             ):
                 raise ValueError(
                     "at least one array is not deep enough to concatenate at "
-                    "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+                    "axis={}".format(axis) + ak._util.exception_suffix(__file__)
                 )
 
             else:
@@ -1761,10 +1756,10 @@ def where(condition, *args, **kwargs):
         )
 
     elif len(args) == 2:
-        left, right = [
+        left, right = (
             ak.operations.convert.to_layout(x, allow_record=False, allow_other=True)
             for x in args
-        ]
+        )
         good_arrays = [akcondition]
         if isinstance(left, ak.layout.Content):
             good_arrays.append(left)
@@ -1800,7 +1795,7 @@ def where(condition, *args, **kwargs):
 
     else:
         raise TypeError(
-            "where() takes from 1 to 3 positional arguments but {0} were "
+            "where() takes from 1 to 3 positional arguments but {} were "
             "given".format(len(args) + 1) + ak._util.exception_suffix(__file__)
         )
 
@@ -2077,7 +2072,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
             ] != len(layout):
                 raise ValueError(
                     "structure imposed by 'counts' does not fit in the array or partition "
-                    "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+                    "at axis={}".format(axis) + ak._util.exception_suffix(__file__)
                 )
 
             offsets = current_offsets[0][: position + 1]
@@ -2129,7 +2124,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                 if not nplike.array_equal(inneroffsets[positions], outeroffsets):
                     raise ValueError(
                         "structure imposed by 'counts' does not fit in the array or partition "
-                        "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+                        "at axis={}".format(axis) + ak._util.exception_suffix(__file__)
                     )
                 positions[0] = 0
 
@@ -2155,7 +2150,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
     ):
         raise ValueError(
             "structure imposed by 'counts' does not fit in the array or partition "
-            "at axis={0}".format(axis) + ak._util.exception_suffix(__file__)
+            "at axis={}".format(axis) + ak._util.exception_suffix(__file__)
         )
 
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
@@ -3581,15 +3576,12 @@ def argcartesian(
     else:
         if isinstance(arrays, dict):
             behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
-            layouts = dict(
-                (
-                    n,
-                    ak.operations.convert.to_layout(
-                        x, allow_record=False, allow_other=False
-                    ).localindex(axis),
-                )
+            layouts = {
+                n: ak.operations.convert.to_layout(
+                    x, allow_record=False, allow_other=False
+                ).localindex(axis)
                 for n, x in arrays.items()
-            )
+            }
         else:
             behavior = ak._util.behaviorof(*arrays, behavior=behavior)
             layouts = [
@@ -3964,7 +3956,7 @@ def repartition(array, lengths, highlevel=True, behavior=None):
 
         if total_length != len(layout):
             raise ValueError(
-                "cannot repartition array of length {0} into "
+                "cannot repartition array of length {} into "
                 "these lengths".format(len(layout))
                 + ak._util.exception_suffix(__file__)
             )
@@ -4387,7 +4379,7 @@ def size(array, axis=None):
         if sizes[-1] is None:
             raise ValueError(
                 "ak.size is ambiguous due to variable-length arrays at "
-                "axis {0} (try ak.flatten to remove structure or "
+                "axis {} (try ak.flatten to remove structure or "
                 "ak.to_numpy to force regularity, if possible)".format(axis)
                 + ak._util.exception_suffix(__file__)
             )
@@ -4589,7 +4581,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
             to_str = to_dtype.name
         else:
             raise ValueError(
-                "cannot use {0} to cast the numeric type of an array".format(to_dtype)
+                "cannot use {} to cast the numeric type of an array".format(to_dtype)
                 + ak._util.exception_suffix(__file__)
             )
 

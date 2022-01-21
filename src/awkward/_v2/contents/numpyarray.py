@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2._slicing import NestedIndexError
@@ -24,7 +23,7 @@ class NumpyArray(Content):
         ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
             raise TypeError(
-                "{0} 'data' must be an array, not {1}".format(
+                "{} 'data' must be an array, not {}".format(
                     type(self).__name__, repr(data)
                 )
             )
@@ -97,7 +96,7 @@ class NumpyArray(Content):
             out.append(" len=" + repr(str(self._data.shape[0])))
         else:
             out.append(
-                " shape='({0})'".format(", ".join(str(x) for x in self._data.shape))
+                " shape='({})'".format(", ".join(str(x) for x in self._data.shape))
             )
 
         extra = self._repr_extra(indent + "    ")
@@ -317,7 +316,7 @@ class NumpyArray(Content):
             depth += 1
         if posaxis > depth:
             raise np.AxisError(
-                "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
+                "axis={} exceeds the depth of this array ({})".format(axis, depth)
             )
 
         tonum = ak._v2.index.Index64.empty(reps, self._nplike)
@@ -793,7 +792,7 @@ class NumpyArray(Content):
 
         if len(self.shape) == 0:
             raise TypeError(
-                "{0} attempting to argsort a scalar ".format(type(self).__name__)
+                "{} attempting to argsort a scalar ".format(type(self).__name__)
             )
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
@@ -891,7 +890,7 @@ class NumpyArray(Content):
     ):
         if len(self.shape) == 0:
             raise TypeError(
-                "{0} attempting to sort a scalar ".format(type(self).__name__)
+                "{} attempting to sort a scalar ".format(type(self).__name__)
             )
 
         elif len(self.shape) != 1 or not self.is_contiguous:
@@ -1070,13 +1069,13 @@ class NumpyArray(Content):
 
     def _validityerror(self, path):
         if len(self.shape) == 0:
-            return 'at {0} ("{1}"): shape is zero-dimensional'.format(path, type(self))
+            return 'at {} ("{}"): shape is zero-dimensional'.format(path, type(self))
         for i in range(len(self.shape)):
             if self.shape[i] < 0:
-                return 'at {0} ("{1}"): shape[{2}] < 0'.format(path, type(self), i)
+                return 'at {} ("{}"): shape[{}] < 0'.format(path, type(self), i)
         for i in range(len(self.strides)):
             if self.strides[i] % self.dtype.itemsize != 0:
-                return 'at {0} ("{1}"): shape[{2}] % itemsize != 0'.format(
+                return 'at {} ("{}"): shape[{}] % itemsize != 0'.format(
                     path, type(self), i
                 )
         return ""
@@ -1089,7 +1088,7 @@ class NumpyArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise np.AxisError(
-                "axis={0} exceeds the depth of this array({1})".format(axis, depth)
+                "axis={} exceeds the depth of this array({})".format(axis, depth)
             )
         if not clip:
             if target < self.length:

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import os
 import datetime
@@ -191,11 +190,11 @@ def by_signature(lib):
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
                 file.write(
                     """
-    f = lib.{0}
-    f.argtypes = [{1}]
+    f = lib.{}
+    f.argtypes = [{}]
     f.restype = ERROR
-    f.dir = [{2}]
-    out[{3}] = f
+    f.dir = [{}]
+    out[{}] = f
 """.format(
                         childfunc["name"],
                         ", ".join(arglist),

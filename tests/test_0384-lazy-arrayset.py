@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -9,16 +8,16 @@ import awkward as ak  # noqa: F401
 
 class Canary(dict):
     def __init__(self):
-        super(Canary, self).__init__()
+        super().__init__()
         self.ops = []
 
     def __getitem__(self, key):
         self.ops.append(("get", key))
-        return super(Canary, self).__getitem__(key)
+        return super().__getitem__(key)
 
     def __setitem__(self, key, value):
         self.ops.append(("set", key))
-        return super(Canary, self).__setitem__(key, value)
+        return super().__setitem__(key, value)
 
 
 def test_lazy_buffers():

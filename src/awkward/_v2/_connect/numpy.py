@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import sys
 
@@ -239,7 +238,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 else:
                     error_message.append(type(x).__name__)
             raise TypeError(
-                "no {0}.{1} overloads for custom types: {2}".format(
+                "no {}.{} overloads for custom types: {}".format(
                     type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
                 )
             )
@@ -455,7 +454,7 @@ except AttributeError:
         func.__name__ = "__{}__".format(name)
         return func
 
-    class NDArrayOperatorsMixin(object):
+    class NDArrayOperatorsMixin:
         __lt__ = _binary_method(um.less, "lt")
         __le__ = _binary_method(um.less_equal, "le")
         __eq__ = _binary_method(um.equal, "eq")

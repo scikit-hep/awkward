@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -15,7 +14,7 @@ _dtype_to_form = {
 }
 
 
-class Index(object):
+class Index:
     _expected_dtype = None
 
     def __init__(self, data, metadata=None, nplike=None):
@@ -129,7 +128,7 @@ class Index(object):
             if self._metadata is not None:
                 for k, v in self._metadata.items():
                     out.append(
-                        "<metadata key={0}>{1}</metadata>\n".format(repr(k), repr(v))
+                        "<metadata key={}>{}</metadata>\n".format(repr(k), repr(v))
                         + indent
                         + "    "
                     )

@@ -2,7 +2,6 @@
 
 # v2: drop this file; partitioning will be handled by Awkward-Dask.
 
-from __future__ import absolute_import
 
 import numbers
 
@@ -97,7 +96,7 @@ def apply(function, array):
     return IrregularlyPartitionedArray([function(x) for x in array.partitions])
 
 
-class PartitionedArray(object):
+class PartitionedArray:
     @classmethod
     def from_ext(cls, obj):
         if isinstance(obj, ak._ext.IrregularlyPartitionedArray):
@@ -270,7 +269,7 @@ class PartitionedArray(object):
                     head += len(self)
                 if not 0 <= head < len(self):
                     raise ValueError(
-                        "{0} index out of range".format(type(self).__name__)
+                        "{} index out of range".format(type(self).__name__)
                         + ak._util.exception_suffix(__file__)
                     )
                 partitionid, index = self._ext.partitionid_index_at(head)
@@ -377,8 +376,7 @@ class PartitionedArray(object):
 
     def __iter__(self):
         for partition in self.partitions:
-            for x in partition:
-                yield x
+            yield from partition
 
     @property
     def kernels(self):

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.forms.form import Form, _parameters_equal
@@ -12,13 +11,13 @@ class RegularForm(Form):
     ):
         if not isinstance(content, Form):
             raise TypeError(
-                "{0} all 'contents' must be Form subclasses, not {1}".format(
+                "{} all 'contents' must be Form subclasses, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
         if not ak._util.isint(size):
             raise TypeError(
-                "{0} 'size' must be of type int, not {1}".format(
+                "{} 'size' must be of type int, not {}".format(
                     type(self).__name__, repr(size)
                 )
             )
@@ -37,7 +36,7 @@ class RegularForm(Form):
 
     def __repr__(self):
         args = [repr(self._content), repr(self._size)] + self._repr_args()
-        return "{0}({1})".format(type(self).__name__, ", ".join(args))
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose, toplevel):
         return self._tolist_extra(

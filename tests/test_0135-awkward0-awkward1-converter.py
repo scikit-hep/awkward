@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -188,12 +187,12 @@ def test_fromawkward0():
     )
     assert ak.to_list(ak.from_awkward0(array)) == ["hello", "you", "guys"]
 
-    class Point(object):
+    class Point:
         def __init__(self, x, y):
             self.x, self.y = x, y
 
         def __repr__(self):
-            return "Point({0}, {1})".format(self.x, self.y)
+            return "Point({}, {})".format(self.x, self.y)
 
     array = awkward0.fromiter([Point(1.1, 10), Point(2.2, 20), Point(3.3, 30)])
     assert ak.to_list(ak.from_awkward0(array)) == [

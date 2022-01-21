@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -50,12 +49,12 @@ def test_types_with_parameters():
     assert t.parameters == {"__array__": ["val", "ue"]}
 
     t = ak.types.UnknownType(
-        parameters={"key1": ["val", "ue"], "__record__": u"one \u2192 two"}
+        parameters={"key1": ["val", "ue"], "__record__": "one \u2192 two"}
     )
-    assert t.parameters == {"__record__": u"one \u2192 two", "key1": ["val", "ue"]}
+    assert t.parameters == {"__record__": "one \u2192 two", "key1": ["val", "ue"]}
 
     assert t == ak.types.UnknownType(
-        parameters={"__record__": u"one \u2192 two", "key1": ["val", "ue"]}
+        parameters={"__record__": "one \u2192 two", "key1": ["val", "ue"]}
     )
     assert t != ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
 
@@ -63,7 +62,7 @@ def test_types_with_parameters():
 def test_dress():
     class Dummy(ak.highlevel.Array):
         def __repr__(self):
-            return "<Dummy {0}>".format(str(self))
+            return "<Dummy {}>".format(str(self))
 
     ns = {"Dummy": Dummy}
 

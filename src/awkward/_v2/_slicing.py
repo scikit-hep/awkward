@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 try:
     from collections.abc import Iterable
@@ -71,7 +70,7 @@ def getitem_broadcast(items):
                             out.append(ak._v2.index.Index64(w))
                 else:
                     raise TypeError(
-                        "array slice must be an array of integers or booleans, not\n\n    {0}".format(
+                        "array slice must be an array of integers or booleans, not\n\n    {}".format(
                             repr(x).replace("\n", "\n    ")
                         )
                     )
@@ -480,7 +479,7 @@ class NestedIndexError(IndexError):
         return self._details
 
     def __str__(self):
-        return "cannot slice {0} with {1}{2}".format(
+        return "cannot slice {} with {}{}".format(
             type(self._array).__name__,
             repr(self._slicer),
             "" if self._details is None else ": " + self._details,

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 try:
     from collections.abc import Iterable
@@ -16,7 +15,7 @@ np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
 
-class Content(object):
+class Content:
     is_NumpyType = False
     is_UnknownType = False
     is_ListType = False
@@ -31,20 +30,20 @@ class Content(object):
             identifier, ak._v2.identifier.Identifier
         ):
             raise TypeError(
-                "{0} 'identifier' must be an Identifier or None, not {1}".format(
+                "{} 'identifier' must be an Identifier or None, not {}".format(
                     type(self).__name__, repr(identifier)
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
-                "{0} 'parameters' must be a dict or None, not {1}".format(
+                "{} 'parameters' must be a dict or None, not {}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
 
         if nplike is not None and not isinstance(nplike, ak.nplike.NumpyLike):
             raise TypeError(
-                "{0} 'nplike' must be an ak.nplike.NumpyLike or None, not {1}".format(
+                "{} 'nplike' must be an ak.nplike.NumpyLike or None, not {}".format(
                     type(self).__name__, repr(nplike)
                 )
             )
@@ -101,7 +100,7 @@ class Content(object):
 
         else:
             raise TypeError(
-                "form_key must be None, a string, or a callable, not {0}".format(
+                "form_key must be None, a string, or a callable, not {}".format(
                     type(form_key)
                 )
             )
@@ -142,7 +141,7 @@ class Content(object):
 
         else:
             raise TypeError(
-                "buffer_key must be a string or a callable, not {0}".format(
+                "buffer_key must be a string or a callable, not {}".format(
                     type(buffer_key)
                 )
             )
@@ -166,7 +165,7 @@ class Content(object):
         if self._parameters is not None:
             for k, v in self._parameters.items():
                 out.append(
-                    "\n{0}<parameter name={1}>{2}</parameter>".format(
+                    "\n{}<parameter name={}>{}</parameter>".format(
                         indent, repr(k), repr(v)
                     )
                 )
@@ -197,9 +196,7 @@ class Content(object):
                     pass
 
                 if error.attempt != ak._util.kSliceNone:
-                    message += " while attempting to get index {0}".format(
-                        error.attempt
-                    )
+                    message += " while attempting to get index {}".format(error.attempt)
 
                 message += filename
 
@@ -225,9 +222,7 @@ class Content(object):
 
             else:
                 if error.attempt != ak._util.kSliceNone:
-                    message += " while attempting to get index {0}".format(
-                        error.attempt
-                    )
+                    message += " while attempting to get index {}".format(error.attempt)
 
                 message += filename
 
@@ -344,7 +339,7 @@ class Content(object):
             raise NestedIndexError(
                 self,
                 head,
-                "cannot fit masked jagged slice with length {0} into {1} of size {2}".format(
+                "cannot fit masked jagged slice with length {} into {} of size {}".format(
                     index.length, type(that).__name__, content.length
                 ),
             )
@@ -425,7 +420,7 @@ class Content(object):
                     )
                 else:
                     raise NotImplementedError(
-                        "FIXME: unhandled case of SliceMissing with RecordArray containing {0}".format(
+                        "FIXME: unhandled case of SliceMissing with RecordArray containing {}".format(
                             content
                         )
                     )
@@ -441,7 +436,7 @@ class Content(object):
 
         else:
             raise NotImplementedError(
-                "FIXME: unhandled case of SliceMissing with {0}".format(nextcontent)
+                "FIXME: unhandled case of SliceMissing with {}".format(nextcontent)
             )
 
     def __getitem__(self, where):
@@ -526,7 +521,7 @@ class Content(object):
                         return self.__getitem__(wheres)
                 else:
                     raise TypeError(
-                        "array slice must be an array of integers or booleans, not\n\n    {0}".format(
+                        "array slice must be an array of integers or booleans, not\n\n    {}".format(
                             repr(where.data).replace("\n", "\n    ")
                         )
                     )
@@ -569,12 +564,12 @@ class Content(object):
             def format_slice(x):
                 if isinstance(x, slice):
                     if x.step is None:
-                        return "{0}:{1}".format(
+                        return "{}:{}".format(
                             "" if x.start is None else x.start,
                             "" if x.stop is None else x.stop,
                         )
                     else:
-                        return "{0}:{1}:{2}".format(
+                        return "{}:{}:{}".format(
                             "" if x.start is None else x.start,
                             "" if x.stop is None else x.stop,
                             x.step,
@@ -595,13 +590,13 @@ class Content(object):
             raise IndexError(
                 """cannot slice
 
-{0}
+{}
 
 with
 
-    {1}
+    {}
 
-at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
+at inner {} of length {}, using sub-slice {}.{}""".format(
                     tmp,
                     format_slice(where),
                     type(err.array).__name__,
@@ -609,7 +604,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     format_slice(err.slicer),
                     ""
                     if err.details is None
-                    else "\n\n{0} error: {1}.".format(
+                    else "\n\n{} error: {}.".format(
                         type(err.array).__name__, err.details
                     ),
                 )
@@ -680,13 +675,13 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             posaxis = depth + axis
             if posaxis < 0:
                 raise np.AxisError(
-                    "axis={0} exceeds the depth ({1}) of this array".format(axis, depth)
+                    "axis={} exceeds the depth ({}) of this array".format(axis, depth)
                 )
             return posaxis
 
         elif mindepth + axis == 0:
             raise np.AxisError(
-                "axis={0} exceeds the depth ({1}) of at least one record field (or union possibility) of this array".format(
+                "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
                     axis, depth
                 )
             )
@@ -807,8 +802,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 )
             if negaxis > depth:
                 raise ValueError(
-                    "cannot use axis={0} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={1} "
+                    "cannot use axis={} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={} "
                     "from the leaves".format(axis, depth)
                 )
         else:
@@ -816,8 +811,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 negaxis += depth
             if not (0 < negaxis and negaxis <= depth):
                 raise ValueError(
-                    "axis={0} exceeds the depth of the nested list structure "
-                    "(which is {1})".format(axis, depth)
+                    "axis={} exceeds the depth of the nested list structure "
+                    "(which is {})".format(axis, depth)
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -878,8 +873,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 )
             if negaxis > depth:
                 raise ValueError(
-                    "cannot use axis={0} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={1} from the leaves".format(
+                    "cannot use axis={} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={} from the leaves".format(
                         axis, depth
                     )
                 )
@@ -888,8 +883,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
                 raise ValueError(
-                    "axis={0} exceeds the depth of the nested list structure "
-                    "(which is {1})".format(axis, depth)
+                    "axis={} exceeds the depth of the nested list structure "
+                    "(which is {})".format(axis, depth)
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -918,8 +913,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 )
             if negaxis > depth:
                 raise ValueError(
-                    "cannot use axis={0} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={1} from the leaves".format(
+                    "cannot use axis={} on a nested list structure that splits into "
+                    "different depths, the minimum of which is depth={} from the leaves".format(
                         axis, depth
                     )
                 )
@@ -928,8 +923,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
                 raise ValueError(
-                    "axis={0} exceeds the depth of the nested list structure "
-                    "(which is {1})".format(axis, depth)
+                    "axis={} exceeds the depth of the nested list structure "
+                    "(which is {})".format(axis, depth)
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -1028,24 +1023,24 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             ):
                 content = self.content
             else:
-                return 'at {0} ("{1}"): __array__ = "string" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
+                return 'at {} ("{}"): __array__ = "string" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
                     path, type(self)
                 )
             if content.parameter("__array__") != "char":
-                return 'at {0} ("{1}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
+                return 'at {} ("{}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
                     path, type(self)
                 )
             if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
                 if content.dtype.type != np.uint8:
-                    return 'at {0} ("{1}"): __array__ = "char" requires dtype == uint8'.format(
+                    return 'at {} ("{}"): __array__ = "char" requires dtype == uint8'.format(
                         path, type(self)
                     )
                 if len(content.shape) != 1:
-                    return 'at {0} ("{1}"): __array__ = "char" must be one-dimensional'.format(
+                    return 'at {} ("{}"): __array__ = "char" must be one-dimensional'.format(
                         path, type(self)
                     )
             else:
-                return 'at {0} ("{1}"): __array__ = "char" only allowed for NumpyArray'.format(
+                return 'at {} ("{}"): __array__ = "char" only allowed for NumpyArray'.format(
                     path, type(self)
                 )
             return ""
@@ -1062,35 +1057,35 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             ):
                 content = self.content
             else:
-                return 'at {0} ("{1}"): __array__ = "bytestring" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
+                return 'at {} ("{}"): __array__ = "bytestring" only allowed for ListArray, ListOffsetArray and RegularArray'.format(
                     path, type(self)
                 )
             if content.parameter("__array__") != "byte":
-                return 'at {0} ("{1}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
+                return 'at {} ("{}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
                     path, type(self)
                 )
             if isinstance(content, ak._v2.contents.numpyarray.NumpyArray):
                 if content.dtype.type != np.uint8:
-                    return 'at {0} ("{1}"): __array__ = "byte" requires dtype == uint8'.format(
+                    return 'at {} ("{}"): __array__ = "byte" requires dtype == uint8'.format(
                         path, type(self)
                     )
                 if len(content.shape) != 1:
-                    return 'at {0} ("{1}"): __array__ = "byte" must be one-dimensional'.format(
+                    return 'at {} ("{}"): __array__ = "byte" must be one-dimensional'.format(
                         path, type(self)
                     )
             else:
-                return 'at {0} ("{1}"): __array__ = "byte" only allowed for NumpyArray'.format(
+                return 'at {} ("{}"): __array__ = "byte" only allowed for NumpyArray'.format(
                     path, type(self)
                 )
             return ""
 
         if self.parameter("__array__") == "char":
-            return 'at {0} ("{1}"): __array__ = "char" must be directly inside __array__ = "string"'.format(
+            return 'at {} ("{}"): __array__ = "char" must be directly inside __array__ = "string"'.format(
                 path, type(self)
             )
 
         if self.parameter("__array__") == "byte":
-            return 'at {0} ("{1}"): __array__ = "byte" must be directly inside __array__ = "bytestring"'.format(
+            return 'at {} ("{}"): __array__ = "byte" must be directly inside __array__ = "bytestring"'.format(
                 path, type(self)
             )
 
@@ -1105,7 +1100,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             ):
                 content = self.content
             else:
-                return 'at {0} ("{1}"): __array__ = "string" only allowed for IndexedArray and IndexedOptionArray'.format(
+                return 'at {} ("{}"): __array__ = "string" only allowed for IndexedArray and IndexedOptionArray'.format(
                     path, type(self)
                 )
             return NotImplementedError("TODO: Implement is_unique")
@@ -1145,8 +1140,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                         )
                     if negaxis > depth:
                         raise np.AxisError(
-                            "cannot use axis={0} on a nested list structure that splits into "
-                            "different depths, the minimum of which is depth={1} from the leaves".format(
+                            "cannot use axis={} on a nested list structure that splits into "
+                            "different depths, the minimum of which is depth={} from the leaves".format(
                                 axis, depth
                             )
                         )
@@ -1155,7 +1150,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                         negaxis = negaxis + depth
                     if not (0 < negaxis and negaxis <= depth):
                         raise np.AxisError(
-                            "axis={0} exceeds the depth of this array ({1})".format(
+                            "axis={} exceeds the depth of this array ({})".format(
                                 axis, depth
                             )
                         )
@@ -1166,7 +1161,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
             return self._unique(negaxis, starts, parents, 1)
 
         raise np.AxisError(
-            "unique expects axis 'None' or '-1', got axis={0} that is not supported yet".format(
+            "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
                 axis
             )
         )

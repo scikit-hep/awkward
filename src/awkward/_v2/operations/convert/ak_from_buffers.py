@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import math
 
@@ -88,9 +87,7 @@ def from_buffers(
 
     else:
         raise TypeError(
-            "buffer_key must be a string or a callable, not {0}".format(
-                type(buffer_key)
-            )
+            "buffer_key must be a string or a callable, not {}".format(type(buffer_key))
         )
 
     out = reconstitute(form, length, container, getkey, nplike)
@@ -115,7 +112,7 @@ def reconstitute(form, length, container, getkey, nplike):
     if isinstance(form, ak._v2.forms.EmptyForm):
         if length != 0:
             raise ValueError(
-                "EmptyForm node, but the expected length is {0}".format(length)
+                "EmptyForm node, but the expected length is {}".format(length)
             )
         return ak._v2.contents.EmptyArray(identifier, form.parameters)
 

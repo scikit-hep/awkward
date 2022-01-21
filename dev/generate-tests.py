@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import copy
 import os
@@ -15,7 +14,7 @@ from numpy import uint8  # noqa: F401 (used in evaluated strings)
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-class Argument(object):
+class Argument:
     __slots__ = ("name", "typename", "direction", "role")
 
     def __init__(self, name, typename, direction, role="default"):
@@ -25,7 +24,7 @@ class Argument(object):
         self.role = role
 
 
-class Specification(object):
+class Specification:
     def __init__(self, spec, testdata, blacklisted):
         self.name = spec["name"]
         self.args = []
@@ -179,13 +178,11 @@ class Specification(object):
 def readspec():
     genpykernels()
     specdict = {}
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification.yml"), "r"
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         loadfile = yaml.safe_load(specfile)
         indspec = loadfile["kernels"]
         data = yaml.safe_load(
-            open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"), "r")
+            open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
         )["tests"]
         for spec in indspec:
             if "def " in spec["definition"]:
@@ -238,7 +235,7 @@ kSliceNone = kMaxInt64 + 1
     os.mkdir(tests_spec)
     with open(os.path.join(tests_spec, "__init__.py"), "w") as f:
         f.write(
-            """# AUTO GENERATED ON {0}
+            """# AUTO GENERATED ON {}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -266,7 +263,7 @@ kSliceNone = kMaxInt64 + 1
                     outfile.write(spec["definition"] + "\n")
                     for childfunc in spec["specializations"]:
                         outfile.write(
-                            "{0} = {1}\n".format(childfunc["name"], spec["name"])
+                            "{} = {}\n".format(childfunc["name"], spec["name"])
                         )
                     outfile.write("\n\n")
 
@@ -312,7 +309,7 @@ def genspectests(specdict):
             "w",
         ) as f:
             f.write(
-                """# AUTO GENERATED ON {0}
+                """# AUTO GENERATED ON {}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -424,7 +421,7 @@ def gencpukerneltests(specdict):
     os.mkdir(tests_cpu_kernels)
     with open(os.path.join(tests_cpu_kernels, "__init__.py"), "w") as f:
         f.write(
-            """# AUTO GENERATED ON {0}
+            """# AUTO GENERATED ON {}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -444,7 +441,7 @@ def gencpukerneltests(specdict):
             os.path.join(tests_cpu_kernels, "test_cpu" + spec.name + ".py"), "w"
         ) as f:
             f.write(
-                """# AUTO GENERATED ON {0}
+                """# AUTO GENERATED ON {}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -523,7 +520,7 @@ def gencpukerneltests(specdict):
                             f.write(" " * 4 + "assert {0} == pytest_{0}\n".format(arg))
                     f.write(" " * 4 + "assert not ret_pass.str\n")
                 else:
-                    f.write(" " * 4 + "assert funcC({0}).str\n".format(args))
+                    f.write(" " * 4 + "assert funcC({}).str\n".format(args))
                 f.write("\n")
 
 
@@ -536,7 +533,7 @@ def gencudakerneltests(specdict):
     os.mkdir(tests_cuda_kernels)
     with open(os.path.join(tests_cuda_kernels, "__init__.py"), "w") as f:
         f.write(
-            """# AUTO GENERATED ON {0}
+            """# AUTO GENERATED ON {}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -593,7 +590,7 @@ class Error(ctypes.Structure):
                 os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
             ) as f:
                 f.write(
-                    """# AUTO GENERATED ON {0}
+                    """# AUTO GENERATED ON {}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -638,7 +635,7 @@ class Error(ctypes.Structure):
                             typename = gettypename(typename)
                             f.write(
                                 " " * 4
-                                + "{0} = cupy.array({1}, dtype=cupy.{2})\n".format(
+                                + "{} = cupy.array({}, dtype=cupy.{})\n".format(
                                     arg,
                                     str(val),
                                     "float32" if typename == "float" else typename,
@@ -656,7 +653,7 @@ class Error(ctypes.Structure):
                     f.write(" " * 4 + "funcC.restype = Error\n")
                     f.write(
                         " " * 4
-                        + "funcC.argtypes = {0}\n".format(getctypelist(spec.args))
+                        + "funcC.argtypes = {}\n".format(getctypelist(spec.args))
                     )
                     args = ""
                     count = 0
@@ -671,7 +668,7 @@ class Error(ctypes.Structure):
                         for arg, val in test["outargs"].items():
                             f.write(
                                 " " * 4
-                                + "pytest_{0} = cupy.array({1}, dtype=cupy.{2})\n".format(
+                                + "pytest_{} = cupy.array({}, dtype=cupy.{})\n".format(
                                     arg,
                                     str(val),
                                     gettypename(
@@ -686,7 +683,7 @@ class Error(ctypes.Structure):
                             if isinstance(val, list):
                                 f.write(
                                     " " * 4
-                                    + "for x in range(len(pytest_{0})):\n".format(arg)
+                                    + "for x in range(len(pytest_{})):\n".format(arg)
                                 )
                                 f.write(
                                     " " * 8
@@ -698,13 +695,13 @@ class Error(ctypes.Structure):
                                 )
                         f.write(" " * 4 + "assert not ret_pass.str\n")
                     else:
-                        f.write(" " * 4 + "assert funcC({0}).str\n".format(args))
+                        f.write(" " * 4 + "assert funcC({}).str\n".format(args))
                     f.write("\n")
 
 
 def genunittests():
     print("Generating Unit Tests")
-    datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"), "r")
+    datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
     data = yaml.safe_load(datayml)["unit-tests"]
     for function in data:
         num = 0

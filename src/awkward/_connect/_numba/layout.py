@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/_numba/layout.py
 
-from __future__ import absolute_import
 
 import json
 import ctypes
@@ -44,7 +43,7 @@ numpy = ak.nplike.Numpy.instance()
 @numba.extending.typeof_impl.register(ak.layout.Record)
 def fake_typeof(obj, c):
     raise TypeError(
-        "{0} objects cannot be passed directly into Numba-compiled functions; "
+        "{} objects cannot be passed directly into Numba-compiled functions; "
         "construct a high-level ak.Array or ak.Record instead".format(
             type(obj).__name__
         )
@@ -292,7 +291,7 @@ class ContentType(numba.types.Type):
             return numba.types.Array(numba.int64, 1, "C")
         else:
             raise AssertionError(
-                "unrecognized Form index type: {0}".format(index_string)
+                "unrecognized Form index type: {}".format(index_string)
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -316,7 +315,7 @@ class ContentType(numba.types.Type):
             return ak.layout.Index64
         else:
             raise AssertionError(
-                "no Index* type for array: {0}".format(arraytype)
+                "no Index* type for array: {}".format(arraytype)
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -337,7 +336,7 @@ class ContentType(numba.types.Type):
             )
         else:
             raise TypeError(
-                "array does not have a field with key {0}".format(repr(key))
+                "array does not have a field with key {}".format(repr(key))
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -567,7 +566,7 @@ class NumpyArrayType(ContentType):
             arraytype = numba.types.Array(numba.boolean, 1, "A")
         else:
             raise ValueError(
-                "unrecognized NumpyForm.primitive type: {0}".format(form.primitive)
+                "unrecognized NumpyForm.primitive type: {}".format(form.primitive)
                 + ak._util.exception_suffix(__file__)
             )
         return NumpyArrayType(
@@ -575,8 +574,8 @@ class NumpyArrayType(ContentType):
         )
 
     def __init__(self, arraytype, identitiestype, parameters):
-        super(NumpyArrayType, self).__init__(
-            name="ak.NumpyArrayType({0}, {1}, {2})".format(
+        super().__init__(
+            name="ak.NumpyArrayType({}, {}, {})".format(
                 arraytype.name, identitiestype.name, json.dumps(parameters)
             )
         )
@@ -684,8 +683,8 @@ class RegularArrayType(ContentType):
         )
 
     def __init__(self, contenttype, size, identitiestype, parameters):
-        super(RegularArrayType, self).__init__(
-            name="ak.RegularArrayType({0}, {1}, {2}, {3})".format(
+        super().__init__(
+            name="ak.RegularArrayType({}, {}, {}, {})".format(
                 contenttype.name, size, identitiestype.name, json.dumps(parameters)
             )
         )
@@ -841,8 +840,8 @@ class ListArrayType(ContentType):
         )
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
-        super(ListArrayType, self).__init__(
-            name="ak.ListArrayType({0}, {1}, {2}, {3})".format(
+        super().__init__(
+            name="ak.ListArrayType({}, {}, {}, {})".format(
                 indextype.name,
                 contenttype.name,
                 identitiestype.name,
@@ -899,7 +898,7 @@ class ListArrayType(ContentType):
             return ak.layout.ListArray64
         else:
             raise AssertionError(
-                "no ListArray* type for array: {0}".format(self.indextype)
+                "no ListArray* type for array: {}".format(self.indextype)
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1030,8 +1029,8 @@ class IndexedArrayType(ContentType):
         )
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
-        super(IndexedArrayType, self).__init__(
-            name="ak.IndexedArrayType({0}, {1}, {2}, {3})".format(
+        super().__init__(
+            name="ak.IndexedArrayType({}, {}, {}, {})".format(
                 indextype.name,
                 contenttype.name,
                 identitiestype.name,
@@ -1065,7 +1064,7 @@ class IndexedArrayType(ContentType):
             return ak.layout.IndexedArray64
         else:
             raise AssertionError(
-                "no IndexedArray* type for array: {0}".format(self.indextype)
+                "no IndexedArray* type for array: {}".format(self.indextype)
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1203,8 +1202,8 @@ class IndexedOptionArrayType(ContentType):
         )
 
     def __init__(self, indextype, contenttype, identitiestype, parameters):
-        super(IndexedOptionArrayType, self).__init__(
-            name="ak.IndexedOptionArrayType({0}, {1}, {2}, {3})".format(
+        super().__init__(
+            name="ak.IndexedOptionArrayType({}, {}, {}, {})".format(
                 indextype.name,
                 contenttype.name,
                 identitiestype.name,
@@ -1236,7 +1235,7 @@ class IndexedOptionArrayType(ContentType):
             return ak.layout.IndexedOptionArray64
         else:
             raise AssertionError(
-                "no IndexedOptionArray* type for array: {0}".format(self.indextype)
+                "no IndexedOptionArray* type for array: {}".format(self.indextype)
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1392,9 +1391,9 @@ class ByteMaskedArrayType(ContentType):
         )
 
     def __init__(self, masktype, contenttype, valid_when, identitiestype, parameters):
-        super(ByteMaskedArrayType, self).__init__(
-            name="ak.ByteMaskedArrayType({0}, {1}, {2}, {3}, "
-            "{4})".format(
+        super().__init__(
+            name="ak.ByteMaskedArrayType({}, {}, {}, {}, "
+            "{})".format(
                 masktype.name,
                 contenttype.name,
                 valid_when,
@@ -1573,9 +1572,9 @@ class BitMaskedArrayType(ContentType):
     def __init__(
         self, masktype, contenttype, valid_when, lsb_order, identitiestype, parameters
     ):
-        super(BitMaskedArrayType, self).__init__(
-            name="ak.BitMaskedArrayType({0}, {1}, {2}, {3}, {4}, "
-            "{5})".format(
+        super().__init__(
+            name="ak.BitMaskedArrayType({}, {}, {}, {}, {}, "
+            "{})".format(
                 masktype.name,
                 contenttype.name,
                 valid_when,
@@ -1767,8 +1766,8 @@ class UnmaskedArrayType(ContentType):
         )
 
     def __init__(self, contenttype, identitiestype, parameters):
-        super(UnmaskedArrayType, self).__init__(
-            name="ak.UnmaskedArrayType({0}, {1}, {2})".format(
+        super().__init__(
+            name="ak.UnmaskedArrayType({}, {}, {})".format(
                 contenttype.name, identitiestype.name, json.dumps(parameters)
             )
         )
@@ -1924,8 +1923,8 @@ class RecordArrayType(ContentType):
         )
 
     def __init__(self, contenttypes, recordlookup, identitiestype, parameters):
-        super(RecordArrayType, self).__init__(
-            name="ak.RecordArrayType(({0}{1}), ({2}), {3}, {4})".format(
+        super().__init__(
+            name="ak.RecordArrayType(({}{}), ({}), {}, {})".format(
                 ", ".join(x.name for x in contenttypes),
                 "," if len(contenttypes) == 1 else "",
                 "None" if recordlookup is None else repr(tuple(recordlookup)),
@@ -2021,15 +2020,15 @@ class RecordArrayType(ContentType):
             if index is None:
                 if self.recordlookup is None:
                     raise ValueError(
-                        "no field {0} in tuples with {1} fields".format(
+                        "no field {} in tuples with {} fields".format(
                             repr(key), len(self.contenttypes)
                         )
                         + ak._util.exception_suffix(__file__)
                     )
                 else:
                     raise ValueError(
-                        "no field {0} in records with "
-                        "fields: [{1}]".format(
+                        "no field {} in records with "
+                        "fields: [{}]".format(
                             repr(key), ", ".join(repr(x) for x in self.recordlookup)
                         )
                         + ak._util.exception_suffix(__file__)
@@ -2045,14 +2044,14 @@ class RecordArrayType(ContentType):
         if index is None:
             if self.recordlookup is None:
                 raise ValueError(
-                    "no field {0} in tuples with {1} fields".format(
+                    "no field {} in tuples with {} fields".format(
                         repr(key), len(self.contenttypes)
                     )
                     + ak._util.exception_suffix(__file__)
                 )
             else:
                 raise ValueError(
-                    "no field {0} in records with fields: [{1}]".format(
+                    "no field {} in records with fields: [{}]".format(
                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
                     )
                     + ak._util.exception_suffix(__file__)
@@ -2066,14 +2065,14 @@ class RecordArrayType(ContentType):
         if index is None:
             if self.recordlookup is None:
                 raise ValueError(
-                    "no field {0} in tuple with {1} fields".format(
+                    "no field {} in tuple with {} fields".format(
                         repr(key), len(self.contenttypes)
                     )
                     + ak._util.exception_suffix(__file__)
                 )
             else:
                 raise ValueError(
-                    "no field {0} in record with fields: [{1}]".format(
+                    "no field {} in record with fields: [{}]".format(
                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
                     )
                     + ak._util.exception_suffix(__file__)
@@ -2321,9 +2320,9 @@ class UnionArrayType(ContentType):
         )
 
     def __init__(self, tagstype, indextype, contenttypes, identitiestype, parameters):
-        super(UnionArrayType, self).__init__(
-            name="ak.UnionArrayType({0}, {1}, ({2}{3}), {4}, "
-            "{5})".format(
+        super().__init__(
+            name="ak.UnionArrayType({}, {}, ({}{}), {}, "
+            "{})".format(
                 tagstype.name,
                 indextype.name,
                 ", ".join(x.name for x in contenttypes),
@@ -2366,12 +2365,12 @@ class UnionArrayType(ContentType):
                 return ak.layout.UnionArray8_64
             else:
                 raise AssertionError(
-                    "no UnionArray* type for index array: {0}".format(self.indextype)
+                    "no UnionArray* type for index array: {}".format(self.indextype)
                     + ak._util.exception_suffix(__file__)
                 )
         else:
             raise AssertionError(
-                "no UnionArray* type for tags array: {0}".format(self.tagstype)
+                "no UnionArray* type for tags array: {}".format(self.tagstype)
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2549,8 +2548,8 @@ class VirtualArrayType(ContentType):
                 "VirtualArrays without a known 'form' can't be used in Numba"
                 + ak._util.exception_suffix(__file__)
             )
-        super(VirtualArrayType, self).__init__(
-            name="ak.VirtualArrayType({0}, {1}, {2})".format(
+        super().__init__(
+            name="ak.VirtualArrayType({}, {}, {})".format(
                 generator_form.tojson(), identitiestype.name, json.dumps(parameters)
             )
         )
@@ -2608,7 +2607,7 @@ class VirtualArrayType(ContentType):
                     return numba.boolean
                 else:
                     raise ValueError(
-                        "unrecognized NumpyForm.primitive type: {0}".format(
+                        "unrecognized NumpyForm.primitive type: {}".format(
                             form.primitive
                         )
                         + ak._util.exception_suffix(__file__)
@@ -2653,7 +2652,7 @@ class VirtualArrayType(ContentType):
 
             else:
                 raise AssertionError(
-                    "unrecognized Form type: {0}".format(type(form))
+                    "unrecognized Form type: {}".format(type(form))
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -2840,7 +2839,7 @@ def inner_dtype_of_form(form):
 
     else:
         raise AssertionError(
-            "unrecognized Form type: {0}".format(type(form))
+            "unrecognized Form type: {}".format(type(form))
             + ak._util.exception_suffix(__file__)
         )
 
@@ -2882,7 +2881,7 @@ def optiontype_of_form(form):
 
     else:
         raise AssertionError(
-            "unrecognized Form type: {0}".format(type(form))
+            "unrecognized Form type: {}".format(type(form))
             + ak._util.exception_suffix(__file__)
         )
 
@@ -2926,6 +2925,6 @@ def recordtype_of_form(form):
 
     else:
         raise AssertionError(
-            "unrecognized Form type: {0}".format(type(form))
+            "unrecognized Form type: {}".format(type(form))
             + ak._util.exception_suffix(__file__)
         )

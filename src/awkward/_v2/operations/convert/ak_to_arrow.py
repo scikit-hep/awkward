@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -17,7 +16,7 @@ def to_arrow(
     extensionarray=True,
     count_nulls=True,
 ):
-    u"""
+    """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -53,18 +52,16 @@ def concatenate(
 
     posaxis = first_content.axis_wrap_if_negative(axis)
     maxdepth = max(
-        [
-            x.minmax_depth[1]
-            for x in contents
-            if isinstance(
-                x,
-                (ak._v2.contents.Content,),
-            )
-        ]
+        x.minmax_depth[1]
+        for x in contents
+        if isinstance(
+            x,
+            (ak._v2.contents.Content,),
+        )
     )
     if not 0 <= posaxis < maxdepth:
         raise ValueError(
-            "axis={0} is beyond the depth of this array or the depth of this array "
+            "axis={} is beyond the depth of this array or the depth of this array "
             "is ambiguous".format(axis)
         )
     for x in contents:
@@ -72,7 +69,7 @@ def concatenate(
             if x.axis_wrap_if_negative(axis) != posaxis:
                 raise ValueError(
                     "arrays to concatenate do not have the same depth for negative "
-                    "axis={0}".format(axis)
+                    "axis={}".format(axis)
                 )
 
     if posaxis == 0:
@@ -121,7 +118,7 @@ def concatenate(
                 nplike = ak.nplike.of(*inputs)
 
                 length = max(
-                    [len(x) for x in inputs if isinstance(x, ak._v2.contents.Content)]
+                    len(x) for x in inputs if isinstance(x, ak._v2.contents.Content)
                 )
                 nextinputs = []
                 for x in inputs:
@@ -183,7 +180,7 @@ def concatenate(
             ):
                 raise ValueError(
                     "at least one array is not deep enough to concatenate at "
-                    "axis={0}".format(axis)
+                    "axis={}".format(axis)
                 )
 
             else:

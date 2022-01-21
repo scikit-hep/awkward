@@ -2,7 +2,6 @@
 
 # v2: no change; keep this file.
 
-from __future__ import absolute_import
 
 import sys
 import argparse
@@ -65,36 +64,34 @@ if __name__ == "__main__":
     # loop over original sys.argv to get optional arguments in order
     for arg in sys.argv:
         if arg == "--cflags":
-            output.append("-std=c++11 -I{0}".format(incdir))
+            output.append("-std=c++11 -I{}".format(incdir))
 
         if arg == "--libs":
-            output.append(
-                "-L{0} -l{1} -l{2} -ldl".format(libdir, libawkward, cpu_kernels)
-            )
+            output.append("-L{} -l{} -l{} -ldl".format(libdir, libawkward, cpu_kernels))
 
         if arg == "--libs-only-L":
-            output.append("-L{0}".format(libdir))
+            output.append("-L{}".format(libdir))
 
         if arg == "--libs-only-l":
-            output.append("-l{0} -l{1} -ldl".format(libawkward, cpu_kernels))
+            output.append("-l{} -l{} -ldl".format(libawkward, cpu_kernels))
 
         if arg == "--static-libs":
             output.append(
-                "-L{0} -l{1}-static -l{2}-static -ldl".format(
+                "-L{} -l{}-static -l{}-static -ldl".format(
                     libdir, libawkward, cpu_kernels
                 )
             )
 
         if arg == "--static-libs-only-L":
-            output.append("-L{0}".format(libdir))
+            output.append("-L{}".format(libdir))
 
         if arg == "--static-libs-only-l":
             output.append(
-                "-l{0}-static -l{1}-static -ldl".format(libawkward, cpu_kernels)
+                "-l{}-static -l{}-static -ldl".format(libawkward, cpu_kernels)
             )
 
         if arg == "--cflags-only-I":
-            output.append("-I{0}".format(incdir))
+            output.append("-I{}".format(incdir))
 
         if arg == "--incdir":
             output.append(incdir)

@@ -2,7 +2,6 @@
 
 # v2: replace with deeply rewritten src/awkward/_v2/_connect/jax.
 
-from __future__ import absolute_import
 
 import awkward as ak
 import numbers
@@ -86,7 +85,7 @@ def _jaxtracers_getitem(array, where):
                 return recurse(array[where[:-1]], where[len(where) - 1])
 
             else:
-                raise ValueError("Can't slice the array with {0}".format(where))
+                raise ValueError("Can't slice the array with {}".format(where))
 
         child = [recurse(array, where)]
         return ak.Array._internal_for_jax(out, child, isscalar=True)
@@ -110,7 +109,7 @@ def _jaxtracers_getitem(array, where):
                 return fetch_indices_and_fieldloc_layout(outlayout.project())
             elif isinstance(outlayout, ak._util.uniontypes):
                 raise ValueError(
-                    "Can't differentiate an UnionArray type {0}".format(outlayout)
+                    "Can't differentiate an UnionArray type {}".format(outlayout)
                 )
             elif isinstance(outlayout, ak._util.recordtypes):
                 indices = []
@@ -187,7 +186,7 @@ def _jaxtracers_getitem(array, where):
                 return fetch_children_tracer(outlayout.content, preslice_identities)
             elif isinstance(outlayout, ak._util.uniontypes):
                 raise ValueError(
-                    "Can't differentiate an UnionArray type {0}".format(outlayout)
+                    "Can't differentiate an UnionArray type {}".format(outlayout)
                 )
             elif isinstance(outlayout, ak._util.recordtypes):
                 children = []
@@ -211,7 +210,7 @@ def _jaxtracers_getitem(array, where):
                 return fetch_children_tracer(outlayout.content, preslice_identities)
             else:
                 raise NotImplementedError(
-                    "fetch_children_tracer not completely implemented yet for {0}".format(
+                    "fetch_children_tracer not completely implemented yet for {}".format(
                         outlayout
                     )
                 )
@@ -248,7 +247,7 @@ def array_ufunc(array, ufunc, method, inputs, kwargs):
     return ak.Array._internal_for_jax(array.layout, nexttracers, array._isscalar)
 
 
-class AuxData(object):
+class AuxData:
     def __init__(self, array):
         self.array = array
 
@@ -289,7 +288,7 @@ def special_flatten(array):
         aux_data = AuxData(ak.Array._internal_for_jax(array.layout, children))
     else:
         raise ValueError(
-            "Can only differentiate Awkward Arrays, received array of type {0}".format(
+            "Can only differentiate Awkward Arrays, received array of type {}".format(
                 type(array)
             )
         )

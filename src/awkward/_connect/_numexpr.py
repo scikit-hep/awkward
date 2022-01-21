@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numexpr.py
 
-from __future__ import absolute_import
 
 import warnings
 import sys
@@ -33,7 +32,7 @@ or
         ) < ak._v2._util.parse_version("2.7.1"):
             warnings.warn(
                 "Awkward Array is only known to work with numexpr 2.7.1 or later"
-                "(you have version {0})".format(numexpr.__version__),
+                "(you have version {})".format(numexpr.__version__),
                 RuntimeWarning,
             )
         checked_version = True

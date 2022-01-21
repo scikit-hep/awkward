@@ -2,7 +2,6 @@
 
 # v2: replace with deeply rewritten src/awkward/_v2/_connect/jax.
 
-from __future__ import absolute_import
 
 import types
 
@@ -31,7 +30,7 @@ or
         ) < ak._v2._util.parse_version("0.2.7"):
             raise ImportError(
                 "Awkward Array can only work with jax 0.2.7 or later "
-                "(you have version {0})".format(jax.__version__)
+                "(you have version {})".format(jax.__version__)
             )
         checked_version = True
         register()

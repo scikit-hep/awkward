@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -68,10 +67,10 @@ def where(condition, *args, **kwargs):
         raise ValueError("either both or neither of x and y should be given")
 
     elif len(args) == 2:
-        left, right = [
+        left, right = (
             ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=True)
             for x in args
-        ]
+        )
         good_arrays = [akcondition]
         if isinstance(left, ak._v2.contents.Content):
             good_arrays.append(left)
@@ -106,6 +105,6 @@ def where(condition, *args, **kwargs):
 
     else:
         raise TypeError(
-            "where() takes from 1 to 3 positional arguments but {0} were "
+            "where() takes from 1 to 3 positional arguments but {} were "
             "given".format(len(args) + 1)
         )

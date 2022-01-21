@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -16,7 +15,7 @@ def to_buffers(
     id_start=0,
     nplike=numpy,
 ):
-    u"""
+    """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         container (None or MutableMapping): The str \u2192 NumPy arrays (or

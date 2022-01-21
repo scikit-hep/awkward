@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/behaviors/categorical.py
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -16,7 +15,7 @@ class CategoricalBehavior(ak.highlevel.Array):
 ak.behavior["categorical"] = CategoricalBehavior
 
 
-class _HashableDict(object):
+class _HashableDict:
     def __init__(self, obj):
         self.keys = tuple(sorted(obj))
         self.values = tuple(_hashable(obj[k]) for k in self.keys)
@@ -33,7 +32,7 @@ class _HashableDict(object):
         )
 
 
-class _HashableList(object):
+class _HashableList:
     def __init__(self, obj):
         self.values = tuple(obj)
         self.hash = hash((_HashableList,) + self.values)

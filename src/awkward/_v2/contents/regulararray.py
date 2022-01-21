@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import copy
 
@@ -29,14 +28,14 @@ class RegularArray(Content):
     ):
         if not isinstance(content, Content):
             raise TypeError(
-                "{0} 'content' must be a Content subtype, not {1}".format(
+                "{} 'content' must be a Content subtype, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
         if not isinstance(size, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(size) and size >= 0):
                 raise TypeError(
-                    "{0} 'size' must be a non-negative integer, not {1}".format(
+                    "{} 'size' must be a non-negative integer, not {}".format(
                         type(self).__name__, size
                     )
                 )
@@ -45,7 +44,7 @@ class RegularArray(Content):
         if not isinstance(zeros_length, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(zeros_length) and zeros_length >= 0):
                 raise TypeError(
-                    "{0} 'zeros_length' must be a non-negative integer, not {1}".format(
+                    "{} 'zeros_length' must be a non-negative integer, not {}".format(
                         type(self).__name__, zeros_length
                     )
                 )
@@ -260,14 +259,14 @@ class RegularArray(Content):
     def _broadcast_tooffsets64(self, offsets):
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
             raise AssertionError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {0}".format(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
                     "(empty)" if offsets.length == 0 else str(offsets[0])
                 )
             )
 
         if offsets.nplike.known_shape and offsets.length - 1 != self._length:
             raise AssertionError(
-                "cannot broadcast RegularArray of length {0} to length {1}".format(
+                "cannot broadcast RegularArray of length {} to length {}".format(
                     self._length, offsets.length - 1
                 )
             )
@@ -521,7 +520,7 @@ class RegularArray(Content):
                 raise NestedIndexError(
                     self,
                     head,
-                    "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                    "cannot fit jagged slice with length {} into {} of size {}".format(
                         head.length, type(self).__name__, self._size
                     ),
                 )
@@ -959,7 +958,7 @@ class RegularArray(Content):
 
     def _validityerror(self, path):
         if self.size < 0:
-            return 'at {0} ("{1}"): size < 0'.format(path, type(self))
+            return 'at {} ("{}"): size < 0'.format(path, type(self))
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"

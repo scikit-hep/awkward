@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -58,7 +57,7 @@ def test_numpyarray_merge():
             one = ak._v2.contents.NumpyArray(np.array([1, 2, 3], dtype=x))
             two = ak._v2.contents.NumpyArray(np.array([4, 5], dtype=y))
             three = one.merge(two)
-            assert np.asarray(three).dtype == np.dtype(z), "{0} {1} {2} {3}".format(
+            assert np.asarray(three).dtype == np.dtype(z), "{} {} {} {}".format(
                 x, y, z, np.asarray(three).dtype.type
             )
             assert to_list(three) == to_list(
