@@ -1263,10 +1263,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                 "function_name": function_name,
             },
         )
-        if len(arrays) == 0:
-            return nplike.empty(0, dtype=np.float64)
-        else:
-            return nplike.concatenate(arrays)
+        return tuple(arrays)
 
     def recursively_apply(
         self,
