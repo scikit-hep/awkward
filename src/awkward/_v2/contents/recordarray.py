@@ -470,7 +470,7 @@ class RecordArray(Content):
                     self._fields,
                     self._length,
                     None,
-                    self._parameters,
+                    {},
                     self._nplike,
                 ),
             )
