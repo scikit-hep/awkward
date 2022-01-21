@@ -56,3 +56,8 @@ repos:
     language: pygrep
     entry: PyBind|Cmake|CCache|Github|PyTest
     exclude: .pre-commit-config.yaml
+
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: "v0.8.0.3"
+  hooks:
+  - id: shellcheck
