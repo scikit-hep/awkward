@@ -27,7 +27,7 @@ def code_to_function(code, function_name, externals=None, debug=False):
 ########## Lookup
 
 
-class Lookup(object):
+class Lookup:
     def __init__(self, layout):
         positions = []
         tolookup(layout, positions)
@@ -179,7 +179,7 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 ########## ArrayView
 
 
-class ArrayView(object):
+class ArrayView:
     @classmethod
     def fromarray(cls, array):
         behavior = ak._v2._util.behavior_of(array)
@@ -562,7 +562,7 @@ def lower_iternext(context, builder, sig, args, result):
 ########## RecordView
 
 
-class RecordView(object):
+class RecordView:
     @classmethod
     def fromrecord(cls, record):
         behavior = ak._v2._util.behavior_of(record)

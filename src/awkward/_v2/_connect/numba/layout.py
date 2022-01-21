@@ -25,12 +25,34 @@ def fake_typeof(obj, c):
 
 
 class ContentType(numba.types.Type):
-    # @classmethod
-    # def tolookup_identifier(cls, layout, positions):
-    #     if layout.identifier is None:
-    #         arrays.append(None)
-    #     else:
-    #         arrays.append(layout.identifier.data)
+    @classmethod
+    def tolookup_identifier(cls, layout, positions):
+        if layout.identifier is None:
+            positions.append(-1)
+        else:
+            positions.append(layout.identifier.data)
+
+    @classmethod
+    def from_form_identifier(cls, form):
+        if not form.has_identifier:
+            return numba.none
+        else:
+            raise NotImplementedError("TODO: identifiers in Numba")
+
+    @classmethod
+    def from_form_index(cls, index_string):
+        if index_string == "i8":
+            return numba.types.Array(numba.int8, 1, "C")
+        elif index_string == "u8":
+            return numba.types.Array(numba.uint8, 1, "C")
+        elif index_string == "i32":
+            return numba.types.Array(numba.int32, 1, "C")
+        elif index_string == "u32":
+            return numba.types.Array(numba.uint32, 1, "C")
+        elif index_string == "i64":
+            return numba.types.Array(numba.int64, 1, "C")
+        else:
+            raise AssertionError(f"unrecognized Form index type: {index_string!r}")
 
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
@@ -231,76 +253,25 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
     )
 
 
-# class NumpyArrayType(ContentType):
-#     IDENTIFIER = 0
-#     ARRAY = 1
+class NumpyArrayType(ContentType):
+    IDENTIFIER = 0
+    ARRAY = 1
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         array = ak.nplike.of(layout).ascontiguousarray(layout)
-#         assert len(array.shape) == 1
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         positions.append(array)
-#         sharedptrs.append(None)
-#         arrays.append(array)
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(layout.contiguous().data)
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         if len(form.inner_shape) != 0:
-#             raise NotImplementedError(
-#                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
-#                 " just as NumpyArrays are converted to RegularArrays"
-#
-#             )
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         arrays.append(0)
-#         return pos
+    @classmethod
+    def from_form(cls, form):
+        t = numba.from_dtype(ak._v2.types.numpytype.primitive_to_dtype(form.primitive))
+        arraytype = numba.types.Array(t, 1, "C")
+        return NumpyArrayType(
+            arraytype, cls.from_form_identifier(form), form.parameters
+        )
 
-#     @classmethod
-#     def from_form(cls, form):
-#         if len(form.inner_shape) != 0:
-#             raise NotImplementedError(
-#                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
-#                 " just as NumpyArrays are converted to RegularArrays"
-#
-#             )
-#         if form.primitive == "float64":
-#             arraytype = numba.types.Array(numba.float64, 1, "A")
-#         elif form.primitive == "float32":
-#             arraytype = numba.types.Array(numba.float32, 1, "A")
-#         elif form.primitive == "int64":
-#             arraytype = numba.types.Array(numba.int64, 1, "A")
-#         elif form.primitive == "uint64":
-#             arraytype = numba.types.Array(numba.uint64, 1, "A")
-#         elif form.primitive == "int32":
-#             arraytype = numba.types.Array(numba.int32, 1, "A")
-#         elif form.primitive == "uint32":
-#             arraytype = numba.types.Array(numba.uint32, 1, "A")
-#         elif form.primitive == "int16":
-#             arraytype = numba.types.Array(numba.int16, 1, "A")
-#         elif form.primitive == "uint16":
-#             arraytype = numba.types.Array(numba.uint16, 1, "A")
-#         elif form.primitive == "int8":
-#             arraytype = numba.types.Array(numba.int8, 1, "A")
-#         elif form.primitive == "uint8":
-#             arraytype = numba.types.Array(numba.uint8, 1, "A")
-#         elif form.primitive == "bool":
-#             arraytype = numba.types.Array(numba.boolean, 1, "A")
-#         else:
-#             raise ValueError(
-#                 "unrecognized NumpyForm.primitive type: {0}".format(form.primitive)
-#
-#             )
-#         return NumpyArrayType(
-#             arraytype, cls.from_form_identifier(form), form.parameters
-#         )
 
 #     def __init__(self, arraytype, identifiertype, parameters):
 #         super(NumpyArrayType, self).__init__(
@@ -374,33 +345,20 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return False
 
 
-# class RegularArrayType(ContentType):
-#     IDENTIFIER = 0
-#     CONTENT = 1
+class RegularArrayType(ContentType):
+    IDENTIFIER = 0
+    CONTENT = 1
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             layout.content, positions, sharedptrs, arrays
-#         )
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
+            layout.content, positions
+        )
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             form.content, positions, sharedptrs, arrays
-#         )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -493,69 +451,24 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return False
 
 
-# class ListArrayType(ContentType):
-#     IDENTIFIER = 0
-#     STARTS = 1
-#     STOPS = 2
-#     CONTENT = 3
+class ListArrayType(ContentType):
+    IDENTIFIER = 0
+    STARTS = 1
+    STOPS = 2
+    CONTENT = 3
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         if isinstance(
-#             layout,
-#             (
-#                 ak._v2.contents.ListArray32,
-#                 ak._v2.contents.ListArrayU32,
-#                 ak._v2.contents.ListArray64,
-#             ),
-#         ):
-#             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
-#             stops = ak.nplike.of(layout.stops).asarray(layout.stops)
-#         elif isinstance(
-#             layout,
-#             (
-#                 ak._v2.contents.ListOffsetArray32,
-#                 ak._v2.contents.ListOffsetArrayU32,
-#                 ak._v2.contents.ListOffsetArray64,
-#             ),
-#         ):
-#             offsets = ak.nplike.of(layout.offsets).asarray(layout.offsets)
-#             starts = offsets[:-1]
-#             stops = offsets[1:]
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(layout.starts.data)
+        positions.append(layout.stops.data)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
+            layout.content, positions
+        )
+        return pos
 
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         positions.append(starts)
-#         sharedptrs.append(None)
-#         arrays.append(starts)
-#         positions.append(stops)
-#         sharedptrs.append(None)
-#         arrays.append(stops)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             layout.content, positions, sharedptrs, arrays
-#         )
-#         return pos
-
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         arrays.append(0)
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         arrays.append(0)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             form.content, positions, sharedptrs, arrays
-#         )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -713,40 +626,22 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return False
 
 
-# class IndexedArrayType(ContentType):
-#     IDENTIFIER = 0
-#     INDEX = 1
-#     CONTENT = 2
+class IndexedArrayType(ContentType):
+    IDENTIFIER = 0
+    INDEX = 1
+    CONTENT = 2
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         arrays.append(ak.nplike.of(layout.index).asarray(layout.index))
-#         positions.append(arrays[-1])
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             layout.content, positions, sharedptrs, arrays
-#         )
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(layout.index.data)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
+            layout.content, positions
+        )
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         arrays.append(0)
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             form.content, positions, sharedptrs, arrays
-#         )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -886,40 +781,22 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return self.contenttype.is_recordtype
 
 
-# class IndexedOptionArrayType(ContentType):
-#     IDENTIFIER = 0
-#     INDEX = 1
-#     CONTENT = 2
+class IndexedOptionArrayType(ContentType):
+    IDENTIFIER = 0
+    INDEX = 1
+    CONTENT = 2
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         arrays.append(ak.nplike.of(layout.index).asarray(layout.index))
-#         positions.append(arrays[-1])
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             layout.content, positions, sharedptrs, arrays
-#         )
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(layout.index.data)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
+            layout.content, positions
+        )
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         arrays.append(0)
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             form.content, positions, sharedptrs, arrays
-#         )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -1074,40 +951,22 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return self.contenttype.is_recordtype
 
 
-# class ByteMaskedArrayType(ContentType):
-#     IDENTIFIER = 0
-#     MASK = 1
-#     CONTENT = 2
+class ByteMaskedArrayType(ContentType):
+    IDENTIFIER = 0
+    MASK = 1
+    CONTENT = 2
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         arrays.append(ak.nplike.of(layout.mask).asarray(layout.mask))
-#         positions.append(arrays[-1])
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             layout.content, positions, sharedptrs, arrays
-#         )
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(layout.mask.data)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
+            layout.content, positions
+        )
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         arrays.append(0)
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             form.content, positions, sharedptrs, arrays
-#         )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -1252,40 +1111,22 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return self.contenttype.is_recordtype
 
 
-# class BitMaskedArrayType(ContentType):
-#     IDENTIFIER = 0
-#     MASK = 1
-#     CONTENT = 2
+class BitMaskedArrayType(ContentType):
+    IDENTIFIER = 0
+    MASK = 1
+    CONTENT = 2
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         arrays.append(ak.nplike.of(layout.mask).asarray(layout.mask))
-#         positions.append(arrays[-1])
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             layout.content, positions, sharedptrs, arrays
-#         )
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(layout.mask.data)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
+            layout.content, positions
+        )
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         arrays.append(0)
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             form.content, positions, sharedptrs, arrays
-#         )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -1458,33 +1299,20 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return self.contenttype.is_recordtype
 
 
-# class UnmaskedArrayType(ContentType):
-#     IDENTIFIER = 0
-#     CONTENT = 1
+class UnmaskedArrayType(ContentType):
+    IDENTIFIER = 0
+    CONTENT = 1
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             layout.content, positions, sharedptrs, arrays
-#         )
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(None)
+        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
+            layout.content, positions
+        )
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-#             form.content, positions, sharedptrs, arrays
-#         )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -1594,45 +1422,21 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return self.contenttype.is_recordtype
 
 
-# class RecordArrayType(ContentType):
-#     IDENTIFIER = 0
-#     CONTENTS = 1
+class RecordArrayType(ContentType):
+    IDENTIFIER = 0
+    CONTENTS = 1
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         positions.extend([None] * layout.numfields)
-#         sharedptrs.extend([None] * layout.numfields)
-#         for i, content in enumerate(layout.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
-#                 content, positions, sharedptrs, arrays
-#             )
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.extend([None] * len(layout.contents))
+        for i, content in enumerate(layout.contents):
+            positions[
+                pos + cls.CONTENTS + i
+            ] = ak._v2._connect.numba.arrayview.tolookup(content, positions)
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         positions.extend([None] * form.numfields)
-#         sharedptrs.extend([None] * form.numfields)
-#         if form.istuple:
-#             for i, (_, content) in enumerate(form.contents.items()):
-#                 positions[
-#                     pos + cls.CONTENTS + i
-#                 ] = ak._v2._connect.numba.arrayview.tolookup(
-#                     content, positions, sharedptrs, arrays
-#                 )
-#         else:
-#             for i, (_, content) in enumerate(form.contents.items()):
-#                 positions[
-#                     pos + cls.CONTENTS + i
-#                 ] = ak._v2._connect.numba.arrayview.tolookup(
-#                     content, positions, sharedptrs, arrays
-#                 )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -1990,49 +1794,25 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #         return True
 
 
-# class UnionArrayType(ContentType):
-#     IDENTIFIER = 0
-#     TAGS = 1
-#     INDEX = 2
-#     CONTENTS = 3
+class UnionArrayType(ContentType):
+    IDENTIFIER = 0
+    TAGS = 1
+    INDEX = 2
+    CONTENTS = 3
 
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         arrays.append(ak.nplike.of(layout.tags).asarray(layout.tags))
-#         positions.append(arrays[-1])
-#         sharedptrs.append(None)
-#         arrays.append(ak.nplike.of(layout.index).asarray(layout.index))
-#         positions.append(arrays[-1])
-#         sharedptrs.append(None)
-#         positions.extend([None] * layout.numcontents)
-#         sharedptrs.extend([None] * layout.numcontents)
-#         for i, content in enumerate(layout.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
-#                 content, positions, sharedptrs, arrays
-#             )
-#         return pos
+    @classmethod
+    def tolookup(cls, layout, positions):
+        pos = len(positions)
+        cls.tolookup_identifier(layout, positions)
+        positions.append(layout.tags.data)
+        positions.append(layout.identifier.data)
+        positions.extend([None] * len(layout.contents))
+        for i, content in enumerate(layout.contents):
+            positions[
+                pos + cls.CONTENTS + i
+            ] = ak._v2._connect.numba.arrayview.tolookup(content, positions)
+        return pos
 
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         arrays.append(0)
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         arrays.append(0)
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         positions.extend([None] * form.numcontents)
-#         sharedptrs.extend([None] * form.numcontents)
-#         for i, content in enumerate(form.contents):
-#             positions[pos + cls.CONTENTS + i] = ak._v2._connect.numba.arrayview.tolookup(
-#                 content, positions, sharedptrs, arrays
-#             )
-#         return pos
 
 #     @classmethod
 #     def from_form(cls, form):
@@ -2211,319 +1991,6 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
 #             return False
 #         else:
 #             return None
-
-
-# class VirtualArrayType(ContentType):
-#     IDENTIFIER = 0
-#     PYOBJECT = 1
-#     ARRAY = 2
-
-#     @classmethod
-#     def tolookup(cls, layout, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.tolookup_identifier(layout, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = layout._persistent_shared_ptr
-#         if layout.form is None:
-#             raise ValueError(
-#                 "VirtualArrays without a known 'form' can't be used in Numba"
-#
-#             )
-#         pyptr = ctypes.py_object(layout)
-#         ctypes.pythonapi.Py_IncRef(pyptr)
-#         voidptr = numpy.frombuffer(pyptr, dtype=np.intp).item()
-
-#         positions.append(voidptr)
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.ARRAY] = ak._v2._connect.numba.arrayview.tolookup(
-#             layout.form.form, positions, sharedptrs, arrays
-#         )
-#         return pos
-
-#     @classmethod
-#     def form_tolookup(cls, form, positions, sharedptrs, arrays):
-#         pos = len(positions)
-#         cls.form_tolookup_identifier(form, positions, sharedptrs, arrays)
-#         sharedptrs[-1] = 0
-#         if form.form is None:
-#             raise ValueError(
-#                 "VirtualArrays without a known 'form' can't be used in Numba"
-#
-#             )
-#         positions.append(0)
-#         sharedptrs.append(None)
-#         positions.append(None)
-#         sharedptrs.append(None)
-#         positions[pos + cls.ARRAY] = ak._v2._connect.numba.arrayview.tolookup(
-#             form.form, positions, sharedptrs, arrays
-#         )
-#         return pos
-
-#     @classmethod
-#     def from_form(cls, form):
-#         if form.form is None:
-#             raise ValueError(
-#                 "VirtualArrays without a known 'form' can't be used in Numba "
-#                 "(including nested)"
-#             )
-#         return VirtualArrayType(
-#             form.form, cls.from_form_identifier(form), form.parameters
-#         )
-
-#     def __init__(self, generator_form, identifiertype, parameters):
-#         if generator_form is None:
-#             raise ValueError(
-#                 "VirtualArrays without a known 'form' can't be used in Numba"
-#
-#             )
-#         super(VirtualArrayType, self).__init__(
-#             name="ak.VirtualArrayType({0}, {1}, {2})".format(
-#                 generator_form.tojson(), identifiertype.name, json.dumps(parameters)
-#             )
-#         )
-#         self.generator_form = generator_form
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
-
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         pyptr = ctypes.py_object(layout)
-#         ctypes.pythonapi.Py_IncRef(pyptr)
-#         voidptr = numpy.frombuffer(pyptr, dtype=np.intp).item()
-
-#         lookup.original_positions[pos + self.PYOBJECT] = voidptr
-#         lookup.arrayptrs[pos + self.PYOBJECT] = voidptr
-
-#     def tolayout(self, lookup, pos, fields):
-#         voidptr = ctypes.c_void_p(int(lookup.arrayptrs[pos + self.PYOBJECT]))
-#         pyptr = ctypes.cast(voidptr, ctypes.py_object)
-#         ctypes.pythonapi.Py_IncRef(pyptr)
-#         virtualarray = pyptr.value
-#         return virtualarray
-
-#     def has_field(self, key):
-#         return self.generator_form.haskey(key)
-
-#     def getitem_at(self, viewtype):
-#         def getitem_at(form):
-#             if isinstance(form, ak.forms.NumpyForm):
-#                 assert len(form.inner_shape) == 0
-#                 if form.primitive == "float64":
-#                     return numba.float64
-#                 elif form.primitive == "float32":
-#                     return numba.float32
-#                 elif form.primitive == "int64":
-#                     return numba.int64
-#                 elif form.primitive == "uint64":
-#                     return numba.uint64
-#                 elif form.primitive == "int32":
-#                     return numba.int32
-#                 elif form.primitive == "uint32":
-#                     return numba.uint32
-#                 elif form.primitive == "int16":
-#                     return numba.int16
-#                 elif form.primitive == "uint16":
-#                     return numba.uint16
-#                 elif form.primitive == "int8":
-#                     return numba.int8
-#                 elif form.primitive == "uint8":
-#                     return numba.uint8
-#                 elif form.primitive == "bool":
-#                     return numba.boolean
-#                 else:
-#                     raise ValueError(
-#                         "unrecognized NumpyForm.primitive type: {0}".format(
-#                             form.primitive
-#                         )
-#
-#                     )
-
-#             elif isinstance(
-#                 form,
-#                 (
-#                     ak.forms.RegularForm,
-#                     ak.forms.ListForm,
-#                     ak.forms.ListOffsetForm,
-#                 ),
-#             ):
-#                 return form.content
-
-#             elif isinstance(form, ak.forms.IndexedForm):
-#                 return getitem_at(form.content)
-
-#             elif isinstance(
-#                 form,
-#                 (
-#                     ak.forms.IndexedOptionForm,
-#                     ak.forms.ByteMaskedForm,
-#                     ak.forms.BitMaskedForm,
-#                     ak.forms.UnmaskedForm,
-#                 ),
-#             ):
-#                 return numba.types.optional(wrap(getitem_at(form.content)))
-
-#             elif isinstance(form, ak.forms.RecordForm):
-#                 arrayview = wrap(form)
-#                 return arrayview.type.getitem_at(arrayview)
-
-#             elif isinstance(form, ak.forms.UnionForm):
-#                 raise TypeError(
-#                     "union types cannot be accessed in Numba"
-#
-#                 )
-
-#             elif isinstance(form, ak.forms.VirtualForm):
-#                 return getitem_at(form.form)
-
-#             else:
-#                 raise AssertionError(
-#                     "unrecognized Form type: {0}".format(type(form))
-#
-#                 )
-
-#         def wrap(out):
-#             if isinstance(out, ak.forms.Form):
-#                 numbatype = ak._v2._connect.numba.arrayview.tonumbatype(out)
-#                 return ak._v2._connect.numba.arrayview.wrap(numbatype, viewtype, None)
-#             else:
-#                 return out
-
-#         return wrap(getitem_at(self.generator_form))
-
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         pyobjptr = getat(
-#             context,
-#             builder,
-#             viewproxy.arrayptrs,
-#             posat(context, builder, viewproxy.pos, self.PYOBJECT),
-#         )
-#         arraypos = getat(
-#             context,
-#             builder,
-#             viewproxy.arrayptrs,
-#             posat(context, builder, viewproxy.pos, self.ARRAY),
-#         )
-#         sharedptr = getat(context, builder, viewproxy.sharedptrs, arraypos)
-
-#         numbatype = ak._v2._connect.numba.arrayview.tonumbatype(self.generator_form)
-
-#         with builder.if_then(
-#             builder.icmp_signed("==", sharedptr, context.get_constant(numba.intp, 0)),
-#             likely=False,
-#         ):
-#             # only rarely enter Python
-#             pyapi = context.get_python_api(builder)
-#             gil = pyapi.gil_ensure()
-
-#             # borrowed references
-#             virtualarray_obj = builder.inttoptr(
-#                 pyobjptr, context.get_value_type(numba.types.pyobject)
-#             )
-#             lookup_obj = viewproxy.pylookup
-
-#             # new references
-#             numbatype_obj = pyapi.unserialize(pyapi.serialize_object(numbatype))
-#             fill_obj = pyapi.object_getattr_string(numbatype_obj, "form_fill")
-#             arraypos_obj = pyapi.long_from_ssize_t(arraypos)
-#             array_obj = pyapi.object_getattr_string(virtualarray_obj, "array")
-
-#             # FIXME: memory leak? what about putting this exception after the decrefs?
-#             with builder.if_then(
-#                 builder.icmp_signed(
-#                     "!=",
-#                     pyapi.err_occurred(),
-#                     context.get_constant(numba.types.voidptr, 0),
-#                 ),
-#                 likely=False,
-#             ):
-#                 context.call_conv.return_exc(builder)
-
-#             # add the materialized array to our Lookup
-#             pyapi.call_function_objargs(
-#                 fill_obj,
-#                 (
-#                     arraypos_obj,
-#                     array_obj,
-#                     lookup_obj,
-#                 ),
-#             )
-
-#             # FIXME: memory leak? what about putting this exception after the decrefs?
-#             with builder.if_then(
-#                 builder.icmp_signed(
-#                     "!=",
-#                     pyapi.err_occurred(),
-#                     context.get_constant(numba.types.voidptr, 0),
-#                 ),
-#                 likely=False,
-#             ):
-#                 context.call_conv.return_exc(builder)
-
-#             # decref the new references
-#             pyapi.decref(array_obj)
-#             pyapi.decref(arraypos_obj)
-#             pyapi.decref(fill_obj)
-#             pyapi.decref(numbatype_obj)
-
-#             pyapi.gil_release(gil)
-
-#         # normally, we just pass on the request to the materialized array
-#         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
-
-#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(numbatype, viewtype, None)
-#         proxynext = context.make_helper(builder, nextviewtype)
-#         proxynext.pos = nextpos
-#         proxynext.start = viewproxy.start
-#         proxynext.stop = viewproxy.stop
-#         proxynext.arrayptrs = viewproxy.arrayptrs
-#         proxynext.sharedptrs = viewproxy.sharedptrs
-#         proxynext.pylookup = viewproxy.pylookup
-
-#         return numbatype.lower_getitem_at_check(
-#             context,
-#             builder,
-#             rettype,
-#             nextviewtype,
-#             proxynext._getvalue(),
-#             proxynext,
-#             numba.intp,
-#             atval,
-#             wrapneg,
-#             checkbounds,
-#         )
-
-#     @property
-#     def ndim(self):
-#         return self.generator_form.purelist_depth
-
-#     @property
-#     def inner_dtype(self):
-#         return inner_dtype_of_form(self.generator_form)
-
-#     @property
-#     def is_optiontype(self):
-#         return optiontype_of_form(self.generator_form)
-
-#     @property
-#     def is_recordtype(self):
-#         return recordtype_of_form(self.generator_form)
 
 
 # def inner_dtype_of_form(form):
