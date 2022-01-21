@@ -25,7 +25,9 @@ def test_fromfile(tmp_path):
     with open(os.path.join(str(tmp_path), "tmp1.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], [], [4, 5.5]]")
 
-    array = ak._v2.operations.convert.from_json(os.path.join(str(tmp_path), "tmp1.json"))
+    array = ak._v2.operations.convert.from_json(
+        os.path.join(str(tmp_path), "tmp1.json")
+    )
     assert array.tolist() == [[1.1, 2.2, 3.0], [], [4.0, 5.5]]
 
     with pytest.raises(IOError):
@@ -36,6 +38,7 @@ def test_fromfile(tmp_path):
 
     with pytest.raises(ValueError):
         ak._v2.operations.convert.from_json(os.path.join(str(tmp_path), "tmp2.json"))
+
 
 @pytest.mark.skip(
     reason="AttributeError: 'NumpyArray' object has no attribute 'tojson'"
@@ -63,9 +66,12 @@ def test_tostring():
         modelB.tolist(), separators=(",", ":")
     )
     assert (
-        ak._v2.operations.convert.to_json(ak._v2.operations.convert.from_json("[[1.1,2.2,3],[],[4,5.5]]"))
+        ak._v2.operations.convert.to_json(
+            ak._v2.operations.convert.from_json("[[1.1,2.2,3],[],[4,5.5]]")
+        )
         == "[[1.1,2.2,3.0],[],[4.0,5.5]]"
     )
+
 
 @pytest.mark.skip(
     reason="awkward/_v2/operations/convert/ak_to_json.py:21: NotImplementedError"
@@ -81,14 +87,22 @@ def test_tofile(tmp_path):
 
 
 def test_fromiter():
-    assert ak._v2.operations.convert.from_iter([True, True, False, False, True]).tolist() == [
+    assert ak._v2.operations.convert.from_iter(
+        [True, True, False, False, True]
+    ).tolist() == [
         True,
         True,
         False,
         False,
         True,
     ]
-    assert ak._v2.operations.convert.from_iter([5, 4, 3, 2, 1]).tolist() == [5, 4, 3, 2, 1]
+    assert ak._v2.operations.convert.from_iter([5, 4, 3, 2, 1]).tolist() == [
+        5,
+        4,
+        3,
+        2,
+        1,
+    ]
     assert ak._v2.operations.convert.from_iter([5, 4, 3.14, 2.22, 1.23]).tolist() == [
         5.0,
         4.0,
@@ -96,14 +110,17 @@ def test_fromiter():
         2.22,
         1.23,
     ]
-    assert ak._v2.operations.convert.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).tolist() == [
+    assert ak._v2.operations.convert.from_iter(
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+    ).tolist() == [
         [1.1, 2.2, 3.3],
         [],
         [4.4, 5.5],
     ]
     assert ak._v2.operations.convert.from_iter(
-            [[[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]]
-        ).tolist() == [[[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]]
+        [[[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]]
+    ).tolist() == [[[1.1, 2.2, 3.3], []], [[4.4, 5.5]], [], [[6.6], [7.7, 8.8, 9.9]]]
+
 
 @pytest.mark.skip(
     reason="awkward/_v2/operations/convert/ak_to_json.py:21: NotImplementedError"
@@ -132,5 +149,9 @@ def test_numpy():
         == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,30.3],[40.4,50.5,60.6]]]"
     )
 
-    c = ak._v2.contents.NumpyArray(np.array([[True, False, True], [False, False, True]]))
-    assert ak._v2.operations.convert.to_json(c) == "[[true,false,true],[false,false,true]]"
+    c = ak._v2.contents.NumpyArray(
+        np.array([[True, False, True], [False, False, True]])
+    )
+    assert (
+        ak._v2.operations.convert.to_json(c) == "[[true,false,true],[false,false,true]]"
+    )

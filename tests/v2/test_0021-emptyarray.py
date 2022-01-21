@@ -106,6 +106,7 @@ def test_getitem():
     with pytest.raises(ValueError):
         a[1:, 1:, 0]
 
+
 def test_unknown():
     a = ak._v2.operations.convert.from_json("[[], [], []]", highlevel=False)
     assert a.tolist() == [[], [], []]
@@ -113,10 +114,14 @@ def test_unknown():
     assert a.form.type == ak._v2.types.ListType(ak._v2.types.UnknownType())
     assert not a.form.type == ak._v2.types.NumpyType("float64")
 
-    a = ak._v2.operations.convert.from_json("[[], [[], []], [[], [], []]]", highlevel=False)
+    a = ak._v2.operations.convert.from_json(
+        "[[], [[], []], [[], [], []]]", highlevel=False
+    )
     assert a.tolist() == [[], [[], []], [[], [], []]]
     assert str(a.form.type) == "var * var * unknown"
-    assert a.form.type == ak._v2.types.ListType(ak._v2.types.ListType(ak._v2.types.UnknownType()))
+    assert a.form.type == ak._v2.types.ListType(
+        ak._v2.types.ListType(ak._v2.types.UnknownType())
+    )
 
     a = ak._v2.highlevel.ArrayBuilder()
     a.begin_list()
@@ -127,13 +132,17 @@ def test_unknown():
     a.end_list()
     assert a.tolist() == [[], [], []]
     assert str(a.type) == "3 * var * unknown"
-    assert a.type == ak._v2.types.ArrayType(ak._v2.types.ListType(ak._v2.types.UnknownType()), 3)
+    assert a.type == ak._v2.types.ArrayType(
+        ak._v2.types.ListType(ak._v2.types.UnknownType()), 3
+    )
     assert not a.type == ak._v2.types.NumpyType("float64")
 
     a = a.snapshot()
     assert a.tolist() == [[], [], []]
     assert str(a.type) == "3 * var * unknown"
-    assert a.type == ak._v2.types.ArrayType(ak._v2.types.ListType(ak._v2.types.UnknownType()), 3)
+    assert a.type == ak._v2.types.ArrayType(
+        ak._v2.types.ListType(ak._v2.types.UnknownType()), 3
+    )
     assert not a.type == ak._v2.types.NumpyType("float64")
 
 
@@ -149,7 +158,10 @@ def test_from_json_getitem():
     assert a[2, 1][()].tolist() == []
     with pytest.raises(IndexError) as excinfo:
         a[2, 1][0]
-    assert "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    0\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nEmptyArray error: array is empty." in str(excinfo.value)
+    assert (
+        "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    0\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nEmptyArray error: array is empty."
+        in str(excinfo.value)
+    )
     assert a[2, 1][100:200].tolist() == []
     assert a[2, 1, 100:200].tolist() == []
     assert a[2, 1][np.array([], dtype=int)].tolist() == []
@@ -159,10 +171,16 @@ def test_from_json_getitem():
     assert "index out of range while attempting to get index 0" in str(excinfo.value)
     with pytest.raises(IndexError) as excinfo:
         a[2, 1][100:200, 0]
-    assert "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 0)\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nEmptyArray error: array is empty." in str(excinfo.value)
+    assert (
+        "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 0)\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nEmptyArray error: array is empty."
+        in str(excinfo.value)
+    )
     with pytest.raises(IndexError) as excinfo:
         a[2, 1][100:200, 200:300]
-    assert "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 200:300)\n\nat inner EmptyArray of length 0, using sub-slice 200:300.\n\nEmptyArray error: array is empty." in str(excinfo.value)
+    assert (
+        "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 200:300)\n\nat inner EmptyArray of length 0, using sub-slice 200:300.\n\nEmptyArray error: array is empty."
+        in str(excinfo.value)
+    )
 
     # FIXME: Failed: DID NOT RAISE <class 'IndexError'>
     # with pytest.raises(ValueError) as excinfo:

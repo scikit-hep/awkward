@@ -122,8 +122,10 @@ def from_json(  # note: move ability to read from file into from_json_file
                     and isinstance(imag, ak._v2.contents.NumpyArray)
                     and len(imag.shape) == 1
                 ):
-                    return ak._v2.contents.NumpyArray(recordnode._nplike.asarray(real)
-                    + recordnode._nplike.asarray(imag) * 1j)
+                    return ak._v2.contents.NumpyArray(
+                        recordnode._nplike.asarray(real)
+                        + recordnode._nplike.asarray(imag) * 1j
+                    )
                 else:
                     raise ValueError("Complex number fields must be numbers")
                 return ak._v2.contents.NumpyArray(real + imag * 1j)
