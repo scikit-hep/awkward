@@ -269,15 +269,15 @@ Templating is only used for integer specialization.
 
 We target Python 3.6 and above. Import statements can assume Python 3 names, string-checking can assume Python 3 meanings of `str` and `bytes`, Unicode literals don't need to be prefixed by `u`, and dict order can be assumed to be stable. Python's f-strings can now be used, but not with equals signs (e.g. `f"{something = }"` rather than `f"something = {something}"`) because that's a Python 3.8 feature (its main use is in debugging, anyway).
 
-If you see any `if ak._util.py27` or `py35` checks in the code, you can safely remove the old code branch (and that will increase test coverage, since we don't test in old Pythons). You may see old-Python inspired idioms like `"some: {0} thing: {1}".format(some, thing)` (which is position-based to be compatible with Python 2.6!) and can freely update them if it makes the code you're working on easier to read. Updating all anachronisms en mass is not a high priority. (Some strings are not easier to read as f-strings; it should be a case-by-case basis.) Similarly, explicit class inheritance from `object` can be implicit now.
+If you see any outdated (pre-Python 3.6) code, you can safely clean them up. Some strings are not easier to read as f-strings or require some work to make them more readable; it should be a case-by-case basis.
 
-Although newer versions of the Python language have great features, none of them have been "painful" to not have (such as the pain of writing tests around an unstable dict order, or completely different module names and syntax in Python 2). Python 3.6 will be the standard until it becomes "painful" to keep it (like, when CI and build tools no longer support it, or if we adopt type annotations).
+Python 3.6 will be the standard until it becomes "painful" to keep it (like, when CI and build tools no longer support it, or if we adopt type annotations).
 
 ### Third party dependencies
 
 Awkward Array's C++ codebase only depends on pybind11 and rapidjson, which are both header-only and included as git submodules (the reason for the `git clone --recursive`).
 
-The Python codebase only strictly depends on NumPy 1.13.1, the first version with [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html). This fixes the minimum Python at 2.7.
+The Python codebase only strictly depends on NumPy 1.13.1, the first version with [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html). This fixes the minimum Python at 2.7 for older versions of awkward.
 
 Other third party libraries are used if they exist (can be imported), and we only accept certain versions of these libraries. Both the test-import and any version-testing must be within runtime code, not startup code, so that they're only invoked when users explicitly call for the feature that requires them.
 

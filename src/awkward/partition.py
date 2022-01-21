@@ -236,9 +236,7 @@ class PartitionedArray:
                 self._ext.getitem_range(where.start, where.stop, where.step)
             )
 
-        elif isinstance(where, str) or (
-            ak._util.py27 and isinstance(where, ak._util.unicode)
-        ):
+        elif isinstance(where, str):
             return self.replace_partitions([x[where] for x in self.partitions])
 
         elif isinstance(where, tuple) and len(where) == 0:
@@ -247,13 +245,7 @@ class PartitionedArray:
         elif (
             isinstance(where, Iterable)
             and len(where) > 0
-            and all(
-                (
-                    isinstance(x, str)
-                    or (ak._util.py27 and isinstance(x, ak._util.unicode))
-                )
-                for x in where
-            )
+            and all(isinstance(x, str) for x in where)
         ):
             return self.replace_partitions([x[where] for x in self.partitions])
 
@@ -288,9 +280,7 @@ class PartitionedArray:
                     [x[(head,) + tail] for x in self.partitions]
                 )
 
-            elif isinstance(head, str) or (
-                ak._util.py27 and isinstance(head, ak._util.unicode)
-            ):
+            elif isinstance(head, str):
                 y = IrregularlyPartitionedArray([x[head] for x in self.partitions])
                 if len(tail) == 0:
                     return y
@@ -300,13 +290,7 @@ class PartitionedArray:
             elif (
                 isinstance(head, Iterable)
                 and len(head) > 0
-                and all(
-                    (
-                        isinstance(x, str)
-                        or (ak._util.py27 and isinstance(x, ak._util.unicode))
-                    )
-                    for x in head
-                )
+                and all(isinstance(x, str) for x in head)
             ):
                 y = IrregularlyPartitionedArray(
                     [x[list(head)] for x in self.partitions]

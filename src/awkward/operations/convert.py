@@ -194,9 +194,6 @@ def to_numpy(array, allow_missing=True):
     if isinstance(array, (bool, str, bytes, numbers.Number)):
         return numpy.array([array])[0]
 
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
-        return numpy.array([array])[0]
-
     elif isinstance(array, np.ndarray):
         return array
 
@@ -941,9 +938,6 @@ def to_list(array):
     elif array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return array
 
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
-        return array
-
     elif isinstance(array, np.ndarray):
         return array.tolist()
 
@@ -1112,11 +1106,7 @@ def from_json(
             buffersize=buffersize,
         )
     else:
-        if ak._util.py27:
-            exc = IOError
-        else:
-            exc = FileNotFoundError
-        raise exc(f"file not found or not a regular file: {source}")
+        raise FileNotFoundError(f"file not found or not a regular file: {source}")
 
     def getfunction(recordnode):
         if isinstance(recordnode, ak.layout.RecordArray):
@@ -1206,9 +1196,6 @@ def to_json(
 
     elif isinstance(array, bytes):
         return json.dumps(array.decode("utf-8", "surrogateescape"))
-
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
-        return json.dumps(array)
 
     elif isinstance(array, np.ndarray):
         out = ak.layout.NumpyArray(array)
@@ -1925,9 +1912,7 @@ def to_layout(
     ):
         return from_cupy(array, regulararray=True, highlevel=False)
 
-    elif isinstance(array, (str, bytes)) or (
-        ak._util.py27 and isinstance(array, ak._util.unicode)
-    ):
+    elif isinstance(array, (str, bytes)):
         return from_iter([array], highlevel=False)
 
     elif isinstance(array, Iterable):
@@ -5059,7 +5044,7 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
-    if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
+    if isinstance(form, str):
         form = ak.forms.Form.fromjson(form)
     elif isinstance(form, dict):
         form = ak.forms.Form.fromjson(json.dumps(form))

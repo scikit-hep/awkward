@@ -11,10 +11,7 @@ import setuptools
 import os
 import numbers
 
-try:
-    from collections.abc import Mapping
-except ImportError:
-    from collections import Mapping
+from collections.abc import Mapping
 
 import awkward as ak
 
