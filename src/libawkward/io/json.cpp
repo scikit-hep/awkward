@@ -771,6 +771,138 @@ namespace awkward {
     const char* minus_infinity_string_;
   };
 
+  class V2Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
+  public:
+    V2Handler(ArrayBuilder& builder,
+            const char* nan_string,
+            const char* infinity_string,
+            const char* minus_infinity_string)
+        : builder_(builder)
+        , moved_(false)
+        , nan_string_(nan_string)
+        , infinity_string_(infinity_string)
+        , minus_infinity_string_(minus_infinity_string) { }
+
+    void
+    reset_moved() {
+      moved_ = false;
+    }
+
+    bool
+    moved() const {
+      return moved_;
+    }
+
+    bool Null() {
+      moved_ = true;
+      builder_.null();
+      return true;
+    }
+
+    bool Bool(bool x) {
+      moved_ = true;
+      builder_.boolean(x);
+      return true;
+    }
+
+    bool Int(int x) {
+      moved_ = true;
+      builder_.integer((int64_t)x);
+      return true;
+    }
+
+    bool Uint(unsigned int x) {
+      moved_ = true;
+      builder_.integer((int64_t)x);
+      return true;
+    }
+
+    bool Int64(int64_t x) {
+      moved_ = true;
+      builder_.integer(x);
+      return true;
+    }
+
+    bool Uint64(uint64_t x) {
+      moved_ = true;
+      builder_.integer((int64_t)x);
+      return true;
+    }
+
+    bool Double(double x) {
+      builder_.real(x);
+      moved_ = true;
+      return true;
+    }
+
+    bool
+    String(const char* str, rj::SizeType length, bool copy) {
+      moved_ = true;
+      if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+        builder_.real(std::numeric_limits<double>::quiet_NaN());
+        return true;
+      }
+      else if (infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
+        builder_.real(std::numeric_limits<double>::infinity());
+        return true;
+      }
+      else if (minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
+        builder_.real(-std::numeric_limits<double>::infinity());
+        return true;
+      }
+      else {
+        builder_.string(str, (int64_t)length);
+        return true;
+      }
+    }
+
+    bool
+    StartArray() {
+      moved_ = true;
+      builder_.beginlist();
+      return true;
+    }
+
+    bool
+    EndArray(rj::SizeType numfields) {
+      moved_ = true;
+      builder_.endlist();
+      return true;
+    }
+
+    bool
+    StartObject() {
+      moved_ = true;
+      builder_.beginrecord();
+      return true;
+    }
+
+    bool
+    EndObject(rj::SizeType numfields) {
+      moved_ = true;
+      builder_.endrecord();
+      return true;
+    }
+
+    bool
+    Key(const char* str, rj::SizeType length, bool copy) {
+      moved_ = true;
+      builder_.field_check(str);
+      return true;
+    }
+
+    const BuilderPtr array_builder() const {
+      return builder_.builder();
+    }
+
+  private:
+    ArrayBuilder& builder_;
+    bool moved_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
+  };
+
   template<typename HANDLER, typename STREAM>
   const std::pair<int, const BuilderPtr>
   do_parse(HANDLER& handler, rj::Reader& reader, STREAM& stream) {
@@ -824,6 +956,22 @@ namespace awkward {
     return do_parse(handler, reader, stream);
   }
 
+  int64_t
+  V2FromJsonString(const char* source,
+                   ArrayBuilder& builder,
+                   const char* nan_string,
+                   const char* infinity_string,
+                   const char* minus_infinity_string) {
+    rj::Reader reader;
+    rj::StringStream stream(source);
+    V2Handler handler(builder,
+                      nan_string,
+                      infinity_string,
+                      minus_infinity_string);
+    auto result = do_parse(handler, reader, stream);
+    return result.first;
+  }
+
   const std::pair<int, const BuilderPtr>
   FromJsonFile(FILE* source,
                const ArrayBuilderOptions& options,
@@ -841,5 +989,24 @@ namespace awkward {
                     infinity_string,
                     minus_infinity_string);
     return do_parse(handler, reader, stream);
+  }
+
+  void
+  V2FromJsonFile(FILE* source,
+                 ArrayBuilder& builder,
+               int64_t buffersize,
+               const char* nan_string,
+               const char* infinity_string,
+               const char* minus_infinity_string) {
+    rj::Reader reader;
+    std::shared_ptr<char> buffer = kernel::malloc<char>(kernel::lib::cpu, buffersize);
+    rj::FileReadStream stream(source,
+                              buffer.get(),
+                              ((size_t)buffersize)*sizeof(char));
+    V2Handler handler(builder,
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string);
+    do_parse(handler, reader, stream);
   }
 }

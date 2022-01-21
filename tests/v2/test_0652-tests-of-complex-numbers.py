@@ -50,9 +50,6 @@ def test_from_iter():
     assert str(builder.type) == "3 * complex128"
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_from_json.py:26: NotImplementedError"
-)
 def test_from_json():
     array = ak._v2.operations.convert.from_json(
         '[{"r": 1.1, "i": 1.0}, {"r": 2.2, "i": 2.0}]'

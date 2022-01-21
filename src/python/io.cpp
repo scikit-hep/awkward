@@ -47,7 +47,87 @@ make_fromjson(py::module& m, const std::string& name) {
 }
 
 void
+make_v2_fromjson(py::module& m, const std::string& name) {
+  m.def(name.c_str(),
+        [](const std::string& source,
+           ak::ArrayBuilder& builder,
+           const char* nan_string,
+           const char* infinity_string,
+           const char* minus_infinity_string,
+           int64_t initial,
+           double resize,
+           int64_t buffersize) -> int64_t {
+    return ak::V2FromJsonString(source.c_str(),
+                                builder,
+                                nan_string,
+                                infinity_string,
+                                minus_infinity_string);
+  }, py::arg("source"),
+     py::arg("builder"),
+     py::arg("nan_string") = nullptr,
+     py::arg("infinity_string") = nullptr,
+     py::arg("minus_infinity_string") = nullptr,
+     py::arg("initial") = 1024,
+     py::arg("resize") = 1.5,
+     py::arg("buffersize") = 65536);
+}
+
+void
 make_fromjsonfile(py::module& m, const std::string& name) {
+  m.def(name.c_str(),
+        [](const std::string& source,
+           const char* nan_string,
+           const char* infinity_string,
+           const char* minus_infinity_string,
+           int64_t initial,
+           double resize,
+           int64_t buffersize) -> py::object {
+#ifdef _MSC_VER
+      FILE* file;
+      if (fopen_s(&file, source.c_str(), "rb") != 0) {
+#else
+      FILE* file = fopen(source.c_str(), "rb");
+      if (file == nullptr) {
+#endif
+        throw std::invalid_argument(
+          std::string("file \"") + source
+          + std::string("\" could not be opened for reading")
+          + FILENAME(__LINE__));
+      }
+      int num = 0;
+      ak::BuilderPtr out(nullptr);
+      try {
+        auto out_pair = ak::FromJsonFile(file,
+                           ak::ArrayBuilderOptions(initial, resize),
+                           buffersize,
+                           nan_string,
+                           infinity_string,
+                           minus_infinity_string);
+        num = out_pair.first;
+        out = out_pair.second;
+      }
+      catch (...) {
+        fclose(file);
+        throw;
+      }
+      fclose(file);
+      if (num == 1) {
+        return box(unbox_content(::builder_snapshot(out))->getitem_at_nowrap(0));
+      }
+      else {
+        return ::builder_snapshot(out);
+      }
+  }, py::arg("source"),
+     py::arg("nan_string") = nullptr,
+     py::arg("infinity_string") = nullptr,
+     py::arg("minus_infinity_string") = nullptr,
+     py::arg("initial") = 1024,
+     py::arg("resize") = 1.5,
+     py::arg("buffersize") = 65536);
+}
+
+void
+make_v2_fromjsonfile(py::module& m, const std::string& name) {
   m.def(name.c_str(),
         [](const std::string& source,
            const char* nan_string,

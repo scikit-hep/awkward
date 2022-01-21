@@ -134,7 +134,11 @@ PYBIND11_MODULE(_ext, m) {
   ////////// io.h
 
   make_fromjson(m, "fromjson");
+  make_v2_fromjson(m, "v2_fromjson");
+
   make_fromjsonfile(m, "fromjsonfile");
+  make_v2_fromjsonfile(m, "v2_fromjsonfile");
+
   make_uproot_issue_90(m);
 
   ////////// forth.h
