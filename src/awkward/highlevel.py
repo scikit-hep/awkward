@@ -1122,8 +1122,7 @@ class Array(
                     )
             else:
                 raise AttributeError(
-                    f"no field named {repr(where)}"
-                    + ak._util.exception_suffix(__file__)
+                    f"no field named {where!r}" + ak._util.exception_suffix(__file__)
                 )
 
     def __dir__(self):
@@ -1845,8 +1844,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                     )
             else:
                 raise AttributeError(
-                    f"no field named {repr(where)}"
-                    + ak._util.exception_suffix(__file__)
+                    f"no field named {where!r}" + ak._util.exception_suffix(__file__)
                 )
 
     def __dir__(self):

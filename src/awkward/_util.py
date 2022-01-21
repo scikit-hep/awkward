@@ -548,7 +548,7 @@ def key2index(keys, key):
 
     if attempt is None:
         raise ValueError(
-            f"key {repr(key)} not found in record" + exception_suffix(__file__)
+            f"key {key!r} not found in record" + exception_suffix(__file__)
         )
     else:
         return attempt

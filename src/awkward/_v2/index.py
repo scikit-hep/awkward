@@ -128,9 +128,7 @@ class Index:
             if self._metadata is not None:
                 for k, v in self._metadata.items():
                     out.append(
-                        f"<metadata key={repr(k)}>{repr(v)}</metadata>\n"
-                        + indent
-                        + "    "
+                        f"<metadata key={k!r}>{v!r}</metadata>\n" + indent + "    "
                     )
             out.append(("\n" + indent + "    ").join(arraystr_lines))
             out.append("\n" + indent + "</Index>")

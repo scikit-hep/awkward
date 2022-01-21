@@ -1219,8 +1219,7 @@ def to_json(
 
     else:
         raise TypeError(
-            f"unrecognized array type: {repr(array)}"
-            + ak._util.exception_suffix(__file__)
+            f"unrecognized array type: {array!r}" + ak._util.exception_suffix(__file__)
         )
 
     if complex_record_fields is None:
@@ -1574,7 +1573,7 @@ def from_awkward0(
                 out.setparameter("__array__", "string")
             else:
                 raise ValueError(
-                    f"unsupported encoding: {repr(array.encoding)}"
+                    f"unsupported encoding: {array.encoding!r}"
                     + ak._util.exception_suffix(__file__)
                 )
             return out
@@ -1634,7 +1633,7 @@ def from_awkward0(
 
         else:
             raise TypeError(
-                f"not an awkward0 array: {repr(array)}"
+                f"not an awkward0 array: {array!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1898,7 +1897,7 @@ def to_layout(
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
             raise ValueError(
-                f"NumPy {repr(array.dtype)} not allowed"
+                f"NumPy {array.dtype!r} not allowed"
                 + ak._util.exception_suffix(__file__)
             )
         return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
@@ -2498,7 +2497,7 @@ def to_arrow(
 
         else:
             raise TypeError(
-                f"unrecognized array type: {repr(layout)}"
+                f"unrecognized array type: {layout!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2723,7 +2722,7 @@ def _from_arrow(
                 assert tpe.num_buffers == 3
             else:
                 raise TypeError(
-                    f"unrecognized Arrow union array mode: {repr(tpe.mode)}"
+                    f"unrecognized Arrow union array mode: {tpe.mode!r}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -2848,7 +2847,7 @@ def _from_arrow(
 
         else:
             raise TypeError(
-                f"unrecognized Arrow array type: {repr(tpe)}"
+                f"unrecognized Arrow array type: {tpe!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -3109,7 +3108,7 @@ def _to_parquet_dataset(directory, filenames=None, filename_extension=".parquet"
     directory = _regularize_path(directory)
     if not os.path.isdir(directory):
         raise ValueError(
-            f"{repr(directory)} is not a local filesystem directory"
+            f"{directory!r} is not a local filesystem directory"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -3729,7 +3728,7 @@ def _partial_schema_from_columns(schema, columns):
     for x in columns:
         if x not in schema.names:
             raise ValueError(
-                f"column {repr(x)} not found in schema"
+                f"column {x!r} not found in schema"
                 + ak._util.exception_suffix(__file__)
             )
         pa_fields.append(schema.field(x))

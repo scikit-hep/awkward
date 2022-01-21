@@ -1132,7 +1132,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     )
             else:
-                raise AttributeError(f"no field named {repr(where)}")
+                raise AttributeError(f"no field named {where!r}")
 
     def __dir__(self):
         """
@@ -1812,7 +1812,7 @@ class Record(NDArrayOperatorsMixin):
                         "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     )
             else:
-                raise AttributeError(f"no field named {repr(where)}")
+                raise AttributeError(f"no field named {where!r}")
 
     def __dir__(self):
         """

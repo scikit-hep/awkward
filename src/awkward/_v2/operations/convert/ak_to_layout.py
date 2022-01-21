@@ -53,7 +53,7 @@ def to_layout(
 
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
-            raise ValueError(f"dtype {repr(array.dtype)} not allowed")
+            raise ValueError(f"dtype {array.dtype!r} not allowed")
         return to_layout(
             ak._v2.operations.convert.from_numpy(
                 array, regulararray=True, recordarray=True, highlevel=False
@@ -66,7 +66,7 @@ def to_layout(
         type(array).__module__.startswith("cupy.") and type(array).__name__ == "ndarray"
     ):
         if not issubclass(array.dtype.type, numpytype):
-            raise ValueError(f"dtype {repr(array.dtype)} not allowed")
+            raise ValueError(f"dtype {array.dtype!r} not allowed")
         return to_layout(
             ak._v2.operations.convert.from_cupy(
                 array, regulararray=True, highlevel=False

@@ -86,7 +86,7 @@ if pyarrow is not None:
             return "ak:" + str(self.storage_type)
 
         def __repr__(self):
-            return f"awkward<{repr(self.storage_type)}>"
+            return f"awkward<{self.storage_type!r}>"
 
         @property
         def mask_type(self):
@@ -550,7 +550,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers):
         return popbuffers_finalize(out, paarray, validbits, awkwardarrow_type)
 
     else:
-        raise TypeError(f"unrecognized Arrow array type: {repr(storage_type)}")
+        raise TypeError(f"unrecognized Arrow array type: {storage_type!r}")
 
 
 def to_awkwardarrow_type(storage_type, use_extensionarray, mask, node):
