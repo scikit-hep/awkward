@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 # import json
 
@@ -17,7 +16,7 @@ numpy = ak.nplike.Numpy.instance()
 @numba.extending.typeof_impl.register(ak._v2.record.Record)
 def fake_typeof(obj, c):
     raise TypeError(
-        "{0} objects cannot be passed directly into Numba-compiled functions; "
+        "{} objects cannot be passed directly into Numba-compiled functions; "
         "construct a high-level ak.Array or ak.Record instead".format(
             type(obj).__name__
         )
@@ -66,7 +65,7 @@ class ContentType(numba.types.Type):
         elif arraytype.dtype.bitwidth == 64:
             return ak._v2.index.Index64
         else:
-            raise AssertionError("no Index* type for array: {0}".format(arraytype))
+            raise AssertionError(f"no Index* type for array: {arraytype}")
 
     def getitem_at_check(self, viewtype):
         typer = ak._v2._util.numba_array_typer(viewtype.type, viewtype.behavior)
@@ -84,9 +83,7 @@ class ContentType(numba.types.Type):
                 self, viewtype, viewtype.fields + (key,)
             )
         else:
-            raise TypeError(
-                "array does not have a field with key {0}".format(repr(key))
-            )
+            raise TypeError(f"array does not have a field with key {repr(key)}")
 
     def lower_getitem_at_check(
         self,
