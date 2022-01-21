@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 # import json
 
 import numba
@@ -356,15 +355,15 @@ class RegularArrayType(ContentType):
         )
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        return RegularArrayType(
+            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            form.size,
+            cls.from_form_identifier(form),
+            form.parameters,
+        )
 
-#     @classmethod
-#     def from_form(cls, form):
-#         return RegularArrayType(
-#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
-#             form.size,
-#             cls.from_form_identifier(form),
-#             form.parameters,
-#         )
 
 #     def __init__(self, contenttype, size, identifiertype, parameters):
 #         super(RegularArrayType, self).__init__(
@@ -466,17 +465,20 @@ class ListArrayType(ContentType):
         )
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        if isinstance(form, ak._v2.forms.ListForm):
+            index_string = form.starts
+        else:
+            index_string = form.offsets
 
-#     @classmethod
-#     def from_form(cls, form):
-#         return ListArrayType(
-#             cls.from_form_index(
-#                 form.starts if isinstance(form, ak.forms.ListForm) else form.offsets
-#             ),
-#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
-#             cls.from_form_identifier(form),
-#             form.parameters,
-#         )
+        return ListArrayType(
+            cls.from_form_index(index_string),
+            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            cls.from_form_identifier(form),
+            form.parameters,
+        )
+
 
 #     def __init__(self, indextype, contenttype, identifiertype, parameters):
 #         super(ListArrayType, self).__init__(
@@ -639,15 +641,15 @@ class IndexedArrayType(ContentType):
         )
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        return IndexedArrayType(
+            cls.from_form_index(form.index),
+            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            cls.from_form_identifier(form),
+            form.parameters,
+        )
 
-#     @classmethod
-#     def from_form(cls, form):
-#         return IndexedArrayType(
-#             cls.from_form_index(form.index),
-#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
-#             cls.from_form_identifier(form),
-#             form.parameters,
-#         )
 
 #     def __init__(self, indextype, contenttype, identifiertype, parameters):
 #         super(IndexedArrayType, self).__init__(
@@ -794,15 +796,15 @@ class IndexedOptionArrayType(ContentType):
         )
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        return IndexedOptionArrayType(
+            cls.from_form_index(form.index),
+            ak._v2._connect.numhba.arrayview.tonumbatype(form.content),
+            cls.from_form_identifier(form),
+            form.parameters,
+        )
 
-#     @classmethod
-#     def from_form(cls, form):
-#         return IndexedOptionArrayType(
-#             cls.from_form_index(form.index),
-#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
-#             cls.from_form_identifier(form),
-#             form.parameters,
-#         )
 
 #     def __init__(self, indextype, contenttype, identifiertype, parameters):
 #         super(IndexedOptionArrayType, self).__init__(
@@ -964,16 +966,16 @@ class ByteMaskedArrayType(ContentType):
         )
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        return ByteMaskedArrayType(
+            cls.from_form_index(form.mask),
+            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            form.valid_when,
+            cls.from_form_identifier(form),
+            form.parameters,
+        )
 
-#     @classmethod
-#     def from_form(cls, form):
-#         return ByteMaskedArrayType(
-#             cls.from_form_index(form.mask),
-#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
-#             form.valid_when,
-#             cls.from_form_identifier(form),
-#             form.parameters,
-#         )
 
 #     def __init__(self, masktype, contenttype, valid_when, identifiertype, parameters):
 #         super(ByteMaskedArrayType, self).__init__(
@@ -1124,17 +1126,17 @@ class BitMaskedArrayType(ContentType):
         )
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        return BitMaskedArrayType(
+            cls.from_form_index(form.mask),
+            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            form.valid_when,
+            form.lsb_order,
+            cls.from_form_identifier(form),
+            form.parameters,
+        )
 
-#     @classmethod
-#     def from_form(cls, form):
-#         return BitMaskedArrayType(
-#             cls.from_form_index(form.mask),
-#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
-#             form.valid_when,
-#             form.lsb_order,
-#             cls.from_form_identifier(form),
-#             form.parameters,
-#         )
 
 #     def __init__(
 #         self, masktype, contenttype, valid_when, lsb_order, identifiertype, parameters
@@ -1310,14 +1312,14 @@ class UnmaskedArrayType(ContentType):
         )
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        return UnmaskedArrayType(
+            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            cls.from_form_identifier(form),
+            form.parameters,
+        )
 
-#     @classmethod
-#     def from_form(cls, form):
-#         return UnmaskedArrayType(
-#             ak._v2._connect.numba.arrayview.tonumbatype(form.content),
-#             cls.from_form_identifier(form),
-#             form.parameters,
-#         )
 
 #     def __init__(self, contenttype, identifiertype, parameters):
 #         super(UnmaskedArrayType, self).__init__(
@@ -1434,23 +1436,23 @@ class RecordArrayType(ContentType):
             ] = ak._v2._connect.numba.arrayview.tolookup(content, positions)
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        contents = []
+        if form.is_tuple:
+            fields = None
+            for x in form.contents.values():
+                contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
+        else:
+            fields = []
+            for n, x in form.contents.items():
+                contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
+                fields.append(n)
 
-#     @classmethod
-#     def from_form(cls, form):
-#         contents = []
-#         if form.istuple:
-#             recordlookup = None
-#             for x in form.contents.values():
-#                 contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
-#         else:
-#             recordlookup = []
-#             for n, x in form.contents.items():
-#                 contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
-#                 recordlookup.append(n)
+        return RecordArrayType(
+            contents, fields, cls.from_form_identifier(form), form.parameters
+        )
 
-#         return RecordArrayType(
-#             contents, recordlookup, cls.from_form_identifier(form), form.parameters
-#         )
 
 #     def __init__(self, contenttypes, recordlookup, identifiertype, parameters):
 #         super(RecordArrayType, self).__init__(
@@ -1810,20 +1812,20 @@ class UnionArrayType(ContentType):
             ] = ak._v2._connect.numba.arrayview.tolookup(content, positions)
         return pos
 
+    @classmethod
+    def from_form(cls, form):
+        contents = []
+        for x in form.contents:
+            contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
 
-#     @classmethod
-#     def from_form(cls, form):
-#         contents = []
-#         for x in form.contents:
-#             contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
+        return UnionArrayType(
+            cls.from_form_index(form.tags),
+            cls.from_form_index(form.index),
+            contents,
+            cls.from_form_identifier(form),
+            form.parameters,
+        )
 
-#         return UnionArrayType(
-#             cls.from_form_index(form.tags),
-#             cls.from_form_index(form.index),
-#             contents,
-#             cls.from_form_identifier(form),
-#             form.parameters,
-#         )
 
 #     def __init__(self, tagstype, indextype, contenttypes, identifiertype, parameters):
 #         super(UnionArrayType, self).__init__(
