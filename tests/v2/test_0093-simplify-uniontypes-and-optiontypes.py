@@ -6,18 +6,16 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2  # noqa: F401
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_numpyarray_merge():
-    emptyarray = v1_to_v2(ak.layout.EmptyArray())
+    emptyarray = ak._v2.contents.EmptyArray()
 
     np1 = np.arange(2 * 7 * 5).reshape(2, 7, 5)
     np2 = np.arange(3 * 7 * 5).reshape(3, 7, 5)
-    ak1 = v1_to_v2(ak.layout.NumpyArray(np1))
-    ak2 = v1_to_v2(ak.layout.NumpyArray(np2))
+    ak1 = ak._v2.contents.NumpyArray(np1)
+    ak2 = ak._v2.contents.NumpyArray(np2)
     assert to_list(ak1.merge(ak2)) == to_list(np.concatenate([np1, np2]))
     assert to_list(ak1[1:, :-1, ::-1].merge(ak2[1:, :-1, ::-1])) == to_list(
         np.concatenate([np1[1:, :-1, ::-1], np2[1:, :-1, ::-1]])
@@ -57,8 +55,8 @@ def test_numpyarray_merge():
             z = np.concatenate(
                 [np.array([1, 2, 3], dtype=x), np.array([4, 5], dtype=y)]
             ).dtype.type
-            one = v1_to_v2(ak.layout.NumpyArray(np.array([1, 2, 3], dtype=x)))
-            two = v1_to_v2(ak.layout.NumpyArray(np.array([4, 5], dtype=y)))
+            one = ak._v2.contents.NumpyArray(np.array([1, 2, 3], dtype=x))
+            two = ak._v2.contents.NumpyArray(np.array([4, 5], dtype=y))
             three = one.merge(two)
             assert np.asarray(three).dtype == np.dtype(z), "{0} {1} {2} {3}".format(
                 x, y, z, np.asarray(three).dtype.type
@@ -75,12 +73,12 @@ def test_numpyarray_merge():
 
 
 def test_regulararray_merge():
-    emptyarray = v1_to_v2(ak.layout.EmptyArray())
+    emptyarray = ak._v2.contents.EmptyArray()
 
     np1 = np.arange(2 * 7 * 5).reshape(2, 7, 5)
     np2 = np.arange(3 * 7 * 5).reshape(3, 7, 5)
-    ak1 = v1_to_v2(ak.from_iter(np1, highlevel=False))
-    ak2 = v1_to_v2(ak.from_iter(np2, highlevel=False))
+    ak1 = ak._v2.operations.convert.from_iter(np1, highlevel=False)
+    ak2 = ak._v2.operations.convert.from_iter(np2, highlevel=False)
 
     assert to_list(ak1.merge(ak2)) == to_list(np.concatenate([np1, np2]))
     assert to_list(ak1.merge(emptyarray)) == to_list(ak1)
@@ -92,55 +90,55 @@ def test_regulararray_merge():
 
 
 def test_listarray_merge():
-    emptyarray = v1_to_v2(ak.layout.EmptyArray())
+    emptyarray = ak._v2.contents.EmptyArray()
 
-    content1 = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    content2 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7]))
+    content1 = ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    content2 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7]))
 
     for (dtype1, Index1, ListArray1), (dtype2, Index2, ListArray2) in [
         (
-            (np.int32, ak.layout.Index32, ak.layout.ListArray32),
-            (np.int32, ak.layout.Index32, ak.layout.ListArray32),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListArray),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListArray),
         ),
         (
-            (np.int32, ak.layout.Index32, ak.layout.ListArray32),
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListArrayU32),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListArray),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListArray),
         ),
         (
-            (np.int32, ak.layout.Index32, ak.layout.ListArray32),
-            (np.int64, ak.layout.Index64, ak.layout.ListArray64),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListArray),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListArray),
         ),
         (
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListArrayU32),
-            (np.int32, ak.layout.Index32, ak.layout.ListArray32),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListArray),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListArray),
         ),
         (
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListArrayU32),
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListArrayU32),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListArray),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListArray),
         ),
         (
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListArrayU32),
-            (np.int64, ak.layout.Index64, ak.layout.ListArray64),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListArray),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListArray),
         ),
         (
-            (np.int64, ak.layout.Index64, ak.layout.ListArray64),
-            (np.int32, ak.layout.Index32, ak.layout.ListArray32),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListArray),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListArray),
         ),
         (
-            (np.int64, ak.layout.Index64, ak.layout.ListArray64),
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListArrayU32),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListArray),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListArray),
         ),
         (
-            (np.int64, ak.layout.Index64, ak.layout.ListArray64),
-            (np.int64, ak.layout.Index64, ak.layout.ListArray64),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListArray),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListArray),
         ),
     ]:
         starts1 = Index1(np.array([0, 3, 3], dtype=dtype1))
         stops1 = Index1(np.array([3, 3, 5], dtype=dtype1))
         starts2 = Index2(np.array([2, 99, 0], dtype=dtype2))
         stops2 = Index2(np.array([6, 99, 3], dtype=dtype2))
-        array1 = v1_to_v2(ListArray1(starts1, stops1, content1))
-        array2 = v1_to_v2(ListArray2(starts2, stops2, content2))
+        array1 = ListArray1(starts1, stops1, content1)
+        array2 = ListArray2(starts2, stops2, content2)
         assert to_list(array1) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
         assert to_list(array2) == [[3, 4, 5, 6], [], [1, 2, 3]]
 
@@ -168,19 +166,19 @@ def test_listarray_merge():
         assert array1.typetracer.merge(emptyarray).form == array1.merge(emptyarray).form
         assert emptyarray.typetracer.merge(array1).form == emptyarray.merge(array1).form
 
-    regulararray = v1_to_v2(ak.layout.RegularArray(content2, 2, zeros_length=0))
+    regulararray = ak._v2.contents.RegularArray(content2, 2, zeros_length=0)
     assert to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
     assert to_list(regulararray.merge(emptyarray)) == to_list(regulararray)
     assert to_list(emptyarray.merge(regulararray)) == to_list(regulararray)
 
     for (dtype1, Index1, ListArray1) in [
-        (np.int32, ak.layout.Index32, ak.layout.ListArray32),
-        (np.uint32, ak.layout.IndexU32, ak.layout.ListArrayU32),
-        (np.int64, ak.layout.Index64, ak.layout.ListArray64),
+        (np.int32, ak._v2.index.Index32, ak._v2.contents.ListArray),
+        (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListArray),
+        (np.int64, ak._v2.index.Index64, ak._v2.contents.ListArray),
     ]:
         starts1 = Index1(np.array([0, 3, 3], dtype=dtype1))
         stops1 = Index1(np.array([3, 3, 5], dtype=dtype1))
-        array1 = v1_to_v2(ListArray1(starts1, stops1, content1))
+        array1 = ListArray1(starts1, stops1, content1)
 
         assert to_list(array1.merge(regulararray)) == [
             [1.1, 2.2, 3.3],
@@ -201,53 +199,53 @@ def test_listarray_merge():
 
 
 def test_listoffsetarray_merge():
-    emptyarray = v1_to_v2(ak.layout.EmptyArray())
+    emptyarray = ak._v2.contents.EmptyArray()
 
-    content1 = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    content2 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7]))
+    content1 = ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    content2 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6, 7]))
 
     for (dtype1, Index1, ListOffsetArray1), (dtype2, Index2, ListOffsetArray2) in [
         (
-            (np.int32, ak.layout.Index32, ak.layout.ListOffsetArray32),
-            (np.int32, ak.layout.Index32, ak.layout.ListOffsetArray32),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListOffsetArray),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListOffsetArray),
         ),
         (
-            (np.int32, ak.layout.Index32, ak.layout.ListOffsetArray32),
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListOffsetArrayU32),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListOffsetArray),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListOffsetArray),
         ),
         (
-            (np.int32, ak.layout.Index32, ak.layout.ListOffsetArray32),
-            (np.int64, ak.layout.Index64, ak.layout.ListOffsetArray64),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListOffsetArray),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray),
         ),
         (
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListOffsetArrayU32),
-            (np.int32, ak.layout.Index32, ak.layout.ListOffsetArray32),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListOffsetArray),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListOffsetArray),
         ),
         (
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListOffsetArrayU32),
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListOffsetArrayU32),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListOffsetArray),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListOffsetArray),
         ),
         (
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListOffsetArrayU32),
-            (np.int64, ak.layout.Index64, ak.layout.ListOffsetArray64),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListOffsetArray),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray),
         ),
         (
-            (np.int64, ak.layout.Index64, ak.layout.ListOffsetArray64),
-            (np.int32, ak.layout.Index32, ak.layout.ListOffsetArray32),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray),
+            (np.int32, ak._v2.index.Index32, ak._v2.contents.ListOffsetArray),
         ),
         (
-            (np.int64, ak.layout.Index64, ak.layout.ListOffsetArray64),
-            (np.uint32, ak.layout.IndexU32, ak.layout.ListOffsetArrayU32),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray),
+            (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListOffsetArray),
         ),
         (
-            (np.int64, ak.layout.Index64, ak.layout.ListOffsetArray64),
-            (np.int64, ak.layout.Index64, ak.layout.ListOffsetArray64),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray),
+            (np.int64, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray),
         ),
     ]:
         offsets1 = Index1(np.array([0, 3, 3, 5], dtype=dtype1))
         offsets2 = Index2(np.array([1, 3, 3, 3, 5], dtype=dtype2))
-        array1 = v1_to_v2(ListOffsetArray1(offsets1, content1))
-        array2 = v1_to_v2(ListOffsetArray2(offsets2, content2))
+        array1 = ListOffsetArray1(offsets1, content1)
+        array2 = ListOffsetArray2(offsets2, content2)
         assert to_list(array1) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
         assert to_list(array2) == [[2, 3], [], [], [4, 5]]
 
@@ -277,17 +275,17 @@ def test_listoffsetarray_merge():
         assert array1.typetracer.merge(emptyarray).form == array1.merge(emptyarray).form
         assert emptyarray.typetracer.merge(array1).form == emptyarray.merge(array1).form
 
-    regulararray = v1_to_v2(ak.layout.RegularArray(content2, 2, zeros_length=0))
+    regulararray = ak._v2.contents.RegularArray(content2, 2, zeros_length=0)
     assert to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
 
     for (dtype1, Index1, ListArray1) in [
-        (np.int32, ak.layout.Index32, ak.layout.ListArray32),
-        (np.uint32, ak.layout.IndexU32, ak.layout.ListArrayU32),
-        (np.int64, ak.layout.Index64, ak.layout.ListArray64),
+        (np.int32, ak._v2.index.Index32, ak._v2.contents.ListArray),
+        (np.uint32, ak._v2.index.IndexU32, ak._v2.contents.ListArray),
+        (np.int64, ak._v2.index.Index64, ak._v2.contents.ListArray),
     ]:
         starts1 = Index1(np.array([0, 3, 3], dtype=dtype1))
         stops1 = Index1(np.array([3, 3, 5], dtype=dtype1))
-        array1 = v1_to_v2(ListArray1(starts1, stops1, content1))
+        array1 = ListArray1(starts1, stops1, content1)
 
         assert to_list(array1.merge(regulararray)) == [
             [1.1, 2.2, 3.3],
@@ -317,78 +315,67 @@ def test_listoffsetarray_merge():
 
 
 def test_recordarray_merge():
-    emptyarray = v1_to_v2(ak.layout.EmptyArray())
+    emptyarray = ak._v2.contents.EmptyArray()
 
-    arrayr1 = v1_to_v2(
-        ak.from_iter(
-            [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}],
-            highlevel=False,
-        )
+    arrayr1 = ak._v2.operations.convert.from_iter(
+        [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}],
+        highlevel=False,
     )
-    print(arrayr1)
-    arrayr2 = v1_to_v2(
-        ak.from_iter(
-            [
-                {"x": 2.2, "y": [2.2, 2.2]},
-                {"x": 1.1, "y": [1.1, 1.1]},
-                {"x": 0.0, "y": [0.0, 0.0]},
-            ],
-            highlevel=False,
-        )
+    arrayr2 = ak._v2.operations.convert.from_iter(
+        [
+            {"x": 2.2, "y": [2.2, 2.2]},
+            {"x": 1.1, "y": [1.1, 1.1]},
+            {"x": 0.0, "y": [0.0, 0.0]},
+        ],
+        highlevel=False,
     )
-    arrayr3 = v1_to_v2(
-        ak.from_iter(
-            [{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}],
-            highlevel=False,
-        )
+    arrayr3 = ak._v2.operations.convert.from_iter(
+        [{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}],
+        highlevel=False,
     )
-    arrayr4 = v1_to_v2(
-        ak.from_iter(
-            [{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}],
-            highlevel=False,
-        )
+    arrayr4 = ak._v2.operations.convert.from_iter(
+        [{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}],
+        highlevel=False,
     )
-    arrayr5 = v1_to_v2(
-        ak.from_iter(
-            [
-                {"x": 0, "y": [], "z": 0},
-                {"x": 1, "y": [1, 1], "z": 1},
-                {"x": 2, "y": [2, 2], "z": 2},
-            ],
-            highlevel=False,
-        )
+    arrayr5 = ak._v2.operations.convert.from_iter(
+        [
+            {"x": 0, "y": [], "z": 0},
+            {"x": 1, "y": [1, 1], "z": 1},
+            {"x": 2, "y": [2, 2], "z": 2},
+        ],
+        highlevel=False,
     )
-    arrayr6 = v1_to_v2(
-        ak.from_iter(
-            [
-                {"z": 0, "x": 0, "y": []},
-                {"z": 1, "x": 1, "y": [1, 1]},
-                {"z": 2, "x": 2, "y": [2, 2]},
-            ],
-            highlevel=False,
-        )
+    arrayr6 = ak._v2.operations.convert.from_iter(
+        [
+            {"z": 0, "x": 0, "y": []},
+            {"z": 1, "x": 1, "y": [1, 1]},
+            {"z": 2, "x": 2, "y": [2, 2]},
+        ],
+        highlevel=False,
     )
-    arrayr7 = v1_to_v2(ak.from_iter([{"x": 0}, {"x": 1}, {"x": 2}], highlevel=False))
+    arrayr7 = ak._v2.operations.convert.from_iter(
+        [{"x": 0}, {"x": 1}, {"x": 2}], highlevel=False
+    )
 
-    arrayt1 = v1_to_v2(
-        ak.from_iter([(0, []), (1, [1.1]), (2, [2, 2])], highlevel=False)
+    arrayt1 = ak._v2.operations.convert.from_iter(
+        [(0, []), (1, [1.1]), (2, [2, 2])], highlevel=False
     )
-    arrayt2 = v1_to_v2(
-        ak.from_iter(
-            [(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], highlevel=False
-        )
+    arrayt2 = ak._v2.operations.convert.from_iter(
+        [(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], highlevel=False
     )
-    arrayt3 = v1_to_v2(ak.from_iter([(0, 0.0), (1, 1.1), (2, 2.2)], highlevel=False))
-    arrayt4 = v1_to_v2(
-        ak.from_iter([([], 0), ([1.1], 1), ([2.2, 2.2], 2)], highlevel=False)
+    arrayt3 = ak._v2.operations.convert.from_iter(
+        [(0, 0.0), (1, 1.1), (2, 2.2)], highlevel=False
     )
-    arrayt5 = v1_to_v2(
-        ak.from_iter([(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], highlevel=False)
+    arrayt4 = ak._v2.operations.convert.from_iter(
+        [([], 0), ([1.1], 1), ([2.2, 2.2], 2)], highlevel=False
     )
-    arrayt6 = v1_to_v2(
-        ak.from_iter([(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], highlevel=False)
+    arrayt5 = ak._v2.operations.convert.from_iter(
+        [(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], highlevel=False
     )
-    arrayt7 = v1_to_v2(ak.from_iter([(0,), (1,), (2,)], highlevel=False))
+    arrayt6 = ak._v2.operations.convert.from_iter(
+        [(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], highlevel=False
+    )
+    arrayt7 = ak._v2.operations.convert.from_iter([(0,), (1,), (2,)], highlevel=False)
 
     assert arrayr1.mergeable(arrayr2)
     assert arrayr2.mergeable(arrayr1)
@@ -553,12 +540,15 @@ def test_recordarray_merge():
 
 
 def test_indexedarray_merge():
-    content1 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
-    content2 = ak.from_iter([[1, 2], [], [3, 4]], highlevel=False)
-    index1 = ak.layout.Index64(np.array([2, 0, -1, 0, 1, 2], dtype=np.int64))
-    indexedarray1 = v1_to_v2(ak.layout.IndexedOptionArray64(index1, content1))
+    content1 = ak._v2.operations.convert.from_iter(
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
+    )
+    content2 = ak._v2.operations.convert.from_iter(
+        [[1, 2], [], [3, 4]], highlevel=False
+    )
+    index1 = ak._v2.index.Index64(np.array([2, 0, -1, 0, 1, 2], dtype=np.int64))
+    indexedarray1 = ak._v2.contents.IndexedOptionArray(index1, content1)
 
-    content2 = v1_to_v2(content2)
     assert to_list(indexedarray1) == [
         [4.4, 5.5],
         [1.1, 2.2, 3.3],
@@ -620,15 +610,17 @@ def test_indexedarray_merge():
 
 
 def test_unionarray_merge():
-    emptyarray = v1_to_v2(ak.layout.EmptyArray())
+    emptyarray = ak._v2.contents.EmptyArray()
 
-    one = v1_to_v2(ak.from_iter([0.0, 1.1, 2.2, [], [1], [2, 2]], highlevel=False))
-    two = v1_to_v2(
-        ak.from_iter(
-            [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], highlevel=False
-        )
+    one = ak._v2.operations.convert.from_iter(
+        [0.0, 1.1, 2.2, [], [1], [2, 2]], highlevel=False
     )
-    three = v1_to_v2(ak.from_iter(["one", "two", "three"], highlevel=False))
+    two = ak._v2.operations.convert.from_iter(
+        [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], highlevel=False
+    )
+    three = ak._v2.operations.convert.from_iter(
+        ["one", "two", "three"], highlevel=False
+    )
 
     assert to_list(one.merge(two)) == [
         0.0,
@@ -710,12 +702,10 @@ def test_unionarray_merge():
 
 
 def test_merge_parameters():
-    one = v1_to_v2(
-        ak.from_iter(
-            [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], highlevel=False
-        )
+    one = ak._v2.operations.convert.from_iter(
+        [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], highlevel=False
     )
-    two = v1_to_v2(ak.from_iter(["good", "stuff"], highlevel=False))
+    two = ak._v2.operations.convert.from_iter(["good", "stuff"], highlevel=False)
 
     assert to_list(ak._v2.operations.structure.concatenate([one, two])) == [
         [121, 117, 99, 107, 121],
@@ -745,12 +735,11 @@ def test_merge_parameters():
 
 
 def test_mask_as_bool():
-    array = ak.from_iter(
+    array = ak._v2.operations.convert.from_iter(
         ["one", "two", None, "three", None, None, "four"], highlevel=False
     )
-    index2 = ak.layout.Index64(np.array([2, 2, 1, 5, 0], dtype=np.int64))
-    array2 = v1_to_v2(ak.layout.IndexedArray64(index2, array))
-    array = v1_to_v2(array)
+    index2 = ak._v2.index.Index64(np.array([2, 2, 1, 5, 0], dtype=np.int64))
+    array2 = ak._v2.contents.IndexedArray(index2, array)
     assert np.asarray(array.mask_as_bool(valid_when=False).view(np.int8)).tolist() == [
         0,
         0,
@@ -770,13 +759,12 @@ def test_mask_as_bool():
 
 
 def test_indexedarray_simplify():
-    array = ak.from_iter(
+    array = ak._v2.operations.convert.from_iter(
         ["one", "two", None, "three", None, None, "four", "five"], highlevel=False
     )
-    index2 = ak.layout.Index64(np.array([2, 2, 1, 6, 5], dtype=np.int64))
+    index2 = ak._v2.index.Index64(np.array([2, 2, 1, 6, 5], dtype=np.int64))
 
-    array2 = v1_to_v2(ak.layout.IndexedArray64(index2, array))
-    array = v1_to_v2(array)
+    array2 = ak._v2.contents.IndexedArray(index2, array)
     assert np.asarray(array.index).tolist() == [0, 1, -1, 2, -1, -1, 3, 4]
     assert (
         to_list(array2.simplify_optiontype())
@@ -791,21 +779,20 @@ def test_indexedarray_simplify():
 
 
 def test_indexedarray_simplify_more():
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
 
-    index1_32 = ak.layout.Index32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int32))
-    index1_U32 = ak.layout.IndexU32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.uint32))
-    index1_64 = ak.layout.Index64(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int64))
-    index2_32 = ak.layout.Index32(np.array([0, 2, 4, 6], dtype=np.int32))
-    index2_U32 = ak.layout.IndexU32(np.array([0, 2, 4, 6], dtype=np.uint32))
-    index2_64 = ak.layout.Index64(np.array([0, 2, 4, 6], dtype=np.int64))
+    index1_32 = ak._v2.index.Index32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int32))
+    index1_U32 = ak._v2.index.IndexU32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.uint32))
+    index1_64 = ak._v2.index.Index64(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int64))
+    index2_32 = ak._v2.index.Index32(np.array([0, 2, 4, 6], dtype=np.int32))
+    index2_U32 = ak._v2.index.IndexU32(np.array([0, 2, 4, 6], dtype=np.uint32))
+    index2_64 = ak._v2.index.Index64(np.array([0, 2, 4, 6], dtype=np.int64))
 
-    array = ak.layout.IndexedArray32(
-        index2_32, ak.layout.IndexedArray32(index1_32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_32, ak._v2.contents.IndexedArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -818,10 +805,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArray32(
-        index2_32, ak.layout.IndexedArrayU32(index1_U32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_32, ak._v2.contents.IndexedArray(index1_U32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -834,10 +820,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArray32(
-        index2_32, ak.layout.IndexedArray64(index1_64, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_32, ak._v2.contents.IndexedArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -850,10 +835,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArrayU32(
-        index2_U32, ak.layout.IndexedArray32(index1_32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_U32, ak._v2.contents.IndexedArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -866,10 +850,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArrayU32(
-        index2_U32, ak.layout.IndexedArrayU32(index1_U32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_U32, ak._v2.contents.IndexedArray(index1_U32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -882,10 +865,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArrayU32(
-        index2_U32, ak.layout.IndexedArray64(index1_64, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_U32, ak._v2.contents.IndexedArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -898,10 +880,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArray64(
-        index2_64, ak.layout.IndexedArray32(index1_32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_64, ak._v2.contents.IndexedArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -914,10 +895,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArray64(
-        index2_64, ak.layout.IndexedArrayU32(index1_U32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_64, ak._v2.contents.IndexedArray(index1_U32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -930,10 +910,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArray64(
-        index2_64, ak.layout.IndexedArray64(index1_64, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_64, ak._v2.contents.IndexedArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, 4.4, 2.2, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, 4.4, 2.2, 0.0]
     assert isinstance(
@@ -946,16 +925,15 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    index1_32 = ak.layout.Index32(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int32))
-    index1_64 = ak.layout.Index64(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int64))
-    index2_32 = ak.layout.Index32(np.array([0, 2, 4, 6], dtype=np.int32))
-    index2_U32 = ak.layout.IndexU32(np.array([0, 2, 4, 6], dtype=np.uint32))
-    index2_64 = ak.layout.Index64(np.array([0, 2, 4, 6], dtype=np.int64))
+    index1_32 = ak._v2.index.Index32(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int32))
+    index1_64 = ak._v2.index.Index64(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int64))
+    index2_32 = ak._v2.index.Index32(np.array([0, 2, 4, 6], dtype=np.int32))
+    index2_U32 = ak._v2.index.IndexU32(np.array([0, 2, 4, 6], dtype=np.uint32))
+    index2_64 = ak._v2.index.Index64(np.array([0, 2, 4, 6], dtype=np.int64))
 
-    array = ak.layout.IndexedArray32(
-        index2_32, ak.layout.IndexedOptionArray32(index1_32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_32, ak._v2.contents.IndexedOptionArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
     assert isinstance(
@@ -969,10 +947,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArray32(
-        index2_32, ak.layout.IndexedOptionArray64(index1_64, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_32, ak._v2.contents.IndexedOptionArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
     assert isinstance(
@@ -986,10 +963,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArrayU32(
-        index2_U32, ak.layout.IndexedOptionArray32(index1_32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_U32, ak._v2.contents.IndexedOptionArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
     assert isinstance(
@@ -1003,10 +979,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArrayU32(
-        index2_U32, ak.layout.IndexedOptionArray64(index1_64, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_U32, ak._v2.contents.IndexedOptionArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
     assert isinstance(
@@ -1020,10 +995,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArray64(
-        index2_64, ak.layout.IndexedOptionArray32(index1_32, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_64, ak._v2.contents.IndexedOptionArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
     assert isinstance(
@@ -1037,10 +1011,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedArray64(
-        index2_64, ak.layout.IndexedOptionArray64(index1_64, content)
+    array = ak._v2.contents.IndexedArray(
+        index2_64, ak._v2.contents.IndexedOptionArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, 0.0]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, 0.0]
     assert isinstance(
@@ -1054,16 +1027,15 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    index1_32 = ak.layout.Index32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int32))
-    index1_U32 = ak.layout.IndexU32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.uint32))
-    index1_64 = ak.layout.Index64(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int64))
-    index2_32 = ak.layout.Index32(np.array([0, -1, 4, -1], dtype=np.int32))
-    index2_64 = ak.layout.Index64(np.array([0, -1, 4, -1], dtype=np.int64))
+    index1_32 = ak._v2.index.Index32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int32))
+    index1_U32 = ak._v2.index.IndexU32(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.uint32))
+    index1_64 = ak._v2.index.Index64(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int64))
+    index2_32 = ak._v2.index.Index32(np.array([0, -1, 4, -1], dtype=np.int32))
+    index2_64 = ak._v2.index.Index64(np.array([0, -1, 4, -1], dtype=np.int64))
 
-    array = ak.layout.IndexedOptionArray32(
-        index2_32, ak.layout.IndexedArray32(index1_32, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_32, ak._v2.contents.IndexedArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, 2.2, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
     assert isinstance(
@@ -1077,10 +1049,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedOptionArray32(
-        index2_32, ak.layout.IndexedArrayU32(index1_U32, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_32, ak._v2.contents.IndexedArray(index1_U32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, 2.2, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
     assert isinstance(
@@ -1094,10 +1065,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedOptionArray32(
-        index2_32, ak.layout.IndexedArray64(index1_64, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_32, ak._v2.contents.IndexedArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, 2.2, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
     assert isinstance(
@@ -1111,10 +1081,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedOptionArray64(
-        index2_64, ak.layout.IndexedArray32(index1_32, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_64, ak._v2.contents.IndexedArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, 2.2, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
     assert isinstance(
@@ -1128,10 +1097,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedOptionArray64(
-        index2_64, ak.layout.IndexedArrayU32(index1_U32, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_64, ak._v2.contents.IndexedArray(index1_U32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, 2.2, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
     assert isinstance(
@@ -1145,10 +1113,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedOptionArray64(
-        index2_64, ak.layout.IndexedArray64(index1_64, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_64, ak._v2.contents.IndexedArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, 2.2, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, 2.2, None]
     assert isinstance(
@@ -1162,15 +1129,14 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    index1_32 = ak.layout.Index32(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int32))
-    index1_64 = ak.layout.Index64(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int64))
-    index2_32 = ak.layout.Index32(np.array([0, -1, 4, -1], dtype=np.int32))
-    index2_64 = ak.layout.Index64(np.array([0, -1, 4, -1], dtype=np.int64))
+    index1_32 = ak._v2.index.Index32(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int32))
+    index1_64 = ak._v2.index.Index64(np.array([6, 5, -1, 3, -1, 1, 0], dtype=np.int64))
+    index2_32 = ak._v2.index.Index32(np.array([0, -1, 4, -1], dtype=np.int32))
+    index2_64 = ak._v2.index.Index64(np.array([0, -1, 4, -1], dtype=np.int64))
 
-    array = ak.layout.IndexedOptionArray32(
-        index2_32, ak.layout.IndexedOptionArray32(index1_32, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_32, ak._v2.contents.IndexedOptionArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, None]
     assert isinstance(
@@ -1184,10 +1150,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedOptionArray32(
-        index2_32, ak.layout.IndexedOptionArray64(index1_64, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_32, ak._v2.contents.IndexedOptionArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, None]
     assert isinstance(
@@ -1201,10 +1166,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedOptionArray64(
-        index2_64, ak.layout.IndexedOptionArray32(index1_32, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_64, ak._v2.contents.IndexedOptionArray(index1_32, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, None]
     assert isinstance(
@@ -1218,10 +1182,9 @@ def test_indexedarray_simplify_more():
         array.typetracer.simplify_optiontype().form == array.simplify_optiontype().form
     )
 
-    array = ak.layout.IndexedOptionArray64(
-        index2_64, ak.layout.IndexedOptionArray64(index1_64, content)
+    array = ak._v2.contents.IndexedOptionArray(
+        index2_64, ak._v2.contents.IndexedOptionArray(index1_64, content)
     )
-    array = v1_to_v2(array)
     assert to_list(array) == [6.6, None, None, None]
     assert to_list(array.simplify_optiontype()) == [6.6, None, None, None]
     assert isinstance(
@@ -1237,16 +1200,18 @@ def test_indexedarray_simplify_more():
 
 
 def test_unionarray_simplify_one():
-    one = ak.from_iter([5, 4, 3, 2, 1], highlevel=False)
-    two = ak.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
-    three = ak.from_iter([1.1, 2.2, 3.3], highlevel=False)
-    tags = ak.layout.Index8(
+    one = ak._v2.operations.convert.from_iter([5, 4, 3, 2, 1], highlevel=False)
+    two = ak._v2.operations.convert.from_iter(
+        [[], [1], [2, 2], [3, 3, 3]], highlevel=False
+    )
+    three = ak._v2.operations.convert.from_iter([1.1, 2.2, 3.3], highlevel=False)
+    tags = ak._v2.index.Index8(
         np.array([0, 0, 1, 2, 1, 0, 2, 1, 1, 0, 2, 0], dtype=np.int8)
     )
-    index = ak.layout.Index64(
+    index = ak._v2.index.Index64(
         np.array([0, 1, 0, 0, 1, 2, 1, 2, 3, 3, 2, 4], dtype=np.int64)
     )
-    array = v1_to_v2(ak.layout.UnionArray8_64(tags, index, [one, two, three]))
+    array = ak._v2.contents.UnionArray(tags, index, [one, two, three])
 
     assert to_list(array) == [
         5,
@@ -1286,20 +1251,22 @@ def test_unionarray_simplify_one():
 
 
 def test_unionarray_simplify():
-    one = ak.from_iter([5, 4, 3, 2, 1], highlevel=False)
-    two = ak.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
-    three = ak.from_iter([1.1, 2.2, 3.3], highlevel=False)
+    one = ak._v2.operations.convert.from_iter([5, 4, 3, 2, 1], highlevel=False)
+    two = ak._v2.operations.convert.from_iter(
+        [[], [1], [2, 2], [3, 3, 3]], highlevel=False
+    )
+    three = ak._v2.operations.convert.from_iter([1.1, 2.2, 3.3], highlevel=False)
 
-    tags2 = ak.layout.Index8(np.array([0, 1, 0, 1, 0, 0, 1], dtype=np.int8))
-    index2 = ak.layout.Index32(np.array([0, 0, 1, 1, 2, 3, 2], dtype=np.int32))
-    inner = ak.layout.UnionArray8_32(tags2, index2, [two, three])
-    tags1 = ak.layout.Index8(
+    tags2 = ak._v2.index.Index8(np.array([0, 1, 0, 1, 0, 0, 1], dtype=np.int8))
+    index2 = ak._v2.index.Index32(np.array([0, 0, 1, 1, 2, 3, 2], dtype=np.int32))
+    inner = ak._v2.contents.UnionArray(tags2, index2, [two, three])
+    tags1 = ak._v2.index.Index8(
         np.array([0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0], dtype=np.int8)
     )
-    index1 = ak.layout.Index64(
+    index1 = ak._v2.index.Index64(
         np.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=np.int64)
     )
-    outer = v1_to_v2(ak.layout.UnionArray8_64(tags1, index1, [one, inner]))
+    outer = ak._v2.contents.UnionArray(tags1, index1, [one, inner])
     assert to_list(outer) == [
         5,
         4,
@@ -1344,16 +1311,16 @@ def test_unionarray_simplify():
         == outer.simplify_uniontype(True, False).form
     )
 
-    tags2 = ak.layout.Index8(np.array([0, 1, 0, 1, 0, 0, 1], dtype=np.int8))
-    index2 = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 3, 2], dtype=np.int64))
-    inner = ak.layout.UnionArray8_64(tags2, index2, [two, three])
-    tags1 = ak.layout.Index8(
+    tags2 = ak._v2.index.Index8(np.array([0, 1, 0, 1, 0, 0, 1], dtype=np.int8))
+    index2 = ak._v2.index.Index64(np.array([0, 0, 1, 1, 2, 3, 2], dtype=np.int64))
+    inner = ak._v2.contents.UnionArray(tags2, index2, [two, three])
+    tags1 = ak._v2.index.Index8(
         np.array([1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1], dtype=np.int8)
     )
-    index1 = ak.layout.Index32(
+    index1 = ak._v2.index.Index32(
         np.array([0, 1, 0, 1, 2, 2, 3, 4, 5, 3, 6, 4], dtype=np.int32)
     )
-    outer = v1_to_v2(ak.layout.UnionArray8_32(tags1, index1, [inner, one]))
+    outer = ak._v2.contents.UnionArray(tags1, index1, [inner, one])
     assert to_list(outer) == [
         5,
         4,
@@ -1371,11 +1338,11 @@ def test_unionarray_simplify():
 
 
 def test_concatenate():
-    one = v1_to_v2(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True).layout)
-    two = v1_to_v2(ak.Array([[], [1], [2, 2], [3, 3, 3]], check_valid=True).layout)
-    three = v1_to_v2(
-        ak.Array([True, False, False, True, True], check_valid=True).layout
-    )
+    one = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True).layout
+    two = ak._v2.highlevel.Array([[], [1], [2, 2], [3, 3, 3]], check_valid=True).layout
+    three = ak._v2.highlevel.Array(
+        [True, False, False, True, True], check_valid=True
+    ).layout
 
     assert to_list(ak._v2.operations.structure.concatenate([one, two, three])) == [
         1.1,
@@ -1407,15 +1374,15 @@ def test_concatenate():
     )
 
 
-@pytest.mark.skip(reason="</NumpyArray> cannot be converted into an Awkward Array")
 def test_where():
-    condition = v1_to_v2(
-        ak.Array([True, False, True, False, True], check_valid=True).layout
+    condition = ak._v2.highlevel.Array(
+        [True, False, True, False, True],
+        check_valid=True,
     )
-    one = v1_to_v2(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True).layout)
-    two = v1_to_v2(ak.Array([False, False, False, True, True], check_valid=True).layout)
-    three = v1_to_v2(
-        ak.Array([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], check_valid=True).layout
+    one = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)
+    two = ak._v2.highlevel.Array([False, False, False, True, True], check_valid=True)
+    three = ak._v2.highlevel.Array(
+        [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], check_valid=True
     )
 
     assert to_list(ak._v2.operations.structure.where(condition, one, two)) == [

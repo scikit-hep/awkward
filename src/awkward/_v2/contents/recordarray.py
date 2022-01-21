@@ -535,7 +535,7 @@ class RecordArray(Content):
 
         head, tail = self._merging_strategy(others)
 
-        parameters = {}
+        parameters = self._parameters
         headless = head[1:]
 
         for_each_field = []

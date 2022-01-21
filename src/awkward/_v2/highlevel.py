@@ -594,8 +594,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         )
                     else:
                         yield x
-                else:
+                elif isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record)):
                     yield ak._v2._util.wrap(x, self._behavior)
+                else:
+                    yield x
 
     def __getitem__(self, where):
         """
@@ -1018,7 +1020,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 return ak._v2._util.tobytes(out.to(numpy)).decode(
                     errors="surrogateescape"
                 )
-        return ak._v2._util.wrap(out, self._behavior)
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, self._behavior)
+        else:
+            return out
 
     def __setitem__(self, where, what):
         """
@@ -1247,14 +1252,20 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         import awkward._v2._prettyprint
 
         pytype = type(self).__name__
-        valuestr = awkward._v2._prettyprint.valuestr(self, 1, 50)
+        if self._layout.nplike.known_shape and self._layout.nplike.known_data:
+            valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, 50)
+            typestr = repr(str(self.type))[1:-1]
+        else:
+            valuestr = "-typetracer"
+            typestr = repr(
+                "?? * " + str(self._layout.form.type_from_behavior(self._behavior))
+            )[1:-1]
         length = max(10, 80 - len(pytype) - 10 - len(valuestr))
-        typestr = repr(str(self.type))[1:-1]
         if len(typestr) > length:
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
-        return "<{0} {1} type={2}>".format(pytype, valuestr, typestr)
+        return "<{0}{1} type={2}>".format(pytype, valuestr, typestr)
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """
@@ -1734,7 +1745,10 @@ class Record(NDArrayOperatorsMixin):
                 return ak._v2._util.tobytes(out.to(numpy)).decode(
                     errors="surrogateescape"
                 )
-        return ak._v2._util.wrap(out, self._behavior)
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, self._behavior)
+        else:
+            return out
 
     def __setitem__(self, where, what):
         """
@@ -1933,14 +1947,23 @@ class Record(NDArrayOperatorsMixin):
         import awkward._v2._prettyprint
 
         pytype = type(self).__name__
-        valuestr = awkward._v2._prettyprint.valuestr(self, 1, 50)
+        if (
+            self._layout.array.nplike.known_shape
+            and self._layout.array.nplike.known_data
+        ):
+            valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, 50)
+            typestr = repr(str(self.type))[1:-1]
+        else:
+            valuestr = "-typetracer"
+            typestr = repr(
+                str(self._layout.array.form.type_from_behavior(self._behavior))
+            )[1:-1]
         length = max(10, 80 - len(pytype) - 10 - len(valuestr))
-        typestr = repr(str(self.type))[1:-1]
         if len(typestr) > length:
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
-        return "<{0} {1} type={2}>".format(pytype, valuestr, typestr)
+        return "<{0}{1} type={2}>".format(pytype, valuestr, typestr)
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """

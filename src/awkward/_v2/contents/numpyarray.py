@@ -647,7 +647,7 @@ class NumpyArray(Content):
                 )
             )
 
-            nextlength = ak._v2.index.Index64.zeros(1, self._nplike)
+            nextlength = ak._v2.index.Index64.empty(1, self._nplike)
             self._handle_error(
                 self._nplike[  # noqa: E231
                     "awkward_unique",
@@ -725,7 +725,7 @@ class NumpyArray(Content):
                 )
             )
 
-            nextoffsets = ak._v2.index.Index64.zeros(offsets.length, self._nplike)
+            nextoffsets = ak._v2.index.Index64.empty(offsets.length, self._nplike)
             self._handle_error(
                 self._nplike[
                     "awkward_unique_ranges",
@@ -741,7 +741,7 @@ class NumpyArray(Content):
                 )
             )
 
-            outoffsets = ak._v2.index.Index64.zeros(starts.length + 1, self._nplike)
+            outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
 
             self._handle_error(
                 self._nplike[
@@ -914,7 +914,7 @@ class NumpyArray(Content):
                 )
             )
 
-            offsets = ak._v2.index.Index64.zeros(offsets_length[0], self._nplike)
+            offsets = ak._v2.index.Index64.empty(offsets_length[0], self._nplike)
 
             self._handle_error(
                 self._nplike[
@@ -1025,7 +1025,7 @@ class NumpyArray(Content):
                 )
 
         if mask:
-            outmask = ak._v2.index.Index8.zeros(outlength, self._nplike)
+            outmask = ak._v2.index.Index8.empty(outlength, self._nplike)
             self._handle_error(
                 self._nplike[
                     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",

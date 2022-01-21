@@ -52,6 +52,8 @@ def any(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
 
     else:
         behavior = ak._v2._util.behavior_of(array)
-        return ak._v2._util.wrap(
-            layout.any(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
-        )
+        out = layout.any(axis=axis, mask=mask_identity, keepdims=keepdims)
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, behavior)
+        else:
+            return out

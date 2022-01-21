@@ -208,6 +208,31 @@ class Content(object):
                 else:
                     raise NestedIndexError(self, slicer, message)
 
+    @staticmethod
+    def _selfless_handle_error(error):
+        if error.str is not None:
+            if error.filename is None:
+                filename = ""
+            else:
+                filename = " (in compiled code: " + error.filename.decode(
+                    errors="surrogateescape"
+                ).lstrip("\n").lstrip("(")
+
+            message = error.str.decode(errors="surrogateescape")
+
+            if error.pass_through:
+                raise ValueError(message + filename)
+
+            else:
+                if error.attempt != ak._util.kSliceNone:
+                    message += " while attempting to get index {0}".format(
+                        error.attempt
+                    )
+
+                message += filename
+
+                raise ValueError(message)
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         raise TypeError(
             "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
@@ -795,8 +820,8 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
                     "(which is {1})".format(axis, depth)
                 )
 
-        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
+        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
         shifts = None
         next = self._reduce_next(
             reducer,
@@ -1228,9 +1253,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
     def to_numpy(self, allow_missing):
         return self._to_numpy(allow_missing)
 
-    def completely_flatten(
-        self, nplike=None, flatten_records=False, function_name=None
-    ):
+    def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
         if nplike is None:
             nplike = self._nplike
         arrays = self._completely_flatten(

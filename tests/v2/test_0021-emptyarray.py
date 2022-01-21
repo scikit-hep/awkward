@@ -6,16 +6,13 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.tmp_for_testing import v1_to_v2
-
 to_list = ak._v2.operations.convert.to_list
 
 
 def test_getitem():
-    a = ak.from_json("[]")
-    a = ak.from_json("[[], [[], []], [[], [], []]]")
-
-    a = v1_to_v2(a.layout)
+    a = ak._v2.operations.convert.from_iter(
+        [[], [[], []], [[], [], []]], highlevel=False
+    )
 
     assert to_list(a[2]) == [[], [], []]
     assert a.typetracer[2].form == a[2].form

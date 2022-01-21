@@ -27,7 +27,7 @@ pr:
 
 schedules:
   - cron: "0 12 1 * *"
-    displayName: Monthly build for status badge
+    displayName: "Monthly build for status badge"
     branches:
       include:
         - main
@@ -43,13 +43,13 @@ jobs:
 
     strategy:
       matrix:
+        "py39-32bit":
+          python.version: "3.9"
+          python.architecture: "x86"
+          numpy.version: "latest"
         "py310-64bit":
           python.version: "3.10"
           python.architecture: "x64"
-          numpy.version: "latest"
-        "py310-32bit":
-          python.version: "3.10"
-          python.architecture: "x86"
           numpy.version: "latest"
         "py39-64bit":
           python.version: "3.9"
@@ -62,10 +62,6 @@ jobs:
         "py37-64bit":
           python.version: "3.7"
           python.architecture: "x64"
-          numpy.version: "latest"
-        "py37-32bit":
-          python.version: "3.7"
-          python.architecture: "x86"
           numpy.version: "latest"
         "py36-64bit":
           python.version: "3.6"

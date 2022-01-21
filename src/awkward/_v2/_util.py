@@ -479,6 +479,11 @@ def behavior_of(*arrays, **kwargs):
 
 # maybe_wrap and maybe_wrap_like go here
 def wrap(content, behavior=None, highlevel=True, like=None):
+    assert content is None or isinstance(
+        content, (ak._v2.contents.Content, ak._v2.record.Record)
+    )
+    assert behavior is None or isinstance(behavior, Mapping)
+    assert isinstance(highlevel, bool)
     if highlevel:
         if like is not None and behavior is None:
             behavior = behavior_of(like)
@@ -491,17 +496,17 @@ def wrap(content, behavior=None, highlevel=True, like=None):
     return content
 
 
-# def extra(args, kwargs, defaults):
-#     out = []
-#     for i in range(len(defaults)):
-#         name, default = defaults[i]
-#         if i < len(args):
-#             out.append(args[i])
-#         elif name in kwargs:
-#             out.append(kwargs[name])
-#         else:
-#             out.append(default)
-#     return out
+def extra(args, kwargs, defaults):
+    out = []
+    for i in range(len(defaults)):
+        name, default = defaults[i]
+        if i < len(args):
+            out.append(args[i])
+        elif name in kwargs:
+            out.append(kwargs[name])
+        else:
+            out.append(default)
+    return out
 
 
 # def key2index(keys, key):

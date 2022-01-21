@@ -52,8 +52,8 @@ ignore = [
 [tool.cibuildwheel]
 test-extras = ["test"]
 test-command = "pytest {project}/tests"
-skip = ["pp*win*"]
-test-skip = ["*universal2:arm64", "pp*"]
+skip = ["pp*win*", "pp*-manylinux_i686"]
+test-skip = ["*universal2:arm64", "pp*", "*musllinux*"]
 manylinux-x86_64-image = "manylinux2014"
 build-verbosity = 1
 

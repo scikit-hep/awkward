@@ -12,6 +12,8 @@ except ImportError:
 
 import awkward as ak
 from awkward._v2.index import Index
+from awkward._v2.index import Index8
+from awkward._v2.index import Index64
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.unionform import UnionForm
@@ -267,71 +269,91 @@ class UnionArray(Content):
         nextcarry = ak._v2.index.Index64(tmpcarry.data[: lenout[0]], self._nplike)
         return self._contents[index]._carry(nextcarry, False, NestedIndexError)
 
-    def _regular_index(self, tags):
+    @staticmethod
+    def regular_index(tags, IndexClass=Index64, nplike=None):
+        if nplike is None:
+            nplike = ak.nplike.of(tags)
+
         lentags = tags.length
-        size = ak._v2.index.Index64.empty(1, self._nplike)
-        self._handle_error(
-            self._nplike[
+        size = ak._v2.index.Index64.empty(1, nplike)
+        Content._selfless_handle_error(
+            nplike[
                 "awkward_UnionArray_regular_index_getsize",
                 size.dtype.type,
                 tags.dtype.type,
             ](
-                size.to(self._nplike),
-                tags.to(self._nplike),
+                size.to(nplike),
+                tags.to(nplike),
                 lentags,
             )
         )
-        current = ak._v2.index.Index64.empty(size[0], self._nplike)
-        outindex = ak._v2.index.Index64.empty(lentags, self._nplike)
-        self._handle_error(
-            self._nplike[
+        current = IndexClass.empty(size[0], nplike)
+        outindex = IndexClass.empty(lentags, nplike)
+        Content._selfless_handle_error(
+            nplike[
                 "awkward_UnionArray_regular_index",
                 outindex.dtype.type,
                 current.dtype.type,
                 tags.dtype.type,
             ](
-                outindex.to(self._nplike),
-                current.to(self._nplike),
+                outindex.to(nplike),
+                current.to(nplike),
                 size[0],
-                tags.to(self._nplike),
+                tags.to(nplike),
                 lentags,
             )
         )
         return outindex
 
-    def _nested_tags_index(self, offsets, counts):
+    def _regular_index(self, tags):
+        return self.regular_index(
+            tags, IndexClass=type(self._index), nplike=self._nplike
+        )
+
+    @staticmethod
+    def nested_tags_index(
+        offsets, counts, TagsClass=Index8, IndexClass=Index64, nplike=None
+    ):
+        if nplike is None:
+            nplike = ak.nplike.of(offsets, counts)
+
         f_offsets = ak._v2.index.Index64(copy.deepcopy(offsets.data))
         contentlen = f_offsets[f_offsets.length - 1]
 
-        tags = ak._v2.index.Index8.empty(contentlen, self._nplike)
-        index = ak._v2.index.Index64.empty(contentlen, self._nplike)
+        tags = TagsClass.empty(contentlen, nplike)
+        index = IndexClass.empty(contentlen, nplike)
 
         for tag in range(len(counts)):
-            self._handle_error(
-                self._nplike[
+            Content._selfless_handle_error(
+                nplike[
                     "awkward_UnionArray_nestedfill_tags_index",
                     tags.dtype.type,
                     index.dtype.type,
                     f_offsets.dtype.type,
                     counts[tag].dtype.type,
                 ](
-                    tags.to(self._nplike),
-                    index.to(self._nplike),
-                    f_offsets.to(self._nplike),
+                    tags.to(nplike),
+                    index.to(nplike),
+                    f_offsets.to(nplike),
                     tag,
-                    counts[tag].to(self._nplike),
+                    counts[tag].to(nplike),
                     f_offsets.length - 1,
                 )
             )
         return (tags, index)
 
+    def _nested_tags_index(self, offsets, counts):
+        return self.nested_tags_index(
+            offsets,
+            counts,
+            TagsClass=type(self._tags),
+            IndexClass=type(self._index),
+            nplike=self._nplike,
+        )
+
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         simplified = self.simplify_uniontype()
-        if (
-            simplified.index.dtype == np.dtype(np.int32)
-            or simplified.index.dtype == np.dtype(np.uint32)
-            or simplified.index.dtype == np.dtype(np.int64)
-        ):
+        if isinstance(simplified, ak._v2.contents.UnionArray):
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(
@@ -760,7 +782,7 @@ class UnionArray(Content):
 
         nextcontents = []
         length_so_far = 0
-        parameters = {}
+        parameters = self._parameters
 
         for array in head:
             parameters = ak._v2._util.merge_parameters(
@@ -1166,9 +1188,12 @@ class UnionArray(Content):
 
     def _completely_flatten(self, nplike, options):
         out = []
-        for content in self._contents:
+        for i in range(len(self._contents)):
+            index = self._index[self._tags.data == i]
             out.extend(
-                content[: self._tags.length]._completely_flatten(nplike, options)
+                self._contents[i]
+                ._carry(index, False, NestedIndexError)
+                ._completely_flatten(nplike, options)
             )
         return out
 

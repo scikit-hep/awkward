@@ -367,7 +367,7 @@ class ByteMaskedArray(Content):
                     )
                 )
 
-            nextmask = ak._v2.index.Index8.zeros(mask_length, self._nplike)
+            nextmask = ak._v2.index.Index8.empty(mask_length, self._nplike)
             self._handle_error(
                 self._nplike[
                     "awkward_ByteMaskedArray_overlay_mask",
@@ -406,7 +406,7 @@ class ByteMaskedArray(Content):
                     self._valid_when,
                 )
             )
-            nextcarry = ak._v2.index.Index64.zeros(
+            nextcarry = ak._v2.index.Index64.empty(
                 mask_length - numnull[0], self._nplike
             )
             self._handle_error(
@@ -431,8 +431,8 @@ class ByteMaskedArray(Content):
                 ak._v2.contents.indexedarray.IndexedArray,
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
                 ak._v2.contents.bytemaskedarray.ByteMaskedArray,
-                ak._v2.contents.bitmaskeddarray.BitMaskedArray,
-                ak._v2.contents.unmaskeddarray.UnmaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
             return self.toIndexedOptionArray64.simplify_optiontype
@@ -657,7 +657,7 @@ class ByteMaskedArray(Content):
     ):
         mask_length = self._mask.length
 
-        numnull = ak._v2.index.Index64.zeros(1, self._nplike)
+        numnull = ak._v2.index.Index64.empty(1, self._nplike)
         self._handle_error(
             self._nplike[
                 "awkward_ByteMaskedArray_numnull",
@@ -672,9 +672,9 @@ class ByteMaskedArray(Content):
         )
 
         next_length = mask_length - numnull[0]
-        nextcarry = ak._v2.index.Index64.zeros(next_length, self._nplike)
-        nextparents = ak._v2.index.Index64.zeros(next_length, self._nplike)
-        outindex = ak._v2.index.Index64.zeros(mask_length, self._nplike)
+        nextcarry = ak._v2.index.Index64.empty(next_length, self._nplike)
+        nextparents = ak._v2.index.Index64.empty(next_length, self._nplike)
+        outindex = ak._v2.index.Index64.empty(mask_length, self._nplike)
         self._handle_error(
             self._nplike[
                 "awkward_ByteMaskedArray_reduce_next_64",
@@ -697,7 +697,7 @@ class ByteMaskedArray(Content):
         branch, depth = self.branch_depth
 
         if reducer.needs_position and (not branch and negaxis == depth):
-            nextshifts = ak._v2.index.Index64.zeros(next_length, self._nplike)
+            nextshifts = ak._v2.index.Index64.empty(next_length, self._nplike)
             if shifts is None:
                 self._handle_error(
                     self._nplike[
@@ -751,7 +751,7 @@ class ByteMaskedArray(Content):
                 out = out.toListOffsetArray64(True)
 
             if isinstance(out, ak._v2.contents.ListOffsetArray):
-                outoffsets = ak._v2.index.Index64.zeros(starts.length + 1, self._nplike)
+                outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
                 self._handle_error(
                     self._nplike[
                         "awkward_IndexedArray_reduce_next_fix_offsets_64",
@@ -851,11 +851,11 @@ class ByteMaskedArray(Content):
             next = self.project()._rpad(target, posaxis, depth, clip)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
-                next.simplify_optiontype(),
+                next,
                 None,
                 self._parameters,
                 self._nplike,
-            )
+            ).simplify_optiontype()
         else:
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
                 self._mask,
