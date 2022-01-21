@@ -51,6 +51,7 @@ def test_typeempty():
         is ak._v2.contents.ListOffsetArray
     )
 
+
 @pytest.mark.skip(reason="FIXME: Fields passing for RecordType v2 is different")
 def test_recordtype():
     array = ak._v2.types.RecordType(
