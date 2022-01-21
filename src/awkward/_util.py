@@ -29,11 +29,7 @@ py36 = sys.version_info[0] == 3 and sys.version_info[1] <= 6
 win = os.name == "nt"
 bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
 
-# to silence flake8 F821 errors
-if py27:
-    unicode = eval("unicode")
-else:
-    unicode = None
+unicode = None
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1

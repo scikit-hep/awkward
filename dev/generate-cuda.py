@@ -112,9 +112,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
             code += traverse(subnode, args, copy.copy(forvars), declared)
         code += "}\n"
     elif node.__class__.__name__ == "Raise":
-        if sys.version_info[0] == 2:
-            code = f'err->str = "{node.type.args[0].s}";\n'
-        elif sys.version_info[0] == 3 and sys.version_info[1] in [5, 6, 7]:
+        if sys.version_info < (3, 8):
             code = f'err->str = "{node.exc.args[0].s}";\n'
         else:
             code = f'err->str = "{node.exc.args[0].value}";\n'

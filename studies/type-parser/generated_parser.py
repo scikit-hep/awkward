@@ -185,8 +185,6 @@ logger.addHandler(logging.StreamHandler())
 
 logger.setLevel(logging.CRITICAL)
 
-Py36 = (sys.version_info[:2] >= (3, 6))
-
 
 def classify(seq, key=None, value=None):
     d = {}
@@ -967,19 +965,10 @@ class Pattern(Serialize):
     def to_regexp(self):
         raise NotImplementedError()
 
-    if Py36:
-        ##
-
-        def _get_flags(self, value):
-            for f in self.flags:
-                value = ('(?%s:%s)' % (f, value))
-            return value
-
-    else:
-        def _get_flags(self, value):
-            for f in self.flags:
-                value = ('(?%s)' % f) + value
-            return value
+    def _get_flags(self, value):
+        for f in self.flags:
+            value = ('(?%s:%s)' % (f, value))
+        return value
 
 
 class PatternStr(Pattern):
@@ -2290,9 +2279,6 @@ class Lark(Serialize):
         if self.options.use_bytes:
             if not isascii(grammar):
                 raise ValueError("Grammar must be ascii only, when use_bytes=True")
-            if sys.version_info[0] == 2 and self.options.use_bytes != 'force':
-                raise NotImplementedError("`use_bytes=True` may have issues on python2."
-                                          "Use `use_bytes='force'` to use it at your own risk.")
 
         cache_fn = None
         if self.options.cache:
