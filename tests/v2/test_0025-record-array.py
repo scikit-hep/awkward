@@ -229,6 +229,87 @@ def test_scalar_record():
     assert to_list(recordarray[2]) == {"one": 3, "two": [4.4, 5.5]}
 
 
+def test_type():
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
+    content2 = ak._v2.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
+    )
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9]))
+    fields = None
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content2)
+    recordarray = ak._v2.contents.RecordArray([content1, listoffsetarray], fields)
+    assert str(ak._v2.operations.describe.type(recordarray)) == "(int64, var * float64)"
+
+    assert ak._v2.operations.describe.type(recordarray) == ak._v2.types.RecordType(
+        (
+            ak._v2.types.NumpyType("int64"),
+            ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
+        ),
+        fields,
+    )
+
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray], fields=["one", "two"]
+    )
+    assert str(ak._v2.operations.describe.type(recordarray)) in (
+        "{one: int64, two: var * float64}",
+        "{two: var * float64, one: int64}",
+    )
+
+    assert (
+        str(
+            ak._v2.types.RecordType(
+                (ak._v2.types.NumpyType("int32"), ak._v2.types.NumpyType("float64")),
+                None,
+            )
+        )
+        == "(int32, float64)"
+    )
+
+
+@pytest.mark.skip(reason="FIXME: recordtype requires field argument")
+def test_recordtype():
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
+    content2 = ak._v2.contents.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)
+    )
+    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9]))
+    fields = None
+    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content2)
+    recordarray = ak._v2.contents.RecordArray([content1, listoffsetarray], fields)
+
+    assert ak._v2.operations.describe.type(recordarray[2]) == ak._v2.types.RecordType(
+        (
+            ak._v2.types.NumpyType("int64"),
+            ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
+        )
+    )
+    assert (
+        str(
+            ak._v2.types.RecordType(
+                {
+                    "one": ak._v2.types.NumpyType("int32"),
+                    "two": ak._v2.types.NumpyType("float64"),
+                }
+            )
+        )
+        in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
+    )
+
+    assert ak._v2.operations.describe.type(recordarray) == ak._v2.types.RecordType(
+        {
+            "one": ak._v2.types.NumpyType("int64"),
+            "two": ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
+        }
+    )
+    assert ak._v2.operations.describe.type(recordarray[2]) == ak._v2.types.RecordType(
+        {
+            "one": ak._v2.types.NumpyType("int64"),
+            "two": ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
+        }
+    )
+
+
 def test_getitem():
     assert (
         ak._ext._slice_tostring((1, 2, [3], "four", ["five", "six"], slice(7, 8, 9)))

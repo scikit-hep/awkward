@@ -21,6 +21,14 @@ stops = ak._v2.index.Index64(np.array([2, 3]))
 listarray = ak._v2.contents.ListArray(starts, stops, regulararray)
 
 
+def test_simple_type():
+    assert str(ak._v2.operations.describe.type(content)) == "float64"
+
+
+def test_type():
+    assert str(ak._v2.operations.describe.type(regulararray)) == "2 * var * float64"
+
+
 def test_iteration():
     assert to_list(regulararray) == [
         [[0.0, 1.1, 2.2], []],
