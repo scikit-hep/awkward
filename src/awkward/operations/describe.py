@@ -2,7 +2,6 @@
 
 # v2: replace with all the src/awkward/_v2/operations/describe/*.py files.
 
-from __future__ import absolute_import
 
 import numbers
 
@@ -72,8 +71,7 @@ def validity_error(array, exception=False):
 
     else:
         raise TypeError(
-            "not an awkward array: {0}".format(repr(array))
-            + ak._util.exception_suffix(__file__)
+            f"not an awkward array: {repr(array)}" + ak._util.exception_suffix(__file__)
         )
 
 
@@ -191,7 +189,7 @@ def type(array):
 
     else:
         raise TypeError(
-            "unrecognized array type: {0}".format(repr(array))
+            f"unrecognized array type: {repr(array)}"
             + ak._util.exception_suffix(__file__)
         )
 

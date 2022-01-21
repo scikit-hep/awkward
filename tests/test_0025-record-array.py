@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -490,31 +489,31 @@ def test_identities():
 
     assert ak.to_list(a) == [
         {
-            u"outer": [
-                {u"x": 0, u"y": []},
-                {u"x": 1, u"y": [1]},
-                {u"x": 2, u"y": [1, 2]},
+            "outer": [
+                {"x": 0, "y": []},
+                {"x": 1, "y": [1]},
+                {"x": 2, "y": [1, 2]},
             ]
         },
-        {u"outer": []},
-        {u"outer": [{u"x": 3, u"y": [1, 2, 3]}, {u"x": 4, u"y": [1, 2, 3, 4]}]},
+        {"outer": []},
+        {"outer": [{"x": 3, "y": [1, 2, 3]}, {"x": 4, "y": [1, 2, 3, 4]}]},
     ]
     assert a.identity == ()
     assert a[2].identity == (2,)
     assert a[2, "outer"].identity == (2, "outer")
     assert a[2, "outer", 0].identity == (2, "outer", 0)
-    assert a[2, "outer", 0, "y"].identity == (2, u"outer", 0, u"y")
+    assert a[2, "outer", 0, "y"].identity == (2, "outer", 0, "y")
 
     assert ak.to_list(b) == [
-        {u"outer": {u"x": 0, u"y": []}},
-        {u"outer": {u"x": 1, u"y": [1]}},
-        {u"outer": {u"x": 2, u"y": [1, 2]}},
-        {u"outer": {u"x": 3, u"y": [1, 2, 3]}},
-        {u"outer": {u"x": 4, u"y": [1, 2, 3, 4]}},
+        {"outer": {"x": 0, "y": []}},
+        {"outer": {"x": 1, "y": [1]}},
+        {"outer": {"x": 2, "y": [1, 2]}},
+        {"outer": {"x": 3, "y": [1, 2, 3]}},
+        {"outer": {"x": 4, "y": [1, 2, 3, 4]}},
     ]
     assert b.identity == ()
     assert b[2].identity == (2,)
-    assert b[2, "outer"].identity == (2, u"outer")
+    assert b[2, "outer"].identity == (2, "outer")
     with pytest.raises(ValueError) as err:
         b[2, "outer", 0].identity
     assert str(err.value).startswith("in NumpyArray, too many dimensions in slice")

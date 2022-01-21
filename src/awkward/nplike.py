@@ -2,7 +2,6 @@
 
 # v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
 
-from __future__ import absolute_import
 
 import ctypes
 
@@ -43,7 +42,7 @@ to move one or the other to main memory or the GPU(s)."""
         )
 
 
-class Singleton(object):
+class Singleton:
     _instance = None
 
     @classmethod
@@ -373,13 +372,13 @@ class NumpyLike(Singleton):
         return self._module.datetime_as_string(*args, **kwargs)
 
 
-class NumpyKernel(object):
+class NumpyKernel:
     def __init__(self, kernel, name_and_types):
         self._kernel = kernel
         self._name_and_types = name_and_types
 
     def __repr__(self):
-        return "<{0} {1}{2}>".format(
+        return "<{} {}{}>".format(
             type(self).__name__,
             self._name_and_types[0],
             "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),

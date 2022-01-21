@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_util.py
 
-from __future__ import absolute_import
 
 import re
 import sys
@@ -114,7 +113,7 @@ def deprecate(
         date = ""
     else:
         date = " (target date: " + date + ")"
-    warning = """In version {0}{1}, this will be {2}.
+    warning = """In version {}{}, this will be {}.
 
 To raise these warnings as errors (and get stack traces to find out where they're called), run
 
@@ -123,14 +122,14 @@ To raise these warnings as errors (and get stack traces to find out where they'r
 
 after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
 
-Issue: {3}.""".format(
+Issue: {}.""".format(
         version, date, will_be, message
     )
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
 
 
 # Sentinel object for catching pass-through values
-class MISSING(object):
+class MISSING:
     pass
 
 
@@ -225,8 +224,7 @@ class Behavior(Mapping):
                 yield n, x
 
     def __iter__(self):
-        for x in self.keys():
-            yield x
+        yield from self.keys()
 
     def __len__(self):
         return len(set(self.defaults) | set(self.overrides))
@@ -566,7 +564,7 @@ def key2index(keys, key):
 
     if attempt is None:
         raise ValueError(
-            "key {0} not found in record".format(repr(key)) + exception_suffix(__file__)
+            f"key {repr(key)} not found in record" + exception_suffix(__file__)
         )
     else:
         return attempt
@@ -626,8 +624,7 @@ def completely_flatten(array):
 
     else:
         raise RuntimeError(
-            "cannot completely flatten: {0}".format(type(array))
-            + exception_suffix(__file__)
+            f"cannot completely flatten: {type(array)}" + exception_suffix(__file__)
         )
 
 
@@ -649,8 +646,8 @@ def broadcast_and_apply(  # noqa: C901
         for x in inputs[1:]:
             if len(x) != length:
                 raise ValueError(
-                    "cannot broadcast {0} of length {1} with {2} of "
-                    "length {3}".format(
+                    "cannot broadcast {} of length {} with {} of "
+                    "length {}".format(
                         type(inputs[0]).__name__, length, type(x).__name__, len(x)
                     )
                     + exception_suffix(__file__)
@@ -809,8 +806,8 @@ def broadcast_and_apply(  # noqa: C901
                         length = len(tagslist[-1])
                     elif length != len(tagslist[-1]):
                         raise ValueError(
-                            "cannot broadcast UnionArray of length {0} "
-                            "with UnionArray of length {1}".format(
+                            "cannot broadcast UnionArray of length {} "
+                            "with UnionArray of length {}".format(
                                 length, len(tagslist[-1])
                             )
                             + exception_suffix(__file__)
@@ -906,7 +903,7 @@ def broadcast_and_apply(  # noqa: C901
                 for x in inputs
             ):
                 maxsize = max(
-                    [x.size for x in inputs if isinstance(x, ak.layout.RegularArray)]
+                    x.size for x in inputs if isinstance(x, ak.layout.RegularArray)
                 )
                 for x in inputs:
                     if isinstance(x, ak.layout.RegularArray):
@@ -930,7 +927,7 @@ def broadcast_and_apply(  # noqa: C901
                         else:
                             raise ValueError(
                                 "cannot broadcast RegularArray of size "
-                                "{0} with RegularArray of size {1}".format(
+                                "{} with RegularArray of size {}".format(
                                     x.size, maxsize
                                 )
                                 + exception_suffix(__file__)
@@ -1069,7 +1066,7 @@ def broadcast_and_apply(  # noqa: C901
                     )
                 else:
                     raise AssertionError(
-                        "unexpected offsets, starts: {0} {1}".format(
+                        "unexpected offsets, starts: {} {}".format(
                             type(offsets), type(starts)
                         )
                         + exception_suffix(__file__)
@@ -1092,7 +1089,7 @@ def broadcast_and_apply(  # noqa: C901
                     elif set(keys) != set(x.keys()):
                         raise ValueError(
                             "cannot broadcast records because keys don't "
-                            "match:\n    {0}\n    {1}".format(
+                            "match:\n    {}\n    {}".format(
                                 ", ".join(sorted(keys)), ", ".join(sorted(x.keys()))
                             )
                             + exception_suffix(__file__)
@@ -1101,8 +1098,8 @@ def broadcast_and_apply(  # noqa: C901
                         length = len(x)
                     elif length != len(x):
                         raise ValueError(
-                            "cannot broadcast RecordArray of length {0} "
-                            "with RecordArray of length {1}".format(length, len(x))
+                            "cannot broadcast RecordArray of length {} "
+                            "with RecordArray of length {}".format(length, len(x))
                             + exception_suffix(__file__)
                         )
                     if not x.istuple:
@@ -1134,7 +1131,7 @@ def broadcast_and_apply(  # noqa: C901
 
         else:
             raise ValueError(
-                "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
+                "cannot broadcast: {}".format(", ".join(repr(type(x)) for x in inputs))
                 + exception_suffix(__file__)
             )
 
@@ -1321,8 +1318,7 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
 
     else:
         raise AssertionError(
-            "unrecognized Content type: {0}".format(type(layout))
-            + exception_suffix(__file__)
+            f"unrecognized Content type: {type(layout)}" + exception_suffix(__file__)
         )
 
 
@@ -1521,8 +1517,7 @@ def transform_child_layouts(transform, layout, depth, user=None, keep_parameters
 
     else:
         raise AssertionError(
-            "unrecognized Content type: {0}".format(type(layout))
-            + exception_suffix(__file__)
+            f"unrecognized Content type: {type(layout)}" + exception_suffix(__file__)
         )
 
 
@@ -1625,7 +1620,7 @@ def minimally_touching_string(limit_length, layout, behavior):
             elif isinstance(x, (np.datetime64, np.timedelta64)):
                 yield space + str(x)
             elif isinstance(x, (float, np.floating)):
-                yield space + "{0:.3g}".format(x)
+                yield space + f"{x:.3g}"
             else:
                 yield space + repr(x)
 
@@ -1692,13 +1687,12 @@ def minimally_touching_string(limit_length, layout, behavior):
             elif isinstance(x, (np.datetime64, np.timedelta64)):
                 yield str(x) + space
             elif isinstance(x, (float, np.floating)):
-                yield "{0:.3g}".format(x) + space
+                yield f"{x:.3g}" + space
             else:
                 yield repr(x) + space
 
     def forever(iterable):
-        for token in iterable:
-            yield token
+        yield from iterable
         while True:
             yield None
 

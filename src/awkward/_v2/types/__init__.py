@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 from awkward._v2.types.type import Type  # noqa: F401
 from awkward._v2.types.unknowntype import UnknownType  # noqa: F401

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
 import copy
@@ -34,43 +33,43 @@ class BitMaskedArray(Content):
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
-                "{0} 'mask' must be an Index with dtype=uint8, not {1}".format(
+                "{} 'mask' must be an Index with dtype=uint8, not {}".format(
                     type(self).__name__, repr(mask)
                 )
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{0} 'content' must be a Content subtype, not {1}".format(
+                "{} 'content' must be a Content subtype, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
         if not isinstance(valid_when, bool):
             raise TypeError(
-                "{0} 'valid_when' must be boolean, not {1}".format(
+                "{} 'valid_when' must be boolean, not {}".format(
                     type(self).__name__, repr(valid_when)
                 )
             )
         if not ak._util.isint(length):
             raise TypeError(
-                "{0} 'length' must be an integer, not {1}".format(
+                "{} 'length' must be an integer, not {}".format(
                     type(self).__name__, repr(length)
                 )
             )
         if not isinstance(lsb_order, bool):
             raise TypeError(
-                "{0} 'lsb_order' must be boolean, not {1}".format(
+                "{} 'lsb_order' must be boolean, not {}".format(
                     type(self).__name__, repr(lsb_order)
                 )
             )
         if length > mask.length * 8:
             raise ValueError(
-                "{0} 'length' ({1}) must be <= len(mask) * 8 ({2})".format(
+                "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
                     type(self).__name__, length, mask.length * 8
                 )
             )
         if length > content.length:
             raise ValueError(
-                "{0} 'length' ({1}) must be <= len(content) ({2})".format(
+                "{} 'length' ({}) must be <= len(content) ({})".format(
                     type(self).__name__, length, content.length
                 )
             )
@@ -480,9 +479,9 @@ class BitMaskedArray(Content):
 
     def _validityerror(self, path):
         if self.mask.length * 8 < self.length:
-            return 'at {0} ("{1}"): len(mask) * 8 < length'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): len(mask) * 8 < length'
         elif self._content.length < self.length:
-            return 'at {0} ("{1}"): len(content) < length'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): len(content) < length'
         elif isinstance(
             self._content,
             (

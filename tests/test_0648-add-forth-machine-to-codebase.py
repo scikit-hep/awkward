@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -519,7 +518,7 @@ x i-> y
                 if not (big == "!" and tpe in ("?", "b", "B")):
                     source = """input x
 
-x {0} stack
+x {} stack
 """.format(
                         rep + big + tpe + "->"
                     )
@@ -528,7 +527,7 @@ x {0} stack
                     source = """input x
 output y int32
 
-x {0} y
+x {} y
 """.format(
                         rep + big + tpe + "->"
                     )

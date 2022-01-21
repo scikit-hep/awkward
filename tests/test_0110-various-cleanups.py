@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -30,17 +29,17 @@ def test_na_union():
 
 class DummyRecord(ak.Record):
     def __repr__(self):
-        return "<{0}>".format(self.x)
+        return f"<{self.x}>"
 
 
 class DummyArray(ak.Array):
     def __repr__(self):
-        return "<DummyArray {0}>".format(" ".join(repr(x) for x in self))
+        return "<DummyArray {}>".format(" ".join(repr(x) for x in self))
 
 
 class DeepDummyArray(ak.Array):
     def __repr__(self):
-        return "<DeepDummyArray {0}>".format(" ".join(repr(x) for x in self))
+        return "<DeepDummyArray {}>".format(" ".join(repr(x) for x in self))
 
 
 def test_behaviors():

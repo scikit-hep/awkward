@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -883,23 +882,23 @@ def test_arrow_null_nested_struct_nested_null():
 
 
 def test_arrow_strings():
-    a = pyarrow.array(["one", "two", "three", u"fo\u2014ur", "five"])
+    a = pyarrow.array(["one", "two", "three", "fo\u2014ur", "five"])
     assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "two",
         "three",
-        u"fo\u2014ur",
+        "fo\u2014ur",
         "five",
     ]
 
 
 def test_arrow_strings_null():
-    a = pyarrow.array(["one", "two", None, u"fo\u2014ur", "five"])
+    a = pyarrow.array(["one", "two", None, "fo\u2014ur", "five"])
     assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "two",
         None,
-        u"fo\u2014ur",
+        "fo\u2014ur",
         "five",
     ]
 

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -505,7 +504,7 @@ def test_rpad_and_clip_listoffset_array():
         [],
         [3.3, 4.4],
     ]
-    assert str("option[") + str(ak.type(listoffsetarray)) + str("]") == str(
+    assert "option[" + str(ak.type(listoffsetarray)) + "]" == str(
         ak.type(listoffsetarray.rpad_and_clip(3, 0))
     )
 
@@ -518,7 +517,7 @@ def test_rpad_and_clip_listoffset_array():
         [],
         None,
     ]
-    assert str("option[") + str(ak.type(listoffsetarray)) + str("]") == str(
+    assert "option[" + str(ak.type(listoffsetarray)) + "]" == str(
         ak.type(listoffsetarray.rpad_and_clip(7, 0))
     )
 
@@ -635,7 +634,7 @@ def test_rpad_listoffset_array():
         [],
         None,
     ]
-    assert str("option[") + str(ak.type(listoffsetarray)) + str("]") == str(
+    assert "option[" + str(ak.type(listoffsetarray)) + "]" == str(
         ak.type(listoffsetarray.rpad(7, 0))
     )
 
@@ -722,7 +721,7 @@ def test_rpad_listoffset_array():
         [],
         [],
     ]
-    assert str("option[") + str(ak.type(listoffsetarray)) + str("]") == str(
+    assert "option[" + str(ak.type(listoffsetarray)) + "]" == str(
         ak.type(listoffsetarray.rpad(6, 0))
     )
 
@@ -735,7 +734,7 @@ def test_rpad_listoffset_array():
         [],
         None,
     ]
-    assert str("option[") + str(ak.type(listoffsetarray)) + str("]") == str(
+    assert "option[" + str(ak.type(listoffsetarray)) + "]" == str(
         ak.type(listoffsetarray.rpad(7, 0))
     )
 
@@ -750,7 +749,7 @@ def test_rpad_listoffset_array():
         None,
         None,
     ]
-    assert str("option[") + str(ak.type(listoffsetarray)) + str("]") == str(
+    assert "option[" + str(ak.type(listoffsetarray)) + "]" == str(
         ak.type(listoffsetarray.rpad(9, 0))
     )
 
@@ -817,9 +816,7 @@ def test_rpad_list_array():
         None,
         None,
     ]
-    assert str("option[") + str(ak.type(array)) + str("]") == str(
-        ak.type(array.rpad(7, 0))
-    )
+    assert "option[" + str(ak.type(array)) + "]" == str(ak.type(array.rpad(7, 0)))
 
     assert ak.to_list(array.rpad(1, 1)) == [
         [0.0, 1.1, 2.2],
@@ -870,12 +867,12 @@ def test_rpad_and_clip_list_array():
         [8.8],
     ]
     assert ak.to_list(array.rpad_and_clip(1, 0)) == [[0.0, 1.1, 2.2]]
-    assert str("option[") + str(ak.type(array)) + str("]") == str(
+    assert "option[" + str(ak.type(array)) + "]" == str(
         ak.type(array.rpad_and_clip(1, 0))
     )
 
     assert ak.to_list(array.rpad_and_clip(2, 0)) == [[0.0, 1.1, 2.2], []]
-    assert str("option[") + str(ak.type(array)) + str("]") == str(
+    assert "option[" + str(ak.type(array)) + "]" == str(
         ak.type(array.rpad_and_clip(2, 0))
     )
 
@@ -888,7 +885,7 @@ def test_rpad_and_clip_list_array():
         None,
         None,
     ]
-    assert str("option[") + str(ak.type(array)) + str("]") == str(
+    assert "option[" + str(ak.type(array)) + "]" == str(
         ak.type(array.rpad_and_clip(7, 0))
     )
 

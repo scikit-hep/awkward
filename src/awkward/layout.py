@@ -7,7 +7,6 @@
 # anyway they need to be exposed here for backward compatibility.
 # Ignore the identities, VirtualArray stuff, kernel_lib, _PersistentSharedPtr, Iterator.
 
-from __future__ import absolute_import
 
 from awkward._ext import Index8
 from awkward._ext import IndexU8

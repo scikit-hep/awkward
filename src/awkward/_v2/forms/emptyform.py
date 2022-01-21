@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.contents.content import NestedIndexError
@@ -13,7 +12,7 @@ class EmptyForm(Form):
 
     def __repr__(self):
         args = self._repr_args()
-        return "{0}({1})".format(type(self).__name__, ", ".join(args))
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose, toplevel):
         return self._tolist_extra({"class": "EmptyArray"}, verbose)

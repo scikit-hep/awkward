@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2.forms.form import Form, _parameters_equal
@@ -17,13 +16,13 @@ class IndexedOptionForm(Form):
     ):
         if not ak._util.isstr(index):
             raise TypeError(
-                "{0} 'index' must be of type str, not {1}".format(
+                "{} 'index' must be of type str, not {}".format(
                     type(self).__name__, repr(index)
                 )
             )
         if not isinstance(content, Form):
             raise TypeError(
-                "{0} all 'contents' must be Form subclasses, not {1}".format(
+                "{} all 'contents' must be Form subclasses, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
@@ -42,7 +41,7 @@ class IndexedOptionForm(Form):
 
     def __repr__(self):
         args = [repr(self._index), repr(self._content)] + self._repr_args()
-        return "{0}({1})".format(type(self).__name__, ", ".join(args))
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose, toplevel):
         return self._tolist_extra(

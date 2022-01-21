@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 from awkward._v2._slicing import NestedIndexError
@@ -268,9 +267,7 @@ class EmptyArray(Content):
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise np.AxisError(
-                "axis={0} exceeds the depth of this array({1})".format(axis, depth)
-            )
+            raise np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
         else:
             return self.rpad_axis0(target, True)
 

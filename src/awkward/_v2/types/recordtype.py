@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 try:
     from collections.abc import Iterable
@@ -18,7 +17,7 @@ class RecordType(Type):
     def __init__(self, contents, fields, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{0} 'contents' must be iterable, not {1}".format(
+                "{} 'contents' must be iterable, not {}".format(
                     type(self).__name__, repr(contents)
                 )
             )
@@ -27,25 +26,25 @@ class RecordType(Type):
         for content in contents:
             if not isinstance(content, Type):
                 raise TypeError(
-                    "{0} all 'contents' must be Type subclasses, not {1}".format(
+                    "{} all 'contents' must be Type subclasses, not {}".format(
                         type(self).__name__, repr(content)
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
             raise TypeError(
-                "{0} 'fields' must be iterable, not {1}".format(
+                "{} 'fields' must be iterable, not {}".format(
                     type(self).__name__, repr(contents)
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
             raise TypeError(
-                "{0} 'parameters' must be of type dict or None, not {1}".format(
+                "{} 'parameters' must be of type dict or None, not {}".format(
                     type(self).__name__, repr(parameters)
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
             raise TypeError(
-                "{0} 'typestr' must be of type string or None, not {1}".format(
+                "{} 'typestr' must be of type string or None, not {}".format(
                     type(self).__name__, repr(typestr)
                 )
             )
@@ -93,24 +92,24 @@ class RecordType(Type):
             else:
                 if self.is_tuple:
                     if name is None:
-                        out = "tuple[[{0}], {1}]".format(", ".join(children), params)
+                        out = "tuple[[{}], {}]".format(", ".join(children), params)
                     else:
-                        out = "{0}[{1}, {2}]".format(name, ", ".join(children), params)
+                        out = "{}[{}, {}]".format(name, ", ".join(children), params)
                 else:
                     if name is None:
                         fields = [json.dumps(x) for x in self._fields]
-                        out = "struct[[{0}], [{1}], {2}]".format(
+                        out = "struct[[{}], [{}], {}]".format(
                             ", ".join(fields), ", ".join(children), params
                         )
                     else:
                         pairs = [k + ": " + v for k, v in zip(self._fields, children)]
-                        out = "{0}[{1}, {2}]".format(name, ", ".join(pairs), params)
+                        out = "{}[{}, {}]".format(name, ", ".join(pairs), params)
 
         return self._str_categorical_begin() + out + self._str_categorical_end()
 
     def __repr__(self):
         args = [repr(self._contents), repr(self._fields)] + self._repr_args()
-        return "{0}({1})".format(type(self).__name__, ", ".join(args))
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):
         if isinstance(other, RecordType):

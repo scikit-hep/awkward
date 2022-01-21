@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -59,7 +58,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
             to_str = to_dtype.name
         else:
             raise ValueError(
-                "cannot use {0} to cast the numeric type of an array".format(to_dtype)
+                f"cannot use {to_dtype} to cast the numeric type of an array"
             )
 
     layout = ak._v2.operations.convert.to_layout(

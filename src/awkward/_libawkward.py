@@ -2,7 +2,6 @@
 
 # v2: no change; keep this file.
 
-from __future__ import absolute_import
 
 import ctypes
 import platform

@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numba/arrayview.py
 
-from __future__ import absolute_import
 
 import operator
 
@@ -29,7 +28,7 @@ def code_to_function(code, function_name, externals=None, debug=False):
 ########## Lookup
 
 
-class Lookup(object):
+class Lookup:
     def __init__(self, layout):
         positions = []
         sharedptrs = []
@@ -224,7 +223,7 @@ def tolookup(layout, positions, sharedptrs, arrays):
 
     else:
         raise AssertionError(
-            "unrecognized Content or Form type: {0}".format(type(layout))
+            f"unrecognized Content or Form type: {type(layout)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -265,7 +264,7 @@ def tonumbatype(form):
 
     else:
         raise AssertionError(
-            "unrecognized Form type: {0}".format(type(form))
+            f"unrecognized Form type: {type(form)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -279,14 +278,14 @@ class LookupType(numba.types.Type):
     arraytype = numba.types.Array(numba.intp, 1, "C")
 
     def __init__(self):
-        super(LookupType, self).__init__(name="ak.LookupType()")
+        super().__init__(name="ak.LookupType()")
 
 
 @numba.extending.register_model(LookupType)
 class LookupModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("arrayptrs", fe_type.arraytype), ("sharedptrs", fe_type.arraytype)]
-        super(LookupModel, self).__init__(dmm, fe_type, members)
+        super().__init__(dmm, fe_type, members)
 
 
 @numba.extending.unbox(LookupType)
@@ -312,7 +311,7 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 ########## ArrayView
 
 
-class ArrayView(object):
+class ArrayView:
     @classmethod
     def fromarray(cls, array):
         behavior = ak._util.behaviorof(array)
@@ -391,8 +390,8 @@ def wrap(type, viewtype, fields):
 
 class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
-        super(ArrayViewType, self).__init__(
-            name="ak.ArrayView({0}, {1}, {2})".format(
+        super().__init__(
+            name="ak.ArrayView({}, {}, {})".format(
                 type.name,
                 ak._connect._numba.repr_behavior(behavior),
                 repr(fields),
@@ -418,7 +417,7 @@ class ArrayViewModel(numba.core.datamodel.models.StructModel):
             ("sharedptrs", numba.types.CPointer(numba.intp)),
             ("pylookup", numba.types.pyobject),
         ]
-        super(ArrayViewModel, self).__init__(dmm, fe_type, members)
+        super().__init__(dmm, fe_type, members)
 
 
 @numba.core.imputils.lower_constant(ArrayViewType)
@@ -667,8 +666,8 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
 
 class IteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, viewtype):
-        super(IteratorType, self).__init__(
-            "ak.Iterator({0})".format(viewtype.name),
+        super().__init__(
+            f"ak.Iterator({viewtype.name})",
             viewtype.type.getitem_at_check(viewtype),
         )
         self.viewtype = viewtype
@@ -691,7 +690,7 @@ class IteratorModel(numba.core.datamodel.models.StructModel):
             ("length", numba.intp),
             ("at", numba.types.EphemeralPointer(numba.intp)),
         ]
-        super(IteratorModel, self).__init__(dmm, fe_type, members)
+        super().__init__(dmm, fe_type, members)
 
 
 @numba.extending.lower_builtin("getiter", ArrayViewType)
@@ -739,7 +738,7 @@ def lower_iternext(context, builder, sig, args, result):
 ########## RecordView
 
 
-class RecordView(object):
+class RecordView:
     @classmethod
     def fromrecord(cls, record):
         behavior = ak._util.behaviorof(record)
@@ -782,9 +781,7 @@ def typeof_RecordView(obj, c):
 
 class RecordViewType(numba.types.Type):
     def __init__(self, arrayviewtype):
-        super(RecordViewType, self).__init__(
-            name="ak.RecordViewType({0})".format(arrayviewtype.name)
-        )
+        super().__init__(name=f"ak.RecordViewType({arrayviewtype.name})")
         self.arrayviewtype = arrayviewtype
 
     @property
@@ -808,7 +805,7 @@ class RecordViewType(numba.types.Type):
 class RecordViewModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("arrayview", fe_type.arrayviewtype), ("at", numba.intp)]
-        super(RecordViewModel, self).__init__(dmm, fe_type, members)
+        super().__init__(dmm, fe_type, members)
 
 
 @numba.core.imputils.lower_constant(RecordViewType)
@@ -923,7 +920,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                                     if isinstance(x, numba.types.Literal)
                                     else x
                                     for x in args
-                                ]
+                                ],
                             )(lower)
                             return sig
 
@@ -1069,9 +1066,7 @@ def overload_contains(obj, element):
                         "({0} is not None and element == {0}): return True".format(name)
                     )
                 else:
-                    statements.append(
-                        indent + "if element == {0}: return True".format(name)
-                    )
+                    statements.append(indent + f"if element == {name}: return True")
 
             else:
                 if arraytype.is_optiontype:
@@ -1080,9 +1075,7 @@ def overload_contains(obj, element):
                         "({0} is not None and element in {0}): return True".format(name)
                     )
                 else:
-                    statements.append(
-                        indent + "if element in {0}: return True".format(name)
-                    )
+                    statements.append(indent + f"if element in {name}: return True")
 
         if isinstance(obj, ArrayViewType):
             add_statement("", "obj", obj.type, True)
@@ -1092,7 +1085,7 @@ def overload_contains(obj, element):
         return code_to_function(
             """
 def contains_impl(obj, element):
-    {0}
+    {}
     return False""".format(
                 "\n    ".join(statements)
             ),
@@ -1130,11 +1123,11 @@ def overload_np_array(array, dtype=None):
             ensure_shape = []
             array_name = "array"
             for i in range(ndim - 1):
-                declare_shape.append("shape{0} = -1".format(i))
+                declare_shape.append(f"shape{i} = -1")
                 compute_shape.append(
-                    "{0}for x{1} in {2}:".format("    " * i, i, array_name)
+                    "{}for x{} in {}:".format("    " * i, i, array_name)
                 )
-                compute_shape.append("{0}    if shape{1} == -1:".format("    " * i, i))
+                compute_shape.append("{}    if shape{} == -1:".format("    " * i, i))
                 compute_shape.append(
                     "{0}        shape{1} = len(x{1})".format("    " * i, i)
                 )
@@ -1142,12 +1135,12 @@ def overload_np_array(array, dtype=None):
                     "{0}    elif shape{1} != len(x{1}):".format("    " * i, i)
                 )
                 compute_shape.append(
-                    "{0}        raise ValueError('cannot convert to NumPy because "
+                    "{}        raise ValueError('cannot convert to NumPy because "
                     "subarray lengths are not regular')".format("    " * i)
                 )
-                specify_shape.append("shape{0}".format(i))
+                specify_shape.append(f"shape{i}")
                 ensure_shape.append("if shape{0} == -1: shape{0} = 0".format(i))
-                array_name = "x{0}".format(i)
+                array_name = f"x{i}"
 
             fill_array = []
             index = []
@@ -1158,28 +1151,28 @@ def overload_np_array(array, dtype=None):
                         "    " * i, i, array_name
                     )
                 )
-                index.append("i{0}".format(i))
-                array_name = "x{0}".format(i)
+                index.append(f"i{i}")
+                array_name = f"x{i}"
 
             fill_array.append(
-                "{0}out[{1}] = x{2}".format("    " * ndim, "][".join(index), ndim - 1)
+                "{}out[{}] = x{}".format("    " * ndim, "][".join(index), ndim - 1)
             )
 
             return code_to_function(
                 """
 def array_impl(array, dtype=None):
-    {0}
-    {1}
-    {2}
-    out = numpy.zeros(({3}), {4})
-    {5}
+    {}
+    {}
+    {}
+    out = numpy.zeros(({}), {})
+    {}
     return out
 """.format(
                     "\n    ".join(declare_shape),
                     "\n    ".join(compute_shape),
                     "\n    ".join(ensure_shape),
                     ", ".join(specify_shape),
-                    "numpy.{0}".format(inner_dtype) if dtype is None else "dtype",
+                    f"numpy.{inner_dtype}" if dtype is None else "dtype",
                     "\n    ".join(fill_array),
                 ),
                 "array_impl",
@@ -1252,7 +1245,7 @@ def lower_asarray(context, builder, sig, args):
 ########## PartitionedView
 
 
-class PartitionedView(object):
+class PartitionedView:
     def __init__(self, type, behavior, lookups, stops, start, stop, fields):
         self.type = type
         self.behavior = behavior
@@ -1308,8 +1301,8 @@ class PartitionedViewType(numba.types.IterableType, numba.types.Sized):
     stopstype = numba.types.Array(numba.intp, 1, "C")
 
     def __init__(self, type, behavior, fields):
-        super(PartitionedViewType, self).__init__(
-            name="ak.PartitionedView({0}, {1}, {2})".format(
+        super().__init__(
+            name="ak.PartitionedView({}, {}, {})".format(
                 type.name,
                 ak._connect._numba.repr_behavior(behavior),
                 repr(fields),
@@ -1388,7 +1381,7 @@ class PartitionedViewModel(numba.core.datamodel.models.StructModel):
             ("start", numba.intp),
             ("stop", numba.intp),
         ]
-        super(PartitionedViewModel, self).__init__(dmm, fe_type, members)
+        super().__init__(dmm, fe_type, members)
 
 
 @numba.extending.unbox(PartitionedViewType)
@@ -1731,8 +1724,8 @@ def lower_getattr_generic_partitioned(
 
 class PartitionedIteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, partviewtype):
-        super(PartitionedIteratorType, self).__init__(
-            "ak.PartitionedIterator({0})".format(partviewtype.name),
+        super().__init__(
+            f"ak.PartitionedIterator({partviewtype.name})",
             partviewtype.type.getitem_at_check(partviewtype.toArrayViewType()),
         )
         self.partviewtype = partviewtype
@@ -1759,7 +1752,7 @@ class PartitionedIteratorModel(numba.core.datamodel.models.StructModel):
             ("length", numba.intp),
             ("at", numba.types.EphemeralPointer(numba.intp)),
         ]
-        super(PartitionedIteratorModel, self).__init__(dmm, fe_type, members)
+        super().__init__(dmm, fe_type, members)
 
 
 @numba.extending.lower_builtin("getiter", PartitionedViewType)

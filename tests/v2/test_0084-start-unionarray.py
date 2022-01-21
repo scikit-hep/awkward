@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -198,10 +197,10 @@ def test_getitem():
         tags, index, [content0, content1, content2, content3]
     )
 
-    assert set(content2.fields) == set(["x", "y"])
-    assert set(content3.fields) == set(["x", "y", "z"])
-    assert set(array2.fields) == set(["x", "y"])
-    assert set(array3.fields) == set(["x", "y"])
+    assert set(content2.fields) == {"x", "y"}
+    assert set(content3.fields) == {"x", "y", "z"}
+    assert set(array2.fields) == {"x", "y"}
+    assert set(array3.fields) == {"x", "y"}
     assert (
         set(array4.fields) == set()
     )  # v2 definition: fields (old keys()) is now the INTERSECTION

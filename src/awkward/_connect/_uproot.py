@@ -2,7 +2,6 @@
 
 # v2: drop, since this functionality will be replaced by AwkwardForth.
 
-from __future__ import absolute_import
 
 import json
 

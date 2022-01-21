@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 import numpy as np
@@ -174,7 +173,7 @@ def v1v2_equal(v1, v2):
         raise AssertionError("VirtualArray is v1 only")
 
     else:
-        raise AssertionError("{0} vs {1}".format(type(v1), type(v2)))
+        raise AssertionError(f"{type(v1)} vs {type(v2)}")
 
 
 def v1_to_v2_id(v1):

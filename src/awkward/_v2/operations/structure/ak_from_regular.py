@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -59,7 +58,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
                 return layout
             elif posaxis == 0:
                 raise np.AxisError(
-                    "axis={0} exceeds the depth of this array ({1})".format(axis, depth)
+                    f"axis={axis} exceeds the depth of this array ({depth})"
                 )
 
             depth_context["posaxis"] = posaxis
