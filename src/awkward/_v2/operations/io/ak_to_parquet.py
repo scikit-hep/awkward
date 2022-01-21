@@ -13,7 +13,7 @@ def to_parquet(  # this will be going through Awkward-Dask
     list_to32=False,
     string_to32=True,
     bytestring_to32=True,
-    **options  # NOTE: a comma after **options breaks Python 2
+    **options
 ):
     raise NotImplementedError
 

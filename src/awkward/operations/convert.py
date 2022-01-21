@@ -2952,7 +2952,7 @@ def to_parquet(
     list_to32=False,
     string_to32=True,
     bytestring_to32=True,
-    **options,  # NOTE: a comma after **options breaks Python 2
+    **options
 ):
     """
     Args:
@@ -3843,7 +3843,7 @@ def from_parquet(
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options,  # NOTE: a comma after **options breaks Python 2
+    **options
 ):
     """
     Args:

@@ -2130,7 +2130,7 @@ class LarkOptions(Serialize):
     lexer_callbacks
             Dictionary of callbacks for the lexer. May alter tokens during lexing. Use with caution.
     use_bytes
-            Accept an input of type ``bytes`` instead of ``str`` (Python 3 only).
+            Accept an input of type ``bytes`` instead of ``str``.
     edit_terminals
             A callback for editing the terminals before parse.
     import_paths

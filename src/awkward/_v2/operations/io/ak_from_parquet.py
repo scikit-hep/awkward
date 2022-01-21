@@ -17,7 +17,7 @@ def from_parquet(  # this will be going through Awkward-Dask
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options  # NOTE: a comma after **options breaks Python 2
+    **options
 ):
     raise NotImplementedError
 
