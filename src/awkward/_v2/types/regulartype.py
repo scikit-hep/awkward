@@ -81,8 +81,3 @@ class RegularType(Type):
             )
         else:
             return False
-
-    def empty(self):
-        return ak._v2.contents.RegularArray(
-            self._content.empty(), self._size, 0, None, self._parameters
-        )

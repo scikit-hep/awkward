@@ -164,7 +164,3 @@ class NumpyType(Type):
             )
         else:
             return False
-
-    def empty(self):
-        out = ak._v2.contents.NumpyArray([]).numbers_to_type(self._primitive)
-        return out

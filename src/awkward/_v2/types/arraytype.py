@@ -43,12 +43,3 @@ class ArrayType(object):
             return self._length == other._length and self._content == other._content
         else:
             return False
-
-    def empty(self):
-        if self._length != 0:
-            raise ValueError(
-                "ArrayType with length {0} does not describe an empty array".format(
-                    self._length
-                )
-            )
-        return self._content.empty()

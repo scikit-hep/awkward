@@ -69,9 +69,3 @@ class ListType(Type):
             )
         else:
             return False
-
-    def empty(self):
-        offsets = ak._v2.index.Index64([0])
-        # offsets.setitem_at_nowrap(0, 0)
-        content = self._content.empty()
-        return ak._v2.contents.ListOffsetArray(offsets, content, None, self._parameters)
