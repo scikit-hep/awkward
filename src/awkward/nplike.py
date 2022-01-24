@@ -403,6 +403,7 @@ class Numpy(NumpyLike):
         if isinstance(
             array,
             (
+                numpy.ndarray,
                 ak.Array,
                 ak.Record,
                 ak.ArrayBuilder,
