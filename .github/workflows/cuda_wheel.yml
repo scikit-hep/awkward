@@ -21,7 +21,9 @@ jobs:
 
       - run: python --version
 
-      - run: pip install -r requirements-dev.txt
+      - run: pip install -r requirements.txt requirements-test.txt requirements-dev.txt
+
+      - run: pip install wheel
 
       - run: python localbuild.py
 
