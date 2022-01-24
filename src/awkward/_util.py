@@ -11,29 +11,15 @@ import warnings
 import itertools
 import numbers
 
-try:
-    from collections.abc import Mapping
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import Mapping
-    from collections import MutableMapping
+from collections.abc import Mapping
+from collections.abc import MutableMapping
 
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
-py27 = sys.version_info[0] < 3
-py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
-py36 = sys.version_info[0] == 3 and sys.version_info[1] <= 6
-
 win = os.name == "nt"
 bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
-
-# to silence flake8 F821 errors
-if py27:
-    unicode = eval("unicode")
-else:
-    unicode = None
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -74,12 +60,10 @@ def isnum(x):
 
 def isstr(x):
     """
-    Returns True if and only if ``x`` is a string (including Python 2 unicode).
+    Returns True if and only if ``x`` is a string. Mostly needed for Python 2
+    compatibility in the past, but still mirrors isnum.
     """
-    if py27:
-        return isinstance(x, (bytes, unicode))
-    else:
-        return isinstance(x, str)
+    return isinstance(x, str)
 
 
 def exception_suffix(filename):
@@ -234,17 +218,17 @@ def arrayclass(layout, behavior):
     layout = ak.partition.first(layout)
     behavior = Behavior(ak.behavior, behavior)
     arr = layout.parameter("__array__")
-    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
+    if isinstance(arr, str):
         cls = behavior[arr]
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     rec = layout.parameter("__record__")
-    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+    if isinstance(rec, str):
         cls = behavior[".", rec]
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
-    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
+    if isinstance(deeprec, str):
         cls = behavior["*", deeprec]
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
@@ -268,11 +252,11 @@ def custom_broadcast(layout, behavior):
     layout = ak.partition.first(layout)
     behavior = Behavior(ak.behavior, behavior)
     custom = layout.parameter("__array__")
-    if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
+    if not isinstance(custom, str):
         custom = layout.parameter("__record__")
-    if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
+    if not isinstance(custom, str):
         custom = layout.purelist_parameter("__record__")
-    if isinstance(custom, str) or (py27 and isinstance(custom, unicode)):
+    if isinstance(custom, str):
         for key, fcn in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -287,17 +271,17 @@ def custom_broadcast(layout, behavior):
 def numba_array_typer(layouttype, behavior):
     behavior = Behavior(ak.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
-    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
+    if isinstance(arr, str):
         typer = behavior["__numba_typer__", arr]
         if callable(typer):
             return typer
     rec = layouttype.parameters.get("__record__")
-    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+    if isinstance(rec, str):
         typer = behavior["__numba_typer__", ".", rec]
         if callable(typer):
             return typer
     deeprec = layouttype.parameters.get("__record__")
-    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
+    if isinstance(deeprec, str):
         typer = behavior["__numba_typer__", "*", deeprec]
         if callable(typer):
             return typer
@@ -307,17 +291,17 @@ def numba_array_typer(layouttype, behavior):
 def numba_array_lower(layouttype, behavior):
     behavior = Behavior(ak.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
-    if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
+    if isinstance(arr, str):
         lower = behavior["__numba_lower__", arr]
         if callable(lower):
             return lower
     rec = layouttype.parameters.get("__record__")
-    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+    if isinstance(rec, str):
         lower = behavior["__numba_lower__", ".", rec]
         if callable(lower):
             return lower
     deeprec = layouttype.parameters.get("__record__")
-    if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
+    if isinstance(deeprec, str):
         lower = behavior["__numba_lower__", "*", deeprec]
         if callable(lower):
             return lower
@@ -328,7 +312,7 @@ def recordclass(layout, behavior):
     layout = ak.partition.first(layout)
     behavior = Behavior(ak.behavior, behavior)
     rec = layout.parameter("__record__")
-    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+    if isinstance(rec, str):
         cls = behavior[rec]
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
             return cls
@@ -343,8 +327,8 @@ def typestrs(behavior):
             isinstance(key, tuple)
             and len(key) == 2
             and key[0] == "__typestr__"
-            and (isinstance(key[1], str) or (py27 and isinstance(key[1], unicode)))
-            and (isinstance(typestr, str) or (py27 and isinstance(typestr, unicode)))
+            and isinstance(key[1], str)
+            and isinstance(typestr, str)
         ):
             out[key[1]] = typestr
     return out
@@ -368,7 +352,7 @@ def gettypestr(parameters, typestrs):
 def numba_record_typer(layouttype, behavior):
     behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
-    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+    if isinstance(rec, str):
         typer = behavior["__numba_typer__", rec]
         if callable(typer):
             return typer
@@ -378,7 +362,7 @@ def numba_record_typer(layouttype, behavior):
 def numba_record_lower(layouttype, behavior):
     behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
-    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+    if isinstance(rec, str):
         lower = behavior["__numba_lower__", rec]
         if callable(lower):
             return lower
@@ -407,7 +391,7 @@ def overload(behavior, signature):
 def numba_attrs(layouttype, behavior):
     behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
-    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+    if isinstance(rec, str):
         for key, typer in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -422,7 +406,7 @@ def numba_attrs(layouttype, behavior):
 def numba_methods(layouttype, behavior):
     behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
-    if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
+    if isinstance(rec, str):
         for key, typer in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -441,7 +425,7 @@ def numba_unaryops(unaryop, left, behavior):
 
     if isinstance(left, ak._connect._numba.layout.ContentType):
         left = left.parameters.get("__record__")
-        if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
+        if not isinstance(left, str):
             done = True
 
     if not done:
@@ -463,12 +447,12 @@ def numba_binops(binop, left, right, behavior):
 
     if isinstance(left, ak._connect._numba.layout.ContentType):
         left = left.parameters.get("__record__")
-        if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
+        if not isinstance(left, str):
             done = True
 
     if isinstance(right, ak._connect._numba.layout.ContentType):
         right = right.parameters.get("__record__")
-        if not isinstance(right, str) and not (py27 and isinstance(right, unicode)):
+        if not isinstance(right, str):
             done = True
 
     if not done:
@@ -564,7 +548,7 @@ def key2index(keys, key):
 
     if attempt is None:
         raise ValueError(
-            f"key {repr(key)} not found in record" + exception_suffix(__file__)
+            f"key {key!r} not found in record" + exception_suffix(__file__)
         )
     else:
         return attempt

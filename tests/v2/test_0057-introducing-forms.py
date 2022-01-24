@@ -3,12 +3,7 @@
 
 import json
 
-try:
-    # pybind11 only supports cPickle protocol 2+ (-1 in pickle.dumps)
-    # (automatically satisfied in Python 3; this is just to keep testing Python 2.7)
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401

@@ -14,8 +14,8 @@ def register_and_check():
     global checked_version
     try:
         import jax
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """install the 'jax' package with:
 
     pip install jax jaxlib --upgrade
@@ -23,7 +23,7 @@ def register_and_check():
 or
 
     conda install jax jaxlib"""
-        )
+        ) from None
     else:
         if not checked_version and ak._v2._util.parse_version(
             jax.__version__

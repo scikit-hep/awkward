@@ -4,10 +4,7 @@
 import copy
 import ctypes
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import awkward as ak
 from awkward._v2.index import Index

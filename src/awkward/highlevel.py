@@ -6,12 +6,8 @@
 import re
 import keyword
 
-try:
-    from collections.abc import Iterable
-    from collections.abc import Sized
-except ImportError:
-    from collections import Iterable
-    from collections import Sized
+from collections.abc import Iterable
+from collections.abc import Sized
 
 import awkward as ak
 
@@ -1000,7 +996,7 @@ class Array(
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+            return str(tmp)
         else:
             return tmp
 
@@ -1126,8 +1122,7 @@ class Array(
                     )
             else:
                 raise AttributeError(
-                    f"no field named {repr(where)}"
-                    + ak._util.exception_suffix(__file__)
+                    f"no field named {where!r}" + ak._util.exception_suffix(__file__)
                 )
 
     def __dir__(self):
@@ -1772,7 +1767,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+            return str(tmp)
         else:
             return tmp
 
@@ -1849,8 +1844,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                     )
             else:
                 raise AttributeError(
-                    f"no field named {repr(where)}"
-                    + ak._util.exception_suffix(__file__)
+                    f"no field named {where!r}" + ak._util.exception_suffix(__file__)
                 )
 
     def __dir__(self):
@@ -2310,7 +2304,7 @@ class ArrayBuilder(Iterable, Sized):
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+            return str(tmp)
         else:
             return tmp
 

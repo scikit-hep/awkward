@@ -336,7 +336,7 @@ class ContentType(numba.types.Type):
             )
         else:
             raise TypeError(
-                f"array does not have a field with key {repr(key)}"
+                f"array does not have a field with key {key!r}"
                 + ak._util.exception_suffix(__file__)
             )
 

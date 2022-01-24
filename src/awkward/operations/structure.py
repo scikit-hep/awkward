@@ -6,10 +6,7 @@
 import numbers
 import json
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import awkward as ak
 
@@ -1218,9 +1215,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
             nplike = ak.nplike.of(layout)
             if isinstance(fill_value, bytes):
                 asbytes = fill_value
-            elif isinstance(fill_value, str) or (
-                ak._util.py27 and isinstance(fill_value, ak._util.unicode)
-            ):
+            elif isinstance(fill_value, str):
                 asbytes = fill_value.encode("utf-8", "surrogateescape")
             else:
                 asbytes = str(fill_value).encode("utf-8", "surrogateescape")
@@ -2791,10 +2786,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
         )
     elif (
         isinstance(value, Iterable)
-        and not (
-            isinstance(value, (str, bytes))
-            or (ak._util.py27 and isinstance(value, ak._util.unicode))
-        )
+        and not isinstance(value, (str, bytes))
         or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
     ):
         valuelayout = ak.operations.convert.to_layout(
@@ -3231,11 +3223,9 @@ def cartesian(
          [(4, 3.3, 'a'), (4, 3.3, 'b')]
         ]
 
-    The order of the output is fixed: it is always lexicographical in the
-    order that the `arrays` are written. (Before Python 3.6, the order of
-    keys in a dict were not guaranteed, so the dict interface is not
-    recommended for these versions of Python.) Thus, it is not possible to
-    group by `three` in the example above.
+    The order of the output is fixed: it is always lexicographical in the order
+    that the `arrays` are written. Thus, it is not possible to group by `three`
+    in the example above.
 
     To emulate an SQL or Pandas "group by" operation, put the keys that you
     wish to group by *first* and use `nested=[0]` or `nested=[n]` to group by
@@ -4139,9 +4129,7 @@ def virtual(
     ):
         form = ak.forms.Form.fromjson('"' + form + '"')
 
-    elif isinstance(form, (str, bytes)) or (
-        ak._util.py27 and isinstance(form, ak._util.unicode)
-    ):
+    elif isinstance(form, (str, bytes)):
         form = ak.forms.Form.fromjson(form)
 
     elif form is not None and not isinstance(form, ak.forms.Form):

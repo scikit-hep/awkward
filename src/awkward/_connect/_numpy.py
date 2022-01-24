@@ -3,12 +3,7 @@
 # v2: replace with src/awkward/_v2/_connect/numpy.py
 
 
-import sys
-
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import numpy
 
@@ -444,8 +439,6 @@ except AttributeError:
         __sub__, __rsub__, __isub__ = _numeric_methods(um.subtract, "sub")
         __mul__, __rmul__, __imul__ = _numeric_methods(um.multiply, "mul")
         __matmul__, __rmatmul__, __imatmul__ = _numeric_methods(um.matmul, "matmul")
-        if sys.version_info.major < 3:
-            __div__, __rdiv__, __idiv__ = _numeric_methods(um.divide, "div")
         __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
             um.true_divide, "truediv"
         )

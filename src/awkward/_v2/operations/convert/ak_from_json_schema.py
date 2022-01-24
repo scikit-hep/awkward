@@ -68,7 +68,7 @@ def from_json_schema(
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
-        raise TypeError(f"malformed JSONSchema: expected dict, got {repr(schema)}")
+        raise TypeError(f"malformed JSONSchema: expected dict, got {schema!r}")
 
     container = {}
     instructions = []
@@ -132,10 +132,10 @@ def from_json_schema(
 
 def build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
-        raise TypeError(f"unrecognized JSONSchema: expected dict, got {repr(schema)}")
+        raise TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
 
     if "type" not in schema is None:
-        raise TypeError(f"unrecognized JSONSchema: no 'type' in {repr(schema)}")
+        raise TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
 
     tpe = schema["type"]
 
@@ -343,4 +343,4 @@ def build_assembly(schema, container, instructions):
         raise NotImplementedError("arbitrary unions of types are not yet supported")
 
     else:
-        raise TypeError(f"unrecognized JSONSchema: {repr(tpe)}")
+        raise TypeError(f"unrecognized JSONSchema: {tpe!r}")

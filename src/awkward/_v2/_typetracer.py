@@ -53,9 +53,6 @@ class UnknownLengthType:
     def __rmul__(self, other):
         return UnknownLength
 
-    def __div__(self, other):
-        return UnknownLength
-
     def __truediv__(self, other):
         return UnknownLength
 
@@ -96,7 +93,7 @@ class UnknownScalar:
         return self._dtype
 
     def __repr__(self):
-        return f"UnknownScalar({repr(self._dtype)})"
+        return f"UnknownScalar({self._dtype!r})"
 
     def __str__(self):
         return f"unknown-{str(self._dtype)}"
@@ -121,9 +118,6 @@ class UnknownScalar:
 
     def __rmul__(self, other):
         return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
-
-    def __div__(self, other):
-        return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
 
     def __truediv__(self, other):
         return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
@@ -159,7 +153,7 @@ class MaybeNone:
             return False
 
     def __repr__(self):
-        return f"MaybeNone({repr(self._content)})"
+        return f"MaybeNone({self._content!r})"
 
 
 class OneOf:
@@ -177,7 +171,7 @@ class OneOf:
             return False
 
     def __repr__(self):
-        return f"OneOf({repr(self._contents)})"
+        return f"OneOf({self._contents!r})"
 
 
 def _length_after_slice(slice, original_length):

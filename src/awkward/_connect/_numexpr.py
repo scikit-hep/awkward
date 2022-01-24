@@ -16,8 +16,8 @@ def import_numexpr():
     global checked_version
     try:
         import numexpr
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """install the 'numexpr' package with:
 
     pip install numexpr --upgrade
@@ -25,7 +25,7 @@ def import_numexpr():
 or
 
     conda install numexpr"""
-        )
+        ) from None
     else:
         if not checked_version and ak._v2._util.parse_version(
             numexpr.__version__
