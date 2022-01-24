@@ -98,7 +98,7 @@ rm -f "awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl"
 unzip "awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-any.whl"
 
 cp "awkward_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL" tmp_WHEEL
-sed "s/Root-Is-Purelib: true/Root-Is-Purelib: false/" < tmp_WHEEL | sed "s/Tag: py3-none-any/Tag: py3-none-$PLATFORM" > "awkward_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL"
+sed "s/Root-Is-Purelib: true/Root-Is-Purelib: false/" < tmp_WHEEL | sed "s/Tag: py3-none-any/Tag: py3-none-$PLATFORM/" > "awkward_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL"
 
 zip "awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl" -r awkward_cuda_kernels "awkward_cuda_kernels-$AWKWARD_VERSION.dist-info"
 
