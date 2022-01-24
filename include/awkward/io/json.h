@@ -337,19 +337,12 @@ namespace awkward {
   /// representation in JSON format
   /// @param minus_infinity_string user-defined string for a negative
   /// infinity representation in JSON format
-  LIBAWKWARD_EXPORT_SYMBOL const std::pair<int, const BuilderPtr>
+  LIBAWKWARD_EXPORT_SYMBOL int64_t
     FromJsonString(const char* source,
-                   const ArrayBuilderOptions& options,
+                   ArrayBuilder& builder,
                    const char* nan_string = nullptr,
                    const char* infinity_string = nullptr,
                    const char* minus_infinity_string = nullptr);
-
- LIBAWKWARD_EXPORT_SYMBOL int64_t
-   V2FromJsonString(const char* source,
-                    ArrayBuilder& builder,
-                    const char* nan_string = nullptr,
-                    const char* infinity_string = nullptr,
-                    const char* minus_infinity_string = nullptr);
 
   /// @brief Parses a JSON-encoded file using an
   /// ArrayBuilder.
@@ -364,21 +357,13 @@ namespace awkward {
   /// representation in JSON format
   /// @param minus_infinity_string user-defined string for a negative
   /// infinity representation in JSON format
-  LIBAWKWARD_EXPORT_SYMBOL const std::pair<int, const BuilderPtr>
+  LIBAWKWARD_EXPORT_SYMBOL int64_t
     FromJsonFile(FILE* source,
-                 const ArrayBuilderOptions& options,
+                 ArrayBuilder& builder,
                  int64_t buffersize,
                  const char* nan_string = nullptr,
                  const char* infinity_string = nullptr,
                  const char* minus_infinity_string = nullptr);
-
-  LIBAWKWARD_EXPORT_SYMBOL void
-    V2FromJsonFile(FILE* source,
-                   ArrayBuilder& builder,
-                   int64_t buffersize,
-                   const char* nan_string = nullptr,
-                   const char* infinity_string = nullptr,
-                   const char* minus_infinity_string = nullptr);
 
 }
 

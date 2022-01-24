@@ -76,8 +76,6 @@ def from_json(  # note: move ability to read from file into from_json_file
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
-            initial=initial,
-            resize=resize,
             buffersize=buffersize,
         )
     elif not is_path and (
@@ -85,14 +83,12 @@ def from_json(  # note: move ability to read from file into from_json_file
         or _maybe_json_str.match(source)
     ):
         builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
-        num = ak._ext.v2_fromjson(
+        num = ak._ext.fromjson(
             source,
             builder,
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
-            initial=initial,
-            resize=resize,
             buffersize=buffersize,
         )
         formstr, length, buffers = builder.to_buffers()
@@ -101,6 +97,8 @@ def from_json(  # note: move ability to read from file into from_json_file
         snapshot = ak._v2.operations.convert.from_buffers(
             form, length, buffers, highlevel=highlevel
         )
+        # FIXME: the code is a copy from snapshot,
+        # because this call returns v1: snapshot = builder.snapshot()
         layout = snapshot[0] if num == 1 else snapshot
 
     else:
