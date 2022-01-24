@@ -106,7 +106,7 @@ def from_json(  # note: move ability to read from file into from_json_file
             exc = IOError
         else:
             exc = FileNotFoundError
-        raise exc("file not found or not a regular file: {0}".format(source))
+        raise exc(f"file not found or not a regular file: {source}")
 
     def action(recordnode, **kwargs):
         if isinstance(recordnode, ak._v2.contents.RecordArray):

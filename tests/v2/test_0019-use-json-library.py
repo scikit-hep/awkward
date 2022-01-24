@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import os
 import json
@@ -82,7 +81,7 @@ def test_tofile(tmp_path):
         os.path.join(str(tmp_path), "tmp1.json"),
     )
 
-    with open(os.path.join(str(tmp_path), "tmp1.json"), "r") as f:
+    with open(os.path.join(str(tmp_path), "tmp1.json")) as f:
         assert f.read() == "[[1.1,2.2,3.0],[],[4.0,5.5]]"
 
 
