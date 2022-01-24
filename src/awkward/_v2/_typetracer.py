@@ -53,9 +53,6 @@ class UnknownLengthType:
     def __rmul__(self, other):
         return UnknownLength
 
-    def __div__(self, other):
-        return UnknownLength
-
     def __truediv__(self, other):
         return UnknownLength
 
@@ -121,9 +118,6 @@ class UnknownScalar:
 
     def __rmul__(self, other):
         return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
-
-    def __div__(self, other):
-        return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
 
     def __truediv__(self, other):
         return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
