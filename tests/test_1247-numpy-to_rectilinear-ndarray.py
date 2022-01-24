@@ -6,6 +6,8 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    reference = np.r_[1, 2, 3, 4]
-    test = ak.Array([1, 2, 9, 0])
-    assert ak.to_list(np.isin(test, reference)) == [True, True, False, False]
+    array = np.array([1, 2, 9, 0])
+    nplike = ak.nplike.of(array)
+
+    ak_array = ak.from_numpy(array)
+    assert ak.to_list(nplike.to_rectilinear(array)) == ak.to_list(ak_array)
