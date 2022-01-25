@@ -41,6 +41,7 @@ export DOCKER_ARGS="-v`pwd`:/home -w/home docker.io/nvidia/cuda:"$DOCKER_IMAGE_T
 export BUILD_SHARED_LIBRARY="nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler -DVERSION_INFO="$AWKWARD_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward_cuda_kernels/libawkward-cuda-kernels.so"
 
 # docker run $DOCKER_ARGS $BUILD_SHARED_LIBRARY
+nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler -DVERSION_INFO="$AWKWARD_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward_cuda_kernels/libawkward-cuda-kernels.so
 
 cat > build/cuda-setup.py << EOF
 
