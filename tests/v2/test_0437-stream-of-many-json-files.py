@@ -13,6 +13,7 @@ path = Path(DIR).parents[0]
 
 to_list = ak._v2.operations.convert.to_list
 
+
 def test_unfinished_fragment_exception():
     # read unfinished json fragments
     strs0 = """{"one": 1, "two": 2.2,"""
@@ -211,7 +212,9 @@ def test_two_arrays():
     array = ak._v2.operations.convert.from_json(str)
     assert array.tolist() == ["one", "two"]
 
-    array = ak._v2.operations.io.from_json_file(os.path.join(path, "samples/test-two-arrays.json"))
+    array = ak._v2.operations.io.from_json_file(
+        os.path.join(path, "samples/test-two-arrays.json")
+    )
     assert array.tolist() == [
         {"one": 1, "two": 2.2},
         {"one": 10, "two": 22.0},
@@ -360,7 +363,9 @@ def test_array_tojson():
 
 def test_fromfile():
     # read multiple json fragments from a json file
-    array = ak._v2.operations.io.from_json_file(os.path.join(path, "samples/test-record-array.json"))
+    array = ak._v2.operations.io.from_json_file(
+        os.path.join(path, "samples/test-record-array.json")
+    )
     assert array.tolist() == [
         {"x": 1.1, "y": []},
         {"x": 2.2, "y": [1]},
@@ -640,22 +645,33 @@ def test_three():
 
 
 def test_jpivarski():
-    assert to_list(ak._v2.operations.convert.from_json('{"x": 1, "y": [1, 2, 3]}')) == {"x": 1, "y": [1, 2, 3]}
-    assert ak._v2.operations.convert.from_json('{"x": 1, "y": [1, 2, 3]} {"x": 2, "y": []}').tolist() == [
+    assert to_list(ak._v2.operations.convert.from_json('{"x": 1, "y": [1, 2, 3]}')) == {
+        "x": 1,
+        "y": [1, 2, 3],
+    }
+    assert ak._v2.operations.convert.from_json(
+        '{"x": 1, "y": [1, 2, 3]} {"x": 2, "y": []}'
+    ).tolist() == [
         {"x": 1, "y": [1, 2, 3]},
         {"x": 2, "y": []},
     ]
-    assert ak._v2.operations.convert.from_json('{"x": 1, "y": [1, 2, 3]} 123').tolist() == [
+    assert ak._v2.operations.convert.from_json(
+        '{"x": 1, "y": [1, 2, 3]} 123'
+    ).tolist() == [
         {"x": 1, "y": [1, 2, 3]},
         123,
     ]
-    assert ak._v2.operations.convert.from_json('{"x": 1, "y": [1, 2, 3]} [1, 2, 3, 4, 5]').tolist() == [
+    assert ak._v2.operations.convert.from_json(
+        '{"x": 1, "y": [1, 2, 3]} [1, 2, 3, 4, 5]'
+    ).tolist() == [
         {"x": 1, "y": [1, 2, 3]},
         [1, 2, 3, 4, 5],
     ]
     assert ak._v2.operations.convert.from_json("123") == 123
     assert ak._v2.operations.convert.from_json("123 456").tolist() == [123, 456]
-    assert ak._v2.operations.convert.from_json('123 {"x": 1, "y": [1, 2, 3]}').tolist() == [
+    assert ak._v2.operations.convert.from_json(
+        '123 {"x": 1, "y": [1, 2, 3]}'
+    ).tolist() == [
         123,
         {"x": 1, "y": [1, 2, 3]},
     ]
