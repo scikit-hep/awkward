@@ -185,8 +185,6 @@ logger.addHandler(logging.StreamHandler())
 
 logger.setLevel(logging.CRITICAL)
 
-Py36 = (sys.version_info[:2] >= (3, 6))
-
 
 def classify(seq, key=None, value=None):
     d = {}
@@ -316,7 +314,7 @@ def smart_decorator(f, create_decorator):
 
 try:
     import regex
-except ImportError:
+except ModuleNotFoundError:
     regex = None
 
 import sre_parse
@@ -334,7 +332,7 @@ def get_regexp_width(expr):
         regexp_final = re.sub(categ_pattern, 'A', expr)
     else:
         if re.search(categ_pattern, expr):
-            raise ImportError('`regex` module must be installed in order to use Unicode categories.', expr)
+            raise ModuleNotFoundError('`regex` module must be installed in order to use Unicode categories.', expr)
         regexp_final = expr
     try:
         return [int(x) for x in sre_parse.parse(regexp_final).getwidth()]
@@ -967,19 +965,10 @@ class Pattern(Serialize):
     def to_regexp(self):
         raise NotImplementedError()
 
-    if Py36:
-        ##
-
-        def _get_flags(self, value):
-            for f in self.flags:
-                value = ('(?%s:%s)' % (f, value))
-            return value
-
-    else:
-        def _get_flags(self, value):
-            for f in self.flags:
-                value = ('(?%s)' % f) + value
-            return value
+    def _get_flags(self, value):
+        for f in self.flags:
+            value = ('(?%s:%s)' % (f, value))
+        return value
 
 
 class PatternStr(Pattern):
@@ -2141,7 +2130,7 @@ class LarkOptions(Serialize):
     lexer_callbacks
             Dictionary of callbacks for the lexer. May alter tokens during lexing. Use with caution.
     use_bytes
-            Accept an input of type ``bytes`` instead of ``str`` (Python 3 only).
+            Accept an input of type ``bytes`` instead of ``str``.
     edit_terminals
             A callback for editing the terminals before parse.
     import_paths
@@ -2262,7 +2251,7 @@ class Lark(Serialize):
             if regex:
                 re_module = regex
             else:
-                raise ImportError('`regex` module must be installed if calling `Lark(regex=True)`.')
+                raise ModuleNotFoundError('`regex` module must be installed if calling `Lark(regex=True)`.')
         else:
             re_module = re
 
@@ -2290,9 +2279,6 @@ class Lark(Serialize):
         if self.options.use_bytes:
             if not isascii(grammar):
                 raise ValueError("Grammar must be ascii only, when use_bytes=True")
-            if sys.version_info[0] == 2 and self.options.use_bytes != 'force':
-                raise NotImplementedError("`use_bytes=True` may have issues on python2."
-                                          "Use `use_bytes='force'` to use it at your own risk.")
 
         cache_fn = None
         if self.options.cache:

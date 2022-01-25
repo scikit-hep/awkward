@@ -28,14 +28,9 @@ import sys
 import re
 import keyword
 
-try:
-    from collections.abc import Iterable
-    from collections.abc import Sized
-    from collections.abc import Mapping
-except ImportError:
-    from collections import Iterable
-    from collections import Sized
-    from collections import Mapping
+from collections.abc import Iterable
+from collections.abc import Sized
+from collections.abc import Mapping
 
 import awkward as ak
 from awkward._v2._connect.numpy import NDArrayOperatorsMixin
@@ -1137,7 +1132,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     )
             else:
-                raise AttributeError(f"no field named {repr(where)}")
+                raise AttributeError(f"no field named {where!r}")
 
     def __dir__(self):
         """
@@ -1817,7 +1812,7 @@ class Record(NDArrayOperatorsMixin):
                         "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     )
             else:
-                raise AttributeError(f"no field named {repr(where)}")
+                raise AttributeError(f"no field named {where!r}")
 
     def __dir__(self):
         """

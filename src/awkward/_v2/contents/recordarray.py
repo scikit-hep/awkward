@@ -4,10 +4,7 @@
 import json
 import copy
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import awkward as ak
 from awkward._v2.record import Record

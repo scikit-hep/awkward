@@ -4,7 +4,6 @@
 import argparse
 import copy
 import os
-import sys
 from collections import OrderedDict
 
 import yaml
@@ -85,10 +84,6 @@ def check_specorder(kerneldict):
             count = 0
             display = []
             flag = False
-            if sys.version_info.major == 2:
-                for dummy in specializations:
-                    if type(sort_specializations(dummy)) == str:
-                        raise TypeError
             for specialization in sorted(
                 copy.copy(specializations), key=sort_specializations
             ):

@@ -12,12 +12,8 @@ import threading
 import glob
 import re
 
-try:
-    from collections.abc import Iterable, Sized
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import Iterable, Sized
-    from collections import MutableMapping
+from collections.abc import Iterable, Sized
+from collections.abc import MutableMapping
 
 import awkward as ak
 
@@ -192,9 +188,6 @@ def to_numpy(array, allow_missing=True):
     See also #ak.from_numpy and #ak.to_cupy.
     """
     if isinstance(array, (bool, str, bytes, numbers.Number)):
-        return numpy.array([array])[0]
-
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
         return numpy.array([array])[0]
 
     elif isinstance(array, np.ndarray):
@@ -616,13 +609,13 @@ def to_jax(array):
     """
     try:
         import jax
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """to use {0}, you must install jax:
 
                 pip install jax jaxlib
             """
-        )
+        ) from None
 
     if isinstance(array, (bool, numbers.Number)):
         return jax.numpy.array([array])[0]
@@ -941,9 +934,6 @@ def to_list(array):
     elif array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return array
 
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
-        return array
-
     elif isinstance(array, np.ndarray):
         return array.tolist()
 
@@ -1112,11 +1102,7 @@ def from_json(
             buffersize=buffersize,
         )
     else:
-        if ak._util.py27:
-            exc = IOError
-        else:
-            exc = FileNotFoundError
-        raise exc(f"file not found or not a regular file: {source}")
+        raise FileNotFoundError(f"file not found or not a regular file: {source}")
 
     def getfunction(recordnode):
         if isinstance(recordnode, ak.layout.RecordArray):
@@ -1207,9 +1193,6 @@ def to_json(
     elif isinstance(array, bytes):
         return json.dumps(array.decode("utf-8", "surrogateescape"))
 
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
-        return json.dumps(array)
-
     elif isinstance(array, np.ndarray):
         out = ak.layout.NumpyArray(array)
 
@@ -1236,8 +1219,7 @@ def to_json(
 
     else:
         raise TypeError(
-            f"unrecognized array type: {repr(array)}"
-            + ak._util.exception_suffix(__file__)
+            f"unrecognized array type: {array!r}" + ak._util.exception_suffix(__file__)
         )
 
     if complex_record_fields is None:
@@ -1591,7 +1573,7 @@ def from_awkward0(
                 out.setparameter("__array__", "string")
             else:
                 raise ValueError(
-                    f"unsupported encoding: {repr(array.encoding)}"
+                    f"unsupported encoding: {array.encoding!r}"
                     + ak._util.exception_suffix(__file__)
                 )
             return out
@@ -1651,7 +1633,7 @@ def from_awkward0(
 
         else:
             raise TypeError(
-                f"not an awkward0 array: {repr(array)}"
+                f"not an awkward0 array: {array!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1915,7 +1897,7 @@ def to_layout(
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
             raise ValueError(
-                f"NumPy {repr(array.dtype)} not allowed"
+                f"NumPy {array.dtype!r} not allowed"
                 + ak._util.exception_suffix(__file__)
             )
         return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
@@ -1925,9 +1907,7 @@ def to_layout(
     ):
         return from_cupy(array, regulararray=True, highlevel=False)
 
-    elif isinstance(array, (str, bytes)) or (
-        ak._util.py27 and isinstance(array, ak._util.unicode)
-    ):
+    elif isinstance(array, (str, bytes)):
         return from_iter([array], highlevel=False)
 
     elif isinstance(array, Iterable):
@@ -1981,19 +1961,17 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True, behavior=None
 def _import_pyarrow(name):
     try:
         import pyarrow
-    except ImportError:
-        raise ImportError(
-            """to use {}, you must install pyarrow:
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            f"""to use {name}, you must install pyarrow:
 
     pip install pyarrow
 
 or
 
     conda install -c conda-forge pyarrow
-""".format(
-                name
-            )
-        )
+"""
+        ) from None
     else:
         if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
             "2.0.0"
@@ -2519,7 +2497,7 @@ def to_arrow(
 
         else:
             raise TypeError(
-                f"unrecognized array type: {repr(layout)}"
+                f"unrecognized array type: {layout!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2744,7 +2722,7 @@ def _from_arrow(
                 assert tpe.num_buffers == 3
             else:
                 raise TypeError(
-                    f"unrecognized Arrow union array mode: {repr(tpe.mode)}"
+                    f"unrecognized Arrow union array mode: {tpe.mode!r}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -2869,7 +2847,7 @@ def _from_arrow(
 
         else:
             raise TypeError(
-                f"unrecognized Arrow array type: {repr(tpe)}"
+                f"unrecognized Arrow array type: {tpe!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2967,7 +2945,7 @@ def to_parquet(
     list_to32=False,
     string_to32=True,
     bytestring_to32=True,
-    **options,  # NOTE: a comma after **options breaks Python 2
+    **options,
 ):
     """
     Args:
@@ -3130,7 +3108,7 @@ def _to_parquet_dataset(directory, filenames=None, filename_extension=".parquet"
     directory = _regularize_path(directory)
     if not os.path.isdir(directory):
         raise ValueError(
-            f"{repr(directory)} is not a local filesystem directory"
+            f"{directory!r} is not a local filesystem directory"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -3750,7 +3728,7 @@ def _partial_schema_from_columns(schema, columns):
     for x in columns:
         if x not in schema.names:
             raise ValueError(
-                f"column {repr(x)} not found in schema"
+                f"column {x!r} not found in schema"
                 + ak._util.exception_suffix(__file__)
             )
         pa_fields.append(schema.field(x))
@@ -3858,7 +3836,7 @@ def from_parquet(
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options,  # NOTE: a comma after **options breaks Python 2
+    **options,
 ):
     """
     Args:
@@ -5059,7 +5037,7 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
-    if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
+    if isinstance(form, str):
         form = ak.forms.Form.fromjson(form)
     elif isinstance(form, dict):
         form = ak.forms.Form.fromjson(json.dumps(form))
@@ -5266,8 +5244,8 @@ def to_pandas(
     """
     try:
         import pandas
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """install the 'pandas' package with:
 
     pip install pandas --upgrade
@@ -5275,7 +5253,7 @@ def to_pandas(
 or
 
     conda install pandas"""
-        )
+        ) from None
 
     if how is not None:
         out = None

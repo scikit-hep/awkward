@@ -160,8 +160,7 @@ def test_actual():
     )
     s = x[..., :0]
     result = ak._v2.operations.structure.zip({"q": s, "t": s})
-    if not ak._util.py27 and not ak._util.py35:
-        assert (
-            str(ak._v2.operations.describe.type(result))
-            == "2 * 3 * 0 * {q: int64, t: int64}"
-        )
+    assert (
+        str(ak._v2.operations.describe.type(result))
+        == "2 * 3 * 0 * {q: int64, t: int64}"
+    )
