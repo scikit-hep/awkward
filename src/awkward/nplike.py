@@ -400,7 +400,10 @@ class NumpyKernel:
 
 class Numpy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
-        if isinstance(
+        if isinstance(array, numpy.ndarray):
+            return array
+
+        elif isinstance(
             array,
             (
                 ak.Array,
