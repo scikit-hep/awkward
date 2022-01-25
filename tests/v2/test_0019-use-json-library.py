@@ -17,26 +17,23 @@ def test_fromstring():
         ak._v2.operations.convert.from_json("[[1.1, 2.2, 3], [blah], [4, 5.5]]")
 
 
-@pytest.mark.skip(
-    reason="AttributeError: module 'awkward._v2._util' has no attribute 'py27'"
-)
 def test_fromfile(tmp_path):
     with open(os.path.join(str(tmp_path), "tmp1.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], [], [4, 5.5]]")
 
-    array = ak._v2.operations.convert.from_json(
+    array = ak._v2.operations.io.from_json_file(
         os.path.join(str(tmp_path), "tmp1.json")
     )
     assert array.tolist() == [[1.1, 2.2, 3.0], [], [4.0, 5.5]]
 
     with pytest.raises(IOError):
-        ak._v2.operations.convert.from_json("nonexistent.json")
+        ak._v2.operations.io.from_json_file("nonexistent.json")
 
     with open(os.path.join(str(tmp_path), "tmp2.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], []], [4, 5.5]]")
 
     with pytest.raises(ValueError):
-        ak._v2.operations.convert.from_json(os.path.join(str(tmp_path), "tmp2.json"))
+        ak._v2.operations.io.from_json_file(os.path.join(str(tmp_path), "tmp2.json"))
 
 
 @pytest.mark.skip(

@@ -11,7 +11,7 @@ _maybe_json_str = re.compile(r"^\s*(\[|\{|\"|[0-9]|true|false|null)")
 _maybe_json_bytes = re.compile(br"^\s*(\[|\{|\"|[0-9]|true|false|null)")
 
 
-def from_json(  # note: move ability to read from file into from_json_file
+def from_json(
     source,
     nan_string=None,
     infinity_string=None,
@@ -25,7 +25,7 @@ def from_json(  # note: move ability to read from file into from_json_file
 ):
     """
     Args:
-        source (str): JSON-formatted string or filename to convert into an array.
+        source (str): JSON-formatted string to convert into an array.
         nan_string (None or str): If not None, strings with this value will be
             interpreted as floating-point NaN values.
         infinity_string (None or str): If not None, strings with this value will
@@ -68,20 +68,9 @@ def from_json(  # note: move ability to read from file into from_json_file
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
-    is_path, source = ak._v2._util.regularize_path(source)
-
-    if is_path and ak._v2._util.is_file_path(source):
-        layout = ak._ext.fromjsonfile(
-            source,
-            nan_string=nan_string,
-            infinity_string=infinity_string,
-            minus_infinity_string=minus_infinity_string,
-            buffersize=buffersize,
-        )
-    elif not is_path and (
-        (isinstance(source, bytes) and _maybe_json_bytes.match(source))
-        or _maybe_json_str.match(source)
-    ):
+    if (
+        isinstance(source, bytes) and _maybe_json_bytes.match(source)
+    ) or _maybe_json_str.match(source):
         builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
         num = ak._ext.fromjson(
             source,
@@ -102,11 +91,7 @@ def from_json(  # note: move ability to read from file into from_json_file
         layout = snapshot[0] if num == 1 else snapshot
 
     else:
-        if ak._v2._util.py27:
-            exc = IOError
-        else:
-            exc = FileNotFoundError
-        raise exc(f"file not found or not a regular file: {source}")
+        raise ValueError(f"JSON string is not a valid: {source}")
 
     def action(recordnode, **kwargs):
         if isinstance(recordnode, ak._v2.contents.RecordArray):
@@ -135,4 +120,7 @@ def from_json(  # note: move ability to read from file into from_json_file
     if complex_imag_string is not None:
         layout = layout.recursively_apply(action)
 
-    return ak._v2._util.wrap(layout, behavior, highlevel)
+    if highlevel:
+        return ak._v2._util.wrap(layout, behavior, highlevel)
+    else:
+        return layout
