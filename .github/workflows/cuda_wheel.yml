@@ -3,7 +3,7 @@ name: CUDA Kernels Build
 on: [push]
 
 jobs:
-  setup-cuda:
+  build-awkward-cuda-kernels:
     runs-on: ubuntu-latest
     steps:
       - uses: Jimver/cuda-toolkit@v0.2.5
@@ -11,9 +11,6 @@ jobs:
         with:
           cuda: '11.5.1'
 
-  build-awkward-cuda-kernels:
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v2
@@ -22,7 +19,7 @@ jobs:
 
       - run: python --version
 
-      - run: pip install -r requirements.txt wheel
+      - run: pip install -r requirements-dev.txt setuptools wheel
 
       - run: python dev/generate-kernel-signatures.py
 
