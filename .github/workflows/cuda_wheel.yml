@@ -30,3 +30,7 @@ jobs:
       - run: python dev/generate-kernel-signatures.py
 
       - run: python dev/generate-cuda.py && ./cuda-build.sh
+
+      - uses: actions/upload-artifacts@v2
+        with:
+          path: dist/awkward_cuda_kernels-**-py3-none-**.whl
