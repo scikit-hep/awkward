@@ -2851,7 +2851,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
     False otherwise (at a given `axis` depth).
     """
 
-    def transform_inner(layout, depth):
+    def transform_inner(layout, depth, user=None):
         nplike = ak.nplike.of(layout)
         if isinstance(layout, ak._util.optiontypes):
             if not isinstance(layout, ak.layout.IndexedOptionArray64):
