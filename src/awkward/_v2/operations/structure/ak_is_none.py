@@ -60,8 +60,10 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
             return
 
     def getfunction_outer(layout, depth, depth_context, **kwargs):
-        posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
-        if posaxis != depth - 1:
+        depth_context["posaxis"] = layout.axis_wrap_if_negative(
+            depth_context["posaxis"]
+        )
+        if depth_context["posaxis"] != depth - 1:
             return
 
         return layout.recursively_apply(getfunction_inner)
