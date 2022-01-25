@@ -27,8 +27,6 @@ jobs:
 
       - run: pip install wheel
 
-      - run: python localbuild.py
+      - run: python dev/generate-kernel-signatures.py
 
-      - run: python dev/generate-cuda.py && ./cuda-build.sh --install
-
-      - run: python -c "import awkward_cuda_kernels"
+      - run: python dev/generate-cuda.py && ./cuda-build.sh
