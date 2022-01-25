@@ -3,17 +3,18 @@ name: CUDA Kernels Build
 on: [push]
 
 jobs:
-  setup-cuda-build-process:
+  setup-cuda:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-
       - uses: Jimver/cuda-toolkit@v0.2.5
         id: cuda-toolkit
         with:
           cuda: '11.5.1'
+
+  build-awkward-cuda-kernels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v2
         with:
@@ -21,11 +22,7 @@ jobs:
 
       - run: python --version
 
-      - run: pip install -r requirements.txt
-      - run: pip install -r requirements-test.txt
-      - run: pip install -r requirements-dev.txt
-
-      - run: pip install wheel
+      - run: pip install -r requirements.txt wheel
 
       - run: python dev/generate-kernel-signatures.py
 
@@ -34,3 +31,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           path: dist/awkward_cuda_kernels-**-py3-none-**.whl
+
