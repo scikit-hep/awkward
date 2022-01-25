@@ -38,9 +38,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
                     ak._v2.index.Index8(tag),
                     ak._v2.index.Index64(index),
                     [
-                        layout.content.recursively_apply(
-                            getfunction_inner
-                        ),
+                        layout.content.recursively_apply(getfunction_inner),
                         ak._v2.contents.NumpyArray(
                             nplike.array([True], dtype=np.bool_)
                         ),
@@ -66,7 +64,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
         if posaxis != depth - 1:
             return
 
-        return getfunction_inner(layout, depth)
+        return layout.recursively_apply(getfunction_inner)
 
     layout = ak._v2.operations.convert.to_layout(array)
     behavior = ak._v2._util.behavior_of(array, behavior=behavior)
