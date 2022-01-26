@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward._v2.index  # noqa: F401
 import awkward._v2.identifier  # noqa: F401
@@ -17,8 +16,8 @@ import awkward._v2._util  # noqa: F401
 
 # third-party connectors
 import awkward._v2._connect.numpy
-import awkward._v2._connect.numba
 import awkward._v2._connect.numexpr  # noqa: F401
+import awkward._v2.numba  # noqa: F401
 
 # high-level interface
 from awkward._v2.highlevel import Array  # noqa: F401

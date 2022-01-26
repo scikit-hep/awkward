@@ -218,13 +218,15 @@ def wrap(type, viewtype, fields):
         return ArrayViewType(type, viewtype.behavior, fields)
 
 
+def repr_behavior(behavior):
+    return repr(behavior)
+
+
 class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
         super().__init__(
             name="ak2.ArrayView({}, {}, {})".format(
-                type.name,
-                ak._v2._connect.numba.repr_behavior(behavior),
-                repr(fields),
+                type.name, repr_behavior(behavior), repr(fields)
             )
         )
         self.type = type

@@ -180,6 +180,32 @@ class ContentType(numba.types.Type):
         return viewval
 
 
+def castint(context, builder, fromtype, totype, val):
+    import llvmlite.ir.types
+
+    if isinstance(fromtype, llvmlite.ir.types.IntType):
+        if fromtype.width == 8:
+            fromtype = numba.int8
+        elif fromtype.width == 16:
+            fromtype = numba.int16
+        elif fromtype.width == 32:
+            fromtype = numba.int32
+        elif fromtype.width == 64:
+            fromtype = numba.int64
+    if not isinstance(fromtype, numba.types.Integer):
+        raise AssertionError(f"unrecognized integer type: {repr(fromtype)}")
+
+    if fromtype.bitwidth < totype.bitwidth:
+        if fromtype.signed:
+            return builder.sext(val, context.get_value_type(totype))
+        else:
+            return builder.zext(val, context.get_value_type(totype))
+    elif fromtype.bitwidth > totype.bitwidth:
+        return builder.trunc(val, context.get_value_type(totype))
+    else:
+        return val
+
+
 def type_bitwidth(numbatype):
     if isinstance(numbatype, numba.types.Boolean):
         return 8
@@ -215,7 +241,7 @@ def getat(context, builder, baseptr, offset, rettype=None):
 
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
-    atval = ak._v2._connect.numba.castint(context, builder, attype, numba.intp, atval)
+    atval = castint(context, builder, attype, numba.intp, atval)
 
     if not attype.signed:
         wrapneg = False
@@ -244,9 +270,7 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                     builder, ValueError, ("slice index out of bounds",)
                 )
 
-    return ak._v2._connect.numba.castint(
-        context, builder, atval.type, numba.intp, atval
-    )
+    return castint(context, builder, atval.type, numba.intp, atval)
 
 
 class NumpyArrayType(ContentType):
@@ -279,7 +303,7 @@ class NumpyArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         assert fields == ()
         return ak._v2.contents.NumpyArray(
             lookup.positions[pos + self.ARRAY], parameters=self.parameters
@@ -331,13 +355,16 @@ class NumpyArrayType(ContentType):
 
 class RegularArrayType(ContentType):
     IDENTIFIER = 0
-    CONTENT = 1
+    ZEROS_LENGTH = 1
+    CONTENT = 2
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
         cls.tolookup_identifier(layout, positions)
         positions.append(None)
+        positions.append(None)
+        positions[pos + cls.ZEROS_LENGTH] = len(layout)
         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
             layout.content, positions
         )
@@ -364,12 +391,15 @@ class RegularArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
         return ak._v2.contents.RegularArray(
-            content, self.size, 0, parameters=self.parameters
+            content,
+            self.size,
+            lookup.positions[pos + self.ZEROS_LENGTH],
+            parameters=self.parameters,
         )
 
     def has_field(self, key):
@@ -397,6 +427,8 @@ class RegularArrayType(ContentType):
         atval = regularize_atval(
             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
         )
+
+        # FIXME: what about ZEROS_LENGTH? Is that handled correctly?
 
         size = context.get_constant(numba.intp, self.size)
         start = builder.mul(builder.add(viewproxy.start, atval), size)
@@ -475,7 +507,7 @@ class ListArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         starts = self.IndexOf(self.indextype)(lookup.positions[pos + self.STARTS])
         stops = self.IndexOf(self.indextype)(lookup.positions[pos + self.STOPS])
         content = self.contenttype.tolayout(
@@ -527,10 +559,10 @@ class ListArrayType(ContentType):
 
         proxyout = context.make_helper(builder, rettype)
         proxyout.pos = nextpos
-        proxyout.start = ak._v2._connect.numba.castint(
+        proxyout.start = castint(
             context, builder, self.indextype.dtype, numba.intp, start
         )
-        proxyout.stop = ak._v2._connect.numba.castint(
+        proxyout.stop = castint(
             context, builder, self.indextype.dtype, numba.intp, stop
         )
         proxyout.arrayptrs = viewproxy.arrayptrs
@@ -595,7 +627,7 @@ class IndexedArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
@@ -645,9 +677,7 @@ class IndexedArrayType(ContentType):
         proxynext.pos = nextpos
         proxynext.start = context.get_constant(numba.intp, 0)
         proxynext.stop = builder.add(
-            ak._v2._connect.numba.castint(
-                context, builder, self.indextype.dtype, numba.intp, nextat
-            ),
+            castint(context, builder, self.indextype.dtype, numba.intp, nextat),
             context.get_constant(numba.intp, 1),
         )
         proxynext.arrayptrs = viewproxy.arrayptrs
@@ -724,7 +754,7 @@ class IndexedOptionArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
@@ -788,9 +818,7 @@ class IndexedOptionArrayType(ContentType):
                 proxynext.pos = nextpos
                 proxynext.start = context.get_constant(numba.intp, 0)
                 proxynext.stop = builder.add(
-                    ak._v2._connect.numba.castint(
-                        context, builder, self.indextype.dtype, numba.intp, nextat
-                    ),
+                    castint(context, builder, self.indextype.dtype, numba.intp, nextat),
                     context.get_constant(numba.intp, 1),
                 )
                 proxynext.arrayptrs = viewproxy.arrayptrs
@@ -875,7 +903,7 @@ class ByteMaskedArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         mask = self.IndexOf(self.masktype)(lookup.positions[pos + self.MASK])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
@@ -1028,7 +1056,7 @@ class BitMaskedArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         mask = self.IndexOf(self.masktype)(lookup.positions[pos + self.MASK])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
@@ -1071,7 +1099,7 @@ class BitMaskedArrayType(ContentType):
             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
         )
         bitatval = builder.sdiv(atval, context.get_constant(numba.intp, 8))
-        shiftval = ak._v2._connect.numba.castint(
+        shiftval = castint(
             context,
             builder,
             numba.intp,
@@ -1189,7 +1217,7 @@ class UnmaskedArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
@@ -1274,13 +1302,16 @@ class UnmaskedArrayType(ContentType):
 
 class RecordArrayType(ContentType):
     IDENTIFIER = 0
-    CONTENTS = 1
+    LENGTH = 1
+    CONTENTS = 2
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
         cls.tolookup_identifier(layout, positions)
+        positions.append(None)
         positions.extend([None] * len(layout.contents))
+        positions[pos + cls.LENGTH] = len(layout)
         for i, content in enumerate(layout.contents):
             positions[
                 pos + cls.CONTENTS + i
@@ -1320,7 +1351,7 @@ class RecordArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         if len(fields) > 0:
             index = self.fieldindex(fields[0])
             assert index is not None
@@ -1335,17 +1366,12 @@ class RecordArrayType(ContentType):
                 )
                 contents.append(layout)
 
-            if len(contents) == 0:
-                return ak._v2.contents.RecordArray(
-                    contents,
-                    self.fields,
-                    np.iinfo(np.int64).max,
-                    parameters=self.parameters,
-                )
-            else:
-                return ak._v2.contents.RecordArray(
-                    contents, self.fields, parameters=self.parameters
-                )
+            return ak._v2.contents.RecordArray(
+                contents,
+                self.fields,
+                lookup.positions[pos + self.LENGTH],
+                parameters=self.parameters,
+            )
 
     def fieldindex(self, key):
         out = -1
@@ -1670,7 +1696,7 @@ class UnionArrayType(ContentType):
         self.parameters = parameters
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert lookup.positions[pos + self.IDENTIFIER] == -1
         tags = self.IndexOf(self.tagstype)(lookup.positions[pos + self.TAGS])
         index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
         contents = []
