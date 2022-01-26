@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# import json
+import json
 
 import numba
 
@@ -268,34 +268,23 @@ class NumpyArrayType(ContentType):
             arraytype, cls.from_form_identifier(form), form.parameters
         )
 
+    def __init__(self, arraytype, identifiertype, parameters):
+        super().__init__(
+            name="ak2.NumpyArrayType({}, {}, {})".format(
+                arraytype.name, identifiertype.name, json.dumps(parameters)
+            )
+        )
+        self.arraytype = arraytype
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, arraytype, identifiertype, parameters):
-#         super(NumpyArrayType, self).__init__(
-#             name="ak.NumpyArrayType({0}, {1}, {2})".format(
-#                 arraytype.name, identifiertype.name, json.dumps(parameters)
-#             )
-#         )
-#         self.arraytype = arraytype
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        assert fields == ()
+        return ak._v2.contents.NumpyArray(
+            lookup.positions[pos + self.ARRAY], parameters=self.parameters
+        )
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         lookup.original_positions[pos + self.ARRAY] = ak.nplike.of(layout).asarray(
-#             layout
-#         )
-#         lookup.arrayptrs[pos + self.ARRAY] = lookup.original_positions[
-#             pos + self.ARRAY
-#         ].ctypes.data
-
-#     def tolayout(self, lookup, pos, fields):
-#         assert fields == ()
-#         return ak._v2.contents.NumpyArray(
-#             lookup.original_positions[pos + self.ARRAY], parameters=self.parameters
-#         )
 
 #     def has_field(self, key):
 #         return False
@@ -364,32 +353,26 @@ class RegularArrayType(ContentType):
             form.parameters,
         )
 
+    def __init__(self, contenttype, size, identifiertype, parameters):
+        super().__init__(
+            name="ak2.RegularArrayType({}, {}, {}, {})".format(
+                contenttype.name, size, identifiertype.name, json.dumps(parameters)
+            )
+        )
+        self.contenttype = contenttype
+        self.size = size
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, contenttype, size, identifiertype, parameters):
-#         super(RegularArrayType, self).__init__(
-#             name="ak.RegularArrayType({0}, {1}, {2}, {3})".format(
-#                 contenttype.name, size, identifiertype.name, json.dumps(parameters)
-#             )
-#         )
-#         self.contenttype = contenttype
-#         self.size = size
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        content = self.contenttype.tolayout(
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return ak._v2.contents.RegularArray(
+            content, self.size, 0, parameters=self.parameters
+        )
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         self.contenttype.form_fill(
-#             lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
-#         )
-
-#     def tolayout(self, lookup, pos, fields):
-#         content = self.contenttype.tolayout(
-#             lookup, lookup.positions[pos + self.CONTENT], fields
-#         )
-#         return ak._v2.contents.RegularArray(content, self.size, 0, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -479,81 +462,31 @@ class ListArrayType(ContentType):
             form.parameters,
         )
 
+    def __init__(self, indextype, contenttype, identifiertype, parameters):
+        super().__init__(
+            name="ak2.ListArrayType({}, {}, {}, {})".format(
+                indextype.name,
+                contenttype.name,
+                identifiertype.name,
+                json.dumps(parameters),
+            )
+        )
+        self.indextype = indextype
+        self.contenttype = contenttype
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, indextype, contenttype, identifiertype, parameters):
-#         super(ListArrayType, self).__init__(
-#             name="ak.ListArrayType({0}, {1}, {2}, {3})".format(
-#                 indextype.name,
-#                 contenttype.name,
-#                 identifiertype.name,
-#                 json.dumps(parameters),
-#             )
-#         )
-#         self.indextype = indextype
-#         self.contenttype = contenttype
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        starts = self.IndexOf(self.indextype)(lookup.positions[pos + self.STARTS])
+        stops = self.IndexOf(self.indextype)(lookup.positions[pos + self.STOPS])
+        content = self.contenttype.tolayout(
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return ak._v2.contents.ListArray(
+            starts, stops, content, parameters=self.parameters
+        )
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         if isinstance(
-#             layout,
-#             (
-#                 ak._v2.contents.ListArray32,
-#                 ak._v2.contents.ListArrayU32,
-#                 ak._v2.contents.ListArray64,
-#             ),
-#         ):
-#             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
-#             stops = ak.nplike.of(layout.stops).asarray(layout.stops)
-#         elif isinstance(
-#             layout,
-#             (
-#                 ak._v2.contents.ListOffsetArray32,
-#                 ak._v2.contents.ListOffsetArrayU32,
-#                 ak._v2.contents.ListOffsetArray64,
-#             ),
-#         ):
-#             offsets = ak.nplike.of(layout.offsets).asarray(layout.offsets)
-#             starts = offsets[:-1]
-#             stops = offsets[1:]
-
-#         lookup.original_positions[pos + self.STARTS] = starts
-#         lookup.original_positions[pos + self.STOPS] = stops
-#         lookup.arrayptrs[pos + self.STARTS] = starts.ctypes.data
-#         lookup.arrayptrs[pos + self.STOPS] = stops.ctypes.data
-
-#         self.contenttype.form_fill(
-#             lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
-#         )
-
-#     def ListArrayOf(self):
-#         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak._v2.contents.ListArray32
-#         elif self.indextype.dtype.bitwidth == 32:
-#             return ak._v2.contents.ListArrayU32
-#         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak._v2.contents.ListArray64
-#         else:
-#             raise AssertionError(
-#                 "no ListArray* type for array: {0}".format(self.indextype)
-#
-#             )
-
-#     def tolayout(self, lookup, pos, fields):
-#         starts = self.IndexOf(self.indextype)(
-#             lookup.original_positions[pos + self.STARTS]
-#         )
-#         stops = self.IndexOf(self.indextype)(
-#             lookup.original_positions[pos + self.STOPS]
-#         )
-#         content = self.contenttype.tolayout(
-#             lookup, lookup.positions[pos + self.CONTENT], fields
-#         )
-#         return self.ListArrayOf()(starts, stops, content, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -650,55 +583,28 @@ class IndexedArrayType(ContentType):
             form.parameters,
         )
 
+    def __init__(self, indextype, contenttype, identifiertype, parameters):
+        super().__init__(
+            name="ak2.IndexedArrayType({}, {}, {}, {})".format(
+                indextype.name,
+                contenttype.name,
+                identifiertype.name,
+                json.dumps(parameters),
+            )
+        )
+        self.indextype = indextype
+        self.contenttype = contenttype
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, indextype, contenttype, identifiertype, parameters):
-#         super(IndexedArrayType, self).__init__(
-#             name="ak.IndexedArrayType({0}, {1}, {2}, {3})".format(
-#                 indextype.name,
-#                 contenttype.name,
-#                 identifiertype.name,
-#                 json.dumps(parameters),
-#             )
-#         )
-#         self.indextype = indextype
-#         self.contenttype = contenttype
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
+        content = self.contenttype.tolayout(
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return ak._v2.contents.IndexedArray(index, content, parameters=self.parameters)
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         index = ak.nplike.of(layout.index).asarray(layout.index)
-#         lookup.original_positions[pos + self.INDEX] = index
-#         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
-
-#         self.contenttype.form_fill(
-#             lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
-#         )
-
-#     def IndexedArrayOf(self):
-#         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak._v2.contents.IndexedArray32
-#         elif self.indextype.dtype.bitwidth == 32:
-#             return ak._v2.contents.IndexedArrayU32
-#         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak._v2.contents.IndexedArray64
-#         else:
-#             raise AssertionError(
-#                 "no IndexedArray* type for array: {0}".format(self.indextype)
-#
-#             )
-
-#     def tolayout(self, lookup, pos, fields):
-#         index = self.IndexOf(self.indextype)(
-#             lookup.original_positions[pos + self.INDEX]
-#         )
-#         content = self.contenttype.tolayout(
-#             lookup, lookup.positions[pos + self.CONTENT], fields
-#         )
-#         return self.IndexedArrayOf()(index, content, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -805,53 +711,30 @@ class IndexedOptionArrayType(ContentType):
             form.parameters,
         )
 
+    def __init__(self, indextype, contenttype, identifiertype, parameters):
+        super().__init__(
+            name="ak2.IndexedOptionArrayType({}, {}, {}, {})".format(
+                indextype.name,
+                contenttype.name,
+                identifiertype.name,
+                json.dumps(parameters),
+            )
+        )
+        self.indextype = indextype
+        self.contenttype = contenttype
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, indextype, contenttype, identifiertype, parameters):
-#         super(IndexedOptionArrayType, self).__init__(
-#             name="ak.IndexedOptionArrayType({0}, {1}, {2}, {3})".format(
-#                 indextype.name,
-#                 contenttype.name,
-#                 identifiertype.name,
-#                 json.dumps(parameters),
-#             )
-#         )
-#         self.indextype = indextype
-#         self.contenttype = contenttype
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
+        content = self.contenttype.tolayout(
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return ak._v2.contents.IndexedOptionArray(
+            index, content, parameters=self.parameters
+        )
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         index = ak.nplike.of(layout.index).asarray(layout.index)
-#         lookup.original_positions[pos + self.INDEX] = index
-#         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
-
-#         self.contenttype.form_fill(
-#             lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
-#         )
-
-#     def IndexedOptionArrayOf(self):
-#         if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#             return ak._v2.contents.IndexedOptionArray32
-#         elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#             return ak._v2.contents.IndexedOptionArray64
-#         else:
-#             raise AssertionError(
-#                 "no IndexedOptionArray* type for array: {0}".format(self.indextype)
-#
-#             )
-
-#     def tolayout(self, lookup, pos, fields):
-#         index = self.IndexOf(self.indextype)(
-#             lookup.original_positions[pos + self.INDEX]
-#         )
-#         content = self.contenttype.tolayout(
-#             lookup, lookup.positions[pos + self.CONTENT], fields
-#         )
-#         return self.IndexedOptionArrayOf()(index, content, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -976,45 +859,32 @@ class ByteMaskedArrayType(ContentType):
             form.parameters,
         )
 
+    def __init__(self, masktype, contenttype, valid_when, identifiertype, parameters):
+        super().__init__(
+            name="ak2.ByteMaskedArrayType({}, {}, {}, {}, {})".format(
+                masktype.name,
+                contenttype.name,
+                valid_when,
+                identifiertype.name,
+                json.dumps(parameters),
+            )
+        )
+        self.masktype = masktype
+        self.contenttype = contenttype
+        self.valid_when = valid_when
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, masktype, contenttype, valid_when, identifiertype, parameters):
-#         super(ByteMaskedArrayType, self).__init__(
-#             name="ak.ByteMaskedArrayType({0}, {1}, {2}, {3}, "
-#             "{4})".format(
-#                 masktype.name,
-#                 contenttype.name,
-#                 valid_when,
-#                 identifiertype.name,
-#                 json.dumps(parameters),
-#             )
-#         )
-#         self.masktype = masktype
-#         self.contenttype = contenttype
-#         self.valid_when = valid_when
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        mask = self.IndexOf(self.masktype)(lookup.positions[pos + self.MASK])
+        content = self.contenttype.tolayout(
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return ak._v2.contents.ByteMaskedArray(
+            mask, content, self.valid_when, parameters=self.parameters
+        )
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         mask = ak.nplike.of(layout.mask).asarray(layout.mask)
-#         lookup.original_positions[pos + self.MASK] = mask
-#         lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
-
-#         self.contenttype.form_fill(
-#             lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
-#         )
-
-#     def tolayout(self, lookup, pos, fields):
-#         mask = self.IndexOf(self.masktype)(lookup.original_positions[pos + self.MASK])
-#         content = self.contenttype.tolayout(
-#             lookup, lookup.positions[pos + self.CONTENT], fields
-#         )
-#         return ak._v2.contents.ByteMaskedArray(
-#             mask, content, self.valid_when, parameters=self.parameters
-#         )
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -1137,54 +1007,41 @@ class BitMaskedArrayType(ContentType):
             form.parameters,
         )
 
+    def __init__(
+        self, masktype, contenttype, valid_when, lsb_order, identifiertype, parameters
+    ):
+        super().__init__(
+            name="ak2.BitMaskedArrayType({}, {}, {}, {}, {}, {})".format(
+                masktype.name,
+                contenttype.name,
+                valid_when,
+                lsb_order,
+                identifiertype.name,
+                json.dumps(parameters),
+            )
+        )
+        self.masktype = masktype
+        self.contenttype = contenttype
+        self.valid_when = valid_when
+        self.lsb_order = lsb_order
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(
-#         self, masktype, contenttype, valid_when, lsb_order, identifiertype, parameters
-#     ):
-#         super(BitMaskedArrayType, self).__init__(
-#             name="ak.BitMaskedArrayType({0}, {1}, {2}, {3}, {4}, "
-#             "{5})".format(
-#                 masktype.name,
-#                 contenttype.name,
-#                 valid_when,
-#                 lsb_order,
-#                 identifiertype.name,
-#                 json.dumps(parameters),
-#             )
-#         )
-#         self.masktype = masktype
-#         self.contenttype = contenttype
-#         self.valid_when = valid_when
-#         self.lsb_order = lsb_order
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        mask = self.IndexOf(self.masktype)(lookup.positions[pos + self.MASK])
+        content = self.contenttype.tolayout(
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return ak._v2.contents.BitMaskedArray(
+            mask,
+            content,
+            self.valid_when,
+            len(content),
+            self.lsb_order,
+            parameters=self.parameters,
+        )
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         mask = ak.nplike.of(layout.mask).asarray(layout.mask)
-#         lookup.original_positions[pos + self.MASK] = mask
-#         lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
-
-#         self.contenttype.form_fill(
-#             lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
-#         )
-
-#     def tolayout(self, lookup, pos, fields):
-#         mask = self.IndexOf(self.masktype)(lookup.original_positions[pos + self.MASK])
-#         content = self.contenttype.tolayout(
-#             lookup, lookup.positions[pos + self.CONTENT], fields
-#         )
-#         return ak._v2.contents.BitMaskedArray(
-#             mask,
-#             content,
-#             self.valid_when,
-#             len(content),
-#             self.lsb_order,
-#             parameters=self.parameters,
-#         )
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -1320,31 +1177,23 @@ class UnmaskedArrayType(ContentType):
             form.parameters,
         )
 
+    def __init__(self, contenttype, identifiertype, parameters):
+        super().__init__(
+            name="ak2.UnmaskedArrayType({}, {}, {})".format(
+                contenttype.name, identifiertype.name, json.dumps(parameters)
+            )
+        )
+        self.contenttype = contenttype
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, contenttype, identifiertype, parameters):
-#         super(UnmaskedArrayType, self).__init__(
-#             name="ak.UnmaskedArrayType({0}, {1}, {2})".format(
-#                 contenttype.name, identifiertype.name, json.dumps(parameters)
-#             )
-#         )
-#         self.contenttype = contenttype
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        content = self.contenttype.tolayout(
+            lookup, lookup.positions[pos + self.CONTENT], fields
+        )
+        return ak._v2.contents.UnmaskedArray(content, parameters=self.parameters)
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         self.contenttype.form_fill(
-#             lookup.arrayptrs[pos + self.CONTENT], layout.content, lookup
-#         )
-
-#     def tolayout(self, lookup, pos, fields):
-#         content = self.contenttype.tolayout(
-#             lookup, lookup.positions[pos + self.CONTENT], fields
-#         )
-#         return ak._v2.contents.UnmaskedArray(content, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return self.contenttype.has_field(key)
@@ -1453,44 +1302,54 @@ class RecordArrayType(ContentType):
             contents, fields, cls.from_form_identifier(form), form.parameters
         )
 
+    def __init__(self, contenttypes, fields, identifiertype, parameters):
+        super().__init__(
+            name="ak2.RecordArrayType(({}{}), ({}), {}, {})".format(
+                ", ".join(x.name for x in contenttypes),
+                "," if len(contenttypes) == 1 else "",
+                "None" if fields is None else repr(tuple(fields)),
+                identifiertype.name,
+                json.dumps(parameters),
+            )
+        )
+        self.contenttypes = contenttypes
+        self.fields = fields
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, contenttypes, recordlookup, identifiertype, parameters):
-#         super(RecordArrayType, self).__init__(
-#             name="ak.RecordArrayType(({0}{1}), ({2}), {3}, {4})".format(
-#                 ", ".join(x.name for x in contenttypes),
-#                 "," if len(contenttypes) == 1 else "",
-#                 "None" if recordlookup is None else repr(tuple(recordlookup)),
-#                 identifiertype.name,
-#                 json.dumps(parameters),
-#             )
-#         )
-#         self.contenttypes = contenttypes
-#         self.recordlookup = recordlookup
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        if len(fields) > 0:
+            index = self.fieldindex(fields[0])
+            assert index is not None
+            return self.contenttypes[index].tolayout(
+                lookup, lookup.positions[pos + self.CONTENTS + index], fields[1:]
+            )
+        else:
+            contents = []
+            for i, contenttype in enumerate(self.contenttypes):
+                layout = contenttype.tolayout(
+                    lookup, lookup.positions[pos + self.CONTENTS + i], fields
+                )
+                contents.append(layout)
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
+            if len(contents) == 0:
+                return ak._v2.contents.RecordArray(
+                    contents,
+                    self.fields,
+                    np.iinfo(np.int64).max,
+                    parameters=self.parameters,
+                )
+            else:
+                return ak._v2.contents.RecordArray(
+                    contents, self.fields, parameters=self.parameters
+                )
 
-#         if self.recordlookup is None:
-#             for i, contenttype in enumerate(self.contenttypes):
-#                 contenttype.form_fill(
-#                     lookup.arrayptrs[pos + self.CONTENTS + i], layout.field(i), lookup
-#                 )
-#         else:
-#             for i, contenttype in enumerate(self.contenttypes):
-#                 contenttype.form_fill(
-#                     lookup.arrayptrs[pos + self.CONTENTS + i],
-#                     layout.field(self.recordlookup[i]),
-#                     lookup,
-#                 )
 
 #     def fieldindex(self, key):
 #         out = -1
-#         if self.recordlookup is not None:
-#             for i, x in enumerate(self.recordlookup):
+#         if self.fields is not None:
+#             for i, x in enumerate(self.fields):
 #                 if x == key:
 #                     out = i
 #                     break
@@ -1502,33 +1361,6 @@ class RecordArrayType(ContentType):
 #             if not 0 <= out < len(self.contenttypes):
 #                 return None
 #         return out
-
-#     def tolayout(self, lookup, pos, fields):
-#         if len(fields) > 0:
-#             index = self.fieldindex(fields[0])
-#             assert index is not None
-#             return self.contenttypes[index].tolayout(
-#                 lookup, lookup.positions[pos + self.CONTENTS + index], fields[1:]
-#             )
-#         else:
-#             contents = []
-#             for i, contenttype in enumerate(self.contenttypes):
-#                 layout = contenttype.tolayout(
-#                     lookup, lookup.positions[pos + self.CONTENTS + i], fields
-#                 )
-#                 contents.append(layout)
-
-#             if len(contents) == 0:
-#                 return ak._v2.contents.RecordArray(
-#                     contents,
-#                     self.recordlookup,
-#                     np.iinfo(np.int64).max,
-#                     parameters=self.parameters,
-#                 )
-#             else:
-#                 return ak._v2.contents.RecordArray(
-#                     contents, self.recordlookup, parameters=self.parameters
-#                 )
 
 #     def has_field(self, key):
 #         return self.fieldindex(key) is not None
@@ -1550,7 +1382,7 @@ class RecordArrayType(ContentType):
 #             key = viewtype.fields[0]
 #             index = self.fieldindex(key)
 #             if index is None:
-#                 if self.recordlookup is None:
+#                 if self.fields is None:
 #                     raise ValueError(
 #                         "no field {0} in tuples with {1} fields".format(
 #                             repr(key), len(self.contenttypes)
@@ -1561,7 +1393,7 @@ class RecordArrayType(ContentType):
 #                     raise ValueError(
 #                         "no field {0} in records with "
 #                         "fields: [{1}]".format(
-#                             repr(key), ", ".join(repr(x) for x in self.recordlookup)
+#                             repr(key), ", ".join(repr(x) for x in self.fields)
 #                         )
 #
 #                     )
@@ -1574,7 +1406,7 @@ class RecordArrayType(ContentType):
 #     def getitem_field(self, viewtype, key):
 #         index = self.fieldindex(key)
 #         if index is None:
-#             if self.recordlookup is None:
+#             if self.fields is None:
 #                 raise ValueError(
 #                     "no field {0} in tuples with {1} fields".format(
 #                         repr(key), len(self.contenttypes)
@@ -1584,7 +1416,7 @@ class RecordArrayType(ContentType):
 #             else:
 #                 raise ValueError(
 #                     "no field {0} in records with fields: [{1}]".format(
-#                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
+#                         repr(key), ", ".join(repr(x) for x in self.fields)
 #                     )
 #
 #                 )
@@ -1595,7 +1427,7 @@ class RecordArrayType(ContentType):
 #     def getitem_field_record(self, recordviewtype, key):
 #         index = self.fieldindex(key)
 #         if index is None:
-#             if self.recordlookup is None:
+#             if self.fields is None:
 #                 raise ValueError(
 #                     "no field {0} in tuple with {1} fields".format(
 #                         repr(key), len(self.contenttypes)
@@ -1605,7 +1437,7 @@ class RecordArrayType(ContentType):
 #             else:
 #                 raise ValueError(
 #                     "no field {0} in record with fields: [{1}]".format(
-#                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
+#                         repr(key), ", ".join(repr(x) for x in self.fields)
 #                     )
 #
 #                 )
@@ -1774,7 +1606,7 @@ class RecordArrayType(ContentType):
 
 #     @property
 #     def is_tuple(self):
-#         return self.recordlookup is None
+#         return self.fields is None
 
 #     @property
 #     def ndim(self):
@@ -1826,74 +1658,37 @@ class UnionArrayType(ContentType):
             form.parameters,
         )
 
+    def __init__(self, tagstype, indextype, contenttypes, identifiertype, parameters):
+        super().__init__(
+            name="ak2.UnionArrayType({}, {}, ({}{}), {}, {})".format(
+                tagstype.name,
+                indextype.name,
+                ", ".join(x.name for x in contenttypes),
+                "," if len(contenttypes) == 1 else "",
+                identifiertype.name,
+                json.dumps(parameters),
+            )
+        )
+        self.tagstype = tagstype
+        self.indextype = indextype
+        self.contenttypes = contenttypes
+        self.identifiertype = identifiertype
+        self.parameters = parameters
 
-#     def __init__(self, tagstype, indextype, contenttypes, identifiertype, parameters):
-#         super(UnionArrayType, self).__init__(
-#             name="ak.UnionArrayType({0}, {1}, ({2}{3}), {4}, "
-#             "{5})".format(
-#                 tagstype.name,
-#                 indextype.name,
-#                 ", ".join(x.name for x in contenttypes),
-#                 "," if len(contenttypes) == 1 else "",
-#                 identifiertype.name,
-#                 json.dumps(parameters),
-#             )
-#         )
-#         self.tagstype = tagstype
-#         self.indextype = indextype
-#         self.contenttypes = contenttypes
-#         self.identifiertype = identifiertype
-#         self.parameters = parameters
+    def tolayout(self, lookup, pos, fields):
+        assert lookup.positions[pos + self.IDENTIFIER] is None
+        tags = self.IndexOf(self.tagstype)(lookup.positions[pos + self.TAGS])
+        index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
+        contents = []
+        for i, contenttype in enumerate(self.contenttypes):
+            layout = contenttype.tolayout(
+                lookup, lookup.positions[pos + self.CONTENTS + i], fields
+            )
+            contents.append(layout)
+        return ak._v2.contents.UnionArray(
+            tags, index, contents, parameters=self.parameters
+        )
 
-#     def form_fill(self, pos, layout, lookup):
-#         lookup.sharedptrs_hold[pos] = layout._persistent_shared_ptr
-#         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
-#         self.form_fill_identifier(pos, layout, lookup)
-
-#         tags = ak.nplike.of(layout.tags).asarray(layout.tags)
-#         lookup.original_positions[pos + self.TAGS] = tags
-#         lookup.arrayptrs[pos + self.TAGS] = tags.ctypes.data
-
-#         index = ak.nplike.of(layout.index).asarray(layout.index)
-#         lookup.original_positions[pos + self.INDEX] = index
-#         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
-
-#         for i, contenttype in enumerate(self.contenttypes):
-#             contenttype.form_fill(
-#                 lookup.arrayptrs[pos + self.CONTENTS + i], layout.content(i), lookup
-#             )
-
-#     def UnionArrayOf(self):
-#         if self.tagstype.dtype.bitwidth == 8 and self.tagstype.dtype.signed:
-#             if self.indextype.dtype.bitwidth == 32 and self.indextype.dtype.signed:
-#                 return ak._v2.contents.UnionArray8_32
-#             elif self.indextype.dtype.bitwidth == 32:
-#                 return ak._v2.contents.UnionArray8_U32
-#             elif self.indextype.dtype.bitwidth == 64 and self.indextype.dtype.signed:
-#                 return ak._v2.contents.UnionArray8_64
-#             else:
-#                 raise AssertionError(
-#                     "no UnionArray* type for index array: {0}".format(self.indextype)
-#
-#                 )
-#         else:
-#             raise AssertionError(
-#                 "no UnionArray* type for tags array: {0}".format(self.tagstype)
-#
-#             )
-
-#     def tolayout(self, lookup, pos, fields):
-#         tags = self.IndexOf(self.tagstype)(lookup.original_positions[pos + self.TAGS])
-#         index = self.IndexOf(self.indextype)(
-#             lookup.original_positions[pos + self.INDEX]
-#         )
-#         contents = []
-#         for i, contenttype in enumerate(self.contenttypes):
-#             layout = contenttype.tolayout(
-#                 lookup, lookup.positions[pos + self.CONTENTS + i], fields
-#             )
-#             contents.append(layout)
-#         return self.UnionArrayOf()(tags, index, contents, parameters=self.parameters)
 
 #     def has_field(self, key):
 #         return any(x.has_field(key) for x in self.contenttypes)
@@ -1992,134 +1787,118 @@ class UnionArrayType(ContentType):
 #             return None
 
 
-# def inner_dtype_of_form(form):
-#     if form is None:
-#         return None
+def inner_dtype_of_form(form):
+    if form is None:
+        return None
 
-#     elif isinstance(form, (ak.forms.NumpyForm,)):
-#         return numba.from_dtype(form.to_numpy())
+    elif isinstance(form, ak._v2.forms.NumpyForm):
+        return numba.from_dtype(
+            ak._v2.types.numpytype.primitive_to_dtype(form.primitive)
+        )
 
-#     elif isinstance(form, (ak.forms.EmptyForm,)):
-#         return numba.types.float64
+    elif isinstance(form, ak._v2.forms.EmptyForm):
+        return numba.types.float64
 
-#     elif isinstance(
-#         form,
-#         (
-#             ak.forms.RegularForm,
-#             ak.forms.ListForm,
-#             ak.forms.ListOffsetForm,
-#             ak.forms.IndexedForm,
-#         ),
-#     ):
-#         return inner_dtype_of_form(form.content)
+    elif isinstance(
+        form,
+        (
+            ak._v2.forms.RegularForm,
+            ak._v2.forms.ListForm,
+            ak._v2.forms.ListOffsetForm,
+            ak._v2.forms.IndexedForm,
+        ),
+    ):
+        return inner_dtype_of_form(form.content)
 
-#     elif isinstance(
-#         form,
-#         (
-#             ak.forms.RecordForm,
-#             ak.forms.IndexedOptionForm,
-#             ak.forms.ByteMaskedForm,
-#             ak.forms.BitMaskedForm,
-#             ak.forms.UnmaskedForm,
-#         ),
-#     ):
-#         return None
+    elif isinstance(
+        form,
+        (
+            ak._v2.forms.RecordForm,
+            ak._v2.forms.IndexedOptionForm,
+            ak._v2.forms.ByteMaskedForm,
+            ak._v2.forms.BitMaskedForm,
+            ak._v2.forms.UnmaskedForm,
+        ),
+    ):
+        return None
 
-#     elif isinstance(form, ak.forms.UnionForm):
-#         context = numba.core.typing.Context()
-#         return context.unify_types(*[inner_dtype_of_form(x) for x in form.contents])
+    elif isinstance(form, ak._v2.forms.UnionForm):
+        context = numba.core.typing.Context()
+        return context.unify_types(*[inner_dtype_of_form(x) for x in form.contents])
 
-#     elif isinstance(form, ak.forms.VirtualForm):
-#         return inner_dtype_of_form(form.form)
-
-#     else:
-#         raise AssertionError(
-#             "unrecognized Form type: {0}".format(type(form))
-#
-#         )
+    else:
+        raise AssertionError(f"unrecognized Form type: {type(form)}")
 
 
-# def optiontype_of_form(form):
-#     if form is None:
-#         return None
+def optiontype_of_form(form):
+    if form is None:
+        return None
 
-#     elif isinstance(
-#         form,
-#         (
-#             ak.forms.NumpyForm,
-#             ak.forms.EmptyForm,
-#             ak.forms.RegularForm,
-#             ak.forms.ListForm,
-#             ak.forms.ListOffsetForm,
-#             ak.forms.IndexedForm,
-#             ak.forms.RecordForm,
-#         ),
-#     ):
-#         return False
+    elif isinstance(
+        form,
+        (
+            ak._v2.forms.NumpyForm,
+            ak._v2.forms.EmptyForm,
+            ak._v2.forms.RegularForm,
+            ak._v2.forms.ListForm,
+            ak._v2.forms.ListOffsetForm,
+            ak._v2.forms.IndexedForm,
+            ak._v2.forms.RecordForm,
+        ),
+    ):
+        return False
 
-#     elif isinstance(
-#         form,
-#         (
-#             ak.forms.IndexedOptionForm,
-#             ak.forms.ByteMaskedForm,
-#             ak.forms.BitMaskedForm,
-#             ak.forms.UnmaskedForm,
-#         ),
-#     ):
-#         return False
+    elif isinstance(
+        form,
+        (
+            ak._v2.forms.IndexedOptionForm,
+            ak._v2.forms.ByteMaskedForm,
+            ak._v2.forms.BitMaskedForm,
+            ak._v2.forms.UnmaskedForm,
+        ),
+    ):
+        return False
 
-#     elif isinstance(form, ak.forms.UnionForm):
-#         return any(optiontype_of_form(x) for x in form.contents)
+    elif isinstance(form, ak._v2.forms.UnionForm):
+        return any(optiontype_of_form(x) for x in form.contents)
 
-#     elif isinstance(form, ak.forms.VirtualForm):
-#         return optiontype_of_form(form.form)
-
-#     else:
-#         raise AssertionError(
-#             "unrecognized Form type: {0}".format(type(form))
-#
-#         )
+    else:
+        raise AssertionError(f"unrecognized Form type: {type(form)}")
 
 
-# def recordtype_of_form(form):
-#     if form is None:
-#         return None
+def recordtype_of_form(form):
+    if form is None:
+        return None
 
-#     elif isinstance(
-#         form,
-#         (
-#             ak.forms.NumpyForm,
-#             ak.forms.EmptyForm,
-#             ak.forms.RegularForm,
-#             ak.forms.ListForm,
-#             ak.forms.ListOffsetForm,
-#         ),
-#     ):
-#         return False
+    elif isinstance(
+        form,
+        (
+            ak._v2.forms.NumpyForm,
+            ak._v2.forms.EmptyForm,
+            ak._v2.forms.RegularForm,
+            ak._v2.forms.ListForm,
+            ak._v2.forms.ListOffsetForm,
+        ),
+    ):
+        return False
 
-#     elif isinstance(
-#         form,
-#         (
-#             ak.forms.IndexedForm,
-#             ak.forms.IndexedOptionForm,
-#             ak.forms.ByteMaskedForm,
-#             ak.forms.BitMaskedForm,
-#             ak.forms.UnmaskedForm,
-#         ),
-#     ):
-#         return recordtype_of_form(form.content)
+    elif isinstance(
+        form,
+        (
+            ak._v2.forms.IndexedForm,
+            ak._v2.forms.IndexedOptionForm,
+            ak._v2.forms.ByteMaskedForm,
+            ak._v2.forms.BitMaskedForm,
+            ak._v2.forms.UnmaskedForm,
+        ),
+    ):
+        return recordtype_of_form(form.content)
 
-#     elif isinstance(form, (ak.forms.RecordForm,)):
-#         return True
+    elif isinstance(form, (ak._v2.forms.RecordForm,)):
+        return True
 
-#     elif isinstance(form, ak.forms.UnionForm):
-#         return any(recordtype_of_form(x) for x in form.contents)
+    elif isinstance(form, ak._v2.forms.UnionForm):
+        return any(recordtype_of_form(x) for x in form.contents)
 
-#     elif isinstance(form, ak.forms.VirtualForm):
-#         return recordtype_of_form(form.form)
-
-#     else:
-#         raise AssertionError(
-#             "unrecognized Form type: {0}".format(type(form))
-#
-#         )
+    else:
+        raise AssertionError(f"unrecognized Form type: {type(form)}")
