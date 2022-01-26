@@ -285,49 +285,48 @@ class NumpyArrayType(ContentType):
             lookup.positions[pos + self.ARRAY], parameters=self.parameters
         )
 
+    def has_field(self, key):
+        return False
 
-#     def has_field(self, key):
-#         return False
+    def getitem_at(self, viewtype):
+        return self.arraytype.dtype
 
-#     def getitem_at(self, viewtype):
-#         return self.arraytype.dtype
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
+        arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
+        arraypos = builder.add(viewproxy.start, atval)
+        return getat(context, builder, arrayptr, arraypos, rettype=rettype)
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
-#         arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
-#         arraypos = builder.add(viewproxy.start, atval)
-#         return getat(context, builder, arrayptr, arraypos, rettype=rettype)
+    @property
+    def ndim(self):
+        return self.arraytype.ndim
 
-#     @property
-#     def ndim(self):
-#         return self.arraytype.ndim
+    @property
+    def inner_dtype(self):
+        return self.arraytype.dtype
 
-#     @property
-#     def inner_dtype(self):
-#         return self.arraytype.dtype
+    @property
+    def is_optiontype(self):
+        return False
 
-#     @property
-#     def is_optiontype(self):
-#         return False
-
-#     @property
-#     def is_recordtype(self):
-#         return False
+    @property
+    def is_recordtype(self):
+        return False
 
 
 class RegularArrayType(ContentType):
@@ -373,61 +372,60 @@ class RegularArrayType(ContentType):
             content, self.size, 0, parameters=self.parameters
         )
 
+    def has_field(self, key):
+        return self.contenttype.has_field(key)
 
-#     def has_field(self, key):
-#         return self.contenttype.has_field(key)
+    def getitem_at(self, viewtype):
+        return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 
-#     def getitem_at(self, viewtype):
-#         return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
+        size = context.get_constant(numba.intp, self.size)
+        start = builder.mul(builder.add(viewproxy.start, atval), size)
+        stop = builder.add(start, size)
 
-#         size = context.get_constant(numba.intp, self.size)
-#         start = builder.mul(builder.add(viewproxy.start, atval), size)
-#         stop = builder.add(start, size)
+        proxyout = context.make_helper(builder, rettype)
+        proxyout.pos = nextpos
+        proxyout.start = start
+        proxyout.stop = stop
+        proxyout.arrayptrs = viewproxy.arrayptrs
+        proxyout.sharedptrs = viewproxy.sharedptrs
+        proxyout.pylookup = viewproxy.pylookup
+        return proxyout._getvalue()
 
-#         proxyout = context.make_helper(builder, rettype)
-#         proxyout.pos = nextpos
-#         proxyout.start = start
-#         proxyout.stop = stop
-#         proxyout.arrayptrs = viewproxy.arrayptrs
-#         proxyout.sharedptrs = viewproxy.sharedptrs
-#         proxyout.pylookup = viewproxy.pylookup
-#         return proxyout._getvalue()
+    @property
+    def ndim(self):
+        return 1 + self.contenttype.ndim
 
-#     @property
-#     def ndim(self):
-#         return 1 + self.contenttype.ndim
+    @property
+    def inner_dtype(self):
+        return self.contenttype.inner_dtype
 
-#     @property
-#     def inner_dtype(self):
-#         return self.contenttype.inner_dtype
+    @property
+    def is_optiontype(self):
+        return False
 
-#     @property
-#     def is_optiontype(self):
-#         return False
-
-#     @property
-#     def is_recordtype(self):
-#         return False
+    @property
+    def is_recordtype(self):
+        return False
 
 
 class ListArrayType(ContentType):
@@ -487,75 +485,74 @@ class ListArrayType(ContentType):
             starts, stops, content, parameters=self.parameters
         )
 
+    def has_field(self, key):
+        return self.contenttype.has_field(key)
 
-#     def has_field(self, key):
-#         return self.contenttype.has_field(key)
+    def getitem_at(self, viewtype):
+        return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 
-#     def getitem_at(self, viewtype):
-#         return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
+        startspos = posat(context, builder, viewproxy.pos, self.STARTS)
+        startsptr = getat(context, builder, viewproxy.arrayptrs, startspos)
+        startsarraypos = builder.add(viewproxy.start, atval)
+        start = getat(
+            context, builder, startsptr, startsarraypos, rettype=self.indextype.dtype
+        )
 
-#         startspos = posat(context, builder, viewproxy.pos, self.STARTS)
-#         startsptr = getat(context, builder, viewproxy.arrayptrs, startspos)
-#         startsarraypos = builder.add(viewproxy.start, atval)
-#         start = getat(
-#             context, builder, startsptr, startsarraypos, rettype=self.indextype.dtype
-#         )
+        stopspos = posat(context, builder, viewproxy.pos, self.STOPS)
+        stopsptr = getat(context, builder, viewproxy.arrayptrs, stopspos)
+        stopsarraypos = builder.add(viewproxy.start, atval)
+        stop = getat(
+            context, builder, stopsptr, stopsarraypos, rettype=self.indextype.dtype
+        )
 
-#         stopspos = posat(context, builder, viewproxy.pos, self.STOPS)
-#         stopsptr = getat(context, builder, viewproxy.arrayptrs, stopspos)
-#         stopsarraypos = builder.add(viewproxy.start, atval)
-#         stop = getat(
-#             context, builder, stopsptr, stopsarraypos, rettype=self.indextype.dtype
-#         )
+        proxyout = context.make_helper(builder, rettype)
+        proxyout.pos = nextpos
+        proxyout.start = ak._v2._connect.numba.castint(
+            context, builder, self.indextype.dtype, numba.intp, start
+        )
+        proxyout.stop = ak._v2._connect.numba.castint(
+            context, builder, self.indextype.dtype, numba.intp, stop
+        )
+        proxyout.arrayptrs = viewproxy.arrayptrs
+        proxyout.sharedptrs = viewproxy.sharedptrs
+        proxyout.pylookup = viewproxy.pylookup
+        return proxyout._getvalue()
 
-#         proxyout = context.make_helper(builder, rettype)
-#         proxyout.pos = nextpos
-#         proxyout.start = ak._v2._connect.numba.castint(
-#             context, builder, self.indextype.dtype, numba.intp, start
-#         )
-#         proxyout.stop = ak._v2._connect.numba.castint(
-#             context, builder, self.indextype.dtype, numba.intp, stop
-#         )
-#         proxyout.arrayptrs = viewproxy.arrayptrs
-#         proxyout.sharedptrs = viewproxy.sharedptrs
-#         proxyout.pylookup = viewproxy.pylookup
-#         return proxyout._getvalue()
+    @property
+    def ndim(self):
+        return 1 + self.contenttype.ndim
 
-#     @property
-#     def ndim(self):
-#         return 1 + self.contenttype.ndim
+    @property
+    def inner_dtype(self):
+        return self.contenttype.inner_dtype
 
-#     @property
-#     def inner_dtype(self):
-#         return self.contenttype.inner_dtype
+    @property
+    def is_optiontype(self):
+        return False
 
-#     @property
-#     def is_optiontype(self):
-#         return False
-
-#     @property
-#     def is_recordtype(self):
-#         return False
+    @property
+    def is_recordtype(self):
+        return False
 
 
 class IndexedArrayType(ContentType):
@@ -605,85 +602,86 @@ class IndexedArrayType(ContentType):
         )
         return ak._v2.contents.IndexedArray(index, content, parameters=self.parameters)
 
+    def has_field(self, key):
+        return self.contenttype.has_field(key)
 
-#     def has_field(self, key):
-#         return self.contenttype.has_field(key)
+    def getitem_at(self, viewtype):
+        viewtype = ak._v2._connect.numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
+        return self.contenttype.getitem_at_check(viewtype)
 
-#     def getitem_at(self, viewtype):
-#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
-#         return self.contenttype.getitem_at_check(viewtype)
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
+        indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
+        indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
+        indexarraypos = builder.add(viewproxy.start, atval)
+        nextat = getat(
+            context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
+        )
 
-#         indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
-#         indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
-#         indexarraypos = builder.add(viewproxy.start, atval)
-#         nextat = getat(
-#             context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
-#         )
+        nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
+        proxynext = context.make_helper(builder, nextviewtype)
+        proxynext.pos = nextpos
+        proxynext.start = context.get_constant(numba.intp, 0)
+        proxynext.stop = builder.add(
+            ak._v2._connect.numba.castint(
+                context, builder, self.indextype.dtype, numba.intp, nextat
+            ),
+            context.get_constant(numba.intp, 1),
+        )
+        proxynext.arrayptrs = viewproxy.arrayptrs
+        proxynext.sharedptrs = viewproxy.sharedptrs
+        proxynext.pylookup = viewproxy.pylookup
 
-#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
-#             self.contenttype, viewtype, None
-#         )
-#         proxynext = context.make_helper(builder, nextviewtype)
-#         proxynext.pos = nextpos
-#         proxynext.start = context.get_constant(numba.intp, 0)
-#         proxynext.stop = builder.add(
-#             ak._v2._connect.numba.castint(
-#                 context, builder, self.indextype.dtype, numba.intp, nextat
-#             ),
-#             context.get_constant(numba.intp, 1),
-#         )
-#         proxynext.arrayptrs = viewproxy.arrayptrs
-#         proxynext.sharedptrs = viewproxy.sharedptrs
-#         proxynext.pylookup = viewproxy.pylookup
+        return self.contenttype.lower_getitem_at_check(
+            context,
+            builder,
+            rettype,
+            nextviewtype,
+            proxynext._getvalue(),
+            proxynext,
+            numba.intp,
+            nextat,
+            False,
+            False,
+        )
 
-#         return self.contenttype.lower_getitem_at_check(
-#             context,
-#             builder,
-#             rettype,
-#             nextviewtype,
-#             proxynext._getvalue(),
-#             proxynext,
-#             numba.intp,
-#             nextat,
-#             False,
-#             False,
-#         )
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
 
-#     @property
-#     def ndim(self):
-#         return self.contenttype.ndim
+    @property
+    def inner_dtype(self):
+        return self.contenttype.inner_dtype
 
-#     @property
-#     def inner_dtype(self):
-#         return self.contenttype.inner_dtype
+    @property
+    def is_optiontype(self):
+        return False
 
-#     @property
-#     def is_optiontype(self):
-#         return False
-
-#     @property
-#     def is_recordtype(self):
-#         return self.contenttype.is_recordtype
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
 
 
 class IndexedOptionArrayType(ContentType):
@@ -735,102 +733,103 @@ class IndexedOptionArrayType(ContentType):
             index, content, parameters=self.parameters
         )
 
+    def has_field(self, key):
+        return self.contenttype.has_field(key)
 
-#     def has_field(self, key):
-#         return self.contenttype.has_field(key)
+    def getitem_at(self, viewtype):
+        viewtype = ak._v2._connect.numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
-#     def getitem_at(self, viewtype):
-#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
-#         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
+        indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
+        indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
+        indexarraypos = builder.add(viewproxy.start, atval)
+        nextat = getat(
+            context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
+        )
 
-#         indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
-#         indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
-#         indexarraypos = builder.add(viewproxy.start, atval)
-#         nextat = getat(
-#             context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
-#         )
+        output = context.make_helper(builder, rettype)
 
-#         output = context.make_helper(builder, rettype)
+        with builder.if_else(
+            builder.icmp_signed(
+                "<", nextat, context.get_constant(self.indextype.dtype, 0)
+            )
+        ) as (isnone, isvalid):
+            with isnone:
+                output.valid = numba.core.cgutils.false_bit
+                output.data = numba.core.cgutils.get_null_value(output.data.type)
 
-#         with builder.if_else(
-#             builder.icmp_signed(
-#                 "<", nextat, context.get_constant(self.indextype.dtype, 0)
-#             )
-#         ) as (isnone, isvalid):
-#             with isnone:
-#                 output.valid = numba.core.cgutils.false_bit
-#                 output.data = numba.core.cgutils.get_null_value(output.data.type)
+            with isvalid:
+                nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+                    self.contenttype, viewtype, None
+                )
+                proxynext = context.make_helper(builder, nextviewtype)
+                proxynext.pos = nextpos
+                proxynext.start = context.get_constant(numba.intp, 0)
+                proxynext.stop = builder.add(
+                    ak._v2._connect.numba.castint(
+                        context, builder, self.indextype.dtype, numba.intp, nextat
+                    ),
+                    context.get_constant(numba.intp, 1),
+                )
+                proxynext.arrayptrs = viewproxy.arrayptrs
+                proxynext.sharedptrs = viewproxy.sharedptrs
+                proxynext.pylookup = viewproxy.pylookup
 
-#             with isvalid:
-#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
-#                     self.contenttype, viewtype, None
-#                 )
-#                 proxynext = context.make_helper(builder, nextviewtype)
-#                 proxynext.pos = nextpos
-#                 proxynext.start = context.get_constant(numba.intp, 0)
-#                 proxynext.stop = builder.add(
-#                     ak._v2._connect.numba.castint(
-#                         context, builder, self.indextype.dtype, numba.intp, nextat
-#                     ),
-#                     context.get_constant(numba.intp, 1),
-#                 )
-#                 proxynext.arrayptrs = viewproxy.arrayptrs
-#                 proxynext.sharedptrs = viewproxy.sharedptrs
-#                 proxynext.pylookup = viewproxy.pylookup
+                outdata = self.contenttype.lower_getitem_at_check(
+                    context,
+                    builder,
+                    rettype.type,
+                    nextviewtype,
+                    proxynext._getvalue(),
+                    proxynext,
+                    numba.intp,
+                    nextat,
+                    False,
+                    False,
+                )
 
-#                 outdata = self.contenttype.lower_getitem_at_check(
-#                     context,
-#                     builder,
-#                     rettype.type,
-#                     nextviewtype,
-#                     proxynext._getvalue(),
-#                     proxynext,
-#                     numba.intp,
-#                     nextat,
-#                     False,
-#                     False,
-#                 )
+                output.valid = numba.core.cgutils.true_bit
+                output.data = outdata
 
-#                 output.valid = numba.core.cgutils.true_bit
-#                 output.data = outdata
+        return output._getvalue()
 
-#         return output._getvalue()
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
 
-#     @property
-#     def ndim(self):
-#         return self.contenttype.ndim
+    @property
+    def inner_dtype(self):
+        return None
 
-#     @property
-#     def inner_dtype(self):
-#         return None
+    @property
+    def is_optiontype(self):
+        return True
 
-#     @property
-#     def is_optiontype(self):
-#         return True
-
-#     @property
-#     def is_recordtype(self):
-#         return self.contenttype.is_recordtype
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
 
 
 class ByteMaskedArrayType(ContentType):
@@ -885,99 +884,100 @@ class ByteMaskedArrayType(ContentType):
             mask, content, self.valid_when, parameters=self.parameters
         )
 
+    def has_field(self, key):
+        return self.contenttype.has_field(key)
 
-#     def has_field(self, key):
-#         return self.contenttype.has_field(key)
+    def getitem_at(self, viewtype):
+        viewtype = ak._v2._connect.numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
-#     def getitem_at(self, viewtype):
-#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
-#         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
+        maskpos = posat(context, builder, viewproxy.pos, self.MASK)
+        maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
+        maskarraypos = builder.add(viewproxy.start, atval)
+        byte = getat(
+            context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
+        )
 
-#         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
-#         maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
-#         maskarraypos = builder.add(viewproxy.start, atval)
-#         byte = getat(
-#             context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
-#         )
+        output = context.make_helper(builder, rettype)
 
-#         output = context.make_helper(builder, rettype)
+        with builder.if_else(
+            builder.icmp_signed(
+                "==",
+                builder.icmp_signed("!=", byte, context.get_constant(numba.int8, 0)),
+                context.get_constant(numba.int8, int(self.valid_when)),
+            )
+        ) as (isvalid, isnone):
+            with isvalid:
+                nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+                    self.contenttype, viewtype, None
+                )
+                proxynext = context.make_helper(builder, nextviewtype)
+                proxynext.pos = nextpos
+                proxynext.start = viewproxy.start
+                proxynext.stop = viewproxy.stop
+                proxynext.arrayptrs = viewproxy.arrayptrs
+                proxynext.sharedptrs = viewproxy.sharedptrs
+                proxynext.pylookup = viewproxy.pylookup
 
-#         with builder.if_else(
-#             builder.icmp_signed(
-#                 "==",
-#                 builder.icmp_signed("!=", byte, context.get_constant(numba.int8, 0)),
-#                 context.get_constant(numba.int8, int(self.valid_when)),
-#             )
-#         ) as (isvalid, isnone):
-#             with isvalid:
-#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
-#                     self.contenttype, viewtype, None
-#                 )
-#                 proxynext = context.make_helper(builder, nextviewtype)
-#                 proxynext.pos = nextpos
-#                 proxynext.start = viewproxy.start
-#                 proxynext.stop = viewproxy.stop
-#                 proxynext.arrayptrs = viewproxy.arrayptrs
-#                 proxynext.sharedptrs = viewproxy.sharedptrs
-#                 proxynext.pylookup = viewproxy.pylookup
+                outdata = self.contenttype.lower_getitem_at_check(
+                    context,
+                    builder,
+                    rettype.type,
+                    nextviewtype,
+                    proxynext._getvalue(),
+                    proxynext,
+                    numba.intp,
+                    atval,
+                    False,
+                    False,
+                )
 
-#                 outdata = self.contenttype.lower_getitem_at_check(
-#                     context,
-#                     builder,
-#                     rettype.type,
-#                     nextviewtype,
-#                     proxynext._getvalue(),
-#                     proxynext,
-#                     numba.intp,
-#                     atval,
-#                     False,
-#                     False,
-#                 )
+                output.valid = numba.core.cgutils.true_bit
+                output.data = outdata
 
-#                 output.valid = numba.core.cgutils.true_bit
-#                 output.data = outdata
+            with isnone:
+                output.valid = numba.core.cgutils.false_bit
+                output.data = numba.core.cgutils.get_null_value(output.data.type)
 
-#             with isnone:
-#                 output.valid = numba.core.cgutils.false_bit
-#                 output.data = numba.core.cgutils.get_null_value(output.data.type)
+        return output._getvalue()
 
-#         return output._getvalue()
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
 
-#     @property
-#     def ndim(self):
-#         return self.contenttype.ndim
+    @property
+    def inner_dtype(self):
+        return None
 
-#     @property
-#     def inner_dtype(self):
-#         return None
+    @property
+    def is_optiontype(self):
+        return True
 
-#     @property
-#     def is_optiontype(self):
-#         return True
-
-#     @property
-#     def is_recordtype(self):
-#         return self.contenttype.is_recordtype
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
 
 
 class BitMaskedArrayType(ContentType):
@@ -1042,117 +1042,118 @@ class BitMaskedArrayType(ContentType):
             parameters=self.parameters,
         )
 
+    def has_field(self, key):
+        return self.contenttype.has_field(key)
 
-#     def has_field(self, key):
-#         return self.contenttype.has_field(key)
+    def getitem_at(self, viewtype):
+        viewtype = ak._v2._connect.numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
-#     def getitem_at(self, viewtype):
-#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
-#         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
+        bitatval = builder.sdiv(atval, context.get_constant(numba.intp, 8))
+        shiftval = ak._v2._connect.numba.castint(
+            context,
+            builder,
+            numba.intp,
+            numba.uint8,
+            builder.srem(atval, context.get_constant(numba.intp, 8)),
+        )
 
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
-#         bitatval = builder.sdiv(atval, context.get_constant(numba.intp, 8))
-#         shiftval = ak._v2._connect.numba.castint(
-#             context,
-#             builder,
-#             numba.intp,
-#             numba.uint8,
-#             builder.srem(atval, context.get_constant(numba.intp, 8)),
-#         )
+        maskpos = posat(context, builder, viewproxy.pos, self.MASK)
+        maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
+        maskarraypos = builder.add(viewproxy.start, bitatval)
+        byte = getat(
+            context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
+        )
+        if self.lsb_order:
+            # ((byte >> ((uint8_t)shift)) & ((uint8_t)1))
+            asbool = builder.and_(
+                builder.lshr(byte, shiftval), context.get_constant(numba.uint8, 1)
+            )
+        else:
+            # ((byte << ((uint8_t)shift)) & ((uint8_t)128))
+            asbool = builder.and_(
+                builder.shl(byte, shiftval), context.get_constant(numba.uint8, 128)
+            )
 
-#         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
-#         maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
-#         maskarraypos = builder.add(viewproxy.start, bitatval)
-#         byte = getat(
-#             context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
-#         )
-#         if self.lsb_order:
-#             # ((byte >> ((uint8_t)shift)) & ((uint8_t)1))
-#             asbool = builder.and_(
-#                 builder.lshr(byte, shiftval), context.get_constant(numba.uint8, 1)
-#             )
-#         else:
-#             # ((byte << ((uint8_t)shift)) & ((uint8_t)128))
-#             asbool = builder.and_(
-#                 builder.shl(byte, shiftval), context.get_constant(numba.uint8, 128)
-#             )
+        output = context.make_helper(builder, rettype)
 
-#         output = context.make_helper(builder, rettype)
+        with builder.if_else(
+            builder.icmp_signed(
+                "==",
+                builder.icmp_signed("!=", asbool, context.get_constant(numba.uint8, 0)),
+                context.get_constant(numba.uint8, int(self.valid_when)),
+            )
+        ) as (isvalid, isnone):
+            with isvalid:
+                nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+                    self.contenttype, viewtype, None
+                )
+                proxynext = context.make_helper(builder, nextviewtype)
+                proxynext.pos = nextpos
+                proxynext.start = viewproxy.start
+                proxynext.stop = viewproxy.stop
+                proxynext.arrayptrs = viewproxy.arrayptrs
+                proxynext.sharedptrs = viewproxy.sharedptrs
+                proxynext.pylookup = viewproxy.pylookup
 
-#         with builder.if_else(
-#             builder.icmp_signed(
-#                 "==",
-#                 builder.icmp_signed("!=", asbool, context.get_constant(numba.uint8, 0)),
-#                 context.get_constant(numba.uint8, int(self.valid_when)),
-#             )
-#         ) as (isvalid, isnone):
-#             with isvalid:
-#                 nextviewtype = ak._v2._connect.numba.arrayview.wrap(
-#                     self.contenttype, viewtype, None
-#                 )
-#                 proxynext = context.make_helper(builder, nextviewtype)
-#                 proxynext.pos = nextpos
-#                 proxynext.start = viewproxy.start
-#                 proxynext.stop = viewproxy.stop
-#                 proxynext.arrayptrs = viewproxy.arrayptrs
-#                 proxynext.sharedptrs = viewproxy.sharedptrs
-#                 proxynext.pylookup = viewproxy.pylookup
+                outdata = self.contenttype.lower_getitem_at_check(
+                    context,
+                    builder,
+                    rettype.type,
+                    nextviewtype,
+                    proxynext._getvalue(),
+                    proxynext,
+                    numba.intp,
+                    atval,
+                    False,
+                    False,
+                )
 
-#                 outdata = self.contenttype.lower_getitem_at_check(
-#                     context,
-#                     builder,
-#                     rettype.type,
-#                     nextviewtype,
-#                     proxynext._getvalue(),
-#                     proxynext,
-#                     numba.intp,
-#                     atval,
-#                     False,
-#                     False,
-#                 )
+                output.valid = numba.core.cgutils.true_bit
+                output.data = outdata
 
-#                 output.valid = numba.core.cgutils.true_bit
-#                 output.data = outdata
+            with isnone:
+                output.valid = numba.core.cgutils.false_bit
+                output.data = numba.core.cgutils.get_null_value(output.data.type)
 
-#             with isnone:
-#                 output.valid = numba.core.cgutils.false_bit
-#                 output.data = numba.core.cgutils.get_null_value(output.data.type)
+        return output._getvalue()
 
-#         return output._getvalue()
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
 
-#     @property
-#     def ndim(self):
-#         return self.contenttype.ndim
+    @property
+    def inner_dtype(self):
+        return None
 
-#     @property
-#     def inner_dtype(self):
-#         return None
+    @property
+    def is_optiontype(self):
+        return True
 
-#     @property
-#     def is_optiontype(self):
-#         return True
-
-#     @property
-#     def is_recordtype(self):
-#         return self.contenttype.is_recordtype
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
 
 
 class UnmaskedArrayType(ContentType):
@@ -1194,80 +1195,81 @@ class UnmaskedArrayType(ContentType):
         )
         return ak._v2.contents.UnmaskedArray(content, parameters=self.parameters)
 
+    def has_field(self, key):
+        return self.contenttype.has_field(key)
 
-#     def has_field(self, key):
-#         return self.contenttype.has_field(key)
+    def getitem_at(self, viewtype):
+        viewtype = ak._v2._connect.numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
+        return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
-#     def getitem_at(self, viewtype):
-#         viewtype = ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
-#         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         whichpos = posat(context, builder, viewproxy.pos, self.CONTENT)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
+        output = context.make_helper(builder, rettype)
 
-#         output = context.make_helper(builder, rettype)
+        nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+            self.contenttype, viewtype, None
+        )
+        proxynext = context.make_helper(builder, nextviewtype)
+        proxynext.pos = nextpos
+        proxynext.start = viewproxy.start
+        proxynext.stop = viewproxy.stop
+        proxynext.arrayptrs = viewproxy.arrayptrs
+        proxynext.sharedptrs = viewproxy.sharedptrs
+        proxynext.pylookup = viewproxy.pylookup
 
-#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
-#             self.contenttype, viewtype, None
-#         )
-#         proxynext = context.make_helper(builder, nextviewtype)
-#         proxynext.pos = nextpos
-#         proxynext.start = viewproxy.start
-#         proxynext.stop = viewproxy.stop
-#         proxynext.arrayptrs = viewproxy.arrayptrs
-#         proxynext.sharedptrs = viewproxy.sharedptrs
-#         proxynext.pylookup = viewproxy.pylookup
+        outdata = self.contenttype.lower_getitem_at_check(
+            context,
+            builder,
+            rettype.type,
+            nextviewtype,
+            proxynext._getvalue(),
+            proxynext,
+            numba.intp,
+            atval,
+            False,
+            False,
+        )
 
-#         outdata = self.contenttype.lower_getitem_at_check(
-#             context,
-#             builder,
-#             rettype.type,
-#             nextviewtype,
-#             proxynext._getvalue(),
-#             proxynext,
-#             numba.intp,
-#             atval,
-#             False,
-#             False,
-#         )
+        output.valid = numba.core.cgutils.true_bit
+        output.data = outdata
 
-#         output.valid = numba.core.cgutils.true_bit
-#         output.data = outdata
+        return output._getvalue()
 
-#         return output._getvalue()
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
 
-#     @property
-#     def ndim(self):
-#         return self.contenttype.ndim
+    @property
+    def inner_dtype(self):
+        return None
 
-#     @property
-#     def inner_dtype(self):
-#         return None
+    @property
+    def is_optiontype(self):
+        return True
 
-#     @property
-#     def is_optiontype(self):
-#         return True
-
-#     @property
-#     def is_recordtype(self):
-#         return self.contenttype.is_recordtype
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
 
 
 class RecordArrayType(ContentType):
@@ -1345,284 +1347,276 @@ class RecordArrayType(ContentType):
                     contents, self.fields, parameters=self.parameters
                 )
 
+    def fieldindex(self, key):
+        out = -1
+        if self.fields is not None:
+            for i, x in enumerate(self.fields):
+                if x == key:
+                    out = i
+                    break
+        if out == -1:
+            try:
+                out = int(key)
+            except ValueError:
+                return None
+            if not 0 <= out < len(self.contenttypes):
+                return None
+        return out
 
-#     def fieldindex(self, key):
-#         out = -1
-#         if self.fields is not None:
-#             for i, x in enumerate(self.fields):
-#                 if x == key:
-#                     out = i
-#                     break
-#         if out == -1:
-#             try:
-#                 out = int(key)
-#             except ValueError:
-#                 return None
-#             if not 0 <= out < len(self.contenttypes):
-#                 return None
-#         return out
+    def has_field(self, key):
+        return self.fieldindex(key) is not None
 
-#     def has_field(self, key):
-#         return self.fieldindex(key) is not None
+    def getitem_at_check(self, viewtype):
+        out = self.getitem_at(viewtype)
+        if isinstance(out, ak._v2._connect.numba.arrayview.RecordViewType):
+            typer = ak._v2._util.numba_record_typer(
+                out.arrayviewtype.type, out.arrayviewtype.behavior
+            )
+            if typer is not None:
+                return typer(out)
+        return out
 
-#     def getitem_at_check(self, viewtype):
-#         out = self.getitem_at(viewtype)
-#         if isinstance(out, ak._v2._connect.numba.arrayview.RecordViewType):
-#             typer = ak._v2._util.numba_record_typer(
-#                 out.arrayviewtype.type, out.arrayviewtype.behavior
-#             )
-#             if typer is not None:
-#                 return typer(out)
-#         return out
+    def getitem_at(self, viewtype):
+        if len(viewtype.fields) == 0:
+            return ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
+        else:
+            key = viewtype.fields[0]
+            index = self.fieldindex(key)
+            if index is None:
+                if self.fields is None:
+                    raise ValueError(
+                        "no field {} in tuples with {} fields".format(
+                            repr(key), len(self.contenttypes)
+                        )
+                    )
+                else:
+                    raise ValueError(
+                        "no field {} in records with fields: [{}]".format(
+                            repr(key), ", ".join(repr(x) for x in self.fields)
+                        )
+                    )
+            contenttype = self.contenttypes[index]
+            subviewtype = ak._v2._connect.numba.arrayview.wrap(
+                contenttype, viewtype, viewtype.fields[1:]
+            )
+            return contenttype.getitem_at_check(subviewtype)
 
-#     def getitem_at(self, viewtype):
-#         if len(viewtype.fields) == 0:
-#             return ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
-#         else:
-#             key = viewtype.fields[0]
-#             index = self.fieldindex(key)
-#             if index is None:
-#                 if self.fields is None:
-#                     raise ValueError(
-#                         "no field {0} in tuples with {1} fields".format(
-#                             repr(key), len(self.contenttypes)
-#                         )
-#
-#                     )
-#                 else:
-#                     raise ValueError(
-#                         "no field {0} in records with "
-#                         "fields: [{1}]".format(
-#                             repr(key), ", ".join(repr(x) for x in self.fields)
-#                         )
-#
-#                     )
-#             contenttype = self.contenttypes[index]
-#             subviewtype = ak._v2._connect.numba.arrayview.wrap(
-#                 contenttype, viewtype, viewtype.fields[1:]
-#             )
-#             return contenttype.getitem_at_check(subviewtype)
+    def getitem_field(self, viewtype, key):
+        index = self.fieldindex(key)
+        if index is None:
+            if self.fields is None:
+                raise ValueError(
+                    "no field {} in tuples with {} fields".format(
+                        repr(key), len(self.contenttypes)
+                    )
+                )
+            else:
+                raise ValueError(
+                    "no field {} in records with fields: [{}]".format(
+                        repr(key), ", ".join(repr(x) for x in self.fields)
+                    )
+                )
+        contenttype = self.contenttypes[index]
+        subviewtype = ak._v2._connect.numba.arrayview.wrap(contenttype, viewtype, None)
+        return contenttype.getitem_range(subviewtype)
 
-#     def getitem_field(self, viewtype, key):
-#         index = self.fieldindex(key)
-#         if index is None:
-#             if self.fields is None:
-#                 raise ValueError(
-#                     "no field {0} in tuples with {1} fields".format(
-#                         repr(key), len(self.contenttypes)
-#                     )
-#
-#                 )
-#             else:
-#                 raise ValueError(
-#                     "no field {0} in records with fields: [{1}]".format(
-#                         repr(key), ", ".join(repr(x) for x in self.fields)
-#                     )
-#
-#                 )
-#         contenttype = self.contenttypes[index]
-#         subviewtype = ak._v2._connect.numba.arrayview.wrap(contenttype, viewtype, None)
-#         return contenttype.getitem_range(subviewtype)
+    def getitem_field_record(self, recordviewtype, key):
+        index = self.fieldindex(key)
+        if index is None:
+            if self.fields is None:
+                raise ValueError(
+                    "no field {} in tuple with {} fields".format(
+                        repr(key), len(self.contenttypes)
+                    )
+                )
+            else:
+                raise ValueError(
+                    "no field {} in record with fields: [{}]".format(
+                        repr(key), ", ".join(repr(x) for x in self.fields)
+                    )
+                )
+        contenttype = self.contenttypes[index]
+        subviewtype = ak._v2._connect.numba.arrayview.wrap(
+            contenttype, recordviewtype, None
+        )
+        return contenttype.getitem_at_check(subviewtype)
 
-#     def getitem_field_record(self, recordviewtype, key):
-#         index = self.fieldindex(key)
-#         if index is None:
-#             if self.fields is None:
-#                 raise ValueError(
-#                     "no field {0} in tuple with {1} fields".format(
-#                         repr(key), len(self.contenttypes)
-#                     )
-#
-#                 )
-#             else:
-#                 raise ValueError(
-#                     "no field {0} in record with fields: [{1}]".format(
-#                         repr(key), ", ".join(repr(x) for x in self.fields)
-#                     )
-#
-#                 )
-#         contenttype = self.contenttypes[index]
-#         subviewtype = ak._v2._connect.numba.arrayview.wrap(
-#             contenttype, recordviewtype, None
-#         )
-#         return contenttype.getitem_at_check(subviewtype)
+    def lower_getitem_at_check(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        out = self.lower_getitem_at(
+            context,
+            builder,
+            rettype,
+            viewtype,
+            viewval,
+            viewproxy,
+            attype,
+            atval,
+            wrapneg,
+            checkbounds,
+        )
+        baretype = self.getitem_at(viewtype)
+        if isinstance(baretype, ak._v2._connect.numba.arrayview.RecordViewType):
+            lower = ak._v2._util.numba_record_lower(
+                baretype.arrayviewtype.type, baretype.arrayviewtype.behavior
+            )
+            if lower is not None:
+                return lower(context, builder, rettype(baretype), (out,))
+        return out
 
-#     def lower_getitem_at_check(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         out = self.lower_getitem_at(
-#             context,
-#             builder,
-#             rettype,
-#             viewtype,
-#             viewval,
-#             viewproxy,
-#             attype,
-#             atval,
-#             wrapneg,
-#             checkbounds,
-#         )
-#         baretype = self.getitem_at(viewtype)
-#         if isinstance(baretype, ak._v2._connect.numba.arrayview.RecordViewType):
-#             lower = ak._v2._util.numba_record_lower(
-#                 baretype.arrayviewtype.type, baretype.arrayviewtype.behavior
-#             )
-#             if lower is not None:
-#                 return lower(context, builder, rettype(baretype), (out,))
-#         return out
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        atval = regularize_atval(
+            context, builder, viewproxy, attype, atval, wrapneg, checkbounds
+        )
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         atval = regularize_atval(
-#             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
-#         )
+        if len(viewtype.fields) == 0:
+            proxyout = context.make_helper(
+                builder, ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
+            )
+            proxyout.arrayview = viewval
+            proxyout.at = atval
+            return proxyout._getvalue()
 
-#         if len(viewtype.fields) == 0:
-#             proxyout = context.make_helper(
-#                 builder, ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
-#             )
-#             proxyout.arrayview = viewval
-#             proxyout.at = atval
-#             return proxyout._getvalue()
+        else:
+            index = self.fieldindex(viewtype.fields[0])
+            contenttype = self.contenttypes[index]
 
-#         else:
-#             index = self.fieldindex(viewtype.fields[0])
-#             contenttype = self.contenttypes[index]
+            whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
+            nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#             whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
-#             nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+            nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+                contenttype, viewtype, viewtype.fields[1:]
+            )
+            proxynext = context.make_helper(builder, nextviewtype)
+            proxynext.pos = nextpos
+            proxynext.start = viewproxy.start
+            proxynext.stop = builder.add(
+                atval, builder.add(viewproxy.start, context.get_constant(numba.intp, 1))
+            )
+            proxynext.arrayptrs = viewproxy.arrayptrs
+            proxynext.sharedptrs = viewproxy.sharedptrs
+            proxynext.pylookup = viewproxy.pylookup
 
-#             nextviewtype = ak._v2._connect.numba.arrayview.wrap(
-#                 contenttype, viewtype, viewtype.fields[1:]
-#             )
-#             proxynext = context.make_helper(builder, nextviewtype)
-#             proxynext.pos = nextpos
-#             proxynext.start = viewproxy.start
-#             proxynext.stop = builder.add(
-#                 atval, builder.add(viewproxy.start, context.get_constant(numba.intp, 1))
-#             )
-#             proxynext.arrayptrs = viewproxy.arrayptrs
-#             proxynext.sharedptrs = viewproxy.sharedptrs
-#             proxynext.pylookup = viewproxy.pylookup
+            return contenttype.lower_getitem_at_check(
+                context,
+                builder,
+                rettype,
+                nextviewtype,
+                proxynext._getvalue(),
+                proxynext,
+                numba.intp,
+                atval,
+                False,
+                False,
+            )
 
-#             return contenttype.lower_getitem_at_check(
-#                 context,
-#                 builder,
-#                 rettype,
-#                 nextviewtype,
-#                 proxynext._getvalue(),
-#                 proxynext,
-#                 numba.intp,
-#                 atval,
-#                 False,
-#                 False,
-#             )
+    def lower_getitem_field(self, context, builder, viewtype, viewval, key):
+        viewproxy = context.make_helper(builder, viewtype, viewval)
 
-#     def lower_getitem_field(self, context, builder, viewtype, viewval, key):
-#         viewproxy = context.make_helper(builder, viewtype, viewval)
+        index = self.fieldindex(key)
+        contenttype = self.contenttypes[index]
 
-#         index = self.fieldindex(key)
-#         contenttype = self.contenttypes[index]
+        whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
+        nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-#         whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
-#         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        proxynext = context.make_helper(builder, contenttype.getitem_range(viewtype))
+        proxynext.pos = nextpos
+        proxynext.start = viewproxy.start
+        proxynext.stop = viewproxy.stop
+        proxynext.arrayptrs = viewproxy.arrayptrs
+        proxynext.sharedptrs = viewproxy.sharedptrs
+        proxynext.pylookup = viewproxy.pylookup
 
-#         proxynext = context.make_helper(builder, contenttype.getitem_range(viewtype))
-#         proxynext.pos = nextpos
-#         proxynext.start = viewproxy.start
-#         proxynext.stop = viewproxy.stop
-#         proxynext.arrayptrs = viewproxy.arrayptrs
-#         proxynext.sharedptrs = viewproxy.sharedptrs
-#         proxynext.pylookup = viewproxy.pylookup
+        return proxynext._getvalue()
 
-#         return proxynext._getvalue()
+    def lower_getitem_field_record(
+        self, context, builder, recordviewtype, recordviewval, key
+    ):
+        arrayviewtype = recordviewtype.arrayviewtype
+        recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
+        arrayviewval = recordviewproxy.arrayview
+        arrayviewproxy = context.make_helper(builder, arrayviewtype, arrayviewval)
 
-#     def lower_getitem_field_record(
-#         self, context, builder, recordviewtype, recordviewval, key
-#     ):
-#         arrayviewtype = recordviewtype.arrayviewtype
-#         recordviewproxy = context.make_helper(builder, recordviewtype, recordviewval)
-#         arrayviewval = recordviewproxy.arrayview
-#         arrayviewproxy = context.make_helper(builder, arrayviewtype, arrayviewval)
+        index = self.fieldindex(key)
+        contenttype = self.contenttypes[index]
 
-#         index = self.fieldindex(key)
-#         contenttype = self.contenttypes[index]
+        whichpos = posat(context, builder, arrayviewproxy.pos, self.CONTENTS + index)
+        nextpos = getat(context, builder, arrayviewproxy.arrayptrs, whichpos)
 
-#         whichpos = posat(context, builder, arrayviewproxy.pos, self.CONTENTS + index)
-#         nextpos = getat(context, builder, arrayviewproxy.arrayptrs, whichpos)
+        proxynext = context.make_helper(
+            builder, contenttype.getitem_range(arrayviewtype)
+        )
+        proxynext.pos = nextpos
+        proxynext.start = arrayviewproxy.start
+        proxynext.stop = builder.add(
+            recordviewproxy.at,
+            builder.add(arrayviewproxy.start, context.get_constant(numba.intp, 1)),
+        )
+        proxynext.arrayptrs = arrayviewproxy.arrayptrs
+        proxynext.sharedptrs = arrayviewproxy.sharedptrs
+        proxynext.pylookup = arrayviewproxy.pylookup
 
-#         proxynext = context.make_helper(
-#             builder, contenttype.getitem_range(arrayviewtype)
-#         )
-#         proxynext.pos = nextpos
-#         proxynext.start = arrayviewproxy.start
-#         proxynext.stop = builder.add(
-#             recordviewproxy.at,
-#             builder.add(arrayviewproxy.start, context.get_constant(numba.intp, 1)),
-#         )
-#         proxynext.arrayptrs = arrayviewproxy.arrayptrs
-#         proxynext.sharedptrs = arrayviewproxy.sharedptrs
-#         proxynext.pylookup = arrayviewproxy.pylookup
+        nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+            contenttype, arrayviewtype, None
+        )
 
-#         nextviewtype = ak._v2._connect.numba.arrayview.wrap(
-#             contenttype, arrayviewtype, None
-#         )
+        rettype = self.getitem_field_record(recordviewtype, key)
 
-#         rettype = self.getitem_field_record(recordviewtype, key)
+        return contenttype.lower_getitem_at_check(
+            context,
+            builder,
+            rettype,
+            nextviewtype,
+            proxynext._getvalue(),
+            proxynext,
+            numba.intp,
+            recordviewproxy.at,
+            False,
+            False,
+        )
 
-#         return contenttype.lower_getitem_at_check(
-#             context,
-#             builder,
-#             rettype,
-#             nextviewtype,
-#             proxynext._getvalue(),
-#             proxynext,
-#             numba.intp,
-#             recordviewproxy.at,
-#             False,
-#             False,
-#         )
+    @property
+    def is_tuple(self):
+        return self.fields is None
 
-#     @property
-#     def is_tuple(self):
-#         return self.fields is None
+    @property
+    def ndim(self):
+        return 1
 
-#     @property
-#     def ndim(self):
-#         return 1
+    @property
+    def inner_dtype(self):
+        return None
 
-#     @property
-#     def inner_dtype(self):
-#         return None
+    @property
+    def is_optiontype(self):
+        return False
 
-#     @property
-#     def is_optiontype(self):
-#         return False
-
-#     @property
-#     def is_recordtype(self):
-#         return True
+    @property
+    def is_recordtype(self):
+        return True
 
 
 class UnionArrayType(ContentType):
@@ -1689,102 +1683,86 @@ class UnionArrayType(ContentType):
             tags, index, contents, parameters=self.parameters
         )
 
+    def has_field(self, key):
+        return any(x.has_field(key) for x in self.contenttypes)
 
-#     def has_field(self, key):
-#         return any(x.has_field(key) for x in self.contenttypes)
+    def getitem_at(self, viewtype):
+        if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
+            raise TypeError("union types cannot be accessed in Numba")
 
-#     def getitem_at(self, viewtype):
-#         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-#             raise TypeError(
-#                 "union types cannot be accessed in Numba"
-#
-#             )
+    def getitem_range(self, viewtype):
+        if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
+            raise TypeError("union types cannot be accessed in Numba")
 
-#     def getitem_range(self, viewtype):
-#         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-#             raise TypeError(
-#                 "union types cannot be accessed in Numba"
-#
-#             )
+    def getitem_field(self, viewtype, key):
+        if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
+            raise TypeError("union types cannot be accessed in Numba")
 
-#     def getitem_field(self, viewtype, key):
-#         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-#             raise TypeError(
-#                 "union types cannot be accessed in Numba"
-#
-#             )
+    def lower_getitem_at(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        attype,
+        atval,
+        wrapneg,
+        checkbounds,
+    ):
+        raise NotImplementedError(
+            type(self).__name__ + ".lower_getitem_at not implemented"
+        )
 
-#     def lower_getitem_at(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         attype,
-#         atval,
-#         wrapneg,
-#         checkbounds,
-#     ):
-#         raise NotImplementedError(
-#             type(self).__name__
-#             + ".lower_getitem_at not implemented"
-#
-#         )
+    def lower_getitem_range(
+        self,
+        context,
+        builder,
+        rettype,
+        viewtype,
+        viewval,
+        viewproxy,
+        start,
+        stop,
+        wrapneg,
+    ):
+        raise NotImplementedError(
+            type(self).__name__ + ".lower_getitem_range not implemented"
+        )
 
-#     def lower_getitem_range(
-#         self,
-#         context,
-#         builder,
-#         rettype,
-#         viewtype,
-#         viewval,
-#         viewproxy,
-#         start,
-#         stop,
-#         wrapneg,
-#     ):
-#         raise NotImplementedError(
-#             type(self).__name__
-#             + ".lower_getitem_range not implemented"
-#
-#         )
+    def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
+        raise NotImplementedError(
+            type(self).__name__ + ".lower_getitem_field not implemented"
+        )
 
-#     def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
-#         raise NotImplementedError(
-#             type(self).__name__
-#             + ".lower_getitem_field not implemented"
-#
-#         )
+    @property
+    def ndim(self):
+        out = None
+        for contenttype in self.contenttypes:
+            if out is None:
+                out = contenttype.ndim
+            elif out != contenttype.ndim:
+                return None
+        return out
 
-#     @property
-#     def ndim(self):
-#         out = None
-#         for contenttype in self.contenttypes:
-#             if out is None:
-#                 out = contenttype.ndim
-#             elif out != contenttype.ndim:
-#                 return None
-#         return out
+    @property
+    def inner_dtype(self):
+        context = numba.core.typing.Context()
+        return context.unify_types(*[x.inner_dtype for x in self.contenttypes])
 
-#     @property
-#     def inner_dtype(self):
-#         context = numba.core.typing.Context()
-#         return context.unify_types(*[x.inner_dtype for x in self.contenttypes])
+    @property
+    def is_optiontype(self):
+        return any(x.is_optiontype for x in self.contents)
 
-#     @property
-#     def is_optiontype(self):
-#         return any(x.is_optiontype for x in self.contents)
-
-#     @property
-#     def is_recordtype(self):
-#         if all(x.is_recordtype for x in self.contents):
-#             return True
-#         elif all(not x.is_recordtype for x in self.contents):
-#             return False
-#         else:
-#             return None
+    @property
+    def is_recordtype(self):
+        if all(x.is_recordtype for x in self.contents):
+            return True
+        elif all(not x.is_recordtype for x in self.contents):
+            return False
+        else:
+            return None
 
 
 def inner_dtype_of_form(form):
