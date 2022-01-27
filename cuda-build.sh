@@ -5,12 +5,13 @@ set -e
 
 PLATFORM="manylinux2014_x86_64"
 CUDA_VERSION=$1
-CUPY_CUDA_VERSION=${${CUDA_VERSION//\./}:0:3}
+CUPY_CUDA_VERSION=${CUDA_VERSION//\./}
 
 AWKWARD_VERSION=$(tr -d '[:space:]' < VERSION_INFO)
 
 case $CUDA_VERSION in
   "11.5.1")
+    CUPY_CUDA_VERSION=11.5
     export DOCKER_IMAGE_TAG="$CUDA_VERSION-devel-ubuntu20.04"
     ;;
   "11.0" | "10.2" | "10.1" | "10.0" | "9.2")
