@@ -14,6 +14,7 @@ import awkward as ak  # noqa: F401
 #      `__array__` and `__record__`.
 
 
+@pytest.mark.skip(reason="FIXME: ak.type not merged yet")
 def test_0459_types():
     plain_plain = ak._v2.highlevel.Array(
         ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]), parameters={})
@@ -36,33 +37,58 @@ def test_0459_types():
         )
     )
 
-    assert plain_plain.layout.parameters == {}
-    assert array_plain.layout.parameters == {"__array__": "zoinks"}
-    assert plain_isdoc.layout.parameters == {"__doc__": "This is a zoink."}
-    assert array_isdoc.layout.parameters == {
+    assert ak._v2.operations.describe.parameters(plain_plain) == {}
+    assert ak._v2.operations.describe.parameters(array_plain) == {"__array__": "zoinks"}
+    assert ak._v2.operations.describe.parameters(plain_isdoc) == {
+        "__doc__": "This is a zoink."
+    }
+    assert ak._v2.operations.describe.parameters(array_isdoc) == {
         "__array__": "zoinks",
         "__doc__": "This is a zoink.",
     }
 
-    assert plain_plain.layout.form.type == plain_plain.layout.form.type
-    assert array_plain.layout.form.type == array_plain.layout.form.type
-    assert plain_isdoc.layout.form.type == plain_isdoc.layout.form.type
-    assert array_isdoc.layout.form.type == array_isdoc.layout.form.type
+    assert ak._v2.operations.describe.type(
+        plain_plain
+    ) == ak._v2.operations.describe.type(plain_plain)
+    assert ak._v2.operations.describe.type(
+        array_plain
+    ) == ak._v2.operations.describe.type(array_plain)
+    assert ak._v2.operations.describe.type(
+        plain_isdoc
+    ) == ak._v2.operations.describe.type(plain_isdoc)
+    assert ak._v2.operations.describe.type(
+        array_isdoc
+    ) == ak._v2.operations.describe.type(array_isdoc)
 
-    assert plain_plain.layout.form.type != array_plain.layout.form.type
-    assert array_plain.layout.form.type != plain_plain.layout.form.type
+    assert ak._v2.operations.describe.type(
+        plain_plain
+    ) != ak._v2.operations.describe.type(array_plain)
+    assert ak._v2.operations.describe.type(
+        array_plain
+    ) != ak._v2.operations.describe.type(plain_plain)
 
-    assert plain_plain.layout.form.type == plain_isdoc.layout.form.type
-    assert plain_isdoc.layout.form.type == plain_plain.layout.form.type
+    assert ak._v2.operations.describe.type(
+        plain_plain
+    ) == ak._v2.operations.describe.type(plain_isdoc)
+    assert ak._v2.operations.describe.type(
+        plain_isdoc
+    ) == ak._v2.operations.describe.type(plain_plain)
 
-    assert array_plain.layout.form.type == array_isdoc.layout.form.type
-    assert array_isdoc.layout.form.type == array_plain.layout.form.type
+    assert ak._v2.operations.describe.type(
+        array_plain
+    ) == ak._v2.operations.describe.type(array_isdoc)
+    assert ak._v2.operations.describe.type(
+        array_isdoc
+    ) == ak._v2.operations.describe.type(array_plain)
 
-    assert plain_isdoc.layout.form.type != array_isdoc.layout.form.type
-    assert array_isdoc.layout.form.type != plain_isdoc.layout.form.type
+    assert ak._v2.operations.describe.type(
+        plain_isdoc
+    ) != ak._v2.operations.describe.type(array_isdoc)
+    assert ak._v2.operations.describe.type(
+        array_isdoc
+    ) != ak._v2.operations.describe.type(plain_isdoc)
 
 
-@pytest.mark.skip(reason="FIXME: need an implementation of v2 concatenate")
 def test_0459():
     plain_plain = ak._v2.highlevel.Array(
         ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]), parameters={})
@@ -85,29 +111,31 @@ def test_0459():
         )
     )
 
-    assert plain_plain.layout.parameters == {}
-    assert array_plain.layout.parameters == {"__array__": "zoinks"}
-    assert plain_isdoc.layout.parameters == {"__doc__": "This is a zoink."}
-    assert array_isdoc.layout.parameters == {
+    assert ak._v2.operations.describe.parameters(plain_plain) == {}
+    assert ak._v2.operations.describe.parameters(array_plain) == {"__array__": "zoinks"}
+    assert ak._v2.operations.describe.parameters(plain_isdoc) == {
+        "__doc__": "This is a zoink."
+    }
+    assert ak._v2.operations.describe.parameters(array_isdoc) == {
         "__array__": "zoinks",
         "__doc__": "This is a zoink.",
     }
 
     assert (
-        ak._v2.operations.structure.concatenate(
-            [plain_plain, plain_plain]
-        ).layout.parameters
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([plain_plain, plain_plain])
+        )
         == {}
     )
-    assert ak._v2.operations.structure.concatenate(
-        [array_plain, array_plain]
-    ).layout.parameters == {"__array__": "zoinks"}
-    assert ak._v2.operations.structure.concatenate(
-        [plain_isdoc, plain_isdoc]
-    ).layout.parameters == {"__doc__": "This is a zoink."}
-    assert ak._v2.operations.structure.concatenate(
-        [array_isdoc, array_isdoc]
-    ).layout.parameters == {
+    assert ak._v2.operations.describe.parameters(
+        ak._v2.operations.structure.concatenate([array_plain, array_plain])
+    ) == {"__array__": "zoinks"}
+    assert ak._v2.operations.describe.parameters(
+        ak._v2.operations.structure.concatenate([plain_isdoc, plain_isdoc])
+    ) == {"__doc__": "This is a zoink."}
+    assert ak._v2.operations.describe.parameters(
+        ak._v2.operations.structure.concatenate([array_isdoc, array_isdoc])
+    ) == {
         "__array__": "zoinks",
         "__doc__": "This is a zoink.",
     }
@@ -130,27 +158,27 @@ def test_0459():
     )
 
     assert (
-        ak._v2.operations.structure.concatenate(
-            [plain_plain, array_plain]
-        ).layout.parameters
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([plain_plain, array_plain])
+        )
         == {}
     )
     assert (
-        ak._v2.operations.structure.concatenate(
-            [plain_isdoc, array_isdoc]
-        ).layout.parameters
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([plain_isdoc, array_isdoc])
+        )
         == {}
     )
     assert (
-        ak._v2.operations.structure.concatenate(
-            [array_plain, plain_plain]
-        ).layout.parameters
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([array_plain, plain_plain])
+        )
         == {}
     )
     assert (
-        ak._v2.operations.structure.concatenate(
-            [array_isdoc, plain_isdoc]
-        ).layout.parameters
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([array_isdoc, plain_isdoc])
+        )
         == {}
     )
 
@@ -172,23 +200,23 @@ def test_0459():
     )
 
     assert (
-        ak._v2.operations.structure.concatenate(
-            [plain_plain, plain_isdoc]
-        ).layout.parameters
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([plain_plain, plain_isdoc])
+        )
         == {}
     )
-    assert ak._v2.operations.structure.concatenate(
-        [array_plain, array_isdoc]
-    ).layout.parameters == {"__array__": "zoinks"}
+    assert ak._v2.operations.describe.parameters(
+        ak._v2.operations.structure.concatenate([array_plain, array_isdoc])
+    ) == {"__array__": "zoinks"}
     assert (
-        ak._v2.operations.structure.concatenate(
-            [plain_isdoc, plain_plain]
-        ).layout.parameters
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([plain_isdoc, plain_plain])
+        )
         == {}
     )
-    assert ak._v2.operations.structure.concatenate(
-        [array_isdoc, array_plain]
-    ).layout.parameters == {"__array__": "zoinks"}
+    assert ak._v2.operations.describe.parameters(
+        ak._v2.operations.structure.concatenate([array_isdoc, array_plain])
+    ) == {"__array__": "zoinks"}
 
     assert isinstance(
         ak._v2.operations.structure.concatenate([plain_plain, plain_isdoc]).layout,

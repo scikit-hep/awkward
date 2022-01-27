@@ -63,3 +63,16 @@ PIP_ONLY_BINARY = "cmake,numpy"
 [[tool.cibuildwheel.overrides]]
 select = "cp3?-*"
 manylinux-x86_64-image = "manylinux2010"
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+norecursedirs = ["src", "pybind11", "rapidjson", "studies"]
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = [
+  "error",
+  "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning",  # move to importlib to fix (setuptools issue)
+  "ignore:The NumPy module was reloaded:UserWarning",
+]
+log_cli_level = "info"

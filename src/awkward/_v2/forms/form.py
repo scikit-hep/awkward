@@ -198,9 +198,9 @@ def _parameters_equal(one, two, only_array_record=False):
 
     else:
         if only_array_record:
-            keys = ("__array__", "__record__")
-        else:
             keys = set(one.keys()).union(two.keys())
+        else:
+            keys = ("__array__", "__record__")
         for key in keys:
             if one.get(key) != two.get(key):
                 return False
