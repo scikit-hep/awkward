@@ -735,7 +735,7 @@ at inner {2} of length {3}, using sub-slice {4}.{5}""".format(
         )
 
         return ak._v2.contents.unionarray.UnionArray(
-            tags, index, contents, None, self._parameters, self._nplike
+            tags, index, contents, None, None, self._nplike
         )
 
     def _merging_strategy(self, others):

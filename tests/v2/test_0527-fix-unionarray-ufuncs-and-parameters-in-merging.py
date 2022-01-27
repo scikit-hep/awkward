@@ -90,6 +90,33 @@ def test_0459_types():
     ) != ak._v2.operations.describe.type(plain_isdoc)
 
 
+def test():
+    plain_plain = ak.Array([0.0, 1.1, 2.2, 3.3, 4.4])
+    array_plain = ak.with_parameter(plain_plain, "__array__", "zoinks")
+    array_isdoc = ak.with_parameter(array_plain, "__doc__", "This is a zoink.")
+
+    assert ak.parameters(ak.concatenate([array_plain, array_isdoc])) == {
+        "__array__": "zoinks"
+    }
+
+    array_plain = ak._v2.highlevel.Array(
+        ak._v2.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4]), parameters={"__array__": "zoinks"}
+        )
+    )
+    array_isdoc = ak._v2.highlevel.Array(
+        ak._v2.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4]),
+            parameters={"__doc__": "This is a zoink.", "__array__": "zoinks"},
+        )
+    )
+
+    assert ak._v2.operations.describe.parameters(
+        ak._v2.operations.structure.concatenate([array_plain, array_isdoc])
+    ) == {"__array__": "zoinks"}
+
+
+@pytest.mark.skip(reason="For debugging purposes.")
 def test_0459():
     plain_plain = ak._v2.highlevel.Array(
         ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]), parameters={})
@@ -158,10 +185,30 @@ def test_0459():
         ak._v2.contents.NumpyArray,
     )
 
-    # assert ak._v2.operations.describe.parameters(ak._v2.operations.structure.concatenate([plain_plain, array_plain])) == {}
-    # assert ak._v2.operations.describe.parameters(ak._v2.operations.structure.concatenate([plain_isdoc, array_isdoc])) == {}
-    # assert ak._v2.operations.describe.parameters(ak._v2.operations.structure.concatenate([array_plain, plain_plain])) == {}
-    # assert ak._v2.operations.describe.parameters(ak._v2.operations.structure.concatenate([array_isdoc, plain_isdoc])) == {}
+    assert (
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([plain_plain, array_plain])
+        )
+        == {}
+    )
+    assert (
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([plain_isdoc, array_isdoc])
+        )
+        == {}
+    )
+    assert (
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([array_plain, plain_plain])
+        )
+        == {}
+    )
+    assert (
+        ak._v2.operations.describe.parameters(
+            ak._v2.operations.structure.concatenate([array_isdoc, plain_isdoc])
+        )
+        == {}
+    )
 
     assert isinstance(
         ak._v2.operations.structure.concatenate([plain_plain, array_plain]).layout,
