@@ -61,7 +61,7 @@ setup(name = "awkward-cuda-kernels",
       license = "BSD 3-clause",
       test_suite = "tests-cuda",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
-      install_requires = ["cupy_cuda"$CUDA_VERSION],
+      install_requires = ["cupy_cuda$CUPY_CUDA_VERSION"],
       classifiers = [
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
