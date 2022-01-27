@@ -33,7 +33,7 @@ jobs:
 
       - run: python dev/generate-kernel-signatures.py
 
-      - run: python dev/generate-cuda.py && ./cuda-build.sh
+      - run: python dev/generate-cuda.py && ./cuda-build.sh ${{ matrix.cuda-version}}
 
       - uses: actions/upload-artifact@v2
         with:
