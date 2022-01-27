@@ -531,7 +531,7 @@ class IndexedArray(Content):
 
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters
+                self._parameters, array._parameters, True
             )
 
             if isinstance(
