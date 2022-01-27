@@ -362,9 +362,8 @@ class RegularArrayType(ContentType):
     def tolookup(cls, layout, positions):
         pos = len(positions)
         cls.tolookup_identifier(layout, positions)
+        positions.append(len(layout))
         positions.append(None)
-        positions.append(None)
-        positions[pos + cls.ZEROS_LENGTH] = len(layout)
         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
             layout.content, positions
         )
@@ -734,7 +733,7 @@ class IndexedOptionArrayType(ContentType):
     def from_form(cls, form):
         return IndexedOptionArrayType(
             cls.from_form_index(form.index),
-            ak._v2._connect.numhba.arrayview.tonumbatype(form.content),
+            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
             cls.from_form_identifier(form),
             form.parameters,
         )
@@ -1010,13 +1009,15 @@ class ByteMaskedArrayType(ContentType):
 
 class BitMaskedArrayType(ContentType):
     IDENTIFIER = 0
-    MASK = 1
-    CONTENT = 2
+    LENGTH = 1
+    MASK = 2
+    CONTENT = 3
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
         cls.tolookup_identifier(layout, positions)
+        positions.append(len(layout))
         positions.append(layout.mask.data)
         positions.append(None)
         positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
@@ -1065,7 +1066,7 @@ class BitMaskedArrayType(ContentType):
             mask,
             content,
             self.valid_when,
-            len(content),
+            lookup.positions[pos + self.LENGTH],
             self.lsb_order,
             parameters=self.parameters,
         )
@@ -1309,9 +1310,8 @@ class RecordArrayType(ContentType):
     def tolookup(cls, layout, positions):
         pos = len(positions)
         cls.tolookup_identifier(layout, positions)
-        positions.append(None)
+        positions.append(len(layout))
         positions.extend([None] * len(layout.contents))
-        positions[pos + cls.LENGTH] = len(layout)
         for i, content in enumerate(layout.contents):
             positions[
                 pos + cls.CONTENTS + i
@@ -1320,19 +1320,11 @@ class RecordArrayType(ContentType):
 
     @classmethod
     def from_form(cls, form):
-        contents = []
-        if form.is_tuple:
-            fields = None
-            for x in form.contents.values():
-                contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
-        else:
-            fields = []
-            for n, x in form.contents.items():
-                contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
-                fields.append(n)
-
         return RecordArrayType(
-            contents, fields, cls.from_form_identifier(form), form.parameters
+            [ak._v2._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
+            None if form.is_tuple else form.fields,
+            cls.from_form_identifier(form),
+            form.parameters,
         )
 
     def __init__(self, contenttypes, fields, identifiertype, parameters):
@@ -1656,7 +1648,7 @@ class UnionArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identifier(layout, positions)
         positions.append(layout.tags.data)
-        positions.append(layout.identifier.data)
+        positions.append(layout.index.data)
         positions.extend([None] * len(layout.contents))
         for i, content in enumerate(layout.contents):
             positions[
@@ -1666,14 +1658,10 @@ class UnionArrayType(ContentType):
 
     @classmethod
     def from_form(cls, form):
-        contents = []
-        for x in form.contents:
-            contents.append(ak._v2._connect.numba.arrayview.tonumbatype(x))
-
         return UnionArrayType(
             cls.from_form_index(form.tags),
             cls.from_form_index(form.index),
-            contents,
+            [ak._v2._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
             cls.from_form_identifier(form),
             form.parameters,
         )

@@ -59,616 +59,620 @@ def test_RegularArray_NumpyArray():
     roundtrip(v2b)
 
 
-# def test_ListArray_NumpyArray():
-#     v2a = ak._v2.contents.listarray.ListArray(
-#         ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
-#         ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
-#         ),
-#     )
+def test_ListArray_NumpyArray():
+    v2a = ak._v2.contents.listarray.ListArray(
+        ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
+        ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
+        ),
+    )
+    roundtrip(v2a)
 
 
-# def test_ListOffsetArray_NumpyArray():
-#     v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
-#         ak._v2.index.Index(np.array([1, 4, 4, 6, 3], np.int64)),
-#         ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
-#     )
+def test_ListOffsetArray_NumpyArray():
+    v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
+        ak._v2.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+    )
+    roundtrip(v2a)
 
 
-# def test_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.recordarray.RecordArray(
-#         [
-#             ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-#             ak._v2.contents.numpyarray.NumpyArray(
-#                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-#             ),
-#         ],
-#         ["x", "y"],
-#     )
+def test_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.recordarray.RecordArray(
+        [
+            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak._v2.contents.numpyarray.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
+            ),
+        ],
+        ["x", "y"],
+    )
+    roundtrip(v2a)
 
-#     v2b = ak._v2.contents.recordarray.RecordArray(
-#         [
-#             ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-#             ak._v2.contents.numpyarray.NumpyArray(
-#                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-#             ),
-#         ],
-#         None,
-#     )
+    v2b = ak._v2.contents.recordarray.RecordArray(
+        [
+            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak._v2.contents.numpyarray.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
+            ),
+        ],
+        None,
+    )
+    roundtrip(v2b)
 
-#     v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
+    v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
+    roundtrip(v2c)
 
-#     v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
-
-
-# def test_IndexedArray_NumpyArray():
-#     v2a = ak._v2.contents.indexedarray.IndexedArray(
-#         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-#     )
+    v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
+    roundtrip(v2d)
 
 
-# def test_IndexedOptionArray_NumpyArray():
-#     v2a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-#         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-#     )
+def test_IndexedArray_NumpyArray():
+    v2a = ak._v2.contents.indexedarray.IndexedArray(
+        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    )
+    roundtrip(v2a)
 
 
-# def test_ByteMaskedArray_NumpyArray():
-#     v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-#         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-#         valid_when=True,
-#     )
-
-#     v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-#         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-#         valid_when=False,
-#     )
+def test_IndexedOptionArray_NumpyArray():
+    v2a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    )
+    roundtrip(v2a)
 
 
-# def test_BitMaskedArray_NumpyArray():
-#     v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=False,
-#     )
+def test_ByteMaskedArray_NumpyArray():
+    v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        valid_when=True,
+    )
+    roundtrip(v2a)
 
-#     v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=False,
-#         length=13,
-#         lsb_order=False,
-#     )
-
-#     v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=True,
-#     )
-
-#     v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=False,
-#         length=13,
-#         lsb_order=True,
-#     )
+    v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        valid_when=False,
+    )
+    roundtrip(v2b)
 
 
-# def test_UnmaskedArray_NumpyArray():
-#     v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
-#     )
+def test_BitMaskedArray_NumpyArray():
+    v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
+    )
+    roundtrip(v2a)
+
+    v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=False,
+    )
+    roundtrip(v2b)
+
+    v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=True,
+    )
+    roundtrip(v2c)
+
+    v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=True,
+    )
+    roundtrip(v2d)
 
 
-# def test_UnionArray_NumpyArray():
-#     v2a = ak._v2.contents.unionarray.UnionArray(
-#         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
-#         ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
-#         [
-#             ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64)),
-#             ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
-#         ],
-#     )
+def test_UnmaskedArray_NumpyArray():
+    v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
+        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
+    )
+    roundtrip(v2a)
 
 
-# def test_RegularArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.regulararray.RegularArray(
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         3,
-#     )
-
-#     v2b = ak._v2.contents.regulararray.RegularArray(
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.emptyarray.EmptyArray().toNumpyArray(
-#                     np.dtype(np.float64)
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         0,
-#         zeros_length=10,
-#     )
+def test_UnionArray_NumpyArray():
+    v2a = ak._v2.contents.unionarray.UnionArray(
+        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
+        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
+        [
+            ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64)),
+            ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
+    )
+    roundtrip(v2a)
 
 
-# def test_ListArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.listarray.ListArray(
-#         ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
-#         ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#     )
+def test_RegularArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.regulararray.RegularArray(
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        3,
+    )
+    roundtrip(v2a)
+
+    v2b = ak._v2.contents.regulararray.RegularArray(
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.emptyarray.EmptyArray().toNumpyArray(
+                    np.dtype(np.float64)
+                )
+            ],
+            ["nest"],
+        ),
+        0,
+        zeros_length=10,
+    )
+    roundtrip(v2b)
 
 
-# def test_ListOffsetArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
-#         ak._v2.index.Index(np.array([1, 4, 4, 6], np.int64)),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     [6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#     )
+def test_ListArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.listarray.ListArray(
+        ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
+        ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
+                )
+            ],
+            ["nest"],
+        ),
+    )
+    roundtrip(v2a)
 
 
-# def test_IndexedArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.indexedarray.IndexedArray(
-#         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#     )
+def test_ListOffsetArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
+        ak._v2.index.Index(np.array([1, 4, 4, 6], np.int64)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    [6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]
+                )
+            ],
+            ["nest"],
+        ),
+    )
+    roundtrip(v2a)
 
 
-# def test_IndexedOptionArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-#         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#     )
+def test_IndexedArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.indexedarray.IndexedArray(
+        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+    )
+    roundtrip(v2a)
 
 
-# def test_ByteMaskedArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-#         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         valid_when=True,
-#     )
-
-#     v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-#         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         valid_when=False,
-#     )
+def test_IndexedOptionArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+    )
+    roundtrip(v2a)
 
 
-# def test_BitMaskedArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         True,
-#                         True,
-#                         True,
-#                         True,
-#                         False,
-#                         False,
-#                         False,
-#                         False,
-#                         True,
-#                         False,
-#                         True,
-#                         False,
-#                         True,
-#                     ]
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array(
-#                         [
-#                             0.0,
-#                             1.0,
-#                             2.0,
-#                             3.0,
-#                             4.0,
-#                             5.0,
-#                             6.0,
-#                             7.0,
-#                             1.1,
-#                             2.2,
-#                             3.3,
-#                             4.4,
-#                             5.5,
-#                             6.6,
-#                         ]
-#                     )
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=False,
-#     )
+def test_ByteMaskedArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+    )
+    roundtrip(v2a)
 
-#     v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array(
-#                         [
-#                             0.0,
-#                             1.0,
-#                             2.0,
-#                             3.0,
-#                             4.0,
-#                             5.0,
-#                             6.0,
-#                             7.0,
-#                             1.1,
-#                             2.2,
-#                             3.3,
-#                             4.4,
-#                             5.5,
-#                             6.6,
-#                         ]
-#                     )
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         valid_when=False,
-#         length=13,
-#         lsb_order=False,
-#     )
-
-#     v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array(
-#                         [
-#                             0.0,
-#                             1.0,
-#                             2.0,
-#                             3.0,
-#                             4.0,
-#                             5.0,
-#                             6.0,
-#                             7.0,
-#                             1.1,
-#                             2.2,
-#                             3.3,
-#                             4.4,
-#                             5.5,
-#                             6.6,
-#                         ]
-#                     )
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=True,
-#     )
-
-#     v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.recordarray.RecordArray(
-#             [
-#                 ak._v2.contents.numpyarray.NumpyArray(
-#                     np.array(
-#                         [
-#                             0.0,
-#                             1.0,
-#                             2.0,
-#                             3.0,
-#                             4.0,
-#                             5.0,
-#                             6.0,
-#                             7.0,
-#                             1.1,
-#                             2.2,
-#                             3.3,
-#                             4.4,
-#                             5.5,
-#                             6.6,
-#                         ]
-#                     )
-#                 )
-#             ],
-#             ["nest"],
-#         ),
-#         valid_when=False,
-#         length=13,
-#         lsb_order=True,
-#     )
+    v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=False,
+    )
+    roundtrip(v2b)
 
 
-# def test_UnmaskedArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
-#         ak._v2.contents.recordarray.RecordArray(
-#             [ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))],
-#             ["nest"],
-#         )
-#     )
+def test_BitMaskedArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        True,
+                        True,
+                        True,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        False,
+                        True,
+                        False,
+                        True,
+                    ]
+                )
+            )
+        ),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
+    )
+    roundtrip(v2a)
+
+    v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=False,
+    )
+    roundtrip(v2b)
+
+    v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=True,
+    )
+    roundtrip(v2c)
+
+    v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.recordarray.RecordArray(
+            [
+                ak._v2.contents.numpyarray.NumpyArray(
+                    np.array(
+                        [
+                            0.0,
+                            1.0,
+                            2.0,
+                            3.0,
+                            4.0,
+                            5.0,
+                            6.0,
+                            7.0,
+                            1.1,
+                            2.2,
+                            3.3,
+                            4.4,
+                            5.5,
+                            6.6,
+                        ]
+                    )
+                )
+            ],
+            ["nest"],
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=True,
+    )
+    roundtrip(v2d)
 
 
-# def test_UnionArray_RecordArray_NumpyArray():
-#     v2a = ak._v2.contents.unionarray.UnionArray(
-#         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
-#         ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
-#         [
-#             ak._v2.contents.recordarray.RecordArray(
-#                 [ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64))],
-#                 ["nest"],
-#             ),
-#             ak._v2.contents.recordarray.RecordArray(
-#                 [
-#                     ak._v2.contents.numpyarray.NumpyArray(
-#                         np.array([1.1, 2.2, 3.3, 4.4, 5.5])
-#                     )
-#                 ],
-#                 ["nest"],
-#             ),
-#         ],
-#     )
+def test_UnmaskedArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
+        ak._v2.contents.recordarray.RecordArray(
+            [ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))],
+            ["nest"],
+        )
+    )
+    roundtrip(v2a)
 
 
-# def test_RecordArray_NumpyArray_lazy():
-#     v2a = ak._v2.contents.recordarray.RecordArray(
-#         [
-#             ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-#             ak._v2.contents.numpyarray.NumpyArray(
-#                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-#             ),
-#         ],
-#         ["x", "y"],
-#     )
-
-#     v2b = ak._v2.contents.recordarray.RecordArray(
-#         [
-#             ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-#             ak._v2.contents.numpyarray.NumpyArray(
-#                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-#             ),
-#         ],
-#         None,
-#     )
-
-#     v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
-
-#     v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
+def test_UnionArray_RecordArray_NumpyArray():
+    v2a = ak._v2.contents.unionarray.UnionArray(
+        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
+        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
+        [
+            ak._v2.contents.recordarray.RecordArray(
+                [ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64))],
+                ["nest"],
+            ),
+            ak._v2.contents.recordarray.RecordArray(
+                [
+                    ak._v2.contents.numpyarray.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5])
+                    )
+                ],
+                ["nest"],
+            ),
+        ],
+    )
+    roundtrip(v2a)
