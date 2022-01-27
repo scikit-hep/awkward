@@ -7,21 +7,19 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-          cuda-version: [11.5.1, 10.2.89, 9.2.148]
+          cuda-version: [11.5, 10.2, 9.2]
 
     steps:
-      - uses: Jimver/cuda-toolkit@v0.2.5
-        id: cuda-toolkit
-        with:
-          cuda: ${{ matrix.cuda-version }}
-      
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-version: latest
+      # - uses: Jimver/cuda-toolkit@v0.2.5
+      #   id: cuda-toolkit
+      #   with:
+      #     cuda: ${{ matrix.cuda-version }}
+      # 
+      # - uses: conda-incubator/setup-miniconda@v2
+      #   with:
+      #     miniforge-version: latest
 
             # - run: conda install -c conda-forge/label/${{ matrix.cuda-conda-label }} cudatoolkit-dev
-
-      - run: nvcc -V
 
       - uses: actions/checkout@v2
 
