@@ -646,7 +646,8 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
-def merge_parameters(one, two):
+def merge_parameters(one, two, merge_equal=False):
+
     if one is None and two is None:
         return None
 
@@ -655,6 +656,14 @@ def merge_parameters(one, two):
 
     elif two is None:
         return one
+
+    elif merge_equal:
+        out = {}
+        for k, v in two.items():
+            if k in one.keys():
+                if v == one[k]:
+                    out[k] = v
+        return out
 
     else:
         out = dict(one)

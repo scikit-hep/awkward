@@ -546,7 +546,7 @@ class RecordArray(Content):
         if self.is_tuple:
             for array in headless:
                 parameters = ak._v2._util.merge_parameters(
-                    self._parameters, array._parameters
+                    self._parameters, array._parameters, True
                 )
 
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):

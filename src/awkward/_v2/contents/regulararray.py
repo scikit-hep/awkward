@@ -146,7 +146,9 @@ class RegularArray(Content):
             return ak._v2.contents.NumpyArray(
                 content.data.reshape(shape),
                 None,
-                ak._v2._util.merge_parameters(self._parameters, content.parameters),
+                ak._v2._util.merge_parameters(
+                    self._parameters, content.parameters, True
+                ),
                 self._nplike,
             )
 
