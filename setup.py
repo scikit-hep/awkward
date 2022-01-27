@@ -193,6 +193,10 @@ class Install(setuptools.command.install.install):
         tree("build")
 
         print("--- copying includes ------------------------------------------")
+        # Python 3.8 can use dirs_exist_ok=True instead.
+        include_dir = os.path.join(outerdir, "awkward", "include")
+        if os.path.exists(include_dir):
+            shutil.rmtree(include_dir)
         shutil.copytree(
             os.path.join("include"), os.path.join(outerdir, "awkward", "include")
         )
