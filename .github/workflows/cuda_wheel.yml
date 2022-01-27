@@ -20,7 +20,7 @@ jobs:
         with:
           miniforge-version: latest
 
-      - run: conda install -c conda-forge/label/${{ cuda-conda-label }} cudatoolkit-dev
+      - run: conda install -c conda-forge/label/${{ matrix.cuda-conda-label }} cudatoolkit-dev
 
       - run: nvcc -V
 
