@@ -4,17 +4,16 @@ on: [push]
 
 jobs:
   build-awkward-cuda-kernels:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu.latest]
-          # cuda-conda-label: [main, cf201901, cf202003]
+          cuda-version: [11.5.1, 10.2.89, 9.2.148]
 
     steps:
       - uses: Jimver/cuda-toolkit@v0.2.5
         id: cuda-toolkit
         with:
-          cuda: '11.5.1'
+          cuda: ${{ cuda-version }}
       
       - uses: conda-incubator/setup-miniconda@v2
         with:
