@@ -11,7 +11,8 @@ AWKWARD_VERSION=$(tr -d '[:space:]' < VERSION_INFO)
 
 case $CUDA_VERSION in
   "11.5"* | "11.4"* | "11.3"* | "11.2"* | "11.1"* | "11.0"*)
-    CUPY_CUDA_VERSION=${CUDA_VERSION:0:3}
+    CUPY_CUDA_VERSION=${CUPY_CUDA_VERSION:0:3}
+    echo $CUPY_CUDA_VERSION
     export DOCKER_IMAGE_TAG="$CUDA_VERSION-devel-ubuntu20.04"
     ;;
   "10.2")
