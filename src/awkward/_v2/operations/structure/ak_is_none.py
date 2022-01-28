@@ -23,54 +23,49 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
     False otherwise (at a given `axis` depth).
     """
 
+    layout = ak._v2.operations.convert.to_layout(array)
+
+    # Determine the (potentially nested) bytemask
     def getfunction_inner(layout, depth, **kwargs):
-        nplike = ak.nplike.of(layout)
-        if isinstance(layout, ak._v2.contents.Content):
-            if layout.is_OptionType:
-                layout = layout.toIndexedOptionArray64()
-
-                # Convert the option type into a union, using the mask
-                # as a tag.
-                tag = nplike.asarray(layout.bytemask())
-                index = nplike.where(tag, 0, nplike.asarray(layout.index))
-
-                return ak._v2.contents.UnionArray(
-                    ak._v2.index.Index8(tag),
-                    ak._v2.index.Index64(index),
-                    [
-                        layout.content.recursively_apply(getfunction_inner),
-                        ak._v2.contents.NumpyArray(
-                            nplike.array([True], dtype=np.bool_)
-                        ),
-                    ],
-                ).simplify_uniontype()
-
-            elif (
-                layout.is_UnknownType
-                or layout.is_ListType
-                or layout.is_RecordType
-                or layout.is_NumpyType
-            ):
-                return ak._v2.contents.NumpyArray(
-                    nplike.zeros(len(layout), dtype=np.bool_)
-                )
-            else:
-                return
-        else:
+        if not isinstance(layout, ak._v2.contents.Content):
             return
 
+        nplike = ak.nplike.of(layout)
+
+        if layout.is_OptionType:
+            layout = layout.toIndexedOptionArray64()
+
+            # Convert the option type into a union, using the mask
+            # as a tag.
+            tag = nplike.asarray(layout.bytemask())
+            index = nplike.where(tag, 0, nplike.asarray(layout.index))
+
+            return ak._v2.contents.UnionArray(
+                ak._v2.index.Index8(tag),
+                ak._v2.index.Index64(index),
+                [
+                    layout.content.recursively_apply(getfunction_inner),
+                    ak._v2.contents.NumpyArray(nplike.array([True], dtype=np.bool_)),
+                ],
+            ).simplify_uniontype()
+
+        elif (
+            layout.is_UnknownType
+            or layout.is_ListType
+            or layout.is_RecordType
+            or layout.is_NumpyType
+        ):
+            return ak._v2.contents.NumpyArray(nplike.zeros(len(layout), dtype=np.bool_))
+
+    # Locate the axis
     def getfunction_outer(layout, depth, depth_context, **kwargs):
         depth_context["posaxis"] = layout.axis_wrap_if_negative(
             depth_context["posaxis"]
         )
-        if depth_context["posaxis"] != depth - 1:
-            return
+        if depth_context["posaxis"] == depth - 1:
+            return layout.recursively_apply(getfunction_inner)
 
-        return layout.recursively_apply(getfunction_inner)
-
-    layout = ak._v2.operations.convert.to_layout(array)
     behavior = ak._v2._util.behavior_of(array, behavior=behavior)
-
     depth_context = {"posaxis": axis}
     out = layout.recursively_apply(getfunction_outer, depth_context=depth_context)
     return ak._v2._util.wrap(out, behavior, highlevel)
