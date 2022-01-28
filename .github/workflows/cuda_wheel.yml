@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-          cuda-version: [11.5.1, 10.2]
+          cuda-version: [11.5, 11.4, 11.3, 11.2, 11.1, 11.0, 10.2]
 
     steps:
       # - uses: Jimver/cuda-toolkit@v0.2.5
