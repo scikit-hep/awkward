@@ -434,7 +434,7 @@ class ByteMaskedArray(Content):
                 ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            return self.toIndexedOptionArray64.simplify_optiontype
+            return self.toIndexedOptionArray64().simplify_optiontype()
         else:
             return self
 

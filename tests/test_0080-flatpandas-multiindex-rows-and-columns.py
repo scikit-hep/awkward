@@ -2,7 +2,7 @@
 
 
 import json
-import distutils.version
+import setuptools
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -12,8 +12,8 @@ pandas = pytest.importorskip("pandas")
 
 
 @pytest.mark.skipif(
-    distutils.version.LooseVersion(pandas.__version__)
-    < distutils.version.LooseVersion("1.0"),
+    setuptools.extern.packaging.version.parse(pandas.__version__)
+    < setuptools.extern.packaging.version.parse("1.0"),
     reason="Test Pandas in 1.0+ because they had to fix their JSON format.",
 )
 def test():

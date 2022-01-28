@@ -332,11 +332,11 @@ class BitMaskedArray(Content):
                 ak._v2.contents.indexedarray.IndexedArray,
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
                 ak._v2.contents.bytemaskedarray.ByteMaskedArray,
-                ak._v2.contents.bitmaskeddarray.BitMaskedArray,
-                ak._v2.contents.unmaskeddarray.UnmaskedArray,
+                ak._v2.contents.bitmaskedarray.BitMaskedArray,
+                ak._v2.contents.unmaskedarray.UnmaskedArray,
             ),
         ):
-            return self.toIndexedOptionArray64.simplify_optiontype
+            return self.toIndexedOptionArray64().simplify_optiontype()
         else:
             return self
 
