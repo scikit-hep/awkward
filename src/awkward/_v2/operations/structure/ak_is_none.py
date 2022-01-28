@@ -23,8 +23,6 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
     False otherwise (at a given `axis` depth).
     """
 
-    layout = ak._v2.operations.convert.to_layout(array)
-
     # Determine the (potentially nested) bytemask
     def getfunction_inner(layout, depth, **kwargs):
         if not isinstance(layout, ak._v2.contents.Content):
@@ -65,6 +63,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
         if depth_context["posaxis"] == depth - 1:
             return layout.recursively_apply(getfunction_inner)
 
+    layout = ak._v2.operations.convert.to_layout(array)
     behavior = ak._v2._util.behavior_of(array, behavior=behavior)
     depth_context = {"posaxis": axis}
     out = layout.recursively_apply(getfunction_outer, depth_context=depth_context)
