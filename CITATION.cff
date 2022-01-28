@@ -46,4 +46,5 @@ authors:
 - family-names: "Smith"
   given-names: "Nicholas"
   affiliation: "Fermilab"
+  orcid: "https://orcid.org/0000-0002-0324-3054"
   email: "nick.smith@cern.ch"
