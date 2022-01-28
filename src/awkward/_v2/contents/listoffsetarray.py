@@ -2038,3 +2038,28 @@ class ListOffsetArray(Content):
             for i in range(starts.length):
                 out[i] = content[starts[i] : stops[i]]
             return out
+
+    def _to_json(self, behavior):
+        if (
+            self.parameter("__array__") == "bytestring"
+            or self.parameter("__array__") == "string"
+        ):
+            content = ak._v2._util.tobytes(self._content.data)
+            starts, stops = self.starts, self.stops
+            out = [None] * starts.length
+            for i in range(starts.length):
+                out[i] = content[starts[i] : stops[i]].decode(errors="surrogateescape")
+            return out
+
+        else:
+            out = self._to_list_custom(behavior)
+            if out is not None:
+                return out
+
+            content = self._content._to_json(behavior)
+            starts, stops = self.starts, self.stops
+            out = [None] * starts.length
+
+            for i in range(starts.length):
+                out[i] = content[starts[i] : stops[i]]
+            return out

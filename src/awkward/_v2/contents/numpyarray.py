@@ -1185,3 +1185,17 @@ class NumpyArray(Content):
                 return out
 
             return self._data.tolist()
+
+    def _to_json(self, behavior):
+        if self.parameter("__array__") == "byte":
+            return ak._v2._util.tobytes(self._data)
+
+        elif self.parameter("__array__") == "char":
+            return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")
+
+        else:
+            out = self._to_list_custom(behavior)
+            if out is not None:
+                return out
+
+            return self._data.tolist()

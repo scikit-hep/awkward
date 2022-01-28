@@ -971,3 +971,16 @@ class ByteMaskedArray(Content):
             if isvalid:
                 out[i] = content[i]
         return out
+
+    def _to_json(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        mask = self.mask_as_bool(valid_when=True, nplike=numpy)
+        content = self._content._to_json(behavior)
+        out = [None] * self._mask.length
+        for i, isvalid in enumerate(mask):
+            if isvalid:
+                out[i] = content[i]
+        return out

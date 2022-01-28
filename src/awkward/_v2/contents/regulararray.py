@@ -1188,3 +1188,29 @@ class RegularArray(Content):
             for i in range(length):
                 out[i] = content[(i) * size : (i + 1) * size]
             return out
+
+    def _to_json(self, behavior):
+        if (
+            self.parameter("__array__") == "bytestring"
+            or self.parameter("__array__") == "string"
+        ):
+            content = ak._v2._util.tobytes(self._content.data)
+            length, size = self._length, self._size
+            out = [None] * length
+            for i in range(length):
+                out[i] = content[(i) * size : (i + 1) * size].decode(
+                    errors="surrogateescape"
+                )
+            return out
+
+        else:
+            out = self._to_list_custom(behavior)
+            if out is not None:
+                return out
+
+            content = self._content._to_json(behavior)
+            length, size = self._length, self._size
+            out = [None] * length
+            for i in range(length):
+                out[i] = content[(i) * size : (i + 1) * size]
+            return out

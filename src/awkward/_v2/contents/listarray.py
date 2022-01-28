@@ -1258,3 +1258,6 @@ class ListArray(Content):
 
     def _to_list(self, behavior):
         return ListOffsetArray._to_list(self, behavior)
+
+    def _to_json(self, behavior):
+        return ListOffsetArray._to_json(self, behavior)

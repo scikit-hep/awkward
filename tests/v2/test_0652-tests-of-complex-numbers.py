@@ -105,9 +105,6 @@ def test_from_json():
     assert array.tolist() == [(1.1 + 1j), (2.2 + 2j)]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_to_json.py:21: NotImplementedError"
-)
 def test_to_json():
     # Complex numbers can't be converted to JSON without setting 'complex_record_fields',
     # but the error messages should refer to that name now. (I changed the name at

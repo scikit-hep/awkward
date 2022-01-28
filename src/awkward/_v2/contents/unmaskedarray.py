@@ -544,3 +544,10 @@ class UnmaskedArray(Content):
             return out
 
         return self._content._to_list(behavior)
+
+    def _to_json(self, behavior):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        return self._content._to_json(behavior)

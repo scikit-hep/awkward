@@ -1298,3 +1298,9 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
     def flatten(self, axis=1, depth=0):
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
+
+    def tojson(self, behavior=None):
+        return self.to_json(behavior)
+
+    def to_json(self, behavior=None):
+        return self.packed()._to_json(behavior)

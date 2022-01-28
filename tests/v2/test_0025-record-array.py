@@ -182,7 +182,6 @@ def test_basic():
     }
 
 
-@pytest.mark.skip(reason="FIXME: highlevel v2 ak.to_json")
 def test_basic_tofrom_json():
     content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
     content2 = ak._v2.contents.NumpyArray(
@@ -194,6 +193,7 @@ def test_basic_tofrom_json():
         [content1, listoffsetarray, content2, content1],
         fields=["one", "two", "2", "wonky"],
     )
+    print(recordarray.as_tuple)
     assert json.loads(ak._v2.operations.convert.to_json(recordarray.as_tuple)) == [
         {"0": 1, "1": [1.1, 2.2, 3.3], "2": 1.1, "3": 1},
         {"0": 2, "1": [], "2": 2.2, "3": 2},

@@ -5,6 +5,16 @@ import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
+# FIXME: implement and document the following:
+#
+# - accept newline as line delimiter '\n' (0x0A) as well as carriage return and newline '\r\n' (0x0D0A)
+# - ignore empty lines '\n\n'
+# - raise an error if JSON is nor parsable
+#
+# https://github.com/ndjson/ndjson-spec
+#
+#
+
 
 def from_json_file(
     source,
@@ -62,8 +72,20 @@ def from_json_file(
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
+    # FIXME: read blocks - need some changes in C++ code
+    #
+    # def read(file_path, out):
+    #     with open(file_path, 'rb') as file_:
+    #         while True:
+    #             block = file_.read(block_size)
+    #             if not block:
+    #                 break
+    #             out.send(block)
+    #     out.close()
+
     with open(source) as f:
         builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
+        # FIXME: for line in f:
         num = ak._ext.fromjson(
             f.read(),
             builder,

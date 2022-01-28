@@ -317,7 +317,7 @@ def test_tostring():
     ]
 
     assert (
-        ak.to_json(array)
+        ak._v2.operations.convert.to_json(array)
         == '[{"x":1.1,"y":[]},{"x":2.2,"y":[1]},{"x":3.3,"y":[1,2]},{"x":4.4,"y":[1,2,3]},{"x":5.5,"y":[1,2,3,4]},{"x":6.6,"y":[1,2,3,4,5]}]'
     )
 
@@ -344,21 +344,24 @@ def test_fromstring():
 
 def test_array_tojson():
     # convert float 'nan' and 'inf' to user-defined strings
-    array = ak.layout.NumpyArray(
+    array = ak._v2.contents.NumpyArray(
         np.array(
             [[float("nan"), float("nan"), 1.1], [float("inf"), 3.3, float("-inf")]]
         )
     )
 
     assert (
-        ak.to_json(
+        ak._v2.operations.convert.to_json(
             array, nan_string="NaN", infinity_string="inf", minus_infinity_string="-inf"
         )
         == '[["NaN","NaN",1.1],["inf",3.3,"-inf"]]'
     )
 
-    array2 = ak.Array([[0, 2], None, None, None, "NaN", "NaN"])
-    assert ak.to_json(array2, nan_string="NaN") == '[[0,2],null,null,null,"NaN","NaN"]'
+    array2 = ak._v2.highlevel.Array([[0, 2], None, None, None, "NaN", "NaN"])
+    assert (
+        ak._v2.operations.convert.to_json(array2, nan_string="NaN")
+        == '[[0,2],null,null,null,"NaN","NaN"]'
+    )
 
 
 def test_fromfile():
