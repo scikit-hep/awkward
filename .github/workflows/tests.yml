@@ -2,19 +2,30 @@ name: Tests
 
 on:
   pull_request:
+  workflow_dispatch:
 
-env:
-  CIBW_TEST_EXTRAS: test
-  CIBW_TEST_COMMAND: pytest {project}/tests
-  CIBW_BUILD_VERBOSITY: 1
-  CIBW_TEST_SKIP: "*universal2:arm64 pp*"
-  CIBW_ENVIRONMENT: PIP_ONLY_BINARY=cmake,numpy
-  CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-  CIBW_ARCHS_MACOS: universal2
-  CIBW_BUILD: cp39-win_amd64 cp36-manylinux_x86_64 cp38-macosx_universal2
+
+concurrency:
+  group: wheels-${{ github.head_ref }}
+  cancel-in-progress: true
 
 
 jobs:
+  pylint:
+    name: "PyLint"
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Run PyLint
+      run: |
+        echo "::add-matcher::$GITHUB_WORKSPACE/.github/matchers/pylint.json"
+        pipx run nox -s pylint
+
+
   make_sdist:
     name: "Make SDist"
     runs-on: ubuntu-latest
@@ -48,6 +59,10 @@ jobs:
         submodules: true
 
     - uses: pypa/cibuildwheel@v2.3.1
+      env:
+        CIBW_ARCHS_MACOS: universal2
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+        CIBW_BUILD: cp39-win_amd64 cp36-manylinux_x86_64 cp38-macosx_universal2
 
     - name: Upload wheels
       uses: actions/upload-artifact@v2
