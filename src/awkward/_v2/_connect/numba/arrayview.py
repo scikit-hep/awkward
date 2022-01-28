@@ -203,7 +203,7 @@ class ArrayView:
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(slice(self.start, self.stop))
-        return self._v2._util.wrap(sliced, self.behavior)
+        return ak._v2._util.wrap(sliced, self.behavior)
 
 
 @numba.extending.typeof_impl.register(ArrayView)

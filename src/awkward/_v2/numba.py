@@ -7,38 +7,41 @@ checked_version = False
 
 def register_and_check():
     global checked_version
-    try:
-        import numba
-    except ImportError:
-        raise ImportError(
-            """install the 'numba' package with:
+
+    if not checked_version:
+        try:
+            import numba
+        except ImportError:
+            raise ImportError(
+                """install the 'numba' package with:
 
     pip install numba --upgrade
 
 or
 
     conda install numba"""
-        )
-    else:
-        if not checked_version and ak._v2._util.parse_version(
-            numba.__version__
-        ) < ak._v2._util.parse_version("0.50"):
+            )
+
+        checked_version = True
+        if ak._v2._util.parse_version(numba.__version__) < ak._v2._util.parse_version(
+            "0.50"
+        ):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
                 "(you have version {})".format(numba.__version__)
             )
-        checked_version = True
-        register()
+
+    register()
 
 
 def register():
+    if hasattr(ak._v2.numba, "ArrayViewType"):
+        return
+
     import numba
     import awkward._v2._connect.numba.arrayview
     import awkward._v2._connect.numba.layout
     import awkward._v2._connect.numba.builder
-
-    if hasattr(ak._v2.numba, "ArrayViewType"):
-        return
 
     n = ak._v2.numba
     n.ArrayViewType = awkward._v2._connect.numba.arrayview.ArrayViewType
