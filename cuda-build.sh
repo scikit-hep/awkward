@@ -17,6 +17,9 @@ case $CUDA_VERSION in
   "10.2")
     export DOCKER_IMAGE_TAG="$CUDA_VERSION-devel-ubuntu18.04"
     ;;
+  "9.0")
+    export DOCKER_IMAGE_TAG="$CUDA_VERSION-devel-ubuntu16.04"
+    ;;
   *)
     echo "Docker image for CUDA version $CUDA_VERSION is not known"
     exit 1
@@ -45,7 +48,7 @@ setup(name = "awkward-cuda-kernels",
       packages = ["awkward_cuda_kernels"],
       package_dir = {"": "build"},
       package_data = {"awkward_cuda_kernels": ["*.so"]},
-      version = open("VERSION_INFO").read().strip(),
+      version = $CUPY_CUDA_VERSION,
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
