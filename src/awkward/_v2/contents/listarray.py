@@ -1259,5 +1259,21 @@ class ListArray(Content):
     def _to_list(self, behavior):
         return ListOffsetArray._to_list(self, behavior)
 
-    def _to_json(self, behavior):
-        return ListOffsetArray._to_json(self, behavior)
+    def _to_json(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        return ListOffsetArray._to_json(
+            self,
+            behavior,
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_real_string,
+            complex_imag_string,
+        )

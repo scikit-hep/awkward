@@ -1186,11 +1186,19 @@ class NumpyArray(Content):
 
             return self._data.tolist()
 
-    def _to_json(self, behavior):
-        if self.parameter("__array__") == "byte":
-            return ak._v2._util.tobytes(self._data)
-
-        elif self.parameter("__array__") == "char":
+    def _to_json(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        if (
+            self.parameter("__array__") == "byte"
+            or self.parameter("__array__") == "char"
+        ):
             return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")
 
         else:

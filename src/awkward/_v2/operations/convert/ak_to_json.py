@@ -205,7 +205,13 @@ def to_json(
     # to a UnionArray if it contains NaNs or Infs.
     # Convert it to a RecordArray if it has complex numbers.
     return json.dumps(
-        out.tojson(),
+        out.tojson(
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_real_string,
+            complex_imag_string,
+        ),
         separators=(",", ":"),
         cls=ComplexEncoder,
         nan_string=nan_string,

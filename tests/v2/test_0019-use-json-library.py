@@ -68,6 +68,13 @@ def test_tostring():
     )
 
 
+def test_bytearray():
+    array = ak._v2.contents.NumpyArray(
+        np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
+    )
+    assert ak._v2.operations.convert.to_json(array) == '"hellothere"'
+
+
 def test_complex():
     content = ak._v2.contents.NumpyArray(
         np.array([(1.1 + 0.1j), 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])

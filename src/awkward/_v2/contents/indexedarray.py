@@ -1148,13 +1148,28 @@ class IndexedArray(Content):
             out[i] = content[ind]
         return out
 
-    def _to_json(self, behavior):
+    def _to_json(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
         out = self._to_list_custom(behavior)
         if out is not None:
             return out
 
         index = self._index.to(numpy)
-        content = self._content._to_json(behavior)
+        content = self._content._to_json(
+            behavior,
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_real_string,
+            complex_imag_string,
+        )
         out = [None] * index.length
         for i, ind in enumerate(index):
             out[i] = content[ind]

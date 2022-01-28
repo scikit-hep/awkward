@@ -996,7 +996,15 @@ class RecordArray(Content):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
 
-    def _to_json(self, behavior):
+    def _to_json(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
         out = self._to_list_custom(behavior)
         if out is not None:
             return out
@@ -1010,7 +1018,17 @@ class RecordArray(Content):
             return out
 
         if self.is_tuple:
-            contents = [x._to_list(behavior) for x in self._contents]
+            contents = [
+                x._to_json(
+                    behavior,
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string,
+                    complex_real_string,
+                    complex_imag_string,
+                )
+                for x in self._contents
+            ]
             length = self._length
             out = [None] * length
             fields = []
@@ -1022,7 +1040,17 @@ class RecordArray(Content):
 
         else:
             fields = self._fields
-            contents = [x._to_list(behavior) for x in self._contents]
+            contents = [
+                x._to_json(
+                    behavior,
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string,
+                    complex_real_string,
+                    complex_imag_string,
+                )
+                for x in self._contents
+            ]
             length = self._length
             out = [None] * length
             for i in range(length):

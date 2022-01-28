@@ -338,5 +338,13 @@ class EmptyArray(Content):
     def _to_list(self, behavior):
         return []
 
-    def _to_json(self, behavior):
+    def _to_json(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
         return []

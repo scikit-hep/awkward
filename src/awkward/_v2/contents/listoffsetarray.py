@@ -2039,7 +2039,15 @@ class ListOffsetArray(Content):
                 out[i] = content[starts[i] : stops[i]]
             return out
 
-    def _to_json(self, behavior):
+    def _to_json(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
         if (
             self.parameter("__array__") == "bytestring"
             or self.parameter("__array__") == "string"
@@ -2056,7 +2064,14 @@ class ListOffsetArray(Content):
             if out is not None:
                 return out
 
-            content = self._content._to_json(behavior)
+            content = self._content._to_json(
+                behavior,
+                nan_string,
+                infinity_string,
+                minus_infinity_string,
+                complex_real_string,
+                complex_imag_string,
+            )
             starts, stops = self.starts, self.stops
             out = [None] * starts.length
 

@@ -1189,7 +1189,15 @@ class RegularArray(Content):
                 out[i] = content[(i) * size : (i + 1) * size]
             return out
 
-    def _to_json(self, behavior):
+    def _to_json(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
         if (
             self.parameter("__array__") == "bytestring"
             or self.parameter("__array__") == "string"
@@ -1208,7 +1216,14 @@ class RegularArray(Content):
             if out is not None:
                 return out
 
-            content = self._content._to_json(behavior)
+            content = self._content._to_json(
+                behavior,
+                nan_string,
+                infinity_string,
+                minus_infinity_string,
+                complex_real_string,
+                complex_imag_string,
+            )
             length, size = self._length, self._size
             out = [None] * length
             for i in range(length):
