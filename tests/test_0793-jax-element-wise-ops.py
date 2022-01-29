@@ -348,7 +348,7 @@ def test_recordarray_5():
 
 def test_recordarray_6():
     def func_recordarray_6(x):
-        return 2 * x.y ** 2
+        return 2 * x.y**2
 
     value_jvp, jvp_grad = jax.jvp(
         func_recordarray_6, (test_recordarray,), (test_recordarray_tangent,)

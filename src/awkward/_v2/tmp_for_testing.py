@@ -55,17 +55,14 @@ def v1v2_equal(v1, v2):
             and v1_stops.dtype == v2_stops.dtype
         )
 
-    elif (
-        isinstance(
-            v1,
-            (
-                ak.layout.ListOffsetArray32,
-                ak.layout.ListOffsetArrayU32,
-                ak.layout.ListOffsetArray64,
-            ),
-        )
-        and isinstance(v2, ak._v2.contents.ListOffsetArray)
-    ):
+    elif isinstance(
+        v1,
+        (
+            ak.layout.ListOffsetArray32,
+            ak.layout.ListOffsetArrayU32,
+            ak.layout.ListOffsetArray64,
+        ),
+    ) and isinstance(v2, ak._v2.contents.ListOffsetArray):
         v1_offsets = np.asarray(v1.offsets)
         v2_offsets = v2.offsets.data
         return (
@@ -82,17 +79,14 @@ def v1v2_equal(v1, v2):
             for i in range(v1.numfields)
         )
 
-    elif (
-        isinstance(
-            v1,
-            (
-                ak.layout.IndexedArray32,
-                ak.layout.IndexedArrayU32,
-                ak.layout.IndexedArray64,
-            ),
-        )
-        and isinstance(v2, ak._v2.contents.IndexedArray)
-    ):
+    elif isinstance(
+        v1,
+        (
+            ak.layout.IndexedArray32,
+            ak.layout.IndexedArrayU32,
+            ak.layout.IndexedArray64,
+        ),
+    ) and isinstance(v2, ak._v2.contents.IndexedArray):
         v1_index = np.asarray(v1.index)
         v2_index = v2.index.data
         return (
@@ -142,17 +136,14 @@ def v1v2_equal(v1, v2):
     ):
         return v1v2_equal(v1.content, v2.content)
 
-    elif (
-        isinstance(
-            v1,
-            (
-                ak.layout.UnionArray8_32,
-                ak.layout.UnionArray8_U32,
-                ak.layout.UnionArray8_64,
-            ),
-        )
-        and isinstance(v2, ak._v2.contents.UnionArray)
-    ):
+    elif isinstance(
+        v1,
+        (
+            ak.layout.UnionArray8_32,
+            ak.layout.UnionArray8_U32,
+            ak.layout.UnionArray8_64,
+        ),
+    ) and isinstance(v2, ak._v2.contents.UnionArray):
         v1_tags = np.asarray(v1.tags)
         v2_tags = v2.tags.data
         v1_index = np.asarray(v1.index)

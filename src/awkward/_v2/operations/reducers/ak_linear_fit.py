@@ -95,7 +95,7 @@ def linear_fit(
                 y, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwxx = ak._v2.operations.reducers.sum(
-                x ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+                x**2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwxy = ak._v2.operations.reducers.sum(
                 x * y, axis=axis, keepdims=keepdims, mask_identity=mask_identity
@@ -114,7 +114,7 @@ def linear_fit(
                 y * weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwxx = ak._v2.operations.reducers.sum(
-                (x ** 2) * weight,
+                (x**2) * weight,
                 axis=axis,
                 keepdims=keepdims,
                 mask_identity=mask_identity,

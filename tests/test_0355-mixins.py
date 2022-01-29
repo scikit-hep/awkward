@@ -18,7 +18,7 @@ def test_make_mixins():
 
         @ak.mixin_class_method(np.abs)
         def point_abs(self):
-            return np.sqrt(self.x ** 2 + self.y ** 2)
+            return np.sqrt(self.x**2 + self.y**2)
 
         @ak.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
