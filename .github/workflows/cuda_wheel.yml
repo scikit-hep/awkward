@@ -27,4 +27,3 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           path: dist/awkward_cuda_kernels-*.whl
-
