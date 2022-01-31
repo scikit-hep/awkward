@@ -31,7 +31,6 @@ AWKWARD_VERSION=$(tr -d '[:space:]' < VERSION_INFO)
 case $CUDA_VERSION in
   "11.5"* | "11.4"* | "11.3"* | "11.2"* | "11.1"* | "11.0"*)
     CUPY_CUDA_VERSION=${CUPY_CUDA_VERSION:0:3}
-    echo $CUPY_CUDA_VERSION
     export DOCKER_IMAGE_TAG="$CUDA_VERSION-devel-ubuntu20.04"
     ;;
   "10.2")
@@ -118,7 +117,7 @@ setup(name = "awkward-cuda-kernels",
 
 EOF
 
-python build/cuda-setup.py bdist_wheel --plat-name manylinux2014_x86_64
+python build/cuda-setup.py bdist_wheel --plat-name $PLATFORM
 
 if [ "$install_flag" == "true" ]; then
     pip install dist/awkward_cuda_kernels-*.whl

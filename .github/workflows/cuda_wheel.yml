@@ -1,6 +1,6 @@
 name: CUDA Kernels Build
 
-on: [push]
+on: [pull_request]
 
 jobs:
   build-awkward-cuda-kernels:
