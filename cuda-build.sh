@@ -4,11 +4,30 @@
 set -e
 
 PLATFORM="manylinux2014_x86_64"
-CUDA_VERSION=$1
-CUPY_CUDA_VERSION=${CUDA_VERSION//\./}
+install_flag=false
 
+help()
+{
+  echo ""
+  echo "Usage: $0 -c <cuda-version> -i"
+  echo -e "\t-c The CUDA Version against which to build the library"
+  echo -e "\t-i Install the awkward_cuda_kernels library"
+  exit 1 # Exit script after printing help
+}
+
+while getopts "c:i" opt
+do
+  case "$opt" in 
+    c) CUDA_VERSION="$OPTARG" ;;
+    i) install_flag=true ;;
+    ?) help ;;
+  esac
+done
+
+CUPY_CUDA_VERSION=${CUDA_VERSION//\./}
 AWKWARD_VERSION=$(tr -d '[:space:]' < VERSION_INFO)
 
+# The choices in the CUDA Version is strictly dependent on Cupy.
 case $CUDA_VERSION in
   "11.5"* | "11.4"* | "11.3"* | "11.2"* | "11.1"* | "11.0"*)
     CUPY_CUDA_VERSION=${CUPY_CUDA_VERSION:0:3}
@@ -43,13 +62,21 @@ export BUILD_SHARED_LIBRARY=(nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler "-DVERS
 docker run "${DOCKER_ARGS[@]}" "${BUILD_SHARED_LIBRARY[@]}"
 
 cat > build/cuda-setup.py << EOF
+
 import setuptools
 from setuptools import setup
+from setuptools.dist import Distribution
+
+class BinaryDistribution(Distribution):
+    def has_ext_modules(self):
+        return True 
+
 setup(name = "awkward-cuda-kernels",
       packages = ["awkward_cuda_kernels"],
       package_dir = {"": "build"},
       package_data = {"awkward_cuda_kernels": ["*.so"]},
-      version = $CUPY_CUDA_VERSION,
+      distclass = BinaryDistribution,
+      version = $CUDA_VERSION,
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
@@ -91,22 +118,11 @@ setup(name = "awkward-cuda-kernels",
           "Topic :: Software Development",
           "Topic :: Utilities",
           ])
+
 EOF
 
-python build/cuda-setup.py bdist_wheel
+python build/cuda-setup.py bdist_wheel --plat-name manylinux2014_x86_64
 
-cd dist
-rm -f "awkward_cuda_kernels-$CUPY_CUDA_VERSION-py3-none-$PLATFORM.whl"
-
-unzip "awkward_cuda_kernels-$CUPY_CUDA_VERSION-py3-none-any.whl"
-
-cp "awkward_cuda_kernels-$CUPY_CUDA_VERSION.dist-info/WHEEL" tmp_WHEEL
-sed "s/Root-Is-Purelib: true/Root-Is-Purelib: false/" < tmp_WHEEL | sed "s/Tag: py3-none-any/Tag: py3-none-$PLATFORM/" > "awkward_cuda_kernels-$CUPY_CUDA_VERSION.dist-info/WHEEL"
-
-zip "awkward_cuda_kernels-$CUPY_CUDA_VERSION-py3-none-$PLATFORM.whl" -r awkward_cuda_kernels "awkward_cuda_kernels-$CUPY_CUDA_VERSION.dist-info"
-
-cd ..
-
-if [ "$1" == "--install" ]; then
-    pip install "dist/awkward_cuda_kernels-$CUPY_CUDA_VERSION-py3-none-$PLATFORM.whl"
+if [ "$install_flag" == "true" ]; then
+    pip install dist/awkward_cuda_kernels-*.whl
 fi
