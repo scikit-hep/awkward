@@ -61,8 +61,19 @@ cat > build/cuda-setup.py << EOF
 
 import setuptools
 from setuptools import setup
-from setuptools.dist import Distribution
+from wheel.bdist_wheel import bdist_wheel as _bdist_wheel_base
 
+class bdist_wheel(_bdist_wheel_base):
+    def finalize_options(self):
+        _bdist_wheel_base.finalize_options(self)
+        self.root_is_pure = False
+
+    def get_tag(self):
+        _, _, plat = _bdist_wheel_base.get_tag(self)
+        python, abi, plat = "py3", "none", "manylinux2014_x86_64"
+        return python, abi, plat
+
+cmdclass = {"bdist_wheel": bdist_wheel}
 class BinaryDistribution(Distribution):
     def has_ext_modules(self):
         return True
@@ -71,7 +82,7 @@ setup(name = "awkward-cuda-kernels",
       packages = ["awkward_cuda_kernels"],
       package_dir = {"": "build"},
       package_data = {"awkward_cuda_kernels": ["*.so"]},
-      distclass = BinaryDistribution,
+      cmdclass = cmdclass,
       version = "$CUDA_VERSION",
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
