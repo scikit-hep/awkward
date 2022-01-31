@@ -37,9 +37,6 @@ case $CUDA_VERSION in
   "10.2")
     export DOCKER_IMAGE_TAG="$CUDA_VERSION-devel-ubuntu18.04"
     ;;
-  "9.0")
-    export DOCKER_IMAGE_TAG="$CUDA_VERSION-devel-ubuntu16.04"
-    ;;
   *)
     echo "Docker image for CUDA version $CUDA_VERSION is not known"
     exit 1
@@ -57,11 +54,7 @@ cp -r src/awkward_cuda_kernels build
 } >> build/awkward_cuda_kernels/__init__.py
 
 export DOCKER_ARGS=("-v$PWD:/home" -w/home "docker.io/nvidia/cuda:$DOCKER_IMAGE_TAG")
-<<<<<<< HEAD
-export BUILD_SHARED_LIBRARY=(nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler "-DVERSION_INFO=$CUPY_CUDA_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward_cuda_kernels/libawkward-cuda-kernels.so)
-=======
-export BUILD_SHARED_LIBRARY=(nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler "-DVERSION_INFO=$AWKWARD_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward_cuda_kernels/libawkward-cuda-kernels.so)
->>>>>>> da762fa814531806d7d95a4ac93b43bccefe9dfe
+export BUILD_SHARED_LIBRARY=(nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler "-DVERSION_INFO=$CUDA_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward_cuda_kernels/libawkward-cuda-kernels.so)
 
 docker run "${DOCKER_ARGS[@]}" "${BUILD_SHARED_LIBRARY[@]}"
 
@@ -127,23 +120,6 @@ EOF
 
 python build/cuda-setup.py bdist_wheel --plat-name manylinux2014_x86_64
 
-<<<<<<< HEAD
 if [ "$install_flag" == "true" ]; then
     pip install dist/awkward_cuda_kernels-*.whl
-=======
-cd dist
-rm -f "awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl"
-
-unzip "awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-any.whl"
-
-cp "awkward_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL" tmp_WHEEL
-sed "s/Root-Is-Purelib: true/Root-Is-Purelib: false/" < tmp_WHEEL | sed "s/Tag: py3-none-any/Tag: py3-none-$PLATFORM/" > "awkward_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL"
-
-zip "awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl" -r awkward_cuda_kernels "awkward_cuda_kernels-$AWKWARD_VERSION.dist-info"
-
-cd ..
-
-if [ "$1" == "--install" ]; then
-    pip install "dist/awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl"
->>>>>>> da762fa814531806d7d95a4ac93b43bccefe9dfe
 fi
