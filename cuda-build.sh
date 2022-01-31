@@ -17,7 +17,7 @@ help()
 
 while getopts "c:i" opt
 do
-  case "$opt" in 
+  case "$opt" in
     c) CUDA_VERSION="$OPTARG" ;;
     i) install_flag=true ;;
     ?) help ;;
@@ -66,7 +66,7 @@ from setuptools.dist import Distribution
 
 class BinaryDistribution(Distribution):
     def has_ext_modules(self):
-        return True 
+        return True
 
 setup(name = "awkward-cuda-kernels",
       packages = ["awkward_cuda_kernels"],
