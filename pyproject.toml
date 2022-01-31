@@ -76,3 +76,88 @@ filterwarnings = [
   "ignore:The NumPy module was reloaded:UserWarning",
 ]
 log_cli_level = "info"
+
+[tool.pylint]
+master.py-version = "3.6"
+master.jobs = "0"
+master.ignore-paths = [
+  "src/awkward/_typeparser/generated_parser.py"
+]
+reports.output-format = "colorized"
+messages_control.enable = [
+  "useless-suppression",
+]
+messages_control.disable = [
+  "abstract-method",  # TODO: check but might need to keep disabled
+  "arguments-differ",  # TODO: some of these can be cleaned up
+  "attribute-defined-outside-init",  # TODO: These should be avoided!
+  "bad-super-call",  # TODO: investigate!
+  "broad-except", # TODO: investigate
+  "cell-var-from-loop",  # TODO: investigate and locally disable if needed (unlikely)
+  "chained-comparison", # TODO
+  "consider-iterating-dictionary",  # TODO
+  "consider-merging-isinstance",  # TODO
+  "consider-using-enumerate", # TODO
+  "consider-using-f-string",  # TODO
+  "consider-using-in",  # TODO
+  "consider-using-max-builtin",  # TODO
+  "consider-using-min-builtin",  # TODO
+  "duplicate-code",  # Hahahaha
+  "exec-used",  # TODO: locally disable
+  "fixme",
+  "global-statement",  # TODO: locally disable if really required
+  "global-variable-not-assigned",  # TODO: investigate!
+  "import-error",
+  "import-outside-toplevel", # Could be done per-use to discourage
+  "inconsistent-return-statements",  # TODO: probably fix
+  "invalid-class-object",  # TODO: investigate!
+  "invalid-name",
+  "invalid-unary-operand-type",  # TODO: investigate!
+  "keyword-arg-before-vararg",  # TODO: investigate
+  "line-too-long",
+  "missing-class-docstring",
+  "missing-function-docstring",
+  "missing-module-docstring",
+  "no-else-break",  # TODO perhaps?
+  "no-else-raise",  # TODO perhaps?
+  "no-else-return",  # TODO perhaps?
+  "no-member",
+  "no-name-in-module",
+  "no-self-use",  # TODO: investigate and locally disable
+  "no-value-for-parameter",  # TODO: investigate
+  "property-with-parameters",  # TODO: investigate
+  "protected-access",
+  "raise-missing-from",  # TODO
+  "redefined-builtin",  # TODO: fix or locally disable if in a signature
+  "redefined-outer-name",  # TODO: fix
+  "simplifiable-if-expression",  # TODO
+  "super-init-not-called",  # TODO: probably fix
+  "too-few-public-methods",
+  "too-many-arguments",
+  "too-many-boolean-expressions",
+  "too-many-branches",
+  "too-many-function-args",
+  "too-many-instance-attributes",
+  "too-many-lines",
+  "too-many-locals",
+  "too-many-nested-blocks",
+  "too-many-public-methods",
+  "too-many-return-statements",
+  "too-many-statements",
+  "unbalanced-tuple-unpacking",  # TODO: investigate!
+  "undefined-loop-variable", # TODO: fix if possible
+  "ungrouped-imports",
+  "unidiomatic-typecheck",  # TODO
+  "unnecessary-comprehension", # TODO
+  "unnecessary-lambda",  # TODO
+  "unreachable",  # TODO
+  "unsubscriptable-object",  # TODO: check, but possibly a false positive
+  "unused-argument",  # TODO: investigate and locally disable
+  "unused-import", # TODO: remove
+  "unused-variable",  # TODO
+  "use-a-generator",  # TODO
+  "use-implicit-booleaness-not-len", # TODO perhaps?
+  "useless-else-on-loop",  # TODO
+  "wrong-import-order",  # Could use isort
+  "wrong-import-position",
+]
