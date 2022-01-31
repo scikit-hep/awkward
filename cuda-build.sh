@@ -74,9 +74,6 @@ class bdist_wheel(_bdist_wheel_base):
         return python, abi, plat
 
 cmdclass = {"bdist_wheel": bdist_wheel}
-class BinaryDistribution(Distribution):
-    def has_ext_modules(self):
-        return True
 
 setup(name = "awkward-cuda-kernels",
       packages = ["awkward_cuda_kernels"],
