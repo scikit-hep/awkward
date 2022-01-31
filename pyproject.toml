@@ -106,7 +106,6 @@ messages_control.disable = [
   "exec-used",  # TODO: locally disable
   "fixme",
   "global-statement",  # TODO: locally disable if really required
-  "global-variable-not-assigned",  # TODO: investigate!
   "import-error",
   "import-outside-toplevel", # Could be done per-use to discourage
   "inconsistent-return-statements",  # TODO: probably fix
