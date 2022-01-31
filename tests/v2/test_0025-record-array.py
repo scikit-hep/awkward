@@ -283,17 +283,14 @@ def test_recordtype():
             ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
         )
     )
-    assert (
-        str(
-            ak._v2.types.RecordType(
-                {
-                    "one": ak._v2.types.NumpyType("int32"),
-                    "two": ak._v2.types.NumpyType("float64"),
-                }
-            )
+    assert str(
+        ak._v2.types.RecordType(
+            {
+                "one": ak._v2.types.NumpyType("int32"),
+                "two": ak._v2.types.NumpyType("float64"),
+            }
         )
-        in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
-    )
+    ) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
 
     assert ak._v2.operations.describe.type(recordarray) == ak._v2.types.RecordType(
         {

@@ -74,7 +74,7 @@ def moment(
                 x, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwxn = ak._v2.operations.reducers.sum(
-                x ** n, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+                x**n, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
         else:
             sumw = ak._v2.operations.reducers.sum(

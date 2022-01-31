@@ -1016,7 +1016,7 @@ def to_list(array):
 
 
 _maybe_json_str = re.compile(r"^\s*(\[|\{|\"|[0-9]|true|false|null)")
-_maybe_json_bytes = re.compile(br"^\s*(\[|\{|\"|[0-9]|true|false|null)")
+_maybe_json_bytes = re.compile(rb"^\s*(\[|\{|\"|[0-9]|true|false|null)")
 
 
 def from_json(

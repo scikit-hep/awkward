@@ -29,11 +29,8 @@ def test():
         == []
     )
     assert ak.to_list(array[empty2]) == [[], [], []]
-    assert (
-        ak.to_list(
-            array[
-                empty2,
-            ]
-        )
-        == [[], [], []]
-    )
+    assert ak.to_list(
+        array[
+            empty2,
+        ]
+    ) == [[], [], []]

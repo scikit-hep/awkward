@@ -146,15 +146,12 @@ def test_array_slice():
     numpyarray1 = ak._v2.contents.NumpyArray(np.array([[0, 1], [1, 0]]))
     numpyarray2 = ak._v2.contents.NumpyArray(np.array([[2, 4], [3, 3]]))
 
-    assert (
-        to_list(
-            array[
-                numpyarray1,
-                numpyarray2,
-            ]
-        )
-        == [[2.2, 9.9], [8.8, 3.3]]
-    )
+    assert to_list(
+        array[
+            numpyarray1,
+            numpyarray2,
+        ]
+    ) == [[2.2, 9.9], [8.8, 3.3]]
     assert (
         array.typetracer[
             numpyarray1,
@@ -342,17 +339,12 @@ def test_missing():
         ].form
     )
 
-    assert (
-        to_list(
-            regulararray[
-                1:,
-                np.ma.MaskedArray(
-                    [2, 1, 1, 999, -1], [False, False, False, True, False]
-                ),
-            ]
-        )
-        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
-    )
+    assert to_list(
+        regulararray[
+            1:,
+            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
+        ]
+    ) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
     assert (
         regulararray.typetracer[
             1:,
@@ -426,17 +418,12 @@ def test_missing():
             np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
         ].form
     )
-    assert (
-        to_list(
-            content[
-                1:,
-                np.ma.MaskedArray(
-                    [2, 1, 1, 999, -1], [False, False, False, True, False]
-                ),
-            ]
-        )
-        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
-    )
+    assert to_list(
+        content[
+            1:,
+            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
+        ]
+    ) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
     assert (
         content.typetracer[
             1:,
@@ -493,17 +480,12 @@ def test_missing():
             np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
         ].form
     )
-    assert (
-        to_list(
-            listoffsetarray[
-                1:,
-                np.ma.MaskedArray(
-                    [2, 1, 1, 999, -1], [False, False, False, True, False]
-                ),
-            ]
-        )
-        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
-    )
+    assert to_list(
+        listoffsetarray[
+            1:,
+            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
+        ]
+    ) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
     assert (
         listoffsetarray.typetracer[
             1:,

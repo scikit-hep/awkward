@@ -194,21 +194,18 @@ def test_record():
     assert pickle.loads(
         pickle.dumps(ak_Record({"x": 2.2, "y": [1, 2]}), -1)
     ).tolist() == {"x": 2.2, "y": [1, 2]}
-    assert (
-        pickle.loads(
-            pickle.dumps(
-                ak_Array(
-                    [
-                        {"x": 1.1, "y": [1]},
-                        {"x": 2.2, "y": [1, 2]},
-                        {"x": 3.3, "y": [1, 2, 3]},
-                    ]
-                )[1],
-                -1,
-            )
-        ).tolist()
-        == {"x": 2.2, "y": [1, 2]}
-    )
+    assert pickle.loads(
+        pickle.dumps(
+            ak_Array(
+                [
+                    {"x": 1.1, "y": [1]},
+                    {"x": 2.2, "y": [1, 2]},
+                    {"x": 3.3, "y": [1, 2, 3]},
+                ]
+            )[1],
+            -1,
+        )
+    ).tolist() == {"x": 2.2, "y": [1, 2]}
 
 
 def test_regulararray():

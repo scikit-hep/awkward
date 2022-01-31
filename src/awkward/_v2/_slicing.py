@@ -172,13 +172,10 @@ def prepare_tuple_nested(item):
         next = prepare_tuple_RegularArray_toListOffsetArray64(next)
         return next
 
-    elif (
-        isinstance(
-            item,
-            ak._v2.contents.ListOffsetArray,
-        )
-        and issubclass(item.offsets.dtype.type, np.int64)
-    ):
+    elif isinstance(
+        item,
+        ak._v2.contents.ListOffsetArray,
+    ) and issubclass(item.offsets.dtype.type, np.int64):
         return ak._v2.contents.ListOffsetArray(
             item.offsets,
             prepare_tuple_nested(item.content),

@@ -548,7 +548,7 @@ class UnionArray(Content):
                     )
                     contents.append(self._contents[i])
 
-        if len(contents) > 2 ** 7:
+        if len(contents) > 2**7:
             raise NotImplementedError(
                 "FIXME: handle UnionArray with more than 127 contents"
             )
@@ -755,7 +755,7 @@ class UnionArray(Content):
             )
         )
 
-        if len(contents) > 2 ** 7:
+        if len(contents) > 2**7:
             raise AssertionError("FIXME: handle UnionArray with more than 127 contents")
 
         parameters = ak._v2._util.merge_parameters(self._parameters, other._parameters)
