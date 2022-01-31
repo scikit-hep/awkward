@@ -1,13 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
 
-class Reducer(object):
+class Reducer:
     needs_position = False
 
     @classmethod
@@ -211,9 +210,7 @@ class Sum(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         if array.dtype.kind == "M":
-            raise ValueError(
-                "cannot compute the sum (ak.sum) of {0}".format(repr(array.dtype))
-            )
+            raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
         else:
             dtype = cls.maybe_other_type(array.dtype)
         result = array.nplike.empty(
@@ -301,9 +298,7 @@ class Prod(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         if array.dtype.kind.upper() == "M":
-            raise ValueError(
-                "cannot compute the product (ak.prod) of {0}".format(repr(array.dtype))
-            )
+            raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
         result = array.nplike.empty(
             cls.maybe_double_length(array.dtype.type, outlength),
             dtype=cls.return_dtype(array.dtype),

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import argparse
 import ast
@@ -95,7 +94,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
         else:
             raise Exception("Cannot handle more than triply nested loops")
         if len(node.iter.args) == 1:
-            code = "if ({0} < {1}) {{\n".format(thread_var, traverse(node.iter.args[0]))
+            code = f"if ({thread_var} < {traverse(node.iter.args[0])}) {{\n"
         elif len(node.iter.args) == 2:
             code = "if (({0} < {1}) && ({0} >= {2})) {{\n".format(
                 thread_var, traverse(node.iter.args[1]), traverse(node.iter.args[0])
@@ -108,17 +107,15 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
     elif node.__class__.__name__ == "While":
         assert node.test.__class__.__name__ == "Compare"
         assert len(node.test.ops) == 1
-        code = "while ({0}) {{\n".format(traverse(node.test))
+        code = f"while ({traverse(node.test)}) {{\n"
         for subnode in node.body:
             code += traverse(subnode, args, copy.copy(forvars), declared)
         code += "}\n"
     elif node.__class__.__name__ == "Raise":
-        if sys.version_info[0] == 2:
-            code = 'err->str = "{0}";\n'.format(node.type.args[0].s)
-        elif sys.version_info[0] == 3 and sys.version_info[1] in [5, 6, 7]:
-            code = 'err->str = "{0}";\n'.format(node.exc.args[0].s)
+        if sys.version_info < (3, 8):
+            code = f'err->str = "{node.exc.args[0].s}";\n'
         else:
-            code = 'err->str = "{0}";\n'.format(node.exc.args[0].value)
+            code = f'err->str = "{node.exc.args[0].value}";\n'
         code += "err->filename = FILENAME(__LINE__);\nerr->pass_through=true;\n"
     elif node.__class__.__name__ == "If":
         code = ""
@@ -144,7 +141,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
         elif node.op.__class__.__name__ == "And":
             operator = "&&"
         assert len(node.values) == 2
-        code = "{0} {1} {2}".format(
+        code = "{} {} {}".format(
             traverse(node.values[0], args, copy.copy(forvars), declared),
             operator,
             traverse(node.values[1], args, copy.copy(forvars), declared),
@@ -160,7 +157,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
         elif node.value is False:
             code = "false"
         else:
-            raise Exception("Unhandled NameConstant value {0}".format(node.value))
+            raise Exception(f"Unhandled NameConstant value {node.value}")
     elif node.__class__.__name__ == "Num":
         code = str(node.n)
     elif node.__class__.__name__ == "BinOp":
@@ -170,23 +167,23 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
             left = getthread_dim(forvars.index(left))
         if right in forvars:
             right = getthread_dim(forvars.index(right))
-        code = "({0} {1} {2})".format(
+        code = "({} {} {})".format(
             left,
             traverse(node.op, args, copy.copy(forvars), declared),
             right,
         )
     elif node.__class__.__name__ == "UnaryOp":
         if node.op.__class__.__name__ == "USub":
-            code = "-{0}".format(
+            code = "-{}".format(
                 traverse(node.operand, args, copy.copy(forvars), declared)
             )
         elif node.op.__class__.__name__ == "Not":
-            code = "!{0}".format(
+            code = "!{}".format(
                 traverse(node.operand, args, copy.copy(forvars), declared)
             )
         else:
             raise Exception(
-                "Unhandled UnaryOp node {0}. Please inform the developers.".format(
+                "Unhandled UnaryOp node {}. Please inform the developers.".format(
                     node.op.__class__.__name__
                 )
             )
@@ -199,15 +196,9 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
     elif node.__class__.__name__ == "Mult":
         code = "*"
     elif node.__class__.__name__ == "Subscript":
-        if (
-            node.slice.__class__.__name__ == "Name"
-            and node.slice.id in forvars
-        ):
+        if node.slice.__class__.__name__ == "Name" and node.slice.id in forvars:
             code = (
-                node.value.id
-                + "["
-                + getthread_dim(forvars.index(node.slice.id))
-                + "]"
+                node.value.id + "[" + getthread_dim(forvars.index(node.slice.id)) + "]"
             )
         elif (
             node.slice.__class__.__name__ == "Constant"
@@ -239,7 +230,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
             casttype = "uint8_t"
         else:
             casttype = node.func.id
-        code = "({0})({1})".format(
+        code = "({})({})".format(
             casttype, traverse(node.args[0], args, copy.copy(forvars), declared)
         )
     elif node.__class__.__name__ == "BitAnd":
@@ -253,38 +244,38 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
             code = node.value
     elif node.__class__.__name__ == "Compare":
         if len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Lt":
-            code = "({0} < {1})".format(
+            code = "({} < {})".format(
                 traverse(node.left, args, copy.copy(forvars), declared),
                 traverse(node.comparators[0], args, copy.copy(forvars), declared),
             )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "NotEq":
-            code = "({0} != {1})".format(
+            code = "({} != {})".format(
                 traverse(node.left, args, copy.copy(forvars), declared),
                 traverse(node.comparators[0], args, copy.copy(forvars), declared),
             )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Eq":
-            code = "({0} == {1})".format(
+            code = "({} == {})".format(
                 traverse(node.left, args, copy.copy(forvars), declared),
                 traverse(node.comparators[0], args, copy.copy(forvars), declared),
             )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Gt":
-            code = "({0} > {1})".format(
+            code = "({} > {})".format(
                 traverse(node.left, args, copy.copy(forvars), declared),
                 traverse(node.comparators[0], args, copy.copy(forvars), declared),
             )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "GtE":
-            code = "({0} >= {1})".format(
+            code = "({} >= {})".format(
                 traverse(node.left, args, copy.copy(forvars), declared),
                 traverse(node.comparators[0], args, copy.copy(forvars), declared),
             )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "LtE":
-            code = "({0} <= {1})".format(
+            code = "({} <= {})".format(
                 traverse(node.left, args, copy.copy(forvars), declared),
                 traverse(node.comparators[0], args, copy.copy(forvars), declared),
             )
         else:
             raise Exception(
-                "Unhandled Compare node {0}. Please inform the developers.".format(
+                "Unhandled Compare node {}. Please inform the developers.".format(
                     node.ops[0]
                 )
             )
@@ -302,7 +293,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
                 operator = "<<="
             else:
                 raise Exception(
-                    "Unhandled AugAssign node {0}".format(node.op.__class__.__name__)
+                    f"Unhandled AugAssign node {node.op.__class__.__name__}"
                 )
             targetnode = node.target
         left = traverse(targetnode, args, copy.copy(forvars), declared)
@@ -323,7 +314,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
                     traverse(targetnode, args, copy.copy(forvars), declared)
                 )
             thread_var = getthread_dim(forvars.index(node.value.id))
-            code += "{0} = {1};\n".format(
+            code += "{} = {};\n".format(
                 traverse(targetnode, args, copy.copy(forvars), declared), thread_var
             )
         else:
@@ -332,7 +323,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
                     traverse(targetnode, args, copy.copy(forvars), declared)
                     not in declared
                 ):
-                    code = "auto {0} {1} {2};\n".format(
+                    code = "auto {} {} {};\n".format(
                         traverse(targetnode, args, copy.copy(forvars), declared),
                         operator,
                         traverse(node.value.orelse, args, copy.copy(forvars), declared),
@@ -372,11 +363,11 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
                     compop = "=="
                 else:
                     raise Exception(
-                        "Unhandled Compare node {0}. Please inform the developers.".format(
+                        "Unhandled Compare node {}. Please inform the developers.".format(
                             node.value.ops[0]
                         )
                     )
-                code += "{0} {1} {2} {3} {4};\n".format(
+                code += "{} {} {} {} {};\n".format(
                     traverse(targetnode, args, copy.copy(forvars), declared),
                     operator,
                     traverse(node.value.left, args, copy.copy(forvars), declared),
@@ -398,13 +389,13 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
                     declared.append(
                         traverse(targetnode, args, copy.copy(forvars), declared)
                     )
-                code += "{0} {1} {2};\n".format(
+                code += "{} {} {};\n".format(
                     traverse(targetnode, args, copy.copy(forvars), declared),
                     operator,
                     traverse(node.value, args, copy.copy(forvars), declared),
                 )
     else:
-        raise Exception("Unhandled node {0}".format(node.__class__.__name__))
+        raise Exception(f"Unhandled node {node.__class__.__name__}")
     return code
 
 
@@ -676,7 +667,7 @@ if __name__ == "__main__":
                     ),
                     "w",
                 ) as outfile:
-                    err_macro = '#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/{0}.cu", line)\n\n'.format(
+                    err_macro = '#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/{}.cu", line)\n\n'.format(
                         spec["name"]
                     )
                     outfile.write(err_macro + code + getcode(spec))

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import itertools
 
@@ -19,6 +18,14 @@ regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
 starts = ak._v2.index.Index64(np.array([0, 1]))
 stops = ak._v2.index.Index64(np.array([2, 3]))
 listarray = ak._v2.contents.ListArray(starts, stops, regulararray)
+
+
+def test_simple_type():
+    assert str(ak._v2.operations.describe.type(content)) == "float64"
+
+
+def test_type():
+    assert str(ak._v2.operations.describe.type(regulararray)) == "2 * var * float64"
 
 
 def test_iteration():

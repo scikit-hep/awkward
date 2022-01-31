@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -178,10 +177,10 @@ def test_getitem():
     array4 = ak.layout.UnionArray8_32(
         tags, index, [content0, content1, content2, content3]
     )
-    assert set(content2.keys()) == set(["x", "y"])
-    assert set(content3.keys()) == set(["x", "y", "z"])
-    assert set(array2.keys()) == set(["x", "y"])
-    assert set(array3.keys()) == set(["x", "y"])
+    assert set(content2.keys()) == {"x", "y"}
+    assert set(content3.keys()) == {"x", "y", "z"}
+    assert set(array2.keys()) == {"x", "y"}
+    assert set(array3.keys()) == {"x", "y"}
     assert array4.keys() == []
 
 

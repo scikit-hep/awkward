@@ -1,9 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
-import distutils.version
+import setuptools
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -13,8 +12,8 @@ pandas = pytest.importorskip("pandas")
 
 
 @pytest.mark.skipif(
-    distutils.version.LooseVersion(pandas.__version__)
-    < distutils.version.LooseVersion("1.0"),
+    setuptools.extern.packaging.version.parse(pandas.__version__)
+    < setuptools.extern.packaging.version.parse("1.0"),
     reason="Test Pandas in 1.0+ because they had to fix their JSON format.",
 )
 def test():
@@ -26,7 +25,7 @@ def test():
 
     def regularize(data):
         if isinstance(data, dict):
-            return dict((key(n), regularize(x)) for n, x in data.items())
+            return {key(n): regularize(x) for n, x in data.items()}
         else:
             return data
 

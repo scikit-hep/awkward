@@ -8,8 +8,6 @@ from generated_parser import Lark_StandAlone, Transformer
 class TreeToJson(Transformer):
     def string(self, s):
         (s,) = s
-        if sys.version_info[0] == 2:
-            s = s.encode("utf-8")
         return s[1:-1]
 
     def number(self, n):

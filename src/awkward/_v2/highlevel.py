@@ -23,20 +23,14 @@
 #
 # TODO in ArrayBuilder: everything
 
-from __future__ import absolute_import
 
 import sys
 import re
 import keyword
 
-try:
-    from collections.abc import Iterable
-    from collections.abc import Sized
-    from collections.abc import Mapping
-except ImportError:
-    from collections import Iterable
-    from collections import Sized
-    from collections import Mapping
+from collections.abc import Iterable
+from collections.abc import Sized
+from collections.abc import Mapping
 
 import awkward as ak
 from awkward._v2._connect.numpy import NDArrayOperatorsMixin
@@ -56,7 +50,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
-    u"""
+    """
     Args:
         data (#ak.layout.Content, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
@@ -256,7 +250,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 elif length != len(contents[-1]):
                     raise ValueError(
                         "dict of arrays in ak.Array constructor must have arrays "
-                        "of equal length ({0} vs {1})".format(length, len(contents[-1]))
+                        "of equal length ({} vs {})".format(length, len(contents[-1]))
                     )
             layout = ak._v2.contents.RecordArray(contents, fields)
 
@@ -594,8 +588,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         )
                     else:
                         yield x
-                else:
+                elif isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record)):
                     yield ak._v2._util.wrap(x, self._behavior)
+                else:
+                    yield x
 
     def __getitem__(self, where):
         """
@@ -1018,7 +1014,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 return ak._v2._util.tobytes(out.to(numpy)).decode(
                     errors="surrogateescape"
                 )
-        return ak._v2._util.wrap(out, self._behavior)
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, self._behavior)
+        else:
+            return out
 
     def __setitem__(self, where, what):
         """
@@ -1122,18 +1121,18 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         to add a field.
         """
         if where in dir(type(self)):
-            return super(Array, self).__getattribute__(where)
+            return super().__getattribute__(where)
         else:
             if where in self._layout.fields:
                 try:
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {0}, an exception "
-                        "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                        "while trying to get field {}, an exception "
+                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     )
             else:
-                raise AttributeError("no field named {0}".format(repr(where)))
+                raise AttributeError(f"no field named {where!r}")
 
     def __dir__(self):
         """
@@ -1143,7 +1142,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return sorted(
             set(
                 [x for x in dir(type(self)) if not x.startswith("_")]
-                + dir(super(Array, self))
+                + dir(super())
                 + [
                     x
                     for x in self._layout.fields
@@ -1260,7 +1259,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
-        return "<{0}{1} type={2}>".format(pytype, valuestr, typestr)
+        return f"<{pytype}{valuestr} type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """
@@ -1445,7 +1444,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                         length,
                         container,
                         highlevel=False,
-                        buffer_key="part{0}-{{form_key}}-{{attribute}}".format(i),
+                        buffer_key=f"part{i}-{{form_key}}-{{attribute}}",
                     )
                     for i in length
                 ]
@@ -1682,8 +1681,7 @@ class Record(NDArrayOperatorsMixin):
         return self._layout.array.fields
 
     def __iter__(self):
-        for x in self._layout.array.fields:
-            yield x
+        yield from self._layout.array.fields
 
     @property
     def type(self):
@@ -1740,7 +1738,10 @@ class Record(NDArrayOperatorsMixin):
                 return ak._v2._util.tobytes(out.to(numpy)).decode(
                     errors="surrogateescape"
                 )
-        return ak._v2._util.wrap(out, self._behavior)
+        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return ak._v2._util.wrap(out, self._behavior)
+        else:
+            return out
 
     def __setitem__(self, where, what):
         """
@@ -1800,18 +1801,18 @@ class Record(NDArrayOperatorsMixin):
              keyword.
         """
         if where in dir(type(self)):
-            return super(Record, self).__getattribute__(where)
+            return super().__getattribute__(where)
         else:
             if where in self._layout.fields:
                 try:
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {0}, an exception "
-                        "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                        "while trying to get field {}, an exception "
+                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                     )
             else:
-                raise AttributeError("no field named {0}".format(repr(where)))
+                raise AttributeError(f"no field named {where!r}")
 
     def __dir__(self):
         """
@@ -1821,7 +1822,7 @@ class Record(NDArrayOperatorsMixin):
         return sorted(
             set(
                 [x for x in dir(type(self)) if not x.startswith("_")]
-                + dir(super(Record, self))
+                + dir(super())
                 + [
                     x
                     for x in self._layout.fields
@@ -1955,7 +1956,7 @@ class Record(NDArrayOperatorsMixin):
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
-        return "<{0}{1} type={2}>".format(pytype, valuestr, typestr)
+        return f"<{pytype}{valuestr} type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """
@@ -2051,7 +2052,7 @@ class Record(NDArrayOperatorsMixin):
                         length,
                         container,
                         highlevel=False,
-                        buffer_key="part{0}-{{form_key}}-{{attribute}}".format(i),
+                        buffer_key=f"part{i}-{{form_key}}-{{attribute}}",
                     )
                     for i in length
                 ]
@@ -2320,7 +2321,7 @@ class ArrayBuilder(Sized):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<ArrayBuilder type={0}>".format(typestr)
+        return f"<ArrayBuilder type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
         """
@@ -2607,7 +2608,7 @@ class ArrayBuilder(Sized):
         for x in obj:
             self._layout.fromiter(x)
 
-    class _Nested(object):
+    class _Nested:
         def __init__(self, arraybuilder):
             self._arraybuilder = arraybuilder
 
@@ -2618,7 +2619,7 @@ class ArrayBuilder(Sized):
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<ArrayBuilder.{0} type={1}>".format(self._name, typestr)
+            return f"<ArrayBuilder.{self._name} type={typestr}>"
 
     class List(_Nested):
         _name = "list"

@@ -1,11 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import awkward as ak
 from awkward._v2.forms.form import Form, _parameters_equal
@@ -23,20 +19,20 @@ class RecordForm(Form):
     ):
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{0} 'contents' must be iterable, not {1}".format(
+                "{} 'contents' must be iterable, not {}".format(
                     type(self).__name__, repr(contents)
                 )
             )
         for content in contents:
             if not isinstance(content, Form):
                 raise TypeError(
-                    "{0} all 'contents' must be Form subclasses, not {1}".format(
+                    "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
             raise TypeError(
-                "{0} 'fields' must be iterable, not {1}".format(
+                "{} 'fields' must be iterable, not {}".format(
                     type(self).__name__, repr(contents)
                 )
             )
@@ -62,7 +58,7 @@ class RecordForm(Form):
 
     def __repr__(self):
         args = [repr(self._contents), repr(self._fields)] + self._repr_args()
-        return "{0}({1})".format(type(self).__name__, ", ".join(args))
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def index_to_field(self, index):
         if 0 <= index < len(self._contents):
@@ -72,7 +68,7 @@ class RecordForm(Form):
                 return self._fields[index]
         else:
             raise IndexError(
-                "no index {0} in record with {1} fields".format(
+                "no index {} in record with {} fields".format(
                     index, len(self._contents)
                 )
             )
@@ -94,7 +90,7 @@ class RecordForm(Form):
             else:
                 return i
         raise IndexError(
-            "no field {0} in record with {1} fields".format(
+            "no field {} in record with {} fields".format(
                 repr(field), len(self._contents)
             )
         )
@@ -117,7 +113,7 @@ class RecordForm(Form):
             index = self.field_to_index(index_or_field)
         else:
             raise TypeError(
-                "index_or_field must be an integer (index) or string (field), not {0}".format(
+                "index_or_field must be an integer (index) or string (field), not {}".format(
                     repr(index_or_field)
                 )
             )

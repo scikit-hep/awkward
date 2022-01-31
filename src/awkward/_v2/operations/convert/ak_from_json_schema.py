@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
 import os
@@ -19,7 +18,7 @@ def from_json_schema(
     output_initial_size=1024,
     output_resize_factor=1.5,
 ):
-    u"""
+    """
     Args:
         source (str or bytes): JSON-formatted string to convert into an array.
         schema (str, bytes, or nested dicts): JSONSchema to assume in the parsing.
@@ -69,9 +68,7 @@ def from_json_schema(
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
-        raise TypeError(
-            "malformed JSONSchema: expected dict, got {0}".format(repr(schema))
-        )
+        raise TypeError(f"malformed JSONSchema: expected dict, got {schema!r}")
 
     container = {}
     instructions = []
@@ -111,7 +108,7 @@ def from_json_schema(
         if position + 30 < len(source):
             after = after + "..."
         raise ValueError(
-            "JSON is invalid or does not fit schema at position {0}:\n\n    {1}\n    {2}".format(
+            "JSON is invalid or does not fit schema at position {}:\n\n    {}\n    {}".format(
                 position, before + after, "-" * len(before) + "^"
             )
         )
@@ -135,14 +132,10 @@ def from_json_schema(
 
 def build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
-        raise TypeError(
-            "unrecognized JSONSchema: expected dict, got {0}".format(repr(schema))
-        )
+        raise TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
 
     if "type" not in schema is None:
-        raise TypeError(
-            "unrecognized JSONSchema: no 'type' in {0}".format(repr(schema))
-        )
+        raise TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
 
     tpe = schema["type"]
 
@@ -170,9 +163,9 @@ def build_assembly(schema, container, instructions):
             primitive = dtype = "float64"
 
         if is_optional:
-            mask = "node{0}".format(len(container))
+            mask = f"node{len(container)}"
             container[mask + "-mask"] = None
-            node = "node{0}".format(len(container))
+            node = f"node{len(container)}"
             container[node + "-data"] = None
             instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
             instructions.append([instruction, node + "-data", dtype])
@@ -184,7 +177,7 @@ def build_assembly(schema, container, instructions):
             )
 
         else:
-            node = "node{0}".format(len(container))
+            node = f"node{len(container)}"
             container[node + "-data"] = None
             instructions.append([instruction, node + "-data", dtype])
             return ak._v2.forms.NumpyForm(primitive, form_key=node)
@@ -198,15 +191,15 @@ def build_assembly(schema, container, instructions):
             assert all(ak._v2._util.isstr(x) for x in strings)
             bytestrings = [x.encode("utf-8", errors="surrogateescape") for x in strings]
 
-            index = "node{0}".format(len(container))
+            index = f"node{len(container)}"
             container[index + "-index"] = None
-            offsets = "node{0}".format(len(container))
+            offsets = f"node{len(container)}"
             container[offsets + "-offsets"] = numpy.empty(len(strings) + 1, np.int64)
             container[offsets + "-offsets"][0] = 0
             container[offsets + "-offsets"][1:] = numpy.cumsum(
                 [len(x) for x in bytestrings]
             )
-            node = "container{0}".format(len(container))
+            node = f"container{len(container)}"
             container[node + "-data"] = b"".join(bytestrings)
 
             if is_optional:
@@ -234,13 +227,13 @@ def build_assembly(schema, container, instructions):
 
         else:
             if is_optional:
-                mask = "node{0}".format(container)
+                mask = f"node{container}"
                 container[mask + "-mask"] = None
                 instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
 
-            offsets = "node{0}".format(len(container))
+            offsets = f"node{len(container)}"
             container[offsets + "-offsets"] = None
-            node = "node{0}".format(len(container))
+            node = f"node{len(container)}"
             container[node + "-data"] = None
             instructions.append(
                 ["FillString", offsets + "-offsets", "int64", node + "-data", "uint8"]
@@ -273,7 +266,7 @@ def build_assembly(schema, container, instructions):
             assert ak._v2._util.isint(schema.get("minItems"))
 
             if is_optional:
-                mask = "node{0}".format(len(container))
+                mask = f"node{len(container)}"
                 container[mask + "-index"] = None
                 instructions.append(
                     ["FillIndexedOptionArray", mask + "-index", "int64"]
@@ -291,11 +284,11 @@ def build_assembly(schema, container, instructions):
 
         else:
             if is_optional:
-                mask = "node{0}".format(len(container))
+                mask = f"node{len(container)}"
                 container[mask + "-mask"] = None
                 instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
 
-            offsets = "node{0}".format(len(container))
+            offsets = f"node{len(container)}"
             container[offsets + "-offsets"] = None
             instructions.append(["VarLengthList", offsets + "-offsets", "int64"])
 
@@ -324,7 +317,7 @@ def build_assembly(schema, container, instructions):
             subschemas.append(subschema)
 
         if is_optional:
-            mask = "node{0}".format(len(container))
+            mask = f"node{len(container)}"
             container[mask + "-index"] = None
             instructions.append(["FillIndexedOptionArray", mask + "-index", "int64"])
 
@@ -350,4 +343,4 @@ def build_assembly(schema, container, instructions):
         raise NotImplementedError("arbitrary unions of types are not yet supported")
 
     else:
-        raise TypeError("unrecognized JSONSchema: {0}".format(repr(tpe)))
+        raise TypeError(f"unrecognized JSONSchema: {tpe!r}")

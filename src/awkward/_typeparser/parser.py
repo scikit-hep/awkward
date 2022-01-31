@@ -2,9 +2,6 @@
 
 # v2: keep this file, but change the Type-generation to generate v2 Types.
 
-from __future__ import absolute_import
-
-import sys
 
 import awkward as ak
 
@@ -14,8 +11,6 @@ from awkward._typeparser.generated_parser import Lark_StandAlone, Transformer
 class TreeToJson(Transformer):
     def string(self, s):
         (s,) = s
-        if sys.version_info[0] == 2:
-            s = s.encode("utf-8")
         return s[1:-1]
 
     def number(self, n):
@@ -85,7 +80,7 @@ def toast(ptnode, high_level, categorical):
                 typestr="bytes",
             )
         else:
-            raise Exception("Unhandled typestring {0}".format(ptnode.children[0]))
+            raise Exception(f"Unhandled typestring {ptnode.children[0]}")
     elif ptnode.data == "primitive":
         if len(ptnode.children) == 1:
             parms = {}

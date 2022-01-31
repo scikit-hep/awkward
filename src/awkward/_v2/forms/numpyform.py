@@ -1,11 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 from awkward._v2.contents.content import NestedIndexError
 from awkward._v2.forms.form import Form, _parameters_equal
@@ -54,7 +50,7 @@ class NumpyForm(Form):
         )
         if not isinstance(inner_shape, Iterable):
             raise TypeError(
-                "{0} 'inner_shape' must be iterable, not {1}".format(
+                "{} 'inner_shape' must be iterable, not {}".format(
                     type(self).__name__, repr(inner_shape)
                 )
             )
@@ -80,7 +76,7 @@ class NumpyForm(Form):
         if len(self._inner_shape) > 0:
             args.append("inner_shape=" + repr(self._inner_shape))
         args += self._repr_args()
-        return "{0}({1})".format(type(self).__name__, ", ".join(args))
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _tolist_part(self, verbose, toplevel):
         if (

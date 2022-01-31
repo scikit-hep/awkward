@@ -2,14 +2,10 @@
 
 # v2: drop this file; partitioning will be handled by Awkward-Dask.
 
-from __future__ import absolute_import
 
 import numbers
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import awkward as ak
 
@@ -97,7 +93,7 @@ def apply(function, array):
     return IrregularlyPartitionedArray([function(x) for x in array.partitions])
 
 
-class PartitionedArray(object):
+class PartitionedArray:
     @classmethod
     def from_ext(cls, obj):
         if isinstance(obj, ak._ext.IrregularlyPartitionedArray):
@@ -237,9 +233,7 @@ class PartitionedArray(object):
                 self._ext.getitem_range(where.start, where.stop, where.step)
             )
 
-        elif isinstance(where, str) or (
-            ak._util.py27 and isinstance(where, ak._util.unicode)
-        ):
+        elif isinstance(where, str):
             return self.replace_partitions([x[where] for x in self.partitions])
 
         elif isinstance(where, tuple) and len(where) == 0:
@@ -248,13 +242,7 @@ class PartitionedArray(object):
         elif (
             isinstance(where, Iterable)
             and len(where) > 0
-            and all(
-                (
-                    isinstance(x, str)
-                    or (ak._util.py27 and isinstance(x, ak._util.unicode))
-                )
-                for x in where
-            )
+            and all(isinstance(x, str) for x in where)
         ):
             return self.replace_partitions([x[where] for x in self.partitions])
 
@@ -270,7 +258,7 @@ class PartitionedArray(object):
                     head += len(self)
                 if not 0 <= head < len(self):
                     raise ValueError(
-                        "{0} index out of range".format(type(self).__name__)
+                        f"{type(self).__name__} index out of range"
                         + ak._util.exception_suffix(__file__)
                     )
                 partitionid, index = self._ext.partitionid_index_at(head)
@@ -289,9 +277,7 @@ class PartitionedArray(object):
                     [x[(head,) + tail] for x in self.partitions]
                 )
 
-            elif isinstance(head, str) or (
-                ak._util.py27 and isinstance(head, ak._util.unicode)
-            ):
+            elif isinstance(head, str):
                 y = IrregularlyPartitionedArray([x[head] for x in self.partitions])
                 if len(tail) == 0:
                     return y
@@ -301,13 +287,7 @@ class PartitionedArray(object):
             elif (
                 isinstance(head, Iterable)
                 and len(head) > 0
-                and all(
-                    (
-                        isinstance(x, str)
-                        or (ak._util.py27 and isinstance(x, ak._util.unicode))
-                    )
-                    for x in head
-                )
+                and all(isinstance(x, str) for x in head)
             ):
                 y = IrregularlyPartitionedArray(
                     [x[list(head)] for x in self.partitions]
@@ -377,8 +357,7 @@ class PartitionedArray(object):
 
     def __iter__(self):
         for partition in self.partitions:
-            for x in partition:
-                yield x
+            yield from partition
 
     @property
     def kernels(self):

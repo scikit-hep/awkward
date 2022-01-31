@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -1200,7 +1199,6 @@ def test_union():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: simplify_uniontype needs to be implemented")
 def test_union_2():
     one = ak._v2.operations.convert.from_iter(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
@@ -1210,7 +1208,7 @@ def test_union_2():
     )
     tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
     index = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak._v2.contentws.UnionArray(tags, index, [one, two])
+    unionarray = ak._v2.contents.UnionArray(tags, index, [one, two])
     array = ak._v2.highlevel.Array(
         [[0, -1], [], [1, 1], [], [-1], [], [1, -2, -1]], check_valid=True
     ).layout

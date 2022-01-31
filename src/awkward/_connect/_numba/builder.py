@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numba/builder.py
 
-from __future__ import absolute_import
 
 import numba
 import numba.core.typing
@@ -20,9 +19,7 @@ def globalstring(context, builder, pyvalue):
 
     if pyvalue not in dynamic_addrs:
         buf = dynamic_addrs[pyvalue] = numpy.array(pyvalue.encode("utf-8") + b"\x00")
-        context.add_dynamic_addr(
-            builder, buf.ctypes.data, info="str({0})".format(repr(pyvalue))
-        )
+        context.add_dynamic_addr(builder, buf.ctypes.data, info=f"str({pyvalue!r})")
     ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
     return builder.inttoptr(
         ptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8))
@@ -31,8 +28,8 @@ def globalstring(context, builder, pyvalue):
 
 class ArrayBuilderType(numba.types.Type):
     def __init__(self, behavior):
-        super(ArrayBuilderType, self).__init__(
-            name="ak.ArrayBuilderType({0})".format(
+        super().__init__(
+            name="ak.ArrayBuilderType({})".format(
                 ak._connect._numba.repr_behavior(behavior)
             )
         )
@@ -43,7 +40,7 @@ class ArrayBuilderType(numba.types.Type):
 class ArrayBuilderModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("rawptr", numba.types.voidptr), ("pyptr", numba.types.pyobject)]
-        super(ArrayBuilderModel, self).__init__(dmm, fe_type, members)
+        super().__init__(dmm, fe_type, members)
 
 
 @numba.core.imputils.lower_constant(ArrayBuilderType)

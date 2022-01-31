@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -78,4 +77,4 @@ def local_index(array, axis=-1, highlevel=True, behavior=None):
         array, allow_record=True, allow_other=False
     )
     out = layout.localindex(axis)
-    return ak._v2._util.wrap(out, array, behavior, highlevel)
+    return ak._v2._util.wrap(out, behavior, highlevel)

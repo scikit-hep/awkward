@@ -1331,6 +1331,8 @@ kernels:
               if fromindex[i] < 0:
                   numnull[i] = 1
                   tolength[0] = tolength[0] + 1
+              else:
+                  numnull[i] = 0
     automatic-tests: false
     manual-tests: []
 

@@ -1,11 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import awkward as ak
 
@@ -57,7 +53,7 @@ def to_layout(
 
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
-            raise ValueError("dtype {0} not allowed".format(repr(array.dtype)))
+            raise ValueError(f"dtype {array.dtype!r} not allowed")
         return to_layout(
             ak._v2.operations.convert.from_numpy(
                 array, regulararray=True, recordarray=True, highlevel=False
@@ -70,7 +66,7 @@ def to_layout(
         type(array).__module__.startswith("cupy.") and type(array).__name__ == "ndarray"
     ):
         if not issubclass(array.dtype.type, numpytype):
-            raise ValueError("dtype {0} not allowed".format(repr(array.dtype)))
+            raise ValueError(f"dtype {array.dtype!r} not allowed")
         return to_layout(
             ak._v2.operations.convert.from_cupy(
                 array, regulararray=True, highlevel=False
@@ -94,7 +90,7 @@ def to_layout(
         )
 
     elif not allow_other:
-        raise TypeError("{0} cannot be converted into an Awkward Array".format(array))
+        raise TypeError(f"{array} cannot be converted into an Awkward Array")
 
     else:
         return array

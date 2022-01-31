@@ -2,7 +2,6 @@
 
 # v2: drop, since this is replaced by JAX. (Implement it only if somebody complains.)
 
-from __future__ import absolute_import
 
 import types
 

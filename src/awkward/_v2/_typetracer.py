@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import numbers
 
@@ -13,7 +12,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-class NoError(object):
+class NoError:
     str = None
     filename = None
     pass_through = False
@@ -21,12 +20,12 @@ class NoError(object):
     id = ak._util.kSliceNone
 
 
-class NoKernel(object):
+class NoKernel:
     def __call__(self, *args):
         return NoError()
 
 
-class UnknownLengthType(object):
+class UnknownLengthType:
     def __repr__(self):
         return "UnknownLength"
 
@@ -52,9 +51,6 @@ class UnknownLengthType(object):
         return UnknownLength
 
     def __rmul__(self, other):
-        return UnknownLength
-
-    def __div__(self, other):
         return UnknownLength
 
     def __truediv__(self, other):
@@ -88,7 +84,7 @@ def _emptyarray(x):
         return numpy.empty(0, numpy.array(x).dtype)
 
 
-class UnknownScalar(object):
+class UnknownScalar:
     def __init__(self, dtype):
         self._dtype = dtype
 
@@ -97,10 +93,10 @@ class UnknownScalar(object):
         return self._dtype
 
     def __repr__(self):
-        return "UnknownScalar({0})".format(repr(self._dtype))
+        return f"UnknownScalar({self._dtype!r})"
 
     def __str__(self):
-        return "unknown-{0}".format(str(self._dtype))
+        return f"unknown-{str(self._dtype)}"
 
     def __eq__(self, other):
         return isinstance(other, UnknownScalar) and self._dtype == other._dtype
@@ -123,9 +119,6 @@ class UnknownScalar(object):
     def __rmul__(self, other):
         return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
 
-    def __div__(self, other):
-        return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
-
     def __truediv__(self, other):
         return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
 
@@ -145,7 +138,7 @@ class UnknownScalar(object):
         return False
 
 
-class MaybeNone(object):
+class MaybeNone:
     def __init__(self, content):
         self._content = content
 
@@ -160,10 +153,10 @@ class MaybeNone(object):
             return False
 
     def __repr__(self):
-        return "MaybeNone({0})".format(repr(self._content))
+        return f"MaybeNone({self._content!r})"
 
 
-class OneOf(object):
+class OneOf:
     def __init__(self, contents):
         self._contents = contents
 
@@ -178,7 +171,7 @@ class OneOf(object):
             return False
 
     def __repr__(self):
-        return "OneOf({0})".format(repr(self._contents))
+        return f"OneOf({self._contents!r})"
 
 
 def _length_after_slice(slice, original_length):
@@ -192,7 +185,7 @@ def _length_after_slice(slice, original_length):
         return 0
 
 
-class TypeTracerArray(object):
+class TypeTracerArray:
     @classmethod
     def from_array(cls, array, dtype=None):
         if isinstance(array, ak._v2.index.Index):
@@ -215,7 +208,7 @@ class TypeTracerArray(object):
         shape = ""
         if self._shape != (UnknownLength,):
             shape = ", " + repr(self._shape)
-        return "TypeTracerArray({0}{1})".format(dtype, shape)
+        return f"TypeTracerArray({dtype}{shape})"
 
     @property
     def dtype(self):
@@ -267,7 +260,7 @@ class TypeTracerArray(object):
     def itemsize(self):
         return self._dtype.itemsize
 
-    class _CTypes(object):
+    class _CTypes:
         data = 0
 
     @property
@@ -606,7 +599,7 @@ class TypeTracer(ak.nplike.NumpyLike):
                 inner_shape = x.shape[1:]
             elif inner_shape != x.shape[1:]:
                 raise ValueError(
-                    "inner dimensions don't match in concatenate: {0} vs {1}".format(
+                    "inner dimensions don't match in concatenate: {} vs {}".format(
                         inner_shape, x.shape[1:]
                     )
                 )

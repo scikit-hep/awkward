@@ -1,11 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import awkward as ak
 from awkward._v2.contents.content import Content
@@ -13,21 +9,15 @@ from awkward._v2.contents.content import Content
 np = ak.nplike.NumpyMetadata.instance()
 
 
-class Record(object):
+class Record:
     def __init__(self, array, at):
         if not isinstance(array, ak._v2.contents.recordarray.RecordArray):
-            raise TypeError(
-                "Record 'array' must be a RecordArray, not {0}".format(repr(array))
-            )
+            raise TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
         if not ak._util.isint(at):
-            raise TypeError(
-                "Record 'at' must be an integer, not {0}".format(repr(array))
-            )
+            raise TypeError(f"Record 'at' must be an integer, not {array!r}")
         if at < 0 or at >= array.length:
             raise ValueError(
-                "Record 'at' must be >= 0 and < len(array) == {0}, not {1}".format(
-                    array.length, at
-                )
+                f"Record 'at' must be >= 0 and < len(array) == {array.length}, not {at}"
             )
         else:
             self._array = array

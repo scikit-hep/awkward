@@ -1,14 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
 import copy
 
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import awkward as ak
 from awkward._v2.record import Record
@@ -35,7 +31,7 @@ class RecordArray(Content):
     ):
         if not isinstance(contents, Iterable):
             raise TypeError(
-                "{0} 'contents' must be iterable, not {1}".format(
+                "{} 'contents' must be iterable, not {}".format(
                     type(self).__name__, repr(contents)
                 )
             )
@@ -44,7 +40,7 @@ class RecordArray(Content):
 
         if len(contents) == 0 and length is None:
             raise TypeError(
-                "{0} if len(contents) == 0, a 'length' must be specified".format(
+                "{} if len(contents) == 0, a 'length' must be specified".format(
                     type(self).__name__
                 )
             )
@@ -54,20 +50,20 @@ class RecordArray(Content):
             ak._util.isint(length) and length >= 0
         ):
             raise TypeError(
-                "{0} 'length' must be a non-negative integer or None, not {1}".format(
+                "{} 'length' must be a non-negative integer or None, not {}".format(
                     type(self).__name__, repr(length)
                 )
             )
         for content in contents:
             if not isinstance(content, Content):
                 raise TypeError(
-                    "{0} all 'contents' must be Content subclasses, not {1}".format(
+                    "{} all 'contents' must be Content subclasses, not {}".format(
                         type(self).__name__, repr(content)
                     )
                 )
             if content.length < length:
                 raise ValueError(
-                    "{0} len(content) ({1}) must be >= length ({2}) for all 'contents'".format(
+                    "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
                         type(self).__name__, content.length, length
                     )
                 )
@@ -77,19 +73,19 @@ class RecordArray(Content):
                 fields = list(fields)
             if not all(ak._util.isstr(x) for x in fields):
                 raise TypeError(
-                    "{0} 'fields' must all be strings, not {1}".format(
+                    "{} 'fields' must all be strings, not {}".format(
                         type(self).__name__, repr(fields)
                     )
                 )
             if not len(contents) == len(fields):
                 raise ValueError(
-                    "{0} len(contents) ({1}) must be equal to len(fields) ({2})".format(
+                    "{} len(contents) ({}) must be equal to len(fields) ({})".format(
                         type(self).__name__, len(contents), len(fields)
                     )
                 )
         elif fields is not None:
             raise TypeError(
-                "{0} 'fields' must be iterable or None, not {1}".format(
+                "{} 'fields' must be iterable or None, not {}".format(
                     type(self).__name__, repr(fields)
                 )
             )
@@ -100,7 +96,7 @@ class RecordArray(Content):
                     break
                 elif nplike is not content.nplike:
                     raise TypeError(
-                        "{0} 'contents' must use the same array library (nplike): {1} vs {2}".format(
+                        "{} 'contents' must use the same array library (nplike): {} vs {}".format(
                             type(self).__name__,
                             type(nplike).__name__,
                             type(content.nplike).__name__,
@@ -190,13 +186,13 @@ class RecordArray(Content):
 
         if self._fields is None:
             for i, x in enumerate(self._contents):
-                out.append("{0}    <content index={1}>\n".format(indent, repr(str(i))))
+                out.append(f"{indent}    <content index={repr(str(i))}>\n")
                 out.append(x._repr(indent + "        ", "", "\n"))
                 out.append(indent + "    </content>\n")
         else:
             for i, x in enumerate(self._contents):
                 out.append(
-                    "{0}    <content index={1} field={2}>\n".format(
+                    "{}    <content index={} field={}>\n".format(
                         indent, repr(str(i)), repr(self._fields[i])
                     )
                 )
@@ -470,7 +466,7 @@ class RecordArray(Content):
                     self._fields,
                     self._length,
                     None,
-                    self._parameters,
+                    {},
                     self._nplike,
                 ),
             )
@@ -535,7 +531,7 @@ class RecordArray(Content):
 
         head, tail = self._merging_strategy(others)
 
-        parameters = {}
+        parameters = self._parameters
         headless = head[1:]
 
         for_each_field = []
@@ -546,7 +542,7 @@ class RecordArray(Content):
         if self.is_tuple:
             for array in headless:
                 parameters = ak._v2._util.merge_parameters(
-                    self._parameters, array._parameters
+                    self._parameters, array._parameters, True
                 )
 
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
@@ -793,11 +789,11 @@ class RecordArray(Content):
     def _validityerror(self, path):
         for i in range(len(self.contents)):
             if self.contents[i].length < self.length:
-                return 'at {0} ("{1}"): len(field({2})) < len(recordarray)'.format(
+                return 'at {} ("{}"): len(field({})) < len(recordarray)'.format(
                     path, type(self), i
                 )
         for i in range(len(self.contents)):
-            sub = self.contents[i].validityerror(path + ".field({0})".format(i))
+            sub = self.contents[i].validityerror(path + f".field({i})")
             if sub != "":
                 return sub
         return ""
@@ -868,7 +864,7 @@ class RecordArray(Content):
             return self._nplike.empty(self.length, dtype=[])
         contents = [x._to_numpy(allow_missing) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
-            raise ValueError("cannot convert {0} into np.ndarray".format(self))
+            raise ValueError(f"cannot convert {self} into np.ndarray")
         out = self._nplike.empty(
             contents[0].shape[0],
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
@@ -900,7 +896,7 @@ class RecordArray(Content):
             if options["function_name"] is not None:
                 in_function = " in " + options["function_name"]
             raise TypeError(
-                "cannot combine record fields{0} unless flatten_records=True".format(
+                "cannot combine record fields{} unless flatten_records=True".format(
                     in_function
                 )
             )

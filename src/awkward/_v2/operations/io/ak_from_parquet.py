@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -18,7 +17,7 @@ def from_parquet(  # this will be going through Awkward-Dask
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options  # NOTE: a comma after **options breaks Python 2
+    **options
 ):
     raise NotImplementedError
 

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import copy
 
@@ -27,23 +26,23 @@ class ListArray(Content):
             np.dtype(np.int64),
         ):
             raise TypeError(
-                "{0} 'starts' must be an Index with dtype in (int32, uint32, int64), "
-                "not {1}".format(type(self).__name__, repr(starts))
+                "{} 'starts' must be an Index with dtype in (int32, uint32, int64), "
+                "not {}".format(type(self).__name__, repr(starts))
             )
         if not (isinstance(stops, Index) and starts.dtype == stops.dtype):
             raise TypeError(
-                "{0} 'stops' must be an Index with the same dtype as 'starts' ({1}), "
-                "not {2}".format(type(self).__name__, repr(starts.dtype), repr(stops))
+                "{} 'stops' must be an Index with the same dtype as 'starts' ({}), "
+                "not {}".format(type(self).__name__, repr(starts.dtype), repr(stops))
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{0} 'content' must be a Content subtype, not {1}".format(
+                "{} 'content' must be a Content subtype, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
         if starts.length > stops.length:
             raise ValueError(
-                "{0} len(starts) ({1}) must be <= len(stops) ({2})".format(
+                "{} len(starts) ({}) must be <= len(stops) ({})".format(
                     type(self).__name__, starts.length, stops.length
                 )
             )
@@ -238,7 +237,7 @@ class ListArray(Content):
                 ak._v2.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
                 ),
-                "cannot fit jagged slice with length {0} into {1} of size {2}".format(
+                "cannot fit jagged slice with length {} into {} of size {}".format(
                     slicestarts.length, type(self).__name__, self.length
                 ),
             )
@@ -294,10 +293,10 @@ class ListArray(Content):
                 )
             )
             sliceindex = ak._v2.index.Index64(slicecontent._data)
-            outoffsets = ak._v2.index.Index64.zeros(
+            outoffsets = ak._v2.index.Index64.empty(
                 slicestarts.length + 1, self._nplike
             )
-            nextcarry = ak._v2.index.Index64.zeros(carrylen[0], self._nplike)
+            nextcarry = ak._v2.index.Index64.empty(carrylen[0], self._nplike)
 
             self._handle_error(
                 self._nplike[
@@ -430,7 +429,7 @@ class ListArray(Content):
                 )
             else:
                 raise AssertionError(
-                    "expected ListOffsetArray from ListArray._getitem_next_jagged, got {0}".format(
+                    "expected ListOffsetArray from ListArray._getitem_next_jagged, got {}".format(
                         type(out).__name__
                     )
                 )
@@ -440,7 +439,7 @@ class ListArray(Content):
 
         else:
             raise AssertionError(
-                "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {0}".format(
+                "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {}".format(
                     type(slicecontent).__name__
                 )
             )
@@ -798,7 +797,7 @@ class ListArray(Content):
 
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters
+                self._parameters, array._parameters, True
             )
 
             if isinstance(
@@ -976,7 +975,6 @@ class ListArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         if self._starts.length == 0:
             return self
-
         return self.toListOffsetArray64(True)._unique(
             negaxis, starts, parents, outlength
         )
@@ -1055,7 +1053,7 @@ class ListArray(Content):
 
     def _validityerror(self, path):
         if self.stops.length < self.starts.length:
-            return 'at {0} ("{1}"): len(stops) < len(starts)'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): len(stops) < len(starts)'
         error = self._nplike[
             "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
         ](
@@ -1072,7 +1070,7 @@ class ListArray(Content):
                     errors="surrogateescape"
                 ).lstrip("\n").lstrip("(")
             message = error.str.decode(errors="surrogateescape")
-            return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+            return 'at {} ("{}"): {} at i={}{}'.format(
                 path, type(self), message, error.id, filename
             )
         else:
@@ -1119,7 +1117,7 @@ class ListArray(Content):
                 if target < min_[0]:
                     return self
                 else:
-                    tolength = ak._v2.index.Index64.zeros(1, self._nplike)
+                    tolength = ak._v2.index.Index64.empty(1, self._nplike)
                     self._handle_error(
                         self._nplike[
                             "awkward_ListArray_rpad_and_clip_length_axis1",
@@ -1180,7 +1178,7 @@ class ListArray(Content):
                 return ak._v2.contents.listarray.ListArray(
                     self._starts,
                     self._stops,
-                    self._content._rpad(target, posaxis, depth + 1),
+                    self._content._rpad(target, posaxis, depth + 1, clip),
                     None,
                     self._parameters,
                     self._nplike,

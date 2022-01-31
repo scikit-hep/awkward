@@ -1,11 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import argparse
 import copy
 import os
-import sys
 from collections import OrderedDict
 
 import yaml
@@ -86,10 +84,6 @@ def check_specorder(kerneldict):
             count = 0
             display = []
             flag = False
-            if sys.version_info.major == 2:
-                for dummy in specializations:
-                    if type(sort_specializations(dummy)) == str:
-                        raise TypeError
             for specialization in sorted(
                 copy.copy(specializations), key=sort_specializations
             ):

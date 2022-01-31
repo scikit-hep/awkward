@@ -1,8 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
-
-import sys
 
 import numpy
 
@@ -239,7 +236,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 else:
                     error_message.append(type(x).__name__)
             raise TypeError(
-                "no {0}.{1} overloads for custom types: {2}".format(
+                "no {}.{} overloads for custom types: {}".format(
                     type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
                 )
             )
@@ -422,7 +419,7 @@ except AttributeError:
                 return NotImplemented
             return ufunc(self, other)
 
-        func.__name__ = "__{}__".format(name)
+        func.__name__ = f"__{name}__"
         return func
 
     def _reflected_binary_method(ufunc, name):
@@ -431,14 +428,14 @@ except AttributeError:
                 return NotImplemented
             return ufunc(other, self)
 
-        func.__name__ = "__r{}__".format(name)
+        func.__name__ = f"__r{name}__"
         return func
 
     def _inplace_binary_method(ufunc, name):
         def func(self, other):
             return ufunc(self, other, out=(self,))
 
-        func.__name__ = "__i{}__".format(name)
+        func.__name__ = f"__i{name}__"
         return func
 
     def _numeric_methods(ufunc, name):
@@ -452,10 +449,10 @@ except AttributeError:
         def func(self):
             return ufunc(self)
 
-        func.__name__ = "__{}__".format(name)
+        func.__name__ = f"__{name}__"
         return func
 
-    class NDArrayOperatorsMixin(object):
+    class NDArrayOperatorsMixin:
         __lt__ = _binary_method(um.less, "lt")
         __le__ = _binary_method(um.less_equal, "le")
         __eq__ = _binary_method(um.equal, "eq")
@@ -467,8 +464,6 @@ except AttributeError:
         __sub__, __rsub__, __isub__ = _numeric_methods(um.subtract, "sub")
         __mul__, __rmul__, __imul__ = _numeric_methods(um.multiply, "mul")
         __matmul__, __rmatmul__, __imatmul__ = _numeric_methods(um.matmul, "matmul")
-        if sys.version_info.major < 3:
-            __div__, __rdiv__, __idiv__ = _numeric_methods(um.divide, "div")
         __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
             um.true_divide, "truediv"
         )

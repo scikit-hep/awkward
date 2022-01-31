@@ -2,17 +2,12 @@
 
 # v2: replace with src/awkward/_v2/highlevel.py.
 
-from __future__ import absolute_import
 
 import re
 import keyword
 
-try:
-    from collections.abc import Iterable
-    from collections.abc import Sized
-except ImportError:
-    from collections import Iterable
-    from collections import Sized
+from collections.abc import Iterable
+from collections.abc import Sized
 
 import awkward as ak
 
@@ -35,7 +30,7 @@ class Array(
     Iterable,
     Sized,
 ):
-    u"""
+    """
     Args:
         data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
@@ -241,7 +236,7 @@ class Array(
                 elif length != len(contents[-1]):
                     raise ValueError(
                         "dict of arrays in ak.Array constructor must have arrays "
-                        "of equal length ({0} vs {1})".format(length, len(contents[-1]))
+                        "of equal length ({} vs {})".format(length, len(contents[-1]))
                         + ak._util.exception_suffix(__file__)
                     )
             parameters = None
@@ -387,7 +382,7 @@ class Array(
     def caches(self):
         return self._caches
 
-    class Mask(object):
+    class Mask:
         def __init__(self, array, valid_when):
             self._array = array
             self._valid_when = valid_when
@@ -424,7 +419,7 @@ class Array(
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
+            return f"<{name}.mask{suffix} {value} type={typestr}>"
 
         def __getitem__(self, where):
             return ak.operations.structure.mask(self._array, where, self._valid_when)
@@ -1001,7 +996,7 @@ class Array(
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+            return str(tmp)
         else:
             return tmp
 
@@ -1114,21 +1109,20 @@ class Array(
         to add a field.
         """
         if where in dir(type(self)):
-            return super(Array, self).__getattribute__(where)
+            return super().__getattribute__(where)
         else:
             if where in self.layout.keys():
                 try:
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {0}, an exception "
-                        "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                        "while trying to get field {}, an exception "
+                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         + ak._util.exception_suffix(__file__)
                     )
             else:
                 raise AttributeError(
-                    "no field named {0}".format(repr(where))
-                    + ak._util.exception_suffix(__file__)
+                    f"no field named {where!r}" + ak._util.exception_suffix(__file__)
                 )
 
     def __dir__(self):
@@ -1139,7 +1133,7 @@ class Array(
         return sorted(
             set(
                 [x for x in dir(type(self)) if not x.startswith("_")]
-                + dir(super(Array, self))
+                + dir(super())
                 + [
                     x
                     for x in self.layout.keys()
@@ -1320,7 +1314,7 @@ class Array(
         )
 
         try:
-            name = super(Array, self).__getattribute__("__name__")
+            name = super().__getattribute__("__name__")
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
@@ -1328,7 +1322,7 @@ class Array(
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
+        return f"<{name}{suffix} {value} type={typestr}>"
 
     def __array__(self, *args, **kwargs):
         """
@@ -1730,8 +1724,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         return ak.operations.describe.fields(self)
 
     def __iter__(self):
-        for x in self.fields:
-            yield x
+        yield from self.fields
 
     @property
     def type(self):
@@ -1774,7 +1767,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+            return str(tmp)
         else:
             return tmp
 
@@ -1838,21 +1831,20 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
              keyword.
         """
         if where in dir(type(self)):
-            return super(Record, self).__getattribute__(where)
+            return super().__getattribute__(where)
         else:
             if where in self.layout.keys():
                 try:
                     return self[where]
                 except Exception as err:
                     raise AttributeError(
-                        "while trying to get field {0}, an exception "
-                        "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                        "while trying to get field {}, an exception "
+                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         + ak._util.exception_suffix(__file__)
                     )
             else:
                 raise AttributeError(
-                    "no field named {0}".format(repr(where))
-                    + ak._util.exception_suffix(__file__)
+                    f"no field named {where!r}" + ak._util.exception_suffix(__file__)
                 )
 
     def __dir__(self):
@@ -1863,7 +1855,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         return sorted(
             set(
                 [x for x in dir(type(self)) if not x.startswith("_")]
-                + dir(super(Record, self))
+                + dir(super())
                 + [
                     x
                     for x in self.layout.keys()
@@ -2012,7 +2004,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         )[1:-1]
 
         try:
-            name = super(Record, self).__getattribute__("__name__")
+            name = super().__getattribute__("__name__")
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
@@ -2020,7 +2012,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
+        return f"<{name}{suffix} {value} type={typestr}>"
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -2312,7 +2304,7 @@ class ArrayBuilder(Iterable, Sized):
         if isinstance(tmp, ak.behaviors.string.ByteBehavior):
             return bytes(tmp)
         elif isinstance(tmp, ak.behaviors.string.CharBehavior):
-            return ak._util.unicode(tmp) if ak._util.py27 else str(tmp)
+            return str(tmp)
         else:
             return tmp
 
@@ -2322,8 +2314,7 @@ class ArrayBuilder(Iterable, Sized):
 
         See #ak.Array.__iter__ for performance considerations.
         """
-        for x in self.snapshot():
-            yield x
+        yield from self.snapshot()
 
     def __str__(self):
         """
@@ -2370,7 +2361,7 @@ class ArrayBuilder(Iterable, Sized):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<ArrayBuilder {0} type={1}>".format(value, typestr)
+        return f"<ArrayBuilder {value} type={typestr}>"
 
     def __array__(self, *args, **kwargs):
         """
@@ -2650,7 +2641,7 @@ class ArrayBuilder(Iterable, Sized):
         """
         self._layout.fromiter(obj)
 
-    class _Nested(object):
+    class _Nested:
         def __init__(self, arraybuilder):
             self._arraybuilder = arraybuilder
 
@@ -2671,7 +2662,7 @@ class ArrayBuilder(Iterable, Sized):
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<ArrayBuilder.{0} {1} type={2}>".format(self._name, value, typestr)
+            return f"<ArrayBuilder.{self._name} {value} type={typestr}>"
 
     class List(_Nested):
         _name = "list"

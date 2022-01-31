@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-from __future__ import print_function
 
 import multiprocessing
 import os
@@ -21,7 +20,7 @@ try:
     import cmake
 
     CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
-except ImportError:
+except ModuleNotFoundError:
     CMAKE = "cmake"
 
 PYTHON = sys.executable
@@ -46,7 +45,7 @@ def read_requirements(name):
 
 
 extras = {
-    "cuda": ["awkward-cuda-kernels=={0}".format(VERSION_INFO)],
+    "cuda": [f"awkward-cuda-kernels=={VERSION_INFO}"],
     "test": read_requirements("requirements-test.txt"),
     "dev": read_requirements("requirements-dev.txt"),
 }
@@ -93,12 +92,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if "CMAKE_ARGS" in os.environ:
             cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
         cmake_args += [
-            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
-            "-DPYTHON_EXECUTABLE={}".format(sys.executable),
-            "-DEXAMPLE_VERSION_INFO={}".format(self.distribution.get_version()),
-            "-DCMAKE_BUILD_TYPE={}".format(cfg),  # not used on MSVC, but no harm
-            "-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
-            "-DPYTHON_EXECUTABLE={0}".format(sys.executable),
+            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
+            f"-DPYTHON_EXECUTABLE={sys.executable}",
+            f"-DEXAMPLE_VERSION_INFO={self.distribution.get_version()}",
+            f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
+            f"-DCMAKE_INSTALL_PREFIX={extdir}",
+            f"-DPYTHON_EXECUTABLE={sys.executable}",
             "-DPYBUILD=ON",
             "-DBUILD_TESTING=OFF",
         ]
@@ -106,7 +105,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         try:
             compiler_path = self.compiler.compiler_cxx[0]
-            cmake_args += ["-DCMAKE_CXX_COMPILER={0}".format(compiler_path)]
+            cmake_args += [f"-DCMAKE_CXX_COMPILER={compiler_path}"]
         except AttributeError:
             print("Not able to access compiler path, using CMake default")
 
@@ -128,7 +127,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             # Multi-config generators have a different way to specify configs
             if not single_config:
                 cmake_args += [
-                    "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}".format(cfg.upper(), extdir)
+                    f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}"
                 ]
                 build_args += ["--config", cfg]
 
@@ -143,7 +142,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             archs = re.findall(r"-arch (\S+)", os.environ.get("ARCHFLAGS", ""))
             if archs:
                 cmake_args.append(
-                    "-DCMAKE_OSX_ARCHITECTURES:STRING={0}".format(";".join(archs))
+                    "-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(";".join(archs))
                 )
 
         if not os.path.exists(self.build_temp):
@@ -194,6 +193,10 @@ class Install(setuptools.command.install.install):
         tree("build")
 
         print("--- copying includes ------------------------------------------")
+        # Python 3.8 can use dirs_exist_ok=True instead.
+        include_dir = os.path.join(outerdir, "awkward", "include")
+        if os.path.exists(include_dir):
+            shutil.rmtree(include_dir)
         shutil.copytree(
             os.path.join("include"), os.path.join(outerdir, "awkward", "include")
         )

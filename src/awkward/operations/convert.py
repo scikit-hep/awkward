@@ -2,7 +2,6 @@
 
 # v2: replace with all the src/awkward/_v2/operations/convert/*.py files.
 
-from __future__ import absolute_import
 
 import numbers
 import json
@@ -13,12 +12,8 @@ import threading
 import glob
 import re
 
-try:
-    from collections.abc import Iterable, Sized
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import Iterable, Sized
-    from collections import MutableMapping
+from collections.abc import Iterable, Sized
+from collections.abc import MutableMapping
 
 import awkward as ak
 
@@ -195,9 +190,6 @@ def to_numpy(array, allow_missing=True):
     if isinstance(array, (bool, str, bytes, numbers.Number)):
         return numpy.array([array])[0]
 
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
-        return numpy.array([array])[0]
-
     elif isinstance(array, np.ndarray):
         return array
 
@@ -263,7 +255,7 @@ def to_numpy(array, allow_missing=True):
                 out = numpy.ma.concatenate(contents)
             except Exception:
                 raise ValueError(
-                    "cannot convert {0} into numpy.ma.MaskedArray".format(array)
+                    f"cannot convert {array} into numpy.ma.MaskedArray"
                     + ak._util.exception_suffix(__file__)
                 )
         else:
@@ -271,7 +263,7 @@ def to_numpy(array, allow_missing=True):
                 out = numpy.concatenate(contents)
             except Exception:
                 raise ValueError(
-                    "cannot convert {0} into np.ndarray".format(array)
+                    f"cannot convert {array} into np.ndarray"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -341,7 +333,7 @@ def to_numpy(array, allow_missing=True):
         ]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(
-                "cannot convert {0} into np.ndarray".format(array)
+                f"cannot convert {array} into np.ndarray"
                 + ak._util.exception_suffix(__file__)
             )
         out = numpy.empty(
@@ -374,7 +366,7 @@ def to_numpy(array, allow_missing=True):
 
     elif isinstance(array, ak.layout.Content):
         raise AssertionError(
-            "unrecognized Content type: {0}".format(type(array))
+            f"unrecognized Content type: {type(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -383,7 +375,7 @@ def to_numpy(array, allow_missing=True):
 
     else:
         raise ValueError(
-            "cannot convert {0} into np.ndarray".format(array)
+            f"cannot convert {array} into np.ndarray"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -542,7 +534,7 @@ def to_cupy(array):
 
     elif isinstance(array, ak.layout.Content):
         raise AssertionError(
-            "unrecognized Content type: {0}".format(type(array))
+            f"unrecognized Content type: {type(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -551,7 +543,7 @@ def to_cupy(array):
 
     else:
         raise ValueError(
-            "cannot convert {0} into cp.ndarray".format(array)
+            f"cannot convert {array} into cp.ndarray"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -617,13 +609,13 @@ def to_jax(array):
     """
     try:
         import jax
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """to use {0}, you must install jax:
 
                 pip install jax jaxlib
             """
-        )
+        ) from None
 
     if isinstance(array, (bool, numbers.Number)):
         return jax.numpy.array([array])[0]
@@ -674,7 +666,7 @@ def to_jax(array):
         array = array.simplify()
         if isinstance(array, ak._util.uniontypes):
             raise ValueError(
-                "cannot convert {0} into jax.numpy.array".format(array)
+                f"cannot convert {array} into jax.numpy.array"
                 + ak._util.exception_suffix(__file__)
             )
         return to_jax(array)
@@ -716,7 +708,7 @@ def to_jax(array):
 
     elif isinstance(array, ak.layout.Content):
         raise AssertionError(
-            "unrecognized Content type: {0}".format(type(array))
+            f"unrecognized Content type: {type(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -725,7 +717,7 @@ def to_jax(array):
 
     else:
         raise ValueError(
-            "cannot convert {0} into jax.numpy.array".format(array)
+            f"cannot convert {array} into jax.numpy.array"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -780,9 +772,9 @@ def kernels(*arrays):
 
     if libs == set():
         return None
-    elif libs == set(["cpu"]):
+    elif libs == {"cpu"}:
         return "cpu"
-    elif libs == set(["cuda"]):
+    elif libs == {"cuda"}:
         return "cuda"
     else:
         return "mixed"
@@ -942,9 +934,6 @@ def to_list(array):
     elif array is None or isinstance(array, (bool, str, bytes, numbers.Number)):
         return array
 
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
-        return array
-
     elif isinstance(array, np.ndarray):
         return array.tolist()
 
@@ -1014,14 +1003,14 @@ def to_list(array):
         raise TypeError("use ak._v2.operations.convert.to_list for v2 arrays (for now)")
 
     elif isinstance(array, dict):
-        return dict((n, to_list(x)) for n, x in array.items())
+        return {n: to_list(x) for n, x in array.items()}
 
     elif isinstance(array, Iterable):
         return [to_list(x) for x in array]
 
     else:
         raise TypeError(
-            "unrecognized array type: {0}".format(type(array))
+            f"unrecognized array type: {type(array)}"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -1113,11 +1102,7 @@ def from_json(
             buffersize=buffersize,
         )
     else:
-        if ak._util.py27:
-            exc = IOError
-        else:
-            exc = FileNotFoundError
-        raise exc("file not found or not a regular file: {0}".format(source))
+        raise FileNotFoundError(f"file not found or not a regular file: {source}")
 
     def getfunction(recordnode):
         if isinstance(recordnode, ak.layout.RecordArray):
@@ -1208,9 +1193,6 @@ def to_json(
     elif isinstance(array, bytes):
         return json.dumps(array.decode("utf-8", "surrogateescape"))
 
-    elif ak._util.py27 and isinstance(array, ak._util.unicode):
-        return json.dumps(array)
-
     elif isinstance(array, np.ndarray):
         out = ak.layout.NumpyArray(array)
 
@@ -1237,8 +1219,7 @@ def to_json(
 
     else:
         raise TypeError(
-            "unrecognized array type: {0}".format(repr(array))
-            + ak._util.exception_suffix(__file__)
+            f"unrecognized array type: {array!r}" + ak._util.exception_suffix(__file__)
         )
 
     if complex_record_fields is None:
@@ -1592,7 +1573,7 @@ def from_awkward0(
                 out.setparameter("__array__", "string")
             else:
                 raise ValueError(
-                    "unsupported encoding: {0}".format(repr(array.encoding))
+                    f"unsupported encoding: {array.encoding!r}"
                     + ak._util.exception_suffix(__file__)
                 )
             return out
@@ -1652,7 +1633,7 @@ def from_awkward0(
 
         else:
             raise TypeError(
-                "not an awkward0 array: {0}".format(repr(array))
+                f"not an awkward0 array: {array!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1861,7 +1842,7 @@ def to_awkward0(array, keep_layout=False):
 
         else:
             raise AssertionError(
-                "missing converter for {0}".format(type(layout).__name__)
+                f"missing converter for {type(layout).__name__}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -1916,7 +1897,7 @@ def to_layout(
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
             raise ValueError(
-                "NumPy {0} not allowed".format(repr(array.dtype))
+                f"NumPy {array.dtype!r} not allowed"
                 + ak._util.exception_suffix(__file__)
             )
         return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
@@ -1926,9 +1907,7 @@ def to_layout(
     ):
         return from_cupy(array, regulararray=True, highlevel=False)
 
-    elif isinstance(array, (str, bytes)) or (
-        ak._util.py27 and isinstance(array, ak._util.unicode)
-    ):
+    elif isinstance(array, (str, bytes)):
         return from_iter([array], highlevel=False)
 
     elif isinstance(array, Iterable):
@@ -1936,7 +1915,7 @@ def to_layout(
 
     elif not allow_other:
         raise TypeError(
-            "{0} cannot be converted into an Awkward Array".format(array)
+            f"{array} cannot be converted into an Awkward Array"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -1982,24 +1961,22 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True, behavior=None
 def _import_pyarrow(name):
     try:
         import pyarrow
-    except ImportError:
-        raise ImportError(
-            """to use {0}, you must install pyarrow:
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            f"""to use {name}, you must install pyarrow:
 
     pip install pyarrow
 
 or
 
     conda install -c conda-forge pyarrow
-""".format(
-                name
-            )
-        )
+"""
+        ) from None
     else:
         if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
             "2.0.0"
         ):
-            raise ImportError("pyarrow 2.0.0 or later required for {0}".format(name))
+            raise ImportError(f"pyarrow 2.0.0 or later required for {name}")
         return pyarrow
 
 
@@ -2520,7 +2497,7 @@ def to_arrow(
 
         else:
             raise TypeError(
-                "unrecognized array type: {0}".format(repr(layout))
+                f"unrecognized array type: {layout!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2745,7 +2722,7 @@ def _from_arrow(
                 assert tpe.num_buffers == 3
             else:
                 raise TypeError(
-                    "unrecognized Arrow union array mode: {0}".format(repr(tpe.mode))
+                    f"unrecognized Arrow union array mode: {tpe.mode!r}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -2870,7 +2847,7 @@ def _from_arrow(
 
         else:
             raise TypeError(
-                "unrecognized Arrow array type: {0}".format(repr(tpe))
+                f"unrecognized Arrow array type: {tpe!r}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2954,7 +2931,7 @@ def _from_arrow(
 
         else:
             raise TypeError(
-                "unrecognized Arrow type: {0}".format(type(obj))
+                f"unrecognized Arrow type: {type(obj)}"
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -2968,7 +2945,7 @@ def to_parquet(
     list_to32=False,
     string_to32=True,
     bytestring_to32=True,
-    **options  # NOTE: a comma after **options breaks Python 2
+    **options,
 ):
     """
     Args:
@@ -3026,8 +3003,7 @@ def to_parquet(
     def batch_iterator(layout):
         if isinstance(layout, ak.partition.PartitionedArray):
             for partition in layout.partitions:
-                for x in batch_iterator(partition):
-                    yield x
+                yield from batch_iterator(partition)
 
         else:
             if explode_records or isinstance(
@@ -3095,7 +3071,7 @@ def _common_parquet_schema(pq, filenames, relpaths):
             first_filename = filename
         elif schema != pq.ParquetFile(filename).schema_arrow:
             raise ValueError(
-                "schema in {0} differs from the first schema (in {1})".format(
+                "schema in {} differs from the first schema (in {})".format(
                     repr(filename), repr(first_filename)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -3132,13 +3108,13 @@ def _to_parquet_dataset(directory, filenames=None, filename_extension=".parquet"
     directory = _regularize_path(directory)
     if not os.path.isdir(directory):
         raise ValueError(
-            "{0} is not a local filesystem directory".format(repr(directory))
+            f"{directory!r} is not a local filesystem directory"
             + ak._util.exception_suffix(__file__)
         )
 
     if filenames is None:
         filenames = sorted(
-            glob.glob(directory + "/**/*{0}".format(filename_extension), recursive=True)
+            glob.glob(directory + f"/**/*{filename_extension}", recursive=True)
         )
     else:
         filenames = [_regularize_path(x) for x in filenames]
@@ -3279,7 +3255,7 @@ def _parquet_schema_to_form(schema):
 
         else:
             raise NotImplementedError(
-                "cannot convert {0}.{1} to an equivalent Awkward Form".format(
+                "cannot convert {}.{} to an equivalent Awkward Form".format(
                     type(arrow_type).__module__, type(arrow_type).__name__
                 )
                 + ak._util.exception_suffix(__file__)
@@ -3293,7 +3269,7 @@ def _parquet_schema_to_form(schema):
     return ak.forms.RecordForm(contents, schema.names)
 
 
-class _LazyDatasetGenerator(object):
+class _LazyDatasetGenerator:
     def __init__(self, reader):
         self._dataset = reader
 
@@ -3311,7 +3287,7 @@ class _LazyDatasetGenerator(object):
 
             else:
                 raise AssertionError(
-                    "unexpected Form: {0}".format(type(form))
+                    f"unexpected Form: {type(form)}"
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -3378,7 +3354,7 @@ class _LazyDatasetGenerator(object):
                 cache_key = None
             else:
                 field_cache = lazy_cache
-                cache_key = "{0}:{1}[{2}]".format(
+                cache_key = "{}:{}[{}]".format(
                     lazy_cache_key, subform.form_key, row_group
                 )
             contents.append(ak.layout.VirtualArray(generator, field_cache, cache_key))
@@ -3394,7 +3370,7 @@ class _LazyDatasetGenerator(object):
         assert sampleform.form_key.startswith("col:") or sampleform.form_key.startswith(
             "lst:"
         )
-        samplekey = "{0}:off:{1}:{2}[{3}]".format(
+        samplekey = "{}:off:{}:{}[{}]".format(
             lazy_cache_key,
             sampleform.form_key[4:],
             ".".join("" if x is None else x for x in columns),
@@ -3433,7 +3409,7 @@ class _LazyDatasetGenerator(object):
                 out = ak.layout.ListOffsetArray64(off, out)
             else:
                 raise AssertionError(
-                    "unexpected Index type: {0}".format(off)
+                    f"unexpected Index type: {off}"
                     + ak._util.exception_suffix(__file__)
                 )
         return out
@@ -3463,7 +3439,7 @@ class _LazyDatasetGenerator(object):
         return self._convert_arrow_to_awkward(table, struct_only, masked, unpack)
 
 
-class _Dataset(object):
+class _Dataset:
     def __init__(self, schema, row_groups, columns, partition_columns):
         self.schema = schema
         self.row_groups = row_groups
@@ -3512,9 +3488,7 @@ class _ParquetFileDataset(_Dataset):
 
         self._use_threads = use_threads
 
-        super(_ParquetFileDataset, self).__init__(
-            schema, row_groups, columns, partition_columns=[]
-        )
+        super().__init__(schema, row_groups, columns, partition_columns=[])
 
     @property
     def row_group_metadata(self):
@@ -3567,9 +3541,7 @@ class _ParquetDataset(_Dataset):
         self._lookup = self._build_row_group_lookup(directory, self._metadata_file)
         self._options = options
 
-        super(_ParquetDataset, self).__init__(
-            schema, row_groups, columns, partition_columns
-        )
+        super().__init__(schema, row_groups, columns, partition_columns)
 
     @staticmethod
     def _build_row_group_lookup(directory, metadata_file):
@@ -3659,9 +3631,7 @@ class _ParquetMultiFileDataset(_Dataset):
 
         self._lookup = lookup
         self._use_threads = use_threads
-        super(_ParquetMultiFileDataset, self).__init__(
-            schema, row_groups, columns, partition_columns
-        )
+        super().__init__(schema, row_groups, columns, partition_columns)
 
     @staticmethod
     def _get_dataset_metadata(source, relative_to, options):
@@ -3677,7 +3647,7 @@ class _ParquetMultiFileDataset(_Dataset):
                 first_filename = filename
             elif schema != single_file.schema_arrow:
                 raise ValueError(
-                    "schema in {0} differs from the first schema (in {1})".format(
+                    "schema in {} differs from the first schema (in {})".format(
                         repr(filename), repr(first_filename)
                     )
                     + ak._util.exception_suffix(__file__)
@@ -3758,7 +3728,7 @@ def _partial_schema_from_columns(schema, columns):
     for x in columns:
         if x not in schema.names:
             raise ValueError(
-                "column {0} not found in schema".format(repr(x))
+                f"column {x!r} not found in schema"
                 + ak._util.exception_suffix(__file__)
             )
         pa_fields.append(schema.field(x))
@@ -3804,7 +3774,7 @@ def _create_partitioned_array_from_form(
                 cache_key = None
             else:
                 field_cache = lazy_cache
-                cache_key = "{0}:{1}[{2}]".format(
+                cache_key = "{}:{}[{}]".format(
                     lazy_cache_key, subform.form_key, row_group
                 )
             contents.append(ak.layout.VirtualArray(generator, field_cache, cache_key))
@@ -3851,7 +3821,7 @@ def _regularize_lazy_cache(lazy_cache):
 
 def _regularize_parquet_lazy_cache_key(lazy_cache_key):
     if lazy_cache_key is None:
-        lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
+        lazy_cache_key = f"ak.from_parquet:{_from_parquet_key()}"
     return lazy_cache_key
 
 
@@ -3866,7 +3836,7 @@ def from_parquet(
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options  # NOTE: a comma after **options breaks Python 2
+    **options,
 ):
     """
     Args:
@@ -4432,13 +4402,13 @@ def to_buffers(
                 form = f
             elif form != f:
                 raise ValueError(
-                    """the Form of partition {0}:
+                    """the Form of partition {}:
 
-    {1}
+    {}
 
 differs from the first Form:
 
-    {2}""".format(
+    {}""".format(
                         partition_start + part,
                         f.tojson(True, False),
                         form.tojson(True, False),
@@ -4545,7 +4515,7 @@ def _form_to_layout(
         if length > len(mask) * 8:
             raise ValueError(
                 "mask is too short for BitMaskedArray: content length "
-                "is {0}, mask length * 8 is {1}".format(length, len(mask) * 8)
+                "is {}, mask length * 8 is {}".format(length, len(mask) * 8)
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -4571,7 +4541,7 @@ def _form_to_layout(
             length = len(mask)
         elif length > len(mask):
             raise ValueError(
-                "mask is too short for ByteMaskedArray: expected {0}, mask length is {1}".format(
+                "mask is too short for ByteMaskedArray: expected {}, mask length is {}".format(
                     length, len(mask)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -4594,7 +4564,7 @@ def _form_to_layout(
     elif isinstance(form, ak.forms.EmptyForm):
         if length is not None and length != 0:
             raise ValueError(
-                "EmptyArray found in node with non-zero expected length: expected {0}".format(
+                "EmptyArray found in node with non-zero expected length: expected {}".format(
                     length
                 )
                 + ak._util.exception_suffix(__file__)
@@ -4613,7 +4583,7 @@ def _form_to_layout(
             length = len(index)
         elif length > len(index):
             raise ValueError(
-                "index too short for IndexedArray: expected {0}, index length is {1}".format(
+                "index too short for IndexedArray: expected {}, index length is {}".format(
                     length, len(index)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -4645,7 +4615,7 @@ def _form_to_layout(
             length = len(index)
         elif length > len(index):
             raise ValueError(
-                "index too short for IndexedOptionArray: expected {0}, index length is {1}".format(
+                "index too short for IndexedOptionArray: expected {}, index length is {}".format(
                     length, len(index)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -4683,14 +4653,14 @@ def _form_to_layout(
             length = len(starts)
         elif length > len(starts):
             raise ValueError(
-                "starts too short for ListArray: expected {0}, starts length is {1}".format(
+                "starts too short for ListArray: expected {}, starts length is {}".format(
                     length, len(starts)
                 )
                 + ak._util.exception_suffix(__file__)
             )
         elif length > len(stops):
             raise ValueError(
-                "stops too short for ListArray: expected {0}, stops length is {1}".format(
+                "stops too short for ListArray: expected {}, stops length is {}".format(
                     length, len(stops)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -4729,7 +4699,7 @@ def _form_to_layout(
             length = len(offsets) - 1
         elif length > len(offsets) - 1:
             raise ValueError(
-                "offsets too short for ListOffsetArray: expected {0}, offsets length - 1 is {1}".format(
+                "offsets too short for ListOffsetArray: expected {}, offsets length - 1 is {}".format(
                     length, len(offsets) - 1
                 )
                 + ak._util.exception_suffix(__file__)
@@ -4766,8 +4736,8 @@ def _form_to_layout(
             actual = len(raw_array) // dtype_inner_shape.itemsize
             if length > actual:
                 raise ValueError(
-                    "buffer is too short for NumpyArray: expected {0}, buffer "
-                    "has {1} items ({2} bytes)".format(length, actual, len(raw_array))
+                    "buffer is too short for NumpyArray: expected {}, buffer "
+                    "has {} items ({} bytes)".format(length, actual, len(raw_array))
                     + ak._util.exception_suffix(__file__)
                 )
 
@@ -4817,7 +4787,7 @@ def _form_to_layout(
             length = minlength
         elif minlength is not None and length > minlength:
             raise ValueError(
-                "RecordArray length mismatch: expected {0}, minimum content is {1}".format(
+                "RecordArray length mismatch: expected {}, minimum content is {}".format(
                     length, minlength
                 )
                 + ak._util.exception_suffix(__file__)
@@ -4867,14 +4837,14 @@ def _form_to_layout(
             length = len(tags)
         elif length > len(tags):
             raise ValueError(
-                "tags too short for UnionArray: expected {0}, tags length is {1}".format(
+                "tags too short for UnionArray: expected {}, tags length is {}".format(
                     length, len(tags)
                 )
                 + ak._util.exception_suffix(__file__)
             )
         elif length > len(index):
             raise ValueError(
-                "index too short for UnionArray: expected {0}, index length is {1}".format(
+                "index too short for UnionArray: expected {}, index length is {}".format(
                     length, len(index)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -4942,11 +4912,11 @@ def _form_to_layout(
         if isinstance(form.form, (ak.forms.NumpyForm, ak.forms.EmptyForm)):
             # If it's a leaf node, the node_cache_key completely determines
             # uniqueness of the subtree (because it's the whole subtree).
-            nested_cache_key = "{0}({1})".format(lazy_cache_key, node_cache_key)
+            nested_cache_key = f"{lazy_cache_key}({node_cache_key})"
         else:
             # Otherwise, the node_cache_key for the root of the subtree might
             # be the same in two places whereas the nested content differs.
-            nested_cache_key = "{0}({1}:{2})".format(
+            nested_cache_key = "{}({}:{})".format(
                 lazy_cache_key, node_cache_key, _from_buffers_key()
             )
 
@@ -5067,7 +5037,7 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
-    if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
+    if isinstance(form, str):
         form = ak.forms.Form.fromjson(form)
     elif isinstance(form, dict):
         form = ak.forms.Form.fromjson(json.dumps(form))
@@ -5098,7 +5068,7 @@ def from_buffers(
             lazy_cache = ak.layout.ArrayCache(hold_cache)
 
         if lazy_cache_key is None:
-            lazy_cache_key = "ak.from_buffers:{0}".format(_from_buffers_key())
+            lazy_cache_key = f"ak.from_buffers:{_from_buffers_key()}"
 
     if length is None or isinstance(length, (numbers.Integral, np.integer)):
         if length is None:
@@ -5130,7 +5100,7 @@ def from_buffers(
             args = (form, container, partnum, key_format)
 
             if lazy:
-                lazy_cache_key_part = "{0}[{1}]".format(lazy_cache_key, partnum)
+                lazy_cache_key_part = f"{lazy_cache_key}[{partnum}]"
                 generator = ak.layout.ArrayGenerator(
                     _form_to_layout,
                     args + (partlen, lazy_cache, lazy_cache_key_part),
@@ -5274,8 +5244,8 @@ def to_pandas(
     """
     try:
         import pandas
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """install the 'pandas' package with:
 
     pip install pandas --upgrade
@@ -5283,7 +5253,7 @@ def to_pandas(
 or
 
     conda install pandas"""
-        )
+        ) from None
 
     if how is not None:
         out = None
@@ -5329,19 +5299,19 @@ or
                 return [(to_numpy(layout), row_arrays, col_names)]
             else:
                 return sum(
-                    [
+                    (
                         recurse(layout.field(n), row_arrays, col_names + (n,))
                         for n in layout.keys()
-                    ],
+                    ),
                     [],
                 )
 
         elif isinstance(layout, ak.layout.RecordArray):
             return sum(
-                [
+                (
                     recurse(layout.field(n), row_arrays, col_names + (n,))
                     for n in layout.keys()
-                ],
+                ),
                 [],
             )
 

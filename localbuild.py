@@ -25,12 +25,10 @@ args = arguments.parse_args()
 args.buildpython = not args.no_buildpython
 args.dependencies = not args.no_dependencies
 
-
-if sys.version_info[0] >= 3:
-    git_root = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE
-    )
-    os.chdir(git_root.stdout.decode().strip())
+git_root = subprocess.run(
+    ["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE
+)
+os.chdir(git_root.stdout.decode().strip())
 
 if args.clean:
     for x in ("localbuild", "awkward", ".pytest_cache", "tests/__pycache__"):
@@ -137,8 +135,7 @@ def walk(directory):
         f = os.path.join(directory, x)
         yield f
         if os.path.isdir(f):
-            for y in walk(f):
-                yield y
+            yield from walk(f)
 
 
 # Build Python (copy sources to executable tree).

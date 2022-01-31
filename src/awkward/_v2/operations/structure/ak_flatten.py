@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -99,8 +98,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
     nplike = ak.nplike.of(layout)
 
     if axis is None:
-        out = (layout.completely_flatten(),)
-
+        out = layout.completely_flatten(function_name="ak.flatten")
         assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
         out = ak._v2.contents.NumpyArray(nplike.concatenate(out))

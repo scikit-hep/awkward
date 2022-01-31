@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -159,5 +158,4 @@ def test_actual():
     x = ak.from_numpy(np.arange(2 * 3 * 4, dtype=np.int64).reshape(2, 3, 4))
     s = x[..., :0]
     result = ak.zip({"q": s, "t": s})
-    if not ak._util.py27 and not ak._util.py35:
-        assert str(ak.type(result)) == '2 * 3 * 0 * {"q": int64, "t": int64}'
+    assert str(ak.type(result)) == '2 * 3 * 0 * {"q": int64, "t": int64}'

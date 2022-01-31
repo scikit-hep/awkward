@@ -3,7 +3,6 @@
 # First, transition all the _v2 code to start using implementations in this file.
 # Then build up the high-level replacements.
 
-from __future__ import absolute_import
 
 # import re
 # import os.path
@@ -12,10 +11,7 @@ import setuptools
 import os
 import numbers
 
-try:
-    from collections.abc import Mapping
-except ImportError:
-    from collections import Mapping
+from collections.abc import Mapping
 
 import awkward as ak
 
@@ -170,8 +166,7 @@ class Behavior(Mapping):
                 yield n, x
 
     def __iter__(self):
-        for x in self.keys():
-            yield x
+        yield from self.keys()
 
     def __len__(self):
         return len(set(self.defaults) | set(self.overrides))
@@ -479,6 +474,11 @@ def behavior_of(*arrays, **kwargs):
 
 # maybe_wrap and maybe_wrap_like go here
 def wrap(content, behavior=None, highlevel=True, like=None):
+    assert content is None or isinstance(
+        content, (ak._v2.contents.Content, ak._v2.record.Record)
+    )
+    assert behavior is None or isinstance(behavior, Mapping)
+    assert isinstance(highlevel, bool)
     if highlevel:
         if like is not None and behavior is None:
             behavior = behavior_of(like)
@@ -527,13 +527,6 @@ def extra(args, kwargs, defaults):
 
 
 # key2index._pattern = re.compile(r"^[1-9][0-9]*$")
-
-
-# def highlevel_type(layout, behavior, isarray):
-#     if isarray:
-#         return ak.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
-#     else:
-#         return layout.type(typestrs(behavior))
 
 
 # def make_union(tags, index, contents, identities, parameters):
@@ -641,7 +634,8 @@ def direct_Content_subclass_name(node):
         return out.__name__
 
 
-def merge_parameters(one, two):
+def merge_parameters(one, two, merge_equal=False):
+
     if one is None and two is None:
         return None
 
@@ -650,6 +644,14 @@ def merge_parameters(one, two):
 
     elif two is None:
         return one
+
+    elif merge_equal:
+        out = {}
+        for k, v in two.items():
+            if k in one.keys():
+                if v == one[k]:
+                    out[k] = v
+        return out
 
     else:
         out = dict(one)

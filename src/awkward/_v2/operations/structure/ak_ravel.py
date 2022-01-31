@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import awkward as ak
 
@@ -49,7 +48,7 @@ def ravel(array, highlevel=True, behavior=None):
     )
     nplike = ak.nplike.of(layout)
 
-    out = (layout.completely_flatten(flatten_records=True),)
+    out = layout.completely_flatten(function_name="ak.ravel")
     assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
     if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
@@ -57,4 +56,4 @@ def ravel(array, highlevel=True, behavior=None):
     else:
         out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
 
-    return ak._v2._util.wrap(out, array, behavior, highlevel)
+    return ak._v2._util.wrap(out, behavior, highlevel)

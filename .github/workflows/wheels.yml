@@ -29,9 +29,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         arch: [auto64]
-        build: ["*"]
+        build: ["cp*", "pp*"]
 
         include:
         - os: ubuntu-latest
@@ -43,11 +43,16 @@ jobs:
         - os: macos-latest
           type: "Universal"
           arch: universal2
-          build: "*"
+          build: "cp*"
+
+        - os: windows-latest
+          arch: auto64
+          build: "cp*"
 
         - os: windows-latest
           arch: auto32
-          build: "*"
+          build: "cp{36,37,38,39}-*"
+
 
     steps:
     - uses: actions/checkout@v2
@@ -102,6 +107,6 @@ jobs:
         name: artifact
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.4.2
+    - uses: pypa/gh-action-pypi-publish@v1.5.0
       with:
         password: ${{ secrets.pypi_password }}

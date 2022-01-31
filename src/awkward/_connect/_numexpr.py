@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numexpr.py
 
-from __future__ import absolute_import
 
 import warnings
 import sys
@@ -17,8 +16,8 @@ def import_numexpr():
     global checked_version
     try:
         import numexpr
-    except ImportError:
-        raise ImportError(
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
             """install the 'numexpr' package with:
 
     pip install numexpr --upgrade
@@ -26,14 +25,14 @@ def import_numexpr():
 or
 
     conda install numexpr"""
-        )
+        ) from None
     else:
         if not checked_version and ak._v2._util.parse_version(
             numexpr.__version__
         ) < ak._v2._util.parse_version("2.7.1"):
             warnings.warn(
                 "Awkward Array is only known to work with numexpr 2.7.1 or later"
-                "(you have version {0})".format(numexpr.__version__),
+                "(you have version {})".format(numexpr.__version__),
                 RuntimeWarning,
             )
         checked_version = True

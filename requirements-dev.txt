@@ -2,8 +2,7 @@ autograd
 flake8
 jax>=0.2.7;sys_platform != "win32"
 jaxlib>=0.1.57,!=0.1.68;sys_platform != "win32"
-numba>=0.50.0;python_version<"3.10"
-numba>=0.55.0rc1;python_version=="3.10"
+numba>=0.50.0
 numexpr
 pandas>=0.24.0
 pyarrow>=6.0.0;sys_platform != "win32"

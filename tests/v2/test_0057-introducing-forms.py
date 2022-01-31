@@ -1,15 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import json
 
-try:
-    # pybind11 only supports cPickle protocol 2+ (-1 in pickle.dumps)
-    # (automatically satisfied in Python 3; this is just to keep testing Python 2.7)
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401

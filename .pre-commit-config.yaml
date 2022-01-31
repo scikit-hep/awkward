@@ -20,6 +20,12 @@ repos:
   hooks:
   - id: setup-cfg-fmt
 
+- repo: https://github.com/asottile/pyupgrade
+  rev: "v2.31.0"
+  hooks:
+  - id: pyupgrade
+    args: ["--py36-plus"]
+
 - repo: https://github.com/psf/black
   rev: 21.12b0
   hooks:
@@ -56,3 +62,8 @@ repos:
     language: pygrep
     entry: PyBind|Cmake|CCache|Github|PyTest
     exclude: .pre-commit-config.yaml
+
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: "v0.8.0.3"
+  hooks:
+  - id: shellcheck

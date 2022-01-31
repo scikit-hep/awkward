@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from __future__ import absolute_import
 
 import copy
 
@@ -25,19 +24,19 @@ class ListOffsetArray(Content):
             np.dtype(np.int64),
         ):
             raise TypeError(
-                "{0} 'offsets' must be an Index with dtype in (int32, uint32, int64), "
-                "not {1}".format(type(self).__name__, repr(offsets))
+                "{} 'offsets' must be an Index with dtype in (int32, uint32, int64), "
+                "not {}".format(type(self).__name__, repr(offsets))
             )
         if not isinstance(content, Content):
             raise TypeError(
-                "{0} 'content' must be a Content subtype, not {1}".format(
+                "{} 'content' must be a Content subtype, not {}".format(
                     type(self).__name__, repr(content)
                 )
             )
         if ak.nplike.of(offsets).known_shape:
             if not offsets.length >= 1:
                 raise ValueError(
-                    "{0} len(offsets) ({1}) must be >= 1".format(
+                    "{} len(offsets) ({}) must be >= 1".format(
                         type(self).__name__, offsets.length
                     )
                 )
@@ -257,14 +256,14 @@ class ListOffsetArray(Content):
     def _broadcast_tooffsets64(self, offsets):
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
             raise AssertionError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {0}".format(
+                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
                     "(empty)" if offsets.length == 0 else str(offsets[0])
                 )
             )
 
         if offsets.nplike.known_shape and offsets.length - 1 != self.length:
             raise AssertionError(
-                "cannot broadcast {0} of length {1} to length {2}".format(
+                "cannot broadcast {} of length {} to length {}".format(
                     type(self).__name__, self.length, offsets.length - 1
                 )
             )
@@ -606,7 +605,7 @@ class ListOffsetArray(Content):
                 )
 
             else:
-                tooffsets = ak._v2.index.Index64.zeros(
+                tooffsets = ak._v2.index.Index64.empty(
                     self._offsets.length, self._nplike, dtype=np.int64
                 )
                 self._handle_error(
@@ -1689,7 +1688,7 @@ class ListOffsetArray(Content):
 
     def _validityerror(self, path):
         if self.offsets.length < 1:
-            return 'at {0} ("{1}"): len(offsets) < 1'.format(path, type(self))
+            return f'at {path} ("{type(self)}"): len(offsets) < 1'
         error = self._nplike[
             "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
         ](
@@ -1706,7 +1705,7 @@ class ListOffsetArray(Content):
                     errors="surrogateescape"
                 ).lstrip("\n").lstrip("(")
             message = error.str.decode(errors="surrogateescape")
-            return 'at {0} ("{1}"): {2} at i={3}{4}'.format(
+            return 'at {} ("{}"): {} at i={}{}'.format(
                 path, type(self), message, error.id, filename
             )
         else:
@@ -1730,7 +1729,7 @@ class ListOffsetArray(Content):
             return self.rpad_axis0(target, clip)
         if posaxis == depth + 1:
             if not clip:
-                tolength = ak._v2.index.Index64.zeros(1, self._nplike)
+                tolength = ak._v2.index.Index64.empty(1, self._nplike)
                 offsets_ = ak._v2.index.Index64.empty(
                     self._offsets.length, self._nplike
                 )

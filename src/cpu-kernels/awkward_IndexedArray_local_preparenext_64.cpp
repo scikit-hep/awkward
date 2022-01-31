@@ -12,9 +12,11 @@ ERROR awkward_IndexedArray_local_preparenext_64(
     const int64_t* nextparents,
     const int64_t nextlen) {
   int64_t j = 0;
+  int64_t parent = 0;
+  int64_t start = 0;
   for (int64_t i = 0;  i < parentslength;  i++) {
-    int64_t parent = parents[i];
-    int64_t start = starts[parent];
+    parent = parents[i];
+    start = starts[parent];
     if (j < nextlen  &&  parent == nextparents[j]) {
       tocarry[i] = j;
       ++j;
