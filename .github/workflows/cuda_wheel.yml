@@ -18,12 +18,13 @@ jobs:
 
       - run: python --version
 
-      - run: pip install -r requirements-dev.txt setuptools wheel pytest ctypes
+      - run: pip install -r requirements-dev.txt setuptools wheel
 
       - run: python dev/generate-kernel-signatures.py
       
       - if: ${{ matrix.cuda-version }} == '11.5.1' || ${{ matrix.cuda-version }} == '10.2'
         run: |
+          pip install pytest
           python dev/generate-cuda.py
           ./cuda-build.sh -c ${{ matrix.cuda-version}} -i
           python -m pytest -vvrs tests-cuda/test_1270-install-test.py
