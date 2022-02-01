@@ -8,97 +8,131 @@ on:
 
 
 jobs:
-  make_sdist:
-    name: "Make SDist"
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
+  # make_sdist:
+  #   name: "Make SDist"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       submodules: true
 
-    - name: Build SDist
-      run: pipx run build --sdist
+  #   - name: Build SDist
+  #     run: pipx run build --sdist
 
-    - uses: actions/upload-artifact@v2
-      with:
-        path: dist/*.tar.gz
+  #   - uses: actions/upload-artifact@v2
+  #     with:
+  #       path: dist/*.tar.gz
 
 
-  build_wheels:
-    name: "Wheel: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }}"
+  # build_wheels:
+  #   name: "Wheel: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }}"
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-latest, macos-latest]
+  #       arch: [auto64]
+  #       build: ["cp*", "pp*"]
+
+  #       include:
+  #       - os: ubuntu-latest
+  #         type: ManyLinux1
+  #         arch: auto64
+  #         build: "cp{36,37,38}-*"
+  #         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+
+  #       - os: macos-latest
+  #         type: "Universal"
+  #         arch: universal2
+  #         build: "cp*"
+
+  #       - os: windows-latest
+  #         arch: auto64
+  #         build: "cp*"
+
+  #       - os: windows-latest
+  #         arch: auto32
+  #         build: "cp{36,37,38,39}-*"
+
+
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       submodules: true
+
+  #   - uses: pypa/cibuildwheel@v2.3.1
+  #     env:
+  #       CIBW_BUILD: ${{ matrix.build }}
+  #       CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
+  #       CIBW_ARCHS: ${{ matrix.arch }}
+
+  #   - name: Upload wheels
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       path: wheelhouse/*.whl
+
+
+  # build_alt_wheels:
+  #   name: "Wheel: ${{ matrix.python }} on ${{ matrix.arch }}"
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python: [36, 37, 38, 39, 310]
+  #       arch: [aarch64]
+  #   steps:
+
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       submodules: true
+
+  #   - uses: docker/setup-qemu-action@v1.2.0
+
+  #   - uses: pypa/cibuildwheel@v2.3.1
+  #     env:
+  #       CIBW_BUILD: cp${{ matrix.python }}-*
+  #       CIBW_ARCHS: ${{ matrix.arch }}
+
+  #   - name: Upload wheels
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       path: wheelhouse/*.whl
+
+  build_cuda_wheels:
+    name: "CUDA Wheel: ${{ matrix.type }} for CUDA ${{ matrix.version }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         arch: [auto64]
-        build: ["cp*", "pp*"]
 
         include:
-        - os: ubuntu-latest
-          type: ManyLinux1
-          arch: auto64
-          build: "cp{36,37,38}-*"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-
-        - os: macos-latest
-          type: "Universal"
-          arch: universal2
-          build: "cp*"
-
-        - os: windows-latest
-          arch: auto64
-          build: "cp*"
-
-        - os: windows-latest
-          arch: auto32
-          build: "cp{36,37,38,39}-*"
-
+          - cuda-version: 11.5.1
+          - cuda-version: 11.4.1
+          - cuda-version: 11.3.1
+          - cuda-version: 11.2.1
+          - cuda-version: 11.1.1
+          - cuda-version: 11.0.1
+          - cuda-version: 10.2
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
 
-    - uses: pypa/cibuildwheel@v2.3.1
-      env:
-        CIBW_BUILD: ${{ matrix.build }}
-        CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.CIBW_MANYLINUX_X86_64_IMAGE }}
-        CIBW_ARCHS: ${{ matrix.arch }}
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - run: pip install -r requirements-dev.txt setuptools wheel
+
+    - run: python dev/generate-kernel-signatures.py
+
+    - run: python dev/generate-cuda.py && ./cuda-build.sh -c ${{ matrix.cuda-version}}
 
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
-        path: wheelhouse/*.whl
-
-
-  build_alt_wheels:
-    name: "Wheel: ${{ matrix.python }} on ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python: [36, 37, 38, 39, 310]
-        arch: [aarch64]
-    steps:
-
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-
-    - uses: docker/setup-qemu-action@v1.2.0
-
-    - uses: pypa/cibuildwheel@v2.3.1
-      env:
-        CIBW_BUILD: cp${{ matrix.python }}-*
-        CIBW_ARCHS: ${{ matrix.arch }}
-
-    - name: Upload wheels
-      uses: actions/upload-artifact@v2
-      with:
-        path: wheelhouse/*.whl
-
+        path: dist/*.whl
 
   upload_all:
-    needs: [build_wheels, build_alt_wheels, make_sdist]
+    needs: [build_cuda_wheels]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
