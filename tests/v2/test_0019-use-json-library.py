@@ -8,6 +8,18 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+# FIXME: for float32
+import re
+
+simpledec = re.compile(r"\d*\.\d+")
+
+
+def mround(match):
+    return f"{float(match.group()):.1f}"
+
+
+# re.sub(simpledec, mround, text)
+
 
 def test_fromstring():
     array = ak._v2.operations.convert.from_json("[[1.1, 2.2, 3], [], [4, 5.5]]")
@@ -78,6 +90,14 @@ def test_bytearray():
 def test_complex():
     content = ak._v2.contents.NumpyArray(
         np.array([(1.1 + 0.1j), 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    # content3 = ak._v2.highlevel.Array(content._data.real)
+    # content4 = ak._v2.highlevel.Array(content._data.imag)
+    # rec_arr = ak._v2.operations.structure.zip({"r": content3, "i": content4})
+
+    assert (
+        ak._v2.operations.convert.to_json(content, complex_record_fields=("r", "i"))
+        == """[{"r":1.1,"i":0.1},{"r":2.2,"i":0.0},{"r":3.3,"i":0.0},{"r":4.4,"i":0.0},{"r":5.5,"i":0.0},{"r":6.6,"i":0.0},{"r":7.7,"i":0.0},{"r":8.8,"i":0.0},{"r":9.9,"i":0.0}]"""
     )
     offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 6, 6, 9], dtype=np.int64))
     array = ak._v2.contents.ListOffsetArray(offsets, content)
@@ -166,7 +186,57 @@ def test_numpy():
         ak._v2.operations.convert.to_json(b)
         == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,30.3],[40.4,50.5,60.6]]]"
     )
-
+    b1 = ak._v2.contents.NumpyArray(
+        np.array(
+            [
+                [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]],
+                [[10.1, 20.2, 30.3], [40.4, 50.5, 60.6]],
+            ],
+            dtype=np.float32,
+        )
+    )
+    assert (
+        re.sub(simpledec, mround, ak._v2.operations.convert.to_json(b1))
+        == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,30.3],[40.4,50.5,60.6]]]"
+    )
+    b2 = ak._v2.contents.NumpyArray(
+        np.array(
+            [
+                [[1.1, 2.2, 3.3], [4.4, np.inf, 6.6]],
+                [[10.1, 20.2, np.nan], [40.4, 50.5, -np.inf]],
+            ]
+        )
+    )
+    assert (
+        ak._v2.operations.convert.to_json(
+            b2, nan_string="None", infinity_string="Inf", minus_infinity_string="-Inf"
+        )
+        == """[[[1.1,2.2,3.3],[4.4,"Inf",6.6]],[[10.1,20.2,"None"],[40.4,50.5,"-Inf"]]]"""
+    )
+    b3 = ak._v2.contents.NumpyArray(
+        np.array(
+            [
+                [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]],
+                [[10.1, 20.2, np.inf], [40.4, 50.5, 60.6]],
+            ]
+        )
+    )
+    assert (
+        ak._v2.operations.convert.to_json(b3)
+        == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,Infinity],[40.4,50.5,60.6]]]"
+    )
+    b4 = ak._v2.contents.NumpyArray(
+        np.array(
+            [
+                [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]],
+                [[10.1, 20.2, -np.inf], [40.4, 50.5, 60.6]],
+            ]
+        )
+    )
+    assert (
+        ak._v2.operations.convert.to_json(b4)
+        == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,-Infinity],[40.4,50.5,60.6]]]"
+    )
     c = ak._v2.contents.NumpyArray(
         np.array([[True, False, True], [False, False, True]])
     )

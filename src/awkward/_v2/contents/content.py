@@ -1319,12 +1319,12 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
     def to_json(
         self,
-        behavior=None,
-        nan_string=None,
-        infinity_string=None,
-        minus_infinity_string=None,
-        complex_real_string=None,
-        complex_imag_string=None,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
     ):
         return self.packed()._to_json(
             behavior,

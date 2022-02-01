@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
@@ -143,6 +142,74 @@ class NumpyArray(Content):
             )
         out._identifier = self._identifier
         out._parameters = self._parameters
+        return out
+
+    def toUnionArray(self, nan_string, infinity_string, minus_infinity_string):
+        shape = self._data.shape
+        zeroslen = [1]
+        for x in shape:
+            zeroslen.append(zeroslen[-1] * x)
+
+        out = NumpyArray(self._data.reshape(-1), None, None, self._nplike)
+        local_index = out.localindex(-1)
+        length = out.length
+
+        union_tags = ak._v2.index.Index8.zeros(length, self._nplike)
+        union_index = ak._v2.index.Index64(local_index._data)
+        if nan_string is not None:
+            nan_tags = ak._v2.index.Index8.empty(length, self._nplike)
+            out._nplike.isnan(out._data, nan_tags._data)
+            # FIXME: out._nplike.where(nan_tags._data == 1, 0, union_index._data)
+            for i in range(length):
+                union_tags._data[i] = (
+                    1 if nan_tags._data[i] == 1 else union_tags._data[i]
+                )
+                union_index._data[i] = (
+                    0 if nan_tags._data[i] == 1 else union_index._data[i]
+                )
+
+        if infinity_string is not None:
+            infinity_tags = ak._v2.index.Index8.empty(length, self._nplike)
+            out._nplike.isposinf(out._data, infinity_tags._data)
+            # FIXME: out._nplike.where(infinity_tags._data == 1, 1, union_index._data)
+            for i in range(length):
+                union_tags._data[i] = (
+                    1 if infinity_tags._data[i] == 1 else union_tags._data[i]
+                )
+                union_index._data[i] = (
+                    1 if infinity_tags._data[i] == 1 else union_index._data[i]
+                )
+        if minus_infinity_string is not None:
+            minus_infinity_tags = ak._v2.index.Index8.empty(out.length, self._nplike)
+            out._nplike.isneginf(out._data, minus_infinity_tags._data)
+            # FIXME: out._nplike.where(minus_infinity_tags._data == 1, 2, union_index._data)
+            for i in range(length):
+                union_tags._data[i] = (
+                    1 if minus_infinity_tags._data[i] == 1 else union_tags._data[i]
+                )
+                union_index._data[i] = (
+                    2 if minus_infinity_tags._data[i] == 1 else union_index._data[i]
+                )
+        content = ak._v2.operations.convert.from_iter(
+            [
+                nan_string if nan_string is not None else "NaN",
+                infinity_string if infinity_string is not None else "Infinity",
+                minus_infinity_string
+                if minus_infinity_string is not None
+                else "-Infinity",
+            ]
+        )
+
+        out = ak._v2.contents.unionarray.UnionArray(
+            tags=union_tags, index=union_index, contents=[out, content.layout]
+        )
+        for i in range(len(shape) - 1, 0, -1):
+            out = ak._v2.contents.RegularArray(
+                out, shape[i], zeroslen[i], None, None, self._nplike
+            )
+        out._identifier = self._identifier
+        out._parameters = self._parameters
+
         return out
 
     def maybe_to_array(self, nplike):
@@ -1186,6 +1253,23 @@ class NumpyArray(Content):
 
             return self._data.tolist()
 
+    def _to_json_custom(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        cls = ak._v2._util.arrayclass(self, behavior)
+        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
+            array = cls(self)
+            out = [None] * self.length
+            for i in range(self.length):
+                out[i] = array[i]
+            return out
+
     def _to_json(
         self,
         behavior,
@@ -1202,7 +1286,42 @@ class NumpyArray(Content):
             return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")
 
         else:
-            out = self._to_list_custom(behavior)
+            if (
+                nan_string is not None
+                or infinity_string is not None
+                or minus_infinity_string is not None
+            ):
+                out = self.toUnionArray(
+                    nan_string, infinity_string, minus_infinity_string
+                )
+                return out.tolist()
+
+            if self.dtype == np.complex128:
+                if complex_real_string is None or complex_imag_string is None:
+                    raise ValueError(
+                        "Complex numbers can't be converted to JSON without"
+                        " setting 'complex_record_fields' "
+                    )
+
+                return ak._v2.operations.structure.zip(
+                    {
+                        complex_real_string: ak._v2.contents.NumpyArray(
+                            self._data.real
+                        ),
+                        complex_imag_string: ak._v2.contents.NumpyArray(
+                            self._data.imag
+                        ),
+                    }
+                ).tolist()
+
+            out = self._to_json_custom(
+                behavior,
+                nan_string,
+                infinity_string,
+                minus_infinity_string,
+                complex_real_string,
+                complex_imag_string,
+            )
             if out is not None:
                 return out
 
