@@ -3,6 +3,7 @@
 import pytest  # noqa: F401
 import ctypes
 
+
 def test_import_and_loading_shared_lib():
     try:
         import awkward_cuda_kernels
@@ -11,7 +12,7 @@ def test_import_and_loading_shared_lib():
 
     try:
         import ctypes
+
         ctypes.cdll.LoadLibrary(awkward_cuda_kernels.shared_library_path)
     except Exception:
         pytest.fail("Could not load the shared library")
-
