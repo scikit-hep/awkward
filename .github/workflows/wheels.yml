@@ -97,7 +97,7 @@ jobs:
   #       path: wheelhouse/*.whl
 
   build_cuda_wheels:
-    name: "CUDA Wheel: ${{ matrix.type }} for CUDA ${{ matrix.version }} on ${{ matrix.os }}"
+    name: "CUDA Kernels Wheel for CUDA ${{ matrix.cuda-version }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
