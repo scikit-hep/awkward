@@ -499,13 +499,11 @@ class RecordArray(Content):
         if isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
-                    for i in range(len(self._contents)):
-                        if not self._contents[i].mergeable(
-                            other._contents[i], mergebool
-                        ):
+                    for self_cont, other_cont in zip(self._contents, other._contents):
+                        if not self_cont.mergeable(other_cont, mergebool):
                             return False
-                    else:
-                        return True
+
+                    return True
 
             elif not self.is_tuple and not other.is_tuple:
                 if set(self._fields) != set(other._fields):
@@ -516,8 +514,7 @@ class RecordArray(Content):
                     y = other._contents[other.field_to_index(field)]
                     if not x.mergeable(y, mergebool):
                         return False
-                else:
-                    return True
+                return True
 
             else:
                 return False
@@ -787,13 +784,11 @@ class RecordArray(Content):
         )
 
     def _validityerror(self, path):
-        for i in range(len(self.contents)):
-            if self.contents[i].length < self.length:
-                return 'at {} ("{}"): len(field({})) < len(recordarray)'.format(
-                    path, type(self), i
-                )
-        for i in range(len(self.contents)):
-            sub = self.contents[i].validityerror(path + f".field({i})")
+        for i, cont in enumerate(self.contents):
+            if cont.length < self.length:
+                return f'at {path} ("{type(self)}"): len(field({i})) < len(recordarray)'
+        for i, cont in enumerate(self.contents):
+            sub = cont.validityerror(f"{path}.field({i})")
             if sub != "":
                 return sub
         return ""

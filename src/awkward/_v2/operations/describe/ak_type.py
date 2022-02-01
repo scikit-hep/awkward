@@ -60,7 +60,7 @@ def type(array):
 
     elif isinstance(
         array,
-        tuple(x.type for x in ak._v2.types.numpytype._dtype_to_primitive_dict.keys()),
+        tuple(x.type for x in ak._v2.types.numpytype._dtype_to_primitive_dict),
     ):
         return ak._v2.types.NumpyType(
             ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype]

@@ -11,26 +11,11 @@ class Reducer:
 
     @classmethod
     def return_dtype(cls, given_dtype):
-        if (
-            given_dtype == np.bool_
-            or given_dtype == np.int8
-            or given_dtype == np.int16
-            or given_dtype == np.int32
-        ):
-            if ak._util.win or ak._util.bits32:
-                return np.int32
-            else:
-                return np.int64
+        if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
+            return np.int32 if ak._util.win or ak._util.bits32 else np.int64
 
-        if (
-            given_dtype == np.uint8
-            or given_dtype == np.uint16
-            or given_dtype == np.uint32
-        ):
-            if ak._util.win or ak._util.bits32:
-                return np.uint32
-            else:
-                return np.uint64
+        if given_dtype in (np.uint8, np.uint16, np.uint32):
+            return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
 
         if given_dtype == np.complex128:
             return np.float64
@@ -41,7 +26,7 @@ class Reducer:
 
     @classmethod
     def maybe_double_length(cls, type, length):
-        return 2 * length if type == np.complex128 or type == np.complex64 else length
+        return 2 * length if type in (np.complex128, np.complex64) else length
 
     @classmethod
     def maybe_other_type(cls, dtype):
@@ -452,16 +437,16 @@ class Min(Reducer):
     @staticmethod
     def _min_initial(initial, type):
         if initial is None:
-            if (
-                type == np.int8
-                or type == np.int16
-                or type == np.int32
-                or type == np.int64
-                or type == np.uint8
-                or type == np.uint16
-                or type == np.uint32
-                or type == np.uint64
-            ):
+            if type in {
+                np.int8,
+                np.int16,
+                np.int32,
+                np.int64,
+                np.uint8,
+                np.uint16,
+                np.uint32,
+                np.uint64,
+            }:
                 return np.iinfo(type).max
             else:
                 return np.inf
@@ -544,16 +529,16 @@ class Max(Reducer):
     @staticmethod
     def _max_initial(initial, type):
         if initial is None:
-            if (
-                type == np.int8
-                or type == np.int16
-                or type == np.int32
-                or type == np.int64
-                or type == np.uint8
-                or type == np.uint16
-                or type == np.uint32
-                or type == np.uint64
-            ):
+            if type in {
+                np.int8,
+                np.int16,
+                np.int32,
+                np.int64,
+                np.uint8,
+                np.uint16,
+                np.uint32,
+                np.uint64,
+            }:
                 return np.iinfo(type).min
             else:
                 return -np.inf

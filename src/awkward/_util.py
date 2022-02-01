@@ -521,8 +521,7 @@ def maybe_wrap_like(content, array, behavior, highlevel):
 
 def extra(args, kwargs, defaults):
     out = []
-    for i in range(len(defaults)):
-        name, default = defaults[i]
+    for i, (name, default) in enumerate(defaults):
         if i < len(args):
             out.append(args[i])
         elif name in kwargs:
@@ -686,8 +685,7 @@ def broadcast_and_apply(  # noqa: C901
                     return False
             elif isinstance(x, ak.layout.Content):
                 return False
-        else:
-            return True
+        return True
 
     def apply(inputs, depth, user):
         nplike = ak.nplike.of(*inputs)

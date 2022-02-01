@@ -207,7 +207,7 @@ def v1_to_v2(v1):
 
     elif isinstance(v1, ak.layout.NumpyArray):
         primitive = v1.form.primitive
-        if primitive == "datetime64" or primitive == "timedelta64":
+        if primitive in {"datetime64", "timedelta64"}:
             return ak._v2.contents.NumpyArray(
                 fix(np.asarray(v1.view_int64)).view(np.dtype(v1.format)),
                 identifier=v1_to_v2_id(v1.identities),

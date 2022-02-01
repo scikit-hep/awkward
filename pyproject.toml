@@ -95,11 +95,7 @@ messages_control.disable = [
   "broad-except", # TODO: investigate
   "cell-var-from-loop",  # TODO: investigate and locally disable if needed (unlikely)
   "chained-comparison", # TODO
-  "consider-iterating-dictionary",  # TODO
-  "consider-merging-isinstance",  # TODO
-  "consider-using-enumerate", # TODO
   "consider-using-f-string",  # TODO
-  "consider-using-in",  # TODO
   "consider-using-max-builtin",  # TODO
   "consider-using-min-builtin",  # TODO
   "duplicate-code",  # Hahahaha
@@ -156,7 +152,6 @@ messages_control.disable = [
   "unused-variable",  # TODO
   "use-a-generator",  # TODO
   "use-implicit-booleaness-not-len", # TODO perhaps?
-  "useless-else-on-loop",  # TODO
   "wrong-import-order",  # Could use isort
   "wrong-import-position",
 ]

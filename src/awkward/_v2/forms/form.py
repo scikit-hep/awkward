@@ -173,28 +173,24 @@ def _parameters_equal(one, two, only_array_record=False):
             for key in ("__array__", "__record__"):
                 if two.get(key) is not None:
                     return False
-            else:
-                return True
+            return True
         else:
             for value in two.values():
                 if value is not None:
                     return False
-            else:
-                return True
+            return True
 
     elif two is None:
         if only_array_record:
             for key in ("__array__", "__record__"):
                 if one.get(key) is not None:
                     return False
-            else:
-                return True
+            return True
         else:
             for value in one.values():
                 if value is not None:
                     return False
-            else:
-                return True
+            return True
 
     else:
         if only_array_record:
@@ -204,8 +200,7 @@ def _parameters_equal(one, two, only_array_record=False):
         for key in keys:
             if one.get(key) != two.get(key):
                 return False
-        else:
-            return True
+        return True
 
 
 def _parameters_update(one, two):

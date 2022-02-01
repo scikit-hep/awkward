@@ -559,7 +559,7 @@ class TypeTracer(ak.nplike.NumpyLike):
                 shape = [1] * (len(thisshape) - len(shape)) + shape
             elif len(shape) > len(thisshape):
                 thisshape = (1,) * (len(shape) - len(thisshape)) + thisshape
-            for i in range(len(shape)):
+            for i in range(len(shape)):  # pylint: disable=consider-using-enumerate
                 if shape[i] == 1 and thisshape[i] != 1:
                     shape[i] = thisshape[i]
                 elif shape[i] != 1 and thisshape[i] != 1 and shape[i] != thisshape[i]:
