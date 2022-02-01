@@ -379,16 +379,16 @@ class NumpyArray(Content):
             ):
                 return False
 
-            if not matching_dtype and np.datetime64 in {
+            if not matching_dtype and np.datetime64 in (
                 self._data.dtype,
                 other._data.dtype,
-            }:
+            ):
                 return False
 
-            if not matching_dtype and np.timedelta64 in {
+            if not matching_dtype and np.timedelta64 in (
                 self._data.dtype,
                 other._data.dtype,
-            }:
+            ):
                 return False
 
             if (

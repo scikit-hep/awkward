@@ -437,7 +437,7 @@ class Min(Reducer):
     @staticmethod
     def _min_initial(initial, type):
         if initial is None:
-            if type in {
+            if type in (
                 np.int8,
                 np.int16,
                 np.int32,
@@ -446,7 +446,7 @@ class Min(Reducer):
                 np.uint16,
                 np.uint32,
                 np.uint64,
-            }:
+            ):
                 return np.iinfo(type).max
             else:
                 return np.inf
@@ -529,7 +529,7 @@ class Max(Reducer):
     @staticmethod
     def _max_initial(initial, type):
         if initial is None:
-            if type in {
+            if type in (
                 np.int8,
                 np.int16,
                 np.int32,
@@ -538,7 +538,7 @@ class Max(Reducer):
                 np.uint16,
                 np.uint32,
                 np.uint64,
-            }:
+            ):
                 return np.iinfo(type).min
             else:
                 return -np.inf
