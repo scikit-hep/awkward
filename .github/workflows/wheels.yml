@@ -103,15 +103,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         arch: [auto64]
-
-        include:
-          - cuda-version: 11.5.1
-          - cuda-version: 11.4.1
-          - cuda-version: 11.3.1
-          - cuda-version: 11.2.1
-          - cuda-version: 11.1.1
-          - cuda-version: 11.0.1
-          - cuda-version: 10.2
+        cuda-version: [11.5.1, 11.4.1, 11.3.1, 11.2.1, 11.1.1, 11.0.3, 10.2]
 
     steps:
     - uses: actions/checkout@v2
