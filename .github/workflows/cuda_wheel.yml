@@ -33,7 +33,7 @@ jobs:
 
       - name: Build and test the wheel
         if: ${{ matrix.cuda-version == '11.5.1' || matrix.cuda-version == '10.2'}}
-        run: |             
+        run: |
           ./cuda-build.sh -c ${{ matrix.cuda-version}} -i
           pip install pytest
           python -m pytest -vvrs tests-cuda/test_1270-install-test.py
