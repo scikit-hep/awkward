@@ -24,7 +24,7 @@ jobs:
       - name: Generate the Kernels Signatures
         run: python dev/generate-kernel-signatures.py
 
-      - name: Generate the trivial CUDA Kernels
+      - name: Generate the CUDA Kernels
         run: python dev/generate-cuda.py
 
       - name: Build the wheel
