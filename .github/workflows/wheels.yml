@@ -132,7 +132,7 @@ jobs:
           path: dist/awkward_cuda_kernels-*.whl
 
   upload_all:
-    needs: [build_cuda_wheels]
+    needs: [build_wheels, build_alt_wheels, make_sdist, build_cuda_wheels]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
