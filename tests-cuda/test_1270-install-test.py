@@ -12,6 +12,9 @@ def test_import_and_loading_shared_lib():
     try:
         import ctypes
 
-        ctypes.cdll.LoadLibrary(awkward_cuda_kernels.shared_library_path)
+        cuak = ctypes.cdll.LoadLibrary(awkward_cuda_kernels.shared_library_path)
+
+        if not hasattr(cuak, "awkward_cuda_ptr_device_name"):
+            pytest.fail("Cannot access the functions in the loaded shared library")
     except Exception:
-        pytest.fail("Could not load the shared library")
+        pytest.fail("Could not load the shared library or access the function")
