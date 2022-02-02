@@ -121,7 +121,7 @@ jobs:
         run: python dev/generate-cuda.py
 
       - name: Build and test the wheel
-        run: |             
+        run: |
           ./cuda-build.sh -c ${{ matrix.cuda-version}} -i
           pip install pytest
           python -m pytest -vvrs tests-cuda/test_1270-install-test.py
