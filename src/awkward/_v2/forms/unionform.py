@@ -93,24 +93,18 @@ class UnionForm(Form):
         )
 
     def __eq__(self, other):
-        if isinstance(other, UnionForm):
-            if (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
-                and self._tags == other._tags
-                and self._index == other._index
-                and len(self._contents) == len(other._contents)
-                and _parameters_equal(self._parameters, other._parameters)
-            ):
-                # TODO: ._contents is a list. Why not just use ==?
-                for self_cont, other_cont in zip(self._contents, other._contents):
-                    if self_cont != other_cont:
-                        return False
-                return True
-            else:
-                return False
-        else:
-            return False
+        if (
+            isinstance(other, UnionForm)
+            and self._has_identifier == other._has_identifier
+            and self._form_key == other._form_key
+            and self._tags == other._tags
+            and self._index == other._index
+            and len(self._contents) == len(other._contents)
+            and _parameters_equal(self._parameters, other._parameters)
+        ):
+            return self._contents == other._contents
+
+        return False
 
     def generated_compatibility(self, other):
         if other is None:

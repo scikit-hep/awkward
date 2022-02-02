@@ -150,19 +150,11 @@ class RecordForm(Form):
                 and _parameters_equal(self._parameters, other._parameters)
             ):
                 if self.is_tuple:
-                    # TODO: could the lengths be different?
-                    for self_cont, other_cont in zip(self._contents, other._contents):
-                        if self_cont != other_cont:
-                            return False
-                    return True
+                    return self._contents == other._contents
                 else:
-                    if set(self._fields) != set(other._fields):
-                        return False
-                    else:
-                        for field, content in zip(self._fields, self._contents):
-                            if content != other.content(field):
-                                return False
-                        return True
+                    return dict(zip(self._fields, self._contents)) == dict(
+                        zip(other._fields, other._contents)
+                    )
             else:
                 return False
         else:

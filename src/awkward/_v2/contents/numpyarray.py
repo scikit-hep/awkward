@@ -625,11 +625,10 @@ class NumpyArray(Content):
 
         if negaxis is None:
             contiguous_self = self if self.is_contiguous else self.contiguous()
+            # Python 3.8 could use math.prod
             flattened_shape = 1
-            # TODO: could this be contiguous_self.shape[i]?
-            # pylint: disable-next=consider-using-enumerate
-            for i in range(len(contiguous_self.shape)):
-                flattened_shape = flattened_shape * self.shape[i]
+            for s in contiguous_self.shape:
+                flattened_shape = flattened_shape * s
 
             offsets = ak._v2.index.Index64.zeros(2, self._nplike)
             offsets[1] = flattened_shape
