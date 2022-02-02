@@ -19,7 +19,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install requirements for building and testing
-        run: pip install -r PyYAML setuptools wheel
+        run: pip install PyYAML setuptools wheel
 
       - name: Generate the Kernels Signatures
         run: python dev/generate-kernel-signatures.py
