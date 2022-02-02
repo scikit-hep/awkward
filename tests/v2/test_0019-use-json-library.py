@@ -95,8 +95,6 @@ def test_complex():
         ak._v2.operations.convert.to_json(content, complex_record_fields=("r", "i"))
         == """[{"r":1.1,"i":0.1},{"r":2.2,"i":0.0},{"r":3.3,"i":0.0},{"r":4.4,"i":0.0},{"r":5.5,"i":0.0},{"r":6.6,"i":0.0},{"r":7.7,"i":0.0},{"r":8.8,"i":0.0},{"r":9.9,"i":0.0}]"""
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 6, 6, 9], dtype=np.int64))
-    array = ak._v2.contents.ListOffsetArray(offsets, content)
 
     array = ak._v2.operations.convert.from_json(
         '[{"r":1.1,"i":1.0},{"r":2.2,"i":2.0}]', complex_record_fields=("r", "i")

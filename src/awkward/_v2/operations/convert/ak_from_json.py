@@ -2,13 +2,9 @@
 
 
 import awkward as ak
-import re
+import json
 
 np = ak.nplike.NumpyMetadata.instance()
-
-
-_maybe_json_str = re.compile(r"^\s*(\[|\{|\"|[0-9]|true|false|null)")
-_maybe_json_bytes = re.compile(rb"^\s*(\[|\{|\"|[0-9]|true|false|null)")
 
 
 def from_json(
@@ -68,30 +64,20 @@ def from_json(
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
-    if (
-        isinstance(source, bytes) and _maybe_json_bytes.match(source)
-    ) or _maybe_json_str.match(source):
-        builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
-        num = ak._ext.fromjson(
-            source,
-            builder,
-            nan_string=nan_string,
-            infinity_string=infinity_string,
-            minus_infinity_string=minus_infinity_string,
-            buffersize=buffersize,
-        )
-        formstr, length, buffers = builder.to_buffers()
-        form = ak._v2.forms.from_json(formstr)
-
-        snapshot = ak._v2.operations.convert.from_buffers(
-            form, length, buffers, highlevel=highlevel
-        )
-        # FIXME: the code is a copy from snapshot,
-        # because this call returns v1: snapshot = builder.snapshot()
-        layout = snapshot[0] if num == 1 else snapshot
-
+    lines = source.splitlines()
+    if len(lines) == 1:
+        out = json.loads(source)
     else:
-        raise ValueError(f"JSON string is not a valid: {source}")
+        non_empty_lines = [line for line in lines if line.strip() != ""]
+        lines = ",".join(non_empty_lines)
+        text = f"[{lines}]"
+        out = json.loads(text)
+
+    try:
+        iter(out)
+        layout = ak._v2.operations.convert.from_iter(out).layout
+    except TypeError:
+        return out
 
     def action(recordnode, **kwargs):
         if isinstance(recordnode, ak._v2.contents.RecordArray):
