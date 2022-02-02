@@ -97,31 +97,39 @@ jobs:
   #       path: wheelhouse/*.whl
 
   build_cuda_wheels:
-    name: "CUDA Kernels Wheel for CUDA ${{ matrix.cuda-version }} on ${{ matrix.os }}"
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        arch: [auto64]
-        cuda-version: [11.5.1, 11.4.1, 11.3.1, 11.2.1, 11.1.1, 11.0.3, 10.2]
+          cuda-version: ["11.5.1", "11.4.1", "11.3.1", "11.2.1", "11.1.1", "11.0.3", "10.2"]
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout repository without submodules
+        uses: actions/checkout@v2
 
-    - uses: actions/setup-python@v2
-      with:
-        python-version: '3.10'
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
 
-    - run: pip install -r requirements-dev.txt setuptools wheel
+      - name: Install requirements for building and testing
+        run: pip install PyYAML setuptools wheel
 
-    - run: python dev/generate-kernel-signatures.py
+      - name: Generate the Kernels Signatures
+        run: python dev/generate-kernel-signatures.py
 
-    - run: python dev/generate-cuda.py && ./cuda-build.sh -c ${{ matrix.cuda-version}}
+      - name: Generate the trivial CUDA Kernels
+        run: python dev/generate-cuda.py
 
-    - name: Upload wheels
-      uses: actions/upload-artifact@v2
-      with:
-        path: dist/*.whl
+      - name: Build and test the wheel
+        run: |             
+          ./cuda-build.sh -c ${{ matrix.cuda-version}} -i
+          pip install pytest
+          python -m pytest -vvrs tests-cuda/test_1270-install-test.py
+
+      - name: Upload the built awkward_cuda_kernels whl for CUDA ${{ matrix.cuda-version }}
+        uses: actions/upload-artifact@v2
+        with:
+          path: dist/awkward_cuda_kernels-*.whl
 
   upload_all:
     needs: [build_cuda_wheels]
