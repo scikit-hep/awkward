@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-          cuda-version: [11.5.1, 11.4.1, 11.3.1, 11.2.1, 11.1.1, 11.0.3, 10.2]
+          cuda-version: ["11.5.1", "11.4.1", "11.3.1", "11.2.1", "11.1.1", "11.0.3", "10.2"]
 
     steps:
       - uses: actions/checkout@v2
