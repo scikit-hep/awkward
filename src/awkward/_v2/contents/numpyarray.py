@@ -189,6 +189,7 @@ class NumpyArray(Content):
                 )
             )
 
+        # FIXME: always use JavaScript equivalents (``NaN``, ``Infinity``, ``-Infinity``)?
         content = ak._v2.operations.convert.from_iter(
             [
                 nan_string if nan_string is not None else "NaN",

@@ -7,6 +7,8 @@ from numbers import Number
 
 np = ak.nplike.NumpyMetadata.instance()
 
+# FIXME: 'pretty', 'verbose', and 'maxdecimals' are not used yet
+
 
 def to_json(
     array,
