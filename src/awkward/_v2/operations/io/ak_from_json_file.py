@@ -83,7 +83,7 @@ def from_json_file(
     #             out.send(block)
     #     out.close()
 
-    with open(source, "rb") as f:  # pylint: disable=unspecified-encoding
+    with open(source, encoding="locale") as f:
         builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
         # FIXME: for line in f:
         num = ak._ext.fromjson(
