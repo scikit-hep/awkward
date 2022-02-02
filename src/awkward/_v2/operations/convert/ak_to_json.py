@@ -106,12 +106,8 @@ def to_json(
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
-    # FIXME: pass parameters down and convert a NumpyArray
-    # to a UnionArray if it contains NaNs or Infs.
-    # Convert it to a RecordArray if it has complex numbers.
     return json.dumps(
         out.tojson(
-            None,
             nan_string,
             infinity_string,
             minus_infinity_string,

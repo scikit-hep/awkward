@@ -340,7 +340,6 @@ class EmptyArray(Content):
 
     def _to_json(
         self,
-        behavior,
         nan_string,
         infinity_string,
         minus_infinity_string,

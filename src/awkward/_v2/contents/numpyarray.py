@@ -162,11 +162,11 @@ class NumpyArray(Content):
         minus_infinity_tags = ak._v2.index.Index8.zeros(length, self._nplike)
 
         if nan_string is not None:
-            out._nplike.isnan(out._data, nan_tags._data)
+            self._nplike.isnan(out._data, nan_tags._data)
         if infinity_string is not None:
-            out._nplike.isposinf(out._data, infinity_tags._data)
+            self._nplike.isposinf(out._data, infinity_tags._data)
         if minus_infinity_string is not None:
-            out._nplike.isneginf(out._data, minus_infinity_tags._data)
+            self._nplike.isneginf(out._data, minus_infinity_tags._data)
 
         # FIXME: move to kernel?
         for i in range(length):
@@ -1254,14 +1254,13 @@ class NumpyArray(Content):
 
     def _to_json_custom(
         self,
-        behavior,
         nan_string,
         infinity_string,
         minus_infinity_string,
         complex_real_string,
         complex_imag_string,
     ):
-        cls = ak._v2._util.arrayclass(self, behavior)
+        cls = ak._v2._util.arrayclass(self, None)
         if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
             array = cls(self)
             out = [None] * self.length
@@ -1271,7 +1270,6 @@ class NumpyArray(Content):
 
     def _to_json(
         self,
-        behavior,
         nan_string,
         infinity_string,
         minus_infinity_string,
@@ -1302,7 +1300,6 @@ class NumpyArray(Content):
                         ),
                     }
                 ).layout._to_json(
-                    behavior,
                     nan_string,
                     infinity_string,
                     minus_infinity_string,
@@ -1321,7 +1318,6 @@ class NumpyArray(Content):
                 return out.tolist()
 
             out = self._to_json_custom(
-                behavior,
                 nan_string,
                 infinity_string,
                 minus_infinity_string,

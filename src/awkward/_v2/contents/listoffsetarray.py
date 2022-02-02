@@ -2041,7 +2041,6 @@ class ListOffsetArray(Content):
 
     def _to_json(
         self,
-        behavior,
         nan_string,
         infinity_string,
         minus_infinity_string,
@@ -2060,12 +2059,11 @@ class ListOffsetArray(Content):
             return out
 
         else:
-            out = self._to_list_custom(behavior)
+            out = self._to_json_custom()
             if out is not None:
                 return out
 
             content = self._content._to_json(
-                behavior,
                 nan_string,
                 infinity_string,
                 minus_infinity_string,

@@ -998,18 +998,17 @@ class RecordArray(Content):
 
     def _to_json(
         self,
-        behavior,
         nan_string,
         infinity_string,
         minus_infinity_string,
         complex_real_string,
         complex_imag_string,
     ):
-        out = self._to_list_custom(behavior)
+        out = self._to_json_custom()
         if out is not None:
             return out
 
-        cls = ak._v2._util.recordclass(self, behavior)
+        cls = ak._v2._util.recordclass(self, None)
         if cls is not ak._v2.highlevel.Record:
             length = self._length
             out = [None] * length
@@ -1020,7 +1019,6 @@ class RecordArray(Content):
         if self.is_tuple:
             contents = [
                 x._to_json(
-                    behavior,
                     nan_string,
                     infinity_string,
                     minus_infinity_string,
@@ -1042,7 +1040,6 @@ class RecordArray(Content):
             fields = self._fields
             contents = [
                 x._to_json(
-                    behavior,
                     nan_string,
                     infinity_string,
                     minus_infinity_string,

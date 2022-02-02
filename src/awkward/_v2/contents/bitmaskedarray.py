@@ -619,20 +619,18 @@ class BitMaskedArray(Content):
 
     def _to_json(
         self,
-        behavior,
         nan_string,
         infinity_string,
         minus_infinity_string,
         complex_real_string,
         complex_imag_string,
     ):
-        out = self._to_list_custom(behavior)
+        out = self._to_json_custom()
         if out is not None:
             return out
 
         mask = self.mask_as_bool(valid_when=True, nplike=numpy)[: self._length]
         content = self._content._to_json(
-            behavior,
             nan_string,
             infinity_string,
             minus_infinity_string,

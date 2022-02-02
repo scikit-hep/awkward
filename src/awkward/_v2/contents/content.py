@@ -1299,9 +1299,17 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
 
+    def _to_json_custom(self):
+        cls = ak._v2._util.arrayclass(self, None)
+        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
+            array = cls(self)
+            out = [None] * self.length
+            for i in range(self.length):
+                out[i] = array[i]
+            return out
+
     def tojson(
         self,
-        behavior=None,
         nan_string=None,
         infinity_string=None,
         minus_infinity_string=None,
@@ -1309,7 +1317,6 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         complex_imag_string=None,
     ):
         return self.to_json(
-            behavior,
             nan_string,
             infinity_string,
             minus_infinity_string,
@@ -1319,7 +1326,6 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
     def to_json(
         self,
-        behavior,
         nan_string,
         infinity_string,
         minus_infinity_string,
@@ -1327,7 +1333,6 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         complex_imag_string,
     ):
         return self.packed()._to_json(
-            behavior,
             nan_string,
             infinity_string,
             minus_infinity_string,
