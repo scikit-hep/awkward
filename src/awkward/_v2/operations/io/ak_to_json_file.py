@@ -108,7 +108,7 @@ def to_json_file(
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
-    with open(destination, "w") as f:
+    with open(destination, "w", encoding="utf-8") as f:
         for chunk in json.dumps(
             out.tojson(
                 nan_string,
