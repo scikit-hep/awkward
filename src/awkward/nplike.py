@@ -478,14 +478,17 @@ class Cupy(NumpyLike):
 
     def __getitem__(self, name_and_types):
         func = ak._cuda_kernels.kernel[name_and_types]
-        if 'cuda' in func.implementations:
+        if "cuda" in func.implementations:
             return CupyKernel(func, name_and_types)
         else:
-            raise ValueError("{} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
-                             "continue the operation.".format(name_and_types[0]))
+            raise ValueError(
+                "{} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
+                "continue the operation.".format(name_and_types[0])
+            )
 
     def __init__(self):
         import awkward._cuda_kernels
+
         try:
             import cupy
         except ModuleNotFoundError:

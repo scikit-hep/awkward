@@ -9,11 +9,15 @@ import platform
 import awkward._kernel_signatures
 
 if platform.system() == "Windows":
-    raise ValueError("There is no support for Awkward CUDA on Windows. Please use a Linux system to use CUDA "
-                     "accelerated Awkward Arrays.")
+    raise ValueError(
+        "There is no support for Awkward CUDA on Windows. Please use a Linux system to use CUDA "
+        "accelerated Awkward Arrays."
+    )
 elif platform.system() == "Darwin":
-    raise ValueError("There is no support for Awkward CUDA on MacOS. Please use a Linux system to use CUDA "
-                     "accelerated Awkward Arrays.")
+    raise ValueError(
+        "There is no support for Awkward CUDA on MacOS. Please use a Linux system to use CUDA "
+        "accelerated Awkward Arrays."
+    )
 else:
     try:
         import awkward_cuda_kernels
