@@ -9,20 +9,19 @@ import platform
 import awkward._kernel_signatures
 
 if platform.system() == "Windows":
-    raise ValueError("There is no support for Awkward CUDA on Windows. Please use a Linux system to use CUDA accelerated Awkward Arrays.")
+    raise ValueError("There is no support for Awkward CUDA on Windows. Please use a Linux system to use CUDA "
+                     "accelerated Awkward Arrays.")
 elif platform.system() == "Darwin":
-    raise ValueError("There is no support for Awkward CUDA on MacOS. Please use a Linux system to use CUDA accelerated Awkward Arrays.")
+    raise ValueError("There is no support for Awkward CUDA on MacOS. Please use a Linux system to use CUDA "
+                     "accelerated Awkward Arrays.")
 else:
     try:
-        import awkward_cuda_kernels 
+        import awkward_cuda_kernels
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
             """to use CUDA awkward arrays in Python, install the 'awkward[cuda]' package with:
-
     pip install awkward[cuda] --upgrade
-
 or
-
     conda install awkward[cuda]"""
         ) from None
 

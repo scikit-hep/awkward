@@ -443,14 +443,49 @@ class Numpy(NumpyLike):
         return self._module.ndarray
 
 
+class CupyKernel:
+    def __init__(self, kernel, name_and_types):
+        self._kernel = kernel
+        self._name_and_types = name_and_types
+
+    def __repr__(self):
+        return "<{} {}{}>".format(
+            type(self).__name__,
+            self._name_and_types[0],
+            "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
+        )
+
+    @staticmethod
+    def _cast(x, t):
+        if issubclass(t, ctypes._Pointer):
+            if isinstance(x, cupy.ndarray):
+                return ctypes.cast(x.data.ptr, t)
+            else:
+                return ctypes.cast(x, t)
+        else:
+            return x
+
+    def __call__(self, *args):
+        assert len(args) == len(self._kernel.argtypes)
+        return self._kernel(
+            *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
+        )
+
+
 class Cupy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
-        raise NotImplementedError("no CUDA in v2 yet")
+        func = ak._cuda_kernels.kernel[name_and_types]
+        if 'cuda' in func.implementations:
+            return CupyKernel(func, name_and_types)
+        else:
+            raise ValueError("{} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
+                             "continue the operation.".format(name_and_types[0]))
 
     def __init__(self):
+        import awkward._cuda_kernels
         try:
             import cupy
         except ModuleNotFoundError:
