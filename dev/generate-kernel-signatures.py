@@ -242,9 +242,9 @@ def by_signature(lib):
         for spec in specification["kernels"]:
             for childfunc in spec["specializations"]:
                 special = [repr(spec["name"])]
-                implementations = ["cpu"]
+                implementations = [repr("cpu")]
                 if spec["name"] in cuda_kernels_impl:
-                    implementations.append("cuda")
+                    implementations.append(repr("cuda"))
                 arglist = [
                     type_to_pytype(x["type"], special) for x in childfunc["args"]
                 ]
