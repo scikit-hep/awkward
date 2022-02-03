@@ -2,18 +2,27 @@
 
 
 import awkward as ak
+import json
 
 np = ak.nplike.NumpyMetadata.instance()
 
-# FIXME: implement and document the following:
-#
-# - accept newline as line delimiter '\n' (0x0A) as well as carriage return and newline '\r\n' (0x0D0A)
-# - ignore empty lines '\n\n'
-# - raise an error if JSON is nor parsable
-#
-# https://github.com/ndjson/ndjson-spec
-#
-#
+
+class NDJSONDecoder(json.JSONDecoder):
+    """
+    JSON decoder class to implement 'ndjson' specs:
+    see https://github.com/ndjson/ndjson-spec
+
+    - accept newline as line delimiter '\n' (0x0A) as well as carriage return and newline '\r\n' (0x0D0A)
+    - ignore empty lines '\n\n'
+    - raise an error if JSON is nor parsable
+    """
+
+    def decode(self, s, *args, **kwargs):
+        lines = s.splitlines()
+        non_empty_lines = [line for line in lines if line.strip() != ""]
+        lines = ",".join(non_empty_lines)
+        text = f"[{lines}]"
+        return super().decode(text, *args, **kwargs)
 
 
 def from_json_file(
@@ -24,8 +33,6 @@ def from_json_file(
     complex_record_fields=None,
     highlevel=False,
     behavior=None,
-    initial=1024,
-    resize=1.5,
     buffersize=65536,
 ):
     """
@@ -43,21 +50,10 @@ def from_json_file(
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        initial (int): Initial size (in bytes) of buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
-        resize (float): Resize multiplier for buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
-            should be strictly greater than 1.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
 
     Converts content of a JSON file into an Awkward Array.
-
-    Internally, this function uses #ak.layout.ArrayBuilder (see the high-level
-    #ak.ArrayBuilder documentation for a more complete description), so it
-    has the same flexibility and the same constraints. Any heterogeneous
-    and deeply nested JSON can be converted, but the output will never have
-    regular-typed array lengths.
 
     See also #ak.from_json_schema and #ak.to_json.
     """
@@ -72,37 +68,10 @@ def from_json_file(
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
-    # FIXME: read blocks - need some changes in C++ code
-    #
-    # def read(file_path, out):
-    #     with open(file_path, 'rb') as file_:
-    #         while True:
-    #             block = file_.read(block_size)
-    #             if not block:
-    #                 break
-    #             out.send(block)
-    #     out.close()
-
     with open(source, encoding="utf-8") as f:
-        builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
-        # FIXME: for line in f:
-        num = ak._ext.fromjson(
-            f.read(),
-            builder,
-            nan_string=nan_string,
-            infinity_string=infinity_string,
-            minus_infinity_string=minus_infinity_string,
-            buffersize=buffersize,
-        )
-        formstr, length, buffers = builder.to_buffers()
-        form = ak._v2.forms.from_json(formstr)
+        data = json.load(f, cls=NDJSONDecoder)
 
-        snapshot = ak._v2.operations.convert.from_buffers(
-            form, length, buffers, highlevel=highlevel
-        )
-        # FIXME: the code is a copy from snapshot,
-        # because this call returns v1: snapshot = builder.snapshot()
-        layout = snapshot[0] if num == 1 else snapshot
+    layout = ak._v2.operations.convert.from_iter(data).layout
 
     def action(recordnode, **kwargs):
         if isinstance(recordnode, ak._v2.contents.RecordArray):
@@ -130,5 +99,8 @@ def from_json_file(
 
     if complex_imag_string is not None:
         layout = layout.recursively_apply(action)
+
+    if isinstance(layout, ak._v2.contents.ListOffsetArray):
+        layout = layout.content
 
     return ak._v2._util.wrap(layout, behavior, highlevel)

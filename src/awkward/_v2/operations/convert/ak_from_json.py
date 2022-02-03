@@ -15,13 +15,13 @@ def from_json(
     complex_record_fields=None,
     highlevel=False,
     behavior=None,
-    initial=1024,
-    resize=1.5,
     buffersize=65536,
 ):
     """
     Args:
-        source (str): JSON-formatted string to convert into an array.
+        source (str): JSON-formatted string to convert into an array. The string
+            must comply with 'ndjson' specification: please, see
+            https://github.com/ndjson/ndjson-spec for more details.
         nan_string (None or str): If not None, strings with this value will be
             interpreted as floating-point NaN values.
         infinity_string (None or str): If not None, strings with this value will
@@ -34,21 +34,10 @@ def from_json(
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        initial (int): Initial size (in bytes) of buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
-        resize (float): Resize multiplier for buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
-            should be strictly greater than 1.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
 
     Converts a JSON string into an Awkward Array.
-
-    Internally, this function uses #ak.layout.ArrayBuilder (see the high-level
-    #ak.ArrayBuilder documentation for a more complete description), so it
-    has the same flexibility and the same constraints. Any heterogeneous
-    and deeply nested JSON can be converted, but the output will never have
-    regular-typed array lengths.
 
     See also #ak.from_json_schema and #ak.to_json.
     """
