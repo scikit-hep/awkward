@@ -80,23 +80,23 @@ def corr(
         ydiff = y - ymean
         if weight is None:
             sumwxx = ak._v2.operations.reducers.sum(
-                xdiff ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+                xdiff**2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwyy = ak._v2.operations.reducers.sum(
-                ydiff ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+                ydiff**2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwxy = ak._v2.operations.reducers.sum(
                 xdiff * ydiff, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
         else:
             sumwxx = ak._v2.operations.reducers.sum(
-                (xdiff ** 2) * weight,
+                (xdiff**2) * weight,
                 axis=axis,
                 keepdims=keepdims,
                 mask_identity=mask_identity,
             )
             sumwyy = ak._v2.operations.reducers.sum(
-                (ydiff ** 2) * weight,
+                (ydiff**2) * weight,
                 axis=axis,
                 keepdims=keepdims,
                 mask_identity=mask_identity,

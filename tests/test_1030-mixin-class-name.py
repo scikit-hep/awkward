@@ -13,7 +13,7 @@ behavior = {}
 class AVeryVeryVeryLargeClassName:
     @property
     def mag2(self):
-        return self.x ** 2 + self.y ** 2
+        return self.x**2 + self.y**2
 
 
 def test():

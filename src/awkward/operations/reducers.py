@@ -887,7 +887,7 @@ def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
         if weight is None:
             sumw = count(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
             sumwxn = sum(
-                x ** n, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+                x**n, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
         else:
             sumw = sum(
@@ -1242,23 +1242,23 @@ def corr(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
         ydiff = y - ymean
         if weight is None:
             sumwxx = sum(
-                xdiff ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+                xdiff**2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwyy = sum(
-                ydiff ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+                ydiff**2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwxy = sum(
                 xdiff * ydiff, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
         else:
             sumwxx = sum(
-                (xdiff ** 2) * weight,
+                (xdiff**2) * weight,
                 axis=axis,
                 keepdims=keepdims,
                 mask_identity=mask_identity,
             )
             sumwyy = sum(
-                (ydiff ** 2) * weight,
+                (ydiff**2) * weight,
                 axis=axis,
                 keepdims=keepdims,
                 mask_identity=mask_identity,
@@ -1333,7 +1333,7 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
             sumwx = sum(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
             sumwy = sum(y, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
             sumwxx = sum(
-                x ** 2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+                x**2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwxy = sum(
                 x * y, axis=axis, keepdims=keepdims, mask_identity=mask_identity
@@ -1352,7 +1352,7 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
                 y * weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
             sumwxx = sum(
-                (x ** 2) * weight,
+                (x**2) * weight,
                 axis=axis,
                 keepdims=keepdims,
                 mask_identity=mask_identity,

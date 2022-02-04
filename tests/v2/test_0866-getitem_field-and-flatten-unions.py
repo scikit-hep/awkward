@@ -31,7 +31,6 @@ def test_flatten_axis_none():
     )
 
     union = ak._v2.operations.structure.where([True, False, True], a1, a2)
-    print(to_list(union))
     assert set(ak._v2.operations.structure.flatten(union, axis=None)) == {
         1,
         2,

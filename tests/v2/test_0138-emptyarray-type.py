@@ -31,11 +31,8 @@ def test():
         == []
     )
     assert to_list(array[empty2]) == [[], [], []]
-    assert (
-        to_list(
-            array[
-                empty2,
-            ]
-        )
-        == [[], [], []]
-    )
+    assert to_list(
+        array[
+            empty2,
+        ]
+    ) == [[], [], []]

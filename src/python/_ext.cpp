@@ -135,6 +135,7 @@ PYBIND11_MODULE(_ext, m) {
 
   make_fromjson(m, "fromjson");
   make_fromjsonfile(m, "fromjsonfile");
+
   make_uproot_issue_90(m);
 
   ////////// forth.h

@@ -13,34 +13,36 @@ namespace awkward {
   const BuilderPtr
   Complex128Builder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<Complex128Builder>(options,
-                                              std::move(GrowableBuffer<std::complex<double>>::empty(options)));
+                                              GrowableBuffer<std::complex<double>>::empty(options));
   }
 
   const BuilderPtr
   Complex128Builder::fromint64(const ArrayBuilderOptions& options,
-                               const GrowableBuffer<int64_t>& old) {
+                               GrowableBuffer<int64_t> old) {
     GrowableBuffer<std::complex<double>> buffer =
-      GrowableBuffer<std::complex<double>>::empty_reserved(options, old.reserved());
+      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
     int64_t* oldraw = old.ptr().get();
     std::complex<double>* newraw = buffer.ptr().get();
-    for (int64_t i = 0;  i < 2*old.length();  i++) {
+    for (size_t i = 0;  i < 2*old.length();  i++) {
       newraw[i] = {static_cast<double>(oldraw[i]), 0};
     }
     buffer.set_length(old.length());
+    old.clear();
     return std::make_shared<Complex128Builder>(options, std::move(buffer));
   }
 
   const BuilderPtr
   Complex128Builder::fromfloat64(const ArrayBuilderOptions& options,
-                                 const GrowableBuffer<double>& old) {
+                                 GrowableBuffer<double> old) {
     GrowableBuffer<std::complex<double>> buffer =
-      GrowableBuffer<std::complex<double>>::empty_reserved(options, old.reserved());
+      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
     double* oldraw = old.ptr().get();
     std::complex<double>* newraw = buffer.ptr().get();
-    for (int64_t i = 0;  i < old.length();  i++) {
+    for (size_t i = 0;  i < old.length();  i++) {
       newraw[i] = std::complex<double>(oldraw[i], 0);
     }
     buffer.set_length(old.length());
+    old.clear();
     return std::make_shared<Complex128Builder>(options, std::move(buffer));
   }
 
@@ -61,7 +63,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           buffer_.ptr().get(),
-                          buffer_.length() * (int64_t)sizeof(double) * 2);
+                          (int64_t)(buffer_.length() * sizeof(double)) * 2);
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
            + form_key.str() + "\"}";
@@ -69,7 +71,7 @@ namespace awkward {
 
   int64_t
   Complex128Builder::length() const {
-    return buffer_.length();
+    return (int64_t)buffer_.length();
   }
 
   void

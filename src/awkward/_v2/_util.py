@@ -117,28 +117,28 @@ def little_endian(array):
 #     pass
 
 
-# def regularize_path(path):
-#     """
-#     Converts pathlib Paths into plain string paths (for all versions of Python).
-#     """
-#     is_path = False
+def regularize_path(path):
+    """
+    Converts pathlib Paths into plain string paths (for all versions of Python).
+    """
+    is_path = False
 
-#     if isinstance(path, getattr(os, "PathLike", ())):
-#         is_path = True
-#         path = os.fspath(path)
+    if isinstance(path, getattr(os, "PathLike", ())):
+        is_path = True
+        path = os.fspath(path)
 
-#     elif hasattr(path, "__fspath__"):
-#         is_path = True
-#         path = path.__fspath__()
+    elif hasattr(path, "__fspath__"):
+        is_path = True
+        path = path.__fspath__()
 
-#     elif path.__class__.__module__ == "pathlib":
-#         import pathlib
+    elif path.__class__.__module__ == "pathlib":
+        import pathlib
 
-#         if isinstance(path, pathlib.Path):
-#             is_path = True
-#             path = str(path)
+        if isinstance(path, pathlib.Path):
+            is_path = True
+            path = str(path)
 
-#     return is_path, path
+    return is_path, path
 
 
 class Behavior(Mapping):

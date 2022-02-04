@@ -64,7 +64,7 @@ def test_flat():
 
 
 def parabola(x):
-    return 3 * x ** 2
+    return 3 * x**2
 
 
 def test_jagged():
