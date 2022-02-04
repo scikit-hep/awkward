@@ -2076,3 +2076,35 @@ class ListOffsetArray(Content):
             for i in range(starts.length):
                 out[i] = content[starts[i] : stops[i]]
             return out
+
+    def _awkward_strings_to_constants(self, constants):
+        if self.parameter("__array__") == "string":
+            if any(item in constants for item in self.to_list()):
+                content = ak._v2._util.tobytes(self._content.data)
+                starts, stops = self.starts, self.stops
+                out = [None] * starts.length
+                all_numbers = self.nplike.empty(starts.length, np.float64)
+                has_another_string = False
+                for i in range(starts.length):
+                    out[i] = content[starts[i] : stops[i]].decode(
+                        errors="surrogateescape"
+                    )
+                    if out[i] in constants:
+                        all_numbers[i] = constants[out[i]]
+                    else:
+                        all_numbers[i] = None
+                        has_another_string = True
+
+                content = ak._v2.contents.NumpyArray(all_numbers)
+
+                if has_another_string:
+                    union_tags = ak._v2.index.Index8.zeros(content.length, self._nplike)
+                    content._nplike.isnan(content._data, union_tags._data)
+                    union_index = ak._v2.index.Index64(content.localindex(-1)._data)
+                    out = self.toListOffsetArray64(True)
+
+                    return ak._v2.contents.unionarray.UnionArray(
+                        tags=union_tags, index=union_index, contents=[content, out]
+                    )
+
+                return content

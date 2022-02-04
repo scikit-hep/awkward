@@ -100,6 +100,22 @@ def from_json_file(
     if complex_imag_string is not None:
         layout = layout.recursively_apply(action)
 
+    _CONSTANTS = {}
+    if nan_string is not None:
+        _CONSTANTS[nan_string] = np.nan
+    if infinity_string is not None:
+        _CONSTANTS[infinity_string] = np.inf
+    if minus_infinity_string is not None:
+        _CONSTANTS[minus_infinity_string] = -np.inf
+
+    def replace_constants_action(node, **kwargs):
+        if isinstance(node, ak._v2.contents.ListOffsetArray):
+            if node.parameter("__array__") == "string":
+                return node._awkward_strings_to_constants(_CONSTANTS)
+
+    if len(_CONSTANTS) > 0:
+        layout = layout.recursively_apply(replace_constants_action)
+
     if isinstance(layout, ak._v2.contents.ListOffsetArray):
         layout = layout.content
 
