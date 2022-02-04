@@ -16,7 +16,7 @@ namespace awkward {
   const BuilderPtr
   Int64Builder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<Int64Builder>(options,
-                                          std::move(GrowableBuffer<int64_t>::empty(options)));
+                                          GrowableBuffer<int64_t>::empty(options));
   }
 
   Int64Builder::Int64Builder(const ArrayBuilderOptions& options,
@@ -24,9 +24,10 @@ namespace awkward {
       : options_(options)
       , buffer_(std::move(buffer)) { }
 
-  const GrowableBuffer<int64_t>&
-  Int64Builder::buffer() const {
-    return buffer_;
+  GrowableBuffer<int64_t>
+  Int64Builder::buffer() {
+    // FIXME: swap with an empty buffer!
+    return std::move(buffer_);
   }
 
   const std::string
@@ -41,7 +42,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           buffer_.ptr().get(),
-                          buffer_.length() * (int64_t)sizeof(int64_t));
+                          (int64_t)(buffer_.length() * sizeof(int64_t)));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"int64\", \"form_key\": \""
            + form_key.str() + "\"}";
@@ -49,7 +50,7 @@ namespace awkward {
 
   int64_t
   Int64Builder::length() const {
-    return buffer_.length();
+    return (int64_t)buffer_.length();
   }
 
   void

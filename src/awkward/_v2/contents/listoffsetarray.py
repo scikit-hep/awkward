@@ -2038,3 +2038,71 @@ class ListOffsetArray(Content):
             for i in range(starts.length):
                 out[i] = content[starts[i] : stops[i]]
             return out
+
+    def _to_json(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        if (
+            self.parameter("__array__") == "bytestring"
+            or self.parameter("__array__") == "string"
+        ):
+            content = ak._v2._util.tobytes(self._content.data)
+            starts, stops = self.starts, self.stops
+            out = [None] * starts.length
+            for i in range(starts.length):
+                out[i] = content[starts[i] : stops[i]].decode(errors="surrogateescape")
+            return out
+
+        else:
+            out = self._to_json_custom()
+            if out is not None:
+                return out
+
+            content = self._content._to_json(
+                nan_string,
+                infinity_string,
+                minus_infinity_string,
+                complex_real_string,
+                complex_imag_string,
+            )
+            starts, stops = self.starts, self.stops
+            out = [None] * starts.length
+
+            for i in range(starts.length):
+                out[i] = content[starts[i] : stops[i]]
+            return out
+
+    def _awkward_strings_to_nonfinite(self, nonfinit_dict):
+        if self.parameter("__array__") == "string":
+            strings = self.to_list()
+            if any(item in nonfinit_dict for item in strings):
+                numbers = self.nplike.empty(self.starts.length, np.float64)
+                has_another_string = False
+                for i, val in enumerate(strings):
+                    if val in nonfinit_dict:
+                        numbers[i] = nonfinit_dict[val]
+                    else:
+                        numbers[i] = None
+                        has_another_string = True
+
+                content = ak._v2.contents.NumpyArray(numbers)
+
+                if has_another_string:
+                    union_tags = ak._v2.index.Index8.zeros(content.length, self._nplike)
+                    content._nplike.isnan(content._data, union_tags._data)
+                    union_index = ak._v2.index.Index64(
+                        self._nplike.arange(content.length, dtype=np.int64)
+                    )
+
+                    return ak._v2.contents.unionarray.UnionArray(
+                        tags=union_tags,
+                        index=union_index,
+                        contents=[content, self.toListOffsetArray64(True)],
+                    )
+
+                return content

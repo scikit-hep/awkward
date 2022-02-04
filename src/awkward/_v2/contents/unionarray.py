@@ -1283,3 +1283,33 @@ class UnionArray(Content):
         for i, tag in enumerate(tags):
             out[i] = contents[tag][index[i]]
         return out
+
+    def _to_json(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        out = self._to_json_custom()
+        if out is not None:
+            return out
+
+        tags = self._tags.to(numpy)
+        index = self._index.to(numpy)
+        contents = [
+            x._to_json(
+                nan_string,
+                infinity_string,
+                minus_infinity_string,
+                complex_real_string,
+                complex_imag_string,
+            )
+            for x in self._contents
+        ]
+
+        out = [None] * tags.shape[0]
+        for i, tag in enumerate(tags):
+            out[i] = contents[tag][index[i]]
+        return out

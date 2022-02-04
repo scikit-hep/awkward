@@ -50,9 +50,6 @@ def test_from_iter():
     assert str(builder.type) == "3 * complex128"
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_from_json.py:26: NotImplementedError"
-)
 def test_from_json():
     array = ak._v2.operations.convert.from_json(
         '[{"r": 1.1, "i": 1.0}, {"r": 2.2, "i": 2.0}]'
@@ -108,9 +105,6 @@ def test_from_json():
     assert array.tolist() == [(1.1 + 1j), (2.2 + 2j)]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/convert/ak_to_json.py:21: NotImplementedError"
-)
 def test_to_json():
     # Complex numbers can't be converted to JSON without setting 'complex_record_fields',
     # but the error messages should refer to that name now. (I changed the name at

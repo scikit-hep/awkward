@@ -42,7 +42,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           content_.ptr().get(),
-                          content_.length() * (int64_t)sizeof(int64_t));
+                          (int64_t)(content_.length() * sizeof(int64_t)));
 
     std::string primitive(units_);
 
@@ -67,7 +67,7 @@ namespace awkward {
 
   int64_t
   DatetimeBuilder::length() const {
-    return content_.length();
+    return (int64_t)content_.length();
   }
 
   void

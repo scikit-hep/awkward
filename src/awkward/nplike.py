@@ -322,6 +322,22 @@ class NumpyLike(Singleton):
         # a, b, rtol=1e-05, atol=1e-08, equal_nan=False
         return self._module.isclose(*args, **kwargs)
 
+    def isnan(self, *args, **kwargs):
+        # array
+        return self._module.isnan(*args, **kwargs)
+
+    def isneginf(self, *args, **kwargs):
+        # array
+        return self._module.isneginf(*args, **kwargs)
+
+    def isposinf(self, *args, **kwargs):
+        # array
+        return self._module.isposinf(*args, **kwargs)
+
+    def isfinite(self, *args, **kwargs):
+        # array
+        return self._module.isfinite(*args, **kwargs)
+
     ############################ reducers
 
     def all(self, *args, **kwargs):

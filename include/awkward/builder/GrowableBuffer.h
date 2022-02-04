@@ -30,7 +30,8 @@ namespace awkward {
   /// copies the buffer it owns.
   template <typename T>
   class LIBAWKWARD_EXPORT_SYMBOL GrowableBuffer {
-    using UniquePtr = kernel::UniquePtr<T>;
+    using UniquePtrDeleter = decltype(kernel::array_deleter<T>());
+    using UniquePtr = std::unique_ptr<T, UniquePtrDeleter>;
   public:
     /// @brief Creates an empty GrowableBuffer.
     ///
@@ -45,7 +46,7 @@ namespace awkward {
     /// of `minreserve` and
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial}.
     static GrowableBuffer<T>
-      empty_reserved(const ArrayBuilderOptions& options, int64_t minreserve);
+      empty(const ArrayBuilderOptions& options, size_t minreserve);
 
     /// @brief Creates a GrowableBuffer in which all elements are initialized
     /// to a given value.
@@ -58,7 +59,7 @@ namespace awkward {
     /// This is similar to NumPy's
     /// [full](https://docs.scipy.org/doc/numpy/reference/generated/numpy.full.html).
     static GrowableBuffer<T>
-      full(const ArrayBuilderOptions& options, T value, int64_t length);
+      full(const ArrayBuilderOptions& options, T value, size_t length);
 
     /// @brief Creates a GrowableBuffer in which the elements are initialized
     /// to numbers counting from `0` to `length`.
@@ -70,7 +71,7 @@ namespace awkward {
     /// This is similar to NumPy's
     /// [arange](https://docs.scipy.org/doc/numpy/reference/generated/numpy.arange.html).
     static GrowableBuffer<T>
-      arange(const ArrayBuilderOptions& options, int64_t length);
+      arange(const ArrayBuilderOptions& options, size_t length);
 
     /// @brief Creates a GrowableBuffer from a full set of parameters.
     ///
@@ -83,8 +84,8 @@ namespace awkward {
     /// it is always less than or equal to #reserved because of reallocations.
     GrowableBuffer(const ArrayBuilderOptions& options,
                    GrowableBuffer::UniquePtr ptr,
-                   int64_t length,
-                   int64_t reserved);
+                   size_t length,
+                   size_t reserved);
 
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
     /// initial #reserved from
@@ -104,20 +105,20 @@ namespace awkward {
     ///
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of reallocations.
-    int64_t
+    size_t
       length() const;
 
     /// @brief Changes the #length in-place and possibly reallocate.
     ///
     /// If the `newlength` is larger than #reserved, #ptr is reallocated.
     void
-      set_length(int64_t newlength);
+      set_length(size_t newlength);
 
     /// @brief Currently allocated number of elements.
     ///
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of reallocations.
-    int64_t
+    size_t
       reserved() const;
 
     /// @brief Possibly changes the #reserved and reallocate.
@@ -127,7 +128,7 @@ namespace awkward {
     ///
     /// If #reserved actually changes, #ptr is reallocated.
     void
-      set_reserved(int64_t minreserved);
+      set_reserved(size_t minreserved);
 
     /// @brief Discards accumulated data, the #reserved returns to
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial},
@@ -153,9 +154,9 @@ namespace awkward {
     // @brief See #ptr.
     UniquePtr ptr_;
     // @brief See #length.
-    int64_t length_;
+    size_t length_;
     // @brief See #reserved.
-    int64_t reserved_;
+    size_t reserved_;
   };
 }
 

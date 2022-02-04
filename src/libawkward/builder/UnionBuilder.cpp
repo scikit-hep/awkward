@@ -22,14 +22,10 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::fromsingle(const ArrayBuilderOptions& options,
                            const BuilderPtr& firstcontent) {
-    GrowableBuffer<int8_t> tags =
-      GrowableBuffer<int8_t>::full(options, 0, firstcontent->length());
-    GrowableBuffer<int64_t> index =
-      GrowableBuffer<int64_t>::arange(options, firstcontent->length());
     std::vector<BuilderPtr> contents({ firstcontent });
     return std::make_shared<UnionBuilder>(options,
-                                          std::move(tags),
-                                          std::move(index),
+                                          GrowableBuffer<int8_t>::full(options, 0, (size_t)firstcontent->length()),
+                                          GrowableBuffer<int64_t>::arange(options, (size_t)firstcontent->length()),
                                           contents);
   }
 
@@ -55,11 +51,11 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-tags",
                           tags_.ptr().get(),
-                          tags_.length() * (int64_t)sizeof(int8_t));
+                          (int64_t)(tags_.length() * sizeof(int8_t)));
 
     container.copy_buffer(form_key.str() + "-index",
                           index_.ptr().get(),
-                          index_.length() * (int64_t)sizeof(int64_t));
+                          (int64_t)(index_.length() * sizeof(int64_t)));
 
     std::stringstream out;
     out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
@@ -75,7 +71,7 @@ namespace awkward {
 
   int64_t
   UnionBuilder::length() const {
-    return tags_.length();
+    return (int64_t)tags_.length();
   }
 
   void
@@ -162,7 +158,7 @@ namespace awkward {
         if (tofill != contents_.end()) {
           *tofill = Float64Builder::fromint64(
               options_,
-              static_cast<Int64Builder*>(tofill->get())->buffer());
+              std::move(static_cast<Int64Builder*>(tofill->get())->buffer()));
         }
         else {
           contents_.emplace_back(Float64Builder::fromempty(options_));
@@ -194,7 +190,7 @@ namespace awkward {
         if (tofill != contents_.end()) {
           *tofill = std::move(Complex128Builder::fromfloat64(
               options_,
-              static_cast<Float64Builder*>(tofill->get())->buffer()));
+              std::move(static_cast<Float64Builder*>(tofill->get())->buffer())));
         }
       }
       if (tofill == contents_.end()) {
@@ -204,7 +200,7 @@ namespace awkward {
         if (tofill != contents_.end()) {
           *tofill = std::move(Complex128Builder::fromint64(
               options_,
-              static_cast<Int64Builder*>(tofill->get())->buffer()));
+              std::move(static_cast<Int64Builder*>(tofill->get())->buffer())));
         }
         else {
           contents_.emplace_back(Complex128Builder::fromempty(options_));

@@ -29,7 +29,7 @@ namespace awkward {
     /// @param old The Int64Builder's buffer.
     static const BuilderPtr
       fromint64(const ArrayBuilderOptions& options,
-                const GrowableBuffer<int64_t>& old);
+                GrowableBuffer<int64_t> old);
 
     /// @brief Create a Float64Builder from a full set of parameters.
     ///
@@ -40,8 +40,8 @@ namespace awkward {
                    GrowableBuffer<double> buffer);
 
     /// @brief Contains the accumulated real numbers (`double`).
-    const GrowableBuffer<double>&
-      buffer() const;
+    GrowableBuffer<double>
+      buffer();
 
     /// @brief User-friendly name of this class: `"Float64Builder"`.
     const std::string
