@@ -334,6 +334,10 @@ class NumpyLike(Singleton):
         # array
         return self._module.isposinf(*args, **kwargs)
 
+    def isfinite(self, *args, **kwargs):
+        # array
+        return self._module.isfinite(*args, **kwargs)
+
     ############################ reducers
 
     def all(self, *args, **kwargs):

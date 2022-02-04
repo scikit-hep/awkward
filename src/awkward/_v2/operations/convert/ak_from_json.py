@@ -13,9 +13,8 @@ def from_json(
     infinity_string=None,
     minus_infinity_string=None,
     complex_record_fields=None,
-    highlevel=False,
+    highlevel=True,
     behavior=None,
-    buffersize=65536,
 ):
     """
     Args:
@@ -34,8 +33,6 @@ def from_json(
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        buffersize (int): Size (in bytes) of the buffer used by the JSON
-            parser.
 
     Converts a JSON string into an Awkward Array.
 
@@ -68,12 +65,12 @@ def from_json(
     except TypeError:
         return out
 
-    def action(recordnode, **kwargs):
-        if isinstance(recordnode, ak._v2.contents.RecordArray):
-            keys = recordnode.fields
+    def record_to_complex(node, **kwargs):
+        if isinstance(node, ak._v2.contents.RecordArray):
+            keys = node.fields
             if complex_record_fields[0] in keys and complex_record_fields[1] in keys:
-                real = recordnode[complex_record_fields[0]]
-                imag = recordnode[complex_record_fields[1]]
+                real = node[complex_record_fields[0]]
+                imag = node[complex_record_fields[1]]
                 if (
                     isinstance(real, ak._v2.contents.NumpyArray)
                     and len(real.shape) == 1
@@ -81,19 +78,17 @@ def from_json(
                     and len(imag.shape) == 1
                 ):
                     return ak._v2.contents.NumpyArray(
-                        recordnode._nplike.asarray(real)
-                        + recordnode._nplike.asarray(imag) * 1j
+                        node._nplike.asarray(real) + node._nplike.asarray(imag) * 1j
                     )
                 else:
                     raise ValueError("Complex number fields must be numbers")
                 return ak._v2.contents.NumpyArray(real + imag * 1j)
-            else:
-                return None
-        else:
-            return None
 
-    if complex_imag_string is not None:
-        layout = layout.recursively_apply(action)
+    layout = (
+        layout
+        if complex_imag_string is None
+        else layout.recursively_apply(record_to_complex)
+    )
 
     if highlevel:
         return ak._v2._util.wrap(layout, behavior, highlevel)

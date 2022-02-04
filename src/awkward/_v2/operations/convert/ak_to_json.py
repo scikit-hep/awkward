@@ -19,7 +19,6 @@ def to_json(
     infinity_string=None,
     minus_infinity_string=None,
     complex_record_fields=None,
-    buffersize=65536,
 ):
     """
     Args:
@@ -37,8 +36,6 @@ def to_json(
             number.
         complex_record_fields (None or (str, str)): If not None, defines a pair of
             field names to interpret records as complex numbers.
-        buffersize (int): Size (in bytes) of the buffer used by the JSON
-            parser.
 
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a JSON string.

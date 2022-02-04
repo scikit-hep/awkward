@@ -73,12 +73,12 @@ def from_json_file(
 
     layout = ak._v2.operations.convert.from_iter(data).layout
 
-    def action(recordnode, **kwargs):
-        if isinstance(recordnode, ak._v2.contents.RecordArray):
-            keys = recordnode.fields
+    def record_to_complex(node, **kwargs):
+        if isinstance(node, ak._v2.contents.RecordArray):
+            keys = node.fields
             if complex_record_fields[0] in keys and complex_record_fields[1] in keys:
-                real = recordnode[complex_record_fields[0]]
-                imag = recordnode[complex_record_fields[1]]
+                real = node[complex_record_fields[0]]
+                imag = node[complex_record_fields[1]]
                 if (
                     isinstance(real, ak._v2.contents.NumpyArray)
                     and len(real.shape) == 1
@@ -86,37 +86,37 @@ def from_json_file(
                     and len(imag.shape) == 1
                 ):
                     return ak._v2.contents.NumpyArray(
-                        recordnode._nplike.asarray(real)
-                        + recordnode._nplike.asarray(imag) * 1j
+                        node._nplike.asarray(real) + node._nplike.asarray(imag) * 1j
                     )
                 else:
                     raise ValueError("Complex number fields must be numbers")
                 return ak._v2.contents.NumpyArray(real + imag * 1j)
-            else:
-                return None
-        else:
-            return None
 
-    if complex_imag_string is not None:
-        layout = layout.recursively_apply(action)
+    layout = (
+        layout
+        if complex_imag_string is None
+        else layout.recursively_apply(record_to_complex)
+    )
 
-    _CONSTANTS = {}
+    nonfinite_dict = {}
     if nan_string is not None:
-        _CONSTANTS[nan_string] = np.nan
+        nonfinite_dict[nan_string] = np.nan
     if infinity_string is not None:
-        _CONSTANTS[infinity_string] = np.inf
+        nonfinite_dict[infinity_string] = np.inf
     if minus_infinity_string is not None:
-        _CONSTANTS[minus_infinity_string] = -np.inf
+        nonfinite_dict[minus_infinity_string] = -np.inf
 
-    def replace_constants_action(node, **kwargs):
+    def string_to_nonfinite(node, **kwargs):
         if isinstance(node, ak._v2.contents.ListOffsetArray):
             if node.parameter("__array__") == "string":
-                return node._awkward_strings_to_constants(_CONSTANTS)
+                return node._awkward_strings_to_nonfinite(nonfinite_dict)
 
-    if len(_CONSTANTS) > 0:
-        layout = layout.recursively_apply(replace_constants_action)
+    layout = layout.recursively_apply(string_to_nonfinite) if nonfinite_dict else layout
 
-    if isinstance(layout, ak._v2.contents.ListOffsetArray):
-        layout = layout.content
+    layout = (
+        layout.content
+        if isinstance(layout, ak._v2.contents.ListOffsetArray)
+        else layout
+    )
 
     return ak._v2._util.wrap(layout, behavior, highlevel)

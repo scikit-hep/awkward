@@ -144,64 +144,42 @@ class NumpyArray(Content):
         out._parameters = self._parameters
         return out
 
-    def _awkward_toUnionArray(self, nan_string, infinity_string, minus_infinity_string):
+    def _nonfinite_to_union(self, nan_string, infinity_string, minus_infinity_string):
         shape = self._data.shape
         zeroslen = [1]
         for x in shape:
             zeroslen.append(zeroslen[-1] * x)
 
         out = NumpyArray(self._data.reshape(-1), None, None, self._nplike)
-        local_index = out.localindex(-1)
         length = out.length
 
-        union_tags = ak._v2.index.Index8.zeros(length, self._nplike)
-        union_index = ak._v2.index.Index64(local_index._data)
-
-        nan_tags = ak._v2.index.Index8.zeros(length, self._nplike)
-        infinity_tags = ak._v2.index.Index8.zeros(length, self._nplike)
-        minus_infinity_tags = ak._v2.index.Index8.zeros(length, self._nplike)
-
-        if nan_string is not None:
-            self._nplike.isnan(out._data, nan_tags._data)
-        if infinity_string is not None:
-            self._nplike.isposinf(out._data, infinity_tags._data)
-        if minus_infinity_string is not None:
-            self._nplike.isneginf(out._data, minus_infinity_tags._data)
-
-        # FIXME: move to kernel?
-        for i in range(length):
-            union_tags._data[i] = (
-                1
-                if nan_tags._data[i] == 1
-                or infinity_tags._data[i] == 1
-                or minus_infinity_tags._data[i] == 1
-                else union_tags._data[i]
-            )
-            union_index._data[i] = (
-                0
-                if nan_tags._data[i] == 1
-                else (
-                    1
-                    if infinity_tags._data[i] == 1
-                    else (
-                        2 if minus_infinity_tags._data[i] == 1 else union_index._data[i]
-                    )
-                )
-            )
-
-        # FIXME: always use JavaScript equivalents (``NaN``, ``Infinity``, ``-Infinity``)?
-        content = ak._v2.operations.convert.from_iter(
-            [
-                nan_string if nan_string is not None else "NaN",
-                infinity_string if infinity_string is not None else "Infinity",
-                minus_infinity_string
-                if minus_infinity_string is not None
-                else "-Infinity",
-            ]
-        ).layout
+        is_nonfinite = ~self._nplike.isfinite(self._data)  # true for inf, -inf, nan
+        is_posinf = is_nonfinite & (self._data > 0)  # true for inf only
+        is_neginf = is_nonfinite & (self._data < 0)  # true for -inf only
+        is_nan = self._nplike.isnan(self._data)  # true for nan only
+        tags = self._nplike.zeros(length, np.int8)
+        tags[is_nonfinite] = 1
+        index = self._nplike.arange(length, dtype=np.int64)
+        index[is_posinf] = 0
+        index[is_neginf] = 1
+        index[is_nan] = 2
 
         out = ak._v2.contents.unionarray.UnionArray(
-            tags=union_tags, index=union_index, contents=[out, content]
+            tags=ak._v2.index.Index8(tags),
+            index=ak._v2.index.Index64(index),
+            contents=[
+                out,
+                ak._v2.operations.convert.from_iter(
+                    [
+                        infinity_string if infinity_string is not None else "Infinity",
+                        minus_infinity_string
+                        if minus_infinity_string is not None
+                        else "-Infinity",
+                        nan_string if nan_string is not None else "NaN",
+                    ],
+                    highlevel=False,
+                ),
+            ],
         )
         for i in range(len(shape) - 1, 0, -1):
             out = ak._v2.contents.RegularArray(
@@ -1313,7 +1291,7 @@ class NumpyArray(Content):
                 or infinity_string is not None
                 or minus_infinity_string is not None
             ):
-                out = self._awkward_toUnionArray(
+                out = self._nonfinite_to_union(
                     nan_string, infinity_string, minus_infinity_string
                 )
                 return out.tolist()
