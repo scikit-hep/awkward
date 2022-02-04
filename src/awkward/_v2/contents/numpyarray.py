@@ -151,15 +151,14 @@ class NumpyArray(Content):
             zeroslen.append(zeroslen[-1] * x)
 
         out = NumpyArray(self._data.reshape(-1), None, None, self._nplike)
-        length = out.length
 
         is_nonfinite = ~self._nplike.isfinite(self._data)  # true for inf, -inf, nan
         is_posinf = is_nonfinite & (self._data > 0)  # true for inf only
         is_neginf = is_nonfinite & (self._data < 0)  # true for -inf only
         is_nan = self._nplike.isnan(self._data)  # true for nan only
-        tags = self._nplike.zeros(length, np.int8)
+        tags = self._nplike.zeros(out.length, np.int8)
         tags[is_nonfinite] = 1
-        index = self._nplike.arange(length, dtype=np.int64)
+        index = self._nplike.arange(out.length, dtype=np.int64)
         index[is_posinf] = 0
         index[is_neginf] = 1
         index[is_nan] = 2

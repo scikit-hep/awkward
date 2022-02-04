@@ -2079,25 +2079,25 @@ class ListOffsetArray(Content):
 
     def _awkward_strings_to_nonfinite(self, nonfinit_dict):
         if self.parameter("__array__") == "string":
-            if any(item in nonfinit_dict for item in self.to_list()):
-                content = ak._v2._util.tobytes(self._content.data)
-                starts, stops = self.starts, self.stops
-                all_numbers = self.nplike.empty(starts.length, np.float64)
+            strings = self.to_list()
+            if any(item in nonfinit_dict for item in strings):
+                numbers = self.nplike.empty(self.starts.length, np.float64)
                 has_another_string = False
-                for i in range(starts.length):
-                    tmp = content[starts[i] : stops[i]].decode(errors="surrogateescape")
-                    if tmp in nonfinit_dict:
-                        all_numbers[i] = nonfinit_dict[tmp]
+                for i, val in enumerate(strings):
+                    if val in nonfinit_dict:
+                        numbers[i] = nonfinit_dict[val]
                     else:
-                        all_numbers[i] = None
+                        numbers[i] = None
                         has_another_string = True
 
-                content = ak._v2.contents.NumpyArray(all_numbers)
+                content = ak._v2.contents.NumpyArray(numbers)
 
                 if has_another_string:
                     union_tags = ak._v2.index.Index8.zeros(content.length, self._nplike)
                     content._nplike.isnan(content._data, union_tags._data)
-                    union_index = ak._v2.index.Index64(content.localindex(-1)._data)
+                    union_index = ak._v2.index.Index64(
+                        self._nplike.arange(content.length, dtype=np.int64)
+                    )
 
                     return ak._v2.contents.unionarray.UnionArray(
                         tags=union_tags,
