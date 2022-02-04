@@ -923,25 +923,21 @@ def contains_impl(obj, element):
 
 
 def array_supported(dtype):
-    return (
-        dtype
-        in (
-            numba.types.boolean,
-            numba.types.int8,
-            numba.types.int16,
-            numba.types.int32,
-            numba.types.int64,
-            numba.types.uint8,
-            numba.types.uint16,
-            numba.types.uint32,
-            numba.types.uint64,
-            numba.types.float32,
-            numba.types.float64,
-            numba.types.complex64,
-            numba.types.complex128,
-        )
-        or isinstance(dtype, (numba.types.NPDatetime, numba.types.NPTimedelta))
-    )
+    return dtype in (
+        numba.types.boolean,
+        numba.types.int8,
+        numba.types.int16,
+        numba.types.int32,
+        numba.types.int64,
+        numba.types.uint8,
+        numba.types.uint16,
+        numba.types.uint32,
+        numba.types.uint64,
+        numba.types.float32,
+        numba.types.float64,
+        numba.types.complex64,
+        numba.types.complex128,
+    ) or isinstance(dtype, (numba.types.NPDatetime, numba.types.NPTimedelta))
 
 
 @numba.extending.overload(ak.nplike.numpy.array)
