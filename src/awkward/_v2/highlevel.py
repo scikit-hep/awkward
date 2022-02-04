@@ -2363,7 +2363,7 @@ class ArrayBuilder(Sized):
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        ak._v2._connect.numba.register_and_check()
+        ak._v2.numba.register_and_check()
 
         return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
 
