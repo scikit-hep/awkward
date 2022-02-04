@@ -199,12 +199,30 @@ def test_RecordArray_NumpyArray():
         None,
     )
     roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
     roundtrip(v2c)
+    array = ak._v2.highlevel.Array(v2c)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
     roundtrip(v2d)
+    array = ak._v2.highlevel.Array(v2d)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_IndexedArray_NumpyArray():
@@ -213,6 +231,12 @@ def test_IndexedArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_IndexedOptionArray_NumpyArray():
@@ -221,6 +245,12 @@ def test_IndexedOptionArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ByteMaskedArray_NumpyArray():
@@ -230,6 +260,12 @@ def test_ByteMaskedArray_NumpyArray():
         valid_when=True,
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
@@ -237,6 +273,12 @@ def test_ByteMaskedArray_NumpyArray():
         valid_when=False,
     )
     roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_BitMaskedArray_NumpyArray():
@@ -273,6 +315,12 @@ def test_BitMaskedArray_NumpyArray():
         lsb_order=False,
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -307,6 +355,12 @@ def test_BitMaskedArray_NumpyArray():
         lsb_order=False,
     )
     roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -344,6 +398,12 @@ def test_BitMaskedArray_NumpyArray():
         lsb_order=True,
     )
     roundtrip(v2c)
+    array = ak._v2.highlevel.Array(v2c)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -381,6 +441,12 @@ def test_BitMaskedArray_NumpyArray():
         lsb_order=True,
     )
     roundtrip(v2d)
+    array = ak._v2.highlevel.Array(v2c)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_UnmaskedArray_NumpyArray():
@@ -388,6 +454,12 @@ def test_UnmaskedArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_UnionArray_NumpyArray():
@@ -400,6 +472,10 @@ def test_UnionArray_NumpyArray():
         ],
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
 
 
 def test_RegularArray_RecordArray_NumpyArray():
@@ -415,6 +491,12 @@ def test_RegularArray_RecordArray_NumpyArray():
         3,
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.regulararray.RegularArray(
         ak._v2.contents.recordarray.RecordArray(
@@ -429,6 +511,12 @@ def test_RegularArray_RecordArray_NumpyArray():
         zeros_length=10,
     )
     roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ListArray_RecordArray_NumpyArray():
@@ -445,6 +533,12 @@ def test_ListArray_RecordArray_NumpyArray():
         ),
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
@@ -460,6 +554,12 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
         ),
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_IndexedArray_RecordArray_NumpyArray():
@@ -475,6 +575,12 @@ def test_IndexedArray_RecordArray_NumpyArray():
         ),
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
@@ -490,6 +596,12 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
         ),
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
@@ -506,6 +618,12 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         valid_when=True,
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
@@ -520,6 +638,12 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         valid_when=False,
     )
     roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
@@ -575,6 +699,12 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         lsb_order=False,
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -629,6 +759,12 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         lsb_order=False,
     )
     roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -686,6 +822,12 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         lsb_order=True,
     )
     roundtrip(v2c)
+    array = ak._v2.highlevel.Array(v2c)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -743,6 +885,12 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         lsb_order=True,
     )
     roundtrip(v2d)
+    array = ak._v2.highlevel.Array(v2d)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
@@ -753,6 +901,12 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
         )
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_UnionArray_RecordArray_NumpyArray():
@@ -775,3 +929,7 @@ def test_UnionArray_RecordArray_NumpyArray():
         ],
     )
     roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
