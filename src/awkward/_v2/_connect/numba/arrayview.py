@@ -261,7 +261,7 @@ def lower_const_view(context, builder, viewtype, view):
     start = view.start
     stop = view.stop
     lookup = view.lookup
-    arrayptrs = lookup.arraytprs
+    arrayptrs = lookup.arrayptrs
 
     arrayptrs_val = context.make_constant_array(
         builder, numba.typeof(arrayptrs), arrayptrs
