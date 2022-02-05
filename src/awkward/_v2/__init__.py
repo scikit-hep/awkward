@@ -25,14 +25,17 @@ from awkward._v2.highlevel import Record  # noqa: F401
 from awkward._v2.highlevel import ArrayBuilder  # noqa: F401
 
 # behaviors
-behavior = {}
-from awkward._v2.behaviors.categorical import *  # noqa: E402, F401, F403
-from awkward._v2.behaviors.mixins import *  # noqa: E402, F401, F403
-from awkward._v2.behaviors.string import *  # noqa: E402, F401, F403
+import awkward._v2.behaviors.categorical  # noqa: F401
+import awkward._v2.behaviors.mixins  # noqa: F401
+import awkward._v2.behaviors.string  # noqa: F401
 
 # operations
-from awkward._v2.operations.io import *  # noqa: E402, F401, F403
-from awkward._v2.operations.convert import *  # noqa: E402, F401, F403
-from awkward._v2.operations.describe import *  # noqa: E402, F401, F403
-from awkward._v2.operations.structure import *  # noqa: E402, F401, F403
-from awkward._v2.operations.reducers import *  # noqa: E402, F401, F403
+from awkward._v2.operations.io import *  # noqa: F401, F403
+from awkward._v2.operations.convert import *  # noqa: F401, F403
+from awkward._v2.operations.describe import *  # noqa: F401, F403
+from awkward._v2.operations.structure import *  # noqa: F401, F403
+from awkward._v2.operations.reducers import *  # noqa: F401, F403
+
+
+behavior = {}
+behaviors.string.register(behavior)  # noqa: F405
