@@ -93,12 +93,6 @@ class CharBehavior(Array):
 #             raise TypeError("can only concatenate str to str")
 
 
-# ak._v2.behavior["byte"] = ByteBehavior
-# ak._v2.behavior["__typestr__", "byte"] = "byte"
-# ak._v2.behavior["char"] = CharBehavior
-# ak._v2.behavior["__typestr__", "char"] = "char"
-
-
 # class ByteStringBehavior(ak._v2.highlevel.Array):
 #     __name__ = "Array"
 
@@ -113,12 +107,6 @@ class CharBehavior(Array):
 #     def __iter__(self):
 #         for x in super(StringBehavior, self).__iter__():
 #             yield x.__str__()
-
-
-# ak._v2.behavior["bytestring"] = ByteStringBehavior
-# ak._v2.behavior["__typestr__", "bytestring"] = "bytes"
-# ak._v2.behavior["string"] = StringBehavior
-# ak._v2.behavior["__typestr__", "string"] = "string"
 
 
 # def _string_equal(one, two):
@@ -153,12 +141,6 @@ class CharBehavior(Array):
 #     return ~_string_equal(one, two)
 
 
-# ak.behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
-# ak.behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
-# ak.behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
-# ak.behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
-
-
 # def _string_broadcast(layout, offsets):
 #     nplike = ak.nplike.of(offsets)
 #     offsets = nplike.asarray(offsets)
@@ -169,106 +151,112 @@ class CharBehavior(Array):
 #     return ak._v2.contents.IndexedArray64(ak._v2.index.Index64(parents), layout).project()
 
 
-# ak.behavior["__broadcast__", "bytestring"] = _string_broadcast
-# ak.behavior["__broadcast__", "string"] = _string_broadcast
+def _string_numba_typer(viewtype):
+    import numba
+
+    if viewtype.type.parameters["__array__"] == "string":
+        return numba.types.string
+    else:
+        return numba.cpython.charseq.bytes_type
 
 
-# def _string_numba_typer(viewtype):
-#     import numba
+def _string_numba_lower(
+    context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
+):
+    import numba
+    import llvmlite.llvmpy.core
 
-#     if viewtype.type.parameters["__array__"] == "string":
-#         return numba.types.string
-#     else:
-#         return numba.cpython.charseq.bytes_type
+    whichpos = ak._v2._connect.numba.layout.posat(
+        context, builder, viewproxy.pos, viewtype.type.CONTENT
+    )
+    nextpos = ak._v2._connect.numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, whichpos
+    )
 
+    whichnextpos = ak._v2._connect.numba.layout.posat(
+        context, builder, nextpos, viewtype.type.contenttype.ARRAY
+    )
 
-# def _string_numba_lower(
-#     context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
-# ):
-#     import numba
-#     import llvmlite.llvmpy.core
+    startspos = ak._v2._connect.numba.layout.posat(
+        context, builder, viewproxy.pos, viewtype.type.STARTS
+    )
+    startsptr = ak._v2._connect.numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, startspos
+    )
+    startsarraypos = builder.add(viewproxy.start, atval)
+    start = ak._v2._connect.numba.layout.getat(
+        context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype
+    )
 
-#     whichpos = ak._v2._connect.numba.layout.posat(
-#         context, builder, viewproxy.pos, viewtype.type.CONTENT
-#     )
-#     nextpos = ak._v2._connect.numba.layout.getat(
-#         context, builder, viewproxy.arrayptrs, whichpos
-#     )
+    stopspos = ak._v2._connect.numba.layout.posat(
+        context, builder, viewproxy.pos, viewtype.type.STOPS
+    )
+    stopsptr = ak._v2._connect.numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, stopspos
+    )
+    stopsarraypos = builder.add(viewproxy.start, atval)
+    stop = ak._v2._connect.numba.layout.getat(
+        context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype
+    )
 
-#     whichnextpos = ak._v2._connect.numba.layout.posat(
-#         context, builder, nextpos, viewtype.type.contenttype.ARRAY
-#     )
+    baseptr = ak._v2._connect.numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, whichnextpos
+    )
+    rawptr = builder.add(
+        baseptr,
+        ak._v2._connect.numba.layout.castint(
+            context, builder, viewtype.type.indextype.dtype, numba.intp, start
+        ),
+    )
+    rawptr_cast = builder.inttoptr(
+        rawptr,
+        llvmlite.llvmpy.core.Type.pointer(
+            llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)
+        ),
+    )
+    strsize = builder.sub(stop, start)
+    strsize_cast = ak._v2._connect.numba.layout.castint(
+        context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
+    )
 
-#     startspos = ak._v2._connect.numba.layout.posat(
-#         context, builder, viewproxy.pos, viewtype.type.STARTS
-#     )
-#     startsptr = ak._v2._connect.numba.layout.getat(
-#         context, builder, viewproxy.arrayptrs, startspos
-#     )
-#     startsarraypos = builder.add(viewproxy.start, atval)
-#     start = ak._v2._connect.numba.layout.getat(
-#         context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype
-#     )
+    pyapi = context.get_python_api(builder)
+    gil = pyapi.gil_ensure()
 
-#     stopspos = ak._v2._connect.numba.layout.posat(
-#         context, builder, viewproxy.pos, viewtype.type.STOPS
-#     )
-#     stopsptr = ak._v2._connect.numba.layout.getat(
-#         context, builder, viewproxy.arrayptrs, stopspos
-#     )
-#     stopsarraypos = builder.add(viewproxy.start, atval)
-#     stop = ak._v2._connect.numba.layout.getat(
-#         context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype
-#     )
+    strptr = builder.bitcast(rawptr_cast, pyapi.cstring)
 
-#     baseptr = ak._v2._connect.numba.layout.getat(
-#         context, builder, viewproxy.arrayptrs, whichnextpos
-#     )
-#     rawptr = builder.add(
-#         baseptr,
-#         ak._v2._connect.numba.castint(
-#             context, builder, viewtype.type.indextype.dtype, numba.intp, start
-#         ),
-#     )
-#     rawptr_cast = builder.inttoptr(
-#         rawptr,
-#         llvmlite.llvmpy.core.Type.pointer(
-#             llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)
-#         ),
-#     )
-#     strsize = builder.sub(stop, start)
-#     strsize_cast = ak._v2._connect.numba.castint(
-#         context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
-#     )
+    if viewtype.type.parameters["__array__"] == "string":
+        kind = context.get_constant(numba.types.int32, pyapi.py_unicode_1byte_kind)
+        pystr = pyapi.string_from_kind_and_data(kind, strptr, strsize_cast)
+    else:
+        pystr = pyapi.bytes_from_string_and_size(strptr, strsize_cast)
 
-#     pyapi = context.get_python_api(builder)
-#     gil = pyapi.gil_ensure()
+    out = pyapi.to_native_value(rettype, pystr).value
 
-#     strptr = builder.bitcast(rawptr_cast, pyapi.cstring)
+    pyapi.gil_release(gil)
 
-#     if viewtype.type.parameters["__array__"] == "string":
-#         kind = context.get_constant(numba.types.int32, pyapi.py_unicode_1byte_kind)
-#         pystr = pyapi.string_from_kind_and_data(kind, strptr, strsize_cast)
-#     else:
-#         pystr = pyapi.bytes_from_string_and_size(strptr, strsize_cast)
-
-#     out = pyapi.to_native_value(rettype, pystr).value
-
-#     pyapi.gil_release(gil)
-
-#     return out
+    return out
 
 
-# ak.behavior["__numba_typer__", "bytestring"] = _string_numba_typer
-# ak.behavior["__numba_lower__", "bytestring"] = _string_numba_lower
-# ak.behavior["__numba_typer__", "string"] = _string_numba_typer
-# ak.behavior["__numba_lower__", "string"] = _string_numba_lower
+def register(behavior):
+    # behavior["byte"] = ByteBehavior
+    # behavior["__typestr__", "byte"] = "byte"
+    # behavior["char"] = CharBehavior
+    # behavior["__typestr__", "char"] = "char"
 
+    # behavior["bytestring"] = ByteStringBehavior
+    # behavior["__typestr__", "bytestring"] = "bytes"
+    # behavior["string"] = StringBehavior
+    # behavior["__typestr__", "string"] = "string"
 
-# __all__ = [
-#     x for x in list(globals()) if not x.startswith("_") and x not in ("ak", "np")
-# ]
+    # behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
+    # behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
+    # behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
+    # behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
 
+    # behavior["__broadcast__", "bytestring"] = _string_broadcast
+    # behavior["__broadcast__", "string"] = _string_broadcast
 
-# def __dir__():
-#     return __all__
+    behavior["__numba_typer__", "bytestring"] = _string_numba_typer
+    behavior["__numba_lower__", "bytestring"] = _string_numba_lower
+    behavior["__numba_typer__", "string"] = _string_numba_typer
+    behavior["__numba_lower__", "string"] = _string_numba_lower

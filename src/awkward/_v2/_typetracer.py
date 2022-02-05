@@ -517,7 +517,7 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def array_equal(self, *args, **kwargs):
         # array1, array2
-        raise NotImplementedError
+        return False
 
     def size(self, *args, **kwargs):
         # array

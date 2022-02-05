@@ -7,19 +7,19 @@
 #    - [ ] `__array__`
 #    - [ ] `__array_ufunc__`
 #    - [ ] `__array_function__`
-#    - [ ] `numba_type`
+#    - [X] `numba_type`
 #    - [ ] `__copy__`
 #    - [ ] `__deepcopy__`
-#    - [ ] `__contains__`
+#    - [X] `__contains__`
 #
 # TODO in Array:
 #
 #    - [ ] all docstrings are old
 #    - [ ] `__array_ufunc__`
-#    - [ ] `numba_type`
+#    - [X] `numba_type`
 #    - [ ] `__copy__`
 #    - [ ] `__deepcopy__`
-#    - [ ] `__contains__`
+#    - [X] `__contains__`
 #
 # TODO in ArrayBuilder: everything
 
@@ -1392,24 +1392,23 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         """
     #         return ak._v2._connect.numpy.array_function(func, types, args, kwargs)
 
-    #     @property
-    #     def numba_type(self):
-    #         """
-    #         The type of this Array when it is used in Numba. It contains enough
-    #         information to generate low-level code for accessing any element,
-    #         down to the leaves.
+    @property
+    def numba_type(self):
+        """
+        The type of this Array when it is used in Numba. It contains enough
+        information to generate low-level code for accessing any element,
+        down to the leaves.
 
-    #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
-    #         on types and signatures.
-    #         """
-    #         import awkward._v2._connect.numba  # noqa: F401
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
+        ak._v2.numba.register_and_check()
 
-    #         ak._v2._connect.numba.register_and_check()
-    #         if self._numbaview is None:
-    #             self._numbaview = ak._v2._connect.numba.arrayview.ArrayView.fromarray(self)
-    #         import numba
+        if self._numbaview is None:
+            self._numbaview = ak._v2._connect.numba.arrayview.ArrayView.fromarray(self)
+        import numba
 
-    #         return numba.typeof(self._numbaview)
+        return numba.typeof(self._numbaview)
 
     def __getstate__(self):
         packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
@@ -1469,12 +1468,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 "use ak.any() or ak.all()"
             )
 
-
-#     def __contains__(self, element):
-#         for test in ak._v2._util.completely_flatten(self._layout):
-#             if element in test:
-#                 return True
-#         return False
+    def __contains__(self, element):
+        for test in self._layout.completely_flatten():
+            if element in test:
+                return True
+        return False
 
 
 class Record(NDArrayOperatorsMixin):
@@ -2000,24 +1998,25 @@ class Record(NDArrayOperatorsMixin):
         """
         return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
-    #     @property
-    #     def numba_type(self):
-    #         """
-    #         The type of this Record when it is used in Numba. It contains enough
-    #         information to generate low-level code for accessing any element,
-    #         down to the leaves.
+    @property
+    def numba_type(self):
+        """
+        The type of this Record when it is used in Numba. It contains enough
+        information to generate low-level code for accessing any element,
+        down to the leaves.
 
-    #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
-    #         on types and signatures.
-    #         """
-    #         import awkward._v2._connect.numba  # noqa: F401
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
+        ak._v2.numba.register_and_check()
 
-    #         ak._v2._connect.numba.register_and_check()
-    #         if self._numbaview is None:
-    #             self._numbaview = ak._v2._connect.numba.arrayview.RecordView.fromrecord(self)
-    #         import numba
+        if self._numbaview is None:
+            self._numbaview = ak._v2._connect.numba.arrayview.RecordView.fromrecord(
+                self
+            )
+        import numba
 
-    #         return numba.typeof(self._numbaview)
+        return numba.typeof(self._numbaview)
 
     def __getstate__(self):
         packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
@@ -2075,12 +2074,11 @@ class Record(NDArrayOperatorsMixin):
             "use ak.any() or ak.all() or pick a field"
         )
 
-
-#     def __contains__(self, element):
-#         for test in ak._v2._util.completely_flatten(self._layout):
-#             if element in test:
-#                 return True
-#         return False
+    def __contains__(self, element):
+        for test in self._layout.completely_flatten():
+            if element in test:
+                return True
+        return False
 
 
 class ArrayBuilder(Sized):
@@ -2353,22 +2351,19 @@ class ArrayBuilder(Sized):
     #     """
     #     return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
-    # @property
-    # def numba_type(self):
-    #     """
-    #     The type of this Array when it is used in Numba. It contains enough
-    #     information to generate low-level code for accessing any element,
-    #     down to the leaves.
+    @property
+    def numba_type(self):
+        """
+        The type of this Array when it is used in Numba. It contains enough
+        information to generate low-level code for accessing any element,
+        down to the leaves.
 
-    #     See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
-    #     on types and signatures.
-    #     """
-    #     import awkward._v2._connect.numba
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
+        ak._v2.numba.register_and_check()
 
-    #     ak._v2._connect.numba.register_and_check()
-    #     import awkward._v2._connect.numba.builder  # noqa: F401
-
-    #     return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
+        return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
 
     def __bool__(self):
         if len(self) == 1:
