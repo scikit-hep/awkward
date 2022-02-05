@@ -882,7 +882,7 @@ def overload_contains(obj, element):
                     for fi, ft in enumerate(arraytype.contenttypes):
                         add_statement(indent, name + "[" + repr(fi) + "]", ft, False)
                 else:
-                    for fn, ft in zip(arraytype.recordlookup, arraytype.contenttypes):
+                    for fn, ft in zip(arraytype.fields, arraytype.contenttypes):
                         add_statement(indent, name + "[" + repr(fn) + "]", ft, False)
 
             elif arraytype.ndim == 1 and not arraytype.is_recordtype:

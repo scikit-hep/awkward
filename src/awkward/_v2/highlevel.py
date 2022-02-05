@@ -7,19 +7,19 @@
 #    - [ ] `__array__`
 #    - [ ] `__array_ufunc__`
 #    - [ ] `__array_function__`
-#    - [ ] `numba_type`
+#    - [X] `numba_type`
 #    - [ ] `__copy__`
 #    - [ ] `__deepcopy__`
-#    - [ ] `__contains__`
+#    - [X] `__contains__`
 #
 # TODO in Array:
 #
 #    - [ ] all docstrings are old
 #    - [ ] `__array_ufunc__`
-#    - [ ] `numba_type`
+#    - [X] `numba_type`
 #    - [ ] `__copy__`
 #    - [ ] `__deepcopy__`
-#    - [ ] `__contains__`
+#    - [X] `__contains__`
 #
 # TODO in ArrayBuilder: everything
 
@@ -1468,12 +1468,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 "use ak.any() or ak.all()"
             )
 
-
-#     def __contains__(self, element):
-#         for test in ak._v2._util.completely_flatten(self._layout):
-#             if element in test:
-#                 return True
-#         return False
+    def __contains__(self, element):
+        for test in self._layout.completely_flatten():
+            if element in test:
+                return True
+        return False
 
 
 class Record(NDArrayOperatorsMixin):
@@ -2075,12 +2074,11 @@ class Record(NDArrayOperatorsMixin):
             "use ak.any() or ak.all() or pick a field"
         )
 
-
-#     def __contains__(self, element):
-#         for test in ak._v2._util.completely_flatten(self._layout):
-#             if element in test:
-#                 return True
-#         return False
+    def __contains__(self, element):
+        for test in self._layout.completely_flatten():
+            if element in test:
+                return True
+        return False
 
 
 class ArrayBuilder(Sized):
