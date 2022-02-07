@@ -38,4 +38,4 @@ from awkward._v2.operations.reducers import *  # noqa: F401, F403
 
 
 behavior = {}
-behaviors.string.register(behavior)  # noqa: F405
+behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
