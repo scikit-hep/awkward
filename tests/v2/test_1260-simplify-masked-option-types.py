@@ -15,7 +15,7 @@ def test_byte_masked_array():
                     ak._v2.contents.NumpyArray(np.arange(2)),
                     ak._v2.contents.IndexedOptionArray(
                         ak._v2.index.Index64(np.array([0, -1])),
-                        ak._v2.contents.NumpyArray([1]),
+                        ak._v2.contents.NumpyArray(np.array([1], dtype=np.int64)),
                     ),
                 ],
                 ["a", "b"],
@@ -37,7 +37,7 @@ def test_bit_masked_array():
                     ak._v2.contents.NumpyArray(np.arange(2)),
                     ak._v2.contents.IndexedOptionArray(
                         ak._v2.index.Index64(np.array([0, -1])),
-                        ak._v2.contents.NumpyArray([1]),
+                        ak._v2.contents.NumpyArray(np.array([1], dtype=np.int64)),
                     ),
                 ],
                 ["a", "b"],
