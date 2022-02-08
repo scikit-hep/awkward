@@ -1188,3 +1188,14 @@ class RegularArray(Content):
             for i in range(length):
                 out[i] = content[(i) * size : (i + 1) * size]
             return out
+
+    def _to_backend(self, backend):
+        content = self._content._to_backend(backend)
+        return RegularArray(
+            content,
+            self._size,
+            zeros_length=self._length,
+            identifier=self.identifier,
+            parameters=self.parameters,
+            nplike=backend,
+        )

@@ -544,3 +544,12 @@ class UnmaskedArray(Content):
             return out
 
         return self._content._to_list(behavior)
+
+    def _to_backend(self, backend):
+        content = self._content._to_backend(backend)
+        return UnmaskedArray(
+            content,
+            identifier=self.identifier,
+            parameters=self.parameters,
+            nplike=backend,
+        )

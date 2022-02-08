@@ -1714,3 +1714,10 @@ class IndexedOptionArray(Content):
             if ind >= 0:
                 out[i] = content[ind]
         return out
+
+    def _to_backend(self, backend):
+        index = self._index._to_backend(backend)
+        content = self._content._to_backend(backend)
+        return IndexedOptionArray(
+            index, content, self.identifier, self.parameters, nplike=backend
+        )

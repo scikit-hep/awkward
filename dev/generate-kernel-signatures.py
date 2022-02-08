@@ -68,6 +68,7 @@ cuda_kernels_impl = [
     "awkward_BitMaskedArray_to_IndexedOptionArray",
 ]
 
+
 def reproducible_datetime():
 
     build_date = datetime.datetime.utcfromtimestamp(
@@ -242,9 +243,6 @@ def by_signature(lib):
         for spec in specification["kernels"]:
             for childfunc in spec["specializations"]:
                 special = [repr(spec["name"])]
-                implementations = [repr("cpu")]
-                if spec["name"] in cuda_kernels_impl:
-                    implementations.append(repr("cuda"))
                 arglist = [
                     type_to_pytype(x["type"], special) for x in childfunc["args"]
                 ]
@@ -255,13 +253,11 @@ def by_signature(lib):
     f.argtypes = [{}]
     f.restype = ERROR
     f.dir = [{}]
-    f.implementations = [{}]
     out[{}] = f
 """.format(
                         childfunc["name"],
                         ", ".join(arglist),
                         ", ".join(dirlist),
-                        ", ".join(implementations),
                         ", ".join(special),
                     )
                 )
@@ -275,8 +271,117 @@ def by_signature(lib):
     print("Done with  src/awkward/_kernel_signatures.py...")
 
 
+def kernel_signatures_cuda_py(specification):
+    print("Generating src/awkward/_kernel_signatures_cuda.py...")
+
+    with open(
+        os.path.join(CURRENT_DIR, "..", "src", "awkward", "_kernel_signatures_cuda.py"),
+        "w",
+    ) as file:
+        file.write(
+            """# AUTO GENERATED ON {0}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-kernel-signatures.py
+#
+# (It is usually run as part of pip install . or localbuild.py.)
+
+# fmt: off
+
+from ctypes import (
+    POINTER,
+    Structure,
+    c_bool,
+    c_int8,
+    c_uint8,
+    c_int16,
+    c_uint16,
+    c_int32,
+    c_uint32,
+    c_int64,
+    c_uint64,
+    c_float,
+    c_double,
+    c_char_p,
+)
+
+import numpy as np
+
+from numpy import (
+    bool_,
+    int8,
+    uint8,
+    int16,
+    uint16,
+    int32,
+    uint32,
+    int64,
+    uint64,
+    float32,
+    float64,
+)
+
+class ERROR(Structure):
+    _fields_ = [
+        ("str", c_char_p),
+        ("filename", c_char_p),
+        ("id", c_int64),
+        ("attempt", c_int64),
+        ("pass_through", c_bool),
+    ]
+
+
+def by_signature(lib):
+    out = {{}}
+""".format(
+                reproducible_datetime()
+            )
+        )
+
+        for spec in specification["kernels"]:
+            for childfunc in spec["specializations"]:
+                special = [repr(spec["name"])]
+                arglist = [
+                    type_to_pytype(x["type"], special) for x in childfunc["args"]
+                ]
+                dirlist = [repr(x["dir"]) for x in childfunc["args"]]
+                if spec["name"] in cuda_kernels_impl:
+                    file.write(
+                    """
+    f = lib.{}
+    f.argtypes = [{}]
+    f.restype = ERROR
+    f.dir = [{}]
+    out[{}] = f
+""".format(
+                        childfunc["name"],
+                        ", ".join(arglist),
+                        ", ".join(dirlist),
+                        ", ".join(special),
+                    )
+                )
+                else:
+                    file.write(
+                    """
+    out[{}] = None
+""".format(
+                        ", ".join(special),
+                    )
+                )
+
+
+        file.write(
+            """
+    return out
+"""
+        )
+
+    print("Done with  src/awkward/_kernel_signatures_cuda.py...")
 if __name__ == "__main__":
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         specification = yaml.safe_load(specfile)
         include_kernels_h(specification)
         kernel_signatures_py(specification)
+        kernel_signatures_cuda_py(specification)

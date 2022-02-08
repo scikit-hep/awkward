@@ -1185,3 +1185,33 @@ class NumpyArray(Content):
                 return out
 
             return self._data.tolist()
+
+    def _to_cuda(self):
+        cupy = ak.nplike.Cupy.instance()
+        return NumpyArray(
+            cupy.asarray(self._data),
+            identifier=self._identifier,
+            parameters=self.parameters,
+            nplike=cupy,
+        )
+
+    def _from_cuda(self):
+        cupy = ak.nplike.Cupy.instance()
+        return NumpyArray(
+            cupy.asnumpy(self._data.get()),
+            identifier=self._identifier,
+            parameters=self.parameters,
+            nplike=numpy,
+        )
+
+    def _to_backend(self, backend):
+        if isinstance(backend, ak.nplike.Numpy):
+            if isinstance(self.nplike, ak.nplike.Cupy):
+                return self._from_cuda()
+            elif isinstance(self.nplike, ak.nplike.Numpy):
+                return self
+        elif isinstance(backend, ak.nplike.Cupy):
+            if isinstance(self.nplike, ak.nplike.Numpy):
+                return self._to_cuda()
+            elif isinstance(self.nplike, ak.nplike.Cupy):
+                return self

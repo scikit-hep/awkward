@@ -6,14 +6,18 @@
 import ctypes
 import platform
 
-import awkward._kernel_signatures
+import awkward._kernel_signatures_cuda
 
 if platform.system() == "Windows":
-    raise ValueError("There is no support for Awkward CUDA on Windows. Please use a Linux system to use CUDA "
-                     "accelerated Awkward Arrays.")
+    raise ValueError(
+        "There is no support for Awkward CUDA on Windows. Please use a Linux system to use CUDA "
+        "accelerated Awkward Arrays."
+    )
 elif platform.system() == "Darwin":
-    raise ValueError("There is no support for Awkward CUDA on MacOS. Please use a Linux system to use CUDA "
-                     "accelerated Awkward Arrays.")
+    raise ValueError(
+        "There is no support for Awkward CUDA on MacOS. Please use a Linux system to use CUDA "
+        "accelerated Awkward Arrays."
+    )
 else:
     try:
         import awkward_cuda_kernels
@@ -26,4 +30,4 @@ or
         ) from None
 
 lib = ctypes.cdll.LoadLibrary(awkward_cuda_kernels.shared_library_path)
-kernel = awkward._kernel_signatures.by_signature(lib)
+kernel = awkward._kernel_signatures_cuda.by_signature(lib)

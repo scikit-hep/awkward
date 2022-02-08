@@ -2038,3 +2038,14 @@ class ListOffsetArray(Content):
             for i in range(starts.length):
                 out[i] = content[starts[i] : stops[i]]
             return out
+
+    def _to_backend(self, backend):
+        offsets = self._offsets._to_backend(backend)
+        content = self._content._to_backend(backend)
+        return ListOffsetArray(
+            offsets,
+            content,
+            identifier=self._identifier,
+            parameters=self._parameters,
+            nplike=library,
+        )

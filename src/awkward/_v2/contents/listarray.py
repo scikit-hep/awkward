@@ -1258,3 +1258,16 @@ class ListArray(Content):
 
     def _to_list(self, behavior):
         return ListOffsetArray._to_list(self, behavior)
+
+    def _to_backend(self, backend):
+        starts = self._starts._to_backend(backend)
+        stops = self._stops._to_backend(backend)
+        content = self._content._to_backend(backend)
+        return ListArray(
+            starts,
+            stops,
+            content,
+            identifier=self._identifier,
+            parameters=self._parameters,
+            nplike=backend,
+        )

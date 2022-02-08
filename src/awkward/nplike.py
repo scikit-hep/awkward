@@ -478,14 +478,17 @@ class Cupy(NumpyLike):
 
     def __getitem__(self, name_and_types):
         func = ak._cuda_kernels.kernel[name_and_types]
-        if 'cuda' in func.implementations:
+        if func is not None:
             return CupyKernel(func, name_and_types)
         else:
-            raise ValueError("{} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
-                             "continue the operation.".format(name_and_types[0]))
+            raise ValueError(
+                "{} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
+                "continue the operation.".format(name_and_types[0])
+            )
 
     def __init__(self):
         import awkward._cuda_kernels
+
         try:
             import cupy
         except ModuleNotFoundError:
@@ -518,7 +521,7 @@ or
     def ndarray(self):
         return self._module.ndarray
 
-    def asarray(self, array, dtype=None):
+    def asarray(self, array, dtype=None, order=None):
         if isinstance(
             array,
             (
@@ -530,11 +533,14 @@ or
         ):
             out = ak.operations.convert.to_cupy(array)
             if dtype is not None and out.dtype != dtype:
-                return self._module.asarray(out, dtype=dtype)
+                return self._module.asarray(out, dtype=dtype, order=order)
             else:
                 return out
         else:
-            return self._module.asarray(array, dtype=dtype)
+            return self._module.asarray(array, dtype=dtype, order=order)
+
+    def asnumpy(self, array):
+        return self._module.asnumpy(array)
 
     def ascontiguousarray(self, array, dtype=None):
         if isinstance(
@@ -620,13 +626,6 @@ or
 
     def count_nonzero(self, array, axis=None):
         out = self._module.count_nonzero(array, axis=axis)
-        if axis is None and isinstance(out, self._module.ndarray):
-            return out.item()
-        else:
-            return out
-
-    def sum(self, array, axis=None):
-        out = self._module.sum(array, axis=axis)
         if axis is None and isinstance(out, self._module.ndarray):
             return out.item()
         else:

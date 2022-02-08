@@ -971,3 +971,15 @@ class ByteMaskedArray(Content):
             if isvalid:
                 out[i] = content[i]
         return out
+
+    def _to_backend(self, backend):
+        content = self._content._to_backend(backend)
+        mask = self._mask._to_backend(backend)
+        return ByteMaskedArray(
+            mask,
+            content,
+            valid_when=self._valid_when,
+            identifier=self._identifier,
+            parameters=self._parameters,
+            nplike=backend,
+        )

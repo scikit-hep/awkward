@@ -165,6 +165,30 @@ class Index:
     def _nbytes_part(self):
         return self.data.nbytes
 
+    def _to_cuda(self):
+        cupy = ak.nplike.Cupy.instance()
+        return Index(cupy.asarray(self._data), metadata=self._metadata, nplike=cupy)
+
+    def _from_cuda(self):
+        cupy = ak.nplike.Cupy.instance()
+        return Index(
+            cupy.asnumpy(self._data.get()),
+            metadata=self._metadata,
+            nplike=ak.nplike.Numpy.instance(),
+        )
+
+    def _to_backend(self, backend):
+        if isinstance(backend, ak.nplike.Numpy):
+            if isinstance(self.nplike, ak.nplike.Cupy):
+                return self._from_cuda()
+            elif isinstance(self.nplike, ak.nplike.Numpy):
+                return self
+        elif isinstance(backend, ak.nplike.Cupy):
+            if isinstance(self.nplike, ak.nplike.Numpy):
+                return self._to_cuda()
+            elif isinstance(self.nplike, ak.nplike.Cupy):
+                return self
+
 
 class Index8(Index):
     _expected_dtype = np.dtype(np.int8)

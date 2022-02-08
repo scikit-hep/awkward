@@ -995,3 +995,14 @@ class RecordArray(Content):
             for i in range(length):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
+
+    def _to_backend(self, backend):
+        contents = [content._to_backend(backend) for content in self._contents]
+        return RecordArray(
+            contents,
+            self._fields,
+            length=self._length,
+            identifier=self._identifier,
+            parameters=self._parameters,
+            nplike=backend,
+        )

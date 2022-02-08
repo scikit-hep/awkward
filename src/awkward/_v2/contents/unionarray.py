@@ -1283,3 +1283,15 @@ class UnionArray(Content):
         for i, tag in enumerate(tags):
             out[i] = contents[tag][index[i]]
         return out
+
+    def _to_backend(self, backend):
+        index = self._index._to_backend(backend)
+        contents = [content._to_backend(backend) for content in self._contents]
+        return UnionArray(
+            self._tags,
+            index,
+            contents,
+            identifier=self.identifier,
+            parameters=self.parameters,
+            nplike=backend,
+        )

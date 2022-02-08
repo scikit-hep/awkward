@@ -616,3 +616,17 @@ class BitMaskedArray(Content):
             if isvalid:
                 out[i] = content[i]
         return out
+
+    def _to_backend(self, backend):
+        content = self._content._to_backend(backend)
+        mask = self._mask._to_backend(backend)
+        return BitMaskedArray(
+            mask,
+            content,
+            valid_when=self._valid_when,
+            length=len(self),
+            lsb_order=self._lsb_order,
+            identifier=self._identifier,
+            parameters=self._parameters,
+            nplike=backend,
+        )

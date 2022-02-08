@@ -337,3 +337,6 @@ class EmptyArray(Content):
 
     def _to_list(self, behavior):
         return []
+
+    def _to_backend(self, backend):
+        return EmptyArray(self._identifier, self._parameters, nplike=backend)

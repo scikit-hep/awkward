@@ -1298,3 +1298,9 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
     def flatten(self, axis=1, depth=0):
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
+
+    def to_backend(self, backend):
+        if backend == "cpu":
+            return self._to_backend(ak.nplike.Numpy.instance())
+        elif backend == "cuda":
+            return self._to_backend(ak.nplike.Cupy.instance())
