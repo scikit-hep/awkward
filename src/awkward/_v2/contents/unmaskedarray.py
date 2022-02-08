@@ -551,7 +551,7 @@ class UnmaskedArray(Content):
             content,
             identifier=self.identifier,
             parameters=self.parameters,
-            nplike=backend
+            nplike=backend,
         )
 
     def _to_json(
