@@ -115,7 +115,6 @@ def test_record_name():
     assert a.type(typestrs).parameters == {"__record__": "Dummy"}
 
 
-@pytest.mark.skip(reason="FIXME: ak.to_json not implemented")
 def test_builder_string():
     builder = ak._v2.highlevel.ArrayBuilder()
 
@@ -126,7 +125,7 @@ def test_builder_string():
     a = builder.snapshot()
     assert str(a) == "[b'one', b'two', b'three']"
     assert to_list(a) == [b"one", b"two", b"three"]
-    # assert ak._v2.operations.convert.to_json(a) == '["one","two","three"]'
+    assert ak._v2.operations.convert.to_json(a) == '["one","two","three"]'
     assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
     assert str(ak._v2.operations.describe.type(a)) == "3 * bytes"
 
@@ -139,7 +138,7 @@ def test_builder_string():
     a = builder.snapshot()
     assert str(a) == "['one', 'two', 'three']"
     assert to_list(a) == ["one", "two", "three"]
-    # assert ak._v2.operations.convert.to_json(a) == '["one","two","three"]'
+    assert ak._v2.operations.convert.to_json(a) == '["one","two","three"]'
     assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
     assert str(ak._v2.operations.describe.type(a)) == "3 * string"
 
@@ -162,7 +161,10 @@ def test_builder_string():
     a = builder.snapshot()
     assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
     assert to_list(a) == [["one", "two", "three"], [], ["four", "five"]]
-    # assert ak._v2.operations.convert.to_json(a) == '[["one","two","three"],[],["four","five"]]'
+    assert (
+        ak._v2.operations.convert.to_json(a)
+        == '[["one","two","three"],[],["four","five"]]'
+    )
     assert str(ak._v2.operations.describe.type(a)) == "3 * var * string"
 
 
@@ -173,7 +175,6 @@ def test_fromiter_fromjson():
     ) == [["one", "two", "three"], [], ["four", "five"]]
 
 
-@pytest.mark.skip(reason="FIXME: ak.from_json not implemented")
 def test_fromjson():
     assert to_list(ak._v2.operations.convert.from_json('["one", "two", "three"]')) == [
         "one",

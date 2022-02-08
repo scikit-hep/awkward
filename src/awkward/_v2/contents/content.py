@@ -1310,3 +1310,44 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
             return self._to_backend(ak.nplike.Cupy.instance())
         else:
             raise ValueError("Possible values for backends are `cpu` or `cuda`.")
+
+    def _to_json_custom(self):
+        cls = ak._v2._util.arrayclass(self, None)
+        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
+            array = cls(self)
+            out = [None] * self.length
+            for i in range(self.length):
+                out[i] = array[i]
+            return out
+
+    def tojson(
+        self,
+        nan_string=None,
+        infinity_string=None,
+        minus_infinity_string=None,
+        complex_real_string=None,
+        complex_imag_string=None,
+    ):
+        return self.to_json(
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_real_string,
+            complex_imag_string,
+        )
+
+    def to_json(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        return self.packed()._to_json(
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_real_string,
+            complex_imag_string,
+        )

@@ -15,20 +15,21 @@ namespace awkward {
   const BuilderPtr
   Float64Builder::fromempty(const ArrayBuilderOptions& options) {
     return std::make_shared<Float64Builder>(options,
-                                            std::move(GrowableBuffer<double>::empty(options)));
+                                            GrowableBuffer<double>::empty(options));
   }
 
   const BuilderPtr
   Float64Builder::fromint64(const ArrayBuilderOptions& options,
-                            const GrowableBuffer<int64_t>& old) {
+                            GrowableBuffer<int64_t> old) {
     GrowableBuffer<double> buffer =
-      GrowableBuffer<double>::empty_reserved(options, old.reserved());
+      GrowableBuffer<double>::empty(options, old.reserved());
     int64_t* oldraw = old.ptr().get();
     double* newraw = buffer.ptr().get();
-    for (int64_t i = 0;  i < old.length();  i++) {
+    for (size_t i = 0;  i < old.length();  i++) {
       newraw[i] = (double)oldraw[i];
     }
     buffer.set_length(old.length());
+    old.clear();
     return std::make_shared<Float64Builder>(options, std::move(buffer));
   }
 
@@ -37,9 +38,10 @@ namespace awkward {
       : options_(options)
       , buffer_(std::move(buffer)) { }
 
-  const GrowableBuffer<double>&
-  Float64Builder::buffer() const {
-    return buffer_;
+  GrowableBuffer<double>
+  Float64Builder::buffer() {
+    // FIXME: swap with an empty buffer
+    return std::move(buffer_);
   }
 
   const std::string
@@ -54,7 +56,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           buffer_.ptr().get(),
-                          buffer_.length() * (int64_t)sizeof(double));
+                          (int64_t)(buffer_.length() * sizeof(double)));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \""
            + form_key.str() + "\"}";
@@ -62,7 +64,7 @@ namespace awkward {
 
   int64_t
   Float64Builder::length() const {
-    return buffer_.length();
+    return (int64_t)buffer_.length();
   }
 
   void

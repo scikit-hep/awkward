@@ -983,3 +983,31 @@ class ByteMaskedArray(Content):
             parameters=self._parameters,
             nplike=backend,
         )
+
+    def _to_json(
+        self,
+        behavior,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        out = self._to_list_custom(behavior)
+        if out is not None:
+            return out
+
+        mask = self.mask_as_bool(valid_when=True, nplike=numpy)
+        content = self._content._to_json(
+            behavior,
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_real_string,
+            complex_imag_string,
+        )
+        out = [None] * self._mask.length
+        for i, isvalid in enumerate(mask):
+            if isvalid:
+                out[i] = content[i]
+        return out

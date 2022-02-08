@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import awkward as ak
 from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
@@ -145,6 +144,51 @@ class NumpyArray(Content):
             )
         out._identifier = self._identifier
         out._parameters = self._parameters
+        return out
+
+    def _nonfinite_to_union(self, nan_string, infinity_string, minus_infinity_string):
+        shape = self._data.shape
+        zeroslen = [1]
+        for x in shape:
+            zeroslen.append(zeroslen[-1] * x)
+
+        out = NumpyArray(self._data.reshape(-1), None, None, self._nplike)
+
+        is_nonfinite = ~self._nplike.isfinite(self._data)  # true for inf, -inf, nan
+        is_posinf = is_nonfinite & (self._data > 0)  # true for inf only
+        is_neginf = is_nonfinite & (self._data < 0)  # true for -inf only
+        is_nan = self._nplike.isnan(self._data)  # true for nan only
+        tags = self._nplike.zeros(out.length, np.int8)
+        tags[is_nonfinite] = 1
+        index = self._nplike.arange(out.length, dtype=np.int64)
+        index[is_posinf] = 0
+        index[is_neginf] = 1
+        index[is_nan] = 2
+
+        out = ak._v2.contents.unionarray.UnionArray(
+            tags=ak._v2.index.Index8(tags),
+            index=ak._v2.index.Index64(index),
+            contents=[
+                out,
+                ak._v2.operations.convert.from_iter(
+                    [
+                        infinity_string if infinity_string is not None else "Infinity",
+                        minus_infinity_string
+                        if minus_infinity_string is not None
+                        else "-Infinity",
+                        nan_string if nan_string is not None else "NaN",
+                    ],
+                    highlevel=False,
+                ),
+            ],
+        )
+        for i in range(len(shape) - 1, 0, -1):
+            out = ak._v2.contents.RegularArray(
+                out, shape[i], zeroslen[i], None, None, self._nplike
+            )
+        out._identifier = self._identifier
+        out._parameters = self._parameters
+
         return out
 
     def maybe_to_array(self, nplike):
@@ -1218,3 +1262,80 @@ class NumpyArray(Content):
                 return self._to_cuda()
             elif isinstance(self.nplike, ak.nplike.Cupy):
                 return self
+
+    def _to_json_custom(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        cls = ak._v2._util.arrayclass(self, None)
+        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
+            array = cls(self)
+            out = [None] * self.length
+            for i in range(self.length):
+                out[i] = array[i]
+            return out
+
+    def _to_json(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        if (
+            self.parameter("__array__") == "byte"
+            or self.parameter("__array__") == "char"
+        ):
+            return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")
+
+        else:
+            if self.dtype == np.complex128:
+                if complex_real_string is None or complex_imag_string is None:
+                    raise ValueError(
+                        "Complex numbers can't be converted to JSON without"
+                        " setting 'complex_record_fields' "
+                    )
+
+                return ak._v2.operations.structure.zip(
+                    {
+                        complex_real_string: ak._v2.contents.NumpyArray(
+                            self._data.real
+                        ),
+                        complex_imag_string: ak._v2.contents.NumpyArray(
+                            self._data.imag
+                        ),
+                    }
+                ).layout._to_json(
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string,
+                    complex_real_string,
+                    complex_imag_string,
+                )
+
+            if (
+                nan_string is not None
+                or infinity_string is not None
+                or minus_infinity_string is not None
+            ):
+                out = self._nonfinite_to_union(
+                    nan_string, infinity_string, minus_infinity_string
+                )
+                return out.tolist()
+
+            out = self._to_json_custom(
+                nan_string,
+                infinity_string,
+                minus_infinity_string,
+                complex_real_string,
+                complex_imag_string,
+            )
+            if out is not None:
+                return out
+
+            return self._data.tolist()

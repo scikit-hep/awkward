@@ -119,28 +119,28 @@ def little_endian(array):
 #     pass
 
 
-# def regularize_path(path):
-#     """
-#     Converts pathlib Paths into plain string paths (for all versions of Python).
-#     """
-#     is_path = False
+def regularize_path(path):
+    """
+    Converts pathlib Paths into plain string paths (for all versions of Python).
+    """
+    is_path = False
 
-#     if isinstance(path, getattr(os, "PathLike", ())):
-#         is_path = True
-#         path = os.fspath(path)
+    if isinstance(path, getattr(os, "PathLike", ())):
+        is_path = True
+        path = os.fspath(path)
 
-#     elif hasattr(path, "__fspath__"):
-#         is_path = True
-#         path = path.__fspath__()
+    elif hasattr(path, "__fspath__"):
+        is_path = True
+        path = path.__fspath__()
 
-#     elif path.__class__.__module__ == "pathlib":
-#         import pathlib
+    elif path.__class__.__module__ == "pathlib":
+        import pathlib
 
-#         if isinstance(path, pathlib.Path):
-#             is_path = True
-#             path = str(path)
+        if isinstance(path, pathlib.Path):
+            is_path = True
+            path = str(path)
 
-#     return is_path, path
+    return is_path, path
 
 
 class Behavior(Mapping):
@@ -247,44 +247,44 @@ def custom_ufunc(ufunc, layout, behavior):
     return None
 
 
-# def numba_array_typer(layouttype, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     arr = layouttype.parameters.get("__array__")
-#     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
-#         typer = behavior["__numba_typer__", arr]
-#         if callable(typer):
-#             return typer
-#     rec = layouttype.parameters.get("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         typer = behavior["__numba_typer__", ".", rec]
-#         if callable(typer):
-#             return typer
-#     deeprec = layouttype.parameters.get("__record__")
-#     if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
-#         typer = behavior["__numba_typer__", "*", deeprec]
-#         if callable(typer):
-#             return typer
-#     return None
+def numba_array_typer(layouttype, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    arr = layouttype.parameters.get("__array__")
+    if isstr(arr):
+        typer = behavior["__numba_typer__", arr]
+        if callable(typer):
+            return typer
+    rec = layouttype.parameters.get("__record__")
+    if isstr(rec):
+        typer = behavior["__numba_typer__", ".", rec]
+        if callable(typer):
+            return typer
+    deeprec = layouttype.parameters.get("__record__")
+    if isstr(deeprec):
+        typer = behavior["__numba_typer__", "*", deeprec]
+        if callable(typer):
+            return typer
+    return None
 
 
-# def numba_array_lower(layouttype, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     arr = layouttype.parameters.get("__array__")
-#     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
-#         lower = behavior["__numba_lower__", arr]
-#         if callable(lower):
-#             return lower
-#     rec = layouttype.parameters.get("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         lower = behavior["__numba_lower__", ".", rec]
-#         if callable(lower):
-#             return lower
-#     deeprec = layouttype.parameters.get("__record__")
-#     if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
-#         lower = behavior["__numba_lower__", "*", deeprec]
-#         if callable(lower):
-#             return lower
-#     return None
+def numba_array_lower(layouttype, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    arr = layouttype.parameters.get("__array__")
+    if isstr(arr):
+        lower = behavior["__numba_lower__", arr]
+        if callable(lower):
+            return lower
+    rec = layouttype.parameters.get("__record__")
+    if isstr(rec):
+        lower = behavior["__numba_lower__", ".", rec]
+        if callable(lower):
+            return lower
+    deeprec = layouttype.parameters.get("__record__")
+    if isstr(deeprec):
+        lower = behavior["__numba_lower__", "*", deeprec]
+        if callable(lower):
+            return lower
+    return None
 
 
 def recordclass(layout, behavior):
@@ -327,24 +327,24 @@ def gettypestr(parameters, typestrs):
     return None
 
 
-# def numba_record_typer(layouttype, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     rec = layouttype.parameters.get("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         typer = behavior["__numba_typer__", rec]
-#         if callable(typer):
-#             return typer
-#     return None
+def numba_record_typer(layouttype, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    rec = layouttype.parameters.get("__record__")
+    if isstr(rec):
+        typer = behavior["__numba_typer__", rec]
+        if callable(typer):
+            return typer
+    return None
 
 
-# def numba_record_lower(layouttype, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     rec = layouttype.parameters.get("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         lower = behavior["__numba_lower__", rec]
-#         if callable(lower):
-#             return lower
-#     return None
+def numba_record_lower(layouttype, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    rec = layouttype.parameters.get("__record__")
+    if isstr(rec):
+        lower = behavior["__numba_lower__", rec]
+        if callable(lower):
+            return lower
+    return None
 
 
 def overload(behavior, signature):
@@ -366,85 +366,85 @@ def overload(behavior, signature):
                 return custom
 
 
-# def numba_attrs(layouttype, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     rec = layouttype.parameters.get("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         for key, typer in behavior.items():
-#             if (
-#                 isinstance(key, tuple)
-#                 and len(key) == 3
-#                 and key[0] == "__numba_typer__"
-#                 and key[1] == rec
-#             ):
-#                 lower = behavior["__numba_lower__", key[1], key[2]]
-#                 yield key[2], typer, lower
+def numba_attrs(layouttype, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    rec = layouttype.parameters.get("__record__")
+    if isstr(rec):
+        for key, typer in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 3
+                and key[0] == "__numba_typer__"
+                and key[1] == rec
+            ):
+                lower = behavior["__numba_lower__", key[1], key[2]]
+                yield key[2], typer, lower
 
 
-# def numba_methods(layouttype, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     rec = layouttype.parameters.get("__record__")
-#     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
-#         for key, typer in behavior.items():
-#             if (
-#                 isinstance(key, tuple)
-#                 and len(key) == 4
-#                 and key[0] == "__numba_typer__"
-#                 and key[1] == rec
-#                 and key[3] == ()
-#             ):
-#                 lower = behavior["__numba_lower__", key[1], key[2], ()]
-#                 yield key[2], typer, lower
+def numba_methods(layouttype, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    rec = layouttype.parameters.get("__record__")
+    if isstr(rec):
+        for key, typer in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 4
+                and key[0] == "__numba_typer__"
+                and key[1] == rec
+                and key[3] == ()
+            ):
+                lower = behavior["__numba_lower__", key[1], key[2], ()]
+                yield key[2], typer, lower
 
 
-# def numba_unaryops(unaryop, left, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     done = False
+def numba_unaryops(unaryop, left, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    done = False
 
-#     if isinstance(left, ak._v2._connect.numba.layout.ContentType):
-#         left = left.parameters.get("__record__")
-#         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
-#             done = True
+    if isinstance(left, ak._v2._connect.numba.layout.ContentType):
+        left = left.parameters.get("__record__")
+        if not isstr(left):
+            done = True
 
-#     if not done:
-#         for key, typer in behavior.items():
-#             if (
-#                 isinstance(key, tuple)
-#                 and len(key) == 3
-#                 and key[0] == "__numba_typer__"
-#                 and key[1] == unaryop
-#                 and key[2] == left
-#             ):
-#                 lower = behavior["__numba_lower__", key[1], key[2]]
-#                 yield typer, lower
+    if not done:
+        for key, typer in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 3
+                and key[0] == "__numba_typer__"
+                and key[1] == unaryop
+                and key[2] == left
+            ):
+                lower = behavior["__numba_lower__", key[1], key[2]]
+                yield typer, lower
 
 
-# def numba_binops(binop, left, right, behavior):
-#     behavior = Behavior(ak._v2.behavior, behavior)
-#     done = False
+def numba_binops(binop, left, right, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    done = False
 
-#     if isinstance(left, ak._v2._connect.numba.layout.ContentType):
-#         left = left.parameters.get("__record__")
-#         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
-#             done = True
+    if isinstance(left, ak._v2._connect.numba.layout.ContentType):
+        left = left.parameters.get("__record__")
+        if not isstr(left):
+            done = True
 
-#     if isinstance(right, ak._v2._connect.numba.layout.ContentType):
-#         right = right.parameters.get("__record__")
-#         if not isinstance(right, str) and not (py27 and isinstance(right, unicode)):
-#             done = True
+    if isinstance(right, ak._v2._connect.numba.layout.ContentType):
+        right = right.parameters.get("__record__")
+        if not isstr(right):
+            done = True
 
-#     if not done:
-#         for key, typer in behavior.items():
-#             if (
-#                 isinstance(key, tuple)
-#                 and len(key) == 4
-#                 and key[0] == "__numba_typer__"
-#                 and key[1] == left
-#                 and key[2] == binop
-#                 and key[3] == right
-#             ):
-#                 lower = behavior["__numba_lower__", key[1], key[2], key[3]]
-#                 yield typer, lower
+    if not done:
+        for key, typer in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == 4
+                and key[0] == "__numba_typer__"
+                and key[1] == left
+                and key[2] == binop
+                and key[3] == right
+            ):
+                lower = behavior["__numba_lower__", key[1], key[2], key[3]]
+                yield typer, lower
 
 
 def behavior_of(*arrays, **kwargs):

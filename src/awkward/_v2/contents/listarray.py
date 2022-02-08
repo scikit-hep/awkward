@@ -132,8 +132,26 @@ class ListArray(Content):
         )
 
     def toListOffsetArray64(self, start_at_zero=False):
-        offsets = self._compact_offsets64(start_at_zero)
-        return self._broadcast_tooffsets64(offsets)
+        starts = self._starts.data
+        stops = self._stops.data
+        if self._nplike.array_equal(starts[1:], stops[:-1]):
+            offsets = self._nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
+            if offsets.shape[0] == 1:
+                offsets[0] = 0
+            else:
+                offsets[:-1] = starts
+                offsets[-1] = stops[-1]
+            return ListOffsetArray(
+                ak._v2.index.Index(offsets),
+                self._content,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            ).toListOffsetArray64(start_at_zero=start_at_zero)
+
+        else:
+            offsets = self._compact_offsets64(start_at_zero)
+            return self._broadcast_tooffsets64(offsets)
 
     def toRegularArray(self):
         offsets = self._compact_offsets64(True)
@@ -1270,4 +1288,21 @@ class ListArray(Content):
             identifier=self._identifier,
             parameters=self._parameters,
             nplike=backend,
+        )
+
+    def _to_json(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        return ListOffsetArray._to_json(
+            self,
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_real_string,
+            complex_imag_string,
         )

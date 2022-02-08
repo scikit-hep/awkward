@@ -121,6 +121,14 @@ class NumpyForm(Form):
         else:
             return False
 
+    def toRegularForm(self):
+        out = NumpyForm(self._primitive, (), False, None, None)
+        for x in self._inner_shape[::-1]:
+            out = ak._v2.forms.RegularForm(out, x, False, None, None)
+        out._has_identifier = self._has_identifier
+        out._parameters = self._parameters
+        return out
+
     def generated_compatibility(self, other):
         if other is None:
             return True

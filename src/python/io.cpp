@@ -8,7 +8,6 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/io/json.h"
 #include "awkward/io/uproot.h"
-#include "awkward/python/content.h"
 
 #include "awkward/python/io.h"
 
@@ -20,29 +19,21 @@ void
 make_fromjson(py::module& m, const std::string& name) {
   m.def(name.c_str(),
         [](const std::string& source,
+           ak::ArrayBuilder& builder,
            const char* nan_string,
            const char* infinity_string,
            const char* minus_infinity_string,
-           int64_t initial,
-           double resize,
-           int64_t buffersize) -> py::object {
-    auto out = ak::FromJsonString(source.c_str(),
-                                  ak::ArrayBuilderOptions(initial, resize),
-                                  nan_string,
-                                  infinity_string,
-                                  minus_infinity_string);
-    if (out.first == 1) {
-      return box(unbox_content(::builder_snapshot(out.second))->getitem_at_nowrap(0));
-    }
-    else {
-      return ::builder_snapshot(out.second);
-    }
+           int64_t buffersize) -> int64_t {
+    return ak::FromJsonString(source.c_str(),
+                              builder,
+                              nan_string,
+                              infinity_string,
+                              minus_infinity_string);
   }, py::arg("source"),
+     py::arg("builder"),
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,
      py::arg("minus_infinity_string") = nullptr,
-     py::arg("initial") = 1024,
-     py::arg("resize") = 1.5,
      py::arg("buffersize") = 65536);
 }
 
@@ -50,12 +41,11 @@ void
 make_fromjsonfile(py::module& m, const std::string& name) {
   m.def(name.c_str(),
         [](const std::string& source,
+           ak::ArrayBuilder& builder,
            const char* nan_string,
            const char* infinity_string,
            const char* minus_infinity_string,
-           int64_t initial,
-           double resize,
-           int64_t buffersize) -> py::object {
+           int64_t buffersize) -> int64_t {
 #ifdef _MSC_VER
       FILE* file;
       if (fopen_s(&file, source.c_str(), "rb") != 0) {
@@ -69,34 +59,26 @@ make_fromjsonfile(py::module& m, const std::string& name) {
           + FILENAME(__LINE__));
       }
       int num = 0;
-      ak::BuilderPtr out(nullptr);
       try {
-        auto out_pair = ak::FromJsonFile(file,
-                           ak::ArrayBuilderOptions(initial, resize),
-                           buffersize,
-                           nan_string,
-                           infinity_string,
-                           minus_infinity_string);
-        num = out_pair.first;
-        out = out_pair.second;
+        num = ak::FromJsonFile(file,
+                         builder,
+                         buffersize,
+                         nan_string,
+                         infinity_string,
+                         minus_infinity_string);
       }
       catch (...) {
         fclose(file);
         throw;
       }
       fclose(file);
-      if (num == 1) {
-        return box(unbox_content(::builder_snapshot(out))->getitem_at_nowrap(0));
-      }
-      else {
-        return ::builder_snapshot(out);
-      }
+
+      return num;
   }, py::arg("source"),
+     py::arg("builder"),
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,
      py::arg("minus_infinity_string") = nullptr,
-     py::arg("initial") = 1024,
-     py::arg("resize") = 1.5,
      py::arg("buffersize") = 65536);
 }
 

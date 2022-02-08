@@ -1006,3 +1006,61 @@ class RecordArray(Content):
             parameters=self._parameters,
             nplike=backend,
         )
+
+    def _to_json(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        out = self._to_json_custom()
+        if out is not None:
+            return out
+
+        cls = ak._v2._util.recordclass(self, None)
+        if cls is not ak._v2.highlevel.Record:
+            length = self._length
+            out = [None] * length
+            for i in range(length):
+                out[i] = cls(self[i])
+            return out
+
+        if self.is_tuple:
+            contents = [
+                x._to_json(
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string,
+                    complex_real_string,
+                    complex_imag_string,
+                )
+                for x in self._contents
+            ]
+            length = self._length
+            out = [None] * length
+            fields = []
+            for i in range(length):
+                fields.append(str(i))
+            for i in range(length):
+                out[i] = dict(zip(fields, [x[i] for x in contents]))
+            return out
+
+        else:
+            fields = self._fields
+            contents = [
+                x._to_json(
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string,
+                    complex_real_string,
+                    complex_imag_string,
+                )
+                for x in self._contents
+            ]
+            length = self._length
+            out = [None] * length
+            for i in range(length):
+                out[i] = dict(zip(fields, [x[i] for x in contents]))
+            return out

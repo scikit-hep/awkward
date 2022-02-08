@@ -1,37 +1,116 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import sys
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.contents.content import NestedIndexError
+numba = pytest.importorskip("numba")
 
-to_list = ak._v2.operations.convert.to_list
+ak_numba = pytest.importorskip("awkward._v2.numba")
+ak_numba_arrayview = pytest.importorskip("awkward._v2._connect.numba.arrayview")
+ak_numba_layout = pytest.importorskip("awkward._v2._connect.numba.layout")
+
+ak_numba.register_and_check()
+
+
+def roundtrip(layout):
+    assert isinstance(layout, ak._v2.contents.Content)
+
+    lookup = ak_numba_arrayview.Lookup(layout)
+    assert isinstance(lookup, ak_numba_arrayview.Lookup)
+
+    numbatype = ak_numba_arrayview.tonumbatype(layout.form)
+    assert isinstance(numbatype, ak_numba_layout.ContentType)
+
+    layout2 = numbatype.tolayout(lookup, 0, ())
+    assert isinstance(layout2, ak._v2.contents.Content)
+
+    assert layout.to_list() == layout2.to_list()
+    assert layout.form.type == layout2.form.type
+
+
+@numba.njit
+def swallow(array):
+    pass
+
+
+@numba.njit
+def passthrough(array):
+    return array
+
+
+@numba.njit
+def passthrough2(array):
+    return array, array
+
+
+@numba.njit
+def digest(array):
+    return array[0]
+
+
+@numba.njit
+def digest2(array):
+    tmp = array[0]
+    return tmp, tmp, array[0]
+
+
+def buffers(layout):
+    if isinstance(layout, ak._v2.contents.NumpyArray):
+        yield layout.data
+    for attr in dir(layout):
+        obj = getattr(layout, attr)
+        if isinstance(obj, ak._v2.index.Index):
+            yield obj.data
+        elif attr == "content":
+            yield from buffers(obj)
+        elif attr == "contents":
+            for x in obj:
+                yield from buffers(x)
+
+
+def memoryleak(array, function):
+    counts = None
+    for _ in range(10):
+        function(array)
+        this_counts = [sys.getrefcount(x) for x in buffers(array.layout)]
+        if counts is None:
+            counts = this_counts
+        else:
+            assert counts == this_counts
 
 
 def test_EmptyArray():
-    v2a = ak._v2.contents.emptyarray.EmptyArray()
-    with pytest.raises(IndexError):
-        v2a[np.array([0, 1], np.int64)]
+    v2a = ak._v2.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64))
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
 
 
 def test_NumpyArray():
     v2a = ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
-    resultv2 = v2a[np.array([0, 1, -2], np.int64)]
-    assert to_list(resultv2) == [0.0, 1.1, 2.2]
-    assert v2a.typetracer[np.array([0, 1, -2], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     )
-    resultv2 = v2b[np.array([1, 1, 1], np.int64)]
-    assert to_list(resultv2) == [
-        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
-        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
-        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
-    ]
-    assert v2b.typetracer[np.array([1, 1, 1], np.int64)].form == resultv2.form
+    roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_RegularArray_NumpyArray():
@@ -39,18 +118,26 @@ def test_RegularArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         3,
     )
-    resultv2 = v2a[np.array([0, 1], np.int64)]
-    assert to_list(resultv2) == [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
-    assert v2a.typetracer[np.array([0, 1], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.regulararray.RegularArray(
-        ak._v2.contents.emptyarray.EmptyArray(), 0, zeros_length=10
+        ak._v2.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64)),
+        0,
+        zeros_length=10,
     )
-    resultv2 = v2b[np.array([0, 0, 0], np.int64)]
-    assert to_list(resultv2) == [[], [], []]
-    assert v2b.typetracer[np.array([0, 0, 0], np.int64)].form == resultv2.form
-
-    assert to_list(resultv2) == [[], [], []]
+    roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ListArray_NumpyArray():
@@ -61,9 +148,13 @@ def test_ListArray_NumpyArray():
             np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
         ),
     )
-    resultv2 = v2a[np.array([1, -1], np.int64)]
-    assert to_list(resultv2) == [[], [4.4, 5.5]]
-    assert v2a.typetracer[np.array([1, -1], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ListOffsetArray_NumpyArray():
@@ -71,15 +162,15 @@ def test_ListOffsetArray_NumpyArray():
         ak._v2.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
         ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
     )
-    resultv2 = v2a[np.array([1, 2], np.int64)]
-    assert to_list(resultv2) == [[], [4.4, 5.5]]
-    assert v2a.typetracer[np.array([1, 2], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
-@pytest.mark.skipif(
-    ak._util.win,
-    reason="unstable dict order. -- on Windows",
-)
 def test_RecordArray_NumpyArray():
     v2a = ak._v2.contents.recordarray.RecordArray(
         [
@@ -90,9 +181,13 @@ def test_RecordArray_NumpyArray():
         ],
         ["x", "y"],
     )
-    resultv2 = v2a[np.array([1, 2], np.int64)]
-    assert to_list(resultv2) == [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]
-    assert v2a.typetracer[np.array([1, 2], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.recordarray.RecordArray(
         [
@@ -103,19 +198,31 @@ def test_RecordArray_NumpyArray():
         ],
         None,
     )
-    resultv2 = v2b[np.array([0, 1, 2, 3, -1], np.int64)]
-    assert to_list(resultv2) == [(0, 0.0), (1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4)]
-    assert v2b.typetracer[np.array([0, 1, 2, 3, -1], np.int64)].form == resultv2.form
+    roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
-    resultv2 = v2c[np.array([0], np.int64)]
-    assert to_list(resultv2) == [{}]
-    assert v2c.typetracer[np.array([0], np.int64)].form == resultv2.form
+    roundtrip(v2c)
+    array = ak._v2.highlevel.Array(v2c)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
-    resultv2 = v2d[np.array([0], np.int64)]
-    assert to_list(resultv2) == [()]
-    assert v2d.typetracer[np.array([0], np.int64)].form == resultv2.form
+    roundtrip(v2d)
+    array = ak._v2.highlevel.Array(v2d)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_IndexedArray_NumpyArray():
@@ -123,9 +230,13 @@ def test_IndexedArray_NumpyArray():
         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
-    resultv2 = v2a[np.array([0, 1, 4], np.int64)]
-    assert to_list(resultv2) == [3.3, 3.3, 5.5]
-    assert v2a.typetracer[np.array([0, 1, 4], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_IndexedOptionArray_NumpyArray():
@@ -133,9 +244,13 @@ def test_IndexedOptionArray_NumpyArray():
         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
-    resultv2 = v2a[np.array([0, 1, -1], np.int64)]
-    assert to_list(resultv2) == [3.3, 3.3, 5.5]
-    assert v2a.typetracer[np.array([0, 1, -1], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ByteMaskedArray_NumpyArray():
@@ -144,18 +259,26 @@ def test_ByteMaskedArray_NumpyArray():
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
-    resultv2 = v2a[np.array([0, 1, 2], np.int64)]
-    assert to_list(resultv2) == [1.1, None, 3.3]
-    assert v2a.typetracer[np.array([0, 1, 2], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
-    resultv2 = v2b[np.array([0, 1, 2], np.int64)]
-    assert to_list(resultv2) == [1.1, None, 3.3]
-    assert v2b.typetracer[np.array([0, 1, 2], np.int64)].form == resultv2.form
+    roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_BitMaskedArray_NumpyArray():
@@ -191,9 +314,13 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    resultv2 = v2a[np.array([0, 1, 4], np.int64)]
-    assert to_list(resultv2) == [0.0, 1.0, None]
-    assert v2a.typetracer[np.array([0, 1, 4], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -227,9 +354,13 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    resultv2 = v2b[np.array([0, 1, 4], np.int64)]
-    assert to_list(resultv2) == [0.0, 1.0, None]
-    assert v2b.typetracer[np.array([0, 1, 4], np.int64)].form == resultv2.form
+    roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -266,9 +397,13 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    resultv2 = v2c[np.array([0, 1, 4], np.int64)]
-    assert to_list(resultv2) == [0.0, 1.0, None]
-    assert v2c.typetracer[np.array([0, 1, 4], np.int64)].form == resultv2.form
+    roundtrip(v2c)
+    array = ak._v2.highlevel.Array(v2c)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -305,18 +440,26 @@ def test_BitMaskedArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    resultv2 = v2d[np.array([0, 1, 4], np.int64)]
-    assert to_list(resultv2) == [0.0, 1.0, None]
-    assert v2d.typetracer[np.array([0, 1, 4], np.int64)].form == resultv2.form
+    roundtrip(v2d)
+    array = ak._v2.highlevel.Array(v2c)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_UnmaskedArray_NumpyArray():
     v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
     )
-    resultv2 = v2a[np.array([0, 1, 3], np.int64)]
-    assert to_list(resultv2) == [0.0, 1.1, 3.3]
-    assert v2a.typetracer[np.array([0, 1, 3], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_UnionArray_NumpyArray():
@@ -328,9 +471,11 @@ def test_UnionArray_NumpyArray():
             ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
-    resultv2 = v2a[np.array([0, 1, 3], np.int64)]
-    assert to_list(resultv2) == [5.5, 4.4, 2]
-    assert v2a.typetracer[np.array([0, 1, 3], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
 
 
 def test_RegularArray_RecordArray_NumpyArray():
@@ -345,34 +490,33 @@ def test_RegularArray_RecordArray_NumpyArray():
         ),
         3,
     )
-    resultv2 = v2a._carry(
-        ak._v2.index.Index(np.array([0], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [[{"nest": 0.0}, {"nest": 1.1}, {"nest": 2.2}]]
-    assert (
-        v2a.typetracer._carry(
-            ak._v2.index.Index(np.array([0], np.int64)), False, NestedIndexError
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.regulararray.RegularArray(
         ak._v2.contents.recordarray.RecordArray(
-            [ak._v2.contents.emptyarray.EmptyArray()], ["nest"]
+            [
+                ak._v2.contents.emptyarray.EmptyArray().toNumpyArray(
+                    np.dtype(np.float64)
+                )
+            ],
+            ["nest"],
         ),
         0,
         zeros_length=10,
     )
-    resultv2 = v2b._carry(
-        ak._v2.index.Index(np.array([0], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [[]]
-    assert (
-        v2b.typetracer._carry(
-            ak._v2.index.Index(np.array([0], np.int64)), False, NestedIndexError
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ListArray_RecordArray_NumpyArray():
@@ -388,9 +532,13 @@ def test_ListArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
-    resultv2 = v2a[np.array([0, 1], np.int64)]
-    assert to_list(resultv2) == [[{"nest": 1.1}, {"nest": 2.2}, {"nest": 3.3}], []]
-    assert v2a.typetracer[np.array([0, 1], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
@@ -405,9 +553,13 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
-    resultv2 = v2a[np.array([1, 2], np.int64)]
-    assert to_list(resultv2) == [[], [{"nest": 4.4}, {"nest": 5.5}]]
-    assert v2a.typetracer[np.array([1, 2], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_IndexedArray_RecordArray_NumpyArray():
@@ -422,9 +574,13 @@ def test_IndexedArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
-    resultv2 = v2a[np.array([0, 1, 4], np.int64)]
-    assert to_list(resultv2) == [{"nest": 3.3}, {"nest": 3.3}, {"nest": 5.5}]
-    assert v2a.typetracer[np.array([0, 1, 4], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
@@ -439,9 +595,13 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
             ["nest"],
         ),
     )
-    resultv2 = v2a[np.array([0, 1, 4], np.int64)]
-    assert to_list(resultv2) == [{"nest": 3.3}, {"nest": 3.3}, None]
-    assert v2a.typetracer[np.array([0, 1, 4], np.int64)].form == resultv2.form
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
@@ -457,16 +617,13 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=True,
     )
-    resultv2 = v2a._carry(
-        ak._v2.index.Index(np.array([0, 1, 4], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [{"nest": 1.1}, None, {"nest": 5.5}]
-    assert (
-        v2a.typetracer._carry(
-            ak._v2.index.Index(np.array([0, 1, 4], np.int64)), False, NestedIndexError
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
@@ -480,16 +637,13 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ),
         valid_when=False,
     )
-    resultv2 = v2b._carry(
-        ak._v2.index.Index(np.array([3, 1, 4], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [None, None, {"nest": 5.5}]
-    assert (
-        v2b.typetracer._carry(
-            ak._v2.index.Index(np.array([3, 1, 4], np.int64)), False, NestedIndexError
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
@@ -544,16 +698,13 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    resultv2 = v2a._carry(
-        ak._v2.index.Index(np.array([0, 1, 4], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [{"nest": 0.0}, {"nest": 1.0}, None]
-    assert (
-        v2a.typetracer._carry(
-            ak._v2.index.Index(np.array([0, 1, 4], np.int64)), False, NestedIndexError
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -607,16 +758,13 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=False,
     )
-    resultv2 = v2b._carry(
-        ak._v2.index.Index(np.array([1, 1, 4], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [{"nest": 1.0}, {"nest": 1.0}, None]
-    assert (
-        v2b.typetracer._carry(
-            ak._v2.index.Index(np.array([1, 1, 4], np.int64)), False, NestedIndexError
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2b)
+    array = ak._v2.highlevel.Array(v2b)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -673,16 +821,13 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    resultv2 = v2c._carry(
-        ak._v2.index.Index(np.array([0, 1, 4], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [{"nest": 0.0}, {"nest": 1.0}, None]
-    assert (
-        v2c.typetracer._carry(
-            ak._v2.index.Index(np.array([0, 1, 4], np.int64)), False, NestedIndexError
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2c)
+    array = ak._v2.highlevel.Array(v2c)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
     v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -739,16 +884,13 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         length=13,
         lsb_order=True,
     )
-    resultv2 = v2d._carry(
-        ak._v2.index.Index(np.array([0, 0, 0], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [{"nest": 0.0}, {"nest": 0.0}, {"nest": 0.0}]
-    assert (
-        v2d.typetracer._carry(
-            ak._v2.index.Index(np.array([0, 0, 0], np.int64)), False, NestedIndexError
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2d)
+    array = ak._v2.highlevel.Array(v2d)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
@@ -758,24 +900,13 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
             ["nest"],
         )
     )
-    resultv2 = v2a._carry(
-        ak._v2.index.Index(np.array([0, 1, 1, 1, 1], np.int64)), False, NestedIndexError
-    )
-    assert to_list(resultv2) == [
-        {"nest": 0.0},
-        {"nest": 1.1},
-        {"nest": 1.1},
-        {"nest": 1.1},
-        {"nest": 1.1},
-    ]
-    assert (
-        v2a.typetracer._carry(
-            ak._v2.index.Index(np.array([0, 1, 1, 1, 1], np.int64)),
-            False,
-            NestedIndexError,
-        ).form
-        == resultv2.form
-    )
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)
+    memoryleak(array, digest)
+    memoryleak(array, digest2)
 
 
 def test_UnionArray_RecordArray_NumpyArray():
@@ -797,122 +928,8 @@ def test_UnionArray_RecordArray_NumpyArray():
             ),
         ],
     )
-    resultv2 = v2a[np.array([0, 1, 1], np.int64)]
-    assert to_list(resultv2) == [{"nest": 5.5}, {"nest": 4.4}, {"nest": 4.4}]
-    assert v2a.typetracer[np.array([0, 1, 1], np.int64)].form == resultv2.form
-
-
-def test_RecordArray_NumpyArray_lazy():
-    v2a = ak._v2.contents.recordarray.RecordArray(
-        [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-            ak._v2.contents.numpyarray.NumpyArray(
-                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-            ),
-        ],
-        ["x", "y"],
-    )
-    resultv2 = v2a._carry(
-        ak._v2.index.Index(np.array([1, 2], np.int64)), True, NestedIndexError
-    )
-    assert to_list(resultv2) == [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]
-    assert (
-        v2a.typetracer._carry(
-            ak._v2.index.Index(np.array([1, 2], np.int64)), True, NestedIndexError
-        ).form
-        == resultv2.form
-    )
-
-    v2b = ak._v2.contents.recordarray.RecordArray(
-        [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-            ak._v2.contents.numpyarray.NumpyArray(
-                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-            ),
-        ],
-        None,
-    )
-    resultv2 = v2b._carry(
-        ak._v2.index.Index(np.array([0, 1, 2, 3, 4], np.int64)), True, NestedIndexError
-    )
-    assert to_list(resultv2) == [(0, 0.0), (1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4)]
-    assert (
-        v2b.typetracer._carry(
-            ak._v2.index.Index(np.array([0, 1, 2, 3, 4], np.int64)),
-            True,
-            NestedIndexError,
-        ).form
-        == resultv2.form
-    )
-
-    v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
-    resultv2 = v2c[np.array([0], np.int64)]
-    assert to_list(resultv2) == [{}]
-    assert v2c.typetracer[np.array([0], np.int64)].form == resultv2.form
-
-    v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
-    resultv2 = v2d[np.array([0], np.int64)]
-    assert to_list(resultv2) == [()]
-    assert v2d.typetracer[np.array([0], np.int64)].form == resultv2.form
-
-
-def test_reshaping():
-    v2 = ak._v2.contents.NumpyArray(
-        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
-    )
-
-    resultv2 = v2[ak._v2.contents.NumpyArray(np.array([3, 6, 9, 2, 2, 1], np.int64))]
-    assert to_list(resultv2) == [3.3, 6.6, 9.9, 2.2, 2.2, 1.1]
-    assert (
-        v2.typetracer[
-            ak._v2.contents.NumpyArray(np.array([3, 6, 9, 2, 2, 1], np.int64))
-        ].form
-        == resultv2.form
-    )
-
-    resultv2 = v2[
-        ak._v2.contents.NumpyArray(np.array([[3, 6, 9], [2, 2, 1]], np.int64))
-    ]
-    assert to_list(resultv2) == [[3.3, 6.6, 9.9], [2.2, 2.2, 1.1]]
-    assert (
-        v2.typetracer[
-            ak._v2.contents.NumpyArray(np.array([[3, 6, 9], [2, 2, 1]], np.int64))
-        ].form
-        == resultv2.form
-    )
-
-    assert (
-        str(
-            ak._v2.highlevel.Array(
-                v2[ak._v2.contents.NumpyArray(np.ones((2, 3), np.int64))]
-            ).type
-        )
-        == "2 * 3 * float64"
-    )
-
-    assert (
-        str(
-            ak._v2.highlevel.Array(
-                v2[ak._v2.contents.NumpyArray(np.ones((0, 3), np.int64))]
-            ).type
-        )
-        == "0 * 3 * float64"
-    )
-
-    assert (
-        str(
-            ak._v2.highlevel.Array(
-                v2[ak._v2.contents.NumpyArray(np.ones((2, 0, 3), np.int64))]
-            ).type
-        )
-        == "2 * 0 * 3 * float64"
-    )
-
-    assert (
-        str(
-            ak._v2.highlevel.Array(
-                v2[ak._v2.contents.NumpyArray(np.ones((1, 2, 0, 3), np.int64))]
-            ).type
-        )
-        == "1 * 2 * 0 * 3 * float64"
-    )
+    roundtrip(v2a)
+    array = ak._v2.highlevel.Array(v2a)
+    memoryleak(array, swallow)
+    memoryleak(array, passthrough)
+    memoryleak(array, passthrough2)

@@ -340,3 +340,13 @@ class EmptyArray(Content):
 
     def _to_backend(self, backend):
         return EmptyArray(self._identifier, self._parameters, nplike=backend)
+
+    def _to_json(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        return []

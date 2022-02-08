@@ -1148,6 +1148,7 @@ class IndexedArray(Content):
             out[i] = content[ind]
         return out
 
+
     def _to_backend(self, backend):
         index = self._index._to_backend(backend)
         content = self._content._to_backend(backend)
@@ -1158,3 +1159,28 @@ class IndexedArray(Content):
             parameters=self.parameters,
             nplike=backend,
         )
+
+    def _to_json(
+        self,
+        nan_string,
+        infinity_string,
+        minus_infinity_string,
+        complex_real_string,
+        complex_imag_string,
+    ):
+        out = self._to_json_custom()
+        if out is not None:
+            return out
+
+        index = self._index.to(numpy)
+        content = self._content._to_json(
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_real_string,
+            complex_imag_string,
+        )
+        out = [None] * index.length
+        for i, ind in enumerate(index):
+            out[i] = content[ind]
+        return out
