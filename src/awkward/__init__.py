@@ -15,6 +15,11 @@ import awkward.partition
 # internal
 import awkward._v2
 import awkward._cpu_kernels
+
+try:
+    import awkward._cuda_kernels
+except ModuleNotFoundError:
+    pass
 import awkward._libawkward
 import awkward._util
 

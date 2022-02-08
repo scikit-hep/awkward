@@ -18,6 +18,8 @@ class NumpyArray(Content):
     def __init__(self, data, identifier=None, parameters=None, nplike=None):
         if nplike is None:
             nplike = ak.nplike.of(data)
+        if isinstance(data, ak._v2.index.Index):
+            data = data.data
         self._data = nplike.asarray(data)
 
         ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
@@ -301,6 +303,7 @@ class NumpyArray(Content):
         if posaxis == depth:
             out = ak._v2.index.Index64.empty(1, self._nplike)
             out[0] = self.length
+            print(ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike))
             return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
                 0
             ]

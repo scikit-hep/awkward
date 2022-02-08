@@ -11,6 +11,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 cuda_kernels_impl = [
+    "awkward_ListArray_num",
     "awkward_new_Identities",
     "awkward_Identities32_to_Identities64",
     "awkward_RegularArray_num",

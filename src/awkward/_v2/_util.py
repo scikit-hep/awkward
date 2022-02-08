@@ -29,6 +29,8 @@ kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
 
+backend = {ak.nplike.Numpy: "cpu", ak.nplike.Cupy: "cuda"}
+
 
 def parse_version(version):
     return setuptools.extern.packaging.version.parse(version)

@@ -2047,5 +2047,5 @@ class ListOffsetArray(Content):
             content,
             identifier=self._identifier,
             parameters=self._parameters,
-            nplike=library,
+            nplike=backend,
         )

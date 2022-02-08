@@ -6,13 +6,11 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-def to_library(
-    array, library, highlevel=True, behavior=None
-):  # note: convert.py's 'to_kernels'
+def to_backend(array, backend, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to convert to a specified `kernels` set.
-        kernels (`"cpu"` or `"cuda"`): If `"cpu"`, the array structure is
+        array: Data to convert to a specified `backend` set.
+        backend (`"cpu"` or `"cuda"`): If `"cpu"`, the array structure is
             recursively copied (if need be) to main memory for use with
             the default `libawkward-cpu-kernels.so`; if `"cuda"`, the
             structure is copied to the GPU(s) for use with
@@ -25,12 +23,12 @@ def to_library(
     Converts an array from `"cpu"`, `"cuda"`, or `"mixed"` kernels to `"cpu"`
     or `"cuda"`.
 
-    An array is `"mixed"` if some components are set to use `"cpu"` kernels and
-    others are set to use `"cuda"` kernels. Mixed arrays can't be used in any
-    operations, and two arrays set to different kernels can't be used in the
+    An array is `"mixed"` if some components are set to use the `"cpu"` backend and
+    others are set to use the `"cuda"` backend. Mixed arrays can't be used in any
+    operations, and two arrays set to different backends can't be used in the
     same operation.
 
-    Any components that are already in the desired kernels library are viewed,
+    Any components that are already in the desired backend are viewed,
     rather than copied, so this operation can be an inexpensive way to ensure
     that an array is ready for a particular library.
 
@@ -49,5 +47,11 @@ def to_library(
 
     See #ak.kernels.
     """
-    arr = ak.to_layout(array)
-    return arr.copy_to(library)
+    arr = ak._v2.operations.convert.to_layout(
+        array,
+        allow_record=True,
+        allow_other=True,
+    )
+    if backend:
+        arr = ak._v2.Array(arr, behavior=behavior)
+    return arr

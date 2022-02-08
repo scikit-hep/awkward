@@ -18,6 +18,11 @@ def of(*arrays):
         nplike = getattr(array, "nplike", None)
         if nplike is not None:
             libs.add(nplike)
+        else:
+            if isinstance(array, ak.nplike.numpy.ndarray):
+                libs.add(ak.nplike.Numpy.instance())
+            elif type(array).__module__.startswith("cupy."):
+                libs.add(ak.nplike.Cupy.instance())
 
     if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in libs):
         return ak._v2._typetracer.TypeTracer.instance()
@@ -458,7 +463,7 @@ class CupyKernel:
     @staticmethod
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
-            if isinstance(x, cupy.ndarray):
+            if type(x).__module__.startswith("cupy."):
                 return ctypes.cast(x.data.ptr, t)
             else:
                 return ctypes.cast(x, t)
@@ -477,6 +482,15 @@ class Cupy(NumpyLike):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
+        import sys
+
+        if "awkward._cuda_kernels" not in sys.modules:
+            raise ModuleNotFoundError(
+                """to use CUDA awkward arrays in Python, install the 'awkward[cuda]' package with:
+        pip install awkward[cuda] --upgrade
+    or
+        conda install awkward[cuda]"""
+            ) from None
         func = ak._cuda_kernels.kernel[name_and_types]
         if func is not None:
             return CupyKernel(func, name_and_types)
@@ -487,8 +501,6 @@ class Cupy(NumpyLike):
             )
 
     def __init__(self):
-        import awkward._cuda_kernels
-
         try:
             import cupy
         except ModuleNotFoundError:

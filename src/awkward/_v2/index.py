@@ -60,7 +60,7 @@ class Index:
     def empty(cls, length, nplike, dtype=None):
         if dtype is None:
             dtype = cls._expected_dtype
-        return Index(nplike.empty(length, dtype=dtype))
+        return Index(nplike.empty(length, dtype=dtype), nplike=nplike)
 
     @property
     def data(self):
