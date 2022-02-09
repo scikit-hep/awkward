@@ -302,12 +302,13 @@ class Content:
         index = ak._v2.index.Index64(head.index)
         outindex = ak._v2.index.Index64.empty(index.length * length, self._nplike)
 
+        assert outindex.nplike is self._nplike and index.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
             ](
-                outindex.to(self._nplike),
-                index.to(self._nplike),
+                outindex.data,
+                index.data,
                 index.length,
                 length,
                 raw._size,
@@ -345,6 +346,13 @@ class Content:
         starts = ak._v2.index.Index64.empty(index.length, self._nplike)
         stops = ak._v2.index.Index64.empty(index.length, self._nplike)
 
+        assert (
+            index.nplike is self._nplike
+            and jagged._offsets.nplike is self._nplike
+            and outputmask.nplike is self._nplike
+            and starts.nplike is self._nplike
+            and stops.nplike is self._nplike
+        )
         self._handle_error(
             self._nplike[
                 "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
@@ -354,11 +362,11 @@ class Content:
                 starts.dtype.type,
                 stops.dtype.type,
             ](
-                index.to(self._nplike),
-                jagged._offsets.to(self._nplike),
-                outputmask.to(self._nplike),
-                starts.to(self._nplike),
-                stops.to(self._nplike),
+                index.data,
+                jagged._offsets.data,
+                outputmask.data,
+                starts.data,
+                stops.data,
                 index.length,
             )
         )
@@ -611,6 +619,7 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         assert isinstance(carry, ak._v2.index.Index)
 
         result = self._nplike.empty(1, dtype=np.bool_)
+        assert carry.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_Index_iscontiguous",  # badly named
@@ -618,7 +627,7 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
                 carry.dtype.type,
             ](
                 result,
-                carry.to(self._nplike),
+                carry.data,
                 carry.length,
             )
         )
@@ -689,7 +698,7 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         localindex = ak._v2.index.Index64.empty(self.length, self._nplike)
         self._handle_error(
             self._nplike["awkward_localindex", np.int64](
-                localindex.to(self._nplike),
+                localindex.data,
                 localindex.length,
             )
         )
@@ -705,24 +714,26 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         tags = ak._v2.index.Index8.empty((mylength + theirlength), self._nplike)
         index = ak._v2.index.Index64.empty((mylength + theirlength), self._nplike)
         contents = [self, other]
+        assert tags.nplike is self._nplike
         self._handle_error(
             self._nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.to(self._nplike), 0, mylength, 0
+                tags.data, 0, mylength, 0
+            )
+        )
+        assert index.nplike is self._nplike
+        self._handle_error(
+            self._nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.data, 0, mylength
+            )
+        )
+        self._handle_error(
+            self._nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
+                tags.data, mylength, theirlength, 1
             )
         )
         self._handle_error(
             self._nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.to(self._nplike), 0, mylength
-            )
-        )
-        self._handle_error(
-            self._nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
-                tags.to(self._nplike), mylength, theirlength, 1
-            )
-        )
-        self._handle_error(
-            self._nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
-                index.to(self._nplike), mylength, theirlength
+                index.data, mylength, theirlength
             )
         )
 
@@ -968,16 +979,20 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         toindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
         fromindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
 
+        assert (
+            toindex.data.nplike is self._nplike
+            and fromindex.data.nplike is self._nplike
+        )
         self._handle_error(
             self._nplike[
                 "awkward_RegularArray_combinations_64",
                 np.int64,
-                toindex.to(self._nplike).dtype.type,
-                fromindex.to(self._nplike).dtype.type,
+                toindex.data.dtype.type,
+                fromindex.data.dtype.type,
             ](
                 tocarryraw,
-                toindex.to(self._nplike),
-                fromindex.to(self._nplike),
+                toindex.data,
+                fromindex.data,
                 n,
                 replacement,
                 self.length,
@@ -1194,11 +1209,12 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         else:
             index = ak._v2.index.Index64.empty(target, self._nplike)
 
+            assert index.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_index_rpad_and_clip_axis0",
                     index.dtype.type,
-                ](index.to(self._nplike), target, self.length)
+                ](index.data, target, self.length)
             )
 
         next = ak._v2.contents.indexedoptionarray.IndexedOptionArray(

@@ -171,14 +171,15 @@ class BitMaskedArray(Content):
 
     def toByteMaskedArray(self):
         bytemask = ak._v2.index.Index8.empty(self._mask.length * 8, self._nplike)
+        assert bytemask.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,
                 self._mask.dtype.type,
             ](
-                bytemask.to(self._nplike),
-                self._mask.to(self._nplike),
+                bytemask.data,
+                self._mask.data,
                 self._mask.length,
                 False,  # this differs from the kernel call in 'bytemask'
                 self._lsb_order,
@@ -195,6 +196,7 @@ class BitMaskedArray(Content):
 
     def toIndexedOptionArray64(self):
         index = ak._v2.index.Index64.empty(self._mask.length * 8, self._nplike)
+        assert index.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_BitMaskedArray_to_IndexedOptionArray",
@@ -202,7 +204,7 @@ class BitMaskedArray(Content):
                 self._mask.dtype.type,
             ](
                 index.to(self._nplike),
-                self._mask.to(self._nplike),
+                self._mask.data,
                 self._mask.length,
                 self._valid_when,
                 self._lsb_order,
@@ -223,14 +225,15 @@ class BitMaskedArray(Content):
             nplike = self._nplike
 
         bytemask = ak._v2.index.Index8.empty(self._mask.length * 8, nplike)
+        assert bytemask.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
             nplike[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,
                 self._mask.dtype.type,
             ](
-                bytemask.to(nplike),
-                self._mask.to(nplike),
+                bytemask.data,
+                self._mask.data,
                 self._mask.length,
                 0 if valid_when == self._valid_when else 1,
                 self._lsb_order,

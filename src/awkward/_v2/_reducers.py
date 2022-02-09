@@ -64,6 +64,7 @@ class ArgMin(Reducer):
         dtype = cls.maybe_other_type(array.dtype)
         result = array.nplike.empty(outlength, dtype=np.int64)
         if array.dtype.type in (np.complex128, np.complex64):
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_argmin_complex",
@@ -73,12 +74,13 @@ class ArgMin(Reducer):
                 ](
                     result,
                     array.data,
-                    parents.to(array.nplike),
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_argmin",
@@ -88,7 +90,7 @@ class ArgMin(Reducer):
                 ](
                     result,
                     array.data,
-                    parents.to(array.nplike),
+                    parents.data,
                     parents.length,
                     outlength,
                 )
@@ -107,6 +109,7 @@ class ArgMax(Reducer):
         dtype = cls.maybe_other_type(array.dtype)
         result = array.nplike.empty(outlength, dtype=np.int64)
         if array.dtype.type in (np.complex128, np.complex64):
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_argmax_complex",
@@ -115,13 +118,14 @@ class ArgMax(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_argmax",
@@ -130,8 +134,8 @@ class ArgMax(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
@@ -147,12 +151,13 @@ class Count(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         result = array.nplike.empty(outlength, dtype=np.int64)
+        assert result.nplike is array.nplike and parents.nplike is array.nplike
         array._handle_error(
             array.nplike[
                 "awkward_reduce_count_64", result.dtype.type, parents.dtype.type
             ](
                 result,
-                parents.to(array.nplike),
+                parents.data,
                 parents.length,
                 outlength,
             )
@@ -170,6 +175,7 @@ class CountNonzero(Reducer):
         dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
         result = array.nplike.empty(outlength, dtype=np.int64)
         if array.dtype.type in (np.complex128, np.complex64):
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_countnonzero_complex",
@@ -178,13 +184,14 @@ class CountNonzero(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_countnonzero",
@@ -193,8 +200,8 @@ class CountNonzero(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
@@ -220,6 +227,8 @@ class Sum(Reducer):
 
         if array.dtype == np.bool_:
             if result.dtype in (np.int64, np.uint64):
+                assert parents.nplike is array.nplike
+                assert parents.nplike is array.nplike
                 array._handle_error(
                     array.nplike[
                         "awkward_reduce_sum_int64_bool_64",
@@ -228,13 +237,14 @@ class Sum(Reducer):
                         parents.dtype.type,
                     ](
                         result,
-                        array._data,
-                        parents.to(array.nplike),
+                        array.data,
+                        parents.data,
                         parents.length,
                         outlength,
                     )
                 )
             elif result.dtype in (np.int32, np.uint32):
+                assert parents.nplike is array.nplike
                 array._handle_error(
                     array.nplike[
                         "awkward_reduce_sum_int32_bool_64",
@@ -243,8 +253,8 @@ class Sum(Reducer):
                         parents.dtype.type,
                     ](
                         result,
-                        array._data,
-                        parents.to(array.nplike),
+                        array.data,
+                        parents.data,
                         parents.length,
                         outlength,
                     )
@@ -252,6 +262,7 @@ class Sum(Reducer):
             else:
                 raise NotImplementedError
         elif array.dtype.type in (np.complex128, np.complex64):
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_sum_complex",
@@ -260,13 +271,14 @@ class Sum(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_sum",
@@ -275,8 +287,8 @@ class Sum(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
@@ -304,6 +316,7 @@ class Prod(Reducer):
             dtype=cls.return_dtype(array.dtype),
         )
         if array.dtype == np.bool_:
+            assert parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod_bool",
@@ -312,13 +325,14 @@ class Prod(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         elif array.dtype.type in (np.complex128, np.complex64):
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod_complex",
@@ -327,13 +341,14 @@ class Prod(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod",
@@ -342,8 +357,8 @@ class Prod(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
@@ -364,6 +379,7 @@ class Any(Reducer):
         dtype = cls.maybe_other_type(array.dtype)
         result = array.nplike.empty(outlength, dtype=np.bool_)
         if array.dtype.type in (np.complex128, np.complex64):
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_sum_bool_complex",
@@ -372,13 +388,14 @@ class Any(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_sum_bool",
@@ -387,8 +404,8 @@ class Any(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
@@ -406,6 +423,7 @@ class All(Reducer):
         dtype = cls.maybe_other_type(array.dtype)
         result = array.nplike.empty(outlength, dtype=np.bool_)
         if array.dtype.type in (np.complex128, np.complex64):
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod_bool_complex",
@@ -414,13 +432,14 @@ class All(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod_bool",
@@ -429,8 +448,8 @@ class All(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
@@ -476,6 +495,7 @@ class Min(Reducer):
             cls.maybe_double_length(array.dtype.type, outlength), dtype=dtype
         )
         if array.dtype == np.bool_:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod_bool",
@@ -484,13 +504,14 @@ class Min(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         elif array.dtype.type in (np.complex128, np.complex64):
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_min_complex",
@@ -499,14 +520,15 @@ class Min(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                     cls._min_initial(cls.initial, dtype),
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_min",
@@ -515,8 +537,8 @@ class Min(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                     cls._min_initial(cls.initial, dtype),
@@ -568,6 +590,7 @@ class Max(Reducer):
             cls.maybe_double_length(array.dtype.type, outlength), dtype=dtype
         )
         if array.dtype == np.bool_:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_sum_bool",
@@ -576,13 +599,14 @@ class Max(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
             )
         elif array.dtype.type in (np.complex128, np.complex64):
+            assert parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_max_complex",
@@ -591,14 +615,15 @@ class Max(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                     cls._max_initial(cls.initial, dtype),
                 )
             )
         else:
+            assert result.nplike is array.nplike and parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_max",
@@ -607,8 +632,8 @@ class Max(Reducer):
                     parents.dtype.type,
                 ](
                     result,
-                    array._data,
-                    parents.to(array.nplike),
+                    array.data,
+                    parents.data,
                     parents.length,
                     outlength,
                     cls._max_initial(cls.initial, dtype),

@@ -480,7 +480,8 @@ class Cupy(NumpyLike):
         import sys
 
         if "awkward._cuda_kernels" not in sys.modules:
-            import awkward._cuda_kernels
+            import awkward._cuda_kernels  # noqa: F401
+
         func = ak._cuda_kernels.kernel[name_and_types]
         if func is not None:
             return NumpyKernel(func, name_and_types)
