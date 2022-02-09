@@ -350,28 +350,27 @@ def by_signature(lib):
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
                 if spec["name"] in cuda_kernels_impl:
                     file.write(
-                    """
+                        """
     f = lib.{}
     f.argtypes = [{}]
     f.restype = ERROR
     f.dir = [{}]
     out[{}] = f
 """.format(
-                        childfunc["name"],
-                        ", ".join(arglist),
-                        ", ".join(dirlist),
-                        ", ".join(special),
+                            childfunc["name"],
+                            ", ".join(arglist),
+                            ", ".join(dirlist),
+                            ", ".join(special),
+                        )
                     )
-                )
                 else:
                     file.write(
-                    """
+                        """
     out[{}] = None
 """.format(
-                        ", ".join(special),
+                            ", ".join(special),
+                        )
                     )
-                )
-
 
         file.write(
             """
@@ -380,6 +379,8 @@ def by_signature(lib):
         )
 
     print("Done with  src/awkward/_kernel_signatures_cuda.py...")
+
+
 if __name__ == "__main__":
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         specification = yaml.safe_load(specfile)
