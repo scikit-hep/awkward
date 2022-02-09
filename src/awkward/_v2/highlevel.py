@@ -57,7 +57,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                - If a NumPy array, the regularity of its dimensions is preserved
                  and the data are viewed, not copied.
                - CuPy arrays are treated the same way as NumPy arrays except that
-                 they default to `kernels="cuda"`, rather than `kernels="cpu"`.
+                 they default to `backend="cuda"`, rather than `backend="cpu"`.
                - If a pyarrow object, calls #ak.from_arrow, preserving as much
                  metadata as possible, usually zero-copy.
                - If a dict of str \u2192 columns, combines the columns into an
@@ -69,7 +69,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+        backend (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
             the Array will be placed in GPU global memory using CUDA; if None,
             the `data` are left untouched. For `"cuda"`,
@@ -221,7 +221,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         behavior=None,
         with_name=None,
         check_valid=False,
-        library=None,
+        backend=None,
     ):
         if isinstance(data, ak._v2.contents.Content):
             layout = data
@@ -270,9 +270,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 layout, with_name, highlevel=False
             )
 
-        if library is not None and library != ak._v2.operations.convert.library(layout):
-            layout = ak._v2.operations.convert.to_library(
-                layout, library, highlevel=False
+        if backend is not None and backend != ak._v2.operations.describe.backend(
+            layout
+        ):
+            layout = ak._v2.operations.describe.to_backend(
+                layout, backend, highlevel=False
             )
 
         self.layout = layout

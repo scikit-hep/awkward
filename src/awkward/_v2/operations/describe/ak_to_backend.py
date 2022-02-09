@@ -47,11 +47,12 @@ def to_backend(array, backend, highlevel=True, behavior=None):
 
     See #ak.kernels.
     """
-    arr = ak._v2.operations.convert.to_layout(
+    layout = ak._v2.operations.convert.to_layout(
         array,
         allow_record=True,
         allow_other=True,
     )
-    if backend:
-        arr = ak._v2.Array(arr, behavior=behavior)
-    return arr
+    backend_layout = layout.to_backend(backend)
+    if highlevel:
+        return ak._v2.Array(backend_layout, behavior=behavior)
+    return backend_layout

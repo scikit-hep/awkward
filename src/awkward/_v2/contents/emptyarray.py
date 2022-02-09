@@ -290,7 +290,7 @@ class EmptyArray(Content):
                 numpy.empty(length, dtype),
                 self._identifier,
                 self._parameters,
-                nplike=numpy,
+                nplike=self.nplike,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 

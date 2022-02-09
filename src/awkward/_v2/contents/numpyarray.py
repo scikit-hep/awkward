@@ -1262,6 +1262,10 @@ class NumpyArray(Content):
                 return self._to_cuda()
             elif isinstance(self.nplike, ak.nplike.Cupy):
                 return self
+        else:
+            raise ValueError(
+                "Can only transfer buffers to ak.nplike.Numpy and ak.nplike.Cupy"
+            )
 
     def _to_json_custom(
         self,

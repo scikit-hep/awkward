@@ -22,7 +22,6 @@ class Index:
             nplike = ak.nplike.of(data)
         self._nplike = nplike
         self._metadata = metadata
-
         self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
         if len(self._data.shape) != 1:
             raise TypeError("Index data must be one-dimensional")
@@ -150,6 +149,8 @@ class Index:
         out = self._data[where]
         if hasattr(out, "shape") and len(out.shape) != 0:
             return type(self)(out)
+        elif type(out).__module__.startswith("cupy.") and len(out.shape) == 0:
+            return out.item()
         else:
             return out
 
@@ -188,6 +189,10 @@ class Index:
                 return self._to_cuda()
             elif isinstance(self.nplike, ak.nplike.Cupy):
                 return self
+        else:
+            raise ValueError(
+                "Can only transfer buffers to ak.nplike.Numpy or ak.nplike.Cupy"
+            )
 
 
 class Index8(Index):

@@ -964,7 +964,7 @@ class ByteMaskedArray(Content):
         if out is not None:
             return out
 
-        mask = self.mask_as_bool(valid_when=True, nplike=numpy)
+        mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)
         content = self._content._to_list(behavior)
         out = [None] * self._mask.length
         for i, isvalid in enumerate(mask):
@@ -997,7 +997,7 @@ class ByteMaskedArray(Content):
         if out is not None:
             return out
 
-        mask = self.mask_as_bool(valid_when=True, nplike=numpy)
+        mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)
         content = self._content._to_json(
             behavior,
             nan_string,

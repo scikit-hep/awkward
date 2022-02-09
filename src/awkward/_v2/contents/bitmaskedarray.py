@@ -609,7 +609,7 @@ class BitMaskedArray(Content):
         if out is not None:
             return out
 
-        mask = self.mask_as_bool(valid_when=True, nplike=numpy)[: self._length]
+        mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)[: self._length]
         content = self._content._to_list(behavior)
         out = [None] * self._length
         for i, isvalid in enumerate(mask):
@@ -643,7 +643,7 @@ class BitMaskedArray(Content):
         if out is not None:
             return out
 
-        mask = self.mask_as_bool(valid_when=True, nplike=numpy)[: self._length]
+        mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)[: self._length]
         content = self._content._to_json(
             nan_string,
             infinity_string,

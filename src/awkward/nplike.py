@@ -13,31 +13,31 @@ import awkward as ak
 
 
 def of(*arrays):
-    libs = set()
+    backends = set()
     for array in arrays:
         nplike = getattr(array, "nplike", None)
         if nplike is not None:
-            libs.add(nplike)
+            backends.add(nplike)
         else:
             if isinstance(array, ak.nplike.numpy.ndarray):
-                libs.add(ak.nplike.Numpy.instance())
+                backends.add(ak.nplike.Numpy.instance())
             elif type(array).__module__.startswith("cupy."):
-                libs.add(ak.nplike.Cupy.instance())
+                backends.add(ak.nplike.Cupy.instance())
 
-    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in libs):
+    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in backends):
         return ak._v2._typetracer.TypeTracer.instance()
 
-    if libs == set():
+    if backends == set():
         return Numpy.instance()
-    elif len(libs) == 1:
-        return next(iter(libs))
+    elif len(backends) == 1:
+        return next(iter(backends))
     else:
         raise ValueError(
             """attempting to use both a 'cpu' array and a 'cuda' array in the """
             """same operation; use one of
 
-    ak.to_kernels(array, 'cpu')
-    ak.to_kernels(array, 'cuda')
+    ak.to_backend(array, 'cpu')
+    ak.to_backend(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
             + ak._util.exception_suffix(__file__)
@@ -132,6 +132,9 @@ class NumpyLike(Singleton):
     def asarray(self, *args, **kwargs):
         # array[, dtype=][, order=]
         return self._module.asarray(*args, **kwargs)
+
+    def asnumpy(self, *args, **kwargs):
+        return self._module.asnumpy(*args, **kwargs)
 
     def ascontiguousarray(self, *args, **kwargs):
         # array[, dtype=]
@@ -407,6 +410,8 @@ class NumpyKernel:
         if issubclass(t, ctypes._Pointer):
             if isinstance(x, numpy.ndarray):
                 return ctypes.cast(x.ctypes.data, t)
+            elif type(x).__module__.startswith("cupy."):
+                return ctypes.cast(x.data.ptr, t)
             else:
                 return ctypes.cast(x, t)
         else:
@@ -463,34 +468,8 @@ class Numpy(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-
-class CupyKernel:
-    def __init__(self, kernel, name_and_types):
-        self._kernel = kernel
-        self._name_and_types = name_and_types
-
-    def __repr__(self):
-        return "<{} {}{}>".format(
-            type(self).__name__,
-            self._name_and_types[0],
-            "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
-        )
-
-    @staticmethod
-    def _cast(x, t):
-        if issubclass(t, ctypes._Pointer):
-            if type(x).__module__.startswith("cupy."):
-                return ctypes.cast(x.data.ptr, t)
-            else:
-                return ctypes.cast(x, t)
-        else:
-            return x
-
-    def __call__(self, *args):
-        assert len(args) == len(self._kernel.argtypes)
-        return self._kernel(
-            *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
-        )
+    def asnumpy(self, array, order=None):
+        return self._module.asarray(array, order=order)
 
 
 class Cupy(NumpyLike):
@@ -501,19 +480,14 @@ class Cupy(NumpyLike):
         import sys
 
         if "awkward._cuda_kernels" not in sys.modules:
-            raise ModuleNotFoundError(
-                """to use CUDA awkward arrays in Python, install the 'awkward[cuda]' package with:
-        pip install awkward[cuda] --upgrade
-    or
-        conda install awkward[cuda]"""
-            ) from None
+            import awkward._cuda_kernels
         func = ak._cuda_kernels.kernel[name_and_types]
         if func is not None:
-            return CupyKernel(func, name_and_types)
+            return NumpyKernel(func, name_and_types)
         else:
-            raise ValueError(
-                "{} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
-                "continue the operation.".format(name_and_types[0])
+            raise NotImplementedError(
+                f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
+                "continue the operation."
             )
 
     def __init__(self):
@@ -567,8 +541,8 @@ or
         else:
             return self._module.asarray(array, dtype=dtype, order=order)
 
-    def asnumpy(self, array):
-        return self._module.asnumpy(array)
+    def asnumpy(self, array, order=None):
+        return self._module.asnumpy(array, order=order)
 
     def ascontiguousarray(self, array, dtype=None):
         if isinstance(

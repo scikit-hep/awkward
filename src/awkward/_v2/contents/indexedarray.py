@@ -1148,11 +1148,10 @@ class IndexedArray(Content):
             out[i] = content[ind]
         return out
 
-
     def _to_backend(self, backend):
         index = self._index._to_backend(backend)
         content = self._content._to_backend(backend)
-        IndexedArray(
+        return IndexedArray(
             index,
             content,
             identifier=self.identifier,

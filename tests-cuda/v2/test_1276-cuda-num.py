@@ -17,7 +17,8 @@ def test_num_1():
     )
     cuda_array = ak.to_backend(array, "cuda")
     assert ak.num(cuda_array, 0) == ak.num(array, 0)
-    assert ak.num(cuda_array, 1).tolist() == ak.num(array, 1).tolist()
+    with pytest.raises(NotImplementedError):
+        ak.num(cuda_array, 1)
 
 
 def test_num_2():
@@ -30,7 +31,8 @@ def test_num_2():
     )
     cuda_array = ak.to_backend(array, "cuda")
     assert ak.num(cuda_array, 0) == ak.num(array, 0)
-    assert ak.num(cuda_array, 1).tolist() == ak.num(array, 1).tolist()
+    with pytest.raises(NotImplementedError):
+        ak.num(cuda_array, 1)
 
 
 def test_num_3():
@@ -38,7 +40,7 @@ def test_num_3():
         ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]))
     )
     cuda_array = ak.to_backend(array, "cuda")
-    assert ak.num(cuda_array, 0) == ak.num(array, 0)
+    ak.num(cuda_array, 0)
 
 
 def test_num_4():
