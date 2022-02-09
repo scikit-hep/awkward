@@ -1506,3 +1506,78 @@ assert list(depth2.reduce(-3)) == [
     [101*31, 103*37, 107*41, 109*43, 113*47],
     [     1],
     [  53*2,   59*3,   61*5,   67*7,  71*11]]
+
+content = RawArray([1,2,3, 4,5,6, 5,6,7, 8,9,10, 9,10,11, 12,13,14, 13,14,15, 16,17,18])
+assert content.tolist() == [1,2,3, 4,5,6, 5,6,7, 8,9,10, 9,10,11, 12,13,14, 13,14,15, 16,17,18]
+
+depth1 = RegularArray(content, 3)
+depth2 = RegularArray(depth1, 2)
+depth3 = RegularArray(depth2, 2)
+depth4 = RegularArray(depth3, 2)
+print(list(depth4))
+assert list(depth4) == [[[[[1, 2, 3],[4, 5, 6]],[[5, 6, 7],[8, 9, 10]]],[[[9, 10, 11],[12, 13, 14]],[[13, 14, 15],[16, 17, 18]]]]]
+print("depth1", list(depth1.reduce(-1)))
+print("depth2", list(depth2.reduce(-1)))
+print("depth3", list(depth3.reduce(-1)))
+print("depth4 (-1)", list(depth4.reduce(-1)))
+# >>> np.prod(array, axis=-1)
+# array([[[   6,  120],
+#         [ 210,  720]],
+#
+#        [[ 990, 2184],
+#         [2730, 4896]]])
+assert list(depth4.reduce(-1)) == [[[[6,120],[210,720]],[[990,2184],[2730,4896]]]]
+
+print("depth4 (-2)", list(depth4.reduce(-2)))
+# >>> np.prod(array, axis=-2)
+# array([[[  4,  10,  18],
+#         [ 40,  54,  70]],
+#
+#        [[108, 130, 154],
+#         [208, 238, 270]]])
+assert list(depth4.reduce(-2)) == [[[[4,10,18],[40,54,70]],[[108,130,154],[208,238,270]]]]
+
+print("depth4 (-3)", list(depth4.reduce(-3)))
+# >>> np.prod(array, axis=-3)
+# array([[[  5,  12,  21],
+#         [ 32,  45,  60]],
+#
+#        [[117, 140, 165],
+#         [192, 221, 252]]])
+assert list(depth4.reduce(-3)) == [[[[5,12,21],[32,45,60]],[[117,140,165],[192,221,252]]]]
+
+print("depth4 (-4)", list(depth4.reduce(-4)))
+# >>> np.prod(array, axis=-4)
+# array([[[  9,  20,  33],
+#         [ 48,  65,  84]],
+#
+#        [[ 65,  84, 105],
+#         [128, 153, 180]]])
+assert list(depth4.reduce(-4)) == [[[[6,120],[210,720]],[[990,2184],[2730,4896]]]]
+
+
+
+# >>> np.prod(array, axis=0)
+# array([[[  9,  20,  33],
+#         [ 48,  65,  84]],
+#
+#        [[ 65,  84, 105],
+#         [128, 153, 180]]])
+# >>> np.prod(array, axis=1)
+# array([[[  5,  12,  21],
+#         [ 32,  45,  60]],
+#
+#        [[117, 140, 165],
+#         [192, 221, 252]]])
+# >>> np.prod(array, axis=2)
+# array([[[  4,  10,  18],
+#         [ 40,  54,  70]],
+#
+#        [[108, 130, 154],
+#         [208, 238, 270]]])
+# >>> np.prod(array, axis=3)
+# array([[[   6,  120],
+#         [ 210,  720]],
+#
+#        [[ 990, 2184],
+#         [2730, 4896]]])
