@@ -271,7 +271,7 @@ class BitMaskedArray(Content):
             self._field_identifier(where),
             None,
             self._nplike,
-        )
+        ).simplify_optiontype()
 
     def _getitem_fields(self, where, only_fields=()):
         return BitMaskedArray(
@@ -283,7 +283,7 @@ class BitMaskedArray(Content):
             self._fields_identifier(where),
             None,
             self._nplike,
-        )
+        ).simplify_optiontype()
 
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
