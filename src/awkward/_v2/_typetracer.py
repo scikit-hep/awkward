@@ -527,9 +527,9 @@ class TypeTracer(ak.nplike.NumpyLike):
         # haystack, needle, side="right"
         raise NotImplementedError
 
-    def argsort(self, *args, **kwargs):
+    def argsort(self, array, *args, **kwargs):
         # array
-        raise NotImplementedError
+        return TypeTracerArray(np.int64, array.shape)
 
     ############################ manipulation
 
