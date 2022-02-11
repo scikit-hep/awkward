@@ -117,8 +117,8 @@ class UnionArray(Content):
         assert isinstance(form, self.Form)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
-        container[key1] = ak._v2._util.little_endian(self._tags.to(nplike))
-        container[key2] = ak._v2._util.little_endian(self._index.to(nplike))
+        container[key1] = ak._v2._util.little_endian(self._tags.raw(nplike))
+        container[key2] = ak._v2._util.little_endian(self._index.raw(nplike))
         for i, content in enumerate(self._contents):
             content._to_buffers(form.content(i), getkey, container, nplike)
 
@@ -126,8 +126,8 @@ class UnionArray(Content):
     def typetracer(self):
         tt = ak._v2._typetracer.TypeTracer.instance()
         return UnionArray(
-            ak._v2.index.Index(self._tags.to(tt)),
-            ak._v2.index.Index(self._index.to(tt)),
+            ak._v2.index.Index(self._tags.raw(tt)),
+            ak._v2.index.Index(self._index.raw(tt)),
             [x.typetracer for x in self._contents],
             self._typetracer_identifier(),
             self._parameters,
@@ -1164,8 +1164,8 @@ class UnionArray(Content):
             return out.simplify_uniontype(True, False)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        nptags = self._tags.to(numpy)
-        npindex = self._index.to(numpy)
+        nptags = self._tags.raw(numpy)
+        npindex = self._index.raw(numpy)
         copied_index = False
 
         values = []
@@ -1322,8 +1322,8 @@ class UnionArray(Content):
             raise AssertionError(result)
 
     def packed(self):
-        tags = self._tags.to(self._nplike)
-        original_index = index = self._index.to(self._nplike)[: tags.shape[0]]
+        tags = self._tags.raw(self._nplike)
+        original_index = index = self._index.raw(self._nplike)[: tags.shape[0]]
 
         contents = list(self._contents)
 
@@ -1353,8 +1353,8 @@ class UnionArray(Content):
         if out is not None:
             return out
 
-        tags = self._tags.to(numpy)
-        index = self._index.to(numpy)
+        tags = self._tags.raw(numpy)
+        index = self._index.raw(numpy)
         contents = [x._to_list(behavior) for x in self._contents]
 
         out = [None] * tags.shape[0]
@@ -1386,8 +1386,8 @@ class UnionArray(Content):
         if out is not None:
             return out
 
-        tags = self._tags.to(numpy)
-        index = self._index.to(numpy)
+        tags = self._tags.raw(numpy)
+        index = self._index.raw(numpy)
         contents = [
             x._to_json(
                 nan_string,

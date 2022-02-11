@@ -567,7 +567,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.to_list.
         """
         if isinstance(self._layout, ak._v2.contents.NumpyArray):
-            array = self._layout.to(numpy)
+            array = self._layout.raw(numpy)
             array_param = self._layout.parameter("__array__")
             if array_param == "byte":
                 for x in ak._v2._util.tobytes(array):
@@ -583,9 +583,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 if isinstance(x, ak._v2.contents.NumpyArray):
                     array_param = x.parameter("__array__")
                     if array_param == "byte":
-                        yield ak._v2._util.tobytes(x.to(numpy))
+                        yield ak._v2._util.tobytes(x.raw(numpy))
                     elif array_param == "char":
-                        yield ak._v2._util.tobytes(x.to(numpy)).decode(
+                        yield ak._v2._util.tobytes(x.raw(numpy)).decode(
                             errors="surrogateescape"
                         )
                     else:
@@ -1011,9 +1011,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if isinstance(out, ak._v2.contents.NumpyArray):
             array_param = out.parameter("__array__")
             if array_param == "byte":
-                return ak._v2._util.tobytes(out.to(numpy))
+                return ak._v2._util.tobytes(out.raw(numpy))
             elif array_param == "char":
-                return ak._v2._util.tobytes(out.to(numpy)).decode(
+                return ak._v2._util.tobytes(out.raw(numpy)).decode(
                     errors="surrogateescape"
                 )
         if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
@@ -1733,9 +1733,9 @@ class Record(NDArrayOperatorsMixin):
         if isinstance(out, ak._v2.contents.NumpyArray):
             array_param = out.parameter("__array__")
             if array_param == "byte":
-                return ak._v2._util.tobytes(out.to(numpy))
+                return ak._v2._util.tobytes(out.raw(numpy))
             elif array_param == "char":
-                return ak._v2._util.tobytes(out.to(numpy)).decode(
+                return ak._v2._util.tobytes(out.raw(numpy)).decode(
                     errors="surrogateescape"
                 )
         if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):

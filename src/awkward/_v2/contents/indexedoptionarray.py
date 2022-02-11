@@ -69,14 +69,14 @@ class IndexedOptionArray(Content):
     def _to_buffers(self, form, getkey, container, nplike):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "index")
-        container[key] = ak._v2._util.little_endian(self._index.to(nplike))
+        container[key] = ak._v2._util.little_endian(self._index.raw(nplike))
         self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
         tt = ak._v2._typetracer.TypeTracer.instance()
         return IndexedOptionArray(
-            ak._v2.index.Index(self._index.to(tt)),
+            ak._v2.index.Index(self._index.raw(tt), nplike=tt),
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
@@ -128,9 +128,9 @@ class IndexedOptionArray(Content):
             nplike = self._nplike
 
         if valid_when:
-            return self._index.to(nplike) >= 0
+            return self._index.raw(nplike) >= 0
         else:
-            return self._index.to(nplike) < 0
+            return self._index.raw(nplike) < 0
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -257,13 +257,13 @@ class IndexedOptionArray(Content):
 
         reducedstarts = ak._v2.index.Index64.empty(self.length - numnull, self._nplike)
         reducedstops = ak._v2.index.Index64.empty(self.length - numnull, self._nplike)
-        assert (
-            outindex.nplike is self._nplike
-            and slicestarts.nplike is self._nplike
-            and slicestops.nplike is self._nplike
-            and reducedstarts.nplike is self._nplike
-            and reducedstops.nplike is self._nplike
-        )
+        # assert (
+        #     outindex.nplike is self._nplike
+        #     and slicestarts.nplike is self._nplike
+        #     and slicestops.nplike is self._nplike
+        #     and reducedstarts.nplike is self._nplike
+        #     and reducedstops.nplike is self._nplike
+        # )
         self._handle_error(
             self._nplike[
                 "awkward_MaskedArray_getitem_next_jagged_project",
@@ -1076,7 +1076,6 @@ class IndexedOptionArray(Content):
         outindex = ak._v2.index.Index64.empty(index_length, self._nplike)
         assert (
             nextcarry.nplike is self._nplike
-            and nextparents.nplike is self._nplike
             and outindex.nplike is self._nplike
             and self._index.nplike is self._nplike
             and parents.nplike is self._nplike
@@ -1255,9 +1254,7 @@ class IndexedOptionArray(Content):
                         "ListOffsetArray64 whose offsets start at zero"
                     )
                 outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
-                assert (
-                    outoffsets.nplike is self._nplike and starts.nplike is self._nplike
-                )
+                assert outoffsets.nplike is self._nplike
                 self._handle_error(
                     self._nplike[
                         "awkward_IndexedArray_reduce_next_fix_offsets_64",
@@ -1563,7 +1560,6 @@ class IndexedOptionArray(Content):
                 assert (
                     nextshifts.nplike is self._nplike
                     and self.index.nplike is self._nplike
-                    and shifts.nplike is self._nplike
                 )
                 self._handle_error(
                     self._nplike[
@@ -1604,9 +1600,7 @@ class IndexedOptionArray(Content):
 
             if isinstance(out, ak._v2.contents.ListOffsetArray):
                 outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
-                assert (
-                    outoffsets.nplike is self._nplike and starts.nplike is self._nplike
-                )
+                assert outoffsets.nplike is self._nplike
                 self._handle_error(
                     self._nplike[
                         "awkward_IndexedArray_reduce_next_fix_offsets_64",
@@ -1828,7 +1822,7 @@ class IndexedOptionArray(Content):
             raise AssertionError(result)
 
     def packed(self):
-        original_index = self._index.to(self._nplike)
+        original_index = self._index.raw(self._nplike)
 
         is_none = original_index < 0
         num_none = self._nplike.count_nonzero(is_none)
@@ -1862,7 +1856,7 @@ class IndexedOptionArray(Content):
         if out is not None:
             return out
 
-        index = self._index.to(numpy)
+        index = self._index.raw(numpy)
         content = self._content._to_list(behavior)
         out = [None] * len(index)
         for i, ind in enumerate(index):
@@ -1889,7 +1883,7 @@ class IndexedOptionArray(Content):
         if out is not None:
             return out
 
-        index = self._index.to(numpy)
+        index = self._index.raw(numpy)
         content = self._content._to_json(
             nan_string,
             infinity_string,

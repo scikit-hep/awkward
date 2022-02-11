@@ -302,7 +302,7 @@ class Content:
         index = ak._v2.index.Index64(head.index)
         outindex = ak._v2.index.Index64.empty(index.length * length, self._nplike)
 
-        assert outindex.nplike is self._nplike and index.nplike is self._nplike
+        # assert outindex.nplike is self._nplike and index.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
@@ -346,13 +346,13 @@ class Content:
         starts = ak._v2.index.Index64.empty(index.length, self._nplike)
         stops = ak._v2.index.Index64.empty(index.length, self._nplike)
 
-        assert (
-            index.nplike is self._nplike
-            and jagged._offsets.nplike is self._nplike
-            and outputmask.nplike is self._nplike
-            and starts.nplike is self._nplike
-            and stops.nplike is self._nplike
-        )
+        # assert (
+        #     index.nplike is self._nplike
+        #     and jagged._offsets.nplike is self._nplike
+        #     and outputmask.nplike is self._nplike
+        #     and starts.nplike is self._nplike
+        #     and stops.nplike is self._nplike
+        # )
         self._handle_error(
             self._nplike[
                 "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
@@ -979,10 +979,7 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         toindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
         fromindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
 
-        assert (
-            toindex.data.nplike is self._nplike
-            and fromindex.data.nplike is self._nplike
-        )
+        assert toindex.nplike is self._nplike and fromindex.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_RegularArray_combinations_64",

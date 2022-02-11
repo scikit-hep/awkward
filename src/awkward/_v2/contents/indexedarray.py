@@ -69,14 +69,14 @@ class IndexedArray(Content):
     def _to_buffers(self, form, getkey, container, nplike):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "index")
-        container[key] = ak._v2._util.little_endian(self._index.to(nplike))
+        container[key] = ak._v2._util.little_endian(self._index.raw(nplike))
         self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
         tt = ak._v2._typetracer.TypeTracer.instance()
         return IndexedArray(
-            ak._v2.index.Index(self._index.to(tt)),
+            ak._v2.index.Index(self._index.raw(tt)),
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
@@ -654,11 +654,7 @@ class IndexedArray(Content):
             offsets = ak._v2.index.Index64.empty(2, self._nplike)
             offsets[0] = 0
             offsets[1] = next.length
-            assert (
-                next.nplike is self._nplike
-                and next.nplike is self._nplike
-                and offsets.nplike is self._nplike
-            )
+            assert next.nplike is self._nplike and offsets.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_sort",
@@ -1107,7 +1103,7 @@ class IndexedArray(Content):
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
-        index = self._index.to(numpy)
+        index = self._index.raw(numpy)
 
         if self.parameter("__array__") == "categorical":
             dictionary = self._content._to_arrow(
@@ -1204,7 +1200,7 @@ class IndexedArray(Content):
         if out is not None:
             return out
 
-        index = self._index.to(numpy)
+        index = self._index.raw(numpy)
         content = self._content._to_list(behavior)
         out = [None] * index.length
         for i, ind in enumerate(index):
@@ -1234,7 +1230,7 @@ class IndexedArray(Content):
         if out is not None:
             return out
 
-        index = self._index.to(numpy)
+        index = self._index.raw(numpy)
         content = self._content._to_json(
             nan_string,
             infinity_string,

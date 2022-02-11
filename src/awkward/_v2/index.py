@@ -87,20 +87,11 @@ class Index:
     def length(self):
         return self._data.shape[0]
 
+    def raw(self, nplike):
+        return self.nplike.raw(self.data, nplike)
+
     def __len__(self):
         return self.length
-
-    def to(self, nplike):
-        if nplike is self._nplike:
-            return self._data
-        else:
-            return nplike.asarray(self._data)
-
-    def on(self, nplike):
-        if nplike is self._nplike:
-            return self
-        else:
-            return Index(nplike.asarray(self._data), self._metadata, nplike)
 
     def __array__(self, *args, **kwargs):
         return self._nplike.asarray(self._data, *args, **kwargs)
@@ -166,33 +157,8 @@ class Index:
     def _nbytes_part(self):
         return self.data.nbytes
 
-    def _to_cuda(self):
-        cupy = ak.nplike.Cupy.instance()
-        return Index(cupy.asarray(self._data), metadata=self._metadata, nplike=cupy)
-
-    def _from_cuda(self):
-        cupy = ak.nplike.Cupy.instance()
-        return Index(
-            cupy.asnumpy(self._data.get()),
-            metadata=self._metadata,
-            nplike=ak.nplike.Numpy.instance(),
-        )
-
     def _to_backend(self, backend):
-        if isinstance(backend, ak.nplike.Numpy):
-            if isinstance(self.nplike, ak.nplike.Cupy):
-                return self._from_cuda()
-            elif isinstance(self.nplike, ak.nplike.Numpy):
-                return self
-        elif isinstance(backend, ak.nplike.Cupy):
-            if isinstance(self.nplike, ak.nplike.Numpy):
-                return self._to_cuda()
-            elif isinstance(self.nplike, ak.nplike.Cupy):
-                return self
-        else:
-            raise ValueError(
-                "Can only transfer buffers to ak.nplike.Numpy or ak.nplike.Cupy"
-            )
+        return Index(self.raw(backend), metadata=self.metadata, nplike=backend)
 
 
 class Index8(Index):

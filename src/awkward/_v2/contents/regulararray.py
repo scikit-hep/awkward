@@ -224,7 +224,7 @@ class RegularArray(Content):
             where.shape[0] * self._size, self._nplike
         )
 
-        assert nextcarry.nplike is self._nplike and where.nplike is self._nplike
+        assert nextcarry.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_RegularArray_getitem_carry",
@@ -398,10 +398,10 @@ class RegularArray(Content):
                 nextadvanced = ak._v2.index.Index64.empty(
                     self._length * nextsize, self._nplike
                 )
-                assert (
-                    nextadvanced.nplike is self._nplike
-                    and advanced.nplike is self._nplike
-                )
+                # assert (
+                #     nextadvanced.nplike is self._nplike
+                #     and advanced.nplike is self._nplike
+                # )
                 self._handle_error(
                     self._nplike[
                         "awkward_RegularArray_getitem_next_range_spreadadvanced",
@@ -443,10 +443,7 @@ class RegularArray(Content):
             regular_flathead = ak._v2.index.Index64.empty(
                 flathead.shape[0], self._nplike
             )
-            assert (
-                regular_flathead.nplike is self._nplike
-                and flathead.nplike is self._nplike
-            )
+            assert regular_flathead.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_getitem_next_array_regularize",
@@ -468,11 +465,11 @@ class RegularArray(Content):
                 nextadvanced = ak._v2.index.Index64.empty(
                     self._length * flathead.shape[0], self._nplike
                 )
-                assert (
-                    nextcarry.nplike is self._nplike
-                    and nextadvanced.nplike is self._nplike
-                    and regular_flathead.nplike is self._nplike
-                )
+                # assert (
+                #     nextcarry.nplike is self._nplike
+                #     and nextadvanced.nplike is self._nplike
+                #     and regular_flathead.nplike is self._nplike
+                # )
                 self._handle_error(
                     self._nplike[
                         "awkward_RegularArray_getitem_next_array",
@@ -508,12 +505,12 @@ class RegularArray(Content):
             else:
                 nextcarry = ak._v2.index.Index64.empty(self._length, self._nplike)
                 nextadvanced = ak._v2.index.Index64.empty(self._length, self._nplike)
-                assert (
-                    nextcarry.nplike is self._nplike
-                    and nextadvanced.nplike is self._nplike
-                    and advanced.nplike is self._nplike
-                    and regular_flathead.nplike is self._nplike
-                )
+                # assert (
+                #     nextcarry.nplike is self._nplike
+                #     and nextadvanced.nplike is self._nplike
+                #     and advanced.nplike is self._nplike
+                #     and regular_flathead.nplike is self._nplike
+                # )
                 self._handle_error(
                     self._nplike[
                         "awkward_RegularArray_getitem_next_array_advanced",
@@ -561,11 +558,7 @@ class RegularArray(Content):
                 head.length * regularlength, self._nplike
             )
 
-            assert (
-                multistarts.nplike is self._nplike
-                and multistops.nplike is self._nplike
-                and singleoffsets.nplike is self._nplike
-            )
+            # assert singleoffsets.nplike is self.nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_getitem_jagged_expand",
@@ -866,8 +859,7 @@ class RegularArray(Content):
 
             if self._size != 0:
                 assert (
-                    toindex.data.nplike is self._nplike
-                    and fromindex.data.nplike is self._nplike
+                    toindex.nplike is self._nplike and fromindex.nplike is self._nplike
                 )
                 self._handle_error(
                     self._nplike[
@@ -1090,7 +1082,7 @@ class RegularArray(Content):
                 self._length,
                 [
                     ak._v2._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent.to(numpy)),
+                    pyarrow.py_buffer(akcontent.raw(numpy)),
                 ],
             )
 

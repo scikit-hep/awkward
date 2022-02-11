@@ -129,12 +129,12 @@ class NumpyLike(Singleton):
         # data[, dtype=[, copy=]]
         return self._module.array(*args, **kwargs)
 
+    def raw(self, *args, **kwargs):
+        return self._module.raw(*args, **kwargs)
+
     def asarray(self, *args, **kwargs):
         # array[, dtype=][, order=]
         return self._module.asarray(*args, **kwargs)
-
-    def asnumpy(self, *args, **kwargs):
-        return self._module.asnumpy(*args, **kwargs)
 
     def ascontiguousarray(self, *args, **kwargs):
         # array[, dtype=]
@@ -468,8 +468,20 @@ class Numpy(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
-    def asnumpy(self, array, order=None):
-        return self._module.asarray(array, order=order)
+    def raw(self, array, nplike):
+        if isinstance(nplike, Numpy):
+            return array
+        elif isinstance(nplike, Cupy):
+            cupy = Cupy.instance()
+            return cupy.asarray(array, dtype=array.dtype, order="C")
+        elif isinstance(nplike, ak._v2._typetracer.TypeTracer):
+            return ak._v2._typetracer.TypeTracerArray(
+                dtype=array.dtype, shape=array.shape
+            )
+        else:
+            raise TypeError(
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+            )
 
 
 class Cupy(NumpyLike):
@@ -542,8 +554,20 @@ or
         else:
             return self._module.asarray(array, dtype=dtype, order=order)
 
-    def asnumpy(self, array, order=None):
-        return self._module.asnumpy(array, order=order)
+    def raw(self, array, nplike):
+        if isinstance(nplike, Cupy):
+            return array
+        elif isinstance(nplike, Numpy):
+            numpy = Numpy.instance()
+            return numpy.asarray(array.get(), dtype=array.dtype, order="C")
+        elif isinstance(nplike, ak._v2._typetracer.TypeTracer):
+            return ak._v2._typetracer.TypeTracerArray(
+                dtype=array.dtype, shape=array.shape
+            )
+        else:
+            raise TypeError(
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+            )
 
     def ascontiguousarray(self, array, dtype=None):
         if isinstance(

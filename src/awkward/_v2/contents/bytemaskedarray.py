@@ -83,13 +83,15 @@ class ByteMaskedArray(Content):
     def _to_buffers(self, form, getkey, container, nplike):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "mask")
-        container[key] = ak._v2._util.little_endian(self._mask.to(nplike))
+        container[key] = ak._v2._util.little_endian(self._mask.raw(nplike))
         self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
         return ByteMaskedArray(
-            ak._v2.index.Index(self._mask.to(ak._v2._typetracer.TypeTracer.instance())),
+            ak._v2.index.Index(
+                self._mask.raw(ak._v2._typetracer.TypeTracer.instance())
+            ),
             self._content.typetracer,
             self._valid_when,
             self._typetracer_identifier(),
@@ -155,9 +157,9 @@ class ByteMaskedArray(Content):
             nplike = self._nplike
 
         if valid_when == self._valid_when:
-            return self._mask.to(nplike) != 0
+            return self._mask.raw(nplike) != 0
         else:
-            return self._mask.to(nplike) != 1
+            return self._mask.raw(nplike) != 1
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -260,7 +262,7 @@ class ByteMaskedArray(Content):
             ](
                 nextcarry.data,
                 outindex.data,
-                self._mask.to(self._nplike),
+                self._mask.raw(self._nplike),
                 self._mask.length,
                 self._valid_when,
             )
@@ -754,7 +756,6 @@ class ByteMaskedArray(Content):
                 assert (
                     nextshifts.nplike is self._nplike
                     and self._mask.nplike is self._nplike
-                    and shifts.nplike is self._nplike
                 )
                 self._handle_error(
                     self._nplike[
@@ -796,9 +797,7 @@ class ByteMaskedArray(Content):
 
             if isinstance(out, ak._v2.contents.ListOffsetArray):
                 outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
-                assert (
-                    outoffsets.nplike is self._nplike and starts.nplike is self._nplike
-                )
+                assert outoffsets.nplike is self._nplike
                 self._handle_error(
                     self._nplike[
                         "awkward_IndexedArray_reduce_next_fix_offsets_64",

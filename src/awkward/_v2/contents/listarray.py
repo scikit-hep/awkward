@@ -85,16 +85,16 @@ class ListArray(Content):
         assert isinstance(form, self.Form)
         key1 = getkey(self, form, "starts")
         key2 = getkey(self, form, "stops")
-        container[key1] = ak._v2._util.little_endian(self._starts.to(nplike))
-        container[key2] = ak._v2._util.little_endian(self._stops.to(nplike))
+        container[key1] = ak._v2._util.little_endian(self._starts.raw(nplike))
+        container[key2] = ak._v2._util.little_endian(self._stops.raw(nplike))
         self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
         tt = ak._v2._typetracer.TypeTracer.instance()
         return ListArray(
-            ak._v2.index.Index(self._starts.to(tt)),
-            ak._v2.index.Index(self._stops.to(tt)),
+            ak._v2.index.Index(self._starts.raw(tt)),
+            ak._v2.index.Index(self._stops.raw(tt)),
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
@@ -269,13 +269,13 @@ class ListArray(Content):
             outoffsets = ak._v2.index.Index64.empty(
                 slicestarts.length + 1, self._nplike
             )
-            assert (
-                outoffsets.nplike is self._nplike
-                and slicestarts.nplike is self._nplike
-                and slicestops.nplike is self._nplike
-                and self._starts.nplike is self._nplike
-                and self._stops.nplike is self._nplike
-            )
+            # assert (
+            #     outoffsets.nplike is self._nplike
+            #     and slicestarts.nplike is self._nplike
+            #     and slicestops.nplike is self._nplike
+            #     and self._starts.nplike is self._nplike
+            #     and self._stops.nplike is self._nplike
+            # )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_jagged_descend",
@@ -309,11 +309,11 @@ class ListArray(Content):
 
         elif isinstance(slicecontent, ak._v2.contents.numpyarray.NumpyArray):
             carrylen = ak._v2.index.Index64.empty(1, self._nplike)
-            assert (
-                carrylen.nplike is self._nplike
-                and slicestarts.nplike is self._nplike
-                and slicestops.nplike is self._nplike
-            )
+            # assert (
+            #     carrylen.nplike is self._nplike
+            #     and slicestarts.nplike is self._nplike
+            #     and slicestops.nplike is self._nplike
+            # )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_jagged_carrylen",
@@ -333,15 +333,15 @@ class ListArray(Content):
             )
             nextcarry = ak._v2.index.Index64.empty(carrylen[0], self._nplike)
 
-            assert (
-                outoffsets.nplike is self._nplike
-                and nextcarry.nplike is self._nplike
-                and slicestarts.nplike is self._nplike
-                and slicestops.nplike is self._nplike
-                and sliceindex.nplike is self._nplike
-                and self._starts.nplike is self._nplike
-                and self._stops.nplike is self._nplike
-            )
+            # assert (
+            #     outoffsets.nplike is self._nplike
+            #     and nextcarry.nplike is self._nplike
+            #     and slicestarts.nplike is self._nplike
+            #     and slicestops.nplike is self._nplike
+            #     and sliceindex.nplike is self._nplike
+            #     and self._starts.nplike is self._nplike
+            #     and self._stops.nplike is self._nplike
+            # )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_jagged_apply",
@@ -388,12 +388,12 @@ class ListArray(Content):
 
             missing = ak._v2.index.Index64(slicecontent._index)
             numvalid = ak._v2.index.Index64.empty(1, self._nplike)
-            assert (
-                numvalid.nplike is self._nplike
-                and slicestarts.nplike is self._nplike
-                and slicestops.nplike is self._nplike
-                and missing.nplike is self._nplike
-            )
+            # assert (
+            #     numvalid.nplike is self._nplike
+            #     and slicestarts.nplike is self._nplike
+            #     and slicestops.nplike is self._nplike
+            #     and missing.nplike is self._nplike
+            # )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_jagged_numvalid",
@@ -420,14 +420,14 @@ class ListArray(Content):
                 slicestarts.length + 1, self._nplike
             )
 
-            assert (
-                nextcarry.nplike is self._nplike
-                and smalloffsets.nplike is self._nplike
-                and largeoffsets.nplike is self._nplike
-                and slicestarts.nplike is self._nplike
-                and slicestops.nplike is self._nplike
-                and missing.nplike is self._nplike
-            )
+            # assert (
+            #     nextcarry.nplike is self._nplike
+            #     and smalloffsets.nplike is self._nplike
+            #     and largeoffsets.nplike is self._nplike
+            #     and slicestarts.nplike is self._nplike
+            #     and slicestops.nplike is self._nplike
+            #     and missing.nplike is self._nplike
+            # )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_jagged_shrink",
@@ -511,11 +511,11 @@ class ListArray(Content):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             lenstarts = self._starts.length
             nextcarry = ak._v2.index.Index64.empty(lenstarts, self._nplike)
-            assert (
-                nextcarry.nplike is self._nplike
-                and self._starts.nplike is self._nplike
-                and self._stops.nplike is self._nplike
-            )
+            # assert (
+            #     nextcarry.nplike is self._nplike
+            #     and self._starts.nplike is self._nplike
+            #     and self._stops.nplike is self._nplike
+            # )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_next_at",
@@ -546,11 +546,11 @@ class ListArray(Content):
 
             if self._nplike.known_shape:
                 carrylength = ak._v2.index.Index64.empty(1, self._nplike)
-                assert (
-                    carrylength.nplike is self._nplike
-                    and self._starts.nplike is self._nplike
-                    and self._stops.nplike is self._nplike
-                )
+                # assert (
+                #     carrylength.nplike is self._nplike
+                #     and self._starts.nplike is self._nplike
+                #     and self._stops.nplike is self._nplike
+                # )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_range_carrylength",
@@ -580,12 +580,12 @@ class ListArray(Content):
             elif self._starts.dtype == "uint32":
                 nextoffsets = ak._v2.index.IndexU32.empty(lenstarts + 1, self._nplike)
 
-            assert (
-                nextoffsets.nplike is self._nplike
-                and nextcarry.nplike is self._nplike
-                and self._starts.nplike is self._nplike
-                and self._stops.nplike is self._nplike
-            )
+            # assert (
+            #     nextoffsets.nplike is self._nplike
+            #     and nextcarry.nplike is self._nplike
+            #     and self._starts.nplike is self._nplike
+            #     and self._stops.nplike is self._nplike
+            # )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_next_range",
@@ -618,10 +618,10 @@ class ListArray(Content):
             else:
                 if self._nplike.known_shape:
                     total = ak._v2.index.Index64.empty(1, self._nplike)
-                    assert (
-                        total.nplike is self._nplike
-                        and nextoffsets.nplike is self._nplike
-                    )
+                    # assert (
+                    #     total.nplike is self._nplike
+                    #     and nextoffsets.nplike is self._nplike
+                    # )
                     self._handle_error(
                         self._nplike[
                             "awkward_ListArray_getitem_next_range_counts",
@@ -639,11 +639,11 @@ class ListArray(Content):
                         ak._v2._typetracer.UnknownLength, self._nplike
                     )
 
-                assert (
-                    nextadvanced.nplike is self._nplike
-                    and advanced.nplike is self._nplike
-                    and nextoffsets.nplike is self._nplike
-                )
+                # assert (
+                #     nextadvanced.nplike is self._nplike
+                #     and advanced.nplike is self._nplike
+                #     and nextoffsets.nplike is self._nplike
+                # )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_range_spreadadvanced",
@@ -690,13 +690,13 @@ class ListArray(Content):
                 nextadvanced = ak._v2.index.Index64.empty(
                     lenstarts * flathead.shape[0], self._nplike
                 )
-                assert (
-                    nextcarry.nplike is self._nplike
-                    and nextadvanced.nplike is self._nplike
-                    and self._starts.nplike is self._nplike
-                    and self._stops.nplike is self._nplike
-                    and regular_flathead.nplike is self._nplike
-                )
+                # assert (
+                #     nextcarry.nplike is self._nplike
+                #     and nextadvanced.nplike is self._nplike
+                #     and self._starts.nplike is self._nplike
+                #     and self._stops.nplike is self._nplike
+                #     and regular_flathead.nplike is self._nplike
+                # )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_array",
@@ -730,14 +730,14 @@ class ListArray(Content):
             else:
                 nextcarry = ak._v2.index.Index64.empty(lenstarts, self._nplike)
                 nextadvanced = ak._v2.index.Index64.empty(lenstarts, self._nplike)
-                assert (
-                    nextcarry.nplike is self._nplike
-                    and nextadvanced.nplike is self._nplike
-                    and self._starts.nplike is self._nplike
-                    and self._stops.nplike is self._nplike
-                    and regular_flathead.nplike is self._nplike
-                    and advanced.nplike is self._nplike
-                )
+                # assert (
+                #     nextcarry.nplike is self._nplike
+                #     and nextadvanced.nplike is self._nplike
+                #     and self._starts.nplike is self._nplike
+                #     and self._stops.nplike is self._nplike
+                #     and regular_flathead.nplike is self._nplike
+                #     and advanced.nplike is self._nplike
+                # )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_array_advanced",
@@ -776,14 +776,14 @@ class ListArray(Content):
             multistops = ak._v2.index.Index64.empty(head.length * length, self._nplike)
             nextcarry = ak._v2.index.Index64.empty(head.length * length, self._nplike)
 
-            assert (
-                multistarts.nplike is self._nplike
-                and multistops.nplike is self._nplike
-                and singleoffsets.nplike is self._nplike
-                and nextcarry.nplike is self._nplike
-                and self._starts.nplike is self._nplike
-                and self._stops.nplike is self._nplike
-            )
+            # assert (
+            #     multistarts.nplike is self._nplike
+            #     and multistops.nplike is self._nplike
+            #     and singleoffsets.nplike is self._nplike
+            #     and nextcarry.nplike is self._nplike
+            #     and self._starts.nplike is self._nplike
+            #     and self._stops.nplike is self._nplike
+            # )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_jagged_expand",
