@@ -622,9 +622,9 @@ class BitMaskedArray(Content):
                 out[i] = content[i]
         return out
 
-    def _to_backend(self, backend):
-        content = self._content._to_backend(backend)
-        mask = self._mask._to_backend(backend)
+    def _to_nplike(self, nplike):
+        content = self._content._to_nplike(nplike)
+        mask = self._mask._to_nplike(nplike)
         return BitMaskedArray(
             mask,
             content,
@@ -633,7 +633,7 @@ class BitMaskedArray(Content):
             lsb_order=self._lsb_order,
             identifier=self._identifier,
             parameters=self._parameters,
-            nplike=backend,
+            nplike=nplike,
         )
 
     def _to_json(

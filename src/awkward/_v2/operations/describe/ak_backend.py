@@ -42,19 +42,19 @@ def backend(*arrays):
         )
         if isinstance(layout, ak._v2.contents.Content):
             if isinstance(layout.nplike, ak.nplike.Numpy):
-                backends.add(ak._v2._util.backend[ak.nplike.Numpy])
+                backends.add("cpu")
             elif isinstance(layout.nplike, ak.nplike.Cupy):
-                backends.add(ak._v2._util.backend[ak.nplike.Cupy])
+                backends.add("cuda")
         elif isinstance(layout, ak.nplike.numpy.ndarray):
-            backends.add(ak._v2._util.backend[ak.nplike.Numpy])
+            backends.add("cpu")
         elif type(layout).__module__.startswith("cupy."):
-            backends.add(ak._v2._util.backend[ak.nplike.Cupy])
+            backends.add("cuda")
 
     if backends == set():
         return None
-    elif backends == {ak._v2._util.backend[ak.nplike.Numpy]}:
-        return ak._v2._util.backend[ak.nplike.Numpy]
-    elif backends == {ak._v2._util.backend[ak.nplike.Cupy]}:
-        return ak._v2._util.backend[ak.nplike.Cupy]
+    elif backends == {"cpu"}:
+        return "cpu"
+    elif backends == {"cuda"}:
+        return "cuda"
     else:
         return "mixed"

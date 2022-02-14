@@ -59,6 +59,12 @@ class UnknownLengthType:
     def __floordiv__(self, other):
         return UnknownLength
 
+    def __rdiv__(self, other):
+        return UnknownLength
+
+    def __rfloordiv__(self, other):
+        return UnknownLength
+
     def __lt__(self, other):
         return False
 

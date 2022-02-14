@@ -46,7 +46,7 @@ def test_tocuda():
 
 
 @pytest.mark.skip(
-    reason="Can't test this right now because of unimplemented CUDA Kernels (awkward_ListOffsetArray_compact_offsets"
+    reason="Can't test this right now because of unimplemented CUDA Kernels (awkward_ListOffsetArray_compact_offsets)"
 )
 def test_tocuda_unimplementedkernels():
     content = ak.contents.NumpyArray(

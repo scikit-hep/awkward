@@ -2,6 +2,7 @@
 
 # v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
 
+import sys
 
 import ctypes
 
@@ -13,24 +14,24 @@ import awkward as ak
 
 
 def of(*arrays):
-    backends = set()
+    nplikes = set()
     for array in arrays:
         nplike = getattr(array, "nplike", None)
         if nplike is not None:
-            backends.add(nplike)
+            nplikes.add(nplike)
         else:
             if isinstance(array, ak.nplike.numpy.ndarray):
-                backends.add(ak.nplike.Numpy.instance())
+                nplikes.add(ak.nplike.Numpy.instance())
             elif type(array).__module__.startswith("cupy."):
-                backends.add(ak.nplike.Cupy.instance())
+                nplikes.add(ak.nplike.Cupy.instance())
 
-    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in backends):
+    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in nplikes):
         return ak._v2._typetracer.TypeTracer.instance()
 
-    if backends == set():
+    if nplikes == set():
         return Numpy.instance()
-    elif len(backends) == 1:
-        return next(iter(backends))
+    elif len(nplikes) == 1:
+        return next(iter(nplikes))
     else:
         raise ValueError(
             """attempting to use both a 'cpu' array and a 'cuda' array in the """
@@ -489,8 +490,6 @@ class Cupy(NumpyLike):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
-        import sys
-
         if "awkward._cuda_kernels" not in sys.modules:
             import awkward._cuda_kernels  # noqa: F401
 

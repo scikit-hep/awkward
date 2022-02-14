@@ -1207,15 +1207,15 @@ class IndexedArray(Content):
             out[i] = content[ind]
         return out
 
-    def _to_backend(self, backend):
-        index = self._index._to_backend(backend)
-        content = self._content._to_backend(backend)
+    def _to_nplike(self, nplike):
+        index = self._index._to_nplike(nplike)
+        content = self._content._to_nplike(nplike)
         return IndexedArray(
             index,
             content,
             identifier=self.identifier,
             parameters=self.parameters,
-            nplike=backend,
+            nplike=nplike,
         )
 
     def _to_json(

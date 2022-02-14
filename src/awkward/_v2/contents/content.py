@@ -298,11 +298,12 @@ class Content:
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-
         index = ak._v2.index.Index64(head.index)
+        indexlength = index.length
+        index = index._to_nplike(self.nplike)
         outindex = ak._v2.index.Index64.empty(index.length * length, self._nplike)
 
-        # assert outindex.nplike is self._nplike and index.nplike is self._nplike
+        assert outindex.nplike is self._nplike and index.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
@@ -321,7 +322,7 @@ class Content:
 
         return ak._v2.contents.regulararray.RegularArray(
             out.simplify_optiontype(),
-            index.length,
+            indexlength,
             1,
             None,
             self._parameters,
@@ -329,6 +330,7 @@ class Content:
         )
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
+        head = head._to_nplike(self._nplike)
         jagged = head.content.toListOffsetArray64()
 
         index = ak._v2.index.Index64(head._index)
@@ -346,13 +348,13 @@ class Content:
         starts = ak._v2.index.Index64.empty(index.length, self._nplike)
         stops = ak._v2.index.Index64.empty(index.length, self._nplike)
 
-        # assert (
-        #     index.nplike is self._nplike
-        #     and jagged._offsets.nplike is self._nplike
-        #     and outputmask.nplike is self._nplike
-        #     and starts.nplike is self._nplike
-        #     and stops.nplike is self._nplike
-        # )
+        assert (
+            index.nplike is self._nplike
+            and jagged._offsets.nplike is self._nplike
+            and outputmask.nplike is self._nplike
+            and starts.nplike is self._nplike
+            and stops.nplike is self._nplike
+        )
         self._handle_error(
             self._nplike[
                 "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
@@ -1313,16 +1315,10 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         return flattened
 
     def to_backend(self, backend):
-        if backend == ak._v2._util.backend[ak.nplike.Numpy]:
-            if isinstance(self.nplike, ak.nplike.Numpy):
-                return self
-            return self._to_backend(ak.nplike.Numpy.instance())
-        elif backend == ak._v2._util.backend[ak.nplike.Cupy]:
-            if isinstance(self.nplike, ak.nplike.Cupy):
-                return self
-            return self._to_backend(ak.nplike.Cupy.instance())
+        if self.nplike is ak._v2._util.regularize_backend(backend):
+            return self
         else:
-            raise ValueError("Possible values for backends are `cpu` or `cuda`.")
+            return self._to_nplike(ak._v2._util.regularize_backend(backend))
 
     def _to_json_custom(self):
         cls = ak._v2._util.arrayclass(self, None)

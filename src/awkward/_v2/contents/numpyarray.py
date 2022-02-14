@@ -1288,12 +1288,12 @@ class NumpyArray(Content):
 
             return self._data.tolist()
 
-    def _to_backend(self, backend):
+    def _to_nplike(self, nplike):
         return NumpyArray(
-            self.raw(backend),
+            self.raw(nplike),
             identifier=self.identifier,
             parameters=self.parameters,
-            nplike=backend,
+            nplike=nplike,
         )
 
     def _to_json_custom(

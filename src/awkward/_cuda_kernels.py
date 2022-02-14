@@ -26,7 +26,7 @@ else:
             """to use CUDA awkward arrays in Python, install the 'awkward[cuda]' package with:
     pip install awkward[cuda] --upgrade
 or
-    conda install awkward[cuda]"""
+    conda install -c conda-forge awkward-cuda-kernels"""
         ) from None
 
 lib = ctypes.cdll.LoadLibrary(awkward_cuda_kernels.shared_library_path)

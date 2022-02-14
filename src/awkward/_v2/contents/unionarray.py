@@ -1362,16 +1362,16 @@ class UnionArray(Content):
             out[i] = contents[tag][index[i]]
         return out
 
-    def _to_backend(self, backend):
-        index = self._index._to_backend(backend)
-        contents = [content._to_backend(backend) for content in self._contents]
+    def _to_nplike(self, nplike):
+        index = self._index._to_nplike(nplike)
+        contents = [content._to_nplike(nplike) for content in self._contents]
         return UnionArray(
             self._tags,
             index,
             contents,
             identifier=self.identifier,
             parameters=self.parameters,
-            nplike=backend,
+            nplike=nplike,
         )
 
     def _to_json(

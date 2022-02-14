@@ -319,6 +319,7 @@ class ListOffsetArray(Content):
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def _getitem_next(self, head, tail, advanced):
+        advanced = advanced._to_nplike(self.nplike)
         if head == ():
             return self
 
@@ -329,11 +330,11 @@ class ListOffsetArray(Content):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             nextcarry = ak._v2.index.Index64.empty(lenstarts, self._nplike)
 
-            # assert (
-            #     nextcarry.nplike is self._nplike
-            #     and starts.nplike is self._nplike
-            #     and stops.nplike is self._nplike
-            # )
+            assert (
+                nextcarry.nplike is self._nplike
+                and starts.nplike is self._nplike
+                and stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_next_at",
@@ -361,11 +362,11 @@ class ListOffsetArray(Content):
             stop = ak._util.kSliceNone if stop is None else stop
 
             carrylength = ak._v2.index.Index64.empty(1, self._nplike)
-            # assert (
-            #     carrylength.nplike is self._nplike
-            #     and self.starts.nplike is self._nplike
-            #     and self.stops.nplike is self._nplike
-            # )
+            assert (
+                carrylength.nplike is self._nplike
+                and self.starts.nplike is self._nplike
+                and self.stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_next_range_carrylength",
@@ -391,12 +392,12 @@ class ListOffsetArray(Content):
                 nextoffsets = ak._v2.index.IndexU32.empty(lenstarts + 1, self._nplike)
             nextcarry = ak._v2.index.Index64.empty(carrylength[0], self._nplike)
 
-            # assert (
-            #     nextoffsets.nplike is self._nplike
-            #     and nextcarry.nplike is self._nplike
-            #     and self.starts.nplike is self._nplike
-            #     and self.stops.nplike is self._nplike
-            # )
+            assert (
+                nextoffsets.nplike is self._nplike
+                and nextcarry.nplike is self._nplike
+                and self.starts.nplike is self._nplike
+                and self.stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_next_range",
@@ -429,9 +430,9 @@ class ListOffsetArray(Content):
 
             else:
                 total = ak._v2.index.Index64.empty(1, self._nplike)
-                # assert (
-                #     total.nplike is self._nplike and nextoffsets.nplike is self._nplike
-                # )
+                assert (
+                    total.nplike is self._nplike and nextoffsets.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_range_counts",
@@ -445,11 +446,11 @@ class ListOffsetArray(Content):
                 )
 
                 nextadvanced = ak._v2.index.Index64.empty(total[0], self._nplike)
-                # assert (
-                #     nextadvanced.nplike is self._nplike
-                #     and advanced.nplike is self._nplike
-                #     and nextoffsets.nplike is self._nplike
-                # )
+                assert (
+                    nextadvanced.nplike is self._nplike
+                    and advanced.nplike is self._nplike
+                    and nextoffsets.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_range_spreadadvanced",
@@ -496,11 +497,11 @@ class ListOffsetArray(Content):
                 nextadvanced = ak._v2.index.Index64.empty(
                     lenstarts * flathead.length, self._nplike
                 )
-                # assert (
-                #     nextcarry.nplike is self._nplike
-                #     and nextadvanced.nplike is self._nplike
-                #     and regular_flathead.nplike is self._nplike
-                # )
+                assert (
+                    nextcarry.nplike is self._nplike
+                    and nextadvanced.nplike is self._nplike
+                    and regular_flathead.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_array",
@@ -532,14 +533,14 @@ class ListOffsetArray(Content):
             else:
                 nextcarry = ak._v2.index.Index64.empty(self.length, self._nplike)
                 nextadvanced = ak._v2.index.Index64.empty(self.length, self._nplike)
-                # assert (
-                #     nextcarry.nplike is self._nplike
-                #     and nextadvanced.nplike is self._nplike
-                #     and self.starts.nplike is self._nplike
-                #     and self.stops.nplike is self._nplike
-                #     and regular_flathead.nplike is self._nplike
-                #     and advanced.nplike is self._nplike
-                # )
+                assert (
+                    nextcarry.nplike is self._nplike
+                    and nextadvanced.nplike is self._nplike
+                    and self.starts.nplike is self._nplike
+                    and self.stops.nplike is self._nplike
+                    and regular_flathead.nplike is self._nplike
+                    and advanced.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_array_advanced",
@@ -2252,15 +2253,15 @@ class ListOffsetArray(Content):
                 out[i] = content[starts[i] : stops[i]]
             return out
 
-    def _to_backend(self, backend):
-        offsets = self._offsets._to_backend(backend)
-        content = self._content._to_backend(backend)
+    def _to_nplike(self, nplike):
+        offsets = self._offsets._to_nplike(nplike)
+        content = self._content._to_nplike(nplike)
         return ListOffsetArray(
             offsets,
             content,
             identifier=self._identifier,
             parameters=self._parameters,
-            nplike=backend,
+            nplike=nplike,
         )
 
     def _to_json(

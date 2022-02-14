@@ -398,10 +398,11 @@ class RegularArray(Content):
                 nextadvanced = ak._v2.index.Index64.empty(
                     self._length * nextsize, self._nplike
                 )
-                # assert (
-                #     nextadvanced.nplike is self._nplike
-                #     and advanced.nplike is self._nplike
-                # )
+                advanced = advanced._to_nplike(self.nplike)
+                assert (
+                    nextadvanced.nplike is self._nplike
+                    and advanced.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_RegularArray_getitem_next_range_spreadadvanced",
@@ -437,6 +438,7 @@ class RegularArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
+            head = head._to_nplike(self.nplike)
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             flathead = self._nplike.asarray(head.data.reshape(-1))
 
@@ -465,11 +467,11 @@ class RegularArray(Content):
                 nextadvanced = ak._v2.index.Index64.empty(
                     self._length * flathead.shape[0], self._nplike
                 )
-                # assert (
-                #     nextcarry.nplike is self._nplike
-                #     and nextadvanced.nplike is self._nplike
-                #     and regular_flathead.nplike is self._nplike
-                # )
+                assert (
+                    nextcarry.nplike is self._nplike
+                    and nextadvanced.nplike is self._nplike
+                    and regular_flathead.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_RegularArray_getitem_next_array",
@@ -505,12 +507,13 @@ class RegularArray(Content):
             else:
                 nextcarry = ak._v2.index.Index64.empty(self._length, self._nplike)
                 nextadvanced = ak._v2.index.Index64.empty(self._length, self._nplike)
-                # assert (
-                #     nextcarry.nplike is self._nplike
-                #     and nextadvanced.nplike is self._nplike
-                #     and advanced.nplike is self._nplike
-                #     and regular_flathead.nplike is self._nplike
-                # )
+                advanced = advanced._to_nplike(self.nplike)
+                assert (
+                    nextcarry.nplike is self._nplike
+                    and nextadvanced.nplike is self._nplike
+                    and advanced.nplike is self._nplike
+                    and regular_flathead.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_RegularArray_getitem_next_array_advanced",
@@ -533,6 +536,9 @@ class RegularArray(Content):
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
+            headlength = head.length
+            head = head._to_nplike(self.nplike)
+
             if advanced is not None:
                 raise NestedIndexError(
                     self,
@@ -558,7 +564,7 @@ class RegularArray(Content):
                 head.length * regularlength, self._nplike
             )
 
-            # assert singleoffsets.nplike is self.nplike
+            assert singleoffsets.nplike is self.nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_getitem_jagged_expand",
@@ -578,7 +584,7 @@ class RegularArray(Content):
             )
 
             return RegularArray(
-                down, head.length, self._length, None, self._parameters, self._nplike
+                down, headlength, self._length, None, self._parameters, self._nplike
             )
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
@@ -1217,15 +1223,15 @@ class RegularArray(Content):
                 out[i] = content[(i) * size : (i + 1) * size]
             return out
 
-    def _to_backend(self, backend):
-        content = self._content._to_backend(backend)
+    def _to_nplike(self, nplike):
+        content = self._content._to_nplike(nplike)
         return RegularArray(
             content,
             self._size,
             zeros_length=self._length,
             identifier=self.identifier,
             parameters=self.parameters,
-            nplike=backend,
+            nplike=nplike,
         )
 
     def _to_json(

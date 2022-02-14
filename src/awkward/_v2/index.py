@@ -158,19 +158,13 @@ class Index:
         return self.data.nbytes
 
     def to_backend(self, backend):
-        if backend == ak._v2._util.backend[ak.nplike.Numpy]:
-            if isinstance(self.nplike, ak.nplike.Numpy):
-                return self
-            return self._to_backend(ak.nplike.Numpy.instance())
-        elif backend == ak._v2._util.backend[ak.nplike.Cupy]:
-            if isinstance(self.nplike, ak.nplike.Cupy):
-                return self
-            return self._to_backend(ak.nplike.Cupy.instance())
+        if self.nplike is ak._v2._util.regularize_backend(backend):
+            return self
         else:
-            raise ValueError("Possible values for backends are `cpu` or `cuda`.")
+            return self._to_nplike(ak._v2._util.regularize_backend(backend))
 
-    def _to_backend(self, backend):
-        return Index(self.raw(backend), metadata=self.metadata, nplike=backend)
+    def _to_nplike(self, nplike):
+        return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
 
 class Index8(Index):

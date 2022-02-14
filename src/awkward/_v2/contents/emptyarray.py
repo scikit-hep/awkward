@@ -338,8 +338,8 @@ class EmptyArray(Content):
     def _to_list(self, behavior):
         return []
 
-    def _to_backend(self, backend):
-        return EmptyArray(self._identifier, self._parameters, nplike=backend)
+    def _to_nplike(self, nplike):
+        return EmptyArray(self._identifier, self._parameters, nplike=nplike)
 
     def _to_json(
         self,

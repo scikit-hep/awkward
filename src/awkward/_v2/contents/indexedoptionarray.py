@@ -242,6 +242,9 @@ class IndexedOptionArray(Content):
         return numnull[0], nextcarry, outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
+        slicestarts = slicestarts._to_nplike(self.nplike)
+        slicestops = slicestops._to_nplike(self.nplike)
+
         if slicestarts.length != self.length and self._nplike.known_shape:
             raise NestedIndexError(
                 self,
@@ -257,13 +260,13 @@ class IndexedOptionArray(Content):
 
         reducedstarts = ak._v2.index.Index64.empty(self.length - numnull, self._nplike)
         reducedstops = ak._v2.index.Index64.empty(self.length - numnull, self._nplike)
-        # assert (
-        #     outindex.nplike is self._nplike
-        #     and slicestarts.nplike is self._nplike
-        #     and slicestops.nplike is self._nplike
-        #     and reducedstarts.nplike is self._nplike
-        #     and reducedstops.nplike is self._nplike
-        # )
+        assert (
+            outindex.nplike is self._nplike
+            and slicestarts.nplike is self._nplike
+            and slicestops.nplike is self._nplike
+            and reducedstarts.nplike is self._nplike
+            and reducedstops.nplike is self._nplike
+        )
         self._handle_error(
             self._nplike[
                 "awkward_MaskedArray_getitem_next_jagged_project",
@@ -1864,11 +1867,11 @@ class IndexedOptionArray(Content):
                 out[i] = content[ind]
         return out
 
-    def _to_backend(self, backend):
-        index = self._index._to_backend(backend)
-        content = self._content._to_backend(backend)
+    def _to_nplike(self, nplike):
+        index = self._index._to_nplike(nplike)
+        content = self._content._to_nplike(nplike)
         return IndexedOptionArray(
-            index, content, self.identifier, self.parameters, nplike=backend
+            index, content, self.identifier, self.parameters, nplike=nplike
         )
 
     def _to_json(
