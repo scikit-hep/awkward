@@ -545,6 +545,15 @@ class UnmaskedArray(Content):
 
         return self._content._to_list(behavior)
 
+    def _to_nplike(self, nplike):
+        content = self._content._to_nplike(nplike)
+        return UnmaskedArray(
+            content,
+            identifier=self.identifier,
+            parameters=self.parameters,
+            nplike=nplike,
+        )
+
     def _to_json(
         self,
         nan_string,

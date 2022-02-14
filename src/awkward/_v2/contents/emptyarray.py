@@ -290,7 +290,7 @@ class EmptyArray(Content):
                 numpy.empty(length, dtype),
                 self._identifier,
                 self._parameters,
-                nplike=numpy,
+                nplike=self.nplike,
             )
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
@@ -337,6 +337,9 @@ class EmptyArray(Content):
 
     def _to_list(self, behavior):
         return []
+
+    def _to_nplike(self, nplike):
+        return EmptyArray(self._identifier, self._parameters, nplike=nplike)
 
     def _to_json(
         self,

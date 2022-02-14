@@ -29,6 +29,18 @@ kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
 
+_backends = {
+    "cpu": ak.nplike.Numpy,
+    "cuda": ak.nplike.Cupy,
+}
+
+
+def regularize_backend(backend):
+    if backend in _backends:
+        return _backends[backend].instance()
+    else:
+        raise ValueError("The available backends for now are `cpu` and `cuda`.")
+
 
 def parse_version(version):
     return setuptools.extern.packaging.version.parse(version)

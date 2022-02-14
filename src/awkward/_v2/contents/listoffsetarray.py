@@ -80,14 +80,14 @@ class ListOffsetArray(Content):
     def _to_buffers(self, form, getkey, container, nplike):
         assert isinstance(form, self.Form)
         key = getkey(self, form, "offsets")
-        container[key] = ak._v2._util.little_endian(self._offsets.to(nplike))
+        container[key] = ak._v2._util.little_endian(self._offsets.raw(nplike))
         self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
     def typetracer(self):
         tt = ak._v2._typetracer.TypeTracer.instance()
         return ListOffsetArray(
-            ak._v2.index.Index(self._offsets.to(tt)),
+            ak._v2.index.Index(self._offsets.raw(tt)),
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
@@ -133,7 +133,7 @@ class ListOffsetArray(Content):
 
             if start_at_zero:
                 offsets = ak._v2.index.Index64(
-                    self._offsets.to(self._nplike) - self._offsets[0]
+                    self._offsets.raw(self._nplike) - self._offsets[0]
                 )
                 content = self._content[self._offsets[0] :]
             else:
@@ -151,14 +151,15 @@ class ListOffsetArray(Content):
         start, stop = self._offsets[0], self._offsets[self._offsets.length - 1]
         content = self._content._getitem_range(slice(start, stop))
         size = ak._v2.index.Index64.empty(1, self._nplike)
+        assert size.nplike is self._nplike and self._offsets.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_ListOffsetArray_toRegularArray",
                 size.dtype.type,
                 self._offsets.dtype.type,
             ](
-                size.to(self._nplike),
-                self._offsets.to(self._nplike),
+                size.data,
+                self._offsets.data,
                 self._offsets.length,
             )
         )
@@ -244,12 +245,13 @@ class ListOffsetArray(Content):
     def _compact_offsets64(self, start_at_zero):
         offsets_len = self._offsets.length - 1
         out = ak._v2.index.Index64.empty(offsets_len + 1, self._nplike)
+        assert out.nplike is self._nplike and self._offsets.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_ListOffsetArray_compact_offsets",
                 out.dtype.type,
                 self._offsets.dtype.type,
-            ](out.to(self._nplike), self._offsets.to(self._nplike), offsets_len)
+            ](out.data, self._offsets.data, offsets_len)
         )
         return out
 
@@ -276,6 +278,12 @@ class ListOffsetArray(Content):
         starts, stops = self.starts, self.stops
 
         nextcarry = ak._v2.index.Index64.empty(offsets[-1], self._nplike)
+        assert (
+            nextcarry.nplike is self._nplike
+            and offsets.nplike is self._nplike
+            and starts.nplike is self._nplike
+            and stops.nplike is self._nplike
+        )
         self._handle_error(
             self._nplike[
                 "awkward_ListArray_broadcast_tooffsets",
@@ -284,11 +292,11 @@ class ListOffsetArray(Content):
                 starts.dtype.type,
                 stops.dtype.type,
             ](
-                nextcarry.to(self._nplike),
-                offsets.to(self._nplike),
+                nextcarry.data,
+                offsets.data,
                 offsets.length,
-                starts.to(self._nplike),
-                stops.to(self._nplike),
+                starts.data,
+                stops.data,
                 self._content.length,
             )
         )
@@ -311,6 +319,7 @@ class ListOffsetArray(Content):
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def _getitem_next(self, head, tail, advanced):
+        advanced = advanced._to_nplike(self.nplike)
         if head == ():
             return self
 
@@ -321,6 +330,11 @@ class ListOffsetArray(Content):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             nextcarry = ak._v2.index.Index64.empty(lenstarts, self._nplike)
 
+            assert (
+                nextcarry.nplike is self._nplike
+                and starts.nplike is self._nplike
+                and stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_next_at",
@@ -328,9 +342,9 @@ class ListOffsetArray(Content):
                     starts.dtype.type,
                     stops.dtype.type,
                 ](
-                    nextcarry.to(self._nplike),
-                    starts.to(self._nplike),
-                    stops.to(self._nplike),
+                    nextcarry.data,
+                    starts.data,
+                    stops.data,
                     lenstarts,
                     head,
                 )
@@ -348,6 +362,11 @@ class ListOffsetArray(Content):
             stop = ak._util.kSliceNone if stop is None else stop
 
             carrylength = ak._v2.index.Index64.empty(1, self._nplike)
+            assert (
+                carrylength.nplike is self._nplike
+                and self.starts.nplike is self._nplike
+                and self.stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_next_range_carrylength",
@@ -355,9 +374,9 @@ class ListOffsetArray(Content):
                     self.starts.dtype.type,
                     self.stops.dtype.type,
                 ](
-                    carrylength.to(self._nplike),
-                    self.starts.to(self._nplike),
-                    self.stops.to(self._nplike),
+                    carrylength.data,
+                    self.starts.data,
+                    self.stops.data,
                     lenstarts,
                     start,
                     stop,
@@ -373,6 +392,12 @@ class ListOffsetArray(Content):
                 nextoffsets = ak._v2.index.IndexU32.empty(lenstarts + 1, self._nplike)
             nextcarry = ak._v2.index.Index64.empty(carrylength[0], self._nplike)
 
+            assert (
+                nextoffsets.nplike is self._nplike
+                and nextcarry.nplike is self._nplike
+                and self.starts.nplike is self._nplike
+                and self.stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_getitem_next_range",
@@ -381,10 +406,10 @@ class ListOffsetArray(Content):
                     self.starts.dtype.type,
                     self.stops.dtype.type,
                 ](
-                    nextoffsets.to(self._nplike),
-                    nextcarry.to(self._nplike),
-                    self.starts.to(self._nplike),
-                    self.stops.to(self._nplike),
+                    nextoffsets.data,
+                    nextcarry.data,
+                    self.starts.data,
+                    self.stops.data,
                     lenstarts,
                     start,
                     stop,
@@ -405,19 +430,27 @@ class ListOffsetArray(Content):
 
             else:
                 total = ak._v2.index.Index64.empty(1, self._nplike)
+                assert (
+                    total.nplike is self._nplike and nextoffsets.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_range_counts",
                         total.dtype.type,
                         nextoffsets.dtype.type,
                     ](
-                        total.to(self._nplike),
-                        nextoffsets.to(self._nplike),
+                        total.data,
+                        nextoffsets.data,
                         lenstarts,
                     )
                 )
 
                 nextadvanced = ak._v2.index.Index64.empty(total[0], self._nplike)
+                assert (
+                    nextadvanced.nplike is self._nplike
+                    and advanced.nplike is self._nplike
+                    and nextoffsets.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_range_spreadadvanced",
@@ -425,9 +458,9 @@ class ListOffsetArray(Content):
                         advanced.dtype.type,
                         nextoffsets.dtype.type,
                     ](
-                        nextadvanced.to(self._nplike),
-                        advanced.to(self._nplike),
-                        nextoffsets.to(self._nplike),
+                        nextadvanced.data,
+                        advanced.data,
+                        nextoffsets.data,
                         lenstarts,
                     )
                 )
@@ -464,6 +497,11 @@ class ListOffsetArray(Content):
                 nextadvanced = ak._v2.index.Index64.empty(
                     lenstarts * flathead.length, self._nplike
                 )
+                assert (
+                    nextcarry.nplike is self._nplike
+                    and nextadvanced.nplike is self._nplike
+                    and regular_flathead.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_array",
@@ -471,11 +509,11 @@ class ListOffsetArray(Content):
                         nextadvanced.dtype.type,
                         regular_flathead.dtype.type,
                     ](
-                        nextcarry.to(self._nplike),
-                        nextadvanced.to(self._nplike),
-                        self.starts.to(self._nplike),
-                        self.stops.to(self._nplike),
-                        regular_flathead.to(self._nplike),
+                        nextcarry.data,
+                        nextadvanced.data,
+                        self.starts.data,
+                        self.stops.data,
+                        regular_flathead.data,
                         lenstarts,
                         regular_flathead.length,
                         self._content.length,
@@ -495,6 +533,14 @@ class ListOffsetArray(Content):
             else:
                 nextcarry = ak._v2.index.Index64.empty(self.length, self._nplike)
                 nextadvanced = ak._v2.index.Index64.empty(self.length, self._nplike)
+                assert (
+                    nextcarry.nplike is self._nplike
+                    and nextadvanced.nplike is self._nplike
+                    and self.starts.nplike is self._nplike
+                    and self.stops.nplike is self._nplike
+                    and regular_flathead.nplike is self._nplike
+                    and advanced.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListArray_getitem_next_array_advanced",
@@ -505,12 +551,12 @@ class ListOffsetArray(Content):
                         regular_flathead.dtype.type,
                         advanced.dtype.type,
                     ](
-                        nextcarry.to(self._nplike),
-                        nextadvanced.to(self._nplike),
-                        self.starts.to(self._nplike),
-                        self.stops.to(self._nplike),
-                        regular_flathead.to(self._nplike),
-                        advanced.to(self._nplike),
+                        nextcarry.data,
+                        nextadvanced.data,
+                        self.starts.data,
+                        self.stops.data,
+                        regular_flathead.data,
+                        advanced.data,
                         lenstarts,
                         regular_flathead.length,
                         self._content.length,
@@ -547,6 +593,11 @@ class ListOffsetArray(Content):
             ]
         elif posaxis == depth + 1:
             tonum = ak._v2.index.Index64.empty(self.length, self._nplike)
+            assert (
+                tonum.nplike is self._nplike
+                and self.starts.nplike is self._nplike
+                and self.stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_num",
@@ -554,9 +605,9 @@ class ListOffsetArray(Content):
                     self.starts.dtype.type,
                     self.stops.dtype.type,
                 ](
-                    tonum.to(self._nplike),
-                    self.starts.to(self._nplike),
-                    self.stops.to(self._nplike),
+                    tonum.data,
+                    self.starts.data,
+                    self.stops.data,
                     self.length,
                 )
             )
@@ -608,6 +659,11 @@ class ListOffsetArray(Content):
                 tooffsets = ak._v2.index.Index64.empty(
                     self._offsets.length, self._nplike, dtype=np.int64
                 )
+                assert (
+                    tooffsets.nplike is self._nplike
+                    and self._offsets.nplike is self._nplike
+                    and inneroffsets.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListOffsetArray_flatten_offsets",
@@ -615,10 +671,10 @@ class ListOffsetArray(Content):
                         self._offsets.dtype.type,
                         inneroffsets.dtype.type,
                     ](
-                        tooffsets.to(self._nplike),
-                        self._offsets.to(self._nplike),
+                        tooffsets.data,
+                        self._offsets.data,
                         self._offsets.length,
-                        inneroffsets.to(self._nplike),
+                        inneroffsets.data,
                         inneroffsets.length,
                     )
                 )
@@ -695,14 +751,15 @@ class ListOffsetArray(Content):
             else:
                 innerlength = ak._v2._typetracer.UnknownLength
             localindex = ak._v2.index.Index64.empty(innerlength, self._nplike)
+            assert localindex.nplike is self._nplike and offsets.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_localindex",
                     localindex.dtype.type,
                     offsets.dtype.type,
                 ](
-                    localindex.to(self._nplike),
-                    offsets.to(self._nplike),
+                    localindex.data,
+                    offsets.data,
                     offsets.length - 1,
                 )
             )
@@ -769,14 +826,18 @@ class ListOffsetArray(Content):
                 self._offsets[-1] - self._offsets[0], self._nplike
             )
 
+            assert (
+                nextparents.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    nextparents.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    nextparents.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
                 )
             )
@@ -821,6 +882,11 @@ class ListOffsetArray(Content):
             nextlen = self._offsets[-1] - self._offsets[0]
             maxcount = ak._v2.index.Index64.empty(1, self._nplike)
             offsetscopy = ak._v2.index.Index64.empty(self._offsets.length, self._nplike)
+            assert (
+                maxcount.nplike is self._nplike
+                and offsetscopy.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
@@ -828,9 +894,9 @@ class ListOffsetArray(Content):
                     offsetscopy.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    maxcount.to(self._nplike),
-                    offsetscopy.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    maxcount.data,
+                    offsetscopy.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
                 )
             )
@@ -840,6 +906,15 @@ class ListOffsetArray(Content):
             nextparents = ak._v2.index.Index64.empty(nextlen, self._nplike)
             maxnextparents = ak._v2.index.Index64.empty(1, self._nplike)
             distincts = ak._v2.index.Index64.empty(distincts_length, self._nplike)
+            assert (
+                nextcarry.nplike is self._nplike
+                and nextparents.nplike is self._nplike
+                and maxnextparents.nplike is self._nplike
+                and distincts.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+                and offsetscopy.nplike is self._nplike
+                and parents.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
@@ -851,29 +926,32 @@ class ListOffsetArray(Content):
                     offsetscopy.dtype.type,
                     parents.dtype.type,
                 ](
-                    nextcarry.to(self._nplike),
-                    nextparents.to(self._nplike),
+                    nextcarry.data,
+                    nextparents.data,
                     nextlen,
-                    maxnextparents.to(self._nplike),
-                    distincts.to(self._nplike),
+                    maxnextparents.data,
+                    distincts.data,
                     distincts_length,
-                    offsetscopy.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    offsetscopy.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
-                    parents.to(self._nplike),
+                    parents.data,
                     maxcount[0],
                 )
             )
 
             nextstarts = ak._v2.index.Index64.empty(maxnextparents[0] + 1, self._nplike)
+            assert (
+                nextstarts.nplike is self._nplike and nextparents.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
                     nextstarts.dtype.type,
                     nextparents.dtype.type,
                 ](
-                    nextstarts.to(self._nplike),
-                    nextparents.to(self._nplike),
+                    nextstarts.data,
+                    nextparents.data,
                     nextlen,
                 )
             )
@@ -887,14 +965,15 @@ class ListOffsetArray(Content):
             )
 
             outcarry = ak._v2.index.Index64.empty(nextlen, self._nplike)
+            assert outcarry.nplike is self._nplike and nextcarry.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_local_preparenext_64",
                     outcarry.dtype.type,
                     nextcarry.dtype.type,
                 ](
-                    outcarry.to(self._nplike),
-                    nextcarry.to(self._nplike),
+                    outcarry.data,
+                    nextcarry.data,
                     nextlen,
                 )
             )
@@ -912,14 +991,18 @@ class ListOffsetArray(Content):
                 self._offsets[-1] - self._offsets[0], self._nplike
             )
 
+            assert (
+                nextparents.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    nextparents.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    nextparents.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
                 )
             )
@@ -978,6 +1061,13 @@ class ListOffsetArray(Content):
                 )
 
                 self_starts, self_stops = self._offsets[:-1], self._offsets[1:]
+                assert (
+                    nextcarry.nplike is self._nplike
+                    and parents.nplike is self._nplike
+                    and self._content.nplike is self._nplike
+                    and self_starts.nplike is self._nplike
+                    and self_stops.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListOffsetArray_argsort_strings",
@@ -987,12 +1077,12 @@ class ListOffsetArray(Content):
                         self_starts.dtype.type,
                         self_stops.dtype.type,
                     ](
-                        nextcarry.to(self._nplike),
-                        parents.to(self._nplike),
+                        nextcarry.data,
+                        parents.data,
                         parents.length,
                         self._content._data,
-                        self_starts.to(self._nplike),
-                        self_stops.to(self._nplike),
+                        self_starts.data,
+                        self_stops.data,
                         stable,
                         ascending,
                         False,
@@ -1011,6 +1101,11 @@ class ListOffsetArray(Content):
 
             maxcount = ak._v2.index.Index64.empty(1, self._nplike)
             offsetscopy = ak._v2.index.Index64.empty(self._offsets.length, self._nplike)
+            assert (
+                maxcount.nplike is self._nplike
+                and offsetscopy.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
@@ -1018,9 +1113,9 @@ class ListOffsetArray(Content):
                     offsetscopy.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    maxcount.to(self._nplike),
-                    offsetscopy.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    maxcount.data,
+                    offsetscopy.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
                 )
             )
@@ -1032,6 +1127,15 @@ class ListOffsetArray(Content):
             nextparents = ak._v2.index.Index64.empty(nextlen, self._nplike)
             maxnextparents = ak._v2.index.Index64.empty(1, self._nplike)
             distincts = ak._v2.index.Index64.empty(maxcount * outlength, self._nplike)
+            assert (
+                nextcarry.nplike is self._nplike
+                and nextparents.nplike is self._nplike
+                and maxnextparents.nplike is self._nplike
+                and distincts.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+                and offsetscopy.nplike is self._nplike
+                and parents.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
@@ -1043,16 +1147,16 @@ class ListOffsetArray(Content):
                     offsetscopy.dtype.type,
                     parents.dtype.type,
                 ](
-                    nextcarry.to(self._nplike),
-                    nextparents.to(self._nplike),
+                    nextcarry.data,
+                    nextparents.data,
                     nextlen,
-                    maxnextparents.to(self._nplike),
-                    distincts.to(self._nplike),
+                    maxnextparents.data,
+                    distincts.data,
                     maxcount * outlength,
-                    offsetscopy.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    offsetscopy.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
-                    parents.to(self._nplike),
+                    parents.data,
                     maxcount,
                 )
             )
@@ -1061,14 +1165,17 @@ class ListOffsetArray(Content):
             nextstarts = ak._v2.index.Index64.empty(
                 nextstarts_length, self._nplike, np.int64
             )
+            assert (
+                nextstarts.nplike is self._nplike and nextparents.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
                     nextstarts.dtype.type,
                     nextparents.dtype.type,
                 ](
-                    nextstarts.to(self._nplike),
-                    nextparents.to(self._nplike),
+                    nextstarts.data,
+                    nextparents.data,
                     nextlen,
                 )
             )
@@ -1076,6 +1183,15 @@ class ListOffsetArray(Content):
             nummissing = ak._v2.index.Index64.empty(maxcount, self._nplike)
             missing = ak._v2.index.Index64.empty(self._offsets[-1], self._nplike)
             nextshifts = ak._v2.index.Index64.empty(nextlen, self._nplike)
+            assert (
+                nummissing.nplike is self._nplike
+                and missing.nplike is self._nplike
+                and nextshifts.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+                and starts.nplike is self._nplike
+                and parents.nplike is self._nplike
+                and nextcarry.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
@@ -1087,16 +1203,16 @@ class ListOffsetArray(Content):
                     parents.dtype.type,
                     nextcarry.dtype.type,
                 ](
-                    nummissing.to(self._nplike),
-                    missing.to(self._nplike),
-                    nextshifts.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    nummissing.data,
+                    missing.data,
+                    nextshifts.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
-                    starts.to(self._nplike),
-                    parents.to(self._nplike),
+                    starts.data,
+                    parents.data,
                     maxcount,
                     nextlen,
-                    nextcarry.to(self._nplike),
+                    nextcarry.data,
                 )
             )
 
@@ -1114,14 +1230,15 @@ class ListOffsetArray(Content):
             )
 
             outcarry = ak._v2.index.Index64.empty(nextlen, self._nplike)
+            assert outcarry.nplike is self._nplike and nextcarry.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_local_preparenext_64",
                     outcarry.dtype.type,
                     nextcarry.dtype.type,
                 ](
-                    outcarry.to(self._nplike),
-                    nextcarry.to(self._nplike),
+                    outcarry.data,
+                    nextcarry.data,
                     nextlen,
                 )
             )
@@ -1140,14 +1257,18 @@ class ListOffsetArray(Content):
                 self._offsets[-1] - self._offsets[0], self._nplike
             )
 
+            assert (
+                nextparents.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    nextparents.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    nextparents.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
                 )
             )
@@ -1193,6 +1314,13 @@ class ListOffsetArray(Content):
                 )
 
                 starts, stops = self._offsets[:-1], self._offsets[1:]
+                assert (
+                    nextcarry.nplike is self._nplike
+                    and parents.nplike is self._nplike
+                    and self._content.nplike is self._nplike
+                    and starts.nplike is self._nplike
+                    and stops.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListOffsetArray_argsort_strings",
@@ -1202,12 +1330,12 @@ class ListOffsetArray(Content):
                         starts.dtype.type,
                         stops.dtype.type,
                     ](
-                        nextcarry.to(self._nplike),
-                        parents.to(self._nplike),
+                        nextcarry.data,
+                        parents.data,
                         parents.length,
                         self._content._data,
-                        starts.to(self._nplike),
-                        stops.to(self._nplike),
+                        starts.data,
+                        stops.data,
                         stable,
                         ascending,
                         False,
@@ -1227,6 +1355,11 @@ class ListOffsetArray(Content):
             nextlen = self._offsets[-1] - self._offsets[0]
             maxcount = ak._v2.index.Index64.empty(1, self._nplike)
             offsetscopy = ak._v2.index.Index64.empty(self._offsets.length, self._nplike)
+            assert (
+                maxcount.nplike is self._nplike
+                and offsetscopy.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
@@ -1234,9 +1367,9 @@ class ListOffsetArray(Content):
                     offsetscopy.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    maxcount.to(self._nplike),
-                    offsetscopy.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    maxcount.data,
+                    offsetscopy.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
                 )
             )
@@ -1246,6 +1379,15 @@ class ListOffsetArray(Content):
             nextparents = ak._v2.index.Index64.empty(nextlen, self._nplike)
             maxnextparents = ak._v2.index.Index64.empty(1, self._nplike)
             distincts = ak._v2.index.Index64.empty(distincts_length, self._nplike)
+            assert (
+                nextcarry.nplike is self._nplike
+                and nextparents.nplike is self._nplike
+                and maxnextparents.nplike is self._nplike
+                and distincts.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+                and offsetscopy.nplike is self._nplike
+                and parents.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
@@ -1257,29 +1399,32 @@ class ListOffsetArray(Content):
                     offsetscopy.dtype.type,
                     parents.dtype.type,
                 ](
-                    nextcarry.to(self._nplike),
-                    nextparents.to(self._nplike),
+                    nextcarry.data,
+                    nextparents.data,
                     nextlen,
-                    maxnextparents.to(self._nplike),
-                    distincts.to(self._nplike),
+                    maxnextparents.data,
+                    distincts.data,
                     distincts_length,
-                    offsetscopy.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    offsetscopy.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
-                    parents.to(self._nplike),
+                    parents.data,
                     maxcount[0],
                 )
             )
 
             nextstarts = ak._v2.index.Index64.empty(maxnextparents[0] + 1, self._nplike)
+            assert (
+                nextstarts.nplike is self._nplike and nextparents.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
                     nextstarts.dtype.type,
                     nextparents.dtype.type,
                 ](
-                    nextstarts.to(self._nplike),
-                    nextparents.to(self._nplike),
+                    nextstarts.data,
+                    nextparents.data,
                     nextlen,
                 )
             )
@@ -1297,14 +1442,15 @@ class ListOffsetArray(Content):
             )
 
             outcarry = ak._v2.index.Index64.empty(nextlen, self._nplike)
+            assert outcarry.nplike is self._nplike and nextcarry.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_local_preparenext_64",
                     outcarry.dtype.type,
                     nextcarry.dtype.type,
                 ](
-                    outcarry.to(self._nplike),
-                    nextcarry.to(self._nplike),
+                    outcarry.data,
+                    nextcarry.data,
                     nextlen,
                 )
             )
@@ -1321,14 +1467,18 @@ class ListOffsetArray(Content):
                 self._offsets[-1] - self._offsets[0], self._nplike
             )
 
+            assert (
+                nextparents.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    nextparents.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    nextparents.data,
+                    self._offsets.data,
                     self._offsets.length - 1,
                 )
             )
@@ -1373,20 +1523,25 @@ class ListOffsetArray(Content):
             offsets = ak._v2.index.Index64.empty(
                 self.length + 1, self._nplike, dtype=np.int64
             )
+            assert (
+                offsets.nplike is self._nplike
+                and starts.nplike is self._nplike
+                and stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_combinations_length",
-                    totallen.to(self._nplike).dtype.type,
-                    offsets.to(self._nplike).dtype.type,
-                    starts.to(self._nplike).dtype.type,
-                    stops.to(self._nplike).dtype.type,
+                    totallen.data.dtype.type,
+                    offsets.data.dtype.type,
+                    starts.data.dtype.type,
+                    stops.data.dtype.type,
                 ](
-                    totallen.to(self._nplike),
-                    offsets.to(self._nplike),
+                    totallen.data,
+                    offsets.data,
                     n,
                     replacement,
-                    starts.to(self._nplike),
-                    stops.to(self._nplike),
+                    starts.data,
+                    stops.data,
                     self.length,
                 )
             )
@@ -1404,22 +1559,28 @@ class ListOffsetArray(Content):
 
             toindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
             fromindex = ak._v2.index.Index64.empty(n, self._nplike, dtype=np.int64)
+            assert (
+                toindex.nplike is self._nplike
+                and fromindex.nplike is self._nplike
+                and starts.nplike is self._nplike
+                and stops.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListArray_combinations",
                     np.int64,
-                    toindex.to(self._nplike).dtype.type,
-                    fromindex.to(self._nplike).dtype.type,
-                    starts.to(self._nplike).dtype.type,
-                    stops.to(self._nplike).dtype.type,
+                    toindex.data.dtype.type,
+                    fromindex.data.dtype.type,
+                    starts.data.dtype.type,
+                    stops.data.dtype.type,
                 ](
                     tocarryraw,
-                    toindex.to(self._nplike),
-                    fromindex.to(self._nplike),
+                    toindex.data,
+                    fromindex.data,
                     n,
                     replacement,
-                    starts.to(self._nplike),
-                    stops.to(self._nplike),
+                    starts.data,
+                    stops.data,
                     self.length,
                 )
             )
@@ -1475,6 +1636,11 @@ class ListOffsetArray(Content):
         if not branch and negaxis == depth:
             maxcount = ak._v2.index.Index64.empty(1, self._nplike)
             offsetscopy = ak._v2.index.Index64.empty(self.offsets.length, self._nplike)
+            assert (
+                maxcount.nplike is self._nplike
+                and offsetscopy.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
@@ -1482,9 +1648,9 @@ class ListOffsetArray(Content):
                     offsetscopy.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    maxcount.to(self._nplike),
-                    offsetscopy.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    maxcount.data,
+                    offsetscopy.data,
+                    self._offsets.data,
                     globalstarts_length,
                 )
             )
@@ -1494,6 +1660,15 @@ class ListOffsetArray(Content):
             nextparents = ak._v2.index.Index64.empty(nextlen, self._nplike)
             maxnextparents = ak._v2.index.Index64.empty(1, self._nplike)
             distincts = ak._v2.index.Index64.empty(distincts_length, self._nplike)
+            assert (
+                nextcarry.nplike is self._nplike
+                and nextparents.nplike is self._nplike
+                and maxnextparents.nplike is self._nplike
+                and distincts.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+                and offsetscopy.nplike is self._nplike
+                and parents.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
@@ -1505,48 +1680,58 @@ class ListOffsetArray(Content):
                     offsetscopy.dtype.type,
                     parents.dtype.type,
                 ](
-                    nextcarry.to(self._nplike),
-                    nextparents.to(self._nplike),
+                    nextcarry.data,
+                    nextparents.data,
                     nextlen,
-                    maxnextparents.to(self._nplike),
-                    distincts.to(self._nplike),
+                    maxnextparents.data,
+                    distincts.data,
                     distincts_length,
-                    offsetscopy.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    offsetscopy.data,
+                    self._offsets.data,
                     globalstarts_length,
-                    parents.to(self._nplike),
+                    parents.data,
                     maxcount[0],
                 )
             )
 
             nextstarts = ak._v2.index.Index64.empty(maxnextparents[0] + 1, self._nplike)
+            assert (
+                nextstarts.nplike is self._nplike and nextparents.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
                     nextstarts.dtype.type,
                     nextparents.dtype.type,
                 ](
-                    nextstarts.to(self._nplike),
-                    nextparents.to(self._nplike),
+                    nextstarts.data,
+                    nextparents.data,
                     nextlen,
                 )
             )
 
             gaps = ak._v2.index.Index64.empty(outlength, self._nplike)
+            assert gaps.nplike is self._nplike and parents.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_findgaps_64",
                     gaps.dtype.type,
                     parents.dtype.type,
                 ](
-                    gaps.to(self._nplike),
-                    parents.to(self._nplike),
+                    gaps.data,
+                    parents.data,
                     parents_length,
                 )
             )
 
             outstarts = ak._v2.index.Index64.empty(outlength, self._nplike)
             outstops = ak._v2.index.Index64.empty(outlength, self._nplike)
+            assert (
+                outstarts.nplike is self._nplike
+                and outstops.nplike is self._nplike
+                and distincts.nplike is self._nplike
+                and gaps.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
@@ -1555,11 +1740,11 @@ class ListOffsetArray(Content):
                     distincts.dtype.type,
                     gaps.dtype.type,
                 ](
-                    outstarts.to(self._nplike),
-                    outstops.to(self._nplike),
-                    distincts.to(self._nplike),
+                    outstarts.data,
+                    outstops.data,
+                    distincts.data,
                     distincts_length,
-                    gaps.to(self._nplike),
+                    gaps.data,
                     outlength,
                 )
             )
@@ -1568,6 +1753,15 @@ class ListOffsetArray(Content):
                 nextshifts = ak._v2.index.Index64.empty(nextlen, self._nplike)
                 nummissing = ak._v2.index.Index64.empty(maxcount[0], self._nplike)
                 missing = ak._v2.index.Index64.empty(self._offsets[-1], self._nplike)
+                assert (
+                    nummissing.nplike is self._nplike
+                    and missing.nplike is self._nplike
+                    and nextshifts.nplike is self._nplike
+                    and self._offsets.nplike is self._nplike
+                    and starts.nplike is self._nplike
+                    and parents.nplike is self._nplike
+                    and nextcarry.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
@@ -1579,16 +1773,16 @@ class ListOffsetArray(Content):
                         parents.dtype.type,
                         nextcarry.dtype.type,
                     ](
-                        nummissing.to(self._nplike),
-                        missing.to(self._nplike),
-                        nextshifts.to(self._nplike),
-                        self._offsets.to(self._nplike),
+                        nummissing.data,
+                        missing.data,
+                        nextshifts.data,
+                        self._offsets.data,
                         globalstarts_length,
-                        starts.to(self._nplike),
-                        parents.to(self._nplike),
+                        starts.data,
+                        parents.data,
                         maxcount[0],
                         nextlen,
-                        nextcarry.to(self._nplike),
+                        nextcarry.data,
                     )
                 )
             else:
@@ -1630,14 +1824,18 @@ class ListOffsetArray(Content):
         else:
             nextparents = ak._v2.index.Index64.empty(nextlen, self._nplike)
 
+            assert (
+                nextparents.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+            )
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
                 ](
-                    nextparents.to(self._nplike),
-                    self._offsets.to(self._nplike),
+                    nextparents.data,
+                    self._offsets.data,
                     globalstarts_length,
                 )
             )
@@ -1657,14 +1855,15 @@ class ListOffsetArray(Content):
             )
 
             outoffsets = ak._v2.index.Index64.empty(outlength + 1, self._nplike)
+            assert outoffsets.nplike is self._nplike and parents.nplike is self._nplike
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
                     outoffsets.dtype.type,
                     parents.dtype.type,
                 ](
-                    outoffsets.to(self._nplike),
-                    parents.to(self._nplike),
+                    outoffsets.data,
+                    parents.data,
                     parents.length,
                     outlength,
                 )
@@ -1689,11 +1888,12 @@ class ListOffsetArray(Content):
     def _validityerror(self, path):
         if self.offsets.length < 1:
             return f'at {path} ("{type(self)}"): len(offsets) < 1'
+        assert self.starts.nplike is self._nplike and self.stops.nplike is self._nplike
         error = self._nplike[
             "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
         ](
-            self.starts.to(self._nplike),
-            self.stops.to(self._nplike),
+            self.starts.data,
+            self.stops.data,
             self.starts.length,
             self._content.length,
         )
@@ -1733,6 +1933,11 @@ class ListOffsetArray(Content):
                 offsets_ = ak._v2.index.Index64.empty(
                     self._offsets.length, self._nplike
                 )
+                assert (
+                    offsets_.nplike is self._nplike
+                    and self._offsets.nplike is self._nplike
+                    and tolength.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListOffsetArray_rpad_length_axis1",
@@ -1740,23 +1945,27 @@ class ListOffsetArray(Content):
                         self._offsets.dtype.type,
                         tolength.dtype.type,
                     ](
-                        offsets_.to(self._nplike),
-                        self._offsets.to(self._nplike),
+                        offsets_.data,
+                        self._offsets.data,
                         self._offsets.length - 1,
                         target,
-                        tolength.to(self._nplike),
+                        tolength.data,
                     )
                 )
 
                 outindex = ak._v2.index.Index64.empty(tolength[0], self._nplike)
+                assert (
+                    outindex.nplike is self._nplike
+                    and self._offsets.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListOffsetArray_rpad_axis1",
                         outindex.dtype.type,
                         self._offsets.dtype.type,
                     ](
-                        outindex.to(self._nplike),
-                        self._offsets.to(self._nplike),
+                        outindex.data,
+                        self._offsets.data,
                         self._offsets.length - 1,
                         target,
                     )
@@ -1782,14 +1991,15 @@ class ListOffsetArray(Content):
                 stops_ = ak._v2.index.Index64.empty(
                     self._offsets.length - 1, self._nplike
                 )
+                assert starts_.nplike is self._nplike and stops_.nplike is self._nplike
                 self._handle_error(
                     self._nplike[
                         "awkward_index_rpad_and_clip_axis1",
                         starts_.dtype.type,
                         stops_.dtype.type,
                     ](
-                        starts_.to(self._nplike),
-                        stops_.to(self._nplike),
+                        starts_.data,
+                        stops_.data,
                         target,
                         starts_.length,
                     )
@@ -1798,14 +2008,18 @@ class ListOffsetArray(Content):
                 outindex = ak._v2.index.Index64.empty(
                     target * (self._offsets.length - 1), self._nplike
                 )
+                assert (
+                    outindex.nplike is self._nplike
+                    and self._offsets.nplike is self._nplike
+                )
                 self._handle_error(
                     self._nplike[
                         "awkward_ListOffsetArray_rpad_and_clip_axis1",
                         outindex.dtype.type,
                         self._offsets.dtype.type,
                     ](
-                        outindex.to(self._nplike),
-                        self._offsets.to(self._nplike),
+                        outindex.data,
+                        self._offsets.data,
                         self._offsets.length - 1,
                         target,
                     )
@@ -1844,7 +2058,7 @@ class ListOffsetArray(Content):
         else:
             downsize = options["list_to32"]
 
-        npoffsets = self._offsets.to(numpy)
+        npoffsets = self._offsets.raw(numpy)
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
         if len(npoffsets) > length + 1:
             npoffsets = npoffsets[: length + 1]
@@ -1903,7 +2117,7 @@ class ListOffsetArray(Content):
                 [
                     ak._v2._connect.pyarrow.to_validbits(validbytes),
                     pyarrow.py_buffer(npoffsets),
-                    pyarrow.py_buffer(akcontent.to(numpy)),
+                    pyarrow.py_buffer(akcontent.raw(numpy)),
                 ],
             )
 
@@ -2038,6 +2252,17 @@ class ListOffsetArray(Content):
             for i in range(starts.length):
                 out[i] = content[starts[i] : stops[i]]
             return out
+
+    def _to_nplike(self, nplike):
+        offsets = self._offsets._to_nplike(nplike)
+        content = self._content._to_nplike(nplike)
+        return ListOffsetArray(
+            offsets,
+            content,
+            identifier=self._identifier,
+            parameters=self._parameters,
+            nplike=nplike,
+        )
 
     def _to_json(
         self,

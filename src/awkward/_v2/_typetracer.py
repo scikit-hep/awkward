@@ -59,6 +59,12 @@ class UnknownLengthType:
     def __floordiv__(self, other):
         return UnknownLength
 
+    def __rdiv__(self, other):
+        return UnknownLength
+
+    def __rfloordiv__(self, other):
+        return UnknownLength
+
     def __lt__(self, other):
         return False
 
@@ -441,6 +447,22 @@ class TypeTracer(ak.nplike.NumpyLike):
     @property
     def ndarray(self):
         return TypeTracerArray
+
+    def raw(self, array, nplike):
+        assert isinstance(array.nplike, TypeTracer)
+
+        if isinstance(nplike, TypeTracer):
+            return TypeTracerArray.from_array(array)
+        elif isinstance(array, TypeTracerArray):
+            return self
+        elif hasattr(nplike, "known_data") and nplike.known_data:
+            raise TypeError(
+                "Converting a TypeTracer nplike to a nplike with `known_data=True` is not possible"
+            )
+        else:
+            raise TypeError(
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+            )
 
     ############################ array creation
 

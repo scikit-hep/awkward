@@ -996,6 +996,17 @@ class RecordArray(Content):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
 
+    def _to_nplike(self, nplike):
+        contents = [content._to_nplike(nplike) for content in self._contents]
+        return RecordArray(
+            contents,
+            self._fields,
+            length=self._length,
+            identifier=self._identifier,
+            parameters=self._parameters,
+            nplike=nplike,
+        )
+
     def _to_json(
         self,
         nan_string,

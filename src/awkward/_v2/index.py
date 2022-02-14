@@ -22,7 +22,6 @@ class Index:
             nplike = ak.nplike.of(data)
         self._nplike = nplike
         self._metadata = metadata
-
         self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
         if len(self._data.shape) != 1:
             raise TypeError("Index data must be one-dimensional")
@@ -60,7 +59,7 @@ class Index:
     def empty(cls, length, nplike, dtype=None):
         if dtype is None:
             dtype = cls._expected_dtype
-        return Index(nplike.empty(length, dtype=dtype))
+        return Index(nplike.empty(length, dtype=dtype), nplike=nplike)
 
     @property
     def data(self):
@@ -88,20 +87,11 @@ class Index:
     def length(self):
         return self._data.shape[0]
 
+    def raw(self, nplike):
+        return self.nplike.raw(self.data, nplike)
+
     def __len__(self):
         return self.length
-
-    def to(self, nplike):
-        if nplike is self._nplike:
-            return self._data
-        else:
-            return nplike.asarray(self._data)
-
-    def on(self, nplike):
-        if nplike is self._nplike:
-            return self
-        else:
-            return Index(nplike.asarray(self._data), self._metadata, nplike)
 
     def __array__(self, *args, **kwargs):
         return self._nplike.asarray(self._data, *args, **kwargs)
@@ -150,6 +140,8 @@ class Index:
         out = self._data[where]
         if hasattr(out, "shape") and len(out.shape) != 0:
             return type(self)(out)
+        elif type(out).__module__.startswith("cupy.") and len(out.shape) == 0:
+            return out.item()
         else:
             return out
 
@@ -164,6 +156,15 @@ class Index:
 
     def _nbytes_part(self):
         return self.data.nbytes
+
+    def to_backend(self, backend):
+        if self.nplike is ak._v2._util.regularize_backend(backend):
+            return self
+        else:
+            return self._to_nplike(ak._v2._util.regularize_backend(backend))
+
+    def _to_nplike(self, nplike):
+        return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
 
 class Index8(Index):
