@@ -40,7 +40,7 @@ def backend(*arrays):
             allow_record=True,
             allow_other=True,
         )
-        if isinstance(layout, ak._v2.contents.Content):
+        if isinstance(layout, ak._v2.contents.Content) or isinstance(layout, ak._v2.index.Index):
             if isinstance(layout.nplike, ak.nplike.Numpy):
                 backends.add("cpu")
             elif isinstance(layout.nplike, ak.nplike.Cupy):
