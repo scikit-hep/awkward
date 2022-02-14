@@ -657,6 +657,13 @@ or
         else:
             return out
 
+    def sum(self, array, axis=None):
+        out = self._module.sum(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
     def prod(self, array, axis=None):
         out = self._module.prod(array, axis=axis)
         if axis is None and isinstance(out, self._module.ndarray):
