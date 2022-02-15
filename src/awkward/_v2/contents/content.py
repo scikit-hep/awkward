@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
+import copy
 from collections.abc import Iterable
 
 import awkward as ak
@@ -1360,3 +1360,10 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
             complex_real_string,
             complex_imag_string,
         )
+
+    def withparameter(self, key, value):
+        out = copy.copy(self)
+        parameters = copy.copy(self.parameters)
+        parameters[key] = value
+        out._init(self.identifier, parameters, self.nplike)
+        return out
