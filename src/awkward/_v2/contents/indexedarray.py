@@ -464,7 +464,7 @@ class IndexedArray(Content):
         i = 0
         while i < len(others):
             other = others[i]
-            if isinstance(other, ak._v2.content.unionarray.UnionArray):
+            if isinstance(other, ak._v2.contents.unionarray.UnionArray):
                 break
             else:
                 head.append(other)
