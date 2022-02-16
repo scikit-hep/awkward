@@ -541,9 +541,7 @@ def getdecl(name, args, templatestring, parent=False):
         else:
             params += ", " + value + " " + key
     if parent:
-        code += (
-            "void cuda" + name[len("awkward") :] + "(" + params + ") {\n"
-        )
+        code += "void cuda" + name[len("awkward") :] + "(" + params + ") {\n"
     else:
         code += "ERROR " + name + "(" + params + ") {\n"
 
@@ -606,9 +604,7 @@ dim3 threads_per_block = threads({});
         code += " " * 2 + "cuda" + indspec["name"][len("awkward") :]
         if templatetypes is not None and len(templatetypes) > 0:
             code += "<" + templatetypes + ">"
-        code += (
-            " <<<blocks_per_grid, threads_per_block>>>(" + paramnames + " );\n"
-        )
+        code += " <<<blocks_per_grid, threads_per_block>>>(" + paramnames + " );\n"
         code += " " * 2 + "return post_kernel_checks();\n"
         code += "}\n\n"
 
