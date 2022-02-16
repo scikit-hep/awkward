@@ -116,7 +116,7 @@ def type(array):
             ak.layout.Record,
         ),
     ):
-        raise TypeError("do not use ak._v2.operations.describe.type on v1 arrays")
+        raise TypeError("do not use ak._v2.operations.convert.to_list on v1 arrays")
 
     else:
         raise TypeError(f"unrecognized array type: {array!r}")
