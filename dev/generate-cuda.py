@@ -622,7 +622,7 @@ if __name__ == "__main__":
     kernelname = args.kernelname
 
     code = """#include "awkward/kernels.h"
-#include "awkward/cuda-utils.h"
+#include "awkward-cuda/cuda-utils.h"
 
 """
 

@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/cuda-utils.cu", line)
 
-#include "awkward/cuda-utils.h"
+#include "awkward-cuda/cuda-utils.h"
 
 dim3 threads(int64_t length) {
   if (length > 1024) {
