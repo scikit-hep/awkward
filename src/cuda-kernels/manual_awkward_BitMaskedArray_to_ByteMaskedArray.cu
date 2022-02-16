@@ -3,7 +3,7 @@
       "src/cuda-kernels/awkward_BitMaskedArray_to_ByteMaskedArray.cu", line)
 
 #include "awkward/kernels.h"
-#include "awkward-cuda/cuda-utils.h"
+#include "awkward-cuda/cuda-functions.h"
 
 __global__ void
 cuda_BitMaskedArray_to_ByteMaskedArray(int8_t* tobytemask,

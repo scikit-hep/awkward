@@ -53,7 +53,7 @@ cp -r src/awkward_cuda_kernels build
 } >> build/awkward_cuda_kernels/__init__.py
 
 export DOCKER_ARGS=("-v$PWD:/home" -w/home "docker.io/nvidia/cuda:$DOCKER_IMAGE_TAG")
-export BUILD_SHARED_LIBRARY=(nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler "-DVERSION_INFO=$CUDA_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward_cuda_kernels/libawkward-cuda-kernels.so)
+export BUILD_SHARED_LIBRARY=(nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler "-DVERSION_INFO=$CUDA_VERSION" -Iinclude src/cuda-kernels/manual*.cu --shared -o build/awkward_cuda_kernels/libawkward-cuda-kernels.so)
 
 docker run "${DOCKER_ARGS[@]}" "${BUILD_SHARED_LIBRARY[@]}"
 
