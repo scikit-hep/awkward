@@ -13,7 +13,7 @@ extern "C" {
     }
     return dim3(length);
   }
-  
+
   inline dim3
   blocks(int64_t length) {
     if (length > 1024) {
@@ -21,7 +21,7 @@ extern "C" {
     }
     return dim3(1);
   }
-  
+
   inline dim3
   threads_2d(int64_t length_x, int64_t length_y) {
     if (length_x > 32 && length_y > 32) {
@@ -34,7 +34,7 @@ extern "C" {
       return dim3(length_x, length_y);
     }
   }
-  
+
   inline dim3
   blocks_2d(int64_t length_x, int64_t length_y) {
     if (length_x > 32 && length_y > 32) {
