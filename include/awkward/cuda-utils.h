@@ -6,6 +6,16 @@
 #include "awkward/common.h"
 
 extern "C" {
+  dim3 threads(int64_t length);
+  
+  dim3 blocks(int64_t length);
+  
+  dim3 threads_2d(int64_t length_x, int64_t length_y);
+  
+  dim3 blocks_2d(int64_t length_x, int64_t length_y);
+  
+  ERROR post_kernel_checks(ERROR* kernel_err = nullptr);
+
   EXPORT_SYMBOL ERROR awkward_cuda_ptr_device_num(
     int64_t* device_num,
     void* ptr);

@@ -4,6 +4,61 @@
 
 #include "awkward/cuda-utils.h"
 
+dim3 threads(int64_t length) {
+  if (length > 1024) {
+    return dim3(1024);
+  }
+  return dim3(length);
+}
+
+dim3 blocks(int64_t length) {
+  if (length > 1024) {
+    return dim3(ceil((length) / 1024.0));
+  }
+  return dim3(1);
+}
+
+dim3 threads_2d(int64_t length_x, int64_t length_y) {
+  if (length_x > 32 && length_y > 32) {
+    return dim3(32, 32);
+  } else if (length_x > 32 && length_y <= 32) {
+    return dim3(32, length_y);
+  } else if (length_x <= 32 && length_y > 32) {
+    return dim3(length_x, 32);
+  } else {
+    return dim3(length_x, length_y);
+  }
+}
+
+dim3 blocks_2d(int64_t length_x, int64_t length_y) {
+  if (length_x > 32 && length_y > 32) {
+    return dim3(ceil(length_x / 32.0), ceil(length_y / 32.0));
+  } else if (length_x > 32 && length_y <= 32) {
+    return dim3(ceil(length_x / 32.0), 1);
+  } else if (length_x <= 32 && length_y > 32) {
+    return dim3(1, ceil(length_y / 32.0));
+  } else {
+    return dim3(1, 1);
+  }
+}
+
+ERROR post_kernel_checks(ERROR* kernel_err = nullptr) {
+    ERROR err;
+    if(kernel_err != nullptr) {
+        err = *kernel_err;
+    }
+    else {
+        cudaError_t cuda_err = cudaGetLastError();
+        if (cuda_err != cudaSuccess) {
+          err = failure(
+              cudaGetErrorString(err), kSliceNone, kSliceNone, FILENAME(__LINE__));
+        }
+        err = success();
+    }
+    cudaDeviceSynchronize();
+    return err;
+}
+
 ERROR awkward_cuda_ptr_device_num(int64_t* num, void* ptr) {
   cudaPointerAttributes att;
   cudaError_t status = cudaPointerGetAttributes(&att, ptr);
