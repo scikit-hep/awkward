@@ -14,34 +14,6 @@ import awkward as ak  # noqa: F401
 #      `__array__` and `__record__`.
 
 
-@pytest.mark.skip(reason="FIXME: parameters mismatch")
-def test_tiny():
-    plain_plain = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
-    array_plain = ak._v2.operations.structure.with_parameter(
-        plain_plain, "__array__", "zoinks"
-    )
-    plain_isdoc = ak._v2.operations.structure.with_parameter(
-        plain_plain, "__doc__", "This is a zoink."
-    )
-    array_isdoc = ak._v2.operations.structure.with_parameter(
-        array_plain, "__doc__", "This is a zoink."
-    )
-
-    assert ak._v2.operations.describe.type(
-        plain_plain
-    ) == ak._v2.operations.describe.type(plain_isdoc)
-    assert ak._v2.operations.describe.type(
-        plain_isdoc
-    ) == ak._v2.operations.describe.type(plain_plain)
-
-    assert ak._v2.operations.describe.type(
-        array_plain
-    ) == ak._v2.operations.describe.type(array_isdoc)
-    assert ak._v2.operations.describe.type(
-        array_isdoc
-    ) == ak._v2.operations.describe.type(array_plain)
-
-
 def test_0459_types():
 
     plain_plain = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
@@ -85,19 +57,19 @@ def test_0459_types():
         array_plain
     ) != ak._v2.operations.describe.type(plain_plain)
 
-    # assert ak._v2.operations.describe.type(
-    #     plain_plain
-    # ) == ak._v2.operations.describe.type(plain_isdoc)
-    # assert ak._v2.operations.describe.type(
-    #     plain_isdoc
-    # ) == ak._v2.operations.describe.type(plain_plain)
+    assert ak._v2.operations.describe.type(
+        plain_plain
+    ) == ak._v2.operations.describe.type(plain_isdoc)
+    assert ak._v2.operations.describe.type(
+        plain_isdoc
+    ) == ak._v2.operations.describe.type(plain_plain)
 
-    # assert ak._v2.operations.describe.type(
-    #     array_plain
-    # ) == ak._v2.operations.describe.type(array_isdoc)
-    # assert ak._v2.operations.describe.type(
-    #     array_isdoc
-    # ) == ak._v2.operations.describe.type(array_plain)
+    assert ak._v2.operations.describe.type(
+        array_plain
+    ) == ak._v2.operations.describe.type(array_isdoc)
+    assert ak._v2.operations.describe.type(
+        array_isdoc
+    ) == ak._v2.operations.describe.type(array_plain)
 
     assert ak._v2.operations.describe.type(
         plain_isdoc
