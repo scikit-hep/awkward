@@ -1363,7 +1363,12 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
     def withparameter(self, key, value):
         out = copy.copy(self)
-        parameters = copy.copy(self.parameters)
+
+        if self._parameters is None:
+            parameters = {}
+        else:
+            parameters = copy.copy(self._parameters)
         parameters[key] = value
-        out._init(self.identifier, parameters, self.nplike)
+        out._parameters = parameters
+
         return out
