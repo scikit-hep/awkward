@@ -107,17 +107,7 @@ class NumpyForm(Form):
         for x in self._inner_shape[::-1]:
             out = ak._v2.types.regulartype.RegularType(out, x)
 
-        if isinstance(self._parameters, dict):
-            out._parameters = (
-                {"__array__": self._parameters["__array__"]}
-                if "__array__" in self._parameters.keys()
-                else out._parameters
-            )
-            out._parameters = (
-                {"__record__": self._parameters["__record__"]}
-                if "__record__" in self._parameters.keys()
-                else out._parameters
-            )
+        out._parameters = self._parameters
 
         return out
 
