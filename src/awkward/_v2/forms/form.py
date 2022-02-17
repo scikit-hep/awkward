@@ -215,6 +215,15 @@ def _parameters_update(one, two):
 
 
 class Form:
+    is_NumpyType = False
+    is_UnknownType = False
+    is_ListType = False
+    is_RegularType = False
+    is_OptionType = False
+    is_IndexedType = False
+    is_RecordType = False
+    is_UnionType = False
+
     def _init(self, has_identifier, parameters, form_key):
         if not isinstance(has_identifier, bool):
             raise TypeError(

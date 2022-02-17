@@ -6,6 +6,8 @@ from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class ByteMaskedForm(Form):
+    is_OptionType = True
+
     def __init__(
         self,
         mask,

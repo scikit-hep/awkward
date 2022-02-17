@@ -7,6 +7,8 @@ from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 
 
 class BitMaskedForm(Form):
+    is_OptionType = True
+
     def __init__(
         self,
         mask,

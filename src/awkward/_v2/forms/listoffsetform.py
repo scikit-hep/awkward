@@ -7,6 +7,8 @@ from awkward._v2.forms.listform import ListForm
 
 
 class ListOffsetForm(Form):
+    is_ListType = True
+
     def __init__(
         self, offsets, content, has_identifier=False, parameters=None, form_key=None
     ):

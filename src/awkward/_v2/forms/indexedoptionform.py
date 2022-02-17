@@ -6,6 +6,9 @@ from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class IndexedOptionForm(Form):
+    is_OptionType = True
+    is_IndexedType = True
+
     def __init__(
         self,
         index,

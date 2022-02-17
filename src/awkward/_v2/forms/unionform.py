@@ -8,6 +8,8 @@ from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class UnionForm(Form):
+    is_UnionType = True
+
     def __init__(
         self,
         tags,
