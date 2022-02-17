@@ -6,13 +6,13 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-import pyarrow.parquet as pyarrow_parquet
+pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
 
 def through_arrow(akarray, extensionarray, tmp_path):
     arrow_table = ak._v2.to_arrow_table(akarray, extensionarray=extensionarray)
     array_form = ak._v2.from_arrow(
-        arrow_table, conservative_optiontype=not extensionarray
+        arrow_table, conservative_optiontype=True
     ).layout.form
     return arrow_table.schema, array_form
 
@@ -24,7 +24,7 @@ def through_parquet(akarray, extensionarray, tmp_path):
     )
     parquet_file = pyarrow_parquet.ParquetFile(filename)
     array_form = ak._v2.from_arrow(
-        parquet_file.read_row_groups([0]), conservative_optiontype=not extensionarray
+        parquet_file.read_row_groups([0]), conservative_optiontype=True
     ).layout.form
     return parquet_file.schema_arrow, array_form
 

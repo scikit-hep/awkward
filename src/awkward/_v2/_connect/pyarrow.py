@@ -269,14 +269,22 @@ def popbuffers_finalize(
 
     # Everything must leave popbuffers as option-type; the mask_node will be
     # removed by the next level up in popbuffers recursion if appropriate.
-    if not conservative_optiontype and validbits is None:
+
+    if conservative_optiontype and awkwardarrow_type is None:
+        # ceildiv(len(out), 8) = -(len(out) // -8)
+        return ak._v2.contents.BitMaskedArray(
+            ak._v2.index.IndexU8(numpy.full(-(len(out) // -8), np.uint8(0xFF))),
+            out,
+            valid_when=True,
+            length=len(out),
+            lsb_order=True,
+            parameters=mask_parameters,
+        )
+
+    elif validbits is None:
         return ak._v2.contents.UnmaskedArray(out, parameters=mask_parameters)
 
     else:
-        if conservative_optiontype:
-            #                      ceildiv(len(out), 8)
-            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF))
-
         return ak._v2.contents.BitMaskedArray(
             ak._v2.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
             out,
