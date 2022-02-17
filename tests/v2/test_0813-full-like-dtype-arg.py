@@ -5,6 +5,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+
 @pytest.mark.skip(reason="FIXME: ak.strings_astype not implemented")
 def test():
     array = ak._v2.Array(

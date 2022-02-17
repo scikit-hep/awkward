@@ -63,10 +63,26 @@ def test():
         [],
         ["hello", "hello"],
     ]
-    assert ak._v2.operations.structure.full_like(array, 1).tolist() == [["1", "1", "1"], [], ["1", "1"]]
-    assert ak._v2.operations.structure.full_like(array, 0).tolist() == [["0", "0", "0"], [], ["0", "0"]]
-    assert ak._v2.operations.structure.ones_like(array).tolist() == [["1", "1", "1"], [], ["1", "1"]]
-    assert ak._v2.operations.structure.zeros_like(array).tolist() == [["", "", ""], [], ["", ""]]
+    assert ak._v2.operations.structure.full_like(array, 1).tolist() == [
+        ["1", "1", "1"],
+        [],
+        ["1", "1"],
+    ]
+    assert ak._v2.operations.structure.full_like(array, 0).tolist() == [
+        ["0", "0", "0"],
+        [],
+        ["0", "0"],
+    ]
+    assert ak._v2.operations.structure.ones_like(array).tolist() == [
+        ["1", "1", "1"],
+        [],
+        ["1", "1"],
+    ]
+    assert ak._v2.operations.structure.zeros_like(array).tolist() == [
+        ["", "", ""],
+        [],
+        ["", ""],
+    ]
 
     array = ak._v2.Array([[b"one", b"two", b"three"], [], [b"four", b"five"]])
     assert ak._v2.operations.structure.full_like(array, b"hello").tolist() == [
@@ -74,7 +90,23 @@ def test():
         [],
         [b"hello", b"hello"],
     ]
-    assert ak._v2.operations.structure.full_like(array, 1).tolist() == [[b"1", b"1", b"1"], [], [b"1", b"1"]]
-    assert ak._v2.operations.structure.full_like(array, 0).tolist() == [[b"0", b"0", b"0"], [], [b"0", b"0"]]
-    assert ak._v2.operations.structure.ones_like(array).tolist() == [[b"1", b"1", b"1"], [], [b"1", b"1"]]
-    assert ak._v2.operations.structure.zeros_like(array).tolist() == [[b"", b"", b""], [], [b"", b""]]
+    assert ak._v2.operations.structure.full_like(array, 1).tolist() == [
+        [b"1", b"1", b"1"],
+        [],
+        [b"1", b"1"],
+    ]
+    assert ak._v2.operations.structure.full_like(array, 0).tolist() == [
+        [b"0", b"0", b"0"],
+        [],
+        [b"0", b"0"],
+    ]
+    assert ak._v2.operations.structure.ones_like(array).tolist() == [
+        [b"1", b"1", b"1"],
+        [],
+        [b"1", b"1"],
+    ]
+    assert ak._v2.operations.structure.zeros_like(array).tolist() == [
+        [b"", b"", b""],
+        [],
+        [b"", b""],
+    ]
