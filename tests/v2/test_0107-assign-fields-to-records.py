@@ -8,9 +8,7 @@ import awkward as ak  # noqa: F401
 to_list = ak._v2.operations.convert.to_list
 
 
-@pytest.mark.skip(
-    reason="FIXME:  setitem changes in v2"
-)
+@pytest.mark.skip(reason="FIXME:  setitem changes in v2")
 def test_record():
     array1 = ak._v2.operations.convert.from_iter(
         [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], highlevel=False
