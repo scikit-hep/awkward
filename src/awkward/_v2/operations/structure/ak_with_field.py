@@ -105,7 +105,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
                         what = ak._v2.contents.NumpyArray(
                             nplike.repeat(what, len(base))
                         )
-                    if base.fields is None and where is None:
+                    if base.is_tuple and where is None:
                         fields = None
                     elif base.is_tuple:
                         fields = keys + [where]

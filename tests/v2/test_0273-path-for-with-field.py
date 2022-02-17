@@ -84,3 +84,35 @@ def test_replace_the_only_field():
         {"a": {"x": 2, "y": 2.2}},
         {"a": {"x": 3, "y": 3.3}},
     ]
+
+
+def test_check_no_field():
+    base = ak._v2.operations.structure.zip(
+        {"a": ak._v2.operations.structure.zip({"x": [1, 2, 3]})}, depth_limit=1
+    )
+    what = ak._v2.Array([1.1, 2.2, 3.3], check_valid=True)
+
+    assert to_list(ak._v2.operations.structure.with_field(base, what)) == [
+        {"a": {"x": 1}, "1": 1.1},
+        {"a": {"x": 2}, "1": 2.2},
+        {"a": {"x": 3}, "1": 3.3},
+    ]
+
+    with pytest.raises(ValueError):
+        ak._v2.operations.structure.with_field(what, what)
+
+    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3]))
+    recordarray = ak._v2.contents.RecordArray([content1], None)
+    what = ak._v2.Array([1.1, 2.2, 3.3], check_valid=True)
+
+    assert to_list(ak._v2.operations.structure.with_field(recordarray, what)) == [
+        (1, 1.1),
+        (2, 2.2),
+        (3, 3.3),
+    ]
+
+    assert to_list(ak._v2.operations.structure.with_field(recordarray, what, "a")) == [
+        {"0": 1, "a": 1.1},
+        {"0": 2, "a": 2.2},
+        {"0": 3, "a": 3.3},
+    ]
