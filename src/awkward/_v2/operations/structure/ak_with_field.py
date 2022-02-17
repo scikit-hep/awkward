@@ -71,7 +71,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
             base, allow_record=True, allow_other=False
         )
 
-        if len(base.fields) < 0:
+        if len(base.fields) == 0:
             raise ValueError("no tuples or records in array; cannot add a new field")
 
         what = ak._v2.operations.convert.to_layout(
