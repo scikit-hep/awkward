@@ -28,3 +28,4 @@ def test_in_place_wrapper_broadcasting():
     array["unknown field"] = None
 
     assert array["unknown field"].tolist() == [None, None, None]
+    assert ak._v2.operations.describe.fields(array) == ["x", "unknown field"]
