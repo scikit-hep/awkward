@@ -78,6 +78,25 @@ def test_0459_types():
         array_isdoc
     ) != ak._v2.operations.describe.type(plain_isdoc)
 
+    assert array_plain.layout.parameters == {"__array__": "zoinks"}
+    assert (
+        ak._v2.operations.structure.without_parameters(array_plain).layout.parameters
+        == {}
+    )
+    assert plain_isdoc.layout.parameters == {"__doc__": "This is a zoink."}
+    assert (
+        ak._v2.operations.structure.without_parameters(plain_isdoc).layout.parameters
+        == {}
+    )
+    assert array_isdoc.layout.parameters == {
+        "__array__": "zoinks",
+        "__doc__": "This is a zoink.",
+    }
+    assert (
+        ak._v2.operations.structure.without_parameters(array_isdoc).layout.parameters
+        == {}
+    )
+
 
 def test_0459():
     plain_plain = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
