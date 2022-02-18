@@ -285,7 +285,7 @@ class Content:
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             return self._getitem_next(nexthead, nexttail, advanced)
 
-        elif mindepth - 1 == dimlength or maxdepth - 1 == dimlength:
+        elif dimlength in {mindepth - 1, maxdepth - 1}:
             raise NestedIndexError(
                 self,
                 Ellipsis,

@@ -40,9 +40,9 @@ class Lookup:
             for i, array in enumerate(arrays):
                 if x is array:
                     return i
-            else:
-                assert isinstance(x, int)
-                return x
+
+            assert isinstance(x, int)
+            return x
 
         self.original_positions = positions
         self.positions = [find(x) for x in positions]
@@ -932,8 +932,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
             if attr == attrname:
                 return typer(recordviewtype)
 
-        else:
-            return recordviewtype.typer_field(attr)
+        return recordviewtype.typer_field(attr)
 
 
 @numba.extending.lower_getattr_generic(RecordViewType)
@@ -948,8 +947,7 @@ def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval
                 typer(recordviewtype)(recordviewtype),
                 (recordviewval,),
             )
-    else:
-        return recordviewtype.lower_field(context, builder, recordviewval, attr)
+    return recordviewtype.lower_field(context, builder, recordviewval, attr)
 
 
 def register_unary_operator(unaryop):

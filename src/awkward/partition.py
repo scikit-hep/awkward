@@ -350,8 +350,8 @@ class PartitionedArray:
                     headparts = layout.partitions
                     outparts = []
                     outoffsets = [0]
-                    for i in range(len(inparts)):
-                        outparts.append(inparts[i][(headparts[i],) + tail])
+                    for i, inpart in enumerate(inparts):
+                        outparts.append(inpart[(headparts[i],) + tail])
                         outoffsets.append(outoffsets[-1] + len(outparts[-1]))
                     return IrregularlyPartitionedArray(outparts, outoffsets[1:])
 

@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# pylint: disable=consider-using-enumerate
 
 import copy
 import ctypes
@@ -331,12 +332,12 @@ class UnionArray(Content):
         tags = TagsClass.empty(contentlen, nplike)
         index = IndexClass.empty(contentlen, nplike)
 
-        for tag in range(len(counts)):
+        for tag, count in enumerate(counts):
             assert (
                 tags.nplike is nplike
                 and index.nplike is nplike
                 and f_offsets.nplike is nplike
-                and counts[tag].nplike is nplike
+                and count.nplike is nplike
             )
             Content._selfless_handle_error(
                 nplike[
@@ -344,13 +345,13 @@ class UnionArray(Content):
                     tags.dtype.type,
                     index.dtype.type,
                     f_offsets.dtype.type,
-                    counts[tag].dtype.type,
+                    count.dtype.type,
                 ](
                     tags.data,
                     index.data,
                     f_offsets.data,
                     tag,
-                    counts[tag].data,
+                    count.data,
                     f_offsets.length - 1,
                 )
             )
@@ -434,16 +435,16 @@ class UnionArray(Content):
         index = ak._v2.index.Index64.empty(length, self._nplike)
         contents = []
 
-        for i in range(len(self._contents)):
-            if isinstance(self._contents[i], UnionArray):
-                innertags = self._contents[i]._tags
-                innerindex = self._contents[i]._index
-                innercontents = self._contents[i]._contents
+        for i, self_cont in enumerate(self._contents):
+            if isinstance(self_cont, UnionArray):
+                innertags = self_cont._tags
+                innerindex = self_cont._index
+                innercontents = self_cont._contents
 
-                for j in range(len(innercontents)):
+                for j, inner_cont in enumerate(innercontents):
                     unmerged = True
                     for k in range(len(contents)):
-                        if merge and contents[k].mergeable(innercontents[j], mergebool):
+                        if merge and contents[k].mergeable(inner_cont, mergebool):
                             assert (
                                 tags.nplike is self._nplike
                                 and index.nplike is self._nplike
@@ -475,7 +476,7 @@ class UnionArray(Content):
                                     contents[k].length,
                                 )
                             )
-                            contents[k] = contents[k].merge(innercontents[j])
+                            contents[k] = contents[k].merge(inner_cont)
                             unmerged = False
                             break
 
@@ -511,12 +512,12 @@ class UnionArray(Content):
                                 0,
                             )
                         )
-                        contents.append(innercontents[j])
+                        contents.append(inner_cont)
 
             else:
                 unmerged = True
                 for k in range(len(contents)):
-                    if contents[k] is self._contents[i]:
+                    if contents[k] is self_cont:
                         assert (
                             tags.nplike is self._nplike
                             and index.nplike is self._nplike
@@ -544,7 +545,7 @@ class UnionArray(Content):
                         unmerged = False
                         break
 
-                    elif merge and contents[k].mergeable(self._contents[i], mergebool):
+                    elif merge and contents[k].mergeable(self_cont, mergebool):
                         assert (
                             tags.nplike is self._nplike
                             and index.nplike is self._nplike
@@ -569,7 +570,7 @@ class UnionArray(Content):
                                 contents[k].length,
                             )
                         )
-                        contents[k] = contents[k].merge(self._contents[i])
+                        contents[k] = contents[k].merge(self_cont)
                         unmerged = False
                         break
 
@@ -598,7 +599,7 @@ class UnionArray(Content):
                             0,
                         )
                     )
-                    contents.append(self._contents[i])
+                    contents.append(self_cont)
 
         if len(contents) > 2**7:
             raise NotImplementedError(

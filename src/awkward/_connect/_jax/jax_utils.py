@@ -76,9 +76,9 @@ def _jaxtracers_getitem(array, where):
 
         def recurse(outarray, recurse_where):
 
-            if isinstance(recurse_where, numbers.Integral) or isinstance(
-                recurse_where, str
-            ):
+            # TODO: capture makes this really confusing. A new parameter should
+            # be used instead if capture is really needed.
+            if isinstance(recurse_where, (numbers.Integral, str)):
                 if isinstance(outarray.layout, ak.layout.NumpyArray):
                     return outarray._tracers[0][recurse_where]
             elif isinstance(where, tuple):

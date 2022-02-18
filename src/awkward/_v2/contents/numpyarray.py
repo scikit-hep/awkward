@@ -414,9 +414,11 @@ class NumpyArray(Content):
             if self._data.ndim != other._data.ndim:
                 return False
 
+            matching_dtype = self._data.dtype == other._data.dtype
+
             if (
                 not mergebool
-                and self._data.dtype != other._data.dtype
+                and not matching_dtype
                 and (
                     self._data.dtype.type is np.bool_
                     or other._data.dtype.type is np.bool_
@@ -424,14 +426,15 @@ class NumpyArray(Content):
             ):
                 return False
 
-            if self._data.dtype != other._data.dtype and (
-                self._data.dtype == np.datetime64 or other._data.dtype == np.datetime64
+            if not matching_dtype and np.datetime64 in (
+                self._data.dtype,
+                other._data.dtype,
             ):
                 return False
 
-            if self._data.dtype != other._data.dtype and (
-                self._data.dtype == np.timedelta64
-                or other._data.dtype == np.timedelta64
+            if not matching_dtype and np.timedelta64 in (
+                self._data.dtype,
+                other._data.dtype,
             ):
                 return False
 
@@ -682,9 +685,10 @@ class NumpyArray(Content):
 
         if negaxis is None:
             contiguous_self = self if self.is_contiguous else self.contiguous()
+            # Python 3.8 could use math.prod
             flattened_shape = 1
-            for i in range(len(contiguous_self.shape)):
-                flattened_shape = flattened_shape * self.shape[i]
+            for s in contiguous_self.shape:
+                flattened_shape = flattened_shape * s
 
             offsets = ak._v2.index.Index64.zeros(2, self._nplike)
             offsets[1] = flattened_shape
@@ -1166,14 +1170,12 @@ class NumpyArray(Content):
     def _validityerror(self, path):
         if len(self.shape) == 0:
             return f'at {path} ("{type(self)}"): shape is zero-dimensional'
-        for i in range(len(self.shape)):
-            if self.shape[i] < 0:
+        for i, dim in enumerate(self.shape):
+            if dim < 0:
                 return f'at {path} ("{type(self)}"): shape[{i}] < 0'
-        for i in range(len(self.strides)):
-            if self.strides[i] % self.dtype.itemsize != 0:
-                return 'at {} ("{}"): shape[{}] % itemsize != 0'.format(
-                    path, type(self), i
-                )
+        for i, stride in enumerate(self.strides):
+            if stride % self.dtype.itemsize != 0:
+                return f'at {path} ("{type(self)}"): shape[{i}] % itemsize != 0'
         return ""
 
     def _rpad(self, target, axis, depth, clip):

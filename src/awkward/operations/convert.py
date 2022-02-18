@@ -949,7 +949,7 @@ def to_list(array):
     elif ak.operations.describe.parameters(array).get("__array__") == "char":
         return ak.behaviors.string.CharBehavior(array).__str__()
 
-    elif isinstance(array, np.datetime64) or isinstance(array, np.timedelta64):
+    elif isinstance(array, (np.datetime64, np.timedelta64)):
         return array
 
     elif isinstance(array, ak.highlevel.Array):
@@ -2740,7 +2740,7 @@ def _from_arrow(
             contents = []
             for i in range(tpe.num_fields):
                 contents.append(popbuffers(array.field(i), tpe[i].type, buffers))
-            for i in range(len(contents)):
+            for i in range(len(contents)):  # pylint: disable=consider-using-enumerate
                 these = index[tags == i]
                 if len(these) == 0:
                     contents[i] = contents[i][0:0]
@@ -2748,7 +2748,7 @@ def _from_arrow(
                     contents[i] = contents[i][: these[-1] + 1]
                 else:
                     contents[i] = contents[i][: these.max() + 1]
-            for i in range(len(contents)):
+            for i in range(len(contents)):  # pylint: disable=consider-using-enumerate
                 if not tpe[i].nullable:
                     contents[i] = contents[i].content
 
@@ -3562,7 +3562,7 @@ class _ParquetDataset(_Dataset):
                     )
                 last_filename = filename
                 start_i = 0
-            elif filename != "" and last_filename != filename:
+            elif filename not in {"", last_filename}:
                 last_filename = filename
                 start_i = i
             lookup.append((os.path.join(directory, last_filename), i - start_i))
@@ -3583,7 +3583,7 @@ class _ParquetDataset(_Dataset):
                     )
                 last_filename = filename
                 paths_and_counts.append([filename, 0])
-            elif filename != "" and last_filename != filename:
+            elif filename not in {"", last_filename}:
                 last_filename = filename
                 paths_and_counts.append([filename, 0])
             paths_and_counts[-1][-1] += file.metadata.row_group(i).num_rows
@@ -3684,11 +3684,9 @@ class _ParquetMultiFileDataset(_Dataset):
 def _parquet_partition_values(path):
     dirname, filename = os.path.split(path)
     m = re.match("([^=]+)=([^=]*)$", filename)
-    if m is None:
-        pair = ()
-    else:
-        pair = (m.groups(),)
-    if dirname == "" or dirname == "/":
+    pair = () if m is None else (m.groups(),)
+
+    if dirname in {"", "/"}:
         return pair
     else:
         return _parquet_partition_values(dirname) + pair

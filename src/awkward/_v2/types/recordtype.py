@@ -124,8 +124,8 @@ class RecordType(Type):
                 for field in self._fields:
                     if self.content(field) != other.content(field):
                         return False
-                else:
-                    return True
+
+                return True
 
             else:
                 return False

@@ -505,8 +505,7 @@ def wrap(content, behavior=None, highlevel=True, like=None):
 
 def extra(args, kwargs, defaults):
     out = []
-    for i in range(len(defaults)):
-        name, default = defaults[i]
+    for i, (name, default) in enumerate(defaults):
         if i < len(args):
             out.append(args[i])
         elif name in kwargs:

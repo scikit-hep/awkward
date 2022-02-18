@@ -15,7 +15,8 @@ NEP13Box = None
 def register():
     import autograd
 
-    global NEP13Box
+    # PyLint false positive: https://github.com/PyCQA/pylint/issues/5756
+    global NEP13Box  # pylint: disable=global-variable-not-assigned
 
     if NEP13Box is None:
 

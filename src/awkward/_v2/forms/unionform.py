@@ -95,24 +95,18 @@ class UnionForm(Form):
         )
 
     def __eq__(self, other):
-        if isinstance(other, UnionForm):
-            if (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
-                and self._tags == other._tags
-                and self._index == other._index
-                and len(self._contents) == len(other._contents)
-                and _parameters_equal(self._parameters, other._parameters)
-            ):
-                for i in range(len(self._contents)):
-                    if self._contents[i] != other._contents[i]:
-                        return False
-                else:
-                    return True
-            else:
-                return False
-        else:
-            return False
+        if (
+            isinstance(other, UnionForm)
+            and self._has_identifier == other._has_identifier
+            and self._form_key == other._form_key
+            and self._tags == other._tags
+            and self._index == other._index
+            and len(self._contents) == len(other._contents)
+            and _parameters_equal(self._parameters, other._parameters)
+        ):
+            return self._contents == other._contents
+
+        return False
 
     def generated_compatibility(self, other):
         if other is None:
@@ -180,8 +174,7 @@ class UnionForm(Form):
                 tmp = content.purelist_parameter(key)
                 if out != tmp:
                     return None
-            else:
-                return out
+            return out
         else:
             return self._parameters[key]
 
@@ -190,8 +183,7 @@ class UnionForm(Form):
         for content in self._contents:
             if not content.purelist_isregular:
                 return False
-        else:
-            return True
+        return True
 
     @property
     def purelist_depth(self):
@@ -201,8 +193,7 @@ class UnionForm(Form):
                 out = content.purelist_depth
             elif out != content.purelist_depth:
                 return -1
-        else:
-            return out
+        return out
 
     @property
     def minmax_depth(self):
@@ -233,9 +224,7 @@ class UnionForm(Form):
 
     @property
     def fields(self):
-        fieldslists = []
-        for i in range(len(self._contents)):
-            fieldslists.append(self._contents[i].fields)
+        fieldslists = [cont.fields for cont in self._contents]
         return list(set.intersection(*[set(x) for x in fieldslists]))
 
     @property

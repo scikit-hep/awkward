@@ -147,7 +147,7 @@ def build_assembly(schema, container, instructions):
         if len(tpe) == 1:
             tpe = tpe[0]
 
-    if tpe == "boolean" or tpe == "integer" or tpe == "number":
+    if tpe in {"boolean", "integer", "number"}:
         # https://json-schema.org/understanding-json-schema/reference/boolean.html
         # https://json-schema.org/understanding-json-schema/reference/numeric.html
 
