@@ -18,7 +18,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
             otherwise, return a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        dtype (None or type): Overrides the data type of the result.
+        dtype (None or data-type): Overrides the data type of the result.
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
@@ -74,7 +74,8 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
     if dtype is not None:
         # In the case of strings and byte strings,
         # converting the fill avoids a ValueError.
-        fill_value = dtype(fill_value)
+        dtype = np.dtype(dtype)
+        fill_value = dtype.type(fill_value)
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
         if dtype is bool:
@@ -139,6 +140,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
         elif isinstance(layout, ak._v2.contents.NumpyArray):
             nplike = ak.nplike.of(layout)
             original = nplike.asarray(layout)
+
             if fill_value == 0 or fill_value is _ZEROS:
                 return ak._v2.contents.NumpyArray(
                     nplike.zeros_like(original),
@@ -164,4 +166,5 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
     if dtype is not None:
         out = ak._v2.operations.structure.strings_astype(out, dtype)
         out = ak._v2.operations.structure.values_astype(out, dtype)
+        return out
     return ak._v2._util.wrap(out, behavior, highlevel)
