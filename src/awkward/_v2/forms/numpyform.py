@@ -106,7 +106,9 @@ class NumpyForm(Form):
         )
         for x in self._inner_shape[::-1]:
             out = ak._v2.types.regulartype.RegularType(out, x)
+
         out._parameters = self._parameters
+
         return out
 
     def __eq__(self, other):
