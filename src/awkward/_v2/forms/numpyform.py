@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 from collections.abc import Iterable
 
 from awkward._v2.contents.content import NestedIndexError

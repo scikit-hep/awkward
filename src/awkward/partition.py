@@ -2,7 +2,6 @@
 
 # v2: drop this file; partitioning will be handled by Awkward-Dask.
 
-
 import numbers
 
 from collections.abc import Iterable

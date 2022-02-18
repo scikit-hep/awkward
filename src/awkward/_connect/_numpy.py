@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numpy.py
 
-
 from collections.abc import Iterable
 
 import numpy

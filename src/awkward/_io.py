@@ -3,7 +3,6 @@
 # v2: drop this file, but the from_json functionality must be available somehow.
 # (uproot_issue_90 will not be ported; it will be replaced by AwkwardForth.)
 
-
 from awkward._ext import fromjson
 from awkward._ext import uproot_issue_90
 
