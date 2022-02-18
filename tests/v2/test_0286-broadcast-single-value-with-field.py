@@ -18,3 +18,10 @@ def test_broadcast_single_bool():
         base_new1, base.x > 0.3, "sometimes_true"
     )
     assert to_list(base_new2.always_true) == [[True, True]]
+    assert ak._v2.operations.describe.fields(base_new2) == [
+        "x",
+        "y",
+        "z",
+        "always_true",
+        "sometimes_true",
+    ]
