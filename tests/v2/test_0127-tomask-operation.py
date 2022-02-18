@@ -984,28 +984,12 @@ def test_merge():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.convert.to_json not implemented")
 def test_BitMaskedArray():
     content = ak._v2.contents.NumpyArray(np.arange(13))
     mask = ak._v2.index.IndexU8(np.array([58, 59], dtype=np.uint8))
     array = ak._v2.contents.BitMaskedArray(
         mask, content, valid_when=False, length=13, lsb_order=False
     )
-    assert np.asarray(array.bytemask()).tolist() == [
-        0,
-        0,
-        1,
-        1,
-        1,
-        0,
-        1,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-    ]
     assert np.asarray(array.toByteMaskedArray().mask).tolist() == [
         0,
         0,
@@ -1052,7 +1036,7 @@ def test_BitMaskedArray():
         None,
     ]
     assert (
-        ak._v2.operations.structure.to_json(array)
+        ak._v2.operations.convert.to_json(array)
         == "[0,1,null,null,null,5,null,7,8,9,null,null,null]"
     )
     assert to_list(array[1:-1]) == [
@@ -1073,21 +1057,6 @@ def test_BitMaskedArray():
     array = ak._v2.contents.BitMaskedArray(
         mask, content, valid_when=False, length=13, lsb_order=True
     )
-    assert np.asarray(array.bytemask()).tolist() == [
-        0,
-        1,
-        0,
-        1,
-        1,
-        1,
-        0,
-        0,
-        1,
-        1,
-        0,
-        1,
-        1,
-    ]
     assert np.asarray(array.toByteMaskedArray().mask).tolist() == [
         0,
         1,
@@ -1134,7 +1103,7 @@ def test_BitMaskedArray():
         None,
     ]
     assert (
-        ak._v2.operations.structure.to_json(array)
+        ak._v2.operations.convert.to_json(array)
         == "[0,null,2,null,null,null,6,7,null,null,10,null,null]"
     )
     assert to_list(array[1:-1]) == [

@@ -36,8 +36,8 @@ def isclose(
             return (
                 ak._v2.contents.NumpyArray(
                     nplike.isclose(
-                        inputs[0].to(nplike),
-                        inputs[1].to(nplike),
+                        inputs[0].raw(nplike),
+                        inputs[1].raw(nplike),
                         rtol=rtol,
                         atol=atol,
                         equal_nan=equal_nan,

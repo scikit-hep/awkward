@@ -7,19 +7,19 @@
 #    - [ ] `__array__`
 #    - [ ] `__array_ufunc__`
 #    - [ ] `__array_function__`
-#    - [ ] `numba_type`
+#    - [X] `numba_type`
 #    - [ ] `__copy__`
 #    - [ ] `__deepcopy__`
-#    - [ ] `__contains__`
+#    - [X] `__contains__`
 #
 # TODO in Array:
 #
 #    - [ ] all docstrings are old
 #    - [ ] `__array_ufunc__`
-#    - [ ] `numba_type`
+#    - [X] `numba_type`
 #    - [ ] `__copy__`
 #    - [ ] `__deepcopy__`
-#    - [ ] `__contains__`
+#    - [X] `__contains__`
 #
 # TODO in ArrayBuilder: everything
 
@@ -57,7 +57,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                - If a NumPy array, the regularity of its dimensions is preserved
                  and the data are viewed, not copied.
                - CuPy arrays are treated the same way as NumPy arrays except that
-                 they default to `kernels="cuda"`, rather than `kernels="cpu"`.
+                 they default to `backend="cuda"`, rather than `backend="cpu"`.
                - If a pyarrow object, calls #ak.from_arrow, preserving as much
                  metadata as possible, usually zero-copy.
                - If a dict of str \u2192 columns, combines the columns into an
@@ -69,7 +69,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+        backend (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
             the Array will be placed in GPU global memory using CUDA; if None,
             the `data` are left untouched. For `"cuda"`,
@@ -221,7 +221,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         behavior=None,
         with_name=None,
         check_valid=False,
-        library=None,
+        backend=None,
     ):
         if isinstance(data, ak._v2.contents.Content):
             layout = data
@@ -270,9 +270,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 layout, with_name, highlevel=False
             )
 
-        if library is not None and library != ak._v2.operations.convert.library(layout):
-            layout = ak._v2.operations.convert.to_library(
-                layout, library, highlevel=False
+        if backend is not None and backend != ak._v2.operations.describe.backend(
+            layout
+        ):
+            layout = ak._v2.operations.describe.to_backend(
+                layout, backend, highlevel=False
             )
 
         self.layout = layout
@@ -565,7 +567,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.to_list.
         """
         if isinstance(self._layout, ak._v2.contents.NumpyArray):
-            array = self._layout.to(numpy)
+            array = self._layout.raw(numpy)
             array_param = self._layout.parameter("__array__")
             if array_param == "byte":
                 for x in ak._v2._util.tobytes(array):
@@ -581,9 +583,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 if isinstance(x, ak._v2.contents.NumpyArray):
                     array_param = x.parameter("__array__")
                     if array_param == "byte":
-                        yield ak._v2._util.tobytes(x.to(numpy))
+                        yield ak._v2._util.tobytes(x.raw(numpy))
                     elif array_param == "char":
-                        yield ak._v2._util.tobytes(x.to(numpy)).decode(
+                        yield ak._v2._util.tobytes(x.raw(numpy)).decode(
                             errors="surrogateescape"
                         )
                     else:
@@ -1009,9 +1011,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if isinstance(out, ak._v2.contents.NumpyArray):
             array_param = out.parameter("__array__")
             if array_param == "byte":
-                return ak._v2._util.tobytes(out.to(numpy))
+                return ak._v2._util.tobytes(out.raw(numpy))
             elif array_param == "char":
-                return ak._v2._util.tobytes(out.to(numpy)).decode(
+                return ak._v2._util.tobytes(out.raw(numpy)).decode(
                     errors="surrogateescape"
                 )
         if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
@@ -1392,24 +1394,23 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     #         """
     #         return ak._v2._connect.numpy.array_function(func, types, args, kwargs)
 
-    #     @property
-    #     def numba_type(self):
-    #         """
-    #         The type of this Array when it is used in Numba. It contains enough
-    #         information to generate low-level code for accessing any element,
-    #         down to the leaves.
+    @property
+    def numba_type(self):
+        """
+        The type of this Array when it is used in Numba. It contains enough
+        information to generate low-level code for accessing any element,
+        down to the leaves.
 
-    #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
-    #         on types and signatures.
-    #         """
-    #         import awkward._v2._connect.numba  # noqa: F401
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
+        ak._v2.numba.register_and_check()
 
-    #         ak._v2._connect.numba.register_and_check()
-    #         if self._numbaview is None:
-    #             self._numbaview = ak._v2._connect.numba.arrayview.ArrayView.fromarray(self)
-    #         import numba
+        if self._numbaview is None:
+            self._numbaview = ak._v2._connect.numba.arrayview.ArrayView.fromarray(self)
+        import numba
 
-    #         return numba.typeof(self._numbaview)
+        return numba.typeof(self._numbaview)
 
     def __getstate__(self):
         packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
@@ -1469,12 +1470,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 "use ak.any() or ak.all()"
             )
 
-
-#     def __contains__(self, element):
-#         for test in ak._v2._util.completely_flatten(self._layout):
-#             if element in test:
-#                 return True
-#         return False
+    def __contains__(self, element):
+        for test in self._layout.completely_flatten():
+            if element in test:
+                return True
+        return False
 
 
 class Record(NDArrayOperatorsMixin):
@@ -1733,9 +1733,9 @@ class Record(NDArrayOperatorsMixin):
         if isinstance(out, ak._v2.contents.NumpyArray):
             array_param = out.parameter("__array__")
             if array_param == "byte":
-                return ak._v2._util.tobytes(out.to(numpy))
+                return ak._v2._util.tobytes(out.raw(numpy))
             elif array_param == "char":
-                return ak._v2._util.tobytes(out.to(numpy)).decode(
+                return ak._v2._util.tobytes(out.raw(numpy)).decode(
                     errors="surrogateescape"
                 )
         if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
@@ -2000,24 +2000,25 @@ class Record(NDArrayOperatorsMixin):
         """
         return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
-    #     @property
-    #     def numba_type(self):
-    #         """
-    #         The type of this Record when it is used in Numba. It contains enough
-    #         information to generate low-level code for accessing any element,
-    #         down to the leaves.
+    @property
+    def numba_type(self):
+        """
+        The type of this Record when it is used in Numba. It contains enough
+        information to generate low-level code for accessing any element,
+        down to the leaves.
 
-    #         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
-    #         on types and signatures.
-    #         """
-    #         import awkward._v2._connect.numba  # noqa: F401
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
+        ak._v2.numba.register_and_check()
 
-    #         ak._v2._connect.numba.register_and_check()
-    #         if self._numbaview is None:
-    #             self._numbaview = ak._v2._connect.numba.arrayview.RecordView.fromrecord(self)
-    #         import numba
+        if self._numbaview is None:
+            self._numbaview = ak._v2._connect.numba.arrayview.RecordView.fromrecord(
+                self
+            )
+        import numba
 
-    #         return numba.typeof(self._numbaview)
+        return numba.typeof(self._numbaview)
 
     def __getstate__(self):
         packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
@@ -2075,12 +2076,11 @@ class Record(NDArrayOperatorsMixin):
             "use ak.any() or ak.all() or pick a field"
         )
 
-
-#     def __contains__(self, element):
-#         for test in ak._v2._util.completely_flatten(self._layout):
-#             if element in test:
-#                 return True
-#         return False
+    def __contains__(self, element):
+        for test in self._layout.completely_flatten():
+            if element in test:
+                return True
+        return False
 
 
 class ArrayBuilder(Sized):
@@ -2353,22 +2353,19 @@ class ArrayBuilder(Sized):
     #     """
     #     return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
-    # @property
-    # def numba_type(self):
-    #     """
-    #     The type of this Array when it is used in Numba. It contains enough
-    #     information to generate low-level code for accessing any element,
-    #     down to the leaves.
+    @property
+    def numba_type(self):
+        """
+        The type of this Array when it is used in Numba. It contains enough
+        information to generate low-level code for accessing any element,
+        down to the leaves.
 
-    #     See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
-    #     on types and signatures.
-    #     """
-    #     import awkward._v2._connect.numba
+        See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
+        on types and signatures.
+        """
+        ak._v2.numba.register_and_check()
 
-    #     ak._v2._connect.numba.register_and_check()
-    #     import awkward._v2._connect.numba.builder  # noqa: F401
-
-    #     return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
+        return ak._v2._connect.numba.builder.ArrayBuilderType(self._behavior)
 
     def __bool__(self):
         if len(self) == 1:

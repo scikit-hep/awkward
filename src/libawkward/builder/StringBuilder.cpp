@@ -52,11 +52,11 @@ namespace awkward {
 
     container.copy_buffer(outer_form_key.str() + "-offsets",
                           offsets_.ptr().get(),
-                          offsets_.length() * (int64_t)sizeof(int64_t));
+                          (int64_t)(offsets_.length() * sizeof(int64_t)));
 
     container.copy_buffer(inner_form_key.str() + "-data",
                           content_.ptr().get(),
-                          content_.length() * (int64_t)sizeof(uint8_t));
+                          (int64_t)(content_.length() * sizeof(uint8_t)));
 
     std::string char_parameter;
     std::string string_parameter;
@@ -82,7 +82,7 @@ namespace awkward {
 
   int64_t
   StringBuilder::length() const {
-    return offsets_.length() - 1;
+    return (int64_t)offsets_.length() - 1;
   }
 
   void
@@ -158,7 +158,7 @@ namespace awkward {
         content_.append((uint8_t)x[i]);
       }
     }
-    offsets_.append(content_.length());
+    offsets_.append((int64_t)content_.length());
     return shared_from_this();
   }
 

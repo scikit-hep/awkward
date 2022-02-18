@@ -10,6 +10,11 @@ to_list = ak._v2.operations.convert.to_list
 
 def test_empty_array_slice():
     # inspired by PR021::test_getitem
+    a = ak._v2.operations.convert.from_json("[[], [[], []], [[], [], []]]")
+    assert to_list(a[2, 1, np.array([], dtype=int)]) == []
+    # FIXME: assert [[]] == []
+    # assert to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == []
+
     a = ak._v2.operations.convert.from_iter(
         [[], [[], []], [[], [], []]], highlevel=False
     )

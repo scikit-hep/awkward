@@ -1079,28 +1079,32 @@ def from_json(
     is_path, source = ak._util.regularize_path(source)
 
     if ak._util.is_file_path(source):
-        layout = ak._ext.fromjsonfile(
+        builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
+        num = ak._ext.fromjsonfile(
             source,
+            builder,
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
-            initial=initial,
-            resize=resize,
             buffersize=buffersize,
         )
+        snapshot = builder.snapshot()
+        layout = snapshot[0] if num == 1 else snapshot
     elif not is_path and (
         (isinstance(source, bytes) and _maybe_json_bytes.match(source))
         or _maybe_json_str.match(source)
     ):
-        layout = ak._ext.fromjson(
+        builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
+        num = ak._ext.fromjson(
             source,
+            builder,
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
-            initial=initial,
-            resize=resize,
             buffersize=buffersize,
         )
+        snapshot = builder.snapshot()
+        layout = snapshot[0] if num == 1 else snapshot
     else:
         raise FileNotFoundError(f"file not found or not a regular file: {source}")
 
