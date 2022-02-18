@@ -1661,9 +1661,7 @@ class ListOffsetArray(Content):
             maxnextparents = ak._v2.index.Index64.empty(1, self._nplike)
             distincts = ak._v2.index.Index64.empty(distincts_length, self._nplike)
             assert (
-                nextcarry.nplike is self._nplike
-                and nextparents.nplike is self._nplike
-                and maxnextparents.nplike is self._nplike
+                maxnextparents.nplike is self._nplike
                 and distincts.nplike is self._nplike
                 and self._offsets.nplike is self._nplike
                 and offsetscopy.nplike is self._nplike
@@ -1694,9 +1692,8 @@ class ListOffsetArray(Content):
                 )
             )
 
-            reorder = self._nplike.argsort(
-                np_nextparents, kind="stable"
-            )  # "stable" is essential!
+            # A "stable" sort is essential for the subsequent steps.
+            reorder = self._nplike.argsort(np_nextparents, kind="stable")
             nextcarry = ak._v2.index.Index64(np_nextcarry[reorder])
             nextparents = ak._v2.index.Index64(np_nextparents[reorder])
 
