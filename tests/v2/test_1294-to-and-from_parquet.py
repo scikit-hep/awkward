@@ -537,156 +537,171 @@ def test_unmaskedarray_numpyarray(tmp_path, through, extensionarray):
     assert predicted_form == array_form
 
 
-# @pytest.mark.parametrize("is_tuple", [False, True])
-# @pytest.mark.parametrize("extensionarray", [False, True])
-# def test_recordarray(tmp_path, is_tuple, extensionarray):
-#     akarray = ak._v2.contents.RecordArray(
-#         [
-#             ak._v2.contents.NumpyArray(
-#                 np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
-#             ),
-#             ak._v2.contents.ListOffsetArray(
-#                 ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-#                 ak._v2.contents.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"which": "inner2"}
-#                 ),
-#             ),
-#         ],
-#         None if is_tuple else ["x", "y"],
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(extensionarray=extensionarray)
-#     if not is_tuple or extensionarray:
-#         arrow_round_trip(akarray, paarray, extensionarray)
-#         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+@pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_recordarray(tmp_path, is_tuple, through, extensionarray):
+    akarray = ak._v2.contents.RecordArray(
+        [
+            ak._v2.contents.NumpyArray(
+                np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+            ),
+            ak._v2.contents.ListOffsetArray(
+                ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"which": "inner2"}
+                ),
+            ),
+        ],
+        None if is_tuple else ["x", "y"],
+        parameters={"which": "outer"},
+    )
 
-#     akarray = ak._v2.contents.RecordArray(
-#         [
-#             ak._v2.contents.ByteMaskedArray(
-#                 ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
-#                 ak._v2.contents.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
-#                 ),
-#                 valid_when=False,
-#             ),
-#             ak._v2.contents.ListOffsetArray(
-#                 ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-#                 ak._v2.contents.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"which": "inner2"}
-#                 ),
-#             ),
-#         ],
-#         None if is_tuple else ["x", "y"],
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(extensionarray=extensionarray)
-#     if not is_tuple or extensionarray:
-#         arrow_round_trip(akarray, paarray, extensionarray)
-#         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
-#     akarray = ak._v2.contents.RecordArray(
-#         [
-#             ak._v2.contents.ByteMaskedArray(
-#                 ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
-#                 ak._v2.contents.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
-#                 ),
-#                 valid_when=False,
-#             ),
-#             ak._v2.contents.UnmaskedArray(
-#                 ak._v2.contents.ListOffsetArray(
-#                     ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-#                     ak._v2.contents.NumpyArray(
-#                         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
-#                         parameters={"which": "inner2"},
-#                     ),
-#                 ),
-#             ),
-#         ],
-#         None if is_tuple else ["x", "y"],
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(extensionarray=extensionarray)
-#     if not is_tuple or extensionarray:
-#         arrow_round_trip(akarray, paarray, extensionarray)
-#         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    akarray = ak._v2.contents.RecordArray(
+        [
+            ak._v2.contents.ByteMaskedArray(
+                ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+                ),
+                valid_when=False,
+            ),
+            ak._v2.contents.ListOffsetArray(
+                ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"which": "inner2"}
+                ),
+            ),
+        ],
+        None if is_tuple else ["x", "y"],
+        parameters={"which": "outer"},
+    )
 
-#     akarray = ak._v2.contents.IndexedOptionArray(
-#         ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
-#         ak._v2.contents.RecordArray(
-#             [
-#                 ak._v2.contents.NumpyArray(
-#                     np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
-#                 ),
-#                 ak._v2.contents.ListOffsetArray(
-#                     ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-#                     ak._v2.contents.NumpyArray(
-#                         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
-#                         parameters={"which": "inner2"},
-#                     ),
-#                 ),
-#             ],
-#             None if is_tuple else ["x", "y"],
-#             parameters={"which": "outer"},
-#         ),
-#     )
-#     paarray = akarray.to_arrow(extensionarray=extensionarray)
-#     if not is_tuple or extensionarray:
-#         arrow_round_trip(akarray, paarray, extensionarray)
-#         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
-#     akarray = ak._v2.contents.IndexedOptionArray(
-#         ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
-#         ak._v2.contents.RecordArray(
-#             [
-#                 ak._v2.contents.ByteMaskedArray(
-#                     ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
-#                     ak._v2.contents.NumpyArray(
-#                         np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
-#                     ),
-#                     valid_when=False,
-#                 ),
-#                 ak._v2.contents.ListOffsetArray(
-#                     ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-#                     ak._v2.contents.NumpyArray(
-#                         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
-#                         parameters={"which": "inner2"},
-#                     ),
-#                 ),
-#             ],
-#             None if is_tuple else ["x", "y"],
-#             parameters={"which": "outer"},
-#         ),
-#     )
-#     paarray = akarray.to_arrow(extensionarray=extensionarray)
-#     if not is_tuple or extensionarray:
-#         arrow_round_trip(akarray, paarray, extensionarray)
-#         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    akarray = ak._v2.contents.RecordArray(
+        [
+            ak._v2.contents.ByteMaskedArray(
+                ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+                ),
+                valid_when=False,
+            ),
+            ak._v2.contents.UnmaskedArray(
+                ak._v2.contents.ListOffsetArray(
+                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak._v2.contents.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+                        parameters={"which": "inner2"},
+                    ),
+                ),
+            ),
+        ],
+        None if is_tuple else ["x", "y"],
+        parameters={"which": "outer"},
+    )
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
+
+    akarray = ak._v2.contents.IndexedOptionArray(
+        ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
+        ak._v2.contents.RecordArray(
+            [
+                ak._v2.contents.NumpyArray(
+                    np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+                ),
+                ak._v2.contents.ListOffsetArray(
+                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak._v2.contents.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+                        parameters={"which": "inner2"},
+                    ),
+                ),
+            ],
+            None if is_tuple else ["x", "y"],
+            parameters={"which": "outer"},
+        ),
+    )
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
+
+    akarray = ak._v2.contents.IndexedOptionArray(
+        ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
+        ak._v2.contents.RecordArray(
+            [
+                ak._v2.contents.ByteMaskedArray(
+                    ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
+                    ak._v2.contents.NumpyArray(
+                        np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
+                    ),
+                    valid_when=False,
+                ),
+                ak._v2.contents.ListOffsetArray(
+                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak._v2.contents.NumpyArray(
+                        np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+                        parameters={"which": "inner2"},
+                    ),
+                ),
+            ],
+            None if is_tuple else ["x", "y"],
+            parameters={"which": "outer"},
+        ),
+    )
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 # @pytest.mark.skipif(
 #     not ak._v2._util.numpy_at_least("1.20"), reason="NumPy >= 1.20 required for dates"
 # )
+# @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 # @pytest.mark.parametrize("extensionarray", [False, True])
-# def test_numpyarray_datetime(tmp_path, extensionarray):
-#     # pyarrow doesn't yet support datetime/duration conversions to Parquet.
-#     # (FIXME: find or create a JIRA ticket.)
-
+# def test_numpyarray_datetime(tmp_path, through, extensionarray):
 #     akarray = ak._v2.contents.NumpyArray(
 #         np.array(
 #             ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], dtype="datetime64[s]"
 #         )
 #     )
-#     paarray = akarray.to_arrow(extensionarray=extensionarray)
-#     arrow_round_trip(akarray, paarray, extensionarray)
-#     # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+#     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+#     predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+#         schema_arrow, pass_empty_field=True
+#     )
+#     assert predicted_form == array_form
 
 #     akarray = ak._v2.contents.NumpyArray(
 #         np.array(["41", "1", "20"], dtype="timedelta64[s]")
 #     )
-#     paarray = akarray.to_arrow(extensionarray=extensionarray)
-#     arrow_round_trip(akarray, paarray, extensionarray)
-#     # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+#     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+#     predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+#         schema_arrow, pass_empty_field=True
+#     )
+#     assert predicted_form == array_form
 
 
 # @pytest.mark.parametrize("extensionarray", [False, True])

@@ -262,63 +262,79 @@ def popbuffers_finalize(
     if fix_offsets and (array.offset != 0 or len(array) != len(out)):
         out = out[array.offset : array.offset + len(array)]
 
-    if isinstance(awkwardarrow_type, AwkwardArrowType):
-        mask_parameters = awkwardarrow_type.mask_parameters
-    else:
-        mask_parameters = None
-
     # Everything must leave popbuffers as option-type; the mask_node will be
     # removed by the next level up in popbuffers recursion if appropriate.
 
-    if conservative_optiontype and awkwardarrow_type is None:
-        # ceildiv(len(out), 8) = -(len(out) // -8)
-        return ak._v2.contents.BitMaskedArray(
-            ak._v2.index.IndexU8(numpy.full(-(len(out) // -8), np.uint8(0xFF))),
-            out,
-            valid_when=True,
-            length=len(out),
-            lsb_order=True,
-            parameters=mask_parameters,
-        )
+    if isinstance(awkwardarrow_type, AwkwardArrowType):
+        if awkwardarrow_type.mask_type == "UnmaskedArray":
+            assert validbits is None or numpy.all(
+                numpy.frombuffer(validbits, np.uint8)[: len(out) // 8] == 0xFF
+            )
+            return ak._v2.contents.UnmaskedArray(
+                out, parameters=awkwardarrow_type.mask_parameters
+            )
 
-    elif validbits is None:
-        return ak._v2.contents.UnmaskedArray(out, parameters=mask_parameters)
-
-    elif (
-        awkwardarrow_type is not None and awkwardarrow_type.mask_type == "UnmaskedArray"
-    ):
-        assert numpy.all(numpy.frombuffer(validbits, np.uint8)[: len(out) // 8] == 0xFF)
-        return ak._v2.contents.UnmaskedArray(out, parameters=mask_parameters)
+        else:
+            if validbits is None:
+                if conservative_optiontype:
+                    return ak._v2.contents.BitMaskedArray(
+                        # ceildiv(len(out), 8) = -(len(out) // -8)
+                        ak._v2.index.IndexU8(
+                            numpy.full(-(len(out) // -8), np.uint8(0xFF))
+                        ),
+                        out,
+                        valid_when=True,
+                        length=len(out),
+                        lsb_order=True,
+                        parameters=awkwardarrow_type.mask_parameters,
+                    )
+                else:
+                    return ak._v2.contents.UnmaskedArray(
+                        out, parameters=awkwardarrow_type.mask_parameters
+                    )
+            else:
+                return ak._v2.contents.BitMaskedArray(
+                    ak._v2.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
+                    out,
+                    valid_when=True,
+                    length=len(out),
+                    lsb_order=True,
+                    parameters=awkwardarrow_type.mask_parameters,
+                )
 
     else:
-        return ak._v2.contents.BitMaskedArray(
-            ak._v2.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
-            out,
-            valid_when=True,
-            length=len(out),
-            lsb_order=True,
-            parameters=mask_parameters,
-        )
+        if validbits is None and conservative_optiontype:
+            # ceildiv(len(out), 8) = -(len(out) // -8)
+            validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF))
+
+        if validbits is None:
+            return ak._v2.contents.UnmaskedArray(out)
+        else:
+            return ak._v2.contents.BitMaskedArray(
+                ak._v2.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
+                out,
+                valid_when=True,
+                length=len(out),
+                lsb_order=True,
+            )
 
 
 def form_popbuffers_finalize(out, awkwardarrow_type):
-    if isinstance(awkwardarrow_type, AwkwardArrowType):
-        mask_parameters = awkwardarrow_type.mask_parameters
-    else:
-        mask_parameters = None
+    if (
+        isinstance(awkwardarrow_type, AwkwardArrowType)
+        and awkwardarrow_type.mask_type == "UnmaskedArray"
+    ):
+        return ak._v2.forms.UnmaskedForm(
+            out, parameters=awkwardarrow_type.mask_parameters
+        )
 
-    # FIXME: can't identify when there is no bitmask to return UnmaskedForm.
-    # popbuffers_finalize will need a mode that always returns zeroed BitMaskedArray
-
-    if awkwardarrow_type is not None and awkwardarrow_type.mask_type == "UnmaskedArray":
-        return ak._v2.forms.UnmaskedForm(out, parameters=mask_parameters)
     else:
         return ak._v2.forms.BitMaskedForm(
             "u8",
             out,
             valid_when=True,
             lsb_order=True,
-            parameters=mask_parameters,
+            parameters=mask_parameters(awkwardarrow_type),
         )
 
 
@@ -751,7 +767,29 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.StructType):
-        raise NotImplementedError
+        keys = []
+        contents = []
+        for i in range(storage_type.num_fields):
+            field = storage_type[i]
+            field_name = field.name
+            keys.append(field_name)
+
+            a, b = to_awkwardarrow_storage_types(field.type)
+            akcontent = form_popbuffers(a, b)
+            if not field.nullable:
+                # strip the dummy option-type node
+                akcontent = form_remove_optiontype(akcontent)
+            contents.append(akcontent)
+
+        if awkwardarrow_type is not None and awkwardarrow_type.record_is_tuple:
+            keys = None
+
+        out = ak._v2.forms.RecordForm(
+            contents,
+            keys,
+            parameters=node_parameters(awkwardarrow_type),
+        )
+        return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.UnionType):
         raise NotImplementedError
@@ -908,14 +946,14 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
             for x in parameters:
                 (key,) = x.keys()
                 (value,) = x.values()
-                if key in (
+                if optiontype is not None and key in (
                     "UnmaskedArray",
                     "BitMaskedArray",
                     "ByteMaskedArray",
                     "IndexedOptionArray",
                 ):
                     optiontype._parameters = value
-                elif key == "RecordArray":
+                elif recordtype is not None and key == "RecordArray":
                     recordtype._parameters = value
 
         return out
@@ -977,14 +1015,14 @@ def form_handle_arrow(schema, pass_empty_field=False):
         for x in parameters:
             (key,) = x.keys()
             (value,) = x.values()
-            if key in (
+            if optiontype is not None and key in (
                 "UnmaskedArray",
                 "BitMaskedArray",
                 "ByteMaskedArray",
                 "IndexedOptionArray",
             ):
                 optiontype._parameters = value
-            elif key == "RecordArray":
+            elif recordtype is not None and key == "RecordArray":
                 recordtype._parameters = value
 
     return out
