@@ -792,7 +792,21 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.UnionType):
-        raise NotImplementedError
+        akcontents = []
+        for i in range(storage_type.num_fields):
+            field = storage_type[i]
+            a, b = to_awkwardarrow_storage_types(field.type)
+            akcontent = form_popbuffers(a, b)
+
+            if not field.nullable:
+                # strip the dummy option-type node
+                akcontent = form_remove_optiontype(akcontent)
+            akcontents.append(akcontent)
+
+        out = ak._v2.forms.UnionForm(
+            "i8", "i32", akcontents, parameters=node_parameters(awkwardarrow_type)
+        )
+        return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif storage_type == pyarrow.null():
         # This is already an option-type, so no form_popbuffers_finalize.
@@ -906,7 +920,12 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
         child_array = []
         for i in range(obj.num_columns):
             layout = handle_arrow(obj.column(i), conservative_optiontype)
-            if obj.schema.field(i).nullable and not layout.is_OptionType:
+
+            if (
+                obj.schema.field(i).nullable
+                and not layout.is_OptionType
+                and not layout.is_UnionType
+            ):
                 layout = ak._v2.contents.UnmaskedArray(layout)
             child_array.append(layout)
 
