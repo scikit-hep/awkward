@@ -18,7 +18,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
             otherwise, return a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        dtype (None or data-type): Overrides the data type of the result.
+        dtype (None or NumPy dtype)): Overrides the data type of the result.
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
