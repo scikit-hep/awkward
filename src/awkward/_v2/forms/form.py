@@ -308,5 +308,5 @@ class Form:
     def simplify_optiontype(self):
         return self
 
-    def simplify_uniontype(self):
+    def simplify_uniontype(self, merge=True, mergebool=False):
         return self

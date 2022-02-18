@@ -170,6 +170,9 @@ class UnionForm(Form):
             form_key=None,
         )
 
+    def simplify_uniontype(self, merge=True, mergebool=False):
+        raise NotImplementedError
+
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:
             out = self._contents[0].purelist_parameter(key)

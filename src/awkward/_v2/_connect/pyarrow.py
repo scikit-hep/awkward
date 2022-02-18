@@ -633,13 +633,53 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         return form_popbuffers(awkwardarrow_type, storage_type.storage_type)
 
     elif isinstance(storage_type, pyarrow.lib.DictionaryType):
-        raise NotImplementedError
+        index_type = storage_type.index_type.to_pandas_dtype()
+        if index_type is np.int64:
+            index = "i64"
+        elif index_type is np.uint32:
+            index = "u32"
+        elif index_type is np.int32:
+            index = "i32"
+        else:
+            raise TypeError(
+                f"unrecognized Arrow DictionaryType index type: {index_type}"
+            )
+
+        a, b = to_awkwardarrow_storage_types(storage_type.value_type)
+        content = form_popbuffers(a, b)
+
+        parameters = ak._v2._util.merge_parameters(
+            mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
+        )
+        if parameters is None:
+            parameters = {"__array__": "categorical"}
+
+        return ak._v2.forms.IndexedOptionForm(
+            index,
+            content,
+            parameters=parameters,
+        ).simplify_optiontype()
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeListType):
         raise NotImplementedError
 
     elif isinstance(storage_type, (pyarrow.lib.LargeListType, pyarrow.lib.ListType)):
-        raise NotImplementedError
+        if isinstance(storage_type, pyarrow.lib.LargeListType):
+            akoffsets = "i64"
+        else:
+            akoffsets = "i32"
+
+        a, b = to_awkwardarrow_storage_types(storage_type.value_type)
+        akcontent = form_popbuffers(a, b)
+
+        if not storage_type.value_field.nullable:
+            # strip the dummy option-type node
+            akcontent = form_remove_optiontype(akcontent)
+
+        out = ak._v2.forms.ListOffsetForm(
+            akoffsets, akcontent, parameters=node_parameters(awkwardarrow_type)
+        )
+        return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.MapType):
         raise NotImplementedError
@@ -666,10 +706,12 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         raise NotImplementedError
 
     elif storage_type == pyarrow.null():
-        raise NotImplementedError
-
-    elif storage_type == pyarrow.bool_():
-        raise NotImplementedError
+        # This is already an option-type, so no form_popbuffers_finalize.
+        return ak._v2.forms.IndexedOptionForm(
+            "i64",
+            ak._v2.forms.EmptyForm(parameters=node_parameters(awkwardarrow_type)),
+            parameters=mask_parameters(awkwardarrow_type),
+        )
 
     elif isinstance(storage_type, pyarrow.lib.DataType):
         _, dt = _pyarrow_to_numpy_dtype.get(str(storage_type), (False, None))

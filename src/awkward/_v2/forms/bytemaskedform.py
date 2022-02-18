@@ -147,6 +147,26 @@ class ByteMaskedForm(Form):
             form_key=None,
         )
 
+    def simplify_optiontype(self):
+        if isinstance(
+            self._content,
+            (
+                ak._v2.forms.indexedform.IndexedForm,
+                ak._v2.forms.indexedoptionform.IndexedOptionForm,
+                ak._v2.forms.bytemaskedform.ByteMaskedForm,
+                ak._v2.forms.bitmaskedform.BitMaskedForm,
+                ak._v2.forms.unmaskedform.UnmaskedForm,
+            ),
+        ):
+            return ak._v2.forms.indexedoptionform.IndexedOptionForm(
+                "i64",
+                self._content,
+                has_identifier=self._has_identifier,
+                parameters=self._parameters,
+            ).simplify_optiontype()
+        else:
+            return self
+
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:
             return self._content.purelist_parameter(key)
