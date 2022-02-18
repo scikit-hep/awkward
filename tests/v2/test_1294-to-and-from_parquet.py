@@ -10,12 +10,20 @@ pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
 
 def through_arrow(
-    akarray, extensionarray, tmp_path, list_to32=False, categorical_as_dictionary=False
+    akarray,
+    extensionarray,
+    tmp_path,
+    list_to32=False,
+    string_to32=False,
+    bytestring_to32=False,
+    categorical_as_dictionary=False,
 ):
     arrow_table = ak._v2.to_arrow_table(
         akarray,
         extensionarray=extensionarray,
         list_to32=list_to32,
+        string_to32=string_to32,
+        bytestring_to32=bytestring_to32,
         categorical_as_dictionary=categorical_as_dictionary,
     )
     array_form = ak._v2.from_arrow(
@@ -25,7 +33,13 @@ def through_arrow(
 
 
 def through_parquet(
-    akarray, extensionarray, tmp_path, list_to32=False, categorical_as_dictionary=False
+    akarray,
+    extensionarray,
+    tmp_path,
+    list_to32=False,
+    string_to32=False,
+    bytestring_to32=False,
+    categorical_as_dictionary=False,
 ):
     filename = os.path.join(tmp_path, "whatever.parquet")
     pyarrow_parquet.write_table(
@@ -33,6 +47,8 @@ def through_parquet(
             akarray,
             extensionarray=extensionarray,
             list_to32=list_to32,
+            string_to32=string_to32,
+            bytestring_to32=bytestring_to32,
             categorical_as_dictionary=categorical_as_dictionary,
         ),
         filename,
@@ -316,165 +332,209 @@ def test_dictionary_encoding(
         assert predicted_form == array_form
 
 
-# @pytest.mark.parametrize("string_to32", [False, True])
-# @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
-# @pytest.mark.parametrize("extensionarray", [False, True])
-# def test_listoffsetraray_string(tmp_path, dtype, string_to32, extensionarray):
-#     akarray = ak._v2.contents.ListOffsetArray(
-#         ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-#         ak._v2.contents.NumpyArray(
-#             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "char"}
-#         ),
-#         parameters={"__array__": "string", "something": "else"},
-#     )
-#     paarray = akarray.to_arrow(string_to32=string_to32, extensionarray=extensionarray)
-#     arrow_round_trip(akarray, paarray, extensionarray)
-#     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+@pytest.mark.parametrize("string_to32", [False, True])
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_listoffsetraray_string(tmp_path, string_to32, dtype, through, extensionarray):
+    akarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak._v2.contents.NumpyArray(
+            np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "char"}
+        ),
+        parameters={"__array__": "string", "something": "else"},
+    )
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, string_to32=string_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
-# @pytest.mark.parametrize("bytestring_to32", [False, True])
-# @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
-# @pytest.mark.parametrize("extensionarray", [False, True])
-# def test_listoffsetraray_bytestring(tmp_path, dtype, bytestring_to32, extensionarray):
-#     akarray = ak._v2.contents.ListOffsetArray(
-#         ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-#         ak._v2.contents.NumpyArray(
-#             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
-#         ),
-#         parameters={"__array__": "bytestring", "something": "else"},
-#     )
-#     paarray = akarray.to_arrow(
-#         bytestring_to32=bytestring_to32, extensionarray=extensionarray
-#     )
-#     arrow_round_trip(akarray, paarray, extensionarray)
-#     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+@pytest.mark.parametrize("bytestring_to32", [False, True])
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_listoffsetraray_bytestring(
+    tmp_path, bytestring_to32, dtype, through, extensionarray
+):
+    akarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak._v2.contents.NumpyArray(
+            np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
+        ),
+        parameters={"__array__": "bytestring", "something": "else"},
+    )
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, bytestring_to32=bytestring_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
-# @pytest.mark.parametrize("size", [5])
-# @pytest.mark.parametrize("list_to32", [False, True])
-# @pytest.mark.parametrize("extensionarray", [False, True])
-# def test_regulararray_numpyarray(tmp_path, size, list_to32, extensionarray):
-#     akarray = ak._v2.contents.RegularArray(
-#         ak._v2.contents.NumpyArray(
-#             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-#             parameters={"which": "inner"},
-#         ),
-#         size,
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-#     arrow_round_trip(akarray, paarray, extensionarray)
-#     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+@pytest.mark.parametrize("size", [5])
+@pytest.mark.parametrize("list_to32", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionarray):
+    akarray = ak._v2.contents.RegularArray(
+        ak._v2.contents.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+            parameters={"which": "inner"},
+        ),
+        size,
+        parameters={"which": "outer"},
+    )
 
-#     akarray = ak._v2.contents.RegularArray(
-#         ak._v2.contents.ByteMaskedArray(
-#             ak._v2.index.Index8(
-#                 np.array(
-#                     [False, True, False, True, True, False, True, True, False, False],
-#                     dtype=np.int8,
-#                 )
-#             ),
-#             ak._v2.contents.NumpyArray(
-#                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-#                 parameters={"which": "inner"},
-#             ),
-#             valid_when=False,
-#             parameters={"which": "middle"},
-#         ),
-#         size,
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-#     arrow_round_trip(akarray, paarray, extensionarray)
-#     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
-#     akarray = ak._v2.contents.ByteMaskedArray(
-#         ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
-#         ak._v2.contents.RegularArray(
-#             ak._v2.contents.NumpyArray(
-#                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-#                 parameters={"which": "inner"},
-#             ),
-#             size,
-#             parameters={"which": "middle"},
-#         ),
-#         valid_when=True,
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-#     arrow_round_trip(akarray, paarray, extensionarray)
+    akarray = ak._v2.contents.RegularArray(
+        ak._v2.contents.ByteMaskedArray(
+            ak._v2.index.Index8(
+                np.array(
+                    [False, True, False, True, True, False, True, True, False, False],
+                    dtype=np.int8,
+                )
+            ),
+            ak._v2.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                parameters={"which": "inner"},
+            ),
+            valid_when=False,
+            parameters={"which": "middle"},
+        ),
+        size,
+        parameters={"which": "outer"},
+    )
 
-#     # https://issues.apache.org/jira/browse/ARROW-14547
-#     # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
-#     akarray = ak._v2.contents.ByteMaskedArray(
-#         ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
-#         ak._v2.contents.RegularArray(
-#             ak._v2.contents.ByteMaskedArray(
-#                 ak._v2.index.Index8(
-#                     np.array(
-#                         [
-#                             False,
-#                             True,
-#                             False,
-#                             True,
-#                             True,
-#                             False,
-#                             True,
-#                             True,
-#                             False,
-#                             False,
-#                         ],
-#                         dtype=np.int8,
-#                     )
-#                 ),
-#                 ak._v2.contents.NumpyArray(
-#                     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
-#                     parameters={"which": "inner"},
-#                 ),
-#                 valid_when=False,
-#                 parameters={"which": "middle-1"},
-#             ),
-#             size,
-#             parameters={"which": "middle-2"},
-#         ),
-#         valid_when=True,
-#         parameters={"which": "outer"},
-#     )
-#     paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-#     arrow_round_trip(akarray, paarray, extensionarray)
+    akarray = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
+        ak._v2.contents.RegularArray(
+            ak._v2.contents.NumpyArray(
+                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                parameters={"which": "inner"},
+            ),
+            size,
+            parameters={"which": "middle"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
 
-#     # https://issues.apache.org/jira/browse/ARROW-14547
-#     # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    # https://issues.apache.org/jira/browse/ARROW-14547
+    if through is through_arrow:
+        schema_arrow, array_form = through(
+            akarray, extensionarray, tmp_path, list_to32=list_to32
+        )
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
+
+    akarray = ak._v2.contents.ByteMaskedArray(
+        ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
+        ak._v2.contents.RegularArray(
+            ak._v2.contents.ByteMaskedArray(
+                ak._v2.index.Index8(
+                    np.array(
+                        [
+                            False,
+                            True,
+                            False,
+                            True,
+                            True,
+                            False,
+                            True,
+                            True,
+                            False,
+                            False,
+                        ],
+                        dtype=np.int8,
+                    )
+                ),
+                ak._v2.contents.NumpyArray(
+                    np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
+                    parameters={"which": "inner"},
+                ),
+                valid_when=False,
+                parameters={"which": "middle-1"},
+            ),
+            size,
+            parameters={"which": "middle-2"},
+        ),
+        valid_when=True,
+        parameters={"which": "outer"},
+    )
+
+    # https://issues.apache.org/jira/browse/ARROW-14547
+    if through is through_arrow:
+        schema_arrow, array_form = through(
+            akarray, extensionarray, tmp_path, list_to32=list_to32
+        )
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
 
-# @pytest.mark.parametrize("size", [5])
-# @pytest.mark.parametrize("bytestring_to32", [False, True])
-# @pytest.mark.parametrize("extensionarray", [False, True])
-# def test_regularaarray_bytestring(tmp_path, size, bytestring_to32, extensionarray):
-#     akarray = ak._v2.contents.RegularArray(
-#         ak._v2.contents.NumpyArray(
-#             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
-#         ),
-#         size,
-#         parameters={"__array__": "bytestring", "something": "else"},
-#     )
-#     paarray = akarray.to_arrow(
-#         bytestring_to32=bytestring_to32, extensionarray=extensionarray
-#     )
-#     arrow_round_trip(akarray, paarray, extensionarray)
-#     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+@pytest.mark.parametrize("size", [5])
+@pytest.mark.parametrize("bytestring_to32", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_regularaarray_bytestring(
+    tmp_path, size, bytestring_to32, through, extensionarray
+):
+    akarray = ak._v2.contents.RegularArray(
+        ak._v2.contents.NumpyArray(
+            np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
+        ),
+        size,
+        parameters={"__array__": "bytestring", "something": "else"},
+    )
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, bytestring_to32=bytestring_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
-# def test_unmaskedarray_numpyarray(tmp_path):
-#     akarray = ak._v2.contents.UnmaskedArray(
-#         ak._v2.contents.NumpyArray(
-#             np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}
-#         )
-#     )
-#     paarray = akarray.to_arrow()
-#     arrow_round_trip(akarray, paarray, True)
-#     parquet_round_trip(akarray, paarray, True, tmp_path)
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_unmaskedarray_numpyarray(tmp_path, through, extensionarray):
+    akarray = ak._v2.contents.UnmaskedArray(
+        ak._v2.contents.NumpyArray(
+            np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}
+        )
+    )
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 # @pytest.mark.parametrize("is_tuple", [False, True])

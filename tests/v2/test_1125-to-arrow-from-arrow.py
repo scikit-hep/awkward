@@ -426,7 +426,8 @@ def test_regularaarray_bytestring(tmp_path, size, bytestring_to32, extensionarra
     parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
-def test_unmaskedarray_numpyarray(tmp_path):
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_unmaskedarray_numpyarray(tmp_path, extensionarray):
     akarray = ak._v2.contents.UnmaskedArray(
         ak._v2.contents.NumpyArray(
             np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}

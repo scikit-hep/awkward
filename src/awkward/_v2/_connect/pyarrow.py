@@ -284,6 +284,12 @@ def popbuffers_finalize(
     elif validbits is None:
         return ak._v2.contents.UnmaskedArray(out, parameters=mask_parameters)
 
+    elif (
+        awkwardarrow_type is not None and awkwardarrow_type.mask_type == "UnmaskedArray"
+    ):
+        assert numpy.all(numpy.frombuffer(validbits, np.uint8)[: len(out) // 8] == 0xFF)
+        return ak._v2.contents.UnmaskedArray(out, parameters=mask_parameters)
+
     else:
         return ak._v2.contents.BitMaskedArray(
             ak._v2.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
@@ -304,14 +310,16 @@ def form_popbuffers_finalize(out, awkwardarrow_type):
     # FIXME: can't identify when there is no bitmask to return UnmaskedForm.
     # popbuffers_finalize will need a mode that always returns zeroed BitMaskedArray
 
-    return ak._v2.forms.BitMaskedForm(
-        "u8",
-        out,
-        valid_when=True,
-        lsb_order=True,
-        parameters=mask_parameters,
-        form_key=None,
-    )
+    if awkwardarrow_type is not None and awkwardarrow_type.mask_type == "UnmaskedArray":
+        return ak._v2.forms.UnmaskedForm(out, parameters=mask_parameters)
+    else:
+        return ak._v2.forms.BitMaskedForm(
+            "u8",
+            out,
+            valid_when=True,
+            lsb_order=True,
+            parameters=mask_parameters,
+        )
 
 
 def popbuffers(
@@ -661,7 +669,19 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         ).simplify_optiontype()
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeListType):
-        raise NotImplementedError
+        a, b = to_awkwardarrow_storage_types(storage_type.value_type)
+        akcontent = form_popbuffers(a, b)
+
+        if not storage_type.value_field.nullable:
+            # strip the dummy option-type node
+            akcontent = form_remove_optiontype(akcontent)
+
+        out = ak._v2.forms.RegularForm(
+            akcontent,
+            storage_type.list_size,
+            parameters=node_parameters(awkwardarrow_type),
+        )
+        return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, (pyarrow.lib.LargeListType, pyarrow.lib.ListType)):
         if isinstance(storage_type, pyarrow.lib.LargeListType):
@@ -694,10 +714,41 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         )
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeBinaryType):
-        raise NotImplementedError
+        parameters = node_parameters(awkwardarrow_type)
+        if parameters is None:
+            parameters = {"__array__": "bytestring"}
+        sub_parameters = {"__array__": "byte"}
+
+        out = ak._v2.forms.RegularForm(
+            ak._v2.forms.NumpyForm("uint8", parameters=sub_parameters),
+            storage_type.byte_width,
+            parameters=parameters,
+        )
+        return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif storage_type in _string_like:
-        raise NotImplementedError
+        if storage_type in _string_like[::2]:
+            akoffsets = "i32"
+        else:
+            akoffsets = "i64"
+
+        parameters = node_parameters(awkwardarrow_type)
+
+        if storage_type in _string_like[:2]:
+            if parameters is None:
+                parameters = {"__array__": "string"}
+            sub_parameters = {"__array__": "char"}
+        else:
+            if parameters is None:
+                parameters = {"__array__": "bytestring"}
+            sub_parameters = {"__array__": "byte"}
+
+        out = ak._v2.forms.ListOffsetForm(
+            akoffsets,
+            ak._v2.forms.NumpyForm("uint8", parameters=sub_parameters),
+            parameters=parameters,
+        )
+        return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.StructType):
         raise NotImplementedError
@@ -721,7 +772,6 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         out = ak._v2.forms.NumpyForm(
             ak._v2.types.numpytype.dtype_to_primitive(dt),
             parameters=node_parameters(awkwardarrow_type),
-            form_key=None,
         )
 
         return form_popbuffers_finalize(out, awkwardarrow_type)
@@ -912,7 +962,7 @@ def form_handle_arrow(schema, pass_empty_field=False):
         assert len(forms) == 1
         out = forms[0]
     else:
-        out = ak._v2.forms.RecordForm(forms, list(schema.names), form_key=None)
+        out = ak._v2.forms.RecordForm(forms, list(schema.names))
 
     if schema.metadata is not None and b"ak:parameters" in schema.metadata:
         optiontype, recordtype = None, None
