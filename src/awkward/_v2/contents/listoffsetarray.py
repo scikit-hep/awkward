@@ -1694,7 +1694,9 @@ class ListOffsetArray(Content):
                 )
             )
 
-            reorder = self._nplike.argsort(np_nextparents, kind="stable")  # "stable" is essential!
+            reorder = self._nplike.argsort(
+                np_nextparents, kind="stable"
+            )  # "stable" is essential!
             nextcarry = ak._v2.index.Index64(np_nextcarry[reorder])
             nextparents = ak._v2.index.Index64(np_nextparents[reorder])
 
