@@ -110,7 +110,6 @@ def test():
         [],
         [b"", b""],
     ]
-<<<<<<< HEAD
 
 
 @pytest.mark.skip(reason="Tests passing, will be enabled in the strings_astype PR.")
@@ -158,5 +157,3 @@ def test_full_like_types():
         str(ak._v2.operations.structure.full_like(array, 11, dtype=np.int64).type)
         == "4 * int64"
     )
-=======
->>>>>>> 827e33f293f4d16f982b29cb38eb58a4c2b96884
