@@ -78,7 +78,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
         fill_value = dtype.type(fill_value)
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
-        if dtype is bool:
+        if dtype is np.dtype(bool):
             # then for bools, only 0 and 1 give correct string behavior
             fill_value = int(fill_value)
 
