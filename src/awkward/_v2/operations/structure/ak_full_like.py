@@ -75,7 +75,8 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
         # In the case of strings and byte strings,
         # converting the fill avoids a ValueError.
         dtype = np.dtype(dtype)
-        fill_value = dtype.type(fill_value)
+        nplike = ak.nplike.of(array)
+        fill_value = nplike.array([fill_value], dtype=dtype)[0]
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
         if dtype == np.dtype(np.bool_):
