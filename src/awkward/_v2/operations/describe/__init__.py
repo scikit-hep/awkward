@@ -7,5 +7,5 @@ from awkward._v2.operations.describe.ak_validity_error import (  # noqa: F401
 from awkward._v2.operations.describe.ak_type import type  # noqa: F401
 from awkward._v2.operations.describe.ak_parameters import parameters  # noqa: F401
 from awkward._v2.operations.describe.ak_fields import fields  # noqa: F401
-from awkward._v2.operations.describe.ak_library import library  # noqa: F401
-from awkward._v2.operations.describe.ak_to_library import to_library  # noqa: F401
+from awkward._v2.operations.describe.ak_backend import backend  # noqa: F401
+from awkward._v2.operations.describe.ak_to_backend import to_backend  # noqa: F401

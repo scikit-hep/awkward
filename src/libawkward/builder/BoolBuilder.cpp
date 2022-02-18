@@ -34,7 +34,7 @@ namespace awkward {
 
     container.copy_buffer(form_key.str() + "-data",
                           buffer_.ptr().get(),
-                          buffer_.length() * (int64_t)sizeof(bool));
+                          (int64_t)(buffer_.length() * sizeof(bool)));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"bool\", \"form_key\": \""
            + form_key.str() + "\"}";
@@ -42,7 +42,7 @@ namespace awkward {
 
   int64_t
   BoolBuilder::length() const {
-    return buffer_.length();
+    return (int64_t)buffer_.length();
   }
 
   void

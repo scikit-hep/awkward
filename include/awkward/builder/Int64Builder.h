@@ -30,8 +30,8 @@ namespace awkward {
                  GrowableBuffer<int64_t> buffer);
 
     /// @brief Contains the accumulated integers.
-    const GrowableBuffer<int64_t>&
-      buffer() const;
+    GrowableBuffer<int64_t>
+      buffer();
 
     /// @brief User-friendly name of this class: `"Int64Builder"`.
     const std::string

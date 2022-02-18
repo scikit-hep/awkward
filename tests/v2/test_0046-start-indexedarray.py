@@ -238,7 +238,6 @@ def test_builder():
     ) == [[None, None, None], [], [None, None]]
 
 
-@pytest.mark.skip(reason="FIXME: ak.from_json not implemented")
 def test_json():
     assert to_list(
         ak._v2.highlevel.Array("[1.1, 2.2, 3.3, null, 4.4]", check_valid=True)

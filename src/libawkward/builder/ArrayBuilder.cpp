@@ -29,7 +29,9 @@ namespace awkward {
 
   void
   ArrayBuilder::clear() {
-    builder_.get()->clear();
+    if (builder_) {
+      builder_.get()->clear();
+    }
   }
 
   void

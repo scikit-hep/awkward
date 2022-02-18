@@ -182,7 +182,6 @@ def test_basic():
     }
 
 
-@pytest.mark.skip(reason="FIXME: highlevel v2 ak.to_json")
 def test_basic_tofrom_json():
     content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
     content2 = ak._v2.contents.NumpyArray(
@@ -571,3 +570,158 @@ def test_getitem_next():
         "two": [8.8, 9.9],
         "four": [8, 9],
     }
+
+
+def test_builder_tuple():
+    builder = ak._v2.highlevel.ArrayBuilder()
+    assert str(builder.type) == "0 * unknown"
+    assert builder.snapshot().tolist() == []
+
+    builder.begin_tuple(0)
+    builder.end_tuple()
+
+    builder.begin_tuple(0)
+    builder.end_tuple()
+
+    builder.begin_tuple(0)
+    builder.end_tuple()
+
+    assert str(builder.type) == "3 * ()"
+    assert builder.snapshot().tolist() == [(), (), ()]
+
+    builder = ak._v2.highlevel.ArrayBuilder()
+
+    builder.begin_tuple(3)
+    builder.index(0)
+    builder.boolean(True)
+    builder.index(1)
+    builder.begin_list()
+    builder.integer(1)
+    builder.end_list()
+    builder.index(2)
+    builder.real(1.1)
+    builder.end_tuple()
+
+    builder.begin_tuple(3)
+    builder.index(1)
+    builder.begin_list()
+    builder.integer(2)
+    builder.integer(2)
+    builder.end_list()
+    builder.index(2)
+    builder.real(2.2)
+    builder.index(0)
+    builder.boolean(False)
+    builder.end_tuple()
+
+    builder.begin_tuple(3)
+    builder.index(2)
+    builder.real(3.3)
+    builder.index(1)
+    builder.begin_list()
+    builder.integer(3)
+    builder.integer(3)
+    builder.integer(3)
+    builder.end_list()
+    builder.index(0)
+    builder.boolean(True)
+    builder.end_tuple()
+
+    assert str(builder.type) == "3 * (bool, var * int64, float64)"
+    assert builder.snapshot().tolist() == [
+        (True, [1], 1.1),
+        (False, [2, 2], 2.2),
+        (True, [3, 3, 3], 3.3),
+    ]
+
+
+def test_builder_record():
+    builder = ak._v2.highlevel.ArrayBuilder()
+    assert str(builder.type) == "0 * unknown"
+    assert builder.snapshot().tolist() == []
+
+    builder.begin_record()
+    builder.end_record()
+
+    builder.begin_record()
+    builder.end_record()
+
+    builder.begin_record()
+    builder.end_record()
+
+    assert str(builder.type) == "3 * {}"
+    assert builder.snapshot().tolist() == [{}, {}, {}]
+
+    builder = ak._v2.highlevel.ArrayBuilder()
+
+    builder.begin_record()
+    builder.field("one")
+    builder.integer(1)
+    builder.field("two")
+    builder.real(1.1)
+    builder.end_record()
+
+    builder.begin_record()
+    builder.field("two")
+    builder.real(2.2)
+    builder.field("one")
+    builder.integer(2)
+    builder.end_record()
+
+    builder.begin_record()
+    builder.field("one")
+    builder.integer(3)
+    builder.field("two")
+    builder.real(3.3)
+    builder.end_record()
+
+    assert str(builder.type) == "3 * {one: int64, two: float64}"
+    assert builder.snapshot().tolist() == [
+        {"one": 1, "two": 1.1},
+        {"one": 2, "two": 2.2},
+        {"one": 3, "two": 3.3},
+    ]
+
+
+def test_fromiter():
+    dataset = [
+        [(1, 1.1), (2, 2.2), (3, 3.3)],
+        [(1, [1.1, 2.2, 3.3]), (2, []), (3, [4.4, 5.5])],
+        [[(1, 1.1), (2, 2.2), (3, 3.3)], [], [(4, 4.4), (5, 5.5)]],
+        [((1, 1), 1.1), ((2, 2), 2.2), ((3, 3), 3.3)],
+        [({"x": 1, "y": 1}, 1.1), ({"x": 2, "y": 2}, 2.2), ({"x": 3, "y": 3}, 3.3)],
+        [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}],
+        [
+            {"one": 1, "two": [1.1, 2.2, 3.3]},
+            {"one": 2, "two": []},
+            {"one": 3, "two": [4.4, 5.5]},
+        ],
+        [
+            [{"one": 1, "two": 1.1}, {"one": 2, "two": 2.2}, {"one": 3, "two": 3.3}],
+            [],
+            [{"one": 4, "two": 4.4}, {"one": 5, "two": 5.5}],
+        ],
+        [
+            {"one": {"x": 1, "y": 1}, "two": 1.1},
+            {"one": {"x": 2, "y": 2}, "two": 2.2},
+            {"one": {"x": 3, "y": 3}, "two": 3.3},
+        ],
+        [
+            {"one": (1, 1), "two": 1.1},
+            {"one": (2, 2), "two": 2.2},
+            {"one": (3, 3), "two": 3.3},
+        ],
+    ]
+    for datum in dataset:
+        assert ak.to_list(ak.from_iter(datum)) == datum
+
+
+def test_json():
+    dataset = [
+        '[{"one":1,"two":1.1},{"one":2,"two":2.2},{"one":3,"two":3.3}]',
+        '[{"one":1,"two":[1.1,2.2,3.3]},{"one":2,"two":[]},{"one":3,"two":[4.4,5.5]}]',
+        '[[{"one":1,"two":1.1},{"one":2,"two":2.2},{"one":3,"two":3.3}],[],[{"one":4,"two":4.4},{"one":5,"two":5.5}]]',
+        '[{"one":{"x":1,"y":1},"two":1.1},{"one":{"x":2,"y":2},"two":2.2},{"one":{"x":3,"y":3},"two":3.3}]',
+    ]
+    for datum in dataset:
+        assert ak.to_json(ak.from_json(datum)) == datum

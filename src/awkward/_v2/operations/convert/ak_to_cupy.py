@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
+import numbers
+from collections.abc import Iterable
 
 import awkward as ak
 
@@ -7,126 +8,101 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def to_cupy(array):
-    raise NotImplementedError
+    """
+    Converts `array` (many types supported) into a CuPy array, if possible.
 
+    If the data are numerical and regular (nested lists have equal lengths
+    in each dimension, as described by the #type), they can be losslessly
+    converted to a CuPy array and this function returns without an error.
 
-#     """
-#     Converts `array` (many types supported) into a CuPy array, if possible.
+    Otherwise, the function raises an error.
 
-#     If the data are numerical and regular (nested lists have equal lengths
-#     in each dimension, as described by the #type), they can be losslessly
-#     converted to a CuPy array and this function returns without an error.
+    If `array` is a scalar, it is converted into a CuPy scalar.
 
-#     Otherwise, the function raises an error.
+    See also #ak.from_cupy and #ak.to_numpy.
+    """
+    cupy = ak.nplike.Cupy.instance()
+    np = ak.nplike.NumpyMetadata.instance()
 
-#     If `array` is a scalar, it is converted into a CuPy scalar.
+    if isinstance(array, (bool, numbers.Number)):
+        return cupy.array(array)
 
-#     See also #ak.from_cupy and #ak.to_numpy.
-#     """
-#     cupy = ak.nplike.Cupy.instance()
-#     np = ak.nplike.NumpyMetadata.instance()
+    elif isinstance(array, cupy.ndarray):
+        return array
 
-#     if isinstance(array, (bool, numbers.Number)):
-#         return cupy.array([array])[0]
+    elif isinstance(array, np.ndarray):
+        return cupy.asarray(array)
 
-#     elif isinstance(array, cupy.ndarray):
-#         return array
+    elif isinstance(array, ak._v2.highlevel.Array):
+        return to_cupy(array.layout)
 
-#     elif isinstance(array, np.ndarray):
-#         return cupy.asarray(array)
+    elif isinstance(array, ak._v2.highlevel.Record):
+        raise ValueError("CuPy does not support record structures")
 
-#     elif isinstance(array, ak._v2.highlevel.Array):
-#         return to_cupy(array.layout)
+    elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
+        return to_cupy(array.snapshot().layout)
 
-#     elif isinstance(array, ak._v2.highlevel.Record):
-#         raise ValueError(
-#             "CuPy does not support record structures"
-#
-#         )
+    elif isinstance(array, ak.layout.ArrayBuilder):
+        return to_cupy(array.snapshot())
 
-#     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
-#         return to_cupy(array.snapshot().layout)
+    elif (
+        ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring"
+        or ak._v2.operations.describe.parameters(array).get("__array__") == "string"
+    ):
+        raise ValueError("CuPy does not support arrays of strings")
 
-#     elif isinstance(array, ak.layout.ArrayBuilder):
-#         return to_cupy(array.snapshot())
+    elif isinstance(array, ak._v2.contents.EmptyArray):
+        return cupy.array([])
 
-#     elif (
-#         ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring"
-#         or ak._v2.operations.describe.parameters(array).get("__array__") == "string"
-#     ):
-#         raise ValueError(
-#             "CuPy does not support arrays of strings"
-#
-#         )
+    elif isinstance(array, ak._v2.contents.IndexedArray):
+        return to_cupy(array.project())
 
-#     elif isinstance(array, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
-#         return cupy.concatenate([to_cupy(x) for x in array.partitions])
+    elif isinstance(array, ak._v2.contents.UnionArray):
+        contents = [to_cupy(array.project(i)) for i in range(len(array.contents))]
+        out = cupy.concatenate(contents)
 
-#     elif isinstance(array, ak._v2._util.virtualtypes):
-#         return to_cupy(array.array)
+        tags = cupy.asarray(array.tags)
+        for tag, content in enumerate(contents):
+            mask = tags == tag
+            out[mask] = content
+        return out
 
-#     elif isinstance(array, ak._v2._util.unknowntypes):
-#         return cupy.array([])
+    elif isinstance(array, ak._v2.contents.UnmaskedArray):
+        return to_cupy(array.content)
 
-#     elif isinstance(array, ak._v2._util.indexedtypes):
-#         return to_cupy(array.project())
+    elif isinstance(array, ak._v2.contents.IndexedOptionArray):
+        content = to_cupy(array.project())
 
-#     elif isinstance(array, ak._v2._util.uniontypes):
-#         contents = [to_cupy(array.project(i)) for i in range(array.numcontents)]
-#         out = cupy.concatenate(contents)
+        shape = list(content.shape)
+        shape[0] = len(array)
+        mask0 = cupy.asarray(array.bytemask()).view(np.bool_)
+        if mask0.any():
+            raise ValueError("CuPy does not support masked arrays")
+        else:
+            return content
 
-#         tags = cupy.asarray(array.tags)
-#         for tag, content in enumerate(contents):
-#             mask = tags == tag
-#             out[mask] = content
-#         return out
+    elif isinstance(array, ak._v2.contents.RegularArray):
+        out = to_cupy(array.content)
+        head, tail = out.shape[0], out.shape[1:]
+        shape = (head // array.size, array.size) + tail
+        return out[: shape[0] * array.size].reshape(shape)
 
-#     elif isinstance(array, ak._v2.contents.UnmaskedArray):
-#         return to_cupy(array.content)
+    elif isinstance(
+        array, (ak._v2.contents.ListArray, ak._v2.contents.ListOffsetArray)
+    ):
+        return to_cupy(array.toRegularArray())
 
-#     elif isinstance(array, ak._v2._util.optiontypes):
-#         content = to_cupy(array.project())
+    elif isinstance(array, ak._v2.contents.recordarray.RecordArray):
+        raise ValueError("CuPy does not support record structures")
 
-#         shape = list(content.shape)
-#         shape[0] = len(array)
-#         mask0 = cupy.asarray(array.bytemask()).view(np.bool_)
-#         if mask0.any():
-#             raise ValueError(
-#                 "CuPy does not support masked arrays"
-#
-#             )
-#         else:
-#             return content
+    elif isinstance(array, ak._v2.contents.NumpyArray):
+        return array.to_cupy()
 
-#     elif isinstance(array, ak._v2.contents.RegularArray):
-#         out = to_cupy(array.content)
-#         head, tail = out.shape[0], out.shape[1:]
-#         shape = (head // array.size, array.size) + tail
-#         return out[: shape[0] * array.size].reshape(shape)
+    elif isinstance(array, ak._v2.contents.Content):
+        raise AssertionError(f"unrecognized Content type: {type(array)}")
 
-#     elif isinstance(array, ak._v2._util.listtypes):
-#         return to_cupy(array.toRegularArray())
+    elif isinstance(array, Iterable):
+        return cupy.asarray(array)
 
-#     elif isinstance(array, ak._v2._util.recordtypes):
-#         raise ValueError(
-#             "CuPy does not support record structures"
-#
-#         )
-
-#     elif isinstance(array, ak._v2.contents.NumpyArray):
-#         return array.to_cupy()
-
-#     elif isinstance(array, ak._v2.contents.Content):
-#         raise AssertionError(
-#             "unrecognized Content type: {0}".format(type(array))
-#
-#         )
-
-#     elif isinstance(array, Iterable):
-#         return cupy.asarray(array)
-
-#     else:
-#         raise ValueError(
-#             "cannot convert {0} into cp.ndarray".format(array)
-#
-#         )
+    else:
+        raise ValueError(f"cannot convert {array} into cp.ndarray")

@@ -14,27 +14,17 @@ import awkward as ak  # noqa: F401
 #      `__array__` and `__record__`.
 
 
-@pytest.mark.skip(reason="FIXME: ak.type not merged yet")
 def test_0459_types():
-    plain_plain = ak._v2.highlevel.Array(
-        ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]), parameters={})
+
+    plain_plain = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
+    array_plain = ak._v2.operations.structure.with_parameter(
+        plain_plain, "__array__", "zoinks"
     )
-    array_plain = ak._v2.highlevel.Array(
-        ak._v2.contents.NumpyArray(
-            np.array([0.0, 1.1, 2.2, 3.3, 4.4]), parameters={"__array__": "zoinks"}
-        )
+    plain_isdoc = ak._v2.operations.structure.with_parameter(
+        plain_plain, "__doc__", "This is a zoink."
     )
-    plain_isdoc = ak._v2.highlevel.Array(
-        ak._v2.contents.NumpyArray(
-            np.array([0.0, 1.1, 2.2, 3.3, 4.4]),
-            parameters={"__doc__": "This is a zoink."},
-        )
-    )
-    array_isdoc = ak._v2.highlevel.Array(
-        ak._v2.contents.NumpyArray(
-            np.array([0.0, 1.1, 2.2, 3.3, 4.4]),
-            parameters={"__doc__": "This is a zoink.", "__array__": "zoinks"},
-        )
+    array_isdoc = ak._v2.operations.structure.with_parameter(
+        array_plain, "__doc__", "This is a zoink."
     )
 
     assert ak._v2.operations.describe.parameters(plain_plain) == {}
@@ -90,25 +80,15 @@ def test_0459_types():
 
 
 def test_0459():
-    plain_plain = ak._v2.highlevel.Array(
-        ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]), parameters={})
+    plain_plain = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
+    array_plain = ak._v2.operations.structure.with_parameter(
+        plain_plain, "__array__", "zoinks"
     )
-    array_plain = ak._v2.highlevel.Array(
-        ak._v2.contents.NumpyArray(
-            np.array([0.0, 1.1, 2.2, 3.3, 4.4]), parameters={"__array__": "zoinks"}
-        )
+    plain_isdoc = ak._v2.operations.structure.with_parameter(
+        plain_plain, "__doc__", "This is a zoink."
     )
-    plain_isdoc = ak._v2.highlevel.Array(
-        ak._v2.contents.NumpyArray(
-            np.array([0.0, 1.1, 2.2, 3.3, 4.4]),
-            parameters={"__doc__": "This is a zoink."},
-        )
-    )
-    array_isdoc = ak._v2.highlevel.Array(
-        ak._v2.contents.NumpyArray(
-            np.array([0.0, 1.1, 2.2, 3.3, 4.4]),
-            parameters={"__doc__": "This is a zoink.", "__array__": "zoinks"},
-        )
+    array_isdoc = ak._v2.operations.structure.with_parameter(
+        array_plain, "__doc__", "This is a zoink."
     )
 
     assert ak._v2.operations.describe.parameters(plain_plain) == {}

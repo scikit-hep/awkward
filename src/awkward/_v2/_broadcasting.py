@@ -103,13 +103,13 @@ def all_same_offsets(nplike, inputs):
     for x in inputs:
         if isinstance(x, ListOffsetArray):
             if offsets is None:
-                offsets = x.offsets.to(nplike)
-            elif not nplike.array_equal(offsets, x.offsets.to(nplike)):
+                offsets = x.offsets.raw(nplike)
+            elif not nplike.array_equal(offsets, x.offsets.raw(nplike)):
                 return False
 
         elif isinstance(x, ListArray):
-            starts = x.starts.to(nplike)
-            stops = x.stops.to(nplike)
+            starts = x.starts.raw(nplike)
+            stops = x.stops.raw(nplike)
 
             if not nplike.array_equal(starts[1:], stops[:-1]):
                 return False
@@ -294,7 +294,7 @@ def apply_step(
                 tagslist, numtags, length = [], [], None
                 for x in inputs:
                     if isinstance(x, UnionArray):
-                        tagslist.append(x.tags.to(nplike))
+                        tagslist.append(x.tags.raw(nplike))
                         numtags.append(len(x.contents))
                         if length is None:
                             length = tagslist[-1].shape[0]

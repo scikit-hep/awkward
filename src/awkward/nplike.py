@@ -2,6 +2,7 @@
 
 # v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
 
+import sys
 
 import ctypes
 
@@ -13,26 +14,31 @@ import awkward as ak
 
 
 def of(*arrays):
-    libs = set()
+    nplikes = set()
     for array in arrays:
         nplike = getattr(array, "nplike", None)
         if nplike is not None:
-            libs.add(nplike)
+            nplikes.add(nplike)
+        else:
+            if isinstance(array, ak.nplike.numpy.ndarray):
+                nplikes.add(ak.nplike.Numpy.instance())
+            elif type(array).__module__.startswith("cupy."):
+                nplikes.add(ak.nplike.Cupy.instance())
 
-    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in libs):
+    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in nplikes):
         return ak._v2._typetracer.TypeTracer.instance()
 
-    if libs == set():
+    if nplikes == set():
         return Numpy.instance()
-    elif len(libs) == 1:
-        return next(iter(libs))
+    elif len(nplikes) == 1:
+        return next(iter(nplikes))
     else:
         raise ValueError(
             """attempting to use both a 'cpu' array and a 'cuda' array in the """
             """same operation; use one of
 
-    ak.to_kernels(array, 'cpu')
-    ak.to_kernels(array, 'cuda')
+    ak.to_backend(array, 'cpu')
+    ak.to_backend(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
             + ak._util.exception_suffix(__file__)
@@ -123,6 +129,9 @@ class NumpyLike(Singleton):
     def array(self, *args, **kwargs):
         # data[, dtype=[, copy=]]
         return self._module.array(*args, **kwargs)
+
+    def raw(self, *args, **kwargs):
+        return self._module.raw(*args, **kwargs)
 
     def asarray(self, *args, **kwargs):
         # array[, dtype=][, order=]
@@ -322,6 +331,22 @@ class NumpyLike(Singleton):
         # a, b, rtol=1e-05, atol=1e-08, equal_nan=False
         return self._module.isclose(*args, **kwargs)
 
+    def isnan(self, *args, **kwargs):
+        # array
+        return self._module.isnan(*args, **kwargs)
+
+    def isneginf(self, *args, **kwargs):
+        # array
+        return self._module.isneginf(*args, **kwargs)
+
+    def isposinf(self, *args, **kwargs):
+        # array
+        return self._module.isposinf(*args, **kwargs)
+
+    def isfinite(self, *args, **kwargs):
+        # array
+        return self._module.isfinite(*args, **kwargs)
+
     ############################ reducers
 
     def all(self, *args, **kwargs):
@@ -386,6 +411,8 @@ class NumpyKernel:
         if issubclass(t, ctypes._Pointer):
             if isinstance(x, numpy.ndarray):
                 return ctypes.cast(x.ctypes.data, t)
+            elif type(x).__module__.startswith("cupy."):
+                return ctypes.cast(x.data.ptr, t)
             else:
                 return ctypes.cast(x, t)
         else:
@@ -442,13 +469,38 @@ class Numpy(NumpyLike):
     def ndarray(self):
         return self._module.ndarray
 
+    def raw(self, array, nplike):
+        if isinstance(nplike, Numpy):
+            return array
+        elif isinstance(nplike, Cupy):
+            cupy = Cupy.instance()
+            return cupy.asarray(array, dtype=array.dtype, order="C")
+        elif isinstance(nplike, ak._v2._typetracer.TypeTracer):
+            return ak._v2._typetracer.TypeTracerArray(
+                dtype=array.dtype, shape=array.shape
+            )
+        else:
+            raise TypeError(
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+            )
+
 
 class Cupy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
-        raise NotImplementedError("no CUDA in v2 yet")
+        if "awkward._cuda_kernels" not in sys.modules:
+            import awkward._cuda_kernels  # noqa: F401
+
+        func = ak._cuda_kernels.kernel[name_and_types]
+        if func is not None:
+            return NumpyKernel(func, name_and_types)
+        else:
+            raise NotImplementedError(
+                f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
+                "continue the operation."
+            )
 
     def __init__(self):
         try:
@@ -483,7 +535,7 @@ or
     def ndarray(self):
         return self._module.ndarray
 
-    def asarray(self, array, dtype=None):
+    def asarray(self, array, dtype=None, order=None):
         if isinstance(
             array,
             (
@@ -495,11 +547,26 @@ or
         ):
             out = ak.operations.convert.to_cupy(array)
             if dtype is not None and out.dtype != dtype:
-                return self._module.asarray(out, dtype=dtype)
+                return self._module.asarray(out, dtype=dtype, order=order)
             else:
                 return out
         else:
-            return self._module.asarray(array, dtype=dtype)
+            return self._module.asarray(array, dtype=dtype, order=order)
+
+    def raw(self, array, nplike):
+        if isinstance(nplike, Cupy):
+            return array
+        elif isinstance(nplike, Numpy):
+            numpy = Numpy.instance()
+            return numpy.asarray(array.get(), dtype=array.dtype, order="C")
+        elif isinstance(nplike, ak._v2._typetracer.TypeTracer):
+            return ak._v2._typetracer.TypeTracerArray(
+                dtype=array.dtype, shape=array.shape
+            )
+        else:
+            raise TypeError(
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+            )
 
     def ascontiguousarray(self, array, dtype=None):
         if isinstance(

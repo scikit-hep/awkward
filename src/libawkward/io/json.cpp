@@ -641,11 +641,11 @@ namespace awkward {
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
-    Handler(const ArrayBuilderOptions& options,
+    Handler(ArrayBuilder& builder,
             const char* nan_string,
             const char* infinity_string,
             const char* minus_infinity_string)
-        : builder_(options)
+        : builder_(builder)
         , moved_(false)
         , nan_string_(nan_string)
         , infinity_string_(infinity_string)
@@ -759,12 +759,8 @@ namespace awkward {
       return true;
     }
 
-    const BuilderPtr array_builder() const {
-      return builder_.builder();
-    }
-
   private:
-    ArrayBuilder builder_;
+    ArrayBuilder& builder_;
     bool moved_;
     const char* nan_string_;
     const char* infinity_string_;
@@ -772,7 +768,7 @@ namespace awkward {
   };
 
   template<typename HANDLER, typename STREAM>
-  const std::pair<int, const BuilderPtr>
+  const int64_t
   do_parse(HANDLER& handler, rj::Reader& reader, STREAM& stream) {
     int64_t number = 0;
     while (stream.Peek() != 0) {
@@ -806,27 +802,27 @@ namespace awkward {
       }
     }
 
-    return std::make_pair(number, handler.array_builder());
+    return number;
   }
 
-  const std::pair<int, const BuilderPtr>
+  int64_t
   FromJsonString(const char* source,
-                 const ArrayBuilderOptions& options,
+                 ArrayBuilder& builder,
                  const char* nan_string,
                  const char* infinity_string,
                  const char* minus_infinity_string) {
     rj::Reader reader;
     rj::StringStream stream(source);
-    Handler handler(options,
+    Handler handler(builder,
                     nan_string,
                     infinity_string,
                     minus_infinity_string);
     return do_parse(handler, reader, stream);
   }
 
-  const std::pair<int, const BuilderPtr>
+  int64_t
   FromJsonFile(FILE* source,
-               const ArrayBuilderOptions& options,
+               ArrayBuilder& builder,
                int64_t buffersize,
                const char* nan_string,
                const char* infinity_string,
@@ -836,7 +832,7 @@ namespace awkward {
     rj::FileReadStream stream(source,
                               buffer.get(),
                               ((size_t)buffersize)*sizeof(char));
-    Handler handler(options,
+    Handler handler(builder,
                     nan_string,
                     infinity_string,
                     minus_infinity_string);

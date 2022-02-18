@@ -68,7 +68,7 @@ def test_ListArray_NumpyArray():
 
 def test_ListOffsetArray_NumpyArray():
     v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
-        ak._v2.index.Index(np.array([1, 4, 4, 6, 3], np.int64)),
+        ak._v2.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
         ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
     )
     resultv2 = v2a[np.array([1, 2], np.int64)]
