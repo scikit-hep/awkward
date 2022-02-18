@@ -6,6 +6,8 @@ from awkward._v2.forms.form import Form, _parameters_equal, _parameters_update
 
 
 class IndexedForm(Form):
+    is_IndexedType = True
+
     def __init__(
         self,
         index,

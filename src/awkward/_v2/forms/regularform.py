@@ -6,6 +6,9 @@ from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class RegularForm(Form):
+    is_ListType = True
+    is_RegularType = True
+
     def __init__(
         self, content, size, has_identifier=False, parameters=None, form_key=None
     ):

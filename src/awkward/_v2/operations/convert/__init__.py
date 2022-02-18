@@ -19,6 +19,11 @@ from awkward._v2.operations.convert.ak_to_arrow_table import (  # noqa: F401
     to_arrow_table,
 )
 from awkward._v2.operations.convert.ak_from_arrow import from_arrow  # noqa: F401
+from awkward._v2.operations.convert.ak_from_arrow_schema import (  # noqa: F401
+    from_arrow_schema,
+)
+from awkward._v2.operations.convert.ak_to_parquet import to_parquet  # noqa: F401
+from awkward._v2.operations.convert.ak_from_parquet import from_parquet  # noqa: F401
 from awkward._v2.operations.convert.ak_to_buffers import to_buffers  # noqa: F401
 from awkward._v2.operations.convert.ak_from_buffers import from_buffers  # noqa: F401
 from awkward._v2.operations.convert.ak_to_pandas import to_pandas  # noqa: F401

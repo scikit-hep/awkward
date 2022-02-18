@@ -1,73 +1,86 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import os
+import os.path
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-pyarrow = pytest.importorskip("pyarrow")
 pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
-to_list = ak._v2.operations.convert.to_list
 
-
-def arrow_round_trip(akarray, paarray, extensionarray):
-    assert to_list(akarray) == paarray.to_pylist()
-    akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-    assert to_list(akarray2) == to_list(akarray)
-    if extensionarray:
-        assert akarray2.form.type == akarray.form.type
-    akarray3 = ak._v2._connect.pyarrow.handle_arrow(
-        akarray2.to_arrow(extensionarray=extensionarray)
+def through_arrow(
+    akarray,
+    extensionarray,
+    tmp_path,
+    list_to32=False,
+    string_to32=False,
+    bytestring_to32=False,
+    categorical_as_dictionary=False,
+):
+    arrow_table = ak._v2.to_arrow_table(
+        akarray,
+        extensionarray=extensionarray,
+        list_to32=list_to32,
+        string_to32=string_to32,
+        bytestring_to32=bytestring_to32,
+        categorical_as_dictionary=categorical_as_dictionary,
     )
-    if extensionarray:
-        assert akarray3.form.type == akarray.form.type
+    array_form = ak._v2.from_arrow(
+        arrow_table, conservative_optiontype=True
+    ).layout.form
+    return arrow_table.schema, array_form
 
 
-def parquet_round_trip(akarray, paarray, extensionarray, tmp_path):
+def through_parquet(
+    akarray,
+    extensionarray,
+    tmp_path,
+    list_to32=False,
+    string_to32=False,
+    bytestring_to32=False,
+    categorical_as_dictionary=False,
+):
     filename = os.path.join(tmp_path, "whatever.parquet")
-    pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
-    table = pyarrow_parquet.read_table(filename)
-    akarray4 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-    assert to_list(akarray4) == to_list(akarray)
-    if extensionarray:
-        assert akarray4.form.type == akarray.form.type
+    pyarrow_parquet.write_table(
+        ak._v2.to_arrow_table(
+            akarray,
+            extensionarray=extensionarray,
+            list_to32=list_to32,
+            string_to32=string_to32,
+            bytestring_to32=bytestring_to32,
+            categorical_as_dictionary=categorical_as_dictionary,
+        ),
+        filename,
+    )
+    parquet_file = pyarrow_parquet.ParquetFile(filename)
+    array_form = ak._v2.from_arrow(
+        parquet_file.read_row_groups([0]), conservative_optiontype=True
+    ).layout.form
+    return parquet_file.schema_arrow, array_form
 
 
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_numpyarray(tmp_path, extensionarray):
+def test_schema_numpyarray(tmp_path, through, extensionarray):
     akarray = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True, False])),
-        ak._v2.contents.NumpyArray(
-            np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}
-        ),
-        valid_when=False,
-        parameters={"which": "outer"},
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
-
-    akarray = ak._v2.contents.NumpyArray(
-        np.arange(2 * 3 * 5).reshape(2, 3, 5), parameters={"which": "inner"}
-    )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
 @pytest.mark.parametrize("list_to32", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_listoffsetarray_numpyarray(tmp_path, dtype, list_to32, extensionarray):
+def test_schema_listoffsetarray_numpyarray(
+    tmp_path, dtype, list_to32, through, extensionarray
+):
     akarray = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
         ak._v2.contents.NumpyArray(
@@ -76,9 +89,14 @@ def test_listoffsetarray_numpyarray(tmp_path, dtype, list_to32, extensionarray):
         ),
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
@@ -98,9 +116,14 @@ def test_listoffsetarray_numpyarray(tmp_path, dtype, list_to32, extensionarray):
         ),
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
@@ -115,9 +138,14 @@ def test_listoffsetarray_numpyarray(tmp_path, dtype, list_to32, extensionarray):
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
@@ -153,15 +181,23 @@ def test_listoffsetarray_numpyarray(tmp_path, dtype, list_to32, extensionarray):
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
 @pytest.mark.parametrize("list_to32", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_listoffsetarray_numpyarray_2(tmp_path, dtype, list_to32, extensionarray):
+def test_schema_listoffsetarray_numpyarray_2(
+    tmp_path, dtype, list_to32, through, extensionarray
+):
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([True, False, True, False, True], dtype=np.int8)),
         ak._v2.contents.ListOffsetArray(
@@ -175,20 +211,29 @@ def test_listoffsetarray_numpyarray_2(tmp_path, dtype, list_to32, extensionarray
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_numpyarray_bool(tmp_path, extensionarray):
+def test_numpyarray_bool(tmp_path, through, extensionarray):
     akarray = ak._v2.contents.NumpyArray(
         np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_),
         parameters={"which": "inner"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_)),
@@ -199,13 +244,17 @@ def test_numpyarray_bool(tmp_path, extensionarray):
         valid_when=False,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
+def test_indexedoptionarray_numpyarray(tmp_path, through, extensionarray):
     akarray = ak._v2.contents.IndexedOptionArray(
         ak._v2.index.Index64(np.array([2, 0, 0, -1, 3, 1, 5, -1, 2], dtype=np.int64)),
         ak._v2.contents.NumpyArray(
@@ -214,9 +263,12 @@ def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
         ),
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.IndexedArray(
         ak._v2.index.Index64(np.array([2, 0, 0, 3, 1, 5, 2], dtype=np.int64)),
@@ -226,60 +278,65 @@ def test_indexedoptionarray_numpyarray(tmp_path, extensionarray):
         ),
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
+def test_indexedoptionarray_emptyarray(tmp_path, through, extensionarray):
     akarray = ak._v2.contents.IndexedOptionArray(
         ak._v2.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
         ak._v2.contents.EmptyArray(parameters={"which": "inner"}),
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
 
     # https://issues.apache.org/jira/browse/ARROW-14522
-    if extensionarray:
-        paarray = akarray.to_arrow(extensionarray=extensionarray, emptyarray_to="f8")
-        akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-        assert to_list(akarray2) == to_list(akarray)
-
-        filename = os.path.join(tmp_path, "whatever.parquet")
-        pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
-        table = pyarrow_parquet.read_table(filename)
-        akarray4 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-        assert to_list(akarray4) == to_list(akarray)
-
-    else:
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    if through is through_arrow or not extensionarray:
+        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_dictionary_encoding(tmp_path, categorical_as_dictionary, extensionarray):
+def test_dictionary_encoding(
+    tmp_path, categorical_as_dictionary, through, extensionarray
+):
     akarray = ak._v2.contents.IndexedArray(
         ak._v2.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
         ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
         parameters={"__array__": "categorical", "which": "outer"},
     )
-    paarray = akarray.to_arrow(
-        categorical_as_dictionary=categorical_as_dictionary,
-        extensionarray=extensionarray,
-    )
-    arrow_round_trip(akarray, paarray, extensionarray)
 
     # https://issues.apache.org/jira/browse/ARROW-14525
-    if not (extensionarray and categorical_as_dictionary):
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    if not (
+        extensionarray and categorical_as_dictionary and through is through_parquet
+    ):
+        schema_arrow, array_form = through(
+            akarray,
+            extensionarray,
+            tmp_path,
+            categorical_as_dictionary=categorical_as_dictionary,
+        )
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("string_to32", [False, True])
 @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_listoffsetraray_string(tmp_path, dtype, string_to32, extensionarray):
+def test_listoffsetraray_string(tmp_path, string_to32, dtype, through, extensionarray):
     akarray = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
         ak._v2.contents.NumpyArray(
@@ -287,15 +344,23 @@ def test_listoffsetraray_string(tmp_path, dtype, string_to32, extensionarray):
         ),
         parameters={"__array__": "string", "something": "else"},
     )
-    paarray = akarray.to_arrow(string_to32=string_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, string_to32=string_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("bytestring_to32", [False, True])
 @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_listoffsetraray_bytestring(tmp_path, dtype, bytestring_to32, extensionarray):
+def test_listoffsetraray_bytestring(
+    tmp_path, bytestring_to32, dtype, through, extensionarray
+):
     akarray = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
         ak._v2.contents.NumpyArray(
@@ -303,17 +368,21 @@ def test_listoffsetraray_bytestring(tmp_path, dtype, bytestring_to32, extensiona
         ),
         parameters={"__array__": "bytestring", "something": "else"},
     )
-    paarray = akarray.to_arrow(
-        bytestring_to32=bytestring_to32, extensionarray=extensionarray
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, bytestring_to32=bytestring_to32
     )
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("size", [5])
 @pytest.mark.parametrize("list_to32", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_regulararray_numpyarray(tmp_path, size, list_to32, extensionarray):
+def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionarray):
     akarray = ak._v2.contents.RegularArray(
         ak._v2.contents.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
@@ -322,9 +391,14 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, extensionarray):
         size,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.RegularArray(
         ak._v2.contents.ByteMaskedArray(
@@ -344,9 +418,14 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, extensionarray):
         size,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, list_to32=list_to32
+    )
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
@@ -361,11 +440,16 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, extensionarray):
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
 
     # https://issues.apache.org/jira/browse/ARROW-14547
-    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    if through is through_arrow:
+        schema_arrow, array_form = through(
+            akarray, extensionarray, tmp_path, list_to32=list_to32
+        )
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
@@ -401,17 +485,25 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, extensionarray):
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(list_to32=list_to32, extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
 
     # https://issues.apache.org/jira/browse/ARROW-14547
-    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    if through is through_arrow:
+        schema_arrow, array_form = through(
+            akarray, extensionarray, tmp_path, list_to32=list_to32
+        )
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("size", [5])
 @pytest.mark.parametrize("bytestring_to32", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_regularaarray_bytestring(tmp_path, size, bytestring_to32, extensionarray):
+def test_regularaarray_bytestring(
+    tmp_path, size, bytestring_to32, through, extensionarray
+):
     akarray = ak._v2.contents.RegularArray(
         ak._v2.contents.NumpyArray(
             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
@@ -419,28 +511,36 @@ def test_regularaarray_bytestring(tmp_path, size, bytestring_to32, extensionarra
         size,
         parameters={"__array__": "bytestring", "something": "else"},
     )
-    paarray = akarray.to_arrow(
-        bytestring_to32=bytestring_to32, extensionarray=extensionarray
+
+    schema_arrow, array_form = through(
+        akarray, extensionarray, tmp_path, bytestring_to32=bytestring_to32
     )
-    arrow_round_trip(akarray, paarray, extensionarray)
-    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_unmaskedarray_numpyarray(tmp_path, extensionarray):
+def test_unmaskedarray_numpyarray(tmp_path, through, extensionarray):
     akarray = ak._v2.contents.UnmaskedArray(
         ak._v2.contents.NumpyArray(
             np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}
         )
     )
-    paarray = akarray.to_arrow()
-    arrow_round_trip(akarray, paarray, True)
-    parquet_round_trip(akarray, paarray, True, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("is_tuple", [False, True])
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_recordarray(tmp_path, is_tuple, extensionarray):
+def test_recordarray(tmp_path, is_tuple, through, extensionarray):
     akarray = ak._v2.contents.RecordArray(
         [
             ak._v2.contents.NumpyArray(
@@ -456,10 +556,12 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         None if is_tuple else ["x", "y"],
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    if not is_tuple or extensionarray:
-        arrow_round_trip(akarray, paarray, extensionarray)
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.RecordArray(
         [
@@ -480,10 +582,12 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         None if is_tuple else ["x", "y"],
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    if not is_tuple or extensionarray:
-        arrow_round_trip(akarray, paarray, extensionarray)
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.RecordArray(
         [
@@ -507,10 +611,12 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
         None if is_tuple else ["x", "y"],
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    if not is_tuple or extensionarray:
-        arrow_round_trip(akarray, paarray, extensionarray)
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.IndexedOptionArray(
         ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
@@ -531,10 +637,12 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
             parameters={"which": "outer"},
         ),
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    if not is_tuple or extensionarray:
-        arrow_round_trip(akarray, paarray, extensionarray)
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
     akarray = ak._v2.contents.IndexedOptionArray(
         ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
@@ -559,17 +667,20 @@ def test_recordarray(tmp_path, is_tuple, extensionarray):
             parameters={"which": "outer"},
         ),
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    if not is_tuple or extensionarray:
-        arrow_round_trip(akarray, paarray, extensionarray)
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 @pytest.mark.skipif(
     not ak._v2._util.numpy_at_least("1.20"), reason="NumPy >= 1.20 required for dates"
 )
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_numpyarray_datetime(tmp_path, extensionarray):
+def test_numpyarray_datetime(tmp_path, through, extensionarray):
     # pyarrow doesn't yet support datetime/duration conversions to Parquet.
     # (FIXME: find or create a JIRA ticket.)
 
@@ -578,20 +689,32 @@ def test_numpyarray_datetime(tmp_path, extensionarray):
             ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], dtype="datetime64[s]"
         )
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    if through is through_arrow:
+        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
     akarray = ak._v2.contents.NumpyArray(
         np.array(["41", "1", "20"], dtype="timedelta64[s]")
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
-    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+
+    if through is through_arrow:
+        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
 
+@pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
-def test_unionarray(tmp_path, extensionarray):
+def test_unionarray(tmp_path, through, extensionarray):
+    # pyarrow doesn't yet support union array conversions to Parquet.
+    # (FIXME: find or create a JIRA ticket.)
+
     akarray = ak._v2.contents.UnionArray(
         ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
         ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
@@ -607,12 +730,13 @@ def test_unionarray(tmp_path, extensionarray):
         ],
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
 
-    # pyarrow doesn't yet support union array conversions to Parquet.
-    # (FIXME: find or create a JIRA ticket.)
-    # parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    if through is through_arrow:
+        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
     akarray = ak._v2.contents.UnionArray(
         ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
@@ -636,8 +760,13 @@ def test_unionarray(tmp_path, extensionarray):
         ],
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
+
+    if through is through_arrow:
+        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(
@@ -660,8 +789,13 @@ def test_unionarray(tmp_path, extensionarray):
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
+
+    if through is through_arrow:
+        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form
 
     akarray = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(
@@ -691,5 +825,10 @@ def test_unionarray(tmp_path, extensionarray):
         valid_when=True,
         parameters={"which": "outer"},
     )
-    paarray = akarray.to_arrow(extensionarray=extensionarray)
-    arrow_round_trip(akarray, paarray, extensionarray)
+
+    if through is through_arrow:
+        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+            schema_arrow, pass_empty_field=True
+        )
+        assert predicted_form == array_form

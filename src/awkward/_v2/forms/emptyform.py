@@ -7,6 +7,9 @@ from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class EmptyForm(Form):
+    is_NumpyType = True
+    is_UnknownType = True
+
     def __init__(self, has_identifier=False, parameters=None, form_key=None):
         self._init(has_identifier, parameters, form_key)
 

@@ -9,6 +9,8 @@ from awkward._v2.forms.indexedform import IndexedForm
 
 
 class RecordForm(Form):
+    is_RecordType = True
+
     def __init__(
         self,
         contents,

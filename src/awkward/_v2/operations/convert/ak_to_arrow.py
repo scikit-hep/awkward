@@ -60,7 +60,7 @@ def to_arrow(
     use. If any third-party tools don't recognize Arrow's extension arrays, set this
     option to False for plain Arrow arrays.
 
-    See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet.
+    See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet, #ak.from_arrow_schema.
     """
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False

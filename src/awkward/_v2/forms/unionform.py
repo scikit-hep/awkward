@@ -8,6 +8,8 @@ from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class UnionForm(Form):
+    is_UnionType = True
+
     def __init__(
         self,
         tags,
@@ -167,6 +169,9 @@ class UnionForm(Form):
             parameters=self._parameters,
             form_key=None,
         )
+
+    def simplify_uniontype(self, merge=True, mergebool=False):
+        raise NotImplementedError
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

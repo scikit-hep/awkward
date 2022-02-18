@@ -6,6 +6,8 @@ from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class UnmaskedForm(Form):
+    is_OptionType = True
+
     def __init__(
         self,
         content,
@@ -101,6 +103,21 @@ class UnmaskedForm(Form):
             parameters=self._parameters,
             form_key=None,
         )
+
+    def simplify_optiontype(self):
+        if isinstance(
+            self._content,
+            (
+                ak._v2.forms.indexedform.IndexedForm,
+                ak._v2.forms.indexedoptionform.IndexedOptionForm,
+                ak._v2.forms.bytemaskedform.ByteMaskedForm,
+                ak._v2.forms.bitmaskedform.BitMaskedForm,
+                ak._v2.forms.unmaskedform.UnmaskedForm,
+            ),
+        ):
+            return self._content
+        else:
+            return self
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:
