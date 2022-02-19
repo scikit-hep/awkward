@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/forms.
 
-
 from awkward._ext import Form
 from awkward._ext import BitMaskedForm
 from awkward._ext import ByteMaskedForm

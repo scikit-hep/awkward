@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numexpr.py
 
-
 import warnings
 import sys
 import types

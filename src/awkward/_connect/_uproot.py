@@ -2,7 +2,6 @@
 
 # v2: drop, since this functionality will be replaced by AwkwardForth.
 
-
 import json
 
 # don't import awkward._connect._uproot in awkward/__init__.py!
