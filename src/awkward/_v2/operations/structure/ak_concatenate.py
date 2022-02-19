@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import awkward as ak
 
 from awkward._v2.operations.structure.ak_fill_none import fill_none

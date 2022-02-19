@@ -2,7 +2,6 @@
 
 # v2: replace with deeply rewritten src/awkward/_v2/_connect/jax.
 
-
 import types
 
 import awkward as ak

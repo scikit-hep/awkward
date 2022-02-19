@@ -2,7 +2,6 @@
 
 # v2: change to pull in classes from src/awkward/_v2/types/*.py.
 
-
 # Typeparser
 from awkward._typeparser.parser import from_datashape
 

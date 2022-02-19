@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/behaviors/string.py
 
-
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()

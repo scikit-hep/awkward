@@ -2,7 +2,6 @@
 
 # v2: keep this file, but change the Type-generation to generate v2 Types.
 
-
 import awkward as ak
 
 from awkward._typeparser.generated_parser import Lark_StandAlone, Transformer

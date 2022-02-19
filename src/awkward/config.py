@@ -2,7 +2,6 @@
 
 # v2: no change; keep this file.
 
-
 import sys
 import argparse
 import pkg_resources

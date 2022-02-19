@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_util.py
 
-
 import re
 import sys
 import os

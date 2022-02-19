@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/highlevel.py.
 
-
 import re
 import keyword
 

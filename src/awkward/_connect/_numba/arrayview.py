@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numba/arrayview.py
 
-
 import operator
 
 import numba

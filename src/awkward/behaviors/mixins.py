@@ -2,7 +2,6 @@
 
 # v2: replace with src/awkward/_v2/behaviors/mixins.py
 
-
 import sys
 
 import awkward as ak
