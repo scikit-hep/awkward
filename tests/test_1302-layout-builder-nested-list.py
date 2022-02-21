@@ -53,9 +53,23 @@ def test():
     """
     )
 
-    builder.begin_list()  # u (0, 0)
+    builder.begin_list()  # u
 
-    builder.int64(1)  # i (1, 1)
+    builder.int64(1)  # i
+    builder.begin_list()  # j
+    builder.int64(2)
+    builder.end_list()  # j
+
+    builder.end_list()  # u
+
+    builder.float64(3.0)  # v
+    builder.int64(4)  # w
+    builder.int64(5)  # x
+
+    # Second pass
+    builder.begin_list()  # u
+
+    builder.int64(1)  # i
     builder.begin_list()  # j
     builder.int64(2)
     builder.end_list()  # j
@@ -67,5 +81,6 @@ def test():
     builder.int64(5)  # x
 
     assert ak.to_list(builder.snapshot()) == [
-        {"u": [{"i": 1, "j": [2]}], "v": 3, "w": 4, "x": 5}
+        {"u": [{"i": 1, "j": [2]}], "v": 3, "w": 4, "x": 5},
+        {"u": [{"i": 1, "j": [2]}], "v": 3, "w": 4, "x": 5},
     ]
