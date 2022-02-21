@@ -7,18 +7,35 @@ import awkward as ak  # noqa: F401
 
 
 def test_but_first_fix_sort():
-    assert ak._v2.operations.describe.is_valid(ak._v2.Array(["one", "two", "three"]).layout.sort(axis=-1))
+    assert ak._v2.operations.describe.is_valid(
+        ak._v2.Array(["one", "two", "three"]).layout.sort(axis=-1)
+    )
 
 
-@pytest.mark.skip(reason="FIXME: issue in ak._v2.operations.structure.argsort")
 def test_argsort():
-    array = ak._v2.Array(["one", "two", "three", "four", "five", "six", "seven", "eight"])
-    assert ak._v2.operations.structure.argsort(array, axis=-1).tolist() == [7, 4, 3, 0, 6, 5, 2, 1]
+    array = ak._v2.Array(
+        ["one", "two", "three", "four", "five", "six", "seven", "eight"]
+    )
+    assert ak._v2.operations.structure.argsort(array, axis=-1).tolist() == [
+        7,
+        4,
+        3,
+        0,
+        6,
+        5,
+        2,
+        1,
+    ]
 
     array = ak._v2.Array(
         [["twotwo", "two", "three"], ["four", "five"], [], ["six", "seven", "eight"]]
     )
-    assert ak._v2.operations.structure.argsort(array, axis=-1).tolist() == [[2, 1, 0], [1, 0], [], [2, 1, 0]]
+    assert ak._v2.operations.structure.argsort(array, axis=-1).tolist() == [
+        [2, 1, 0],
+        [1, 0],
+        [],
+        [2, 1, 0],
+    ]
 
     array = ak._v2.Array(
         [
@@ -35,9 +52,12 @@ def test_argsort():
         [[0], [1, 0]],
     ]
 
+
 @pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.sort not implemented")
 def test_sort():
-    array = ak._v2.Array(["one", "two", "three", "four", "five", "six", "seven", "eight"])
+    array = ak._v2.Array(
+        ["one", "two", "three", "four", "five", "six", "seven", "eight"]
+    )
     assert ak._v2.operations.structure.sort(array, axis=-1).tolist() == [
         "eight",
         "five",

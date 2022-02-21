@@ -7,10 +7,16 @@ import awkward as ak  # noqa: F401
 
 to_list = ak._v2.operations.convert.to_list
 
+
 @pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.sort not implemented")
 def test_sort():
     data = ak._v2.Array([[7, 5, 7], [], [2], [8, 2]])
-    assert ak.to_list(ak._v2.operations.structure.sort(data)) == [[5, 7, 7], [], [2], [2, 8]]
+    assert ak.to_list(ak._v2.operations.structure.sort(data)) == [
+        [5, 7, 7],
+        [],
+        [2],
+        [2, 8],
+    ]
 
 
 def test_argsort():

@@ -1084,7 +1084,7 @@ class ListOffsetArray(Content):
                         self_stops.data,
                         stable,
                         ascending,
-                        False,
+                        True,
                     )
                 )
                 return ak._v2.contents.NumpyArray(nextcarry, None, None, self._nplike)
