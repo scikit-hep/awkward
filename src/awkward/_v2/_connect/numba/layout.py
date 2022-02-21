@@ -24,13 +24,6 @@ def fake_typeof(obj, c):
 
 class ContentType(numba.types.Type):
     @classmethod
-    def tolookup_identifier(cls, layout, positions):
-        if layout.identifier is None:
-            positions.append(-1)
-        else:
-            positions.append(layout.identifier.data)
-
-    @classmethod
     def from_form_identifier(cls, form):
         if not form.has_identifier:
             return numba.none
@@ -273,17 +266,7 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
     return castint(context, builder, atval.type, numba.intp, atval)
 
 
-class NumpyArrayType(ContentType):
-    IDENTIFIER = 0
-    ARRAY = 1
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(layout.contiguous().data)
-        return pos
-
+class NumpyArrayType(ContentType, ak._v2._lookup.NumpyLookup):
     @classmethod
     def from_form(cls, form):
         t = numba.from_dtype(ak._v2.types.numpytype.primitive_to_dtype(form.primitive))
@@ -301,13 +284,6 @@ class NumpyArrayType(ContentType):
         self.arraytype = arraytype
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        assert fields == ()
-        return ak._v2.contents.NumpyArray(
-            lookup.positions[pos + self.ARRAY], parameters=self.parameters
-        )
 
     def has_field(self, key):
         return False
@@ -353,22 +329,7 @@ class NumpyArrayType(ContentType):
         return False
 
 
-class RegularArrayType(ContentType):
-    IDENTIFIER = 0
-    ZEROS_LENGTH = 1
-    CONTENT = 2
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(len(layout))
-        positions.append(None)
-        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-            layout.content, positions
-        )
-        return pos
-
+class RegularArrayType(ContentType, ak._v2._lookup.RegularLookup):
     @classmethod
     def from_form(cls, form):
         return RegularArrayType(
@@ -388,18 +349,6 @@ class RegularArrayType(ContentType):
         self.size = size
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields
-        )
-        return ak._v2.contents.RegularArray(
-            content,
-            self.size,
-            lookup.positions[pos + self.ZEROS_LENGTH],
-            parameters=self.parameters,
-        )
 
     def has_field(self, key):
         return self.contenttype.has_field(key)
@@ -458,24 +407,7 @@ class RegularArrayType(ContentType):
         return False
 
 
-class ListArrayType(ContentType):
-    IDENTIFIER = 0
-    STARTS = 1
-    STOPS = 2
-    CONTENT = 3
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(layout.starts.data)
-        positions.append(layout.stops.data)
-        positions.append(None)
-        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-            layout.content, positions
-        )
-        return pos
-
+class ListArrayType(ContentType, ak._v2._lookup.ListLookup):
     @classmethod
     def from_form(cls, form):
         if isinstance(form, ak._v2.forms.ListForm):
@@ -503,17 +435,6 @@ class ListArrayType(ContentType):
         self.contenttype = contenttype
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        starts = self.IndexOf(self.indextype)(lookup.positions[pos + self.STARTS])
-        stops = self.IndexOf(self.indextype)(lookup.positions[pos + self.STOPS])
-        content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields
-        )
-        return ak._v2.contents.ListArray(
-            starts, stops, content, parameters=self.parameters
-        )
 
     def has_field(self, key):
         return self.contenttype.has_field(key)
@@ -584,22 +505,7 @@ class ListArrayType(ContentType):
         return False
 
 
-class IndexedArrayType(ContentType):
-    IDENTIFIER = 0
-    INDEX = 1
-    CONTENT = 2
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(layout.index.data)
-        positions.append(None)
-        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-            layout.content, positions
-        )
-        return pos
-
+class IndexedArrayType(ContentType, ak._v2._lookup.IndexedLookup):
     @classmethod
     def from_form(cls, form):
         return IndexedArrayType(
@@ -622,14 +528,6 @@ class IndexedArrayType(ContentType):
         self.contenttype = contenttype
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
-        content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields
-        )
-        return ak._v2.contents.IndexedArray(index, content, parameters=self.parameters)
 
     def has_field(self, key):
         return self.contenttype.has_field(key)
@@ -710,22 +608,7 @@ class IndexedArrayType(ContentType):
         return self.contenttype.is_recordtype
 
 
-class IndexedOptionArrayType(ContentType):
-    IDENTIFIER = 0
-    INDEX = 1
-    CONTENT = 2
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(layout.index.data)
-        positions.append(None)
-        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-            layout.content, positions
-        )
-        return pos
-
+class IndexedOptionArrayType(ContentType, ak._v2._lookup.IndexedOptionLookup):
     @classmethod
     def from_form(cls, form):
         return IndexedOptionArrayType(
@@ -748,16 +631,6 @@ class IndexedOptionArrayType(ContentType):
         self.contenttype = contenttype
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
-        content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields
-        )
-        return ak._v2.contents.IndexedOptionArray(
-            index, content, parameters=self.parameters
-        )
 
     def has_field(self, key):
         return self.contenttype.has_field(key)
@@ -855,22 +728,7 @@ class IndexedOptionArrayType(ContentType):
         return self.contenttype.is_recordtype
 
 
-class ByteMaskedArrayType(ContentType):
-    IDENTIFIER = 0
-    MASK = 1
-    CONTENT = 2
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(layout.mask.data)
-        positions.append(None)
-        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-            layout.content, positions
-        )
-        return pos
-
+class ByteMaskedArrayType(ContentType, ak._v2._lookup.ByteMaskedLookup):
     @classmethod
     def from_form(cls, form):
         return ByteMaskedArrayType(
@@ -896,16 +754,6 @@ class ByteMaskedArrayType(ContentType):
         self.valid_when = valid_when
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        mask = self.IndexOf(self.masktype)(lookup.positions[pos + self.MASK])
-        content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields
-        )
-        return ak._v2.contents.ByteMaskedArray(
-            mask, content, self.valid_when, parameters=self.parameters
-        )
 
     def has_field(self, key):
         return self.contenttype.has_field(key)
@@ -1002,24 +850,7 @@ class ByteMaskedArrayType(ContentType):
         return self.contenttype.is_recordtype
 
 
-class BitMaskedArrayType(ContentType):
-    IDENTIFIER = 0
-    LENGTH = 1
-    MASK = 2
-    CONTENT = 3
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(len(layout))
-        positions.append(layout.mask.data)
-        positions.append(None)
-        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-            layout.content, positions
-        )
-        return pos
-
+class BitMaskedArrayType(ContentType, ak._v2._lookup.BitMaskedLookup):
     @classmethod
     def from_form(cls, form):
         return BitMaskedArrayType(
@@ -1050,21 +881,6 @@ class BitMaskedArrayType(ContentType):
         self.lsb_order = lsb_order
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        mask = self.IndexOf(self.masktype)(lookup.positions[pos + self.MASK])
-        content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields
-        )
-        return ak._v2.contents.BitMaskedArray(
-            mask,
-            content,
-            self.valid_when,
-            lookup.positions[pos + self.LENGTH],
-            self.lsb_order,
-            parameters=self.parameters,
-        )
 
     def has_field(self, key):
         return self.contenttype.has_field(key)
@@ -1179,20 +995,7 @@ class BitMaskedArrayType(ContentType):
         return self.contenttype.is_recordtype
 
 
-class UnmaskedArrayType(ContentType):
-    IDENTIFIER = 0
-    CONTENT = 1
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(None)
-        positions[pos + cls.CONTENT] = ak._v2._connect.numba.arrayview.tolookup(
-            layout.content, positions
-        )
-        return pos
-
+class UnmaskedArrayType(ContentType, ak._v2._lookup.UnmaskedLookup):
     @classmethod
     def from_form(cls, form):
         return UnmaskedArrayType(
@@ -1210,13 +1013,6 @@ class UnmaskedArrayType(ContentType):
         self.contenttype = contenttype
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        content = self.contenttype.tolayout(
-            lookup, lookup.positions[pos + self.CONTENT], fields
-        )
-        return ak._v2.contents.UnmaskedArray(content, parameters=self.parameters)
 
     def has_field(self, key):
         return self.contenttype.has_field(key)
@@ -1294,23 +1090,7 @@ class UnmaskedArrayType(ContentType):
         return self.contenttype.is_recordtype
 
 
-class RecordArrayType(ContentType):
-    IDENTIFIER = 0
-    LENGTH = 1
-    CONTENTS = 2
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(len(layout))
-        positions.extend([None] * len(layout.contents))
-        for i, content in enumerate(layout.contents):
-            positions[
-                pos + cls.CONTENTS + i
-            ] = ak._v2._connect.numba.arrayview.tolookup(content, positions)
-        return pos
-
+class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
     @classmethod
     def from_form(cls, form):
         return RecordArrayType(
@@ -1334,29 +1114,6 @@ class RecordArrayType(ContentType):
         self.fields = fields
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        if len(fields) > 0:
-            index = self.fieldindex(fields[0])
-            assert index is not None
-            return self.contenttypes[index].tolayout(
-                lookup, lookup.positions[pos + self.CONTENTS + index], fields[1:]
-            )
-        else:
-            contents = []
-            for i, contenttype in enumerate(self.contenttypes):
-                layout = contenttype.tolayout(
-                    lookup, lookup.positions[pos + self.CONTENTS + i], fields
-                )
-                contents.append(layout)
-
-            return ak._v2.contents.RecordArray(
-                contents,
-                self.fields,
-                lookup.positions[pos + self.LENGTH],
-                parameters=self.parameters,
-            )
 
     def fieldindex(self, key):
         out = -1
@@ -1627,25 +1384,7 @@ class RecordArrayType(ContentType):
         return True
 
 
-class UnionArrayType(ContentType):
-    IDENTIFIER = 0
-    TAGS = 1
-    INDEX = 2
-    CONTENTS = 3
-
-    @classmethod
-    def tolookup(cls, layout, positions):
-        pos = len(positions)
-        cls.tolookup_identifier(layout, positions)
-        positions.append(layout.tags.data)
-        positions.append(layout.index.data)
-        positions.extend([None] * len(layout.contents))
-        for i, content in enumerate(layout.contents):
-            positions[
-                pos + cls.CONTENTS + i
-            ] = ak._v2._connect.numba.arrayview.tolookup(content, positions)
-        return pos
-
+class UnionArrayType(ContentType, ak._v2._lookup.UnionLookup):
     @classmethod
     def from_form(cls, form):
         return UnionArrayType(
@@ -1672,20 +1411,6 @@ class UnionArrayType(ContentType):
         self.contenttypes = contenttypes
         self.identifiertype = identifiertype
         self.parameters = parameters
-
-    def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos + self.IDENTIFIER] == -1
-        tags = self.IndexOf(self.tagstype)(lookup.positions[pos + self.TAGS])
-        index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
-        contents = []
-        for i, contenttype in enumerate(self.contenttypes):
-            layout = contenttype.tolayout(
-                lookup, lookup.positions[pos + self.CONTENTS + i], fields
-            )
-            contents.append(layout)
-        return ak._v2.contents.UnionArray(
-            tags, index, contents, parameters=self.parameters
-        )
 
     def has_field(self, key):
         return any(x.has_field(key) for x in self.contenttypes)

@@ -18,8 +18,8 @@ ak_numba.register_and_check()
 def roundtrip(layout):
     assert isinstance(layout, ak._v2.contents.Content)
 
-    lookup = ak_numba_arrayview.Lookup(layout)
-    assert isinstance(lookup, ak_numba_arrayview.Lookup)
+    lookup = ak._v2._lookup.Lookup(layout)
+    assert isinstance(lookup, ak._v2._lookup.Lookup)
 
     numbatype = ak_numba_arrayview.tonumbatype(layout.form)
     assert isinstance(numbatype, ak_numba_layout.ContentType)
