@@ -1,8 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line)     \
-  FILENAME_FOR_EXCEPTIONS( \
-      "src/libawkward/layoutbuilder/RecordArrayBuilder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/layoutbuilder/RecordArrayBuilder.cpp", line)
 
 #include "awkward/layoutbuilder/RecordArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
@@ -11,17 +9,16 @@ namespace awkward {
 
   ///
   template <typename T, typename I>
-  RecordArrayBuilder<T, I>::RecordArrayBuilder(
-      const std::vector<FormBuilderPtr<T, I>>& contents,
-      const util::RecordLookupPtr recordlookup,
-      const util::Parameters& parameters,
-      const std::string& form_key,
-      const std::string attribute,
-      const std::string partition)
-      : form_recordlookup_(recordlookup),
-        parameters_(parameters),
-        field_index_(0),
-        contents_size_((int64_t)contents.size()) {
+  RecordArrayBuilder<T, I>::RecordArrayBuilder(const std::vector<FormBuilderPtr<T, I>>& contents,
+                                               const util::RecordLookupPtr recordlookup,
+                                               const util::Parameters& parameters,
+                                               const std::string& form_key,
+                                               const std::string attribute,
+                                               const std::string partition)
+    : form_recordlookup_(recordlookup),
+      parameters_(parameters),
+      field_index_(0),
+      contents_size_((int64_t) contents.size()) {
     for (auto const& content : contents) {
       contents_.push_back(content);
       vm_output_.append(contents_.back().get()->vm_output());
@@ -32,12 +29,12 @@ namespace awkward {
 
     vm_func_name_ = std::string(form_key).append(attribute);
 
-    vm_func_.append(": ").append(vm_func_name_);
+    vm_func_.append(": ")
+      .append(vm_func_name_);
 
     for (auto const& content : contents_) {
-      vm_func_.append(" ")
-          .append(content.get()->vm_func_name())
-          .append(" pause");
+      vm_func_.append(" ").append(content.get()->vm_func_name())
+        .append(" pause");
     }
     // Remove the last pause
     vm_func_.erase(vm_func_.end() - 6, vm_func_.end());
@@ -95,14 +92,12 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   RecordArrayBuilder<T, I>::field_index() {
-    if (!list_field_index_.empty()) {
+    if (!list_field_index_.empty())
+    {
       return field_index_;
     }
-    auto index = field_index_;
-    field_index_ = (++field_index_ < contents_size_)
-                       ? field_index_
-                       : field_index_ % contents_size_;
-    return index;
+    return (field_index_ < contents_size_ - 1) ?
+      field_index_++ : (field_index_ = 0);
   }
 
   template <typename T, typename I>
@@ -125,22 +120,19 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::complex(std::complex<double> x,
-                                    LayoutBuilderPtr<T, I> builder) {
+  RecordArrayBuilder<T, I>::complex(std::complex<double> x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->complex(x, builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::bytestring(const std::string& x,
-                                       LayoutBuilderPtr<T, I> builder) {
+  RecordArrayBuilder<T, I>::bytestring(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->bytestring(x, builder);
   }
 
   template <typename T, typename I>
   void
-  RecordArrayBuilder<T, I>::string(const std::string& x,
-                                   LayoutBuilderPtr<T, I> builder) {
+  RecordArrayBuilder<T, I>::string(const std::string& x, LayoutBuilderPtr<T, I> builder) {
     contents_[(size_t)field_index()].get()->string(x, builder);
   }
 
@@ -165,8 +157,9 @@ namespace awkward {
   RecordArrayBuilder<T, I>::active() {
     if (!list_field_index_.empty()) {
       return contents_[(size_t)list_field_index_.back()].get()->active();
-    } else {
-      for (auto content : contents_) {
+    }
+    else {
+      for(auto content : contents_) {
         if (content.get()->active()) {
           return true;
         }
@@ -178,4 +171,4 @@ namespace awkward {
   template class EXPORT_TEMPLATE_INST RecordArrayBuilder<int32_t, int32_t>;
   template class EXPORT_TEMPLATE_INST RecordArrayBuilder<int64_t, int32_t>;
 
-}  // namespace awkward
+}
