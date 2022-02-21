@@ -96,8 +96,11 @@ namespace awkward {
     {
       return field_index_;
     }
-    return (field_index_ < contents_size_ - 1) ?
-      field_index_++ : (field_index_ = 0);
+    auto index = field_index_;
+    field_index_ = (++field_index_ < contents_size_)
+                       ? field_index_
+                       : field_index_ % contents_size_;
+    return index;
   }
 
   template <typename T, typename I>
