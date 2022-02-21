@@ -22,13 +22,13 @@ def test():
                         "i": {
                             "class": "NumpyArray",
                             "primitive": "int64",
-                            "form_key": "u-content.i"
+                            "form_key": "i"
                         },
                         "j": {
                             "class": "ListOffsetArray64",
                             "offsets": "i64",
                             "content": "int64",
-                            "form_key": "u-content.j"
+                            "form_key": "j"
                         }
                     }
                 }
