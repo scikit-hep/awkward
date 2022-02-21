@@ -112,7 +112,6 @@ def test():
     ]
 
 
-@pytest.mark.skip(reason="Tests passing, will be enabled in the strings_astype PR.")
 def test_full_like_types():
 
     array = ak._v2.highlevel.Array(

@@ -6,7 +6,6 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-@pytest.mark.skip(reason="FIXME: ak.strings_astype not implemented")
 def test():
     array = ak._v2.Array(
         [
@@ -46,36 +45,36 @@ def test():
     int_type = ak._v2.operations.structure.full_like(array, 12, dtype=int)
     float_type = ak._v2.operations.structure.full_like(array, 12, dtype=float)
     assert int_type.tolist() == float_type.tolist()
-    assert_array_type(int_type, int)
+    assert_array_type(int_type, np.int64)
     assert_array_type(float_type, float)
 
     bool_type = ak._v2.operations.structure.full_like(array, 12, dtype=bool)
-    assert_array_type(bool_type, bool)
+    assert_array_type(bool_type, np.bool_)
 
     int_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=int)
     float_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=float)
     bool_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=bool)
-    assert_array_type(int_type, int)
+    assert_array_type(int_type, np.int64)
     assert_array_type(float_type, float)
-    assert_array_type(bool_type, bool)
+    assert_array_type(bool_type, np.bool_)
 
     int_type = ak._v2.operations.structure.zeros_like(array, dtype=int)
     float_type = ak._v2.operations.structure.zeros_like(array, dtype=float)
     bool_type = ak._v2.operations.structure.zeros_like(array, dtype=bool)
     assert int_type.tolist() == float_type.tolist()
     assert int_type.tolist() == bool_type.tolist()
-    assert_array_type(int_type, int)
+    assert_array_type(int_type, np.int64)
     assert_array_type(float_type, float)
-    assert_array_type(bool_type, bool)
+    assert_array_type(bool_type, np.bool_)
 
     int_type = ak._v2.operations.structure.ones_like(array, dtype=int)
     float_type = ak._v2.operations.structure.ones_like(array, dtype=float)
     bool_type = ak._v2.operations.structure.ones_like(array, dtype=bool)
     assert int_type.tolist() == float_type.tolist()
     assert int_type.tolist() == bool_type.tolist()
-    assert_array_type(int_type, int)
+    assert_array_type(int_type, np.int64)
     assert_array_type(float_type, float)
-    assert_array_type(bool_type, bool)
+    assert_array_type(bool_type, np.bool_)
 
     array = ak.Array([["one", "two", "three"], [], ["four", "five"]])
 
@@ -90,33 +89,33 @@ def test():
     int_type = ak._v2.operations.structure.full_like(array, 12, dtype=int)
     float_type = ak._v2.operations.structure.full_like(array, 12, dtype=float)
     assert int_type.tolist() == float_type.tolist()
-    assert_array_type(int_type, int)
+    assert_array_type(int_type, np.int64)
     assert_array_type(float_type, float)
 
     bool_type = ak._v2.operations.structure.full_like(array, 12, dtype=bool)
-    assert_array_type(bool_type, bool)
+    assert_array_type(bool_type, np.bool_)
 
     int_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=int)
     float_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=float)
     bool_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=bool)
-    assert_array_type(int_type, int)
+    assert_array_type(int_type, np.int64)
     assert_array_type(float_type, float)
-    assert_array_type(bool_type, bool)
+    assert_array_type(bool_type, np.bool_)
 
     int_type = ak._v2.operations.structure.zeros_like(array, dtype=int)
     float_type = ak._v2.operations.structure.zeros_like(array, dtype=float)
     bool_type = ak._v2.operations.structure.zeros_like(array, dtype=bool)
     assert int_type.tolist() == float_type.tolist()
     assert int_type.tolist() == bool_type.tolist()
-    assert_array_type(int_type, int)
+    assert_array_type(int_type, np.int64)
     assert_array_type(float_type, float)
-    assert_array_type(bool_type, bool)
+    assert_array_type(bool_type, np.bool_)
 
     int_type = ak._v2.operations.structure.ones_like(array, dtype=int)
     float_type = ak._v2.operations.structure.ones_like(array, dtype=float)
     bool_type = ak._v2.operations.structure.ones_like(array, dtype=bool)
     assert int_type.tolist() == float_type.tolist()
     assert int_type.tolist() == bool_type.tolist()
-    assert_array_type(int_type, int)
+    assert_array_type(int_type, np.int64)
     assert_array_type(float_type, float)
-    assert_array_type(bool_type, bool)
+    assert_array_type(bool_type, np.bool_)
