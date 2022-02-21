@@ -35,7 +35,7 @@ def test():
             },
             "v": {
                 "class": "NumpyArray",
-                "primitive": "float64",
+                "primitive": "int64",
                 "form_key": "v"
             },
             "w": {
@@ -57,30 +57,33 @@ def test():
 
     builder.int64(1)  # i
     builder.begin_list()  # j
-    builder.int64(2)
+    builder.int64(9)
+    builder.int64(8)
+    builder.int64(7)
     builder.end_list()  # j
 
     builder.end_list()  # u
 
-    builder.float64(3.0)  # v
-    builder.int64(4)  # w
-    builder.int64(5)  # x
+    builder.int64(2)  # v
+    builder.int64(3)  # w
+    builder.int64(4)  # x
 
-    # Second pass
     builder.begin_list()  # u
 
     builder.int64(1)  # i
     builder.begin_list()  # j
-    builder.int64(2)
+    builder.int64(9)
+    builder.int64(8)
+    builder.int64(7)
     builder.end_list()  # j
 
     builder.end_list()  # u
 
-    builder.float64(3.0)  # v
-    builder.int64(4)  # w
-    builder.int64(5)  # x
+    builder.int64(2)  # v
+    builder.int64(3)  # w
+    builder.int64(4)  # x
 
     assert ak.to_list(builder.snapshot()) == [
-        {"u": [{"i": 1, "j": [2]}], "v": 3, "w": 4, "x": 5},
-        {"u": [{"i": 1, "j": [2]}], "v": 3, "w": 4, "x": 5},
+        {"u": [{"i": 1, "j": [9, 8, 7]}], "v": 2, "w": 3, "x": 4},
+        {"u": [{"i": 1, "j": [9, 8, 7]}], "v": 2, "w": 3, "x": 4},
     ]
