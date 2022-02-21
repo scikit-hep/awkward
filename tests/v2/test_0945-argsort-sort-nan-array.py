@@ -45,7 +45,10 @@ def test_argsort():
 
 def test_argsort_2d():
     array = ak._v2.Array([[1, 2, None, 3, 0, None], [1, 2, None, 3, 0, None]])
-    assert ak._v2.operations.structure.argsort(array).tolist() == [[4, 0, 1, 3, 2, 5], [4, 0, 1, 3, 2, 5]]
+    assert ak._v2.operations.structure.argsort(array).tolist() == [
+        [4, 0, 1, 3, 2, 5],
+        [4, 0, 1, 3, 2, 5],
+    ]
     assert array[ak._v2.operations.structure.argsort(array)].tolist() == [
         [
             0,
