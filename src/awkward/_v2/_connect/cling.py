@@ -3,6 +3,7 @@
 import base64
 import struct
 import json
+import re
 
 import awkward as ak
 
@@ -61,7 +62,7 @@ def generate_RecordView(compiler, use_cached=True):
 namespace awkward {
   class RecordView {
   public:
-    ArrayView(ssize_t at, ssize_t which, ssize_t* ptrs)
+    RecordView(ssize_t at, ssize_t which, ssize_t* ptrs)
       : at_(at), which_(which), ptrs_(ptrs) { }
 
   protected:
@@ -83,36 +84,36 @@ def togenerator(form):
 
     elif isinstance(form, ak._v2.forms.NumpyForm):
         if len(form.inner_shape) == 0:
-            return NumpyGenerator.from_form(form)
+            return NumpyArrayGenerator.from_form(form)
         else:
             return togenerator(form.toRegularForm())
 
     elif isinstance(form, ak._v2.forms.RegularForm):
-        return RegularGenerator.from_form(form)
+        return RegularArrayGenerator.from_form(form)
 
     elif isinstance(form, (ak._v2.forms.ListForm, ak._v2.forms.ListOffsetForm)):
-        return ListGenerator.from_form(form)
+        return ListArrayGenerator.from_form(form)
 
     elif isinstance(form, ak._v2.forms.IndexedForm):
-        return IndexedGenerator.from_form(form)
+        return IndexedArrayGenerator.from_form(form)
 
     elif isinstance(form, ak._v2.forms.IndexedOptionForm):
-        return IndexedOptionGenerator.from_form(form)
+        return IndexedOptionArrayGenerator.from_form(form)
 
     elif isinstance(form, ak._v2.forms.ByteMaskedForm):
-        return ByteMaskedGenerator.from_form(form)
+        return ByteMaskedArrayGenerator.from_form(form)
 
     elif isinstance(form, ak._v2.forms.BitMaskedForm):
-        return BitMaskedGenerator.from_form(form)
+        return BitMaskedArrayGenerator.from_form(form)
 
     elif isinstance(form, ak._v2.forms.UnmaskedForm):
-        return UnmaskedGenerator.from_form(form)
+        return UnmaskedArrayGenerator.from_form(form)
 
     elif isinstance(form, ak._v2.forms.RecordForm):
-        return RecordGenerator.from_form(form)
+        return RecordArrayGenerator.from_form(form)
 
     elif isinstance(form, ak._v2.forms.UnionForm):
-        return UnionGenerator.from_form(form)
+        return UnionArrayGenerator.from_form(form)
 
     else:
         raise AssertionError(f"unrecognized Form: {type(form)}")
@@ -138,7 +139,7 @@ class Generator:
 
     def _generate_common(self):
         params = [
-            f"if (parameter == {json.dumps(key)}) return {json.dumps(json.dumps(value))};\n    "
+            f"if (parameter == {json.dumps(key)}) return {json.dumps(json.dumps(value))};\n      "
             for key, value in self.parameters.items()
         ]
         return f"""
@@ -149,11 +150,8 @@ class Generator:
     }}
 
     value_type at(size_t at) const {{
-      size_t length = stop_ - start_;
-      if (at >= length) {{
-        throw std::out_of_range(
-          std::to_string(at) + " is out of range for length " + std::to_string(length)
-        );
+      if (at >= stop_ - start_) {{
+        throw std::out_of_range(std::to_string(at) + " is out of range");
       }}
       else {{
         return (*this)[at];
@@ -165,10 +163,10 @@ class Generator:
         return f"awkward::{self.class_type}(0, {length}, 0, {ptrs})"
 
 
-class NumpyGenerator(Generator, ak._v2._lookup.NumpyLookup):
+class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
     @classmethod
     def from_form(cls, form):
-        return NumpyGenerator(
+        return NumpyArrayGenerator(
             form.primitive, cls.form_from_identifier(form), form.parameters
         )
 
@@ -189,7 +187,8 @@ class NumpyGenerator(Generator, ak._v2._lookup.NumpyLookup):
 
     def __eq__(self, other):
         return (
-            self.primitive == other.primitive
+            isinstance(other, type(self))
+            and self.primitive == other.primitive
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -242,10 +241,10 @@ namespace awkward {{
             compiler(out)
 
 
-class RegularGenerator(Generator, ak._v2._lookup.RegularLookup):
+class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
     @classmethod
     def from_form(cls, form):
-        return RegularGenerator(
+        return RegularArrayGenerator(
             togenerator(form.content),
             form.size,
             cls.form_from_identifier(form),
@@ -271,7 +270,8 @@ class RegularGenerator(Generator, ak._v2._lookup.RegularLookup):
 
     def __eq__(self, other):
         return (
-            self.content == other.content
+            isinstance(other, type(self))
+            and self.content == other.content
             and self.size == other.size
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -312,7 +312,7 @@ namespace awkward {{
             compiler(out)
 
 
-class ListGenerator(Generator, ak._v2._lookup.ListLookup):
+class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
     @classmethod
     def from_form(cls, form):
         if isinstance(form, ak._v2.forms.ListForm):
@@ -320,7 +320,7 @@ class ListGenerator(Generator, ak._v2._lookup.ListLookup):
         else:
             index_string = form.offsets
 
-        return ListGenerator(
+        return ListArrayGenerator(
             index_string,
             togenerator(form.content),
             cls.form_from_identifier(form),
@@ -353,7 +353,8 @@ class ListGenerator(Generator, ak._v2._lookup.ListLookup):
 
     def __eq__(self, other):
         return (
-            self.index_type == other.index_type
+            isinstance(other, type(self))
+            and self.index_type == other.index_type
             and self.content == other.content
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -394,10 +395,10 @@ namespace awkward {{
             compiler(out)
 
 
-class IndexedGenerator(Generator, ak._v2._lookup.IndexedLookup):
+class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
     @classmethod
     def from_form(cls, form):
-        return IndexedGenerator(
+        return IndexedArrayGenerator(
             form.index,
             togenerator(form.content),
             cls.form_from_identifier(form),
@@ -430,17 +431,18 @@ class IndexedGenerator(Generator, ak._v2._lookup.IndexedLookup):
 
     def __eq__(self, other):
         return (
-            self.index_type == other.index_type
+            isinstance(other, type(self))
+            and self.index_type == other.index_type
             and self.content == other.content
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
 
-class IndexedOptionGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
+class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
     @classmethod
     def from_form(cls, form):
-        return IndexedOptionGenerator(
+        return IndexedOptionArrayGenerator(
             form.index,
             togenerator(form.content),
             cls.form_from_identifier(form),
@@ -471,17 +473,18 @@ class IndexedOptionGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
 
     def __eq__(self, other):
         return (
-            self.index_type == other.index_type
+            isinstance(other, type(self))
+            and self.index_type == other.index_type
             and self.content == other.content
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
 
-class ByteMaskedGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
+class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
     @classmethod
     def from_form(cls, form):
-        return ByteMaskedGenerator(
+        return ByteMaskedArrayGenerator(
             togenerator(form.content),
             form.valid_when,
             cls.form_from_identifier(form),
@@ -507,17 +510,18 @@ class ByteMaskedGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
 
     def __eq__(self, other):
         return (
-            self.content == other.content
+            isinstance(other, type(self))
+            and self.content == other.content
             and self.valid_when == other.valid_when
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
 
-class BitMaskedGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
+class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
     @classmethod
     def from_form(cls, form):
-        return BitMaskedGenerator(
+        return BitMaskedArrayGenerator(
             togenerator(form.content),
             form.valid_when,
             form.lsb_order,
@@ -545,7 +549,8 @@ class BitMaskedGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
 
     def __eq__(self, other):
         return (
-            self.content == other.content
+            isinstance(other, type(self))
+            and self.content == other.content
             and self.valid_when == other.valid_when
             and self.lsb_order == other.lsb_order
             and self.identifier == other.identifier
@@ -553,10 +558,10 @@ class BitMaskedGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
         )
 
 
-class UnmaskedGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
+class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
     @classmethod
     def from_form(cls, form):
-        return UnmaskedGenerator(
+        return UnmaskedArrayGenerator(
             togenerator(form.content), cls.form_from_identifier(form), form.parameters
         )
 
@@ -572,16 +577,89 @@ class UnmaskedGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
 
     def __eq__(self, other):
         return (
-            self.content == other.content
+            isinstance(other, type(self))
+            and self.content == other.content
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
 
 class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
+    def __init__(self, contents, fields, parameters, class_type):
+        self.contents = tuple(contents)
+        self.fields = None if fields is None else tuple(fields)
+        self.parameters = parameters
+        self.class_type = class_type
+
+    def __hash__(self):
+        return hash(
+            (
+                type(self),
+                self.contents,
+                self.fields,
+                json.dumps(self.parameters),
+            )
+        )
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, type(self))
+            and self.contents == other.contents
+            and self.fields == other.fields
+            and self.parameters == other.parameters
+        )
+
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_RecordView(compiler, use_cached=use_cached)
+        for content in self.contents:
+            content.generate(compiler, use_cached, flatlist_as_rvec)
+
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            params = [
+                f"if (parameter == {json.dumps(key)}) return {json.dumps(json.dumps(value))};\n      "
+                for key, value in self.parameters.items()
+            ]
+
+            if self.fields is None:
+                fieldnames = [f"slot{i}" for i in range(len(self.contents))]
+            else:
+                fieldnames = self.fields
+            getfields = []
+            for i, (fieldname, content) in enumerate(zip(fieldnames, self.contents)):
+                if re.match("^[A-Za-z_][A-Za-z_0-9]*$", fieldname) is not None:
+                    getfields.append(
+                        f"""
+    {content.value_type} {fieldname}() const noexcept {{
+      return {content.class_type}(at_, at_ + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_)[0];
+    }}
+""".strip()
+                    )
+
+            eoln = "\n    "
+            out = f"""
+namespace awkward {{
+  class {self.class_type}: public RecordView {{
+  public:
+    {self.class_type}(ssize_t at, ssize_t which, ssize_t* ptrs)
+      : RecordView(at, which, ptrs) {{ }}
+
+    const std::string parameter(const std::string& parameter) const noexcept {{
+      {"" if len(params) == 0 else "".join(x for x in params)}return "null";
+    }}
+
+    {eoln.join(getfields)}
+  }};
+}}
+""".strip()
+            cache[key] = out
+            compiler(out)
+
+
+class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
     @classmethod
     def from_form(cls, form):
-        return RecordGenerator(
+        return RecordArrayGenerator(
             [togenerator(x) for x in form.contents],
             None if form.is_tuple else form.fields,
             cls.form_from_identifier(form),
@@ -589,10 +667,22 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
         )
 
     def __init__(self, contents, fields, identifier, parameters):
-        self.contents = contents
-        self.fields = fields
+        self.contents = tuple(contents)
+        self.fields = None if fields is None else tuple(fields)
         self.identifier = identifier
         self.parameters = parameters
+
+        if (
+            isinstance(self.parameters, dict)
+            and self.parameters.get("__record__") is not None
+        ):
+            insert = "_" + self.parameters["__record__"]
+        else:
+            insert = ""
+        self.class_type = f"RecordArray{insert}_{self.class_type_suffix}"
+        self.value_type = "Record" + self.class_type[11:]
+
+        self.record = RecordGenerator(contents, fields, parameters, self.value_type)
 
     def __hash__(self):
         return hash(
@@ -607,17 +697,42 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
 
     def __eq__(self, other):
         return (
-            self.contents == other.contents
+            isinstance(other, type(self))
+            and self.contents == other.contents
             and self.fields == other.fields
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
+        self.record.generate(compiler, use_cached, flatlist_as_rvec)
 
-class UnionGenerator(Generator, ak._v2._lookup.UnionLookup):
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      return value_type(start_ + at, which_, ptrs_);
+    }}
+  }};
+}}
+""".strip()
+            cache[key] = out
+            compiler(out)
+
+
+class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
     @classmethod
     def from_form(cls, form):
-        return UnionGenerator(
+        return UnionArrayGenerator(
             form.index,
             [togenerator(x) for x in form.contents],
             cls.form_from_identifier(form),
@@ -650,7 +765,8 @@ class UnionGenerator(Generator, ak._v2._lookup.UnionLookup):
 
     def __eq__(self, other):
         return (
-            self.index_type == other.index_type
+            isinstance(other, type(self))
+            and self.index_type == other.index_type
             and self.contents == other.contents
             and self.identifier == other.identifier
             and self.parameters == other.parameters
