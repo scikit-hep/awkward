@@ -97,7 +97,6 @@ def test_integerindex_null_more():
     assert a.typetracer[b].form == a[b].form
 
 
-@pytest.mark.skip(reason="FIXME: erroneous slicing case")
 def test_integerindex_null_more_2():
     a = ak._v2.highlevel.Array(
         [[[0, 1, 2, None], None], [[3, 4], [5]], None, [[6]]]

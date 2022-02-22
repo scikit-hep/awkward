@@ -8,7 +8,6 @@ import awkward as ak  # noqa: F401
 to_list = ak._v2.operations.convert.to_list
 
 
-@pytest.mark.skip(reason="FIXME: typetracer dtype issue")
 def test_numpyarray():
     for dtype1 in ("i1", "i2", "i4", "i8", "u1", "u2", "u4", "u8", "f4", "f8", "?"):
         for dtype2 in ("i1", "i2", "i4", "i8", "u1", "u2", "u4", "u8", "f4", "f8", "?"):

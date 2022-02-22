@@ -98,9 +98,6 @@ def test_localindex():
     assert ak._v2.operations.structure.local_index(empty, axis=2).tolist() == []
 
 
-@pytest.mark.skip(
-    reason="FIXME: ak._v2.operations.structure.combinations must be merged"
-)
 def test_combinations():
     assert ak._v2.operations.structure.combinations(empty, 2, axis=0).tolist() == []
     assert ak._v2.operations.structure.combinations(empty, 2, axis=1).tolist() == []
