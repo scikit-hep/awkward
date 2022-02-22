@@ -13,7 +13,7 @@ namespace is_iterable_impl
     template<typename... Ts> using void_t = typename make_void<Ts...>::type;
 
     template< bool B, class T = void >
-    using enable_if_t = typename std::enable_if<B,T>::type;
+    using enable_if_t = typename std::enable_if<B, T>::type;
 
     template< class T, class U >
     inline constexpr bool is_same_v = std::is_same<T, U>::value;
