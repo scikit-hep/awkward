@@ -4,23 +4,11 @@ import ROOT
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
 ROOT.RDF.RInterface(
     "ROOT::Detail::RDF::RLoopManager", "void"
 ).AsAwkward = lambda data_frame: _as_awkward(data_frame)
-
-print_me_cpp = """
-void print_me(ROOT::RDF::RResultPtr<ULong64_t> myResultProxy) {
-    ULong64_t* ptr = myResultProxy.GetPtr();
-    // FIXME: only objects that support iteration
-    // for (auto& myItem : myResultProxy) {
-    for (int64_t i = 0; i < myResultProxy.GetValue(); i++ ) {
-        std::cout << (double)ptr[i] << ", ";
-    };
-}
-"""
 
 
 def _as_awkward(data_frame, columns=None, exclude=None):
@@ -59,4 +47,6 @@ def _as_awkward(data_frame, columns=None, exclude=None):
                     ] = x  # This creates only the wrapping of the objects and does not copy.
                 contents[col] = ak._v2.contents.numpyarray.NumpyArray(tmp)
 
-        return contents[columns[0]]
+        return ak._v2.contents.recordarray.RecordArray(
+            list(contents.values()), list(contents.keys())
+        )
