@@ -20,9 +20,7 @@ def generate_ArrayView(compiler, use_cached=True):
         out = None
 
     if out is None:
-        cache[
-            key
-        ] = out = """
+        out = """
 namespace awkward {
   class ArrayView {
   public:
@@ -45,6 +43,7 @@ namespace awkward {
   };
 }
 """.strip()
+        cache[key] = out
         compiler(out)
 
     return out
@@ -58,9 +57,7 @@ def generate_RecordView(compiler, use_cached=True):
         out = None
 
     if out is None:
-        cache[
-            key
-        ] = out = """
+        out = """
 namespace awkward {
   class RecordView {
   public:
@@ -74,6 +71,7 @@ namespace awkward {
   };
 }
 """.strip()
+        cache[key] = out
         compiler(out)
 
     return out
@@ -225,9 +223,7 @@ class NumpyGenerator(Generator, ak._v2._lookup.NumpyLookup):
 
         key = (self, use_cached, flatlist_as_rvec)
         if not use_cached or key not in cache:
-            cache[
-                key
-            ] = out = f"""
+            out = f"""
 namespace awkward {{
   class {self.class_type}: public ArrayView {{
   public:
@@ -242,6 +238,7 @@ namespace awkward {{
   }};
 }}
 """.strip()
+            cache[key] = out
             compiler(out)
 
 
@@ -294,9 +291,7 @@ class RegularGenerator(Generator, ak._v2._lookup.RegularLookup):
 
         key = (self, use_cached, flatlist_as_rvec)
         if not use_cached or key not in cache:
-            cache[
-                key
-            ] = out = f"""
+            out = f"""
 namespace awkward {{
   class {self.class_type}: public ArrayView {{
   public:
@@ -313,6 +308,7 @@ namespace awkward {{
   }};
 }}
 """.strip()
+            cache[key] = out
             compiler(out)
 
 
@@ -331,8 +327,15 @@ class ListGenerator(Generator, ak._v2._lookup.ListLookup):
             form.parameters,
         )
 
-    def __init__(self, indextype, content, identifier, parameters):
-        self.indextype = indextype
+    def __init__(self, index_type, content, identifier, parameters):
+        if index_type == "i32":
+            self.index_type = "int32_t"
+        elif index_type == "u32":
+            self.index_type = "uint32_t"
+        elif index_type == "i64":
+            self.index_type = "int64_t"
+        else:
+            raise AssertionError(index_type)
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
@@ -341,7 +344,7 @@ class ListGenerator(Generator, ak._v2._lookup.ListLookup):
         return hash(
             (
                 type(self),
-                self.indextype,
+                self.index_type,
                 self.content,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -350,11 +353,45 @@ class ListGenerator(Generator, ak._v2._lookup.ListLookup):
 
     def __eq__(self, other):
         return (
-            self.indextype == other.indextype
+            self.index_type == other.index_type
             and self.content == other.content
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
+
+    @property
+    def class_type(self):
+        return f"ListArray_{self.class_type_suffix}"
+
+    @property
+    def value_type(self):
+        return self.content.class_type
+
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
+        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[at];
+      ssize_t stop = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STOPS}])[at];
+      return value_type(start, stop, ptrs_[which_ + {self.CONTENT}], ptrs_);
+    }}
+  }};
+}}
+""".strip()
+            cache[key] = out
+            compiler(out)
 
 
 class IndexedGenerator(Generator, ak._v2._lookup.IndexedLookup):
@@ -367,8 +404,15 @@ class IndexedGenerator(Generator, ak._v2._lookup.IndexedLookup):
             form.parameters,
         )
 
-    def __init__(self, indextype, content, identifier, parameters):
-        self.indextype = indextype
+    def __init__(self, index_type, content, identifier, parameters):
+        if index_type == "i32":
+            self.index_type = "int32_t"
+        elif index_type == "u32":
+            self.index_type = "uint32_t"
+        elif index_type == "i64":
+            self.index_type = "int64_t"
+        else:
+            raise AssertionError(index_type)
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
@@ -377,7 +421,7 @@ class IndexedGenerator(Generator, ak._v2._lookup.IndexedLookup):
         return hash(
             (
                 type(self),
-                self.indextype,
+                self.index_type,
                 self.content,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -386,7 +430,7 @@ class IndexedGenerator(Generator, ak._v2._lookup.IndexedLookup):
 
     def __eq__(self, other):
         return (
-            self.indextype == other.indextype
+            self.index_type == other.index_type
             and self.content == other.content
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -403,8 +447,13 @@ class IndexedOptionGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
             form.parameters,
         )
 
-    def __init__(self, indextype, content, identifier, parameters):
-        self.indextype = indextype
+    def __init__(self, index_type, content, identifier, parameters):
+        if index_type == "i32":
+            self.index_type = "int32_t"
+        elif index_type == "i64":
+            self.index_type = "int64_t"
+        else:
+            raise AssertionError(index_type)
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
@@ -413,7 +462,7 @@ class IndexedOptionGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
         return hash(
             (
                 type(self),
-                self.indextype,
+                self.index_type,
                 self.content,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -422,7 +471,7 @@ class IndexedOptionGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
 
     def __eq__(self, other):
         return (
-            self.indextype == other.indextype
+            self.index_type == other.index_type
             and self.content == other.content
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -575,8 +624,15 @@ class UnionGenerator(Generator, ak._v2._lookup.UnionLookup):
             form.parameters,
         )
 
-    def __init__(self, indextype, contents, identifier, parameters):
-        self.indextype = indextype
+    def __init__(self, index_type, contents, identifier, parameters):
+        if index_type == "i32":
+            self.index_type = "int32_t"
+        elif index_type == "u32":
+            self.index_type = "uint32_t"
+        elif index_type == "i64":
+            self.index_type = "int64_t"
+        else:
+            raise AssertionError(index_type)
         self.contents = contents
         self.identifier = identifier
         self.parameters = parameters
@@ -585,7 +641,7 @@ class UnionGenerator(Generator, ak._v2._lookup.UnionLookup):
         return hash(
             (
                 type(self),
-                self.indextype,
+                self.index_type,
                 self.contents,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -594,7 +650,7 @@ class UnionGenerator(Generator, ak._v2._lookup.UnionLookup):
 
     def __eq__(self, other):
         return (
-            self.indextype == other.indextype
+            self.index_type == other.index_type
             and self.contents == other.contents
             and self.identifier == other.identifier
             and self.parameters == other.parameters

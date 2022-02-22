@@ -148,21 +148,73 @@ void roottest_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* 
     assert out.tolist() == [10.0, 0.0, 0.0]
 
 
-# def test_ListArray_NumpyArray():
-#     v2a = ak._v2.contents.listarray.ListArray(
-#         ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
-#         ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
-#         ),
-#     )
+def test_ListArray_NumpyArray():
+    v2a = ak._v2.contents.listarray.ListArray(
+        ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
+        ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
+        ),
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_ListArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].size();
+  out[2] = obj[0][0];
+  out[3] = obj[0][1];
+  out[4] = obj[0][2];
+  out[5] = obj[1].size();
+  out[6] = obj[2].size();
+  out[7] = obj[2][0];
+  out[8] = obj[2][1];
+}}
+"""
+    )
+    out = np.zeros(9, dtype=np.float64)
+    ROOT.roottest_ListArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [3.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5]
 
 
-# def test_ListOffsetArray_NumpyArray():
-#     v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
-#         ak._v2.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-#         ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
-#     )
+def test_ListOffsetArray_NumpyArray():
+    v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
+        ak._v2.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_ListOffsetArray_NumpyArray(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].size();
+  out[2] = obj[0][0];
+  out[3] = obj[0][1];
+  out[4] = obj[0][2];
+  out[5] = obj[1].size();
+  out[6] = obj[2].size();
+  out[7] = obj[2][0];
+  out[8] = obj[2][1];
+  out[9] = obj[3].size();
+  out[10] = obj[3][0];
+}}
+"""
+    )
+    out = np.zeros(11, dtype=np.float64)
+    ROOT.roottest_ListOffsetArray_NumpyArray(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [4.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5, 1.0, 7.7]
 
 
 # def test_RecordArray_NumpyArray():
