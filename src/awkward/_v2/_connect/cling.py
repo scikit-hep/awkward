@@ -616,7 +616,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       int8_t mask = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.MASK}])[start_ + at];
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type}(at, at + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0] }};
+        return value_type{{ {self.content.class_type}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -697,7 +697,7 @@ namespace awkward {{
       uint8_t byte = reinterpret_cast<uint8_t*>(ptrs_[which_ + {self.MASK}])[start_ + bitat];
       uint8_t mask = {"(byte >> shift) & 1" if self.lsb_order else "(byte << shift) & 128"};
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type}(at, at + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0] }};
+        return value_type{{ {self.content.class_type}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -734,6 +734,38 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
+
+    @property
+    def class_type(self):
+        return f"UnmaskedArray_{self.class_type_suffix}"
+
+    @property
+    def value_type(self):
+        return f"std::optional<{self.content.value_type}>"
+
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
+        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      return value_type{{ {self.content.class_type}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
+    }}
+  }};
+}}
+""".strip()
+            cache[key] = out
+            compiler(out)
 
 
 class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):

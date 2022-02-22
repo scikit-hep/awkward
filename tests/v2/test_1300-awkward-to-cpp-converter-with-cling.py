@@ -764,10 +764,29 @@ void roottest_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t
     ]
 
 
-# def test_UnmaskedArray_NumpyArray():
-#     v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
-#     )
+def test_UnmaskedArray_NumpyArray():
+    v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
+        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_UnmaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[1].has_value() ? obj[1].value() : 999.0;
+  out[2] = obj[3].has_value() ? obj[3].value() : 999.0;
+}}
+"""
+    )
+    out = np.zeros(3, dtype=np.float64)
+    ROOT.roottest_UnmaskedArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [4.0, 1.1, 3.3]
 
 
 # def test_UnionArray_NumpyArray():
@@ -779,6 +798,25 @@ void roottest_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t
 #             ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
 #         ],
 #     )
+
+#     layout = v2a
+#     generator = ak._v2._connect.cling.togenerator(layout.form)
+#     lookup = ak._v2._lookup.Lookup(layout)
+#     generator.generate(compiler)
+
+#     ROOT.gInterpreter.Declare(
+#         f"""
+# void roottest_UnmaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+#   auto obj = {generator.entry()};
+#   out[0] = obj.size();
+#   out[1] = obj[1].has_value() ? obj[1].value() : 999.0;
+#   out[2] = obj[3].has_value() ? obj[3].value() : 999.0;
+# }}
+# """
+#     )
+#     out = np.zeros(3, dtype=np.float64)
+#     ROOT.roottest_UnmaskedArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+#     assert out.tolist() == [4.0, 1.1, 3.3]
 
 
 # def test_RegularArray_RecordArray_NumpyArray():
