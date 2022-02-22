@@ -9,7 +9,6 @@ to_list = ak._v2.operations.convert.to_list
 
 
 def test_combinations():
-    one = ak._v2.Array([1, 2, 3, 4])
     two = ak._v2.Array(["aa", "bb", "cc", "dd"])
     with pytest.raises(ValueError):
         ak._v2.operations.structure.combinations(two, 2, axis=1)
