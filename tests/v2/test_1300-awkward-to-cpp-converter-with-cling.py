@@ -396,7 +396,7 @@ def test_ByteMaskedArray_NumpyArray():
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(debug_compiler)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
@@ -424,7 +424,7 @@ void roottest_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(debug_compiler)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
@@ -444,144 +444,324 @@ void roottest_ByteMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_
     assert out.tolist() == [5.0, 1.1, 999.0, 3.3, 999.0, 5.5]
 
 
-# def test_BitMaskedArray_NumpyArray():
-#     v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=False,
-#     )
+def test_BitMaskedArray_NumpyArray():
+    v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
+    )
 
-#     v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=False,
-#         length=13,
-#         lsb_order=False,
-#     )
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
 
-#     v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=True,
-#     )
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
+  out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
+  out[3] = obj[2].has_value() ? obj[2].value() : 999.0;
+  out[4] = obj[3].has_value() ? obj[3].value() : 999.0;
+  out[5] = obj[4].has_value() ? obj[4].value() : 999.0;
+  out[6] = obj[5].has_value() ? obj[5].value() : 999.0;
+  out[7] = obj[6].has_value() ? obj[6].value() : 999.0;
+  out[8] = obj[7].has_value() ? obj[7].value() : 999.0;
+  out[9] = obj[8].has_value() ? obj[8].value() : 999.0;
+  out[10] = obj[9].has_value() ? obj[9].value() : 999.0;
+  out[11] = obj[10].has_value() ? obj[10].value() : 999.0;
+  out[12] = obj[11].has_value() ? obj[11].value() : 999.0;
+  out[13] = obj[12].has_value() ? obj[12].value() : 999.0;
+}}
+"""
+    )
+    out = np.zeros(14, dtype=np.float64)
+    ROOT.roottest_BitMaskedArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [
+        13.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        1.1,
+        999.0,
+        3.3,
+        999.0,
+        5.5,
+    ]
 
-#     v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=False,
-#         length=13,
-#         lsb_order=True,
-#     )
+    v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=False,
+    )
+
+    layout = v2b
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
+  out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
+  out[3] = obj[2].has_value() ? obj[2].value() : 999.0;
+  out[4] = obj[3].has_value() ? obj[3].value() : 999.0;
+  out[5] = obj[4].has_value() ? obj[4].value() : 999.0;
+  out[6] = obj[5].has_value() ? obj[5].value() : 999.0;
+  out[7] = obj[6].has_value() ? obj[6].value() : 999.0;
+  out[8] = obj[7].has_value() ? obj[7].value() : 999.0;
+  out[9] = obj[8].has_value() ? obj[8].value() : 999.0;
+  out[10] = obj[9].has_value() ? obj[9].value() : 999.0;
+  out[11] = obj[10].has_value() ? obj[10].value() : 999.0;
+  out[12] = obj[11].has_value() ? obj[11].value() : 999.0;
+  out[13] = obj[12].has_value() ? obj[12].value() : 999.0;
+}}
+"""
+    )
+    out = np.zeros(14, dtype=np.float64)
+    ROOT.roottest_BitMaskedArray_NumpyArray_v2b(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [
+        13.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        1.1,
+        999.0,
+        3.3,
+        999.0,
+        5.5,
+    ]
+
+    v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=True,
+    )
+
+    layout = v2c
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
+  out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
+  out[3] = obj[2].has_value() ? obj[2].value() : 999.0;
+  out[4] = obj[3].has_value() ? obj[3].value() : 999.0;
+  out[5] = obj[4].has_value() ? obj[4].value() : 999.0;
+  out[6] = obj[5].has_value() ? obj[5].value() : 999.0;
+  out[7] = obj[6].has_value() ? obj[6].value() : 999.0;
+  out[8] = obj[7].has_value() ? obj[7].value() : 999.0;
+  out[9] = obj[8].has_value() ? obj[8].value() : 999.0;
+  out[10] = obj[9].has_value() ? obj[9].value() : 999.0;
+  out[11] = obj[10].has_value() ? obj[10].value() : 999.0;
+  out[12] = obj[11].has_value() ? obj[11].value() : 999.0;
+  out[13] = obj[12].has_value() ? obj[12].value() : 999.0;
+}}
+"""
+    )
+    out = np.zeros(14, dtype=np.float64)
+    ROOT.roottest_BitMaskedArray_NumpyArray_v2c(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [
+        13.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        1.1,
+        999.0,
+        3.3,
+        999.0,
+        5.5,
+    ]
+
+    v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=False,
+        length=13,
+        lsb_order=True,
+    )
+
+    layout = v2d
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
+  out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
+  out[3] = obj[2].has_value() ? obj[2].value() : 999.0;
+  out[4] = obj[3].has_value() ? obj[3].value() : 999.0;
+  out[5] = obj[4].has_value() ? obj[4].value() : 999.0;
+  out[6] = obj[5].has_value() ? obj[5].value() : 999.0;
+  out[7] = obj[6].has_value() ? obj[6].value() : 999.0;
+  out[8] = obj[7].has_value() ? obj[7].value() : 999.0;
+  out[9] = obj[8].has_value() ? obj[8].value() : 999.0;
+  out[10] = obj[9].has_value() ? obj[9].value() : 999.0;
+  out[11] = obj[10].has_value() ? obj[10].value() : 999.0;
+  out[12] = obj[11].has_value() ? obj[11].value() : 999.0;
+  out[13] = obj[12].has_value() ? obj[12].value() : 999.0;
+}}
+"""
+    )
+    out = np.zeros(14, dtype=np.float64)
+    ROOT.roottest_BitMaskedArray_NumpyArray_v2d(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [
+        13.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        1.1,
+        999.0,
+        3.3,
+        999.0,
+        5.5,
+    ]
 
 
 # def test_UnmaskedArray_NumpyArray():

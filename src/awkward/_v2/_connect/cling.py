@@ -386,8 +386,8 @@ namespace awkward {{
     {self._generate_common()}
 
     value_type operator[](size_t at) const noexcept {{
-      ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[at];
-      ssize_t stop = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STOPS}])[at];
+      ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[start_ + at];
+      ssize_t stop = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STOPS}])[start_ + at];
       return value_type(start, stop, ptrs_[which_ + {self.CONTENT}], ptrs_);
     }}
   }};
@@ -464,7 +464,7 @@ namespace awkward {{
     {self._generate_common()}
 
     value_type operator[](size_t at) const noexcept {{
-      ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[at];
+      ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
       return {self.content.class_type}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0];
     }}
   }};
@@ -539,7 +539,7 @@ namespace awkward {{
     {self._generate_common()}
 
     value_type operator[](size_t at) const noexcept {{
-      ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[at];
+      ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
       if (index >= 0) {{
         return value_type{{ {self.content.class_type}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0] }};
       }}
@@ -614,7 +614,7 @@ namespace awkward {{
     {self._generate_common()}
 
     value_type operator[](size_t at) const noexcept {{
-      int8_t mask = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.MASK}])[at];
+      int8_t mask = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.MASK}])[start_ + at];
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
         return value_type{{ {self.content.class_type}(at, at + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0] }};
       }}
@@ -654,7 +654,7 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
                 self.valid_when,
                 self.lsb_order,
                 self.identifier,
-                self.parameters,
+                json.dumps(self.parameters),
             )
         )
 
@@ -667,6 +667,47 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
+
+    @property
+    def class_type(self):
+        return f"BitMaskedArray_{self.class_type_suffix}"
+
+    @property
+    def value_type(self):
+        return f"std::optional<{self.content.value_type}>"
+
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
+        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      size_t bitat = at / 8;
+      size_t shift = at % 8;
+      uint8_t byte = reinterpret_cast<uint8_t*>(ptrs_[which_ + {self.MASK}])[start_ + bitat];
+      uint8_t mask = {"(byte >> shift) & 1" if self.lsb_order else "(byte << shift) & 128"};
+      if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
+        return value_type{{ {self.content.class_type}(at, at + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0] }};
+      }}
+      else {{
+        return std::nullopt;
+      }}
+    }}
+  }};
+}}
+""".strip()
+            cache[key] = out
+            compiler(out)
 
 
 class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
