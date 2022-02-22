@@ -2,6 +2,7 @@
 
 import base64
 import struct
+import json
 
 import awkward as ak
 
@@ -27,6 +28,14 @@ namespace awkward {
   public:
     ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : start_(start), stop_(stop), which_(which), ptrs_(ptrs) { }
+
+    size_t size() const noexcept {{
+      return stop_ - start_;
+    }}
+
+    bool empty() const noexcept {{
+      return start_ == stop_;
+    }}
 
   protected:
     ssize_t start_;
@@ -153,6 +162,31 @@ namespace awkward {{
             )
         return out
 
+    def _generate_common(self):
+        params = [
+            f"if (parameter == {json.dumps(key)}) return {json.dumps(json.dumps(value))};\n    "
+            for key, value in self.parameters.items()
+        ]
+        return f"""
+  typedef {self.value_type} value_type;
+
+  const std::string parameter(const std::string& parameter) const noexcept {{
+    {"" if len(params) == 0 else "".join(x for x in params)}return "null";
+  }}
+
+  value_type at(size_t at) const {{
+    size_t length = stop_ - start_;
+    if (at >= length) {{
+      throw std::out_of_range(
+        std::to_string(at) + " is out of range for length " + std::to_string(length)
+      );
+    }}
+    else {{
+      return (*this)[at];
+    }}
+  }}
+""".strip()
+
     def entry(self, length="length", ptrs="ptrs"):
         return f"awkward::{self.name}(0, {length}, 0, {ptrs})"
 
@@ -175,7 +209,7 @@ class NumpyGenerator(Generator, ak._v2._lookup.NumpyLookup):
                 type(self),
                 self.primitive,
                 self.identifier,
-                tuple(self.parameters.items()),
+                json.dumps(self.parameters),
             )
         )
 
@@ -191,7 +225,7 @@ class NumpyGenerator(Generator, ak._v2._lookup.NumpyLookup):
         return f"NumpyArray_{self.primitive}_{self.name_suffix}"
 
     @property
-    def itemtype(self):
+    def value_type(self):
         return {
             "bool": "bool",
             "int8": "int8_t",
@@ -217,8 +251,10 @@ public:
   {self.name}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
     : ArrayView(start, stop, which, ptrs) {{ }}
 
-  {self.itemtype} operator[](ssize_t at) {{
-    return 123;
+  {self._generate_common()}
+
+  value_type operator[](size_t at) const noexcept {{
+    return reinterpret_cast<{self.value_type}*>(ptrs_[which_ + {self.ARRAY}])[start_ + at];
   }}
 }};
 """.strip()
@@ -247,7 +283,7 @@ class RegularGenerator(Generator, ak._v2._lookup.RegularLookup):
                 self.content,
                 self.size,
                 self.identifier,
-                tuple(self.parameters.items()),
+                json.dumps(self.parameters),
             )
         )
 
@@ -288,7 +324,7 @@ class ListGenerator(Generator, ak._v2._lookup.ListLookup):
                 self.indextype,
                 self.content,
                 self.identifier,
-                tuple(self.parameters.items()),
+                json.dumps(self.parameters),
             )
         )
 
@@ -324,7 +360,7 @@ class IndexedGenerator(Generator, ak._v2._lookup.IndexedLookup):
                 self.indextype,
                 self.content,
                 self.identifier,
-                tuple(self.parameters.items()),
+                json.dumps(self.parameters),
             )
         )
 
@@ -360,7 +396,7 @@ class IndexedOptionGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
                 self.indextype,
                 self.content,
                 self.identifier,
-                tuple(self.parameters.items()),
+                json.dumps(self.parameters),
             )
         )
 
@@ -396,7 +432,7 @@ class ByteMaskedGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
                 self.content,
                 self.valid_when,
                 self.identifier,
-                tuple(self.parameters.items()),
+                json.dumps(self.parameters),
             )
         )
 
@@ -462,7 +498,7 @@ class UnmaskedGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
 
     def __hash__(self):
         return hash(
-            (type(self), self.content, self.identifier, tuple(self.parameters.items()))
+            (type(self), self.content, self.identifier, json.dumps(self.parameters))
         )
 
     def __eq__(self, other):
@@ -496,7 +532,7 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
                 self.contents,
                 self.fields,
                 self.identifier,
-                tuple(self.parameters.items()),
+                json.dumps(self.parameters),
             )
         )
 
@@ -532,7 +568,7 @@ class UnionGenerator(Generator, ak._v2._lookup.UnionLookup):
                 self.indextype,
                 self.contents,
                 self.identifier,
-                tuple(self.parameters.items()),
+                json.dumps(self.parameters),
             )
         )
 
