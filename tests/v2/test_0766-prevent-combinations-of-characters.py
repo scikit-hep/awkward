@@ -14,14 +14,17 @@ def test_combinations():
         ak._v2.operations.structure.combinations(two, 2, axis=1)
 
     two = ak._v2.Array([["aa", "bb"], ["cc"], [], ["dd"]])
-    assert to_list(ak._v2.operations.structure.combinations(two, 2, axis=1)) == [[("aa", "bb")], [], [], []]
+    assert to_list(ak._v2.operations.structure.combinations(two, 2, axis=1)) == [
+        [("aa", "bb")],
+        [],
+        [],
+        [],
+    ]
     with pytest.raises(ValueError):
         ak._v2.operations.structure.combinations(two, 2, axis=2)
 
 
-@pytest.mark.skip(
-    reason="FIXME: ak._v2.operations.structure.cartesian"
-)
+@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.cartesian")
 def test_cartesian():
     one = ak._v2.Array([1, 2, 3, 4])
     two = ak._v2.Array(["aa", "bb", "cc", "dd"])
