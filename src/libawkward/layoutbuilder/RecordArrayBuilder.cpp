@@ -92,8 +92,15 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   RecordArrayBuilder<T, I>::field_index() {
-    return (field_index_ < contents_size_ - 1) ?
-      field_index_++ : (field_index_ = 0);
+    if (!list_field_index_.empty())
+    {
+      return field_index_;
+    }
+    auto index = field_index_;
+    field_index_ = (++field_index_ < contents_size_)
+                       ? field_index_
+                       : field_index_ % contents_size_;
+    return index;
   }
 
   template <typename T, typename I>
