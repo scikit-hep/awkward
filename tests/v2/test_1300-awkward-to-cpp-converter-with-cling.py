@@ -386,18 +386,62 @@ void roottest_IndexedOptionArray_NumpyArray_v2a(double* out, ssize_t length, ssi
     assert out.tolist() == [7.0, 2.2, 2.2, 999.0, 1.1, 999.0, 5.5, 4.4]
 
 
-# def test_ByteMaskedArray_NumpyArray():
-#     v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-#         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-#         valid_when=True,
-#     )
+def test_ByteMaskedArray_NumpyArray():
+    v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        valid_when=True,
+    )
 
-#     v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-#         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-#         valid_when=False,
-#     )
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(debug_compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
+  out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
+  out[3] = obj[2].has_value() ? obj[2].value() : 999.0;
+  out[4] = obj[3].has_value() ? obj[3].value() : 999.0;
+  out[5] = obj[4].has_value() ? obj[4].value() : 999.0;
+}}
+"""
+    )
+    out = np.zeros(6, dtype=np.float64)
+    ROOT.roottest_ByteMaskedArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [5.0, 1.1, 999.0, 3.3, 999.0, 5.5]
+
+    v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        valid_when=False,
+    )
+
+    layout = v2b
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(debug_compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_ByteMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
+  out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
+  out[3] = obj[2].has_value() ? obj[2].value() : 999.0;
+  out[4] = obj[3].has_value() ? obj[3].value() : 999.0;
+  out[5] = obj[4].has_value() ? obj[4].value() : 999.0;
+}}
+"""
+    )
+    out = np.zeros(6, dtype=np.float64)
+    ROOT.roottest_ByteMaskedArray_NumpyArray_v2b(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [5.0, 1.1, 999.0, 3.3, 999.0, 5.5]
 
 
 # def test_BitMaskedArray_NumpyArray():
