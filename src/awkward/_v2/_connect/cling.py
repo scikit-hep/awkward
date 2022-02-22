@@ -129,7 +129,7 @@ class Generator:
             raise NotImplementedError("TODO: identifiers in C++")
 
     @property
-    def name_suffix(self):
+    def class_type_suffix(self):
         return (
             base64.encodebytes(struct.pack("q", hash(self)))
             .rstrip(b"=\n")
@@ -138,57 +138,33 @@ class Generator:
             .decode("ascii")
         )
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        generate_ArrayView(compiler, use_cached=True)
-
-        optionnames = ("flatlist_as_rvec",)
-        options = (flatlist_as_rvec,)
-
-        key = (self, options)
-        if use_cached:
-            out = cache.get(key)
-        else:
-            out = None
-
-        if out is None:
-            cache[key] = out = self._generate(dict(zip(optionnames, options)))
-            eoln = "\n"
-            compiler(
-                f"""
-namespace awkward {{
-  {out.replace(eoln, eoln + "  ")}
-}}
-""".strip()
-            )
-        return out
-
     def _generate_common(self):
         params = [
             f"if (parameter == {json.dumps(key)}) return {json.dumps(json.dumps(value))};\n    "
             for key, value in self.parameters.items()
         ]
         return f"""
-  typedef {self.value_type} value_type;
+    typedef {self.value_type} value_type;
 
-  const std::string parameter(const std::string& parameter) const noexcept {{
-    {"" if len(params) == 0 else "".join(x for x in params)}return "null";
-  }}
+    const std::string parameter(const std::string& parameter) const noexcept {{
+      {"" if len(params) == 0 else "".join(x for x in params)}return "null";
+    }}
 
-  value_type at(size_t at) const {{
-    size_t length = stop_ - start_;
-    if (at >= length) {{
-      throw std::out_of_range(
-        std::to_string(at) + " is out of range for length " + std::to_string(length)
-      );
+    value_type at(size_t at) const {{
+      size_t length = stop_ - start_;
+      if (at >= length) {{
+        throw std::out_of_range(
+          std::to_string(at) + " is out of range for length " + std::to_string(length)
+        );
+      }}
+      else {{
+        return (*this)[at];
+      }}
     }}
-    else {{
-      return (*this)[at];
-    }}
-  }}
 """.strip()
 
     def entry(self, length="length", ptrs="ptrs"):
-        return f"awkward::{self.name}(0, {length}, 0, {ptrs})"
+        return f"awkward::{self.class_type}(0, {length}, 0, {ptrs})"
 
 
 class NumpyGenerator(Generator, ak._v2._lookup.NumpyLookup):
@@ -221,8 +197,8 @@ class NumpyGenerator(Generator, ak._v2._lookup.NumpyLookup):
         )
 
     @property
-    def name(self):
-        return f"NumpyArray_{self.primitive}_{self.name_suffix}"
+    def class_type(self):
+        return f"NumpyArray_{self.primitive}_{self.class_type_suffix}"
 
     @property
     def value_type(self):
@@ -244,20 +220,29 @@ class NumpyGenerator(Generator, ak._v2._lookup.NumpyLookup):
             "timedelta64": "std::duration",
         }[self.primitive]
 
-    def _generate(self, options):
-        return f"""
-class {self.name}: public ArrayView {{
-public:
-  {self.name}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-    : ArrayView(start, stop, which, ptrs) {{ }}
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
 
-  {self._generate_common()}
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            cache[
+                key
+            ] = out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
 
-  value_type operator[](size_t at) const noexcept {{
-    return reinterpret_cast<{self.value_type}*>(ptrs_[which_ + {self.ARRAY}])[start_ + at];
-  }}
-}};
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      return reinterpret_cast<{self.value_type}*>(ptrs_[which_ + {self.ARRAY}])[start_ + at];
+    }}
+  }};
+}}
 """.strip()
+            compiler(out)
 
 
 class RegularGenerator(Generator, ak._v2._lookup.RegularLookup):
@@ -294,6 +279,41 @@ class RegularGenerator(Generator, ak._v2._lookup.RegularLookup):
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
+
+    @property
+    def class_type(self):
+        return f"RegularArray_{self.class_type_suffix}"
+
+    @property
+    def value_type(self):
+        return self.content.class_type
+
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
+        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            cache[
+                key
+            ] = out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      ssize_t start = (start_ + at) * {self.size};
+      ssize_t stop = start + {self.size};
+      return value_type(start, stop, ptrs_[which_ + {self.CONTENT}], ptrs_);
+    }}
+  }};
+}}
+""".strip()
+            compiler(out)
 
 
 class ListGenerator(Generator, ak._v2._lookup.ListLookup):

@@ -31,7 +31,7 @@ def test_NumpyArray():
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_1(double* out, ssize_t length, ssize_t* ptrs) {{
+void roottest_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()};
   out[0] = obj.size();
   out[1] = obj[1];
@@ -40,7 +40,7 @@ void roottest_1(double* out, ssize_t length, ssize_t* ptrs) {{
 """
     )
     out = np.zeros(3, dtype=np.float64)
-    ROOT.roottest_1(out, len(layout), lookup.arrayptrs)
+    ROOT.roottest_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
     assert out.tolist() == [4.0, 1.1, 3.3]
 
 
@@ -54,32 +54,98 @@ def test_EmptyArray():
 
     ROOT.gInterpreter.Declare(
         f"""
-size_t roottest_2(ssize_t length, ssize_t* ptrs) {{
+size_t roottest_EmptyArray_v2a(ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()};
   return obj.size();
 }}
 """
     )
-    assert ROOT.roottest_2(len(layout), lookup.arrayptrs) == 0
+    assert ROOT.roottest_EmptyArray_v2a(len(layout), lookup.arrayptrs) == 0
 
 
-# def test_NumpyArray_shape():
-#     v2a = ak._v2.contents.numpyarray.NumpyArray(
-#         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
-#     )
+def test_NumpyArray_shape():
+    v2a = ak._v2.contents.numpyarray.NumpyArray(
+        np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_NumpyArray_shape_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].size();
+  out[2] = obj[0][0].size();
+  out[3] = obj[0][0][0];
+  out[4] = obj[0][0][1];
+  out[5] = obj[0][1][0];
+  out[6] = obj[0][1][1];
+  out[7] = obj[1][0][0];
+  out[8] = obj[1][1][1];
+}}
+"""
+    )
+    out = np.zeros(9, dtype=np.float64)
+    ROOT.roottest_NumpyArray_shape_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [2.0, 3.0, 5.0, 0.0, 1.0, 5.0, 6.0, 15.0, 21.0]
 
 
-# def test_RegularArray_NumpyArray():
-#     v2a = ak._v2.contents.regulararray.RegularArray(
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
-#         3,
-#     )
+def test_RegularArray_NumpyArray():
+    v2a = ak._v2.contents.regulararray.RegularArray(
+        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        3,
+    )
 
-#     v2b = ak._v2.contents.regulararray.RegularArray(
-#         ak._v2.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64)),
-#         0,
-#         zeros_length=10,
-#     )
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_RegularArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0][0];
+  out[2] = obj[0][1];
+  out[3] = obj[1][0];
+  out[4] = obj[1][1];
+  out[5] = obj[1].size();
+}}
+"""
+    )
+    out = np.zeros(6, dtype=np.float64)
+    ROOT.roottest_RegularArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [2.0, 0.0, 1.1, 3.3, 4.4, 3.0]
+
+    v2b = ak._v2.contents.regulararray.RegularArray(
+        ak._v2.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64)),
+        0,
+        zeros_length=10,
+    )
+
+    layout = v2b
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].size();
+  out[2] = obj[1].size();
+}}
+"""
+    )
+    out = np.zeros(3, dtype=np.float64)
+    ROOT.roottest_RegularArray_NumpyArray_v2b(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [10.0, 0.0, 0.0]
 
 
 # def test_ListArray_NumpyArray():
