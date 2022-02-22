@@ -3,10 +3,10 @@
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
+from awkward._v2._connect.rdataframe._from_rdataframe import *
 
 ROOT = pytest.importorskip("ROOT")
 
-from awkward._v2._connect.rdataframe._from_rdataframe import *
 
 def test_from_rdf_to_awkward():
     rdf = ROOT.RDataFrame(100)
@@ -15,9 +15,15 @@ def test_from_rdf_to_awkward():
 
     rdf_x = rdf.Define("x", "gRandom->Rndm()")
     array_x = rdf_x.AsAwkward()
-    assert str(array_x.form) == """{
+    assert (
+        str(array_x.form)
+        == """{
     "class": "RecordArray",
     "contents": {
         "x": "float64"
     }
 }"""
+    )
+
+    array_none = rdf_x.AsAwkward(exclude=["x"])
+    assert array_none.to_list() == []

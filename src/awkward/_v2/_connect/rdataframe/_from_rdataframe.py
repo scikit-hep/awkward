@@ -6,10 +6,6 @@ import awkward as ak
 
 numpy = ak.nplike.Numpy.instance()
 
-ROOT.RDF.RInterface(
-    "ROOT::Detail::RDF::RLoopManager", "void"
-).AsAwkward = lambda data_frame: _as_awkward(data_frame)
-
 
 def _as_awkward(data_frame, columns=None, exclude=None):
     # Find all column names in the dataframe
@@ -50,3 +46,6 @@ def _as_awkward(data_frame, columns=None, exclude=None):
         return ak._v2.contents.recordarray.RecordArray(
             list(contents.values()), list(contents.keys())
         )
+
+
+ROOT.RDF.RInterface("ROOT::Detail::RDF::RLoopManager", "void").AsAwkward = _as_awkward
