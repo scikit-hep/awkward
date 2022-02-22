@@ -932,7 +932,7 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
             self.index_type = "int64_t"
         else:
             raise AssertionError(index_type)
-        self.contents = contents
+        self.contents = tuple(contents)
         self.identifier = identifier
         self.parameters = parameters
 
@@ -955,3 +955,52 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
+
+    @property
+    def class_type(self):
+        return f"UnionArray_{self.class_type_suffix}"
+
+    @property
+    def value_type(self):
+        return f"std::variant<{','.join(x.value_type for x in self.contents)}>"
+
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
+        for content in self.contents:
+            content.generate(compiler, use_cached, flatlist_as_rvec)
+
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            cases = []
+            for i, content in enumerate(self.contents):
+                cases.append(
+                    f"""
+        case {i}:
+          return value_type{{ {content.class_type}(index, index + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_)[0] }};
+""".strip()
+                )
+
+            eoln = "\n        "
+            out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      int8_t tag = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.TAGS}])[start_ + at];
+      {self.index_type} index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
+      switch (tag) {{
+        {eoln.join(cases)}
+        default:
+          return value_type{{ {self.contents[0].class_type}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_)[0] }};
+      }}
+    }}
+  }};
+}}
+""".strip()
+            cache[key] = out
+            compiler(out)
