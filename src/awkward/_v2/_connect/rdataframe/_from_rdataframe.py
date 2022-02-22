@@ -4,12 +4,12 @@ import ROOT
 
 import awkward as ak
 
-from awkward._v2._connect.cling import *
-from ctypes import *
+np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 ROOT.RDF.RInterface(
     "ROOT::Detail::RDF::RLoopManager", "void"
-).AsAwkward = lambda self: _as_awkward(self)
+).AsAwkward = lambda data_frame: _as_awkward(data_frame)
 
 print_me_cpp = """
 void print_me(ROOT::RDF::RResultPtr<ULong64_t> myResultProxy) {
@@ -22,56 +22,41 @@ void print_me(ROOT::RDF::RResultPtr<ULong64_t> myResultProxy) {
 }
 """
 
-progress_cpp = """
-void progress(const ROOT::RDataFrame& tdf, int64_t nEvents) {
-    // any action would do, but `Count` is the most lightweight
-    auto c = tdf.Count();
-    std::string progress;
-    std::mutex bar_mutex;
-    c.OnPartialResultSlot(nEvents / 100, [&progress, &bar_mutex](unsigned int, ULong64_t &) {
-        std::lock_guard<std::mutex> lg(bar_mutex);
-        progress.push_back('#');
-        std::cout << "[";
-        std::cout << std::left;
-        std::cout << std::setw(100);
-        std::cout << progress;
-        std::cout << "]";
-        std::cout << std::flush;
-    });
-    std::cout << "Analysis running..." << std::endl;
 
-    // trigger the event loop by accessing an action's result
-    *c;
-    std::cout << std::endl << "Done!" << std::endl;
-}
-"""
+def _as_awkward(data_frame, columns=None, exclude=None):
+    # Find all column names in the dataframe
+    if not columns:
+        columns = [str(x) for x in data_frame.GetColumnNames()]
 
+    # Exclude the specified columns
+    if exclude is None:
+        exclude = []
+    columns = [x for x in columns if x not in exclude]
 
-def _as_awkward(self):
-    print(self)
-    ncol = self.GetColumnNames()
-    if len(ncol) == 0:
+    if len(columns) == 0:
         return ak._v2.contents.EmptyArray()
-
     else:
-        for key in range(len(ncol)):
-            print(key, "->", ncol[key])
+        # Register Take action for each column
+        result_ptrs = {}
+        for col in columns:
+            column_type = data_frame.GetColumnType(col)
+            result_ptrs[col] = data_frame.Take[column_type](col)
 
-        # FIXME: handle just one column for now
-        ncol_x = self.GetColumnNames()
-        ncol_x_type = self.GetColumnType(ncol_x[0])
+        # Convert the C++ vectors to Awkward arrays
+        contents = {}
+        for col in columns:
+            cpp_reference = result_ptrs[col].GetValue()
+            if hasattr(cpp_reference, "__array_interface__"):
+                tmp = numpy.asarray(
+                    cpp_reference
+                )  # This adopts the memory of the C++ object.
+                contents[col] = ak._v2.contents.numpyarray.NumpyArray(tmp)
+            else:
+                tmp = numpy.empty(len(cpp_reference), dtype=numpy.object)
+                for i, x in enumerate(cpp_reference):
+                    tmp[
+                        i
+                    ] = x  # This creates only the wrapping of the objects and does not copy.
+                contents[col] = ak._v2.contents.numpyarray.NumpyArray(tmp)
 
-        entries_x = self.Count()
-        num = entries_x.GetValue()
-        ptr = entries_x.GetPtr()
-        print(f"{entries_x.GetValue()} entries passed all filters")
-
-        ROOT.gInterpreter.ProcessLine(print_me_cpp)
-        ROOT.print_me(entries_x)
-
-        # ROOT.gInterpreter.ProcessLine(progress_cpp)
-        # ROOT.progress(self, 5)
-        #
-        return ak._v2.contents.EmptyArray()
-
-        raise NotImplementedError(f"FIXME: cannot handle {ncol} columns just yet.")
+        return contents[columns[0]]
