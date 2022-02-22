@@ -324,18 +324,66 @@ void roottest_RecordArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* p
     assert out.tolist() == [10.0]
 
 
-# def test_IndexedArray_NumpyArray():
-#     v2a = ak._v2.contents.indexedarray.IndexedArray(
-#         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-#     )
+def test_IndexedArray_NumpyArray():
+    v2a = ak._v2.contents.indexedarray.IndexedArray(
+        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_IndexedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0];
+  out[2] = obj[1];
+  out[3] = obj[2];
+  out[4] = obj[3];
+  out[5] = obj[4];
+  out[6] = obj[5];
+  out[7] = obj[6];
+}}
+"""
+    )
+    out = np.zeros(8, dtype=np.float64)
+    ROOT.roottest_IndexedArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [7.0, 2.2, 2.2, 0.0, 1.1, 4.4, 5.5, 4.4]
 
 
-# def test_IndexedOptionArray_NumpyArray():
-#     v2a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-#         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
-#         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-#     )
+def test_IndexedOptionArray_NumpyArray():
+    v2a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_IndexedOptionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
+  out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
+  out[3] = obj[2].has_value() ? obj[2].value() : 999.0;
+  out[4] = obj[3].has_value() ? obj[3].value() : 999.0;
+  out[5] = obj[4].has_value() ? obj[4].value() : 999.0;
+  out[6] = obj[5].has_value() ? obj[5].value() : 999.0;
+  out[7] = obj[6].has_value() ? obj[6].value() : 999.0;
+}}
+"""
+    )
+    out = np.zeros(8, dtype=np.float64)
+    ROOT.roottest_IndexedOptionArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [7.0, 2.2, 2.2, 999.0, 1.1, 999.0, 5.5, 4.4]
 
 
 # def test_ByteMaskedArray_NumpyArray():

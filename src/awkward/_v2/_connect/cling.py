@@ -10,6 +10,8 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
+# C++17 is required for optional, variant
+headers = ("stdexcept", "string", "optional", "variant", "complex", "chrono")
 cache = {}
 
 
@@ -438,6 +440,39 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
             and self.parameters == other.parameters
         )
 
+    @property
+    def class_type(self):
+        return f"IndexedArray_{self.class_type_suffix}"
+
+    @property
+    def value_type(self):
+        return self.content.value_type
+
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
+        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[at];
+      return {self.content.class_type}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0];
+    }}
+  }};
+}}
+""".strip()
+            cache[key] = out
+            compiler(out)
+
 
 class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
     @classmethod
@@ -479,6 +514,44 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
+
+    @property
+    def class_type(self):
+        return f"IndexedOptionArray_{self.class_type_suffix}"
+
+    @property
+    def value_type(self):
+        return f"std::optional<{self.content.value_type}>"
+
+    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        generate_ArrayView(compiler, use_cached=use_cached)
+        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+
+        key = (self, use_cached, flatlist_as_rvec)
+        if not use_cached or key not in cache:
+            out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[at];
+      if (index < 0) {{
+        return std::nullopt;
+      }}
+      else {{
+        return value_type{{ {self.content.class_type}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0] }};
+      }}
+    }}
+  }};
+}}
+""".strip()
+            cache[key] = out
+            compiler(out)
 
 
 class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
