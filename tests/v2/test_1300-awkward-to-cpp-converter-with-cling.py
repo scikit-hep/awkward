@@ -94,7 +94,8 @@ void roottest_NumpyArray_shape_v2a(double* out, ssize_t length, ssize_t* ptrs) {
     assert out.tolist() == [2.0, 3.0, 5.0, 0.0, 1.0, 5.0, 6.0, 15.0, 21.0]
 
 
-def test_RegularArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_RegularArray_NumpyArray(flatlist_as_rvec):
     v2a = ak._v2.contents.regulararray.RegularArray(
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         3,
@@ -103,11 +104,11 @@ def test_RegularArray_NumpyArray():
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler)
+    generator.generate(debug_compiler, flatlist_as_rvec=flatlist_as_rvec)
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_RegularArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+void roottest_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()};
   out[0] = obj.size();
   out[1] = obj[0][0];
@@ -119,9 +120,13 @@ void roottest_RegularArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* 
 """
     )
     out = np.zeros(6, dtype=np.float64)
-    ROOT.roottest_RegularArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    getattr(ROOT, f"roottest_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}")(
+        out, len(layout), lookup.arrayptrs
+    )
     assert out.tolist() == [2.0, 0.0, 1.1, 3.3, 4.4, 3.0]
 
+
+def test_RegularArray_NumpyArray_v2b():
     v2b = ak._v2.contents.regulararray.RegularArray(
         ak._v2.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64)),
         0,
@@ -148,7 +153,8 @@ void roottest_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* 
     assert out.tolist() == [10.0, 0.0, 0.0]
 
 
-def test_ListArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_ListArray_NumpyArray(flatlist_as_rvec):
     v2a = ak._v2.contents.listarray.ListArray(
         ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
         ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
@@ -160,11 +166,11 @@ def test_ListArray_NumpyArray():
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler)
+    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_ListArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+void roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()};
   out[0] = obj.size();
   out[1] = obj[0].size();
@@ -179,11 +185,14 @@ void roottest_ListArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptr
 """
     )
     out = np.zeros(9, dtype=np.float64)
-    ROOT.roottest_ListArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    getattr(ROOT, f"roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}")(
+        out, len(layout), lookup.arrayptrs
+    )
     assert out.tolist() == [3.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5]
 
 
-def test_ListOffsetArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
         ak._v2.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
         ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
@@ -192,11 +201,11 @@ def test_ListOffsetArray_NumpyArray():
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler)
+    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_ListOffsetArray_NumpyArray(double* out, ssize_t length, ssize_t* ptrs) {{
+void roottest_ListOffsetArray_NumpyArray_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()};
   out[0] = obj.size();
   out[1] = obj[0].size();
@@ -213,7 +222,9 @@ void roottest_ListOffsetArray_NumpyArray(double* out, ssize_t length, ssize_t* p
 """
     )
     out = np.zeros(11, dtype=np.float64)
-    ROOT.roottest_ListOffsetArray_NumpyArray(out, len(layout), lookup.arrayptrs)
+    getattr(ROOT, f"roottest_ListOffsetArray_NumpyArray_{flatlist_as_rvec}")(
+        out, len(layout), lookup.arrayptrs
+    )
     assert out.tolist() == [4.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5, 1.0, 7.7]
 
 
@@ -833,7 +844,8 @@ void roottest_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* pt
     assert out.tolist() == [7, 1, 1, 0, 0, 1, 0, 1, 5.5, 4.4, 1, 2, 3.3, 3, 5.5]
 
 
-def test_nested_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_nested_NumpyArray(flatlist_as_rvec):
     v2a = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
         ak._v2.contents.numpyarray.NumpyArray(
@@ -845,11 +857,11 @@ def test_nested_NumpyArray():
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler)
+    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_nested_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+void roottest_nested_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()}[1];
   out[0] = obj.size();
   out[1] = obj[1];
@@ -858,7 +870,9 @@ void roottest_nested_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) 
 """
     )
     out = np.zeros(3, dtype=np.float64)
-    ROOT.roottest_nested_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    getattr(ROOT, f"roottest_nested_NumpyArray_v2a_{flatlist_as_rvec}")(
+        out, len(layout), lookup.arrayptrs
+    )
     assert out.tolist() == [4.0, 1.1, 3.3]
 
 
@@ -959,7 +973,8 @@ void roottest_nested_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ss
     assert out.tolist() == [10.0, 0.0, 0.0]
 
 
-def test_nested_ListArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_nested_ListArray_NumpyArray(flatlist_as_rvec):
     v2a = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 4], dtype=np.int64)),
         ak._v2.contents.listarray.ListArray(
@@ -974,11 +989,11 @@ def test_nested_ListArray_NumpyArray():
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler)
+    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_nested_ListArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+void roottest_nested_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
@@ -993,11 +1008,14 @@ void roottest_nested_ListArray_NumpyArray_v2a(double* out, ssize_t length, ssize
 """
     )
     out = np.zeros(9, dtype=np.float64)
-    ROOT.roottest_nested_ListArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    getattr(ROOT, f"roottest_nested_ListArray_NumpyArray_v2a_{flatlist_as_rvec}")(
+        out, len(layout), lookup.arrayptrs
+    )
     assert out.tolist() == [3.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5]
 
 
-def test_nested_ListOffsetArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     v2a = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
         ak._v2.contents.listoffsetarray.ListOffsetArray(
@@ -1009,11 +1027,11 @@ def test_nested_ListOffsetArray_NumpyArray():
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler)
+    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_nested_ListOffsetArray_NumpyArray(double* out, ssize_t length, ssize_t* ptrs) {{
+void roottest_nested_ListOffsetArray_NumpyArray_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
@@ -1030,7 +1048,9 @@ void roottest_nested_ListOffsetArray_NumpyArray(double* out, ssize_t length, ssi
 """
     )
     out = np.zeros(11, dtype=np.float64)
-    ROOT.roottest_nested_ListOffsetArray_NumpyArray(out, len(layout), lookup.arrayptrs)
+    getattr(ROOT, f"roottest_nested_ListOffsetArray_NumpyArray_{flatlist_as_rvec}")(
+        out, len(layout), lookup.arrayptrs
+    )
     assert out.tolist() == [4.0, 3.0, 1.1, 2.2, 3.3, 0.0, 2.0, 4.4, 5.5, 1.0, 7.7]
 
 

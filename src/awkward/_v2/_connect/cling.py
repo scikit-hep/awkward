@@ -139,13 +139,18 @@ class Generator:
             .decode("ascii")
         )
 
-    def _generate_common(self):
+    def _generate_common(self, define_value_type=True):
         params = [
             f"if (parameter == {json.dumps(key)}) return {json.dumps(json.dumps(value))};\n      "
             for key, value in self.parameters.items()
         ]
+        if define_value_type:
+            defining_value_type = f"typedef {self.value_type} value_type;"
+        else:
+            defining_value_type = ""
+
         return f"""
-    typedef {self.value_type} value_type;
+    {defining_value_type}
 
     const std::string parameter(const std::string& parameter) const noexcept {{
       {"" if len(params) == 0 else "".join(x for x in params)}return "null";
@@ -285,6 +290,9 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
             "__array__"
         ) in ("string", "bytestring")
 
+    def is_flatlist(self):
+        return isinstance(self.content, NumpyArrayGenerator)
+
     @property
     def class_type(self):
         return f"RegularArray_{self.class_type_suffix}"
@@ -298,7 +306,7 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
         generate_ArrayView(compiler, use_cached=use_cached)
-        if not self.is_string:
+        if not self.is_string and not (flatlist_as_rvec and self.is_flatlist):
             self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
         key = (self, use_cached, flatlist_as_rvec)
@@ -318,6 +326,30 @@ namespace awkward {{
       ssize_t stop = start + {self.size};
       ssize_t which = ptrs_[which_ + {self.CONTENT}];
       char* content = reinterpret_cast<char*>(ptrs_[which + {NumpyArrayGenerator.ARRAY}]) + start;
+      return value_type(content, stop - start);
+    }}
+  }};
+}}
+""".strip()
+            elif flatlist_as_rvec and self.is_flatlist:
+                nested_type = self.content.value_type
+                value_type = f"ROOT::RVec<{nested_type}>"
+                out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {value_type} value_type;
+
+    {self._generate_common(define_value_type=False)}
+
+    value_type operator[](size_t at) const noexcept {{
+      ssize_t start = (start_ + at) * {self.size};
+      ssize_t stop = start + {self.size};
+      ssize_t which = ptrs_[which_ + {self.CONTENT}];
+      {nested_type}* content = reinterpret_cast<{nested_type}*>(ptrs_[which + {NumpyArrayGenerator.ARRAY}]) + start;
       return value_type(content, stop - start);
     }}
   }};
@@ -399,6 +431,9 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
             "__array__"
         ) in ("string", "bytestring")
 
+    def is_flatlist(self):
+        return isinstance(self.content, NumpyArrayGenerator)
+
     @property
     def class_type(self):
         return f"ListArray_{self.class_type_suffix}"
@@ -412,7 +447,7 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
         generate_ArrayView(compiler, use_cached=use_cached)
-        if not self.is_string:
+        if not self.is_string and not (flatlist_as_rvec and self.is_flatlist):
             self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
         key = (self, use_cached, flatlist_as_rvec)
@@ -432,6 +467,30 @@ namespace awkward {{
       ssize_t stop = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STOPS}])[start_ + at];
       ssize_t which = ptrs_[which_ + {self.CONTENT}];
       char* content = reinterpret_cast<char*>(ptrs_[which + {NumpyArrayGenerator.ARRAY}]) + start;
+      return value_type(content, stop - start);
+    }}
+  }};
+}}
+""".strip()
+            elif flatlist_as_rvec and self.is_flatlist:
+                nested_type = self.content.value_type
+                value_type = f"ROOT::RVec<{nested_type}>"
+                out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {value_type} value_type;
+
+    {self._generate_common(define_value_type=False)}
+
+    value_type operator[](size_t at) const noexcept {{
+      ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[start_ + at];
+      ssize_t stop = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STOPS}])[start_ + at];
+      ssize_t which = ptrs_[which_ + {self.CONTENT}];
+      {nested_type}* content = reinterpret_cast<{nested_type}*>(ptrs_[which + {NumpyArrayGenerator.ARRAY}]) + start;
       return value_type(content, stop - start);
     }}
   }};
