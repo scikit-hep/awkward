@@ -82,7 +82,7 @@ namespace awkward {
 
 def togenerator(form):
     if isinstance(form, ak._v2.forms.EmptyForm):
-        return togenerator(form.toEmptyForm(np.dtype(np.float64)))
+        return togenerator(form.toNumpyForm(np.dtype(np.float64)))
 
     elif isinstance(form, ak._v2.forms.NumpyForm):
         if len(form.inner_shape) == 0:
@@ -692,10 +692,12 @@ namespace awkward {{
     {self._generate_common()}
 
     value_type operator[](size_t at) const noexcept {{
-      size_t bitat = at / 8;
-      size_t shift = at % 8;
-      uint8_t byte = reinterpret_cast<uint8_t*>(ptrs_[which_ + {self.MASK}])[start_ + bitat];
+      size_t startat = start_ + at;
+      size_t bitat = startat / 8;
+      size_t shift = startat % 8;
+      uint8_t byte = reinterpret_cast<uint8_t*>(ptrs_[which_ + {self.MASK}])[bitat];
       uint8_t mask = {"(byte >> shift) & 1" if self.lsb_order else "(byte << shift) & 128"};
+
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
         return value_type{{ {self.content.class_type}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
       }}

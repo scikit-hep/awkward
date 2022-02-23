@@ -22,7 +22,7 @@ def code_to_function(code, function_name, externals=None, debug=False):
 
 def tonumbatype(form):
     if isinstance(form, ak._v2.forms.EmptyForm):
-        return tonumbatype(form.toEmptyForm(np.dtype(np.float64)))
+        return tonumbatype(form.toNumpyForm(np.dtype(np.float64)))
 
     elif isinstance(form, ak._v2.forms.NumpyForm):
         if len(form.inner_shape) == 0:
