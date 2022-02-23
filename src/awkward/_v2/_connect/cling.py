@@ -139,19 +139,13 @@ class Generator:
             .decode("ascii")
         )
 
-    def _generate_common(self, define_value_type=True):
+    def _generate_common(self):
         params = [
             f"if (parameter == {json.dumps(key)}) return {json.dumps(json.dumps(value))};\n      "
             for key, value in self.parameters.items()
         ]
-        if define_value_type:
-            defining_value_type = f"typedef {self.value_type} value_type;"
-        else:
-            defining_value_type = ""
 
         return f"""
-    {defining_value_type}
-
     const std::string parameter(const std::string& parameter) const noexcept {{
       {"" if len(params) == 0 else "".join(x for x in params)}return "null";
     }}
@@ -166,7 +160,8 @@ class Generator:
     }}
 """.strip()
 
-    def entry(self, length="length", ptrs="ptrs"):
+    def entry(self, length="length", ptrs="ptrs", flatlist_as_rvec=False):
+        key = (self, flatlist_as_rvec)
         return f"awkward::{self.class_type}(0, {length}, 0, {ptrs})"
 
 
@@ -227,7 +222,7 @@ class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
         generate_ArrayView(compiler, use_cached=use_cached)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -235,6 +230,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -299,17 +296,14 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
 
     @property
     def value_type(self):
-        if self.is_string:
-            return "std::string"
-        else:
-            return self.content.class_type
+        return self.content.class_type
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
         generate_ArrayView(compiler, use_cached=use_cached)
         if not self.is_string and not (flatlist_as_rvec and self.is_flatlist):
             self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             if self.is_string:
                 out = f"""
@@ -318,6 +312,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef std::string value_type;
 
     {self._generate_common()}
 
@@ -343,7 +339,7 @@ namespace awkward {{
 
     typedef {value_type} value_type;
 
-    {self._generate_common(define_value_type=False)}
+    {self._generate_common()}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = (start_ + at) * {self.size};
@@ -362,6 +358,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -440,17 +438,14 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
 
     @property
     def value_type(self):
-        if self.is_string:
-            return "std::string"
-        else:
-            return self.content.class_type
+        return self.content.class_type
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
         generate_ArrayView(compiler, use_cached=use_cached)
         if not self.is_string and not (flatlist_as_rvec and self.is_flatlist):
             self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             if self.is_string:
                 out = f"""
@@ -459,6 +454,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef std::string value_type;
 
     {self._generate_common()}
 
@@ -484,7 +481,7 @@ namespace awkward {{
 
     typedef {value_type} value_type;
 
-    {self._generate_common(define_value_type=False)}
+    {self._generate_common()}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[start_ + at];
@@ -503,6 +500,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -573,7 +572,7 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
         generate_ArrayView(compiler, use_cached=use_cached)
         self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -581,6 +580,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -648,7 +649,7 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         generate_ArrayView(compiler, use_cached=use_cached)
         self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -656,6 +657,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -723,7 +726,7 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
         generate_ArrayView(compiler, use_cached=use_cached)
         self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -731,6 +734,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -801,7 +806,7 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
         generate_ArrayView(compiler, use_cached=use_cached)
         self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -809,6 +814,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -870,7 +877,7 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
         generate_ArrayView(compiler, use_cached=use_cached)
         self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -878,6 +885,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -921,7 +930,7 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
         for content in self.contents:
             content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             params = [
                 f"if (parameter == {json.dumps(key)}) return {json.dumps(json.dumps(value))};\n      "
@@ -1015,7 +1024,7 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
         generate_ArrayView(compiler, use_cached=use_cached)
         self.record.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
@@ -1023,6 +1032,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
@@ -1092,7 +1103,7 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         for content in self.contents:
             content.generate(compiler, use_cached, flatlist_as_rvec)
 
-        key = (self, use_cached, flatlist_as_rvec)
+        key = (self, flatlist_as_rvec)
         if not use_cached or key not in cache:
             cases = []
             for i, content in enumerate(self.contents):
@@ -1110,6 +1121,8 @@ namespace awkward {{
   public:
     {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+
+    typedef {self.value_type} value_type;
 
     {self._generate_common()}
 
