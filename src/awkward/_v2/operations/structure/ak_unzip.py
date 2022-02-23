@@ -33,6 +33,7 @@ def unzip(array, highlevel=True, behavior=None):
     #     >>> y
     #     <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
     # """
+    # behavior = ak._util.behaviorof(array, behavior=behavior)
     # layout = ak.operations.convert.to_layout(array, allow_record=True, allow_other=False)
     # fields = ak.operations.describe.fields(layout)
 
