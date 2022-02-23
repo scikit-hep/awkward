@@ -1788,3 +1788,61 @@ void roottest_nested_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssiz
     out = np.zeros(15, dtype=np.float64)
     ROOT.roottest_nested_UnionArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
     assert out.tolist() == [7, 1, 1, 0, 0, 1, 0, 1, 5.5, 4.4, 1, 2, 3.3, 3, 5.5]
+
+
+def test_ListArray_strings():
+    layout = ak._v2.operations.convert.from_iter(
+        ["one", "two", "three", "four", "five"], highlevel=False
+    )
+
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_ListArray_strings(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = (obj[0] == "one");
+  out[2] = (obj[1] == "two");
+  out[3] = (obj[2] == "three");
+  out[4] = (obj[3] == "four");
+  out[5] = (obj[4] == "five");
+}}
+"""
+    )
+    out = np.zeros(6, dtype=np.float64)
+    ROOT.roottest_ListArray_strings(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [5.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+
+def test_RegularArray_strings():
+    layout = ak._v2.operations.structure.to_regular(
+        ak._v2.operations.convert.from_iter(
+            ["onexx", "twoxx", "three", "fourx", "fivex"]
+        ),
+        axis=1,
+        highlevel=False,
+    )
+
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_RegularArray_strings(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()};
+  out[0] = obj.size();
+  out[1] = (obj[0] == "onexx");
+  out[2] = (obj[1] == "twoxx");
+  out[3] = (obj[2] == "three");
+  out[4] = (obj[3] == "fourx");
+  out[5] = (obj[4] == "fivex");
+}}
+"""
+    )
+    out = np.zeros(6, dtype=np.float64)
+    ROOT.roottest_RegularArray_strings(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [5.0, 1.0, 1.0, 1.0, 1.0, 1.0]

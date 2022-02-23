@@ -280,20 +280,51 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
         )
 
     @property
+    def is_string(self):
+        return isinstance(self.parameters, dict) and self.parameters.get(
+            "__array__"
+        ) in ("string", "bytestring")
+
+    @property
     def class_type(self):
         return f"RegularArray_{self.class_type_suffix}"
 
     @property
     def value_type(self):
-        return self.content.class_type
+        if self.is_string:
+            return "std::string"
+        else:
+            return self.content.class_type
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        if not self.is_string:
+            self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
         key = (self, use_cached, flatlist_as_rvec)
         if not use_cached or key not in cache:
-            out = f"""
+            if self.is_string:
+                out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      ssize_t start = (start_ + at) * {self.size};
+      ssize_t stop = start + {self.size};
+      ssize_t which = ptrs_[which_ + {self.CONTENT}];
+      char* content = reinterpret_cast<char*>(ptrs_[which + {NumpyArrayGenerator.ARRAY}]) + start;
+      return value_type(content, stop - start);
+    }}
+  }};
+}}
+""".strip()
+            else:
+                out = f"""
 namespace awkward {{
   class {self.class_type}: public ArrayView {{
   public:
@@ -363,20 +394,51 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         )
 
     @property
+    def is_string(self):
+        return isinstance(self.parameters, dict) and self.parameters.get(
+            "__array__"
+        ) in ("string", "bytestring")
+
+    @property
     def class_type(self):
         return f"ListArray_{self.class_type_suffix}"
 
     @property
     def value_type(self):
-        return self.content.class_type
+        if self.is_string:
+            return "std::string"
+        else:
+            return self.content.class_type
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        if not self.is_string:
+            self.content.generate(compiler, use_cached, flatlist_as_rvec)
 
         key = (self, use_cached, flatlist_as_rvec)
         if not use_cached or key not in cache:
-            out = f"""
+            if self.is_string:
+                out = f"""
+namespace awkward {{
+  class {self.class_type}: public ArrayView {{
+  public:
+    {self.class_type}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : ArrayView(start, stop, which, ptrs) {{ }}
+
+    {self._generate_common()}
+
+    value_type operator[](size_t at) const noexcept {{
+      ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[start_ + at];
+      ssize_t stop = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STOPS}])[start_ + at];
+      ssize_t which = ptrs_[which_ + {self.CONTENT}];
+      char* content = reinterpret_cast<char*>(ptrs_[which + {NumpyArrayGenerator.ARRAY}]) + start;
+      return value_type(content, stop - start);
+    }}
+  }};
+}}
+""".strip()
+            else:
+                out = f"""
 namespace awkward {{
   class {self.class_type}: public ArrayView {{
   public:
