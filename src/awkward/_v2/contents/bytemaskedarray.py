@@ -173,7 +173,7 @@ class ByteMaskedArray(Content):
 
         if where < 0:
             where += self.length
-        if self._nplike.known_shape and not (0 <= where < self.length):
+        if self._nplike.known_shape and not 0 <= where < self.length:
             raise NestedIndexError(self, where)
         if self._mask[where] == self._valid_when:
             return self._content._getitem_at(where)

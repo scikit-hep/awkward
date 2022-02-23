@@ -185,7 +185,7 @@ class UnionArray(Content):
 
         if where < 0:
             where += self.length
-        if self._nplike.known_shape and not (0 <= where < self.length):
+        if self._nplike.known_shape and not 0 <= where < self.length:
             raise NestedIndexError(self, where)
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
