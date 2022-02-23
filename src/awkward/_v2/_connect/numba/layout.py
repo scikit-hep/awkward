@@ -896,18 +896,19 @@ class BitMaskedArrayType(ContentType, ak._v2._lookup.BitMaskedLookup):
         atval = regularize_atval(
             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
         )
-        bitatval = builder.sdiv(atval, context.get_constant(numba.intp, 8))
+        startatval = builder.add(viewproxy.start, atval)
+        bitatval = builder.sdiv(startatval, context.get_constant(numba.intp, 8))
         shiftval = castint(
             context,
             builder,
             numba.intp,
             numba.uint8,
-            builder.srem(atval, context.get_constant(numba.intp, 8)),
+            builder.srem(startatval, context.get_constant(numba.intp, 8)),
         )
 
         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
         maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
-        maskarraypos = builder.add(viewproxy.start, bitatval)
+        maskarraypos = bitatval
         byte = getat(
             context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
         )
