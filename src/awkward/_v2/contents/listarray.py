@@ -39,7 +39,11 @@ class ListArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if starts.length > stops.length:
+        if (
+            starts.nplike.known_shape
+            and stops.nplike.known_shape
+            and starts.length > stops.length
+        ):
             raise ValueError(
                 "{} len(starts) ({}) must be <= len(stops) ({})".format(
                     type(self).__name__, starts.length, stops.length
@@ -255,7 +259,7 @@ class ListArray(Content):
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         slicestarts = slicestarts._to_nplike(self.nplike)
         slicestops = slicestops._to_nplike(self.nplike)
-        if slicestarts.length != self.length and self._nplike.known_shape:
+        if self._nplike.known_shape and slicestarts.length != self.length:
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(
@@ -378,7 +382,7 @@ class ListArray(Content):
         elif isinstance(
             slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray
         ):
-            if self._starts.length < slicestarts.length and self._nplike.known_shape:
+            if self._nplike.known_shape and self._starts.length < slicestarts.length:
                 raise NestedIndexError(
                     self,
                     ak._v2.contents.ListArray(
@@ -1180,7 +1184,7 @@ class ListArray(Content):
         )
 
     def _validityerror(self, path):
-        if self.stops.length < self.starts.length:
+        if self._nplike.known_shape and self.stops.length < self.starts.length:
             return f'at {path} ("{type(self)}"): len(stops) < len(starts)'
         assert self.starts.nplike is self._nplike and self.stops.nplike is self._nplike
         error = self._nplike[

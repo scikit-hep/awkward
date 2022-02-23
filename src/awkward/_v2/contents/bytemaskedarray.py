@@ -38,7 +38,11 @@ class ByteMaskedArray(Content):
                     type(self).__name__, repr(valid_when)
                 )
             )
-        if mask.length > content.length:
+        if (
+            mask.nplike.known_shape
+            and content.nplike.known_shape
+            and mask.length > content.length
+        ):
             raise ValueError(
                 "{} len(mask) ({}) must be <= len(content) ({})".format(
                     type(self).__name__, mask.length, content.length
@@ -169,7 +173,7 @@ class ByteMaskedArray(Content):
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._nplike.known_shape:
+        if self._nplike.known_shape and not (0 <= where < self.length):
             raise NestedIndexError(self, where)
         if self._mask[where] == self._valid_when:
             return self._content._getitem_at(where)
@@ -269,7 +273,11 @@ class ByteMaskedArray(Content):
         return nextcarry, outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        if self._nplike.known_shape and slicestarts.length != self.length:
+        if (
+            slicestarts.nplike.known_shape
+            and self._nplike.known_shape
+            and slicestarts.length != self.length
+        ):
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(
@@ -374,7 +382,7 @@ class ByteMaskedArray(Content):
         numnull = ak._v2.index.Index64.zeros(1, self._nplike)
 
         if mask is not None:
-            if mask_length != mask.length:
+            if self._nplike.known_shape and mask_length != mask.length:
                 raise ValueError(
                     "mask length ({}) is not equal to {} length ({})".format(
                         mask.length, type(self).__name__, mask_length
@@ -834,7 +842,7 @@ class ByteMaskedArray(Content):
                 )
 
     def _validityerror(self, path):
-        if self._content.length < self.mask.length:
+        if self._nplike.known_shape and self._content.length < self.mask.length:
             return f'at {path} ("{type(self)}"): len(content) < len(mask)'
         elif isinstance(
             self._content,

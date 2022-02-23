@@ -545,7 +545,7 @@ class RegularArray(Content):
                     "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
-            if head.length != self._size and self._nplike.known_shape:
+            if self._nplike.known_shape and head.length != self._size:
                 raise NestedIndexError(
                     self,
                     head,

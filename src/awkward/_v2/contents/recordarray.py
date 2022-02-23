@@ -44,7 +44,13 @@ class RecordArray(Content):
                 )
             )
         elif length is None:
-            length = min(x.length for x in contents)
+            lengths = [x.length for x in contents]
+            if any(
+                isinstance(x, ak._v2._typetracer.UnknownLengthType) for x in contents
+            ):
+                length = ak._v2._typetracer.UnknownLength
+            else:
+                length = min(lengths)
         if not isinstance(length, ak._v2._typetracer.UnknownLengthType) and not (
             ak._util.isint(length) and length >= 0
         ):
@@ -452,7 +458,7 @@ class RecordArray(Content):
             for content in self._contents:
                 trimmed = content._getitem_range(slice(0, self.length))
                 offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
-                if offsets.length != 0:
+                if self._nplike.known_shape and offsets.length != 0:
                     raise AssertionError(
                         "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
                     )

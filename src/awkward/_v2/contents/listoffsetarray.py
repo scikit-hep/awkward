@@ -32,13 +32,12 @@ class ListOffsetArray(Content):
                     type(self).__name__, repr(content)
                 )
             )
-        if ak.nplike.of(offsets).known_shape:
-            if not offsets.length >= 1:
-                raise ValueError(
-                    "{} len(offsets) ({}) must be >= 1".format(
-                        type(self).__name__, offsets.length
-                    )
+        if offsets.nplike.known_shape and not offsets.length >= 1:
+            raise ValueError(
+                "{} len(offsets) ({}) must be >= 1".format(
+                    type(self).__name__, offsets.length
                 )
+            )
         if nplike is None:
             nplike = content.nplike
         if nplike is None:
@@ -876,7 +875,8 @@ class ListOffsetArray(Content):
             ):
                 raise np.AxisError("array with strings can only be sorted with axis=-1")
 
-            assert self._offsets.length - 1 == parents.length
+            if self._nplike.known_shape and parents.nplike.known_shape:
+                assert self._offsets.length - 1 == parents.length
 
             nextlen = self._offsets[-1] - self._offsets[0]
             maxcount = ak._v2.index.Index64.empty(1, self._nplike)
@@ -1096,7 +1096,8 @@ class ListOffsetArray(Content):
             ):
                 raise np.AxisError("array with strings can only be sorted with axis=-1")
 
-            assert self._offsets.length - 1 == parents.length
+            if self._nplike.known_shape and parents.nplike.known_shape:
+                assert self._offsets.length - 1 == parents.length
 
             maxcount = ak._v2.index.Index64.empty(1, self._nplike)
             offsetscopy = ak._v2.index.Index64.empty(self._offsets.length, self._nplike)
