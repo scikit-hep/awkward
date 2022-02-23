@@ -15,7 +15,9 @@ def test():
         [None, None, None, 2, 1],
     ]
 
-    assert ak._v2.operations.structure.sort(ak._v2.operations.structure.mask(array, is_valid)).tolist() == [
+    assert ak._v2.operations.structure.sort(
+        ak._v2.operations.structure.mask(array, is_valid)
+    ).tolist() == [
         [0, 1, 2, None],
         [1, 2, None, None, None],
     ]

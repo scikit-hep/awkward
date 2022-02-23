@@ -7,7 +7,9 @@ import awkward as ak  # noqa: F401
 
 
 def test_but_first_fix_sort():
-    assert ak._v2.operations.describe.is_valid(ak._v2.operations.structure.sort(ak._v2.Array(["one", "two", "three"]), axis=-1))
+    assert ak._v2.operations.describe.is_valid(
+        ak._v2.operations.structure.sort(ak._v2.Array(["one", "two", "three"]), axis=-1)
+    )
 
 
 def test_argsort():
