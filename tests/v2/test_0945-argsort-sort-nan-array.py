@@ -20,14 +20,24 @@ def test_nan():
         3,
     ]
     # Note, `nan` comparison with `nan` returns False
-    assert str(to_list(array.layout.sort())) == "[nan, nan, 0.0, 1.0, 2.0, 3.0]"
+    assert (
+        str(ak._v2.operations.structure.sort(array).tolist())
+        == "[nan, nan, 0.0, 1.0, 2.0, 3.0]"
+    )
 
 
 def test_bool():
     array = ak._v2.Array([True, False, False, True, True, True])
 
     assert ak._v2.operations.structure.argsort(array).tolist() == [1, 2, 0, 3, 4, 5]
-    assert to_list(array.layout.sort()) == [False, False, True, True, True, True]
+    assert ak._v2.operations.structure.sort(array).tolist() == [
+        False,
+        False,
+        True,
+        True,
+        True,
+        True,
+    ]
 
 
 def test_argsort():

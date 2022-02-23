@@ -231,9 +231,7 @@ def test_minmax():
     ).tolist() == [1, None, 0]
 
 
-@pytest.mark.skip(
-    reason="awkward/_v2/operations/structure/ak_sort.py:12: NotImplementedError"
-)
+@pytest.mark.skip(reason="Remember to implement sorting for complex numbers.")
 def test_sort():
     assert ak._v2.operations.structure.sort(
         ak._v2.operations.convert.from_iter([[2 + 4j, 1 + 5j], [], [3 + 3j]])
