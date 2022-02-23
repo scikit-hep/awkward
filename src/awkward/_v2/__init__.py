@@ -13,6 +13,7 @@ import awkward._v2._typetracer  # noqa: F401
 
 # internal
 import awkward._v2._util  # noqa: F401
+import awkward._v2._lookup  # noqa: F401
 
 # third-party connectors
 import awkward._v2._connect.numpy

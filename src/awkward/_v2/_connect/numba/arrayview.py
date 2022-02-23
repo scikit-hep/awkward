@@ -10,8 +10,6 @@ import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
-########## for code that's built up from strings
-
 
 def code_to_function(code, function_name, externals=None, debug=False):
     if debug:
@@ -22,86 +20,9 @@ def code_to_function(code, function_name, externals=None, debug=False):
     return namespace[function_name]
 
 
-########## Lookup
-
-
-class Lookup:
-    def __init__(self, layout):
-        positions = []
-        tolookup(layout, positions)
-
-        def arrayptr(x):
-            if isinstance(x, int):
-                return x
-            else:
-                return x.ctypes.data
-
-        self.nplike = layout.nplike
-        self.positions = positions
-        self.arrayptrs = self.nplike.array(
-            [arrayptr(x) for x in positions], dtype=np.intp
-        )
-
-
-def tolookup(layout, positions):
-    if isinstance(layout, ak._v2.contents.EmptyArray):
-        return tolookup(layout.toNumpyArray(np.dtype(np.float64)), positions)
-
-    elif isinstance(layout, ak._v2.contents.NumpyArray):
-        if len(layout.shape) == 1:
-            return ak._v2._connect.numba.layout.NumpyArrayType.tolookup(
-                layout, positions
-            )
-        else:
-            return tolookup(layout.toRegularArray(), positions)
-
-    elif isinstance(layout, ak._v2.contents.RegularArray):
-        return ak._v2._connect.numba.layout.RegularArrayType.tolookup(layout, positions)
-
-    elif isinstance(
-        layout, (ak._v2.contents.ListArray, ak._v2.contents.ListOffsetArray)
-    ):
-        return ak._v2._connect.numba.layout.ListArrayType.tolookup(layout, positions)
-
-    elif isinstance(layout, ak._v2.contents.IndexedArray):
-        return ak._v2._connect.numba.layout.IndexedArrayType.tolookup(layout, positions)
-
-    elif isinstance(layout, ak._v2.contents.IndexedOptionArray):
-        return ak._v2._connect.numba.layout.IndexedOptionArrayType.tolookup(
-            layout, positions
-        )
-
-    elif isinstance(layout, ak._v2.contents.ByteMaskedArray):
-        return ak._v2._connect.numba.layout.ByteMaskedArrayType.tolookup(
-            layout, positions
-        )
-
-    elif isinstance(layout, ak._v2.contents.BitMaskedArray):
-        return ak._v2._connect.numba.layout.BitMaskedArrayType.tolookup(
-            layout, positions
-        )
-
-    elif isinstance(layout, ak._v2.contents.UnmaskedArray):
-        return ak._v2._connect.numba.layout.UnmaskedArrayType.tolookup(
-            layout, positions
-        )
-
-    elif isinstance(layout, ak._v2.contents.RecordArray):
-        return ak._v2._connect.numba.layout.RecordArrayType.tolookup(layout, positions)
-
-    elif isinstance(layout, ak._v2.record.Record):
-        return ak._v2._connect.numba.layout.RecordType.tolookup(layout, positions)
-
-    elif isinstance(layout, ak._v2.contents.UnionArray):
-        return ak._v2._connect.numba.layout.UnionArrayType.tolookup(layout, positions)
-
-    else:
-        raise AssertionError(f"unrecognized Content or Record: {type(layout)}")
-
-
 def tonumbatype(form):
     if isinstance(form, ak._v2.forms.EmptyForm):
-        return tonumbatype(form.toEmptyForm(np.dtype(np.float64)))
+        return tonumbatype(form.toNumpyForm(np.dtype(np.float64)))
 
     elif isinstance(form, ak._v2.forms.NumpyForm):
         if len(form.inner_shape) == 0:
@@ -140,7 +61,10 @@ def tonumbatype(form):
         raise AssertionError(f"unrecognized Form: {type(form)}")
 
 
-@numba.extending.typeof_impl.register(Lookup)
+########## Lookup
+
+
+@numba.extending.typeof_impl.register(ak._v2._lookup.Lookup)
 def typeof_Lookup(obj, c):
     return LookupType()
 
@@ -188,7 +112,13 @@ class ArrayView:
             numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
         )
         return ArrayView(
-            tonumbatype(layout.form), behavior, Lookup(layout), 0, 0, len(layout), ()
+            tonumbatype(layout.form),
+            behavior,
+            ak._v2._lookup.Lookup(layout),
+            0,
+            0,
+            len(layout),
+            (),
         )
 
     def __init__(self, type, behavior, lookup, pos, start, stop, fields):
@@ -578,7 +508,7 @@ class RecordView:
             ArrayView(
                 tonumbatype(arraylayout.form),
                 behavior,
-                Lookup(arraylayout),
+                ak._v2._lookup.Lookup(arraylayout),
                 0,
                 0,
                 len(arraylayout),
