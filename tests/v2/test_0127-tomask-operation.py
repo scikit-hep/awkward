@@ -791,9 +791,6 @@ def test_ByteMaskedArray_localindex():
     ]
 
 
-@pytest.mark.skip(
-    reason="FIXME: ak._v2.operations.structure.combinations not implemented"
-)
 def test_ByteMaskedArray_combinations():
     content = ak._v2.operations.convert.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
@@ -864,16 +861,13 @@ def test_ByteMaskedArray_combinations():
     ]
 
 
-@pytest.mark.skip(
-    reason="FIXME: ak._v2.operations.structure.combinations not implemented"
-)
 def test_IndexedOptionArray_combinations():
     content = ak._v2.operations.convert.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
     )
     index = ak._v2.index.Index64(np.array([0, 1, -1, -1, 4], dtype=np.int64))
-    array = ak._v2.highlevelArray(ak._v2.contents.IndexedOptionArray(index, content))
+    array = ak._v2.Array(ak._v2.contents.IndexedOptionArray(index, content))
     assert to_list(array) == [
         [[0, 1, 2], [], [3, 4]],
         [],
