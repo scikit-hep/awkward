@@ -1250,7 +1250,7 @@ class IndexedOptionArray(Content):
             if isinstance(out, ak._v2.contents.RegularArray):
                 out = out.toListOffsetArray64(True)
             if isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts.length > 0 and starts[0] != 0:
+                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise RuntimeError(
                         "sort_next with unbranching depth > negaxis expects a "
                         "ListOffsetArray64 whose offsets start at zero"
@@ -1416,7 +1416,7 @@ class IndexedOptionArray(Content):
             if isinstance(out, ak._v2.contents.RegularArray):
                 out = out.toListOffsetArray64(True)
             if isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts.length > 0 and starts[0] != 0:
+                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise RuntimeError(
                         "sort_next with unbranching depth > negaxis expects a "
                         "ListOffsetArray64 whose offsets start at zero"

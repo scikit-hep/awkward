@@ -1203,7 +1203,9 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
     def rpad_axis0(self, target, clip):
         if not clip and target < self.length:
-            index = ak._v2.index.Index64(self._nplike.arange(self.length))
+            index = ak._v2.index.Index64(
+                self._nplike.arange(self.length, dtype=np.int64)
+            )
 
         else:
             index = ak._v2.index.Index64.empty(target, self._nplike)

@@ -269,7 +269,7 @@ class ByteMaskedArray(Content):
         return nextcarry, outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        if slicestarts.length != self.length:
+        if self._nplike.known_shape and slicestarts.length != self.length:
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(

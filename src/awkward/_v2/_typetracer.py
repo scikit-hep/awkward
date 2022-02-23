@@ -195,14 +195,9 @@ class TypeTracerArray:
     def from_array(cls, array, dtype=None):
         if isinstance(array, ak._v2.index.Index):
             array = array.data
-
         if dtype is None:
             dtype = array.dtype
-
-        shape = list(array.shape)
-        shape[0] = UnknownLength
-
-        return cls(dtype, shape=shape)
+        return cls(dtype, shape=array.shape)
 
     def __init__(self, dtype, shape=None):
         self._dtype = np.dtype(dtype)
@@ -225,16 +220,12 @@ class TypeTracerArray:
 
     @shape.setter
     def shape(self, value):
-        if (
-            value is None
-            or ak._v2._util.isint(value)
-            or isinstance(value, (UnknownLengthType, UnknownScalar))
-        ):
+        if ak._v2._util.isint(value):
+            value = (value,)
+        elif value is None or isinstance(value, (UnknownLengthType, UnknownScalar)):
             value = (UnknownLength,)
-        elif len(value) == 0:
-            value = ()
-        else:
-            value = (UnknownLength,) + tuple(value[1:])
+        elif not isinstance(value, tuple):
+            value = tuple(value)
         self._shape = value
 
     @property
@@ -524,7 +515,26 @@ class TypeTracer(ak.nplike.NumpyLike):
         # stop[, dtype=]
         # start, stop[, dtype=]
         # start, stop, step[, dtype=]
-        raise NotImplementedError
+        assert 1 <= len(args) <= 3
+        assert (
+            "dtype" in kwargs
+        ), "internal error: calling arange without dtype (platform dependence)"
+
+        if len(args) == 1:
+            start, stop, step = 0, args[0], 1
+        elif len(args) == 2:
+            start, stop, step = args[0], args[1], 1
+        elif len(args) == 3:
+            start, stop, step = args[0], args[1], args[2]
+
+        if (
+            ak._v2._util.isint(start)
+            and ak._v2._util.isint(stop)
+            and ak._v2._util.isint(step)
+        ):
+            length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
+
+        return TypeTracerArray(kwargs["dtype"], (length,))
 
     def meshgrid(self, *args, **kwargs):
         # *arrays, indexing="ij"

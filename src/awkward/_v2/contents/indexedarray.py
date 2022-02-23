@@ -806,7 +806,7 @@ class IndexedArray(Content):
                 unique = unique.toListOffsetArray64(True)
 
             elif isinstance(unique, ak._v2.contents.ListOffsetArray):
-                if starts.length > 0 and starts[0] != 0:
+                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise AssertionError(
                         "reduce_next with unbranching depth > negaxis expects a "
                         "ListOffsetArray64 whose offsets start at zero ({})".format(
@@ -987,7 +987,7 @@ class IndexedArray(Content):
                 out = out.toListOffsetArray64(True)
 
             elif isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts.length > 0 and starts[0] != 0:
+                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise AssertionError(
                         "reduce_next with unbranching depth > negaxis expects a "
                         "ListOffsetArray64 whose offsets start at zero ({})".format(

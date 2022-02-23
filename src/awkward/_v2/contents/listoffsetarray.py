@@ -1349,7 +1349,8 @@ class ListOffsetArray(Content):
             ):
                 raise np.AxisError("array with strings can only be sorted with axis=-1")
 
-            assert self._offsets.length - 1 == parents.length
+            if self._nplike.known_shape and parents.nplike.known_shape:
+                assert self._offsets.length - 1 == parents.length
 
             nextlen = self._offsets[-1] - self._offsets[0]
             maxcount = ak._v2.index.Index64.empty(1, self._nplike)

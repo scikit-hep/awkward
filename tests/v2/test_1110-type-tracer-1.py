@@ -5,8 +5,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2._typetracer import UnknownLength
-
 typetracer = ak._v2._typetracer.TypeTracer.instance()
 
 
@@ -15,9 +13,9 @@ def test_getitem_at():
     abstract = ak._v2.contents.NumpyArray(concrete.raw(typetracer))
 
     assert concrete.shape == (2, 3, 5)
-    assert abstract.shape == (UnknownLength, 3, 5)
-    assert abstract[0].shape == (UnknownLength, 5)
-    assert abstract[0][0].shape == (UnknownLength,)
+    assert abstract.shape[1:] == (3, 5)
+    assert abstract[0].shape[1:] == (5,)
+    assert abstract[0][0].shape[1:] == ()
 
     assert abstract.form == concrete.form
     assert abstract.form.type == concrete.form.type
