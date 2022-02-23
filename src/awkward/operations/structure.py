@@ -475,7 +475,7 @@ def zip(
     highlevel=True,
     behavior=None,
     right_broadcast=False,
-    after_option=False,
+    optiontype_outside_record=False,
 ):
     """
     Args:
@@ -497,8 +497,8 @@ def zip(
             high-level.
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described in #ak.broadcast_arrays.
-        after_option (bool): If True, continue broadcasting past any option
-            types before creating the new #ak.layout.RecordArray node.
+        optiontype_outside_record (bool): If True, continue broadcasting past
+            any option types before creating the new #ak.layout.RecordArray node.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -578,11 +578,11 @@ def zip(
         >>> ak.zip([one, two])
         <Array [(1, None), (2, 5), (None, 6)] type='3 * (?int64, ?int64)'>
 
-    If the `after_option` option is set to `True`, Awkward will continue to
+    If the `optiontype_outside_record` option is set to `True`, Awkward will continue to
     broadcast the arrays together at the depth_limit until it reaches non-option
     types. This effectively takes the union of the option mask:
 
-        >>> ak.zip([one, two], after_option=True)
+        >>> ak.zip([one, two], optiontype_outside_record=True)
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
 
     """
@@ -650,7 +650,7 @@ def zip(
             )
         ):
             # If we want to zip after option types at this depth
-            if after_option and any(
+            if optiontype_outside_record and any(
                 isinstance(x, ak._util.optiontypes) for x in inputs
             ):
                 return None
