@@ -475,6 +475,7 @@ def zip(
     highlevel=True,
     behavior=None,
     right_broadcast=False,
+    optiontype_outside_record=False,
 ):
     """
     Args:
@@ -496,6 +497,8 @@ def zip(
             high-level.
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described in #ak.broadcast_arrays.
+        optiontype_outside_record (bool): If True, continue broadcasting past
+            any option types before creating the new #ak.layout.RecordArray node.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -565,6 +568,23 @@ def zip(
     As an extreme, `depth_limit=1` is a handy way to make a record structure
     at the outermost level, regardless of whether the fields have matching
     structure or not.
+
+    When zipping together arrays with optional values, it can be useful to create
+    the #ak.layout.RecordArray node after the option types. By default, #ak.zip
+    does not do this:
+
+        >>> one = ak.Array([1, 2, None])
+        >>> two = ak.Array([None, 5, 6])
+        >>> ak.zip([one, two])
+        <Array [(1, None), (2, 5), (None, 6)] type='3 * (?int64, ?int64)'>
+
+    If the `optiontype_outside_record` option is set to `True`, Awkward will continue to
+    broadcast the arrays together at the depth_limit until it reaches non-option
+    types. This effectively takes the union of the option mask:
+
+        >>> ak.zip([one, two], optiontype_outside_record=True)
+        <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
+
     """
     if depth_limit is not None and depth_limit <= 0:
         raise ValueError(
@@ -629,6 +649,12 @@ def zip(
                 for x in inputs
             )
         ):
+            # If we want to zip after option types at this depth
+            if optiontype_outside_record and any(
+                isinstance(x, ak._util.optiontypes) for x in inputs
+            ):
+                return None
+
             return lambda: (
                 ak.layout.RecordArray(inputs, recordlookup, parameters=parameters),
             )
