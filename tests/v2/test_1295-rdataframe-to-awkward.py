@@ -5,8 +5,8 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 from awkward._v2._connect.rdataframe._from_rdataframe import *
 
-ROOT = pytest.importorskip("ROOT")
 
+ROOT = pytest.importorskip("ROOT")
 
 def test_from_rdf_to_awkward():
     rdf = ROOT.RDataFrame(100)
@@ -27,3 +27,7 @@ def test_from_rdf_to_awkward():
 
     array_none = rdf_x.AsAwkward(exclude=["x"])
     assert array_none.to_list() == []
+
+def test_vectors():
+    list = []
+    print(ROOT.is_iterable(list))

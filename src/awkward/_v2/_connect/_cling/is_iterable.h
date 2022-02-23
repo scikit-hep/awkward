@@ -9,18 +9,9 @@ namespace is_iterable_impl
     using std::begin;
     using std::end;
 
-    template<typename... Ts> struct make_void { typedef void type;};
-    template<typename... Ts> using void_t = typename make_void<Ts...>::type;
-
-    template< bool B, class T = void >
-    using enable_if_t = typename std::enable_if<B, T>::type;
-
-    template< class T, class U >
-    inline constexpr bool is_same_v = std::is_same<T, U>::value;
-
     template<class T>
-    using check_specs = void_t<
-        enable_if_t<is_same_v<
+    using check_specs = std::void_t<
+        std::enable_if_t<std::is_same_v<
             decltype(begin(std::declval<T&>())), // has begin()
             decltype(end(std::declval<T&>()))    // has end()
         >>,                                      // ... begin() and end() are the same type ...
