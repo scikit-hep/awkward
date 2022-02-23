@@ -109,7 +109,7 @@ def test_RegularArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
   out[0] = obj.size();
   out[1] = obj[0][0];
   out[2] = obj[0][1];
@@ -171,7 +171,7 @@ def test_ListArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -206,7 +206,7 @@ def test_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ListOffsetArray_NumpyArray_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -862,7 +862,7 @@ def test_nested_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[1];
   out[2] = obj.at(3);
@@ -911,7 +911,8 @@ void roottest_nested_NumpyArray_shape_v2a(double* out, ssize_t length, ssize_t* 
     assert out.tolist() == [2.0, 3.0, 5.0, 0.0, 1.0, 5.0, 6.0, 15.0, 21.0]
 
 
-def test_nested_RegularArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_nested_RegularArray_NumpyArray(flatlist_as_rvec):
     v2a = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 3], dtype=np.int64)),
         ak._v2.contents.regulararray.RegularArray(
@@ -925,12 +926,12 @@ def test_nested_RegularArray_NumpyArray():
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler)
+    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_nested_RegularArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+void roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[0][0];
   out[2] = obj[0][1];
@@ -941,7 +942,9 @@ void roottest_nested_RegularArray_NumpyArray_v2a(double* out, ssize_t length, ss
 """
     )
     out = np.zeros(6, dtype=np.float64)
-    ROOT.roottest_nested_RegularArray_NumpyArray_v2a(out, len(layout), lookup.arrayptrs)
+    getattr(ROOT, f"roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}")(
+        out, len(layout), lookup.arrayptrs
+    )
     assert out.tolist() == [2.0, 0.0, 1.1, 3.3, 4.4, 3.0]
 
     v2b = ak._v2.contents.ListOffsetArray(
@@ -994,7 +997,7 @@ def test_nested_ListArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -1027,12 +1030,12 @@ def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form)
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
+    generator.generate(debug_compiler, flatlist_as_rvec=flatlist_as_rvec)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ListOffsetArray_NumpyArray_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
