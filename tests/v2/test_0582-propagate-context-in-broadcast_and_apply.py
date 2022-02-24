@@ -19,20 +19,20 @@ def test_toregular():
     )
 
     assert str(array.type) in (
-        '1 * {x: var * var * var * int64, y: var * var * var * var * int64}',
-        '1 * {y: var * var * var * var * int64, x: var * var * var * int64}',
+        "1 * {x: var * var * var * int64, y: var * var * var * var * int64}",
+        "1 * {y: var * var * var * var * int64, x: var * var * var * int64}",
     )
     assert str(ak._v2.operations.structure.to_regular(array, axis=-1).type) in (
-        '1 * {x: var * var * 5 * int64, y: var * var * var * 7 * int64}',
-        '1 * {y: var * var * var * 7 * int64, x: var * var * 5 * int64}',
+        "1 * {x: var * var * 5 * int64, y: var * var * var * 7 * int64}",
+        "1 * {y: var * var * var * 7 * int64, x: var * var * 5 * int64}",
     )
     assert str(ak._v2.operations.structure.to_regular(array, axis=-2).type) in (
-        '1 * {x: var * 3 * var * int64, y: var * var * 5 * var * int64}',
-        '1 * {y: var * var * 5 * var * int64, x: var * 3 * var * int64}',
+        "1 * {x: var * 3 * var * int64, y: var * var * 5 * var * int64}",
+        "1 * {y: var * var * 5 * var * int64, x: var * 3 * var * int64}",
     )
     assert str(ak._v2.operations.structure.to_regular(array, axis=-3).type) in (
-        '1 * {x: 2 * var * var * int64, y: var * 3 * var * var * int64}',
-        '1 * {y: var * 3 * var * var * int64, x: 2 * var * var * int64}',
+        "1 * {x: 2 * var * var * int64, y: var * 3 * var * var * int64}",
+        "1 * {y: var * 3 * var * var * int64, x: 2 * var * var * int64}",
     )
 
 
@@ -57,19 +57,27 @@ def test_cartesian():
         == "2 * var * var * var * var * (int64, int64)"
     )
     assert (
-        str(ak._v2.operations.structure.cartesian([one, two], axis=-1, nested=True).type)
+        str(
+            ak._v2.operations.structure.cartesian([one, two], axis=-1, nested=True).type
+        )
         == "2 * var * var * var * var * (int64, int64)"
     )
     assert (
-        str(ak._v2.operations.structure.cartesian([one, two], axis=-2, nested=True).type)
+        str(
+            ak._v2.operations.structure.cartesian([one, two], axis=-2, nested=True).type
+        )
         == "2 * var * var * var * (var * int64, var * int64)"
     )
     assert (
-        str(ak._v2.operations.structure.cartesian([one, two], axis=-3, nested=True).type)
+        str(
+            ak._v2.operations.structure.cartesian([one, two], axis=-3, nested=True).type
+        )
         == "2 * var * var * (var * var * int64, var * var * int64)"
     )
     assert (
-        str(ak._v2.operations.structure.cartesian([one, two], axis=-4, nested=True).type)
+        str(
+            ak._v2.operations.structure.cartesian([one, two], axis=-4, nested=True).type
+        )
         == "2 * 2 * (var * var * var * int64, var * var * var * int64)"
     )
 
@@ -112,18 +120,40 @@ def test_cartesian():
     with pytest.raises(ValueError):
         ak._v2.operations.structure.cartesian([one, two], axis=-5)
 
-@pytest.mark.skip(
-    reason="ak._v2.operations.structure.firsts to be implemented"
-)
+
+@pytest.mark.skip(reason="ak._v2.operations.structure.firsts to be implemented")
 def test_firsts():
     array = ak._v2.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]]])
 
     assert to_list(ak._v2.operations.structure.firsts(array, axis=0)) == [[0, 1, 2], []]
-    assert to_list(ak._v2.operations.structure.firsts(array, axis=1)) == [[0, 1, 2], [3, 4], None, [5]]
-    assert to_list(ak._v2.operations.structure.firsts(array, axis=2)) == [[0, None], [3], [], [5, 6]]
-    assert to_list(ak._v2.operations.structure.firsts(array, axis=-1)) == [[0, None], [3], [], [5, 6]]
-    assert to_list(ak._v2.operations.structure.firsts(array, axis=-2)) == [[0, 1, 2], [3, 4], None, [5]]
-    assert to_list(ak._v2.operations.structure.firsts(array, axis=-3)) == [[0, 1, 2], []]
+    assert to_list(ak._v2.operations.structure.firsts(array, axis=1)) == [
+        [0, 1, 2],
+        [3, 4],
+        None,
+        [5],
+    ]
+    assert to_list(ak._v2.operations.structure.firsts(array, axis=2)) == [
+        [0, None],
+        [3],
+        [],
+        [5, 6],
+    ]
+    assert to_list(ak._v2.operations.structure.firsts(array, axis=-1)) == [
+        [0, None],
+        [3],
+        [],
+        [5, 6],
+    ]
+    assert to_list(ak._v2.operations.structure.firsts(array, axis=-2)) == [
+        [0, 1, 2],
+        [3, 4],
+        None,
+        [5],
+    ]
+    assert to_list(ak._v2.operations.structure.firsts(array, axis=-3)) == [
+        [0, 1, 2],
+        [],
+    ]
 
     with pytest.raises(ValueError):
         ak._v2.operations.structure.firsts(array, axis=-4)

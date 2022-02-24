@@ -13,7 +13,11 @@ def test_axis0():
     two = ak._v2.Array([100, 200, 300, 400, 500])
     three = ak._v2.Array(["a", "b"])
 
-    assert to_list(ak._v2.operations.structure.cartesian([one], axis=0)) == [(1.1,), (2.2,), (3.3,)]
+    assert to_list(ak._v2.operations.structure.cartesian([one], axis=0)) == [
+        (1.1,),
+        (2.2,),
+        (3.3,),
+    ]
     assert to_list(ak._v2.operations.structure.cartesian({"x": one}, axis=0)) == [
         {"x": 1.1},
         {"x": 2.2},
@@ -37,7 +41,9 @@ def test_axis0():
         (3.3, 400),
         (3.3, 500),
     ]
-    assert to_list(ak._v2.operations.structure.cartesian({"x": one, "y": two}, axis=0)) == [
+    assert to_list(
+        ak._v2.operations.structure.cartesian({"x": one, "y": two}, axis=0)
+    ) == [
         {"x": 1.1, "y": 100},
         {"x": 1.1, "y": 200},
         {"x": 1.1, "y": 300},
@@ -54,7 +60,9 @@ def test_axis0():
         {"x": 3.3, "y": 400},
         {"x": 3.3, "y": 500},
     ]
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], axis=0)) == [
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], axis=0)
+    ) == [
         (1.1, 100, "a"),
         (1.1, 100, "b"),
         (1.1, 200, "a"),
@@ -87,7 +95,9 @@ def test_axis0():
         (3.3, 500, "b"),
     ]
 
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[0])) == [
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[0])
+    ) == [
         [
             (1.1, 100, "a"),
             (1.1, 100, "b"),
@@ -131,7 +141,9 @@ def test_axis0():
             (3.3, 500, "b"),
         ],
     ]
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[1])) == [
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[1])
+    ) == [
         [(1.1, 100, "a"), (1.1, 100, "b")],
         [(1.1, 200, "a"), (1.1, 200, "b")],
         [(1.1, 300, "a"), (1.1, 300, "b")],
@@ -148,7 +160,9 @@ def test_axis0():
         [(3.3, 400, "a"), (3.3, 400, "b")],
         [(3.3, 500, "a"), (3.3, 500, "b")],
     ]
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[0, 1])) == [
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[0, 1])
+    ) == [
         [
             [(1.1, 100, "a"), (1.1, 100, "b")],
             [(1.1, 200, "a"), (1.1, 200, "b")],
@@ -172,15 +186,21 @@ def test_axis0():
         ],
     ]
 
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[])) == to_list(
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[])
+    ) == to_list(
         ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=False)
     )
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[])) == to_list(
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[])
+    ) == to_list(
         ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=None)
     )
     assert to_list(
         ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=[0, 1])
-    ) == to_list(ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=True))
+    ) == to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], axis=0, nested=True)
+    )
 
 
 def test_axis1():
@@ -188,7 +208,11 @@ def test_axis1():
     two = ak._v2.Array([[100, 200], [300], [400, 500]])
     three = ak._v2.Array([["a", "b"], ["c", "d"], ["e"]])
 
-    assert to_list(ak._v2.operations.structure.cartesian([one])) == [[(0,), (1,), (2,)], [], [(3,), (4,)]]
+    assert to_list(ak._v2.operations.structure.cartesian([one])) == [
+        [(0,), (1,), (2,)],
+        [],
+        [(3,), (4,)],
+    ]
     assert to_list(ak._v2.operations.structure.cartesian({"x": one})) == [
         [{"x": 0}, {"x": 1}, {"x": 2}],
         [],
@@ -237,7 +261,9 @@ def test_axis1():
         [(3, 400, "e"), (3, 500, "e"), (4, 400, "e"), (4, 500, "e")],
     ]
 
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=[0])) == [
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], nested=[0])
+    ) == [
         [
             [(0, 100, "a"), (0, 100, "b"), (0, 200, "a"), (0, 200, "b")],
             [(1, 100, "a"), (1, 100, "b"), (1, 200, "a"), (1, 200, "b")],
@@ -246,7 +272,9 @@ def test_axis1():
         [],
         [[(3, 400, "e"), (3, 500, "e")], [(4, 400, "e"), (4, 500, "e")]],
     ]
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=[1])) == [
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], nested=[1])
+    ) == [
         [
             [(0, 100, "a"), (0, 100, "b")],
             [(0, 200, "a"), (0, 200, "b")],
@@ -258,7 +286,9 @@ def test_axis1():
         [],
         [[(3, 400, "e")], [(3, 500, "e")], [(4, 400, "e")], [(4, 500, "e")]],
     ]
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=[0, 1])) == [
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], nested=[0, 1])
+    ) == [
         [
             [[(0, 100, "a"), (0, 100, "b")], [(0, 200, "a"), (0, 200, "b")]],
             [[(1, 100, "a"), (1, 100, "b")], [(1, 200, "a"), (1, 200, "b")]],
@@ -268,20 +298,22 @@ def test_axis1():
         [[[(3, 400, "e")], [(3, 500, "e")]], [[(4, 400, "e")], [(4, 500, "e")]]],
     ]
 
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=[])) == to_list(
-        ak._v2.operations.structure.cartesian([one, two, three], nested=False)
-    )
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=[])) == to_list(
-        ak._v2.operations.structure.cartesian([one, two, three], nested=None)
-    )
-    assert to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=[0, 1])) == to_list(
-        ak._v2.operations.structure.cartesian([one, two, three], nested=True)
-    )
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], nested=[])
+    ) == to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=False))
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], nested=[])
+    ) == to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=None))
+    assert to_list(
+        ak._v2.operations.structure.cartesian([one, two, three], nested=[0, 1])
+    ) == to_list(ak._v2.operations.structure.cartesian([one, two, three], nested=True))
 
 
 def test_axis2():
     one = ak._v2.Array([[[0, 1, 2], [], [3, 4]], [[0, 1, 2], [], [3, 4]]])
-    two = ak._v2.Array([[[100, 200], [300], [400, 500]], [[100, 200], [300], [400, 500]]])
+    two = ak._v2.Array(
+        [[[100, 200], [300], [400, 500]], [[100, 200], [300], [400, 500]]]
+    )
 
     assert to_list(ak._v2.operations.structure.cartesian([one, two], axis=2)) == [
         [

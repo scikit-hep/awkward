@@ -17,10 +17,14 @@ def test():
     )
     indexedarray = ak._v2.contents.IndexedArray(ak._v2.index.Index64([]), listarray)
 
-    cart = ak._v2.operations.structure.cartesian([indexedarray, indexedarray], nested=True)
+    cart = ak._v2.operations.structure.cartesian(
+        [indexedarray, indexedarray], nested=True
+    )
     assert str(cart.type) == "0 * var * var * (int64, int64)"
     assert to_list(cart) == []
 
-    cart = ak._v2.operations.structure.cartesian([indexedarray, indexedarray], nested=False)
+    cart = ak._v2.operations.structure.cartesian(
+        [indexedarray, indexedarray], nested=False
+    )
     assert str(cart.type) == "0 * var * (int64, int64)"
     assert to_list(cart) == []
