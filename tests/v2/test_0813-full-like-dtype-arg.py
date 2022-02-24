@@ -42,8 +42,8 @@ def test():
         assert isinstance(new_array[2][4]["y"][3], intended_type)
         assert isinstance(new_array[2][4]["y"][4], intended_type)
 
-    int_type32 = ak._v2.operations.structure.full_like(array, 12, dtype='int32')
-    int_type64 = ak._v2.operations.structure.full_like(array, 12, dtype='int64')
+    int_type32 = ak._v2.operations.structure.full_like(array, 12, dtype="int32")
+    int_type64 = ak._v2.operations.structure.full_like(array, 12, dtype="int64")
     float_type = ak._v2.operations.structure.full_like(array, 12, dtype=float)
 
     assert int_type64.tolist() == float_type.tolist()
@@ -54,8 +54,8 @@ def test():
     bool_type = ak._v2.operations.structure.full_like(array, 12, dtype=bool)
     assert_array_type(bool_type, np.bool_)
 
-    int_type32 = ak._v2.operations.structure.full_like(array, -1.2, dtype='int32')
-    int_type64 = ak._v2.operations.structure.full_like(array, -1.2, dtype='int64')
+    int_type32 = ak._v2.operations.structure.full_like(array, -1.2, dtype="int32")
+    int_type64 = ak._v2.operations.structure.full_like(array, -1.2, dtype="int64")
     float_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=float)
     bool_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=bool)
 
@@ -64,8 +64,8 @@ def test():
     assert_array_type(float_type, float)
     assert_array_type(bool_type, np.bool_)
 
-    int_type32 = ak._v2.operations.structure.zeros_like(array, dtype='int32')
-    int_type64 = ak._v2.operations.structure.zeros_like(array, dtype='int64')
+    int_type32 = ak._v2.operations.structure.zeros_like(array, dtype="int32")
+    int_type64 = ak._v2.operations.structure.zeros_like(array, dtype="int64")
     float_type = ak._v2.operations.structure.zeros_like(array, dtype=float)
     bool_type = ak._v2.operations.structure.zeros_like(array, dtype=bool)
 
@@ -76,8 +76,8 @@ def test():
     assert_array_type(float_type, float)
     assert_array_type(bool_type, np.bool_)
 
-    int_type32 = ak._v2.operations.structure.ones_like(array, dtype='int32')
-    int_type64 = ak._v2.operations.structure.ones_like(array, dtype='int64')
+    int_type32 = ak._v2.operations.structure.ones_like(array, dtype="int32")
+    int_type64 = ak._v2.operations.structure.ones_like(array, dtype="int64")
     float_type = ak._v2.operations.structure.ones_like(array, dtype=float)
     bool_type = ak._v2.operations.structure.ones_like(array, dtype=bool)
 
@@ -98,8 +98,8 @@ def test():
         assert isinstance(new_array[2][0], intended_type)
         assert isinstance(new_array[2][1], intended_type)
 
-    int_type32 = ak._v2.operations.structure.full_like(array, 12, dtype='int32')
-    int_type64 = ak._v2.operations.structure.full_like(array, 12, dtype='int64')
+    int_type32 = ak._v2.operations.structure.full_like(array, 12, dtype="int32")
+    int_type64 = ak._v2.operations.structure.full_like(array, 12, dtype="int64")
     float_type = ak._v2.operations.structure.full_like(array, 12, dtype=float)
 
     assert int_type64.tolist() == float_type.tolist()
@@ -110,8 +110,8 @@ def test():
     bool_type = ak._v2.operations.structure.full_like(array, 12, dtype=bool)
     assert_array_type(bool_type, np.bool_)
 
-    int_type32 = ak._v2.operations.structure.full_like(array, -1.2, dtype='int32')
-    int_type64 = ak._v2.operations.structure.full_like(array, -1.2, dtype='int64')
+    int_type32 = ak._v2.operations.structure.full_like(array, -1.2, dtype="int32")
+    int_type64 = ak._v2.operations.structure.full_like(array, -1.2, dtype="int64")
     float_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=float)
     bool_type = ak._v2.operations.structure.full_like(array, -1.2, dtype=bool)
 
@@ -120,8 +120,8 @@ def test():
     assert_array_type(float_type, float)
     assert_array_type(bool_type, np.bool_)
 
-    int_type32 = ak._v2.operations.structure.zeros_like(array, dtype='int32')
-    int_type64 = ak._v2.operations.structure.zeros_like(array, dtype='int64')
+    int_type32 = ak._v2.operations.structure.zeros_like(array, dtype="int32")
+    int_type64 = ak._v2.operations.structure.zeros_like(array, dtype="int64")
     float_type = ak._v2.operations.structure.zeros_like(array, dtype=float)
     bool_type = ak._v2.operations.structure.zeros_like(array, dtype=bool)
 
@@ -132,8 +132,8 @@ def test():
     assert_array_type(float_type, float)
     assert_array_type(bool_type, np.bool_)
 
-    int_type32 = ak._v2.operations.structure.ones_like(array, dtype='int32')
-    int_type64 = ak._v2.operations.structure.ones_like(array, dtype='int64')
+    int_type32 = ak._v2.operations.structure.ones_like(array, dtype="int32")
+    int_type64 = ak._v2.operations.structure.ones_like(array, dtype="int64")
     float_type = ak._v2.operations.structure.ones_like(array, dtype=float)
     bool_type = ak._v2.operations.structure.ones_like(array, dtype=bool)
     assert int_type64.tolist() == float_type.tolist()
