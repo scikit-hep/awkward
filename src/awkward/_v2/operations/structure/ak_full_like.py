@@ -165,7 +165,9 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
 
     out = layout.recursively_apply(action)
     if dtype is not None:
-        out = ak._v2.operations.structure.strings_astype(out, dtype)
-        out = ak._v2.operations.structure.values_astype(out, dtype)
+        out = ak._v2.operations.structure.strings_astype(
+            out, dtype, highlevel, behavior
+        )
+        out = ak._v2.operations.structure.values_astype(out, dtype, highlevel, behavior)
         return out
     return ak._v2._util.wrap(out, behavior, highlevel)
