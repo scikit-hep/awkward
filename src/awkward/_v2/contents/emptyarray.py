@@ -33,15 +33,15 @@ class EmptyArray(Content):
 
     @property
     def typetracer(self):
-        return EmptyArray(
-            self._typetracer_identifier(),
-            self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
-        )
+        tt = ak._v2._typetracer.TypeTracer.instance()
+        return EmptyArray(self._typetracer_identifier(), self._parameters, tt)
 
     @property
     def length(self):
         return 0
+
+    def _forget_length(self):
+        return EmptyArray(self._identifier, self._parameters, self._nplike)
 
     def __repr__(self):
         return self._repr("", "", "")

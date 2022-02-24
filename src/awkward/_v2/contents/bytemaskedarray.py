@@ -91,20 +91,29 @@ class ByteMaskedArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return ByteMaskedArray(
-            ak._v2.index.Index(
-                self._mask.raw(ak._v2._typetracer.TypeTracer.instance())
-            ),
+            ak._v2.index.Index(self._mask.raw(tt)),
             self._content.typetracer,
             self._valid_when,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._mask.length
+
+    def _forget_length(self):
+        return ByteMaskedArray(
+            self._mask.forget_length(),
+            self._content,
+            self._valid_when,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")

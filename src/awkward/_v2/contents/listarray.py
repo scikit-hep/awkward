@@ -101,12 +101,22 @@ class ListArray(Content):
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._starts.length
+
+    def _forget_length(self):
+        return ListArray(
+            self._starts.forget_length(),
+            self._stops,
+            self._content,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")

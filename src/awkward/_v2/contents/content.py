@@ -104,6 +104,12 @@ class Content:
 
         return self._form_with_key(getkey)
 
+    def forget_length(self):
+        if not isinstance(self._nplike, ak._v2._typetracer.TypeTracer):
+            return self.typetracer._forget_length()
+        else:
+            return self._forget_length()
+
     def to_buffers(
         self,
         container=None,

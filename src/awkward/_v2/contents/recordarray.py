@@ -164,18 +164,29 @@ class RecordArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return RecordArray(
             [x.typetracer for x in self._contents],
             self._fields,
             self._length,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._length
+
+    def _forget_length(self):
+        return RecordArray(
+            [x._forget_length() for x in self._contents],
+            self._fields,
+            ak._v2._typetracer.UnknownLength,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")

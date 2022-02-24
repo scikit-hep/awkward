@@ -136,12 +136,22 @@ class UnionArray(Content):
             [x.typetracer for x in self._contents],
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._tags.length
+
+    def _forget_length(self):
+        return UnionArray(
+            self._tags.forget_length(),
+            self._index,
+            self._contents,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")

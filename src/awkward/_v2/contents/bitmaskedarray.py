@@ -48,12 +48,13 @@ class BitMaskedArray(Content):
                     type(self).__name__, repr(valid_when)
                 )
             )
-        if not ak._util.isint(length):
-            raise TypeError(
-                "{} 'length' must be an integer, not {}".format(
-                    type(self).__name__, repr(length)
+        if not isinstance(length, ak._v2._typetracer.UnknownLengthType):
+            if not (ak._util.isint(length) and length >= 0):
+                raise TypeError(
+                    "{} 'length' must be a non-negative integer, not {}".format(
+                        type(self).__name__, length
+                    )
                 )
-            )
         if not isinstance(lsb_order, bool):
             raise TypeError(
                 "{} 'lsb_order' must be boolean, not {}".format(
@@ -122,22 +123,33 @@ class BitMaskedArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return BitMaskedArray(
-            ak._v2.index.Index(
-                self._mask.raw(ak._v2._typetracer.TypeTracer.instance())
-            ),
+            ak._v2.index.Index(self._mask.raw(tt)),
             self._content.typetracer,
             self._valid_when,
             self._length,
             self._lsb_order,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._length
+
+    def _forget_length(self):
+        return BitMaskedArray(
+            self._mask,
+            self._content.typetracer,
+            self._valid_when,
+            ak._v2._typetracer.UnknownLength,
+            self._lsb_order,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")

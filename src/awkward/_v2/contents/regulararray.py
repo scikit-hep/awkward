@@ -84,18 +84,29 @@ class RegularArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return RegularArray(
             self._content.typetracer,
             self._size,
             self._length,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._length
+
+    def _forget_length(self):
+        return RegularArray(
+            self._content._forget_length(),
+            self._size,
+            ak._v2._typetracer.UnknownLength,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")
