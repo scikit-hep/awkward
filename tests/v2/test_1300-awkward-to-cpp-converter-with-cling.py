@@ -963,8 +963,8 @@ void roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out,
 
     ROOT.gInterpreter.Declare(
         f"""
-void roottest_nested_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.dataset()}[1];
+void roottest_nested_RegularArray_NumpyArray_v2b_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.entry()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[1].size();
@@ -972,7 +972,9 @@ void roottest_nested_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ss
 """
     )
     out = np.zeros(3, dtype=np.float64)
-    ROOT.roottest_nested_RegularArray_NumpyArray_v2b(out, len(layout), lookup.arrayptrs)
+    getattr(ROOT, f"roottest_nested_RegularArray_NumpyArray_v2b_{flatlist_as_rvec}")(
+        out, len(layout), lookup.arrayptrs
+    )
     assert out.tolist() == [10.0, 0.0, 0.0]
 
 
