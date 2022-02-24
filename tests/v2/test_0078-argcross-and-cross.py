@@ -381,3 +381,20 @@ def test_argcartesian():
         [],
         [{"x": 0, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 0}, {"x": 1, "y": 1}],
     ]
+
+
+def test_argcartesian_negative_axis():
+    one = ak._v2.Array([[["a", "b"], []], [], [["c"]]])
+    two = ak._v2.Array([[[1.1], []], [], [[2.2, 3.3]]])
+
+    assert ak._v2.cartesian([one, two], axis=-1).tolist() == [
+        [[("a", 1.1), ("b", 1.1)], []],
+        [],
+        [[("c", 2.2), ("c", 3.3)]],
+    ]
+
+    assert ak._v2.argcartesian([one, two], axis=-1).tolist() == [
+        [[(0, 0), (1, 0)], []],
+        [],
+        [[(0, 0), (0, 1)]],
+    ]

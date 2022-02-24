@@ -253,8 +253,7 @@ def cartesian(
     for x in new_arrays_values[1:]:
         if x.axis_wrap_if_negative(axis) != posaxis:
             raise ValueError(
-                "arrays to cartesian-product do not have the same depth for "
-                "negative axis"
+                "arrays to cartesian-product do not have the same depth for negative axis"
             )
 
     if posaxis == 0:

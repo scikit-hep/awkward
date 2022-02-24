@@ -71,36 +71,32 @@ def argcartesian(
     All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
     so see the #ak.cartesian documentation for a more complete description.
     """
-    if axis < 0:
-        raise ValueError("the 'axis' of argcartesian must be non-negative")
-
+    if isinstance(arrays, dict):
+        behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)
+        layouts = {
+            n: ak._v2.operations.convert.to_layout(
+                x, allow_record=False, allow_other=False
+            ).localindex(axis)
+            for n, x in arrays.items()
+        }
     else:
-        if isinstance(arrays, dict):
-            behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)
-            layouts = {
-                n: ak._v2.operations.convert.to_layout(
-                    x, allow_record=False, allow_other=False
-                ).localindex(axis)
-                for n, x in arrays.items()
-            }
+        behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
+        layouts = [
+            ak._v2.operations.convert.to_layout(
+                x, allow_record=False, allow_other=False
+            ).localindex(axis)
+            for x in arrays
+        ]
+
+    if with_name is not None:
+        if parameters is None:
+            parameters = {}
         else:
-            behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
-            layouts = [
-                ak._v2.operations.convert.to_layout(
-                    x, allow_record=False, allow_other=False
-                ).localindex(axis)
-                for x in arrays
-            ]
+            parameters = dict(parameters)
+        parameters["__record__"] = with_name
 
-        if with_name is not None:
-            if parameters is None:
-                parameters = {}
-            else:
-                parameters = dict(parameters)
-            parameters["__record__"] = with_name
+    result = ak._v2.operations.structure.cartesian(
+        layouts, axis=axis, nested=nested, parameters=parameters, highlevel=False
+    )
 
-        result = ak._v2.operations.structure.cartesian(
-            layouts, axis=axis, nested=nested, parameters=parameters, highlevel=False
-        )
-
-        return ak._v2._util.wrap(result, behavior, highlevel)
+    return ak._v2._util.wrap(result, behavior, highlevel)
