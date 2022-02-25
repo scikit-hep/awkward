@@ -964,7 +964,7 @@ void roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out,
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RegularArray_NumpyArray_v2b_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[1].size();
